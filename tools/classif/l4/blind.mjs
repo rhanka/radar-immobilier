@@ -11,7 +11,7 @@
 // --sequential keeps the former one-route-at-a-time order (same outputs).
 import path from 'node:path';
 import process from 'node:process';
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, writeFileSync } from 'node:fs';
 import { ROUTES, callSeat } from '../run-seat.mjs';
 import { appendJsonlRecord, parseJsonlTolerant } from '../lib/jsonl.mjs';
 import { sha256, stableStringify } from '../lib/render.mjs';
@@ -58,9 +58,85 @@ export function isS113Done({ outDir, k, promptSha, route, evalDir = EVAL_DIR_DEF
   } catch { return false; }
 }
 
-export function buildBlindManifest({ k, promptSha, routes, blindItems, aggregatesSha256 }) {
+/** Typed refusal of an infrastructure re-run (`code` says which rule refused). */
+export class BlindRerunRefused extends Error {
+  constructor(code, message) {
+    super(`blind infra re-run refused (${code}): ${message}`);
+    this.name = 'BlindRerunRefused';
+    this.code = code;
+  }
+}
+
+/** A route may be re-run for infrastructure only if it answered at most 1% of the items. */
+export const INFRA_RERUN_MAX_ANSWERED_RATE = 0.01;
+
+/**
+ * Eligibility of one infrastructure re-run (pure reads, nothing written). Allowed only
+ * when the previous run of the route in this series answered at most 1% of the blind
+ * items, so nothing about the blind half can have been learned from it. Answered is
+ * the max of: route-file items minus failures, distinct blind items with a seat answer
+ * (exitCode 0) in calls.jsonl, and valid per-item caches. The route file must agree with
+ * its blind-run audit and calls.jsonl must hold a terminal record for every failure.
+ * One re-run per route: an audited allowance already consumed refuses; an allowance not
+ * yet consumed (interrupted re-run) resumes. Exported for the re-run tests.
+ */
+export function assessInfraRerun({ home, outDir, k, promptSha, route, blindIds, callsLog }) {
+  const { model, effort } = ROUTES[route];
+  const log = readAudit(home);
+  const tuple = (e) => e.promptSha256 === promptSha && e.model === model && e.effort === effort;
+  const runs = log.filter((e) => e.action === 'blind-run' && tuple(e));
+  const allowances = log.filter((e) => e.action === 'blind-rerun-infra' && tuple(e));
+  if (allowances.length) {
+    if (runs.length > allowances.length) throw new BlindRerunRefused('already-rerun', `${route} was already re-run once (${allowances[0].at})`);
+    return { route, model, effort, resume: true };
+  }
+  if (runs.length !== 1 || !String(runs[0].purpose ?? '').includes(`l4-blind-s${k}`)) {
+    throw new BlindRerunRefused('no-previous-run', `${route} has ${runs.length} completed blind run(s) in series ${k}, exactly 1 required`);
+  }
+  const routeFile = path.join(outDir, `series-${k}-${route}.json`);
+  let prev;
+  try { prev = JSON.parse(readFileSync(routeFile, 'utf8')); } catch { throw new BlindRerunRefused('route-file-mismatch', `${route} route file is missing or unreadable`); }
+  if (String(prev.series) !== String(k) || prev.route !== route || prev.promptSha256 !== promptSha || !Number.isInteger(prev.failures)) {
+    throw new BlindRerunRefused('route-file-mismatch', `${route} route file does not match series ${k} at the frozen prompt`);
+  }
+  const items = blindIds.length;
+  if (runs[0].items !== items || runs[0].failures !== prev.failures) {
+    throw new BlindRerunRefused('audit-mismatch', `${route} route file disagrees with its blind-run audit`);
+  }
+  const ids = new Set(blindIds);
+  const calls = existsSync(callsLog) ? parseJsonlTolerant(readFileSync(callsLog, 'utf8')) : [];
+  const terminal = calls.filter((c) => c.intent === false && c.phase === `l4-blind-s${k}` && c.route === route && ids.has(c.itemId));
+  const exitCodes = {};
+  for (const c of terminal) exitCodes[String(c.exitCode)] = (exitCodes[String(c.exitCode)] ?? 0) + 1;
+  const callsAnswered = new Set(terminal.filter((c) => c.exitCode === 0).map((c) => c.itemId)).size;
+  const callsTerminalItems = new Set(terminal.map((c) => c.itemId)).size;
+  if (callsTerminalItems < prev.failures) {
+    throw new BlindRerunRefused('calls-mismatch', `${route}: calls.jsonl has terminal records for ${callsTerminalItems} items, the route file records ${prev.failures} failed`);
+  }
+  let cachedItems = 0;
+  for (const itemId of blindIds) {
+    try {
+      const c = JSON.parse(readFileSync(path.join(outDir, `blind-s${k}-${route}.${itemId}.json`), 'utf8'));
+      if (c.series === String(k) && c.promptSha256 === promptSha && c.route === route && c.itemId === itemId) cachedItems++;
+    } catch { /* not cached */ }
+  }
+  const routeFileAnswered = items - prev.failures;
+  const previousAnswered = Math.max(routeFileAnswered, callsAnswered, cachedItems);
+  const maxAnswered = Math.floor(items * INFRA_RERUN_MAX_ANSWERED_RATE);
+  const counts = { items, routeFileFailed: prev.failures, routeFileAnswered, callsAnswered, callsTerminalItems, cachedItems, exitCodes };
+  if (previousAnswered > maxAnswered) {
+    throw new BlindRerunRefused('answered-above-threshold', `${route} answered ${previousAnswered} of ${items} items (max ${maxAnswered}, 1%)`);
+  }
+  const codes = Object.entries(exitCodes).map(([c, n]) => `${c}x${n}`).join(',') || 'none';
+  const reason = `seat infrastructure failure: ${previousAnswered}/${items} items answered (route file ${prev.failures}/${items} failed, `
+    + `calls.jsonl exitCode 0 on ${callsAnswered} items, ${cachedItems} cached), terminal exit codes ${codes}`;
+  return { route, model, effort, resume: false, previousAnswered, maxAnswered, counts, reason };
+}
+
+export function buildBlindManifest({ k, promptSha, routes, blindItems, aggregatesSha256, infraReruns = [] }) {
   return { kind: 'l4-blind', series: k, createdAt: new Date().toISOString(), promptSha256: promptSha,
     routes, blindItems, aggregatesSha256,
+    ...(infraReruns.length ? { infraReruns: infraReruns.map(({ route, previousAnswered, reason }) => ({ route, previousAnswered, reason })) } : {}),
     note: 'blind aggregates sealed in $CLASSIF_HOME/blind/ (owner only); S113 is golden-exposed and excluded from selection' };
 }
 
@@ -70,6 +146,14 @@ export async function main(argv = process.argv.slice(2)) {
   const deferred = argv.includes('--deferred') ? argv[argv.indexOf('--deferred') + 1].split(',').filter(Boolean) : [];
   const routes = EVAL_ROUTES.filter((r) => !deferred.includes(r));
   const concurrency = Number(argv.includes('--concurrency') ? argv[argv.indexOf('--concurrency') + 1] : 2);
+  // Infrastructure re-run (fail closed): named routes only, each one an executed route.
+  const rerunRoutes = argv.includes('--rerun-infra-failed')
+    ? [...new Set(String(argv[argv.indexOf('--rerun-infra-failed') + 1] ?? '').split(',').filter(Boolean))] : [];
+  if (argv.includes('--rerun-infra-failed') && !rerunRoutes.length) throw new BlindRerunRefused('not-a-route', '--rerun-infra-failed needs at least one route');
+  for (const r of rerunRoutes) {
+    if (!ROUTES[r] || !EVAL_ROUTES.includes(r)) throw new BlindRerunRefused('not-a-route', `${r} is not an evaluated route`);
+    if (!routes.includes(r)) throw new BlindRerunRefused('not-a-route', `${r} is deferred in this run`);
+  }
   const home = classifHome();
   // The blind run refuses a series whose tuning manifest or frozen prompt is missing,
   // uncommitted, or locally modified (Annex M M.5).
@@ -108,6 +192,16 @@ export async function main(argv = process.argv.slice(2)) {
   const callsLog = path.join(home, 'l2', 'calls.jsonl');
   const seatTmp = privateDir(path.join(home, 'l4', 'seat-tmp'));
   const outDir = privateDir(blindDir(home));
+  // Infrastructure re-run eligibility, before the budget plan and any seat call: every
+  // named route must qualify (typed refusal otherwise) and pass the guard's prompt checks
+  // as if its allowance were already recorded. A refusal makes no seat call, writes no
+  // re-run audit and archives nothing (only the audited blind-set open precedes it).
+  const rerun = new Map();
+  for (const route of rerunRoutes) {
+    const a = assessInfraRerun({ home, outDir, k, promptSha, route, blindIds: blind.map((b) => b.itemId), callsLog });
+    assertBlindRunAllowed({ promptFile: promptRel, promptSha256: promptSha, model: a.model, effort: a.effort, home, extraAllowance: a.resume ? 0 : 1 });
+    rerun.set(route, a);
+  }
   // Review §5 (D5): planned counts only non-cached items — blind + S113 caches deducted.
   const blindCachedCount = (route, itemId) => {
     const f = path.join(outDir, `blind-s${k}-${route}.${itemId}.json`);
@@ -123,7 +217,7 @@ export async function main(argv = process.argv.slice(2)) {
     const { model, effort } = ROUTES[route];
     const routeFile = path.join(outDir, `series-${k}-${route}.json`);
     const done = readAudit(home).some((e) => e.action === 'blind-run' && e.promptSha256 === promptSha && e.model === model && e.effort === effort
-      && String(e.purpose ?? '').includes(`l4-blind-s${k}`)) && existsSync(routeFile);
+      && String(e.purpose ?? '').includes(`l4-blind-s${k}`)) && existsSync(routeFile) && !rerun.has(route);
     if (done) continue;
     for (const item of blind) {
       if (!blindCachedCount(route, item.itemId)) uncachedBlind++;
@@ -164,14 +258,31 @@ function readdirSyncSafe(dir) {
     const routeFile = path.join(outDir, `series-${k}-${route}.json`);
     // Review N6: resumed aggregates must equal an uninterrupted run — withUnresolved and
     // verdict restored, prompt sha verified (stale prompt never reuses rows).
-    if (blindDone(model, effort) && existsSync(routeFile)) {
+    const infra = rerun.get(route);
+    if (!infra && blindDone(model, effort) && existsSync(routeFile)) {
       const prev = JSON.parse(readFileSync(routeFile, 'utf8'));
       if (prev.promptSha256 !== promptSha) throw new Error(`blind resume refused: ${routeFile} prompt sha differs (re-run with the frozen prompt)`);
       return { ...prev.stats, withUnresolved: prev.withUnresolved, failures: prev.failures, verdict: prev.verdict };
     }
+    if (infra) {
+      // Audited allowance first (the guard admits exactly one more blind-run per allowance),
+      // then the previous route file is archived; an interrupted re-run resumes on the same
+      // allowance and only archives a route file still in place.
+      const archived = `series-${k}-${route}.infra-failed.${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+      if (!infra.resume) {
+        audit({ action: 'blind-rerun-infra', purpose: `l4-blind-s${k}`, promptSha256: promptSha, model, effort, route,
+          previousAnswered: infra.previousAnswered, maxAnswered: infra.maxAnswered, reason: infra.reason, counts: infra.counts, archivedTo: archived },
+        { home, env: process.env });
+      }
+      if (existsSync(routeFile)) {
+        renameSync(routeFile, path.join(outDir, archived));
+        chmodSync(path.join(outDir, archived), 0o600);
+      }
+    }
     // Review N7: guard before the start audit — a refused run leaves no started trace.
     assertBlindRunAllowed({ promptFile: promptRel, promptSha256: promptSha, model, effort, home });
-    audit({ action: 'blind-run-started', purpose: `l4-blind-s${k}`, promptSha256: promptSha, model, effort, items: blind.length }, { home, env: process.env });
+    audit({ action: 'blind-run-started', purpose: `l4-blind-s${k}`, promptSha256: promptSha, model, effort, items: blind.length,
+      ...(infra ? { infraRerun: true } : {}) }, { home, env: process.env });
     // Review §8: per-item cache keyed (series,promptSha,route,itemId), written on return.
     // Review §9: the predicted code is kept.
     const loadBlindCached = (itemId) => {
@@ -211,7 +322,8 @@ function readdirSyncSafe(dir) {
     const verdict = seriesVerdict({ stats, failures, items: rows.length },
       { recallFloor: seriesSpec.floors?.recall ?? 0, precisionFloor: seriesSpec.floors?.precision ?? 0, failureCeiling: seriesSpec.failureCeiling ?? 0.1 });
     writeFileSync(routeFile, JSON.stringify({ series: k, route, model, effort, promptSha256: promptSha, stats, withUnresolved: statsWithUnresolved, failures, verdict }, null, 1), { mode: 0o600 });
-    audit({ action: 'blind-run', purpose: `l4-blind-s${k}`, promptSha256: promptSha, model, effort, items: rows.length, failures }, { home, env: process.env });
+    audit({ action: 'blind-run', purpose: `l4-blind-s${k}`, promptSha256: promptSha, model, effort, items: rows.length, failures,
+      ...(infra ? { infraRerun: true } : {}) }, { home, env: process.env });
     return { ...stats, withUnresolved: statsWithUnresolved, failures, verdict };
   };
   const sequential = argv.includes('--sequential');
@@ -301,7 +413,10 @@ function readdirSyncSafe(dir) {
   const aggregatesSha256 = sha256(stableStringify(aggregates));
   writeFileSync(path.join(outDir, `series-${k}-aggregates.json`), JSON.stringify({ series: k, promptSha256: promptSha, aggregatesSha256, ...aggregates }, null, 1), { mode: 0o600 });
   // Review §1: repo manifest + stdout carry NO scores (aggregates sha only).
-  const manifest = buildBlindManifest({ k, promptSha, routes, blindItems: blind.length, aggregatesSha256 });
+  // Infra re-runs come from the audit, so a later resume keeps them in the manifest.
+  const infraReruns = readAudit(home).filter((e) => e.action === 'blind-rerun-infra' && e.promptSha256 === promptSha
+    && String(e.purpose ?? '').includes(`l4-blind-s${k}`) && routes.includes(e.route));
+  const manifest = buildBlindManifest({ k, promptSha, routes, blindItems: blind.length, aggregatesSha256, infraReruns });
   mkdirSync(path.join(classifDir(process.env), 'l4', 'manifests'), { recursive: true });
   writeFileSync(path.join(classifDir(process.env), 'l4', 'manifests', `series-${k}-blind.json`), `${JSON.stringify(manifest, null, 1)}\n`);
   process.stdout.write(`${JSON.stringify(manifest, null, 2)}\n`);
