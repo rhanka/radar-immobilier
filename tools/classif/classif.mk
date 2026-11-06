@@ -166,3 +166,15 @@ classif-l4-blind: ## Classification pilot L4: executor-only blind-half scoring +
 	@test "$(ENV)" = "preprod" || { echo "[classif-l4-blind] ENV=preprod required"; exit 2; }
 	@test "$(CLASSIF_ROLE)" = "test-executor" || { echo "[classif-l4-blind] CLASSIF_ROLE=test-executor required"; exit 2; }
 	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l4/blind.mjs --series $(SERIES) $(if $(DEFERRED),--deferred $(DEFERRED),) --concurrency $(if $(CONCURRENCY),$(CONCURRENCY),2) $(if $(RERUN_INFRA_FAILED),--rerun-infra-failed $(RERUN_INFRA_FAILED),)
+
+# L4 GEPA — population of prompts (P0..P4), reflective mutation by astra-max (fallback and
+# repair opus-5.5-max), per-case Pareto selection on the tuning half only, 5 evaluation routes
+# (opus-5.5-low, glm-5.3-low, sol-6.1-low, luna-6-low, mistral-large-4-low). MAX_CALLS caps the
+# run (lib/budget.mjs runBudget, on top of the pilot cap); resume = same SERIES/RUN/SEED.
+# GEPA_CONCURRENCY = calls in flight per route (2 per seat, branch guardrail).
+MAX_CALLS ?= 5000
+GEPA_CONCURRENCY ?= 2
+.PHONY: classif-l4-gepa
+classif-l4-gepa: ## Classification pilot L4: GEPA prompt optimisation, tuning half only (SERIES=k MAX_CALLS=5000 SEED= RUN= MAX_ITER= FINAL_TOP=3 GEPA_CONCURRENCY=2)
+	@test "$(ENV)" = "preprod" || { echo "[classif-l4-gepa] ENV=preprod required"; exit 2; }
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l4/gepa.mjs --series $(SERIES) --max-calls $(MAX_CALLS) --concurrency $(GEPA_CONCURRENCY) $(if $(SEED),--seed '$(SEED)',) $(if $(RUN),--run $(RUN),) $(if $(MAX_ITER),--max-iterations $(MAX_ITER),) $(if $(FINAL_TOP),--final-top $(FINAL_TOP),)

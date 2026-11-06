@@ -190,12 +190,13 @@ function passesShingleCheck(text, home, what) {
 
 /**
  * Shingle-checks the fused prompt; on refusal runs up to `maxRepairs` repair calls on the
- * reconciler seat (phase l4-opt-s<k>-repair<n>, budget-checked before each call). Each repair
- * rewrites the latest candidate. Returns { text, repairs }; throws (fail closed) when the
- * candidate is still refused after the last repair.
+ * reconciler seat (phase <phaseBase>-repair<n>, default l4-opt-s<k>, budget-checked before each
+ * call). Each repair rewrites the latest candidate. Returns { text, repairs }; throws (fail
+ * closed) when the candidate is still refused after the last repair. GEPA reuses it with its
+ * own phaseBase and candidate label (`what`).
  */
-export async function shingleCheckWithRepair({ home, callsLog, k, fusedText, call = seatCall, maxRepairs = MAX_REPAIRS, reconciler = RECONCILER }) {
-  const what = `prompt P${Number(k) + 1}`;
+export async function shingleCheckWithRepair({ home, callsLog, k, fusedText, call = seatCall, maxRepairs = MAX_REPAIRS, reconciler = RECONCILER,
+  phaseBase = `l4-opt-s${k}`, what = `prompt P${Number(k) + 1}` }) {
   let text = fusedText;
   let repairs = 0;
   while (!passesShingleCheck(text, home, what)) {
@@ -203,7 +204,7 @@ export async function shingleCheckWithRepair({ home, callsLog, k, fusedText, cal
     repairs++;
     process.stderr.write(`classif-l4-optimise: shingle check refused ${what}; repair ${repairs}/${maxRepairs}\n`);
     budgetCheck(home, 1);
-    const repaired = parseProposal(await call(home, callsLog, `l4-opt-s${k}-repair${repairs}`, reconciler, buildRepairPrompt(text)));
+    const repaired = parseProposal(await call(home, callsLog, `${phaseBase}-repair${repairs}`, reconciler, buildRepairPrompt(text)));
     if (!repaired) throw new Error(`repair ${repairs} returned no usable prompt`);
     text = repaired;
   }
@@ -241,9 +242,10 @@ export function loadBaselinePrompt(repoClassif, k) {
 
 // Review §8: optimiser calls cached like amend cachedCall — a crash never repays a
 // returned proposal (keyed by prompt sha256). `seat` is the paid seat (callSeat; a fake in tests).
-async function seatCall(home, callsLog, phase, annotator, prompt, seat = callSeat) {
+// `rawDir` moves the cache (GEPA keeps it inside its run directory).
+export async function seatCall(home, callsLog, phase, annotator, prompt, seat = callSeat, { rawDir = path.join(home, 'l4', 'opt-raw') } = {}) {
   const key = sha256(prompt).slice(0, 16);
-  const file = path.join(home, 'l4', 'opt-raw', `${phase}.${annotator}.${key}.json`);
+  const file = path.join(rawDir, `${phase}.${annotator}.${key}.json`);
   if (existsSync(file)) {
     const c = JSON.parse(readFileSync(file, 'utf8'));
     if (c.promptSha256 === sha256(prompt) && typeof c.text === 'string') return c.text;
