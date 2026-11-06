@@ -1,0 +1,219 @@
+{
+ "kind": "l4-dev",
+ "series": "2",
+ "createdAt": "2026-11-06T03:12:14.264Z",
+ "promptSha256": "c0ba6a671141b251a3393a6884deb2aaa5b055087658b3277e0c19d468f30b2f",
+ "routes": [
+  "muse-spark-1.3-low",
+  "muse-spark-1.3-medium",
+  "opus-5.5-low",
+  "opus-5.5-medium",
+  "mistral-large-4-medium",
+  "glm-5.3-low"
+ ],
+ "deferred": [
+  "gemini-4-argon-low",
+  "gemini-4-argon-medium"
+ ],
+ "tuningItems": 252,
+ "aggregates": {
+  "muse-spark-1.3-low": {
+   "scored": 252,
+   "refShown": 95,
+   "predShown": 120,
+   "recall": 0.9894736842105263,
+   "recallLB": 0.9510378297006205,
+   "precision": 0.7833333333333333,
+   "precisionLB": 0.7123182883213022,
+   "indeterminate": {
+    "recall": false,
+    "precision": false
+   },
+   "failures": 0,
+   "withUnresolved": {
+    "scored": 252,
+    "refShown": 95,
+    "predShown": 120,
+    "recall": 0.9894736842105263,
+    "recallLB": 0.9510378297006205,
+    "precision": 0.7833333333333333,
+    "precisionLB": 0.7123182883213022,
+    "indeterminate": {
+     "recall": false,
+     "precision": false
+    }
+   },
+   "verdict": "pass",
+   "costUsd": 0,
+   "items": 252
+  },
+  "muse-spark-1.3-medium": {
+   "scored": 252,
+   "refShown": 95,
+   "predShown": 189,
+   "recall": 0.9894736842105263,
+   "recallLB": 0.9510378297006205,
+   "precision": 0.455026455026455,
+   "precisionLB": 0.39365397607221075,
+   "indeterminate": {
+    "recall": false,
+    "precision": false
+   },
+   "failures": 81,
+   "withUnresolved": {
+    "scored": 252,
+    "refShown": 95,
+    "predShown": 189,
+    "recall": 0.9894736842105263,
+    "recallLB": 0.9510378297006205,
+    "precision": 0.455026455026455,
+    "precisionLB": 0.39365397607221075,
+    "indeterminate": {
+     "recall": false,
+     "precision": false
+    }
+   },
+   "verdict": "fail",
+   "costUsd": 0,
+   "items": 252
+  },
+  "opus-5.5-low": {
+   "scored": 252,
+   "refShown": 95,
+   "predShown": 116,
+   "recall": 0.9894736842105263,
+   "recallLB": 0.9510378297006205,
+   "precision": 0.8103448275862069,
+   "precisionLB": 0.7403900399268072,
+   "indeterminate": {
+    "recall": false,
+    "precision": false
+   },
+   "failures": 0,
+   "withUnresolved": {
+    "scored": 252,
+    "refShown": 95,
+    "predShown": 116,
+    "recall": 0.9894736842105263,
+    "recallLB": 0.9510378297006205,
+    "precision": 0.8103448275862069,
+    "precisionLB": 0.7403900399268072,
+    "indeterminate": {
+     "recall": false,
+     "precision": false
+    }
+   },
+   "verdict": "pass",
+   "costUsd": 38.30828399999997,
+   "items": 252
+  },
+  "opus-5.5-medium": {
+   "scored": 252,
+   "refShown": 95,
+   "predShown": 117,
+   "recall": 0.9894736842105263,
+   "recallLB": 0.9510378297006205,
+   "precision": 0.8034188034188035,
+   "precisionLB": 0.7331457254713714,
+   "indeterminate": {
+    "recall": false,
+    "precision": false
+   },
+   "failures": 0,
+   "withUnresolved": {
+    "scored": 252,
+    "refShown": 95,
+    "predShown": 117,
+    "recall": 0.9894736842105263,
+    "recallLB": 0.9510378297006205,
+    "precision": 0.8034188034188035,
+    "precisionLB": 0.7331457254713714,
+    "indeterminate": {
+     "recall": false,
+     "precision": false
+    }
+   },
+   "verdict": "pass",
+   "costUsd": 3.9710069999999997,
+   "items": 252
+  },
+  "mistral-large-4-medium": {
+   "scored": 252,
+   "refShown": 95,
+   "predShown": 252,
+   "recall": 1,
+   "recallLB": 0.968957988132045,
+   "precision": 0,
+   "precisionLB": 0,
+   "indeterminate": {
+    "recall": false,
+    "precision": false
+   },
+   "failures": 252,
+   "withUnresolved": {
+    "scored": 252,
+    "refShown": 95,
+    "predShown": 252,
+    "recall": 1,
+    "recallLB": 0.968957988132045,
+    "precision": 0,
+    "precisionLB": 0,
+    "indeterminate": {
+     "recall": false,
+     "precision": false
+    }
+   },
+   "verdict": "fail",
+   "costUsd": 0,
+   "items": 252
+  },
+  "glm-5.3-low": {
+   "scored": 252,
+   "refShown": 95,
+   "predShown": 252,
+   "recall": 1,
+   "recallLB": 0.968957988132045,
+   "precision": 0,
+   "precisionLB": 0,
+   "indeterminate": {
+    "recall": false,
+    "precision": false
+   },
+   "failures": 252,
+   "withUnresolved": {
+    "scored": 252,
+    "refShown": 95,
+    "predShown": 252,
+    "recall": 1,
+    "recallLB": 0.968957988132045,
+    "precision": 0,
+    "precisionLB": 0,
+    "indeterminate": {
+     "recall": false,
+     "precision": false
+    }
+   },
+   "verdict": "fail",
+   "costUsd": 0,
+   "items": 252
+  }
+ },
+ "selection": {
+  "order": [
+   "opus-5.5-low",
+   "opus-5.5-medium",
+   "muse-spark-1.3-low",
+   "mistral-large-4-medium",
+   "glm-5.3-low",
+   "muse-spark-1.3-medium"
+  ],
+  "best": "opus-5.5-low",
+  "excluded": [
+   "mistral-large-4-medium",
+   "glm-5.3-low",
+   "muse-spark-1.3-medium"
+  ],
+  "criterion": "M.3 lexicographic (tuning half only, failing routes excluded)"
+ },
+ "trackNote": "per-item tuning outputs stay private (optimiser input); this manifest carries metrics only"
+}
