@@ -82,9 +82,14 @@ describe("artifact transport routing (J1.2d/e wagon 7)", () => {
     }
   });
 
-  it("should name the four geo gaps, including a cross-origin CPTAQ base", () => {
+  it("should route zoning to the governed op and name the three remaining geo gaps", () => {
     const route = (path: string) => routeArtifactRequest(path, "GET", ORIGIN, "");
-    expect(route("/api/geo/collections/qc-zonage-valleyfield/items?limit=10")).toEqual({ kind: "gap", gap: "zonage" });
+    expect(route("/api/geo/collections/qc-zonage-valleyfield/items?limit=10"))
+      .toEqual({ kind: "zoning", path: "/api/geo/collections/qc-zonage-valleyfield/items?limit=10" });
+    expect(routeArtifactRequest("/__app/api/geo/collections/qc-zonage-valleyfield/items", "GET", ORIGIN, "/__app"))
+      .toEqual({ kind: "zoning", path: "/api/geo/collections/qc-zonage-valleyfield/items" });
+    expect(routeArtifactRequest("/api/geo/collections/qc-zonage-valleyfield/items", "POST", ORIGIN, ""))
+      .toMatchObject({ kind: "refused", status: 405 });
     expect(route("/api/geo/collections/qc-lots-valleyfield/items")).toEqual({ kind: "gap", gap: "lots" });
     expect(route("/api/geo/valleyfield/zones")).toEqual({ kind: "gap", gap: "zones" });
     expect(route("/api/geo/collections/ca-qc-constraints-valleyfield/items")).toEqual({ kind: "gap", gap: "cptaq" });
@@ -120,16 +125,45 @@ describe("artifact transport through the real API clients", () => {
     expect(JSON.stringify(detail)).toContain("/__reader/api/documents.pv.v1?");
   });
 
-  it("should answer the geo gaps locally with zero network call and never an empty dataset", async () => {
+  it("should answer the zones, lots and CPTAQ gaps locally with zero network call", async () => {
     const { network } = install();
-    await expect(fetchZones("valleyfield")).rejects.toThrow("zones HTTP 503");
     await expect(fetchLots("valleyfield")).rejects.toThrow("lots HTTP 503");
     await expect(fetchGeoZones("valleyfield")).rejects.toThrow("geo-zones HTTP 503");
     await expect(fetchCptaqConstraints("valleyfield", { baseUrl: "https://geo.example.org/ogc" }))
       .rejects.toThrow("cptaq HTTP 503");
-    const gap = await fetch("/api/geo/collections/qc-zonage-valleyfield/items");
-    expect(await gap.json()).toEqual({ ok: false, error: "artifact_source_gap", gap: "zonage" });
+    const gap = await fetch("/api/geo/collections/qc-lots-valleyfield/items");
+    expect(await gap.json()).toEqual({ ok: false, error: "artifact_source_gap", gap: "lots" });
     expect(network).not.toHaveBeenCalled();
+  });
+
+  it("should read the zoning layer through geo.collection-items.v1 pages with the bridge grant", async () => {
+    const zone = (code: string) => ({ type: "Feature", geometry: { type: "Polygon",
+      coordinates: [[[-74, 45], [-74, 45.1], [-73.9, 45.1], [-74, 45]]] }, properties: { zoneCode: code } });
+    const page = (offset: number, codes: string[], nextOffset: number | null) => json(200, {
+      type: "FeatureCollection", features: codes.map(zone), numberMatched: 3, numberReturned: codes.length,
+      nextOffset, projection: "zoning-v1", collectionId: "qc-zonage-valleyfield",
+      license: { id: "cc-by-4.0", title: "CC BY 4.0", href: null, attribution: "Ville" } });
+    const host = readerHost({ "/__reader/api/geo.collection-items.v1": (url) =>
+      url.searchParams.get("offset") === "2" ? page(2, ["C-1"], null) : page(0, ["H-1", "H-2"], 2) });
+    const { calls } = install(host);
+    const zones = await fetchZones("valleyfield");
+    expect(zones.ok).toBe(true);
+    expect(zones.numberReturned).toBe(3);
+    expect(calls.map((call) => Object.fromEntries(call.url.searchParams))).toEqual([
+      { collectionId: "qc-zonage-valleyfield", limit: "200" },
+      { collectionId: "qc-zonage-valleyfield", limit: "200", offset: "2" },
+    ]);
+    for (const call of calls) {
+      expect(call.url.pathname).toBe("/__reader/api/geo.collection-items.v1");
+      expect((call.init?.headers as Record<string, string>)["x-preview-grant"]).toBe("initial-grant");
+    }
+  });
+
+  it("should report a governance refusal of zoning as an absent collection, never a fake zero", async () => {
+    install(readerHost({ "/__reader/api/geo.collection-items.v1": () =>
+      json(403, { error: "geo_governed_not_served" }) }));
+    const zones = await fetchZones("valleyfield");
+    expect(zones.ok).toBe(false);
   });
 
   it("should refuse a raw document URL locally and pass the op PDF URL through untouched", async () => {
