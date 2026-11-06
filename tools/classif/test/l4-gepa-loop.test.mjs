@@ -4,7 +4,7 @@
 // Synthetic items only; the blind rows of the fake reference must never reach a seat.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { runGepa, stratifiedSplit } from '../l4/gepa.mjs';
@@ -64,7 +64,7 @@ function setup(home) {
 }
 
 /** Fake seats. `mutation(prompt, n)` gives the mutator answer; `failAt` makes the n-th eval call throw (crash). */
-function fakeSeat({ mutation = (_p, n) => `${RULES}MARK:clean-${n}`, crossover = () => `${RULES}MARK:clean-cross`, repair = () => `${RULES}MARK:noisy-repaired`, failAt = null, astraDown = false } = {}) {
+function fakeSeat({ mutation = (_p, n) => `${RULES}MARK:clean-${n}`, crossover = () => `${RULES}MARK:clean-cross`, repair = () => `${RULES}MARK:noisy-repaired`, failAt = null, astraDown = false, override = () => null } = {}) {
   const seen = [];
   let evals = 0;
   let mutations = 0;
@@ -75,6 +75,8 @@ function fakeSeat({ mutation = (_p, n) => `${RULES}MARK:clean-${n}`, crossover =
       if (failAt !== null && evals === failAt) throw new Error('fake crash');
       const id = /### item_id: (\S+)/.exec(prompt)[1];
       const mark = /MARK:(\S+)/.exec(prompt)[1];
+      const forced = override(label, mark, id);
+      if (forced) return { latencyMs: 1, ...forced };
       const verdict = predict(mark, label, id);
       return { code: 0, text: JSON.stringify({ verdict, code: CODE[verdict], citation: `motif ${mark}` }), latencyMs: 1 };
     }
@@ -212,4 +214,79 @@ test('gepa loop: a child without noise gain is rejected and journaled; astra fai
   }
   assert.equal(m.population.length, 5 + j.filter((r) => r.status === 'admitted').length);
   assert.ok(f.mutatorCalls().some((s) => s.label === 'astra-max'));
+}));
+
+const evalCacheFiles = (home, sha) => {
+  const d = path.join(home, 'l4', `gepa-s${K}`, 'eval-cache', sha.slice(0, 16));
+  return existsSync(d) ? GEPA_ROUTES.flatMap((r) => (existsSync(path.join(d, r)) ? readdirSync(path.join(d, r)) : [])).length : 0;
+};
+const candidate = (home, id) => JSON.parse(readFileSync(path.join(home, 'l4', `gepa-s${K}`, 'candidates', `${id}.json`), 'utf8'));
+
+test('review B2: invalid answers count as shown, are cached and never stop the run; an out-of-format child is rejected', withTempHome(async (home) => {
+  setup(home);
+  // glm answers out of format for every seed case (4/4 > the infra allowance): no breaker.
+  const override = (label, mark) => (mark.startsWith('junk') || (label === 'glm-5.3-low' && mark.startsWith('seed')) ? { code: 0, text: 'pas de json' } : null);
+  const f = fakeSeat({ mutation: (_p, n) => `${RULES}MARK:junk-${n}`, override });
+  const m = await runGepa({ home, k: K, maxIterations: 1, seat: f.seat, log: quiet });
+  const j = journal(home);
+  assert.deepEqual([j[0].status, j[0].reason], ['rejected', 'answer-failures']);
+  assert.deepEqual(j[0].child.failureCeilingExceeded, GEPA_ROUTES, 'every route over the 5 % failed-call share');
+  assert.equal(evalCacheFiles(home, j[0].child.sha), 6 * 5, 'invalid answers are cached as answers');
+  assert.ok(candidate(home, 'P0').pareto[SPLIT.pareto[0]]['glm-5.3-low'].failed);
+  assert.equal(candidate(home, 'P0').pareto[SPLIT.pareto[0]]['glm-5.3-low'].infra, false);
+  assert.equal(m.result.status, 'no-candidate');
+  const again = fakeSeat({ override });
+  await runGepa({ home, k: K, maxIterations: 1, seat: again.seat, log: quiet });
+  assert.equal(again.seen.length, 0, 'a resume repays nothing');
+}));
+
+test('review B2/m6: infrastructure failures trip the breaker in flight; the resume pays only what was not answered', withTempHome(async (home) => {
+  setup(home);
+  let down = true;
+  const override = (label) => (down && label === 'luna-6-low' ? { code: 1, text: '' } : null);
+  const f = fakeSeat({ override });
+  await assert.rejects(runGepa({ home, k: K, maxIterations: 1, seat: f.seat, log: quiet }), /route luna-6-low had 2 infrastructure failures on seed-P0 \(> 1 of 4\): no further call launched/);
+  const luna = f.evalCalls().filter((s) => s.label === 'luna-6-low');
+  assert.equal(luna.length, 2, 'the 3rd and 4th luna calls are never launched');
+  down = false;
+  const answered = new Set(f.evalCalls().filter((s) => s.label !== 'luna-6-low').map((s) => `${s.label}|${s.prompt}`));
+  const g = fakeSeat({ override });
+  const m = await runGepa({ home, k: K, maxIterations: 1, seat: g.seat, log: quiet });
+  assert.ok(m.result);
+  for (const s of g.evalCalls()) assert.ok(!answered.has(`${s.label}|${s.prompt}`), 'an answered call was paid twice');
+}));
+
+test('review B1a/m2: a tool-event answer is an uncached infra failure, retried on D_pareto at the resume', withTempHome(async (home) => {
+  setup(home);
+  const target = SPLIT.pareto[0];
+  let tools = true;
+  const override = (label, mark, id) => (tools && label === 'sol-6.1-low' && mark === 'seed-1' && id === target
+    ? { code: 0, text: JSON.stringify({ verdict: REF.get(id), code: CODE[REF.get(id)] }), toolEvents: 1 } : null);
+  await runGepa({ home, k: K, maxCalls: 150, seat: fakeSeat({ override }).seat, log: quiet });
+  const row = candidate(home, 'P1').pareto[target]['sol-6.1-low'];
+  assert.deepEqual([row.failed, row.infra], [true, true], 'a well-formed answer with a tool event is refused');
+  assert.equal(evalCacheFiles(home, candidate(home, 'P1').sha), 4 * 5 - 1, 'the refused answer is not cached');
+  tools = false;
+  const g = fakeSeat({ override });
+  await runGepa({ home, k: K, maxCalls: 150, seat: g.seat, log: quiet });
+  assert.deepEqual(g.evalCalls().map((s) => [s.label, /### item_id: (\S+)/.exec(s.prompt)[1]]), [['sol-6.1-low', target]], 'only the infra failure is retried');
+  assert.equal(candidate(home, 'P1').pareto[target]['sol-6.1-low'].failed, false);
+}));
+
+test('review m1: the loop stops after MAX_SKIPPED consecutive skipped iterations', withTempHome(async (home) => {
+  setup(home);
+  const m = await runGepa({ home, k: K, maxSkipped: 3, seat: fakeSeat().seat, log: quiet });
+  assert.equal(m.stop, 'stagnation');
+  assert.deepEqual(journal(home).map((r) => r.status), ['admitted', 'skipped', 'skipped', 'skipped']);
+  assert.equal(m.result.status, 'selected');
+}));
+
+test('review m3: a changed evaluation context (tuning input) refuses the resume of a run', withTempHome(async (home) => {
+  setup(home);
+  await runGepa({ home, k: K, maxCalls: 150, seat: fakeSeat().seat, log: quiet });
+  const file = path.join(home, 'l0', 'dev-items.jsonl');
+  writeFileSync(file, readFileSync(file, 'utf8').replace('texte p1', 'texte p1 modifié'));
+  const g = fakeSeat();
+  await assert.rejects(runGepa({ home, k: K, maxCalls: 150, seat: g.seat, log: quiet }), /evaluated under another context/);
+  assert.equal(g.seen.length, 0);
 }));
