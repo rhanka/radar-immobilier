@@ -1,0 +1,19 @@
+{
+ "kind": "l4-blind",
+ "series": "3",
+ "createdAt": "2026-11-06T06:00:06.832Z",
+ "promptSha256": "762e164630cd48475fd3c0bc2fe79c3fad00a913d51be391fe6df4708606f6b6",
+ "routes": [
+  "opus-5.5-low",
+  "opus-5.5-medium",
+  "mistral-large-4-medium",
+  "glm-5.3-low"
+ ],
+ "blindItems": 252,
+ "aggregatesSha256": "afc4db31713dabb0dd40f78fb014cc71b4da35661a797ee1080b0abd059f2b3d",
+ "recallNonRegression": {
+  "baselineSeries": 0,
+  "tolerance": 0
+ },
+ "note": "blind aggregates sealed in $CLASSIF_HOME/blind/ (owner only); S113 is golden-exposed and excluded from selection"
+}
