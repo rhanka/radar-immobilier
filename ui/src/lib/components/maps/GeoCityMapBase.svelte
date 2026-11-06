@@ -307,6 +307,10 @@
   // loaded. The overlay then shows an actionable message instead of an endless
   // "Chargement de la carte…"; finalization resumes on `style.load`.
   let mapStalled = false;
+  // The map could not be built at all (MapLibre init threw: chunk or WebGL
+  // unavailable) or its style failed before parsing: no timer will lift the
+  // overlay, so the alert shows at once and « Réessayer » rebuilds the map.
+  let mapLoadFailed = false;
   // Résilience style-load — FILET DE RÉCUPÉRATION (onglet caché / canvas taille-nulle
   // au montage → `'load'` jamais émis, ou canvas 0×0 devenu visible mais non repeint).
   // `triggerFinalize` expose le corps de finalisation (closure locale d'`initMap`) au
@@ -1785,6 +1789,12 @@
    * à CONFIRMER par un test d'intégration qui capturera le payload réel d'une
    * erreur de tuile avant de figer ce discriminateur.
    */
+  /** MapLibre error raised by a source or tile (not by the style or the map itself). */
+  function isSourceError(e: unknown): boolean {
+    const ev = e as { sourceId?: unknown; source?: unknown; tile?: unknown } | null;
+    return ev?.sourceId !== undefined || ev?.source !== undefined || ev?.tile !== undefined;
+  }
+
   function isSatelliteTileError(e: unknown): boolean {
     const ev = e as { sourceId?: unknown; source?: { id?: unknown } } | null;
     return ev?.sourceId === "sat-2d" || ev?.source?.id === "sat-2d";
@@ -1798,6 +1808,13 @@
    * effectif devient plan ⇒ plus aucune erreur sat ne se redéclenche.
    */
   function handleMapError(e: unknown): void {
+    // A non-tile error before the style is parsed is a style failure: show the
+    // alert now instead of an endless « Chargement de la carte… ».
+    if (!styleReady && !mapSetupStarted && !isSourceError(e)) {
+      mapLoadFailed = true;
+      mapStalled = true;
+      return;
+    }
     if (!satelliteActive || satelliteFailedForSession) return;
     if (!isSatelliteTileError(e)) return;
     satelliteFailedForSession = true;
@@ -1958,6 +1975,7 @@
         if (mapSetupStarted) return;
         mapSetupStarted = true;
         mapStalled = false;
+        mapLoadFailed = false;
         // Finalisation engagée → annule le repli s'il est encore en vol (chemin
         // nominal : le timeout ne fera jamais un second passage).
         if (readyFallbackTimer !== undefined) {
@@ -2041,6 +2059,8 @@
       mapInstance = m;
     } catch (err) {
       console.error("MapLibre init error", err);
+      mapLoadFailed = true;
+      mapStalled = true;
     }
   }
 
@@ -2081,6 +2101,7 @@
     mapSetupStarted = false;
     styleReady = false;
     mapStalled = false;
+    mapLoadFailed = false;
     // Résilience style-load — la carte est détruite : ses handlers villes et son
     // déclencheur de finalisation deviennent caducs. On les remet à zéro pour que
     // la carte NEUVE relie ses propres handlers et expose sa propre finalisation.
@@ -2128,6 +2149,10 @@
 
   /** "Réessayer" of the stalled overlay: request a frame, then run the recovery net. */
   function retryMapRender(): void {
+    if (mapLoadFailed) {
+      void reinitForBasemap();
+      return;
+    }
     try {
       (mapInstance as { triggerRepaint?: () => void } | null)?.triggerRepaint?.();
     } catch {
@@ -2535,11 +2560,18 @@
           data-testid="map-stalled"
           class="mx-4 max-w-sm rounded border border-amber-300 bg-amber-50 px-4 py-3 text-center text-xs text-amber-900"
         >
-          <p class="m-0 font-semibold">La carte ne s'affiche pas : le fond de carte n'a pas fini de charger.</p>
-          <p class="mt-1 mb-2">
-            L'onglet n'affiche aucune image (fenêtre masquée ou en arrière-plan). Les signaux restent
-            consultables dans les panneaux ; ramenez l'onglet au premier plan ou réessayez.
-          </p>
+          {#if mapLoadFailed}
+            <p class="m-0 font-semibold">La carte n'a pas pu être chargée : le fond de carte est inaccessible.</p>
+            <p class="mt-1 mb-2">
+              Les signaux restent consultables dans les panneaux ; réessayez dans un instant.
+            </p>
+          {:else}
+            <p class="m-0 font-semibold">La carte ne s'affiche pas : le fond de carte n'a pas fini de charger.</p>
+            <p class="mt-1 mb-2">
+              L'onglet n'affiche aucune image (fenêtre masquée ou en arrière-plan). Les signaux restent
+              consultables dans les panneaux ; ramenez l'onglet au premier plan ou réessayez.
+            </p>
+          {/if}
           <button
             type="button"
             class="rounded border border-amber-400 bg-white px-3 py-1 font-semibold text-amber-900"
