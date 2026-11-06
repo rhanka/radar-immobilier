@@ -156,9 +156,11 @@ classif-l4-dev: ## Classification pilot L4: tuning-half evaluation of every rout
 	@test "$(ENV)" = "preprod" || { echo "[classif-l4-dev] ENV=preprod required"; exit 2; }
 	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l4/dev.mjs --series $(SERIES) $(if $(DEFERRED),--deferred $(DEFERRED),) --concurrency $(if $(CONCURRENCY),$(CONCURRENCY),2)
 
-classif-l4-optimise: ## Classification pilot L4: 2 max optimisers + reconciliation to one common P(k+1) (SERIES=k DEFERRED=)
+# Seat override (recorded method deviation in the optimise manifest): OPTIMISERS=a,b RECONCILER=x
+# among the max seats of run-seat.mjs; DEVIATION="<reason>" unless it is the recorded owner 06/11 choice.
+classif-l4-optimise: ## Classification pilot L4: 2 max optimisers + reconciliation to one common P(k+1) (SERIES=k DEFERRED= OPTIMISERS= RECONCILER= DEVIATION=)
 	@test "$(ENV)" = "preprod" || { echo "[classif-l4-optimise] ENV=preprod required"; exit 2; }
-	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l4/optimise.mjs --series $(SERIES) $(if $(DEFERRED),--deferred $(DEFERRED),)
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l4/optimise.mjs --series $(SERIES) $(if $(DEFERRED),--deferred $(DEFERRED),) $(if $(OPTIMISERS),--optimisers $(OPTIMISERS),) $(if $(RECONCILER),--reconciler $(RECONCILER),) $(if $(DEVIATION),--deviation '$(DEVIATION)',)
 
 classif-l4-blind: ## Classification pilot L4: executor-only blind-half scoring + S113 secondary (SERIES=k CLASSIF_ROLE=test-executor)
 	@test "$(ENV)" = "preprod" || { echo "[classif-l4-blind] ENV=preprod required"; exit 2; }

@@ -176,6 +176,16 @@ export function parseCodex(stdout, dir) {
     const last = fs.readFileSync(path.join(dir, 'last-message.md'), 'utf8').trim();
     if (last) text = last;
   } catch { /* file absent: fall back to the events */ }
+  // File absent: the last completed agent_message is the answer — before the generic walk,
+  // so a reasoning item's text is never taken as the model's answer.
+  if (!text) {
+    for (const line of String(stdout ?? '').split('\n')) {
+      try {
+        const e = JSON.parse(line);
+        if (e?.type === 'item.completed' && e?.item?.type === 'agent_message' && typeof e.item.text === 'string' && e.item.text.trim()) text = e.item.text;
+      } catch { /* next */ }
+    }
+  }
   const walk = (o) => {
     if (!o || typeof o !== 'object') return;
     if (Array.isArray(o)) { for (const v of o) walk(v); return; }
@@ -192,15 +202,6 @@ export function parseCodex(stdout, dir) {
     try { walk(JSON.parse(line)); } catch { /* not json */ }
   }
   const { toolEvents, unknownTypes } = countCodexToolEvents(stdout);
-  // Prefer agent_message text from item.completed events when the file is absent.
-  if (!text) {
-    for (const line of String(stdout ?? '').split('\n')) {
-      try {
-        const e = JSON.parse(line);
-        if (e?.type === 'item.completed' && e?.item?.type === 'agent_message' && typeof e.item.text === 'string' && e.item.text.trim()) text = e.item.text;
-      } catch { /* next */ }
-    }
-  }
   return { text, usage, toolEvents, unknownTypes };
 }
 
