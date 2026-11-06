@@ -14,8 +14,8 @@ import { ROUTES, callSeat, parseJsonObject } from '../run-seat.mjs';
 import { appendJsonlRecord, parseJsonlTolerant } from '../lib/jsonl.mjs';
 import { sha256 } from '../lib/render.mjs';
 import { classifDir, classifHome, privateDir } from '../lib/paths.mjs';
-import { compareRoutes, routeFailed, seriesVerdict, shownStats } from './metrics.mjs';
-import { assertSeriesHalves, assertSeriesRoutes, loadSeriesManifest } from './series.mjs';
+import { buildRecallComparison, compareRoutes, routeFailed, seriesVerdict, shownStats } from './metrics.mjs';
+import { assertSeriesHalves, assertSeriesRoutes, loadSeriesManifest, loadTuningRecallBaseline } from './series.mjs';
 import { groupRoutesByFamily, runFamiliesParallel } from './families.mjs';
 import { check as budgetCheck } from '../lib/budget.mjs';
 import { assertNoVerbatim } from '../lib/freeze.mjs';
@@ -106,6 +106,9 @@ export async function main(argv = process.argv.slice(2)) {
   // that changes the series makes it exploratory, not the registered one), and the
   // frozen halves must match the split draw (plain read — L2 already enforced committed).
   assertSeriesRoutes(seriesSpec, routes, k);
+  // Owner rule 06/11 (manifests declaring recallNonRegression): the tuning recall baseline is
+  // loaded before any paid call; a route below it fails whatever its precision.
+  const recallBaseline = loadTuningRecallBaseline(seriesSpec, k);
   try {
     const splitFile = path.join(classifDir(process.env), 'l3', 'manifests', 'split.json');
     if (existsSync(splitFile)) {
@@ -183,7 +186,8 @@ export async function main(argv = process.argv.slice(2)) {
       { recallSupport: devSupports.recall ?? 30, precisionSupport: devSupports.precision ?? 30 });
     const failures = rows.filter((r) => r.failed).length;
     const spec = { recallFloor: seriesSpec.floors?.recall ?? 0, precisionFloor: seriesSpec.floors?.precision ?? 0,
-      failureCeiling: specFailureCeiling };
+      failureCeiling: specFailureCeiling,
+      ...(recallBaseline ? { baselineRecall: recallBaseline.recall[route] ?? null, recallTolerance: recallBaseline.tolerance } : {}) };
     aggregates[route] = { ...stats, failures,
       withUnresolved: statsWithUnresolved,
       verdict: seriesVerdict ? seriesVerdict({ stats, failures, items: rows.length }, spec) : null,
@@ -208,6 +212,9 @@ export async function main(argv = process.argv.slice(2)) {
   const selection = selectBest(ranked);
   const manifest = { kind: 'l4-dev', series: k, createdAt: new Date().toISOString(), promptSha256: promptSha,
     routes, deferred, tuningItems: tuning.length, aggregates,
+    ...(recallBaseline ? { recallNonRegression: { baselineSeries: recallBaseline.baselineSeries, half: 'tuning', metric: 'recall',
+      tolerance: recallBaseline.tolerance, rule: 'a route whose recall point estimate is below the baseline recall of the same route fails, whatever its precision',
+      routes: buildRecallComparison(perRoute, aggregates, recallBaseline) } } : {}),
     selection: { order: selection.order, best: selection.best, excluded: selection.excluded, criterion: 'M.3 lexicographic (tuning half only, failing routes excluded)' },
     trackNote: 'per-item tuning outputs stay private (optimiser input); this manifest carries metrics only' };
   mkdirSync(path.join(classifDir(process.env), 'l4', 'manifests'), { recursive: true });
