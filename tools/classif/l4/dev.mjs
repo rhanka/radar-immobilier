@@ -10,12 +10,13 @@
 import path from 'node:path';
 import process from 'node:process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { ROUTES, callSeat, parseJsonObject } from '../run-seat.mjs';
+import { callSeat, parseJsonObject } from '../run-seat.mjs';
 import { appendJsonlRecord, parseJsonlTolerant } from '../lib/jsonl.mjs';
 import { sha256 } from '../lib/render.mjs';
 import { classifDir, classifHome, privateDir } from '../lib/paths.mjs';
-import { buildRecallComparison, compareRoutes, routeFailed, seriesVerdict, shownStats } from './metrics.mjs';
-import { assertSeriesHalves, assertSeriesRoutes, loadSeriesManifest, loadTuningRecallBaseline } from './series.mjs';
+import { buildRecallComparison, compareRoutes, routeFailed, seriesVerdict, shownMisses, shownStats } from './metrics.mjs';
+import { assertSeriesHalves, assertSeriesRoutes, loadSeriesManifest, loadTuningRecallBaseline, seriesMethod } from './series.mjs';
+import { GEPA_METHOD, gepaRouteVerdict, gepaSeriesVerdict, seriesRouteUniverse } from './gepa-common.mjs';
 import { groupRoutesByFamily, runFamiliesParallel } from './families.mjs';
 import { check as budgetCheck } from '../lib/budget.mjs';
 import { assertNoVerbatim } from '../lib/freeze.mjs';
@@ -89,7 +90,8 @@ export async function main(argv = process.argv.slice(2)) {
   const k = argv.includes('--series') ? argv[argv.indexOf('--series') + 1] : process.env.SERIES;
   if (!k) { process.stderr.write('classif-l4-dev: pass SERIES=<k>\n'); process.exit(2); }
   const deferred = argv.includes('--deferred') ? argv[argv.indexOf('--deferred') + 1].split(',').filter(Boolean) : [];
-  const routes = EVAL_ROUTES.filter((r) => !deferred.includes(r));
+  // A GEPA series (series-<k>.json method gepa) evaluates the 5 GEPA routes instead.
+  const routes = seriesRouteUniverse(seriesMethod(k), EVAL_ROUTES).filter((r) => !deferred.includes(r));
   const concurrency = Number(argv.includes('--concurrency') ? argv[argv.indexOf('--concurrency') + 1] : 2);
   const home = classifHome();
   const promptFile = path.join(classifDir(process.env), 'l4', 'prompts', `P${k}.md`);
@@ -185,6 +187,13 @@ export async function main(argv = process.argv.slice(2)) {
     const statsWithUnresolved = shownStats(rows.map((r) => ({ ref: r.refVerdict, pred: r.failed ? { failed: true } : r.pred, unresolved: false })),
       { recallSupport: devSupports.recall ?? 30, precisionSupport: devSupports.precision ?? 30 });
     const failures = rows.filter((r) => r.failed).length;
+    // GEPA series: pass only with 0 miss and failures within the ceiling (no floor).
+    if (seriesSpec.method === GEPA_METHOD) {
+      const g = gepaRouteVerdict({ misses: shownMisses(rows).length, failures, items: rows.length }, specFailureCeiling);
+      aggregates[route] = { ...stats, failures, withUnresolved: statsWithUnresolved, misses: g.misses, verdict: g.verdict,
+        costUsd: rows.reduce((s, r) => s + (r.costUsd ?? 0), 0), items: rows.length };
+      continue;
+    }
     const spec = { recallFloor: seriesSpec.floors?.recall ?? 0, precisionFloor: seriesSpec.floors?.precision ?? 0,
       failureCeiling: specFailureCeiling,
       ...(recallBaseline ? { baselineRecall: recallBaseline.recall[route] ?? null, recallTolerance: recallBaseline.tolerance } : {}) };
@@ -212,6 +221,8 @@ export async function main(argv = process.argv.slice(2)) {
   const selection = selectBest(ranked);
   const manifest = { kind: 'l4-dev', series: k, createdAt: new Date().toISOString(), promptSha256: promptSha,
     routes, deferred, tuningItems: tuning.length, aggregates,
+    ...(seriesSpec.method === GEPA_METHOD ? { method: GEPA_METHOD, gepa: { ...gepaSeriesVerdict(aggregates, seriesSpec.routes),
+      rule: 'pass only when every GEPA route has 0 miss (P/S predicted non_pertinent) and a failure share within the ceiling; precision reported, no floor' } } : {}),
     ...(recallBaseline ? { recallNonRegression: { baselineSeries: recallBaseline.baselineSeries, half: 'tuning', metric: 'recall',
       tolerance: recallBaseline.tolerance, rule: 'a route whose recall point estimate is below the baseline recall of the same route fails, whatever its precision',
       routes: buildRecallComparison(perRoute, aggregates, recallBaseline) } } : {}),
