@@ -23,20 +23,31 @@ export interface GovernedLicence {
   readonly id: string;
   /** Exact OGC `license.title` as rendered by the geo API (verbatim). */
   readonly title: string;
+  /**
+   * Redistributability of the licence terms as reviewed by immo (PR #1010
+   * follow-up). `verified` (CC-BY 4.0: redistribution with attribution) is
+   * the only value that allows rights DERIVED from the licence when geo
+   * renders no `rights` object. `unverified` titles (municipal/MRC terms
+   * without a reviewed text) never derive rights. Absent = `unverified`.
+   */
+  readonly redistribution?: "verified" | "unverified";
 }
 
 export const GOVERNED_LICENCE_REGISTRY: readonly GovernedLicence[] = [
   {
     id: "cc-by-4.0",
     title: "Creative Commons Attribution 4.0 International",
+    redistribution: "verified",
   },
   {
     id: "portneuf-zonage-municipal",
     title: "Donnée publique municipale (zonage) — MRC de Portneuf",
+    redistribution: "unverified",
   },
   {
     id: "rosemere-zonage-municipal",
     title: "Plan de zonage municipal Ville de Rosemère",
+    redistribution: "unverified",
   },
 ];
 
@@ -58,6 +69,14 @@ export type LicenceResolution =
  * prove the ambiguous-title refusal against a duplicated title without
  * touching the shipped registry.
  */
+/** True when the registry marks `licenseId` redistributable (verified terms). */
+export function isRedistributableLicence(
+  licenseId: string,
+  registry: readonly GovernedLicence[] = GOVERNED_LICENCE_REGISTRY,
+): boolean {
+  return registry.find((entry) => entry.id === licenseId)?.redistribution === "verified";
+}
+
 export function resolveLicenceId(
   title: unknown,
   registry: readonly GovernedLicence[] = GOVERNED_LICENCE_REGISTRY,
