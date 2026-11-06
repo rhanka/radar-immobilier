@@ -43,6 +43,7 @@ import { adaptGrantToReader, canInvoke, type ApiReaderContext } from "./reader-c
 import type { AuthorityReader } from "./reader-profile.js";
 import { validateReaderResponse } from "./reader-responses.js";
 import {
+  GEO_COLLECTION_ITEMS_QUERY_KEYS,
   isGeoReadOperation,
   isWorkspaceReadOperation,
   workspacesListParams,
@@ -55,6 +56,7 @@ import {
   type ReaderOperationName,
 } from "./reader-operations.js";
 import { GeoItemsRefusal } from "./reader-geo.js";
+import { createGeoReaderBudget, type GeoReaderBudget } from "./reader-geo-budget.js";
 import { BASKET_READ_SCOPE_ID, type BasketConsentGate } from "./reader-consent.js";
 import {
   TILE_CLIENT_MAX_AGE_SECONDS,
@@ -109,6 +111,20 @@ export function parseContentRange(header: string | undefined, size: number): Par
   return { start, end: Math.min(end, size - 1) };
 }
 
+/** J1 zonage §0.4: the items query carries known keys only, each at most once. */
+function geoItemsQueryIsStrict(rawUrl: string): boolean {
+  const url = new URL(rawUrl);
+  if (Buffer.byteLength(url.pathname + url.search) > 16384) return false;
+  const seen = new Set<string>();
+  for (const key of url.searchParams.keys()) {
+    if (seen.has(key)) return false;
+    seen.add(key);
+    if (key === "grant") continue;
+    if (!(GEO_COLLECTION_ITEMS_QUERY_KEYS as readonly string[]).includes(key)) return false;
+  }
+  return true;
+}
+
 export interface ContentServeDeps {
   readonly contentBase: string;
   readonly grantSecret: string;
@@ -137,6 +153,12 @@ export interface ContentServeDeps {
    * zero extra wiring. Isolated optional field for the I2-partage rebase.
    */
   readonly tileProxy?: TileProxy;
+  /**
+   * J1 zonage §13 budget for `geo.collection-items.v1` (30/min per reader
+   * and artifact). Absent, a process-local store is created. Isolated
+   * optional field (tests inject a tight budget).
+   */
+  readonly geoBudget?: GeoReaderBudget;
 }
 type AuthorizedReader = ApiReaderContext & { readonly validUntil: number; readonly authorityVersion: string };
 
@@ -158,6 +180,7 @@ function presentedGrant(c: Context): string {
 export function createReaderContentApp(deps: ContentServeDeps): Hono {
   const app = new Hono();
   const now = deps.now ?? (() => Date.now());
+  const geoBudget = deps.geoBudget ?? createGeoReaderBudget();
 
   /**
    * Lot I2: deferred basket consent. H5 business calls (workspace/basket
@@ -459,11 +482,24 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     // the I2-partage rebase — no line above or below is touched.
     if (op === "geo.cities.v1" || op === "geo.collection-items.v1") {
       const query = c.req.query();
-      const params = validateOperationParams(op, op === "geo.cities.v1" ? {} : {
+      // J1 zonage §13: the items budget is spent BEFORE param validation, so
+      // invalid params and catalogue refusals count against it.
+      if (op === "geo.collection-items.v1") {
+        const spent = geoBudget.consume(auth.readerSub, auth.artifactId, now());
+        if (!spent.ok) {
+          applyReaderContentHeaders(c);
+          c.header("Retry-After", String(spent.retryAfterSec));
+          return c.json({ error: "rate_limited", retryAfterSec: spent.retryAfterSec }, 429);
+        }
+      }
+      // J1 zonage §0.4: unknown or duplicated query key = local refusal.
+      const strictQuery = op === "geo.collection-items.v1" ? geoItemsQueryIsStrict(c.req.url) : true;
+      const params = !strictQuery ? { ok: false as const } : validateOperationParams(op, op === "geo.cities.v1" ? {} : {
         collectionId: query["collectionId"] ?? "",
         ...(query["limit"] !== undefined ? { limit: Number(query["limit"]) } : {}),
         ...(query["bbox"] !== undefined ? { bbox: query["bbox"] } : {}),
         ...(query["offset"] !== undefined ? { offset: Number(query["offset"]) } : {}),
+        ...(query["fields"] !== undefined ? { fields: query["fields"] } : {}),
       });
       if (!params.ok) {
         applyReaderContentHeaders(c);

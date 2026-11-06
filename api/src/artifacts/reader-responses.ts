@@ -4,6 +4,7 @@ import { Availability, FacetContextResponse } from "../services/facets/classific
 import { WorkspaceId } from "../services/facets/classification-query.js";
 import { SignalSearchResponse } from "../services/facets/classification-search-contract.js";
 import { SignalStateResponse } from "../services/facets/classification-state.js";
+import { ZONING_PROJECTION_FIELDS } from "../services/geo/zoning-projection.js";
 
 const geoResponse = z.object({
   type: z.literal("FeatureCollection"),
@@ -27,6 +28,12 @@ const geoCitiesResponse = z.object({
   }).strict()),
 }).strict();
 
+const ZONING_V1_RESPONSE_KEYS: ReadonlySet<string> = new Set([
+  ...ZONING_PROJECTION_FIELDS,
+  "proof",
+  "immo_zone_lot_provenance",
+]);
+
 const geoCollectionItemsResponse = z.object({
   type: z.literal("FeatureCollection"),
   features: z.array(z.object({
@@ -37,14 +44,39 @@ const geoCollectionItemsResponse = z.object({
   numberMatched: z.number().int().nonnegative(),
   numberReturned: z.number().int().nonnegative(),
   truncated: z.boolean(),
+  // J1 zonage: paging cursor, projection kind and the licence record.
+  nextOffset: z.number().int().nonnegative().nullable(),
+  projection: z.enum(["zoning-v1", "allowlist"]),
   collectionId: z.string(),
   licenseId: z.string(),
+  license: z.object({
+    id: z.string(),
+    title: z.string(),
+    href: z.string().nullable(),
+    attribution: z.string().nullable(),
+  }).strict(),
+  rights: z.union([
+    z.object({ source: z.literal("geo") }).strict(),
+    z.object({ source: z.literal("derived-from-licence"), licenceId: z.string(), attribution: z.string() }).strict(),
+  ]),
   contract: z.object({
     status: z.string(),
     snapshot_sha256: z.string().optional(),
     reason: z.string().optional(),
   }).strict(),
-}).strict();
+}).strict().superRefine((value, ctx) => {
+  // J1 zonage: a zoning-v1 page carries the CLOSED projection keys only.
+  if (value.projection !== "zoning-v1") return;
+  for (const feature of value.features) {
+    for (const key of Object.keys(feature.properties)) {
+      if (!ZONING_V1_RESPONSE_KEYS.has(key)) {
+        ctx.addIssue({ code: "custom", message: "zoning-v1 property outside the closed projection" });
+        return;
+      }
+    }
+  }
+});
+
 
 /** Discovery exposes labels and signal/basket availability, never account or membership details. */
 export const ReaderWorkspacesResponse = z.object({

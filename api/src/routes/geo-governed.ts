@@ -37,6 +37,7 @@ import {
   type ServedCollectionRecord,
 } from "../services/geo/governed-policy.js";
 import { applyZonageAllowlist } from "../services/geo/governed-allowlist.js";
+import { projectZoningProperties } from "../services/geo/zoning-projection.js";
 import { assertRegistryTitlesUnique } from "../services/geo/governed-licences.js";
 import {
   readServedContractPointer,
@@ -75,7 +76,25 @@ export function serveZonageProperties(
   collectionId: string,
   rawProperties: Record<string, unknown>,
   records: readonly ServedCollectionRecord[] = GOVERNED_SERVED_RECORDS,
+  origin: "live" | "pg-fallback" = "live",
 ): Record<string, unknown> {
+  const record = records.find((r) => r.collectionId === collectionId);
+  // J1 zonage: a record carrying a zoning mapping is served through the
+  // CLOSED projection (never a raw key). The pg-fallback store emits its own
+  // closed shape (geo-features.ts ZoneFeatureProperties): only `zoneCode` is
+  // read there, as the UI reads it on the app fallback path (review §7.2).
+  if (record?.zoning) {
+    const sourceKeys = origin === "pg-fallback" ? ZONING_PG_FALLBACK_SOURCE_KEYS : record.zoning.sourceKeys;
+    const out: Record<string, unknown> = { ...projectZoningProperties(rawProperties, sourceKeys) };
+    const provenanceKeys = (["proof", "immo_zone_lot_provenance"] as const).filter(
+      (key) => origin === "pg-fallback" || record.zoning?.sourceKeys.includes(key),
+    );
+    if (provenanceKeys.length > 0) {
+      const sanitized = sanitizeFeatureProvenance({ ...rawProperties });
+      for (const key of provenanceKeys) if (key in sanitized) out[key] = sanitized[key];
+    }
+    return out;
+  }
   const allowed = applyZonageAllowlist(collectionId, rawProperties, records);
   const sanitized = sanitizeFeatureProvenance({ ...rawProperties });
   const out: Record<string, unknown> = { ...allowed };
@@ -85,6 +104,9 @@ export function serveZonageProperties(
   }
   return out;
 }
+
+/** Keys read on the pg-fallback path for zoning records (closed PG shape). */
+export const ZONING_PG_FALLBACK_SOURCE_KEYS: readonly string[] = ["zoneCode"];
 
 export interface GovernedLocalZoneResolver {
   (collectionId: string): Promise<{
@@ -318,6 +340,12 @@ export function geoGovernedRoute(deps: GeoGovernedDeps = {}): Hono {
       return c.json(refusalBody(entry), 403);
     }
 
+    // PR #1010 follow-up: a collection served on derived rights carries its
+    // provenance and the recorded attribution (CC-BY attribution duty).
+    const rightsFields = entry.rightsSource === "derived-from-licence" && entry.record.rights
+      ? { rights: { ...entry.record.rights } }
+      : {};
+
     // Bounded passthrough query: limit/bbox/offset only, f=json forced.
     const limit = clampLimit(c.req.query("limit"));
     const params = new URLSearchParams();
@@ -362,6 +390,7 @@ export function geoGovernedRoute(deps: GeoGovernedDeps = {}): Hono {
         numberReturned: served.length,
         collectionId: id,
         licenseId: entry.record.licenseId,
+        ...rightsFields,
         contract,
       });
     }
@@ -377,7 +406,7 @@ export function geoGovernedRoute(deps: GeoGovernedDeps = {}): Hono {
           ...feature,
           properties: serveZonageProperties(id, {
             ...((feature.properties ?? {}) as Record<string, unknown>),
-          }, records),
+          }, records, "pg-fallback"),
         }));
         const sliced = fallen.slice(0, limit);
         c.header(GOVERNANCE_PROVENANCE_HEADER, GOVERNANCE_PROVENANCE_FALLBACK);
@@ -388,6 +417,7 @@ export function geoGovernedRoute(deps: GeoGovernedDeps = {}): Hono {
           numberReturned: sliced.length,
           collectionId: id,
           licenseId: entry.record.licenseId,
+          ...rightsFields,
           contract,
         });
       }

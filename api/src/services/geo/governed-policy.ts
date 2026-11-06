@@ -9,7 +9,11 @@
  * happens BEFORE any upstream call.
  *
  * Statuses:
- * - `served`      — full dated record, all three conditions hold.
+ * - `served`      — full dated record, all three conditions hold. Condition
+ *                   (iii) holds with a geo-rendered `rights` object, or —
+ *                   when geo renders none — with the record's derived
+ *                   rights for a registry-redistributable licence (CC-BY 4.0,
+ *                   conductor decision, PR #1010 follow-up).
  * - `not covered` — licence known but the record is incomplete (no dated
  *                   per-collection line, or rights missing).
  * - `unknown`     — licence unknown, unmatched, or ambiguous.
@@ -19,10 +23,12 @@
 
 import {
   GOVERNED_LICENCE_REGISTRY,
+  isRedistributableLicence,
   resolveLicenceId,
   type GovernedLicence,
   type LicenceResolution,
 } from "./governed-licences.js";
+import { GOVERNED_ZONING_RECORDS } from "./governed-zoning-records.js";
 
 /** Per-collection served record (instance policy, versioned in code). */
 export interface ServedCollectionRecord {
@@ -39,6 +45,28 @@ export interface ServedCollectionRecord {
   readonly observedAt: string;
   /** Where the record comes from (live recount, field review, …). */
   readonly source: string;
+  /**
+   * J1 zonage: when present, items are served through the CLOSED zoning
+   * projection (zoning-projection.ts) instead of the raw-key allowlist:
+   * `sourceKeys` is the explicit per-collection mapping (the only raw keys
+   * ever read) and `servedFields` lists the projection output keys.
+   */
+  readonly zoning?: {
+    readonly projection: "zoning-v1";
+    readonly sourceKeys: readonly string[];
+  };
+  /**
+   * Derived rights (PR #1010 follow-up, conductor decision): satisfies
+   * condition (iii) ONLY while geo renders no `rights` object, and only when
+   * `licenceId` equals the live-resolved licence AND the registry marks it
+   * redistributable. A geo-rendered `rights` always takes precedence.
+   * `attribution` is served with every page.
+   */
+  readonly rights?: {
+    readonly source: "derived-from-licence";
+    readonly licenceId: string;
+    readonly attribution: string;
+  };
 }
 
 /**
@@ -47,8 +75,12 @@ export interface ServedCollectionRecord {
  * features, property keys recorded verbatim, no personal data among them).
  * Every other collection — including the 41 other licence-known qc-zonage-*
  * collections — has NO complete dated line and stays listed, not served.
+ *
+ * J1 zonage (policy j1z-2026-11-05) appends the dated city zoning records of
+ * governed-zoning-records.ts. The three conditions are unchanged: a city
+ * record whose live listing renders no `rights` stays `not covered`.
  */
-export const GOVERNED_POLICY_VERSION = "i1a-2026-11-03";
+export const GOVERNED_POLICY_VERSION = "j1z-2026-11-05-r2";
 
 export const GOVERNED_SERVED_RECORDS: readonly ServedCollectionRecord[] = [
   {
@@ -72,6 +104,9 @@ export const GOVERNED_SERVED_RECORDS: readonly ServedCollectionRecord[] = [
     observedAt: "2026-11-03",
     source: "live-recount-public-ogc-api-collections-items-limit-1",
   },
+  // J1 zonage (2026-11-05): 68 city zoning collections through the closed
+  // zoning projection. Each still needs live licence + rights at every read.
+  ...GOVERNED_ZONING_RECORDS,
 ];
 
 /** Technical pilot city named at I-1A opening (P2). */
@@ -105,6 +140,8 @@ export interface CataloguedCollection {
   readonly rightsPresent: boolean;
   /** Present only when served. */
   readonly record?: ServedCollectionRecord;
+  /** Present only when served: where condition (iii) came from. */
+  readonly rightsSource?: "geo" | "derived-from-licence";
   /** Machine-readable refusal reason (absent when served). */
   readonly reason?: string;
 }
@@ -166,7 +203,15 @@ export function catalogueCollection(
     };
   }
   const record = records.find((r) => r.collectionId === collection.id);
-  if (!record || record.licenseId !== licence.licenseId || !collection.rightsPresent) {
+  // (iii): a geo-rendered `rights` wins; otherwise derived rights hold only
+  // for the live-resolved licence when the registry marks it redistributable.
+  const derivedRights =
+    !collection.rightsPresent &&
+    record?.rights?.source === "derived-from-licence" &&
+    record.rights.licenceId === licence.licenseId &&
+    record.licenseId === licence.licenseId &&
+    isRedistributableLicence(licence.licenseId, registry);
+  if (!record || record.licenseId !== licence.licenseId || (!collection.rightsPresent && !derivedRights)) {
     return {
       collectionId: collection.id,
       status: "not covered",
@@ -183,8 +228,9 @@ export function catalogueCollection(
     collectionId: collection.id,
     status: "served",
     licence,
-    rightsPresent: true,
+    rightsPresent: collection.rightsPresent,
     record,
+    rightsSource: collection.rightsPresent ? "geo" : "derived-from-licence",
   };
 }
 
