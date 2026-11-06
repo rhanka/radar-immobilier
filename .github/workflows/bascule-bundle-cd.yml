@@ -110,13 +110,18 @@ jobs:
     # the bundle still re-applies it. Sequencing with `needs` was rejected: it
     # would still load the node right before the backup and tie the backup to the
     # bundle's anti-RCE gate.
-    if: vars.BASCULE_BUNDLE_CD_ENABLED == 'true' && !(github.event_name == 'workflow_dispatch' && inputs.backup_run_now)
+    # G0 v3 §5 P7: prod mutations run only from main or a version tag.
+    if: vars.BASCULE_BUNDLE_CD_ENABLED == 'true' && !(github.event_name == 'workflow_dispatch' && inputs.backup_run_now) && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
     env:
       # PROD namespace (VAP is cluster-scoped; RBAC/RO-role/CronJob/SealedSecrets are ns-scoped).
       NAMESPACE: radar-immobilier
       BUNDLE: deploy/ci/bascule-preprod
     steps:
       - uses: actions/checkout@v4
+      # G0 v3 §5 P7 (#1012 review E2): a version tag deploys only from main history.
+      - name: Refuse a version tag outside main history
+        if: startsWith(github.ref, 'refs/tags/')
+        run: bash deploy/ci/require-main-ancestry.sh
 
       - name: Install kubectl
         uses: azure/setup-kubectl@v4
@@ -333,7 +338,7 @@ jobs:
     # Two switches: the bundle CD is armed (the permanent SA exists) AND the k8s
     # lane armed the backup AFTER re-applying rbac-ci-bascule-prod.yaml (the new
     # name-scoped verbs). Merging can never red main against an old Role.
-    if: always() && vars.BASCULE_BUNDLE_CD_ENABLED == 'true' && vars.BACKUP_DAILY_CD_ENABLED == 'true'
+    if: always() && vars.BASCULE_BUNDLE_CD_ENABLED == 'true' && vars.BACKUP_DAILY_CD_ENABLED == 'true' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
     # SECRET VAULT `radar-backup-prod` (created by the k8s lane: deployment branch = main
     # ONLY, no required reviewer, so the merge push stays automatic): holds the three
     # backup identities (secrets RADAR_BACKUP_{WRITER,READER,PURGER}_{ACCESS,SECRET}_KEY)
@@ -346,6 +351,10 @@ jobs:
       BACKUP_DIR: deploy/ci/backup
     steps:
       - uses: actions/checkout@v4
+      # G0 v3 §5 P7 (#1012 review E2): a version tag deploys only from main history.
+      - name: Refuse a version tag outside main history
+        if: startsWith(github.ref, 'refs/tags/')
+        run: bash deploy/ci/require-main-ancestry.sh
 
       # Fail-closed BEFORE touching the cluster: the retention/manifest/upload
       # logic must pass its selftest (in-memory S3 fake, 0 network).

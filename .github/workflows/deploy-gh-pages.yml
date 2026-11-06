@@ -51,7 +51,8 @@ jobs:
   deploy:
     name: Build and deploy UI
     needs: pages_preflight
-    if: needs.pages_preflight.outputs.pages_enabled == 'true'
+    # G0 v3 §5 P7: a public deployment runs only from main.
+    if: github.ref == 'refs/heads/main' && needs.pages_preflight.outputs.pages_enabled == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment:
