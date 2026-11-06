@@ -174,10 +174,12 @@ classif-l4-blind: ## Classification pilot L4: executor-only blind-half scoring +
 # GEPA_CONCURRENCY = calls in flight per route (2 per seat, branch guardrail).
 MAX_CALLS ?= 5000
 GEPA_CONCURRENCY ?= 2
+# QUOTA_BACKOFF_MS = delays before each retry of a 402/429/quota failure (default 30000,120000,300000).
+QUOTA_BACKOFF_MS ?=
 .PHONY: classif-l4-gepa
-classif-l4-gepa: ## Classification pilot L4: GEPA prompt optimisation, tuning half only (SERIES=k MAX_CALLS=5000 SEED= RUN= MAX_ITER= MAX_SKIPPED=5 GEPA_CONCURRENCY=2)
+classif-l4-gepa: ## Classification pilot L4: GEPA prompt optimisation, tuning half only (SERIES=k MAX_CALLS=5000 SEED= RUN= MAX_ITER= MAX_SKIPPED=5 QUOTA_BACKOFF_MS= GEPA_CONCURRENCY=2)
 	@test "$(ENV)" = "preprod" || { echo "[classif-l4-gepa] ENV=preprod required"; exit 2; }
-	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l4/gepa.mjs --series $(SERIES) --max-calls $(MAX_CALLS) --concurrency $(GEPA_CONCURRENCY) $(if $(SEED),--seed '$(SEED)',) $(if $(RUN),--run $(RUN),) $(if $(MAX_ITER),--max-iterations $(MAX_ITER),) $(if $(MAX_SKIPPED),--max-skipped $(MAX_SKIPPED),)
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l4/gepa.mjs --series $(SERIES) --max-calls $(MAX_CALLS) --concurrency $(GEPA_CONCURRENCY) $(if $(SEED),--seed '$(SEED)',) $(if $(RUN),--run $(RUN),) $(if $(MAX_ITER),--max-iterations $(MAX_ITER),) $(if $(MAX_SKIPPED),--max-skipped $(MAX_SKIPPED),) $(if $(QUOTA_BACKOFF_MS),--quota-backoff-ms $(QUOTA_BACKOFF_MS),)
 
 # Codex seat auth (review GEPA R5): the isolated seat homes live in ~/.local/share/radar-classif-seats/<seat>
 # (outside $(CLASSIF_HOME)). After a new codex login, or when a run stops on authentication errors,

@@ -250,6 +250,15 @@ export function refreshCodexAuth(seat, { root = seatHomesRoot(), home = classifH
   return dir;
 }
 
+/**
+ * A failed call whose output reads as a quota or rate limit (HTTP 402/429, quota, rate limit,
+ * budget exhausted): retried with a bounded backoff by GEPA before it counts as a failure.
+ */
+export function looksLikeQuotaFailure(r) {
+  if (!r || r.code === 0) return false;
+  return /\b(?:402|429)\b|quota|rate[ _-]?limit|too many requests|budget exhausted|insufficient[ _](?:quota|credit|balance)/i.test(`${r.stderrTail ?? ''}\n${r.stdoutTail ?? ''}\n${r.text ?? ''}`);
+}
+
 /** A failed codex call whose output reads as an authentication failure (stale or revoked seat token). */
 export function looksLikeAuthFailure(code, text) {
   return code !== 0 && /\b401\b|unauthori[sz]ed|authentication|auth(?:orization)? (?:error|failed|expired)|token (?:expired|is expired|refresh)|refresh[_ ]token|not logged in|log ?in again|codex login/i.test(String(text ?? ''));
