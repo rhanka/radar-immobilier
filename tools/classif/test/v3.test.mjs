@@ -125,7 +125,7 @@ test('v3 deferred annotator keeps its last vote with a recorded gap', async () =
 // tolerated), intent-counted, check refuses over-cap.
 test('v3 pilot budget: counter in the manifest, chain refuses over cap', async () => {
   const { BUDGET_CAP, check, spent, spentByPhase } = await import('../lib/budget.mjs');
-  assert.equal(BUDGET_CAP, 22000);
+  assert.equal(BUDGET_CAP, 30000);
   const home = tmp();
   try {
     mkdirSync(path.join(home, 'l2'), { recursive: true });
