@@ -1,4 +1,5 @@
-// Pilot budget guard (plan v3 owner decision D5): hard cap of 22,000 model calls over the
+// Pilot budget guard (plan v3 owner decision D5, raised to 30,000 by the owner on 2026-11-06
+// for the GEPA series): hard cap of 30,000 model calls over the
 // whole pilot. Every seat caller appends one record per call to $CLASSIF_HOME/l2/calls.jsonl
 // (run.mjs, amend.mjs, probe.mjs, l4/*); spent() counts those records and check() refuses any
 // planned batch that would exceed the cap. The chain calls check() before every pass.
@@ -6,7 +7,7 @@ import path from 'node:path';
 import { existsSync, readFileSync } from 'node:fs';
 import { classifHome } from './paths.mjs';
 
-export const BUDGET_CAP = 22000;
+export const BUDGET_CAP = 30000;
 export const CALLS_LOG = 'l2/calls.jsonl';
 
 /**
