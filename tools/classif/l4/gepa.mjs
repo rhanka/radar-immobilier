@@ -37,12 +37,15 @@
 // dev per-item cache of series k (same prompt bytes, same route, same item).
 //
 // Failures: an invalid answer (no-json, unknown-code, verdict-not-partition) counts as shown
-// and is cached as that answer; an infrastructure failure (exit, timeout, quota, any tool
-// event) is never cached and trips the in-flight breaker of its route (> max(1, 5 %) of a
-// batch: no further call launched, the run stops with the exact resume command, a resume
-// retries). On its mini-batch a child is rejected, never a run stop: `tool-events` (any tool
-// event, the child is then consumed) or `answer-failures` (on one route, 2 failed calls or
-// more than its parent). Over 5 % failed calls on a route of D_pareto, an admitted candidate
+// and is cached as that answer; a tool-event answer counts as a failed call (shown, failure
+// share), is never cached and never trips the breaker; an infrastructure failure (exit,
+// timeout, 402/429/quota, authentication) is never cached and trips the in-flight breaker of
+// its route (> max(1, 5 %) of the whole batch: no further call launched, the run stops with
+// the exact resume command). Kept D_pareto failures are retried at most MAX_RETRIES times per
+// (candidate, route, case), never under the breaker; past that they are definitive. A parent
+// with tool events on its mini-batch skips the iteration. On its mini-batch a child is
+// rejected, never a run stop: `tool-events` (its evaluation stops at the first one, the child
+// is consumed) or `answer-failures` (on one route, 2 failed calls or more than its parent). Over 5 % failed calls on a route of D_pareto, an admitted candidate
 // stays in the population but is ineligible for the final choice.
 //
 // Budget: MAX_CALLS (default 5000) is a run cap enforced by lib/budget.mjs runBudget (phases
@@ -365,21 +368,47 @@ export function uncachedCalls(ctx, cand, ids) {
 }
 
 /**
+ * One paid evaluation call: logged intent + result, parsed by parseSeatResult. Answers and
+ * invalid answers are cached; infrastructure failures and tool-event answers never are.
+ * Returns { row, authError }.
+ */
+async function callOne(ctx, cand, route, id, step) {
+  const phase = `${ctx.phase}.eval`;
+  appendJsonlRecord(ctx.callsLog, { at: new Date().toISOString(), intent: true, phase, route, itemId: id, candidate: cand.id, step });
+  const r = await ctx.seat(route, devPrompt(cand.text, ctx.refById.get(id)), { base: ctx.seatTmp, timeoutMs: 1800000 });
+  appendJsonlRecord(ctx.callsLog, { at: new Date().toISOString(), intent: false, phase, route, itemId: id, candidate: cand.id, step,
+    exitCode: r.code, latencyMs: r.latencyMs ?? null, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null, toolEvents: r.toolEvents ?? null });
+  const parsed = parseSeatResult(r, ctx.codes);
+  const j = parsed.failed ? null : parseJsonObject(r.text);
+  const row = { itemId: id, pred: parsed.failed ? null : { verdict: parsed.verdict, code: parsed.code }, failed: parsed.failed, infra: parsed.infra,
+    tool: parsed.why === 'tool-events', why: parsed.why ?? null, justification: trunc(j?.justification ?? j?.citation ?? j?.reason ?? '', JUSTIFICATION_CHARS),
+    usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null };
+  if (!row.infra) {
+    const f = evalCacheFile(ctx, cand, route, id);
+    mkdirSync(path.dirname(f), { recursive: true, mode: 0o700 });
+    writeFileSync(f, JSON.stringify({ promptSha256: cand.sha, evalKey: evalKey(ctx, cand, id), route, itemId: id, row }), { mode: 0o600 });
+  }
+  return { row, authError: !!r.authError };
+}
+
+/**
  * Evaluates a candidate on `ids` over every route (families in parallel, `concurrency` calls per
- * route). Returns { itemId: { route: row } }. Two failure classes (review GEPA B2):
+ * route). Returns { itemId: { route: row } } (a call never launched is null). Failure classes:
  * - `answer` (no-json, unknown-code, verdict-not-partition): the model answered badly; counted
  *   shown, CACHED as that answer, never trips the breaker;
- * - `infra` (non-zero exit, timeout, quota, any tool event): never cached (retried on resume).
- * Circuit breaker, in flight: once a route has more than max(1, 5 %) infra failures on the
- * batch, no further call of that route is launched; the batch then stops the run, with the exact
- * resume command (and the seat auth refresh when the failures read as authentication errors).
- * `child: true` (a child on its mini-batch, review GEPA R2): its tool-event answers stay
- * uncached failures but never trip the breaker — the loop rejects the child instead.
+ * - `tool` (any tool event, review GEPA B3c): counted as a failed call (shown, failure share),
+ *   NEVER cached, never trips the breaker — over 5 % on a route of D_pareto the candidate is
+ *   ineligible; on a child mini-batch (`child: true`) the FIRST one stops every route of the
+ *   child (review GEPA R2-bis) and the loop rejects the child;
+ * - `infra` (non-zero exit, timeout, 402/429/quota, authentication): never cached; circuit
+ *   breaker in flight over the WHOLE batch (`lotSize`, review GEPA B3d): beyond max(1, 5 %) of
+ *   it on a route, no further call of that route is launched and the run stops with the exact
+ *   resume command (and the seat auth refresh when the failures read as authentication errors).
  */
-export async function evaluateCandidate(ctx, cand, ids, step, { child = false } = {}) {
+export async function evaluateCandidate(ctx, cand, ids, step, { child = false, lotSize = ids.length } = {}) {
   ctx.budget.check(uncachedCalls(ctx, cand, ids));
-  const phase = `${ctx.phase}.eval`;
-  const allowed = Math.max(1, Math.floor(ids.length * GEPA_FAILURE_CEILING));
+  const allowed = Math.max(1, Math.floor(lotSize * GEPA_FAILURE_CEILING));
+  let childTool = false;
   const runRoute = async (route) => {
     let infraFailures = 0;
     let authFailures = 0;
@@ -387,28 +416,16 @@ export async function evaluateCandidate(ctx, cand, ids, step, { child = false } 
     const rows = await pool(ids.map((id) => async () => {
       const hit = readEvalCache(ctx, cand, route, id);
       if (hit) return hit;
-      if (tripped) return null;
-      appendJsonlRecord(ctx.callsLog, { at: new Date().toISOString(), intent: true, phase, route, itemId: id, candidate: cand.id, step });
-      const r = await ctx.seat(route, devPrompt(cand.text, ctx.refById.get(id)), { base: ctx.seatTmp, timeoutMs: 1800000 });
-      appendJsonlRecord(ctx.callsLog, { at: new Date().toISOString(), intent: false, phase, route, itemId: id, candidate: cand.id, step,
-        exitCode: r.code, latencyMs: r.latencyMs ?? null, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null, toolEvents: r.toolEvents ?? null });
-      const parsed = parseSeatResult(r, ctx.codes);
-      if (r.authError) authFailures++;
-      if (parsed.infra && !(child && parsed.why === 'tool-events') && ++infraFailures > allowed) tripped = true;
-      const j = parsed.failed ? null : parseJsonObject(r.text);
-      const row = { itemId: id, pred: parsed.failed ? null : { verdict: parsed.verdict, code: parsed.code }, failed: parsed.failed, infra: parsed.infra, why: parsed.why ?? null,
-        justification: trunc(j?.justification ?? j?.citation ?? j?.reason ?? '', JUSTIFICATION_CHARS),
-        usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null };
-      if (!row.infra) {
-        const f = evalCacheFile(ctx, cand, route, id);
-        mkdirSync(path.dirname(f), { recursive: true, mode: 0o700 });
-        writeFileSync(f, JSON.stringify({ promptSha256: cand.sha, evalKey: evalKey(ctx, cand, id), route, itemId: id, row }), { mode: 0o600 });
-      }
+      if (tripped || childTool) return null;
+      const { row, authError } = await callOne(ctx, cand, route, id, step);
+      if (authError) authFailures++;
+      if (row.tool && child) childTool = true;
+      if (row.infra && !row.tool && ++infraFailures > allowed) tripped = true;
       return row;
     }), ctx.concurrency);
     if (tripped) {
       const auth = authFailures ? ` ${authFailures} read as authentication errors: refresh the seat with \`${seatAuthRefreshCommand(route)}\`, then` : '';
-      throw new Error(`classif-l4-gepa: route ${route} had ${infraFailures} infrastructure failures on ${step} (> ${allowed} of ${ids.length}): no further call launched, run stopped.${auth} resume with \`${ctx.resumeCommand}\` (answered calls are cached, failed ones are retried)`);
+      throw new Error(`classif-l4-gepa: route ${route} had ${infraFailures} infrastructure failures on ${step} (> ${allowed} of ${lotSize}): no further call launched, run stopped.${auth} resume with \`${ctx.resumeCommand}\` (answered calls are cached, failed ones are retried)`);
     }
     return rows;
   };
@@ -417,6 +434,9 @@ export async function evaluateCandidate(ctx, cand, ids, step, { child = false } 
   for (const route of ctx.routes) byRoute.get(route).forEach((row, i) => { out[ids[i]][route] = row; });
   return out;
 }
+
+/** Number of tool-event answers in evaluated rows. */
+export const toolEventCount = (evals) => Object.values(evals).reduce((n, byRoute) => n + Object.values(byRoute).filter((r) => r?.tool || r?.why === 'tool-events').length, 0);
 
 /** Case scores of evaluated rows: { itemId: { misses, noise, failures } }. */
 export function scoreEvals(evals, refById, routes = GEPA_ROUTES) {
@@ -428,7 +448,7 @@ export function scoreEvals(evals, refById, routes = GEPA_ROUTES) {
 }
 
 const compactEvals = (evals) => Object.fromEntries(Object.entries(evals).map(([id, byRoute]) => [id,
-  Object.fromEntries(Object.entries(byRoute).map(([route, r]) => [route, { failed: r.failed, infra: !!r.infra, pred: r.pred }]))]));
+  Object.fromEntries(Object.entries(byRoute).map(([route, r]) => [route, { failed: r.failed, infra: !!r.infra, ...(r.tool ? { tool: true } : {}), pred: r.pred }]))]));
 
 /** Per-route { misses, noise, failures, items } of compact evals. */
 export function perRouteCounts(evalsList, refById, routes) {
@@ -473,19 +493,44 @@ function loadCandidate(ctx, id, sha = null) {
   return { ...c, scores: scoreEvals(c.pareto, ctx.refById, ctx.routes), ineligible: overFailureCeiling(perRouteCounts([c.pareto], ctx.refById, ctx.routes)) };
 }
 
-/** D_pareto cases of a candidate holding an infrastructure failure on some route. */
-const infraCases = (cand) => Object.keys(cand.pareto).filter((id) => Object.values(cand.pareto[id]).some((r) => r.infra));
+/** At most this many retries per (candidate, route, case) over the whole run (review GEPA B3b). */
+export const MAX_RETRIES = 2;
+const retriesFile = (ctx) => path.join(ctx.runDir, 'retries.json');
+const retryKey = (cand, route, id) => `${cand.sha}|${route}|${id}`;
+function readRetries(ctx) {
+  try { return JSON.parse(readFileSync(retriesFile(ctx), 'utf8')); } catch { return {}; }
+}
+
+/** (route, case) pairs of D_pareto a candidate keeps as infra or tool failures and may still retry. */
+export function retryablePairs(ctx, cand) {
+  const retries = readRetries(ctx);
+  const out = [];
+  for (const [id, byRoute] of Object.entries(cand.pareto)) {
+    for (const [route, r] of Object.entries(byRoute)) if (r?.infra && (retries[retryKey(cand, route, id)] ?? 0) < MAX_RETRIES) out.push({ route, id });
+  }
+  return out;
+}
 
 /**
- * Re-runs the infrastructure failures a candidate kept on D_pareto (review GEPA m2): only those
- * (route, case) pairs are uncached, so only they are paid. Returns the reloaded candidate.
+ * Re-runs the infrastructure and tool failures a candidate kept on D_pareto (review GEPA m2,
+ * B3): only those pairs are paid, NEVER under the circuit breaker (B3a), and each pair at most
+ * MAX_RETRIES times over the run — the counter is persisted (retries.json) before the calls.
+ * Past that bound the pair stays a definitive failure: shown, and in the failure share.
  */
 async function retryInfra(ctx, cand, step) {
-  const ids = infraCases(cand);
-  if (!ids.length) return cand;
-  ctx.log(`${cand.id}: retrying the infrastructure failures of ${ids.length} D_pareto case(s)`);
-  const evals = await evaluateCandidate(ctx, cand, ids, step);
-  saveCandidate(ctx, { ...cand, pareto: { ...cand.pareto, ...compactEvals(evals) } });
+  const pairs = retryablePairs(ctx, cand);
+  if (!pairs.length) return cand;
+  ctx.budget.check(pairs.length);
+  ctx.log(`${cand.id}: retrying ${pairs.length} failed D_pareto call(s)`);
+  const retries = readRetries(ctx);
+  for (const p of pairs) retries[retryKey(cand, p.route, p.id)] = (retries[retryKey(cand, p.route, p.id)] ?? 0) + 1;
+  writeFileSync(retriesFile(ctx), JSON.stringify(retries), { mode: 0o600 });
+  const pareto = JSON.parse(JSON.stringify(cand.pareto));
+  await pool(pairs.map((p) => async () => {
+    const { row } = await callOne(ctx, cand, p.route, p.id, step);
+    pareto[p.id][p.route] = compactEvals({ [p.id]: { [p.route]: row } })[p.id][p.route];
+  }), ctx.concurrency);
+  saveCandidate(ctx, { ...cand, pareto });
   return loadCandidate(ctx, cand.id, cand.sha);
 }
 
@@ -633,8 +678,8 @@ export async function runGepa({ home = classifHome(), repoClassif = classifDir(p
     if (!c) throw new Error(`classif-l4-gepa: journal admits ${rec.child.id} but its candidate file is missing`);
     return c;
   });
-  const initPlanned = seeds.reduce((s, c) => { const l = loadCandidate(ctx, c.id, c.sha); return s + (l ? infraCases(l).length * ctx.routes.length : uncachedCalls(ctx, c, split.pareto)); }, 0)
-    + loadedChildren.reduce((s, c) => s + infraCases(c).length * ctx.routes.length, 0);
+  const initPlanned = seeds.reduce((s, c) => { const l = loadCandidate(ctx, c.id, c.sha); return s + (l ? retryablePairs(ctx, l).length : uncachedCalls(ctx, c, split.pareto)); }, 0)
+    + loadedChildren.reduce((s, c) => s + retryablePairs(ctx, c).length, 0);
   if (!budget.fits(initPlanned + finalReserve)) {
     throw new Error(`classif-l4-gepa: MAX_CALLS ${maxCalls} cannot hold the initial population (${initPlanned} calls) plus one final evaluation (${finalReserve}); remaining ${budget.remaining()}`);
   }
@@ -673,6 +718,7 @@ export async function runGepa({ home = classifHome(), repoClassif = classifDir(p
     log(`iteration ${iter} (${kind}): parents ${parentIds.join('+')}, mini-batch ${minibatch.length}, ${budget.spent()} run calls spent`);
     const parentEvals = [];
     for (const c of parents) parentEvals.push(await evaluateCandidate(ctx, c, minibatch, `i${iter}-parent-${c.id}`));
+    const parentTools = parentEvals.reduce((n, e) => n + toolEventCount(e), 0);
     const parentTotals = parentEvals.map((e) => totalScore(scoreEvals(e, refById, ctx.routes), minibatch));
     const bestParent = parentTotals.reduce((b, t, i) => (compareScore(t, parentTotals[b]) < 0 ? i : b), 0);
     const rec = { iter, kind, at: new Date().toISOString(), parents: parentIds, minibatch,
@@ -684,6 +730,9 @@ export async function runGepa({ home = classifHome(), repoClassif = classifDir(p
       journal.push(rec);
       log(`iteration ${iter}: ${status} (${reason})`);
     };
+    // Review GEPA B3e: a parent whose answers carry tool events on this mini-batch does not stop
+    // the run — the iteration is skipped (journaled) and the next one draws with its own seed.
+    if (parentTools) { finish('skipped', 'parent-tool-events', { toolEvents: parentTools }); continue; }
     // No child can beat a parent without miss nor noise on the mini-batch: skip the paid calls.
     if (parentTotals[bestParent].misses === 0 && parentTotals[bestParent].noise === 0) {
       finish('skipped', 'parent-without-error-on-minibatch');
@@ -712,12 +761,13 @@ export async function runGepa({ home = classifHome(), repoClassif = classifDir(p
       continue;
     }
     const childEvals = await evaluateCandidate(ctx, child, minibatch, `i${iter}-child`, { child: true });
+    // Review GEPA R2 / R2-bis: a child that makes a seat use a tool is rejected (journaled,
+    // consumed), never a run stop; its evaluation stopped at the first tool event and its refused
+    // answers were never cached.
+    const toolEvents = toolEventCount(childEvals);
+    if (toolEvents) { finish('rejected', 'tool-events', { child: { id: child.id, sha: child.sha, seat: prop.seat, repairs: checked.repairs, toolEvents, consumed: true } }); continue; }
     const childTotal = totalScore(scoreEvals(childEvals, refById, ctx.routes), minibatch);
     const childRec = { id: child.id, sha: child.sha, seat: prop.seat, repairs: checked.repairs, minibatch: childTotal, ...errorsOf(childEvals, refById, ctx.routes) };
-    // Review GEPA R2: a child that makes a seat use a tool is rejected (journaled, consumed), never
-    // a run stop; its refused answers were never cached.
-    const toolEvents = Object.values(childEvals).reduce((n, byRoute) => n + Object.values(byRoute).filter((r) => r.why === 'tool-events').length, 0);
-    if (toolEvents) { finish('rejected', 'tool-events', { child: { ...childRec, toolEvents, consumed: true } }); continue; }
     // Review GEPA R1: a child whose answers break the format would look "shown" everywhere; it is
     // rejected when, on one route, it fails at least CHILD_FAILURE_MARGIN more calls than its parent.
     const childCounts = perRouteCounts([compactEvals(childEvals)], refById, ctx.routes);
@@ -739,7 +789,8 @@ export async function runGepa({ home = classifHome(), repoClassif = classifDir(p
   const allIds = [...split.feedback, ...split.pareto].sort();
   for (const f of paretoFront(candidates, split.pareto)) {
     const i = candidates.findIndex((c) => c.id === f.id);
-    if (infraCases(candidates[i]).length && budget.fits(infraCases(candidates[i]).length * ctx.routes.length)) candidates[i] = await retryInfra(ctx, candidates[i], `final-retry-${f.id}`);
+    const n = retryablePairs(ctx, candidates[i]).length;
+    if (n && budget.fits(n)) candidates[i] = await retryInfra(ctx, candidates[i], `final-retry-${f.id}`);
   }
   const front = paretoFront(candidates, split.pareto);
   const ranked = front.map((f, order) => {
