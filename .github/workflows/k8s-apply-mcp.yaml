@@ -32,12 +32,18 @@ concurrency:
 
 jobs:
   apply:
+    # G0 v3 §5 P7: prod mutations run only from main or a version tag.
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
       NAMESPACE: radar-immobilier
     steps:
       - uses: actions/checkout@v4
+      # G0 v3 §5 P7 (#1012 review E2): a version tag deploys only from main history.
+      - name: Refuse a version tag outside main history
+        if: startsWith(github.ref, 'refs/tags/')
+        run: bash deploy/ci/require-main-ancestry.sh
 
       - name: Install kubectl
         uses: azure/setup-kubectl@v4

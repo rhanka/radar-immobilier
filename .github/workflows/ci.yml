@@ -3,7 +3,11 @@ name: CI
 on:
   push:
     branches: [main]
+  # G0 v3 §5 P7 / §7.1 condition 5: ordinary CI never runs for git-backed
+  # artifact refs. `branches-ignore` filters only the PR TARGET branch, so
+  # every job also refuses an `artifact/**` PR HEAD (github.head_ref).
   pull_request:
+    branches-ignore: ['artifact/**']
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -12,6 +16,7 @@ concurrency:
 jobs:
   quality:
     name: Quality gates
+    if: ${{ !startsWith(github.head_ref, 'artifact/') }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
@@ -103,6 +108,7 @@ jobs:
 
   e2e:
     name: Real-stack e2e (Playwright)
+    if: ${{ !startsWith(github.head_ref, 'artifact/') }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
