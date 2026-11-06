@@ -78,6 +78,20 @@ export const ROUTES = {
       env: { CODEX_HOME: ensureAstraHome() } }),
     parse: parseCodex,
   },
+  // GEPA evaluation seats (owner decision, GEPA method): two low-effort ChatGPT models on the
+  // same isolated codex route as astra-max — own CODEX_HOME per seat (config with NO
+  // mcp_servers, copied auth), empty cwd, scrubbed env, read-only sandbox, --ephemeral,
+  // --json + -o last-message.md for parsing, prompt on stdin, parseCodex (fail-closed tools).
+  ...Object.fromEntries([
+    ['sol-6.1-low', 'Sol 6.1', 'gpt-6.1-sol'],
+    ['luna-6-low', 'Luna 6', 'gpt-6-luna'],
+  ].map(([label, family, model]) => [label, {
+    family, model, effort: 'low', route: `codex exec -m ${model} -c model_reasoning_effort=low -s read-only, isolated CODEX_HOME, empty cwd, scrubbed env (--json + -o last-message.md for parsing, prompt on stdin)`,
+    build: (dir, _file, prompt) => ({ cmd: 'codex', args: ['exec', '-m', model, '-c', 'model_reasoning_effort=low', '-s', 'read-only',
+      '--skip-git-repo-check', '--ephemeral', '--json', '-o', path.join(dir, 'last-message.md'), '-'], stdin: prompt,
+      env: { CODEX_HOME: ensureCodexHome(label, { model, effort: 'low' }) } }),
+    parse: parseCodex,
+  }])),
   // vibe: per-effort VIBE_HOME (lib/vibe-home.mjs) + classification alias; L0 aliases kept for reference.
   ...Object.fromEntries([
     ['glm-5.3', 'glm-5-3', 'GLM 5.3', null, 'config (high)'],
@@ -97,24 +111,45 @@ export const ROUTES = {
 // CODEX_HOME warns, isolated home with copied auth connects, doctor reports auth mode
 // chatgpt). The seat env sets CODEX_HOME to this dir, so the seat never sees the user's
 // ~/.codex/config.toml MCP servers.
-export function astraCodexHomeDir(home = classifHome()) {
-  return path.join(home, 'seat-homes', 'astra');
+// Every codex seat (astra-max, sol-6.1-low, luna-6-low) gets its OWN home under
+// $CLASSIF_HOME/seat-homes/<dir>/ (astra keeps its historical 'astra' directory).
+const CODEX_HOME_DIRS = { 'astra-max': 'astra' };
+
+export function codexHomeDir(seat, home = classifHome()) {
+  return path.join(home, 'seat-homes', CODEX_HOME_DIRS[seat] ?? seat);
 }
 
-export const ASTRA_ISOLATED_CONFIG = `# Classification pilot — isolated Astra seat (review §10).
+export function astraCodexHomeDir(home = classifHome()) {
+  return codexHomeDir('astra-max', home);
+}
+
+/** Isolated codex config of one seat: NO mcp_servers, web search disabled, read-only sandbox. */
+export function codexIsolatedConfig({ name, model, effort }) {
+  return `# Classification pilot — isolated ${name} seat (review §10).
 # NO mcp_servers section: any MCP exposure fails the call (parseCodex counts it).
 # Auth comes from auth.json copied from ~/.codex/auth.json (never committed).
-model = "gpt-6-astra"
-model_reasoning_effort = "max"
+model = "${model}"
+model_reasoning_effort = "${effort}"
 web_search = "disabled"
 approval_policy = "never"
 sandbox_mode = "read-only"
 `;
+}
 
-export function ensureAstraHome(home = classifHome(), { authSrc = testOnlyEnv(process.env, 'CLASSIF_ASTRA_AUTH_SRC') ?? null } = {}) {
-  const dir = astraCodexHomeDir(home);
+export const ASTRA_ISOLATED_CONFIG = codexIsolatedConfig({ name: 'Astra', model: 'gpt-6-astra', effort: 'max' });
+
+export function ensureAstraHome(home = classifHome(), opts = {}) {
+  return ensureCodexHome('astra-max', { model: 'gpt-6-astra', effort: 'max', name: 'Astra', home, ...opts });
+}
+
+/**
+ * Writes (every call) the isolated config of one codex seat and copies the auth file.
+ * The test-only CLASSIF_ASTRA_AUTH_SRC hook (CLASSIF_TEST_MODE=1) serves every codex seat.
+ */
+export function ensureCodexHome(seat, { model, effort, name = seat, home = classifHome(), authSrc = testOnlyEnv(process.env, 'CLASSIF_ASTRA_AUTH_SRC') ?? null } = {}) {
+  const dir = codexHomeDir(seat, home);
   privateDir(dir);
-  fs.writeFileSync(path.join(dir, 'config.toml'), ASTRA_ISOLATED_CONFIG, { mode: 0o600 });
+  fs.writeFileSync(path.join(dir, 'config.toml'), codexIsolatedConfig({ name, model, effort }), { mode: 0o600 });
   // Review D1/D2: hermetic tests set CLASSIF_ASTRA_AUTH_SRC to a fake auth file in
   // test mode (CLASSIF_TEST_MODE=1) — production refuses the hook, the real
   // ~/.codex/auth.json is never read in tests.
@@ -124,7 +159,7 @@ export function ensureAstraHome(home = classifHome(), { authSrc = testOnlyEnv(pr
     fs.copyFileSync(src, dst);
     fs.chmodSync(dst, 0o600);
   } else if (!fs.existsSync(dst)) {
-    throw new Error(`astra isolation refused: no auth to copy (${src} absent and ${dst} absent)`);
+    throw new Error(`${seat === 'astra-max' ? 'astra' : seat} isolation refused: no auth to copy (${src} absent and ${dst} absent)`);
   }
   return dir;
 }
@@ -292,7 +327,7 @@ export function callSeat(label, prompt, { timeoutMs = 900000, base = process.env
       fs.rmSync(dir, { recursive: true, force: true });
       // Review §10: the astra --json event stream stays in the raw record (the run.mjs raw
       // file saves this whole object), so tool-event audits are reproducible.
-      const rawJsonl = label === 'astra-max' ? out : undefined;
+      const rawJsonl = r.parse === parseCodex ? out : undefined;
       resolve({ code, latencyMs, timedOut, ...parsed, ...(rawJsonl !== undefined ? { rawJsonl } : {}), stderrTail: err.slice(-600), stdoutTail: parsed.text ? undefined : out.slice(-600) });
     };
     // Timeout: SIGTERM to the group, then SIGKILL to the group after killEscalationMs.
