@@ -124,7 +124,8 @@ jobs:
     # promotes the existing main-built digest. Skip build-push on tag refs so the
     # promoted image is exactly the CI-validated main build (main push + dispatch
     # still build normally).
-    if: github.ref_type != 'tag'
+    # G0 v3 §5 P7: an artifact/** dispatch ref never builds or pushes images.
+    if: github.ref_type != 'tag' && !startsWith(github.ref, 'refs/heads/artifact/')
     permissions:
       contents: read
       packages: write

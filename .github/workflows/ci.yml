@@ -3,7 +3,11 @@ name: CI
 on:
   push:
     branches: [main]
+  # G0 v3 §5 P7 / §7.1 condition 5: ordinary CI never runs for git-backed
+  # artifact refs. `branches-ignore` filters only the PR TARGET branch, so
+  # every job also refuses an `artifact/**` PR HEAD (github.head_ref).
   pull_request:
+    branches-ignore: ['artifact/**']
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -12,6 +16,7 @@ concurrency:
 jobs:
   quality:
     name: Quality gates
+    if: ${{ !startsWith(github.head_ref, 'artifact/') }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
@@ -76,6 +81,9 @@ jobs:
       - name: Validate cutover controller and backup adapters (hermetic tests)
         run: make -f deploy/cutover/operator.mk test TEST_PATTERN='one command restores|long owned radar-refresh-pending-watchdog|failure remains closed.*failJob|daily restoration|daily and inter-tenant interfaces|prepare|prepared|rollback patches|resume reconciles|main deployment' ENV=test-cutover
 
+      - name: Validate git-artifact guards (descriptor, build env, tag ancestry, pre-flight, workflows)
+        run: make -f tools/make/git-artifact.mk test ENV=test-git-artifact
+
       - name: Install workspace deps
         run: make install ENV=ci
 
@@ -103,6 +111,7 @@ jobs:
 
   e2e:
     name: Real-stack e2e (Playwright)
+    if: ${{ !startsWith(github.head_ref, 'artifact/') }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
