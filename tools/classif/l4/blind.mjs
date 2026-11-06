@@ -17,13 +17,14 @@ import { appendJsonlRecord, parseJsonlTolerant } from '../lib/jsonl.mjs';
 import { sha256, stableStringify } from '../lib/render.mjs';
 import { EVAL_DIR_DEFAULT, classifDir, repoRoot, testOnlyEnv, classifHome, privateDir } from '../lib/paths.mjs';
 import { EVAL_ROUTES, devPrompt, parseDevAnswer } from './dev.mjs';
-import { pertinentMasked, recallRegressed, seriesVerdict, shownStats } from './metrics.mjs';
+import { pertinentMasked, recallRegressed, seriesVerdict, shownMisses, shownStats } from './metrics.mjs';
+import { GEPA_METHOD, gepaRouteVerdict, gepaSeriesVerdict, seriesRouteUniverse } from './gepa-common.mjs';
 import { check as budgetCheck } from '../lib/budget.mjs';
 import { assertNoVerbatim } from '../lib/freeze.mjs';
 import { loadCodes } from '../l2/run.mjs';
 import { assertBlindRunAllowed, audit, blindDir, openBlindSet, readAudit } from '../lib/blind.mjs';
 import { assertEvalRunAllowed, audit as auditEval, openEvalSet, readAudit as readEvalAudit } from '../guard/evalset.mjs';
-import { assertSeriesHalves, assertSeriesRoutes, loadSeriesManifest } from './series.mjs';
+import { assertSeriesHalves, assertSeriesRoutes, loadSeriesManifest, seriesMethod } from './series.mjs';
 import { groupRoutesByFamily, runFamiliesParallel } from './families.mjs';
 
 async function pool(tasks, n) {
@@ -185,8 +186,21 @@ export function blindRouteVerdict({ stats, failures, items }, seriesSpec, baseli
   return { verdict, regressed: recallRegressed(stats?.recall, base, baseline.tolerance), baselineRecall: base };
 }
 
-export function buildBlindManifest({ k, promptSha, routes, blindItems, aggregatesSha256, infraReruns = [], recallNonRegression = null }) {
+/**
+ * GEPA blind route gate (series declaring method gepa): `pass` only with 0 miss on the blind
+ * half (reference P/S predicted non_pertinent, a failed call counts as shown) AND a call
+ * failure share within the pre-registered ceiling (<= 5 %). Precision stays in the private
+ * aggregates, never a floor. Exported for the GEPA blind tests.
+ */
+export function gepaBlindRouteGate(blind, rows, ceiling) {
+  const misses = shownMisses(blind.map((b, i) => ({ itemId: b.itemId, refVerdict: b.verdict, unresolved: b.status === 'unresolved',
+    pred: rows[i].pred, failed: rows[i].failed }))).length;
+  return gepaRouteVerdict({ misses, failures: rows.filter((r) => r.failed).length, items: rows.length }, ceiling);
+}
+
+export function buildBlindManifest({ k, promptSha, routes, blindItems, aggregatesSha256, infraReruns = [], recallNonRegression = null, method = null }) {
   return { kind: 'l4-blind', series: k, createdAt: new Date().toISOString(), promptSha256: promptSha,
+    ...(method ? { method } : {}),
     routes, blindItems, aggregatesSha256,
     ...(infraReruns.length ? { infraReruns: infraReruns.map(({ route, previousAnswered, reason }) => ({ route, previousAnswered, reason })) } : {}),
     ...(recallNonRegression ? { recallNonRegression: { baselineSeries: recallNonRegression.baselineSeries, tolerance: recallNonRegression.tolerance } } : {}),
@@ -197,14 +211,16 @@ export async function main(argv = process.argv.slice(2)) {
   const k = argv.includes('--series') ? argv[argv.indexOf('--series') + 1] : process.env.SERIES;
   if (!k) { process.stderr.write('classif-l4-blind: pass SERIES=<k>\n'); process.exit(2); }
   const deferred = argv.includes('--deferred') ? argv[argv.indexOf('--deferred') + 1].split(',').filter(Boolean) : [];
-  const routes = EVAL_ROUTES.filter((r) => !deferred.includes(r));
+  // A GEPA series (series-<k>.json method gepa) is scored on the 5 GEPA routes.
+  const universe = seriesRouteUniverse(seriesMethod(k), EVAL_ROUTES);
+  const routes = universe.filter((r) => !deferred.includes(r));
   const concurrency = Number(argv.includes('--concurrency') ? argv[argv.indexOf('--concurrency') + 1] : 2);
   // Infrastructure re-run (fail closed): named routes only, each one an executed route.
   const rerunRoutes = argv.includes('--rerun-infra-failed')
     ? [...new Set(String(argv[argv.indexOf('--rerun-infra-failed') + 1] ?? '').split(',').filter(Boolean))] : [];
   if (argv.includes('--rerun-infra-failed') && !rerunRoutes.length) throw new BlindRerunRefused('not-a-route', '--rerun-infra-failed needs at least one route');
   for (const r of rerunRoutes) {
-    if (!ROUTES[r] || !EVAL_ROUTES.includes(r)) throw new BlindRerunRefused('not-a-route', `${r} is not an evaluated route`);
+    if (!ROUTES[r] || !universe.includes(r)) throw new BlindRerunRefused('not-a-route', `${r} is not an evaluated route`);
     if (!routes.includes(r)) throw new BlindRerunRefused('not-a-route', `${r} is deferred in this run`);
   }
   const home = classifHome();
@@ -225,6 +241,7 @@ export async function main(argv = process.argv.slice(2)) {
   // Review §9b: executed routes and frozen halves must match the pre-registered series
   // (plain split read — L2 already enforced committed).
   assertSeriesRoutes(seriesSpec, routes, k);
+  const gepa = seriesSpec.method === GEPA_METHOD;
   try {
     const splitFile = path.join(classifDir(process.env), 'l3', 'manifests', 'split.json');
     if (existsSync(splitFile)) {
@@ -318,7 +335,8 @@ function readdirSyncSafe(dir) {
     if (!infra && blindDone(model, effort) && existsSync(routeFile)) {
       const prev = JSON.parse(readFileSync(routeFile, 'utf8'));
       if (prev.promptSha256 !== promptSha) throw new Error(`blind resume refused: ${routeFile} prompt sha differs (re-run with the frozen prompt)`);
-      return { ...prev.stats, withUnresolved: prev.withUnresolved, failures: prev.failures, verdict: prev.verdict };
+      return { ...prev.stats, withUnresolved: prev.withUnresolved, failures: prev.failures, verdict: prev.verdict,
+        ...(gepa ? { misses: prev.misses, failureShare: prev.failureShare } : {}) };
     }
     if (infra) {
       // Audited allowance first (the guard admits exactly one more blind-run per allowance),
@@ -375,7 +393,8 @@ function readdirSyncSafe(dir) {
     const statsWithUnresolved = shownStats(blind.map((b, i) => ({ ref: b.verdict, pred: rows[i].failed ? { failed: true } : rows[i].pred, unresolved: false })),
       { recallSupport: supports.recall ?? 30, precisionSupport: supports.precision ?? 30 });
     const failures = rows.filter((r) => r.failed).length;
-    const gate = blindRouteVerdict({ stats, failures, items: rows.length }, seriesSpec, recallBaseline, route);
+    const gate = gepa ? gepaBlindRouteGate(blind, rows, seriesSpec.failureCeiling)
+      : blindRouteVerdict({ stats, failures, items: rows.length }, seriesSpec, recallBaseline, route);
     writeFileSync(routeFile, JSON.stringify({ series: k, route, model, effort, promptSha256: promptSha, stats, withUnresolved: statsWithUnresolved, failures, ...gate }, null, 1), { mode: 0o600 });
     audit({ action: 'blind-run', purpose: `l4-blind-s${k}`, promptSha256: promptSha, model, effort, items: rows.length, failures,
       ...(infra ? { infraRerun: true } : {}) }, { home, env: process.env });
@@ -472,14 +491,17 @@ function readdirSyncSafe(dir) {
       perRoute[route] = { ...e, ...blindRouteVerdict({ stats: e, failures: e.failures, items: blind.length }, seriesSpec, recallBaseline, route) };
     }
   }
-  const aggregates = { perRoute, s113 };
+  // GEPA series: the series verdict (every GEPA route passes) joins the private aggregates.
+  const aggregates = { perRoute, s113, ...(gepa ? { gepa: { ...gepaSeriesVerdict(perRoute, seriesSpec.routes),
+    rule: 'pass only when every GEPA route has 0 blind miss and a call failure share <= the ceiling; precision reported, no floor' } } : {}) };
   const aggregatesSha256 = sha256(stableStringify(aggregates));
   writeFileSync(path.join(outDir, `series-${k}-aggregates.json`), JSON.stringify({ series: k, promptSha256: promptSha, aggregatesSha256, ...aggregates }, null, 1), { mode: 0o600 });
   // Review §1: repo manifest + stdout carry NO scores (aggregates sha only).
   // Infra re-runs come from the audit, so a later resume keeps them in the manifest.
   const infraReruns = readAudit(home).filter((e) => e.action === 'blind-rerun-infra' && e.promptSha256 === promptSha
     && String(e.purpose ?? '').includes(`l4-blind-s${k}`) && routes.includes(e.route));
-  const manifest = buildBlindManifest({ k, promptSha, routes, blindItems: blind.length, aggregatesSha256, infraReruns, recallNonRegression: recallBaseline });
+  const manifest = buildBlindManifest({ k, promptSha, routes, blindItems: blind.length, aggregatesSha256, infraReruns, recallNonRegression: recallBaseline,
+    method: gepa ? GEPA_METHOD : null });
   mkdirSync(path.join(classifDir(process.env), 'l4', 'manifests'), { recursive: true });
   writeFileSync(path.join(classifDir(process.env), 'l4', 'manifests', `series-${k}-blind.json`), `${JSON.stringify(manifest, null, 1)}\n`);
   process.stdout.write(`${JSON.stringify(manifest, null, 2)}\n`);

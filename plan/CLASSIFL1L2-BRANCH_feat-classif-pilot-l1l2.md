@@ -54,6 +54,12 @@ Lots L1 and L2 of the Steve-aligned classification pilot (plan-pilote-v2 §B-L1,
   - [x] Low-Pertinent analysis (5 P / 504) with two options for the L4 dev objective.
   - [x] Fingerprint refusal audit (`make classif-l2-fingerprint-audit ENV=preprod`): bylaw-number list causes 29/30.
   - [ ] Track event before L4 (conductor, single track writer).
+- [ ] **Lot L4-GEPA — GEPA prompt optimiser (owner-validated method)**
+  - [x] Seats `sol-6.1-low` and `luna-6-low` (isolated codex route), run-scoped call cap in `lib/budget.mjs`.
+  - [x] GEPA loop on the tuning half only (`make classif-l4-gepa SERIES=k MAX_CALLS=5000 ENV=preprod`), fake-seat tests.
+  - [x] GEPA dev and blind verdict (0 miss per route, call failures <= 5 %) for series marked `method: gepa`.
+  - [x] CI lint of `tools/classif` (unused variables, explicit `node:` imports).
+  - [ ] Real GEPA run, freeze of the winner and pre-registration of the GEPA series (conductor, paid calls).
 
 - [x] **Gate**
   - [x] `make classif-check ENV=preprod` + `make classif-test ENV=preprod` (46/46, passe 4).
