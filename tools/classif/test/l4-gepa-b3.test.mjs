@@ -138,3 +138,54 @@ test('V1: vibe tool calls and tool messages count as tool events and fail the ca
     assert.equal(countVibeToolEvents(null), 0);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
+
+test('B4 (final-reserve replay): a breaker stop during the final choice resumes under the same MAX_CALLS and writes the manifest', withTempHome(async (home) => {
+  const repo = setup(home);
+  const infraIds = SPLIT.feedback.filter((x) => x.startsWith('p')).slice(0, 4);
+  let down = true;
+  const override = (label, _mark, id) => (down && label === 'sol-6.1-low' && infraIds.includes(id) ? { code: 1, text: '' } : null);
+  // 1200 seed calls + 360 final reserve fit in 1610; the final evaluation of P0 trips (4 > 3 of 72).
+  await assert.rejects(runGepa({ home, k: K, maxIterations: 0, maxCalls: 1610, seat: fakeSeat(override).seat, log: quiet }),
+    /route sol-6.1-low had 4 infrastructure failures on final-P0 \(> 3 of 72\)/);
+  assert.ok(!existsSync(manifestFile(repo)));
+  down = false;
+  const f = fakeSeat(override);
+  const m = await runGepa({ home, k: K, maxIterations: 0, maxCalls: 1610, seat: f.seat, log: quiet });
+  assert.ok(existsSync(manifestFile(repo)), 'the resume writes the manifest');
+  assert.equal(m.result.status, 'selected');
+  // Only the final calls of P0 left unanswered by the stop are paid: the rest of sol, and luna
+  // (same codex family, run after sol, never started once sol tripped).
+  assert.ok(f.seen.every((c) => c.mark === 'seed-0' && SPLIT.feedback.includes(c.id) && ['sol-6.1-low', 'luna-6-low'].includes(c.label)));
+  assert.ok(infraIds.every((id) => f.seen.some((c) => c.label === 'sol-6.1-low' && c.id === id)), 'the failed calls are retried');
+  assert.ok(f.seen.length <= 2 * 72);
+  assert.ok(m.callsSpent <= 1610);
+  assert.ok(m.finalCoverage.notEvaluated > 0, 'the candidates the budget could not cover are counted');
+}));
+
+test('N1: a 429 is retried after a bounded backoff before it counts; the retries are logged paid calls', withTempHome(async (home) => {
+  setup(home);
+  const target = SPLIT.pareto[0];
+  const attempts = new Map();
+  const override = (label, mark, id) => {
+    if (label !== 'glm-5.3-low') return null;
+    const k = `${mark}|${id}`;
+    attempts.set(k, (attempts.get(k) ?? 0) + 1);
+    if (mark === 'seed-0' && id === target && attempts.get(k) <= 2) return { code: 1, text: '', stderrTail: 'HTTP 429 Too Many Requests' };
+    if (mark === 'seed-2' && SPLIT.pareto.slice(0, 3).includes(id)) return { code: 2, text: '', stderrTail: 'HTTP 402 budget exhausted' };
+    return null;
+  };
+  const sleeps = [];
+  await assert.rejects(runGepa({ home, k: K, maxIterations: 0, seat: fakeSeat(override).seat, log: quiet, sleep: async (ms) => { sleeps.push(ms); } }),
+    /route glm-5.3-low had 3 infrastructure failures on seed-P2 \(> 2 of 48\)/);
+  // seed-0: 2 failures then an answer (cached, no breaker); seed-2: 3 cases fail all 4 attempts.
+  assert.equal(attempts.get(`seed-0|${target}`), 3);
+  for (const id of SPLIT.pareto.slice(0, 3)) assert.equal(attempts.get(`seed-2|${id}`), 4, 'first call + 3 retries');
+  assert.deepEqual(sleeps.slice(0, 2), [30000, 120000]);
+  assert.deepEqual(sleeps.slice(2).sort((a, b) => a - b), [30000, 30000, 30000, 120000, 120000, 120000, 300000, 300000, 300000]);
+  const calls = readFileSync(path.join(home, 'l2', 'calls.jsonl'), 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l));
+  const retried = calls.filter((c) => c.intent === true && c.attempt);
+  assert.equal(retried.length, 2 + 3 * 3, 'every retry is a logged intent (counted by the run budget)');
+  assert.ok(retried.every((c) => c.phase === `l4-gepa-s${K}.eval` && typeof c.backoffMs === 'number'));
+  const p0 = JSON.parse(readFileSync(path.join(home, 'l4', `gepa-s${K}`, 'candidates', 'P0.json'), 'utf8'));
+  assert.equal(p0.pareto[target]['glm-5.3-low'].failed, false, 'the answer after the backoff counts, not the 429');
+}));
