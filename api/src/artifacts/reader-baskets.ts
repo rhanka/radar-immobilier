@@ -15,6 +15,7 @@
  * inside the services (workspace_not_authorized). Several memberships
  * require the caller to pick one workspace id explicitly.
  */
+import { randomBytes } from "node:crypto";
 import type { Database } from "../db/client.js";
 import type { ObjectStore } from "../storage/object-store.js";
 import { readFacetContext } from "../services/facets/classification-context.js";
@@ -24,13 +25,27 @@ import {
 } from "../services/facets/classification-search.js";
 import { readSignalClassification } from "../services/facets/classification-state.js";
 import { listWorkspacesForAccount } from "../services/workspaces/store.js";
+import { readScopedByCity } from "../services/facets/scoped-by-city.js";
+import { readCoherentProjection } from "../services/facets/projection-revisions.js";
+import { readScopedPersonalHeads } from "../services/facets/scoped-reader.js";
+import { readWorkspaceArchiveCity } from "../services/facets/workspace-reader.js";
+import { getSignalNodesForCity } from "../services/graph/graph-store.js";
+import { buildScopedSignalCards, scopedLegacyProjection } from "../services/facets/scoped-signal-cards.js";
 import type { ApiReaderContext } from "./reader-context.js";
+import { toByCityServiceQuery, type ByCityParams } from "./reader-by-city.js";
+import { deriveReaderKey } from "./reader-me.js";
+import { buildCoherentCityResponse, type CoherentCityParams } from "./reader-coherent-city.js";
 import { isWorkspaceReadOperation, type ReaderOperationName } from "./reader-operations.js";
 
 export interface BasketReadDeps {
   readonly db: Database;
   readonly store: ObjectStore;
   readonly classification?: ClassificationOptions | undefined;
+  /**
+   * Reader session secret: keys the coherent-city token (HKDF purpose key).
+   * Absent (tests, closed reader), a random per-process key.
+   */
+  readonly tokenSecret?: string | undefined;
 }
 
 export function createBasketReadOperation(deps: BasketReadDeps): (
@@ -38,16 +53,80 @@ export function createBasketReadOperation(deps: BasketReadDeps): (
   params: unknown,
   context: ApiReaderContext,
 ) => Promise<unknown> {
+  const tokenKey = deps.tokenSecret
+    ? deriveReaderKey(deps.tokenSecret, "signals.coherent-city.v1/token") : randomBytes(32);
   return async (op, params, context) => {
+    // J1.2d/e §4.3: same service as the app route — the dispatch already
+    // refused `showDiscarded` and unknown keys, so the viewer population
+    // matches the app exactly. Response projection is enforced by
+    // `validateReaderResponse` (strict allowlist → typed 502).
+    if (op === "signals.by-city.v1") {
+      const scoped = params as ByCityParams;
+      const result = await readScopedByCity(deps.db, context.readerSub, scoped.workspaceId,
+        toByCityServiceQuery(scoped));
+      // Same envelope as the app route body (`{ ok, totalCount, cities }`).
+      return { ok: true as const, totalCount: result.totalCount, cities: result.cities };
+    }
+    // J1.2d/e §5.5: same coherent service as the app route, assembled into
+    // the closed DTO (projection + strict schema in `reader-coherent-city`).
+    // Archived targets are filtered before card construction, exactly like
+    // the app handler — served signals and `legacyProjection.a.signalIds`
+    // never name an archived node.
+    if (op === "signals.coherent-city.v1") {
+      const scoped = params as CoherentCityParams;
+      const coherent = await readCoherentProjection(deps.db, context.readerSub,
+        scoped.workspaceId, scoped.citySlug, "signal", async () => ({
+          archive: await readWorkspaceArchiveCity(deps.db, context.readerSub,
+            scoped.workspaceId, scoped.citySlug),
+          selection: await readScopedPersonalHeads(deps.db, context.readerSub,
+            scoped.workspaceId, scoped.citySlug),
+          signals: await getSignalNodesForCity(deps.db, scoped.citySlug),
+        }));
+      const hiddenKeys = new Set(coherent.payload.archive
+        .filter((head) => head.effectiveDiscarded)
+        .map((head) => JSON.stringify([head.target.type, head.target.id])));
+      const visibleNodes = coherent.payload.signals.filter(
+        (node) => !hiddenKeys.has(JSON.stringify([node.type, node.id])));
+      const cards = await buildScopedSignalCards(
+        { ...(deps.store ? { store: deps.store } : {}), docEnrichmentBudgetMs: 2000,
+          // Typed journal only: never the city, the node id or the error text.
+          onDegraded: () => console.error("[reader-op] signals.coherent-city.v1 card degraded"),
+          onRefFailed: () => console.error("[reader-op] signals.coherent-city.v1 doc-ref enrichment failed") },
+        visibleNodes, scoped.citySlug);
+      const total = coherent.payload.signals.length;
+      const selected = coherent.payload.selection
+        .filter((head) => head.facet === "selection" && head.state === "active").length;
+      return buildCoherentCityResponse({
+        artifactId: context.artifactId, readerSub: context.readerSub,
+        workspaceId: scoped.workspaceId, citySlug: scoped.citySlug,
+        serverToken: coherent.scope.token, tokenKey, total, hidden: total - visibleNodes.length, selected,
+        legacyProjection: scopedLegacyProjection(cards),
+        sources: visibleNodes.map((node, index) => ({
+          node: { id: node.id, type: node.type, citySlug: node.citySlug,
+            label: node.label, createdAt: node.createdAt },
+          card: cards[index]!,
+        })),
+      });
+    }
     if (!isWorkspaceReadOperation(op)) throw new Error("Capability unavailable");
     if (op === "workspaces.list.v1") {
       const memberships = await listWorkspacesForAccount(deps.db, context.readerSub);
       const workspaces = [];
       for (const { workspace } of memberships) {
+        // The context read stays the authorization check (revoked or foreign
+        // workspaces refuse here).
         const result = await readFacetContext(deps.db, context.readerSub, workspace.id);
         if (result.workspaceId !== workspace.id) throw new Error("Workspace mismatch");
+        // J1.2d/e §3.3 server-side shape adapter: the app parser shape
+        // (nested `workspace`, constant read-only capabilities) ADDED next to
+        // the published v1 row (`id`, `slug`, `label`, availability) that
+        // starter pages already read — the op contract only widens, so no
+        // published artifact breaks. Never `accountId`, never `scope`, never
+        // the real capabilities.
         workspaces.push({ id: workspace.id, slug: workspace.slug, label: workspace.label,
-          signals: { availability: result.signals.availability } });
+          signals: { availability: result.signals.availability },
+          workspace: { id: workspace.id, slug: workspace.slug, label: workspace.label },
+          moderateArchive: false, manageMembers: false });
       }
       return { ok: true as const, workspaces };
     }
