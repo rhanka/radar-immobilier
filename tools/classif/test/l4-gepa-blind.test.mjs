@@ -5,7 +5,7 @@
 // unchanged (their own tests run as before).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { appendFileSync, chmodSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { appendFileSync, chmodSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { GEPA_ROUTES } from '../l4/gepa-common.mjs';
@@ -17,7 +17,7 @@ const K = '96';
 const N = 40;
 const IDS = blindIds(N);
 
-/** Fake codex: answers pertinent, non_pertinent for ids in FAKE_<SEAT>_NP, exit 3 for ids in FAKE_<SEAT>_FAIL. */
+/** Fake codex: answers pertinent, non_pertinent for ids in FAKE_<SEAT>_NP, exit 3 for ids in FAKE_<SEAT>_FAIL, a command event (well-formed answer kept) for ids in FAKE_<SEAT>_TOOL. */
 function fakeCodex() {
   const bin = tmp('gepa-codex-bin-');
   const f = path.join(bin, 'codex');
@@ -26,12 +26,13 @@ out=""; prev=""; model=""
 for a in "$@"; do [ "$prev" = "-o" ] && out="$a"; [ "$prev" = "-m" ] && model="$a"; prev="$a"; done
 body=$(cat)
 id=$(printf '%s' "$body" | grep -o 'item_id: [A-Za-z0-9._-]*' | head -1 | cut -d' ' -f2)
-case "$model" in *sol*) np="$FAKE_SOL_NP"; fail="$FAKE_SOL_FAIL" ;; *) np="$FAKE_LUNA_NP"; fail="$FAKE_LUNA_FAIL" ;; esac
+case "$model" in *sol*) np="$FAKE_SOL_NP"; fail="$FAKE_SOL_FAIL"; tool="$FAKE_SOL_TOOL" ;; *) np="$FAKE_LUNA_NP"; fail="$FAKE_LUNA_FAIL"; tool="$FAKE_LUNA_TOOL" ;; esac
 case " $fail " in *" $id "*) echo "quota" >&2; exit 3 ;; esac
 verdict=pertinent; code=P-DENSITE
 case " $np " in *" $id "*) verdict=non_pertinent; code=N-ADMIN ;; esac
 printf '{"verdict":"%s","code":"%s"}' "$verdict" "$code" > "$out"
 echo '{"type":"thread.started"}'
+case " $tool " in *" $id "*) echo '{"type":"item.completed","item":{"type":"command_execution","command":"cat ../../l3b/reference-d.jsonl"}}' ;; esac
 echo '{"type":"turn.completed","usage":{"input_tokens":3}}'
 exit 0
 `, { mode: 0o755 });
@@ -121,3 +122,45 @@ test('gepa blind gate: unresolved rows are not misses; classic blind manifests c
   assert.equal(gepaBlindRouteGate(blind, [np, np], 0.05).verdict, 'fail');
   assert.ok(!('method' in buildBlindManifest({ k: '4', promptSha: 'x', routes: [], blindItems: 0, aggregatesSha256: 'y' })));
 });
+
+test('review B1a: blind and S113 count a codex answer carrying a tool event as failed and never cache it', withTempHome(async (home) => {
+  const s = await setupGepa(home);
+  try {
+    const r = await blindPass(home, { k: K, routes: GEPA_ROUTES, fake: { FAKE_SOL_TOOL: 'b-003 undefined' } });
+    assert.equal(r.error, null, r.error?.stack);
+    const agg = readAggregates(home, K);
+    assert.equal(agg.perRoute['sol-6.1-low'].failures, 1, 'the tool-event answer is a failure');
+    assert.equal(agg.perRoute['luna-6-low'].failures, 0);
+    const files = readdirSync(path.join(home, 'blind'));
+    assert.ok(!files.includes(`blind-s${K}-sol-6.1-low.b-003.json`), 'never cached');
+    assert.ok(files.includes(`blind-s${K}-sol-6.1-low.b-004.json`));
+    // S113 prompts carry no item id (devPrompt reads itemId, S113 rows have evalId): the fake
+    // sees "undefined" and emits the command event on every S113 call of sol.
+    for (const e of ['eval-1', 'eval-2']) {
+      assert.ok(!files.includes(`s113-s${K}-sol-6.1-low.${e}.json`), 'S113: never cached either');
+      assert.ok(files.includes(`s113-s${K}-luna-6-low.${e}.json`));
+    }
+    const results = r.calls.filter((c) => c.intent === false && c.route === 'sol-6.1-low' && c.itemId === 'b-003');
+    assert.ok(results.every((c) => c.toolEvents > 0), 'the calls log keeps the tool-event count');
+  } finally { s.cleanup(); }
+}));
+
+test('review B1a: dev counts a codex answer carrying a tool event as failed and never caches it', withTempHome(async (home) => {
+  const s = await setupGepa(home);
+  try {
+    mkdirSync(path.join(home, 'l3b'), { recursive: true });
+    writeFileSync(path.join(home, 'l3b', 'reference-d.jsonl'), `${JSON.stringify({ itemId: 'rr-tuning-1', half: 'tuning', status: 'resolved', code: 'P-DENSITE', verdict: 'pertinent' })}\n`);
+    appendFileSync(path.join(home, 'l0', 'dev-items.jsonl'), `${JSON.stringify({ itemId: 'rr-tuning-1', input: 'texte tuning six logements zone H-9.' })}\n`);
+    const { main } = await import('../l4/dev.mjs');
+    const restore = swapEnv('FAKE_LUNA_TOOL', 'rr-tuning-1');
+    let m;
+    try { m = await main(['--series', K, '--concurrency', '2']); } finally { restore(); }
+    assert.equal(m.aggregates['luna-6-low'].failures, 1);
+    assert.deepEqual([m.aggregates['luna-6-low'].verdict, m.aggregates['luna-6-low'].misses], ['fail', 0], '1/1 failures exceed the ceiling');
+    const dir = path.join(home, 'l4', `series-${K}`);
+    const row = JSON.parse(readFileSync(path.join(dir, 'dev-luna-6-low.jsonl'), 'utf8').trim());
+    assert.deepEqual([row.failed, row.why, row.pred], [true, 'tool-events', null]);
+    assert.ok(!existsSync(path.join(dir, 'dev-luna-6-low.rr-tuning-1.json')), 'never cached');
+    assert.ok(existsSync(path.join(dir, 'dev-sol-6.1-low.rr-tuning-1.json')));
+  } finally { s.cleanup(); }
+}));
