@@ -9,7 +9,7 @@ import process from 'node:process';
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { CLASSIF_DIR, classifHome } from '../lib/paths.mjs';
 import { readJsonlRecords } from '../lib/jsonl.mjs';
-import { ANNOTATORS, loadCodes, loadDevItems, readPass } from './run.mjs';
+import { ANNOTATORS, loadCodes, loadDevItems } from './run.mjs';
 import { latestVotes, loadComplements, summarise } from './converge.mjs';
 import { buildReferenceRows } from '../l3/reference.mjs';
 

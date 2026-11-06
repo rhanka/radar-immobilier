@@ -203,7 +203,7 @@ export async function runPass({ pass, mode = 'independent', guide = 'G0', annota
     pairs = kept;
     if (!exitAdmissible) log(`[pass ${pass}] ${annotator} ${lot.lotId} seat exit code ${r.code}: votes inadmissible (fail-closed exit policy)`);
     if (r.toolEvents > 0) pairs = pairs.map((p) => ({ ...p, answer: null }));
-    const extraction = toExtraction({ annotator, pass, guideVersion: pack.guideVersion, pairs, codes, goldenRows });
+    const extraction = toExtraction({ annotator, pass, guideVersion: pack.guideVersion, pairs, codes });
     const rel = path.join('runs', `pass${pass}`, annotator, `${lot.lotId}.json`);
     atomicWrite(path.join(work, rel), JSON.stringify(extraction), { mode: 0o600 });
     const validation = extraction.nodes.length ? validateExtraction(work, rel) : { valid: false, issues: [] };

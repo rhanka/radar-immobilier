@@ -76,7 +76,7 @@ export function loadAdjudications(home) {
   return new Map(Object.entries(raw));
 }
 
-export async function main(argv = process.argv.slice(2)) {
+export async function main() {
   const home = classifHome();
   const { requireCommittedSplit } = await import('./split.mjs');
   try {
@@ -95,7 +95,7 @@ export async function main(argv = process.argv.slice(2)) {
   }
   const split = requireCommittedSplit();
   const halves = { tuning: new Set(split.halves.tuning), blind: new Set(split.halves.blind) };
-  const items = loadDevItems(home);
+  loadDevItems(home); // frozen-corpus integrity check (count + sha) before any write
   const codes = loadCodes();
   const lastPass = lastConvergedPass(home);
   // Review §6: sealing requires the blind-stage marker — the last pass must be the blind
