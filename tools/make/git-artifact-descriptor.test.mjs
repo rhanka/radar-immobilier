@@ -59,7 +59,7 @@ test('descriptor validation refuses typed, with zero execution', () => {
     [{ ...ACCEPTED_IMMO, outputDir: '../dist' }, 'build_descriptor_invalid'],
     [{ ...ACCEPTED_IMMO, outputDir: '/abs' }, 'build_descriptor_invalid'],
     [{ ...ACCEPTED_IMMO, publicEnvNames: ['VITE_X=1'] }, 'build_descriptor_invalid'],
-    [(({ lockfilePath, ...rest }) => rest)(ACCEPTED_IMMO), 'build_descriptor_invalid'],
+    [Object.fromEntries(Object.entries(ACCEPTED_IMMO).filter(([k]) => k !== 'lockfilePath')), 'build_descriptor_invalid'],
     [{ ...ACCEPTED_IMMO, buildScript: 'build:absent' }, 'build_script_missing'],
     [{ ...ACCEPTED_IMMO, lockfilePath: 'missing-lock.json' }, 'lock_missing'],
   ];
