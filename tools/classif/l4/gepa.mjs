@@ -39,7 +39,8 @@
 // Failures: an invalid answer (no-json, unknown-code, verdict-not-partition) counts as shown
 // and is cached as that answer; a tool-event answer counts as a failed call (shown, failure
 // share), is never cached and never trips the breaker; an infrastructure failure (exit,
-// timeout, 402/429/quota, authentication) is never cached and trips the in-flight breaker of
+// timeout, 402/429/quota after a bounded backoff of 30 s, 2 min, 5 min with one paid retry
+// each, authentication) is never cached and trips the in-flight breaker of
 // its route (> max(1, 5 %) of the whole batch: no further call launched, the run stops with
 // the exact resume command). Kept D_pareto failures are retried at most MAX_RETRIES times per
 // (candidate, route, case), never under the breaker; past that they are definitive. A parent
@@ -50,7 +51,8 @@
 //
 // Budget: MAX_CALLS (default 5000) is a run cap enforced by lib/budget.mjs runBudget (phases
 // `l4-gepa-<run>.*`), on top of the pilot cap. An iteration starts only when its planned calls
-// plus the reserve of one final evaluation fit; the loop then stops cleanly (also after
+// plus the reserve of one final evaluation fit (a resumed run only needs the uncached final
+// calls of a candidate still eligible); the loop then stops cleanly (also after
 // MAX_SKIPPED consecutive skipped iterations) and the final choice uses what remains. Resume is
 // idempotent: per-call caches keyed by the sha of the full evaluated prompt and of the code
 // registry, candidate files and the iteration journal in $CLASSIF_HOME/l4/gepa-<run>/
@@ -59,7 +61,8 @@
 import path from 'node:path';
 import process from 'node:process';
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
-import { callSeat, parseJsonObject, seatAuthRefreshCommand } from '../run-seat.mjs';
+import { setTimeout as sleepMs } from 'node:timers/promises';
+import { callSeat, looksLikeQuotaFailure, parseJsonObject, seatAuthRefreshCommand } from '../run-seat.mjs';
 import { appendJsonlRecord, parseJsonlTolerant, readJsonlRecords } from '../lib/jsonl.mjs';
 import { sha256 } from '../lib/render.mjs';
 import { classifDir, classifHome, privateDir } from '../lib/paths.mjs';
@@ -78,6 +81,8 @@ export const FEEDBACK_SHARE = 0.6;
 export const MINIBATCH_SIZE = 30;
 export const CROSSOVER_EVERY = 3;
 export const MAX_SKIPPED = 5;
+/** Bounded backoff before a 402/429/quota failure counts (review GEPA N1): 30 s, 2 min, 5 min. */
+export const QUOTA_BACKOFF_MS = [30000, 120000, 300000];
 /** A child is rejected on its mini-batch when, on one route, it fails at least this many more calls than its parent. */
 export const CHILD_FAILURE_MARGIN = 2;
 export const DEFAULT_MAX_CALLS = 5000;
@@ -374,10 +379,21 @@ export function uncachedCalls(ctx, cand, ids) {
  */
 async function callOne(ctx, cand, route, id, step) {
   const phase = `${ctx.phase}.eval`;
-  appendJsonlRecord(ctx.callsLog, { at: new Date().toISOString(), intent: true, phase, route, itemId: id, candidate: cand.id, step });
-  const r = await ctx.seat(route, devPrompt(cand.text, ctx.refById.get(id)), { base: ctx.seatTmp, timeoutMs: 1800000 });
-  appendJsonlRecord(ctx.callsLog, { at: new Date().toISOString(), intent: false, phase, route, itemId: id, candidate: cand.id, step,
-    exitCode: r.code, latencyMs: r.latencyMs ?? null, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null, toolEvents: r.toolEvents ?? null });
+  const prompt = devPrompt(cand.text, ctx.refById.get(id));
+  let r;
+  // Review GEPA N1: a 402/429/quota failure is retried after each delay of ctx.quotaBackoffMs;
+  // every attempt is a logged, budget-checked paid call; only the last failure is returned.
+  for (let attempt = 0; ; attempt++) {
+    const backoffMs = attempt ? ctx.quotaBackoffMs[attempt - 1] : 0;
+    appendJsonlRecord(ctx.callsLog, { at: new Date().toISOString(), intent: true, phase, route, itemId: id, candidate: cand.id, step, ...(attempt ? { attempt, backoffMs } : {}) });
+    r = await ctx.seat(route, prompt, { base: ctx.seatTmp, timeoutMs: 1800000 });
+    appendJsonlRecord(ctx.callsLog, { at: new Date().toISOString(), intent: false, phase, route, itemId: id, candidate: cand.id, step, ...(attempt ? { attempt, backoffMs } : {}),
+      exitCode: r.code, latencyMs: r.latencyMs ?? null, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null, toolEvents: r.toolEvents ?? null,
+      ...(looksLikeQuotaFailure(r) ? { quota: true } : {}) });
+    if (!looksLikeQuotaFailure(r) || attempt >= ctx.quotaBackoffMs.length || !ctx.budget.fits(1)) break;
+    ctx.log(`${route} ${id}: quota or rate limit, retry ${attempt + 1}/${ctx.quotaBackoffMs.length} in ${ctx.quotaBackoffMs[attempt]} ms`);
+    await ctx.sleep(ctx.quotaBackoffMs[attempt]);
+  }
   const parsed = parseSeatResult(r, ctx.codes);
   const j = parsed.failed ? null : parseJsonObject(r.text);
   const row = { itemId: id, pred: parsed.failed ? null : { verdict: parsed.verdict, code: parsed.code }, failed: parsed.failed, infra: parsed.infra,
@@ -633,7 +649,8 @@ function contextSha(ctx, rows) {
  * Returns the repo manifest object.
  */
 export async function runGepa({ home = classifHome(), repoClassif = classifDir(process.env), k, run = null, seed = null, maxCalls = DEFAULT_MAX_CALLS,
-  maxIterations = null, maxSkipped = MAX_SKIPPED, concurrency = 2, seat = callSeat, log = (m) => process.stderr.write(`classif-l4-gepa: ${m}\n`) }) {
+  maxIterations = null, maxSkipped = MAX_SKIPPED, concurrency = 2, quotaBackoffMs = QUOTA_BACKOFF_MS, sleep = sleepMs, seat = callSeat,
+  log = (m) => process.stderr.write(`classif-l4-gepa: ${m}\n`) }) {
   if (k === undefined || k === null || !/^\d+$/.test(String(k))) throw new Error('classif-l4-gepa: SERIES=<k> (integer) required');
   const runId = run ?? `s${k}`;
   if (!/^[A-Za-z0-9-]+$/.test(runId)) throw new Error(`classif-l4-gepa: RUN must be [A-Za-z0-9-]+ (got ${runId})`);
@@ -649,7 +666,7 @@ export async function runGepa({ home = classifHome(), repoClassif = classifDir(p
   const codes = loadCodes();
   const ctx = { home, runDir, phase, budget, refById, routes: GEPA_ROUTES, codes, codesSha: sha256(JSON.stringify([...codes].sort())), evalKeys: new Map(),
     resumeCommand: `make classif-l4-gepa SERIES=${k} MAX_CALLS=${maxCalls} RUN=${runId} SEED='${seedValue}'${maxIterations !== null ? ` MAX_ITER=${maxIterations}` : ''} ENV=preprod`,
-    seat, concurrency, log, callsLog: path.join(home, 'l2', 'calls.jsonl'), seatTmp: privateDir(path.join(home, 'l4', 'seat-tmp')) };
+    seat, concurrency, log, quotaBackoffMs: [...quotaBackoffMs], sleep, callsLog: path.join(home, 'l2', 'calls.jsonl'), seatTmp: privateDir(path.join(home, 'l4', 'seat-tmp')) };
   const split = { ...stratifiedSplit(rows, { seed: seedValue }), contextSha256: contextSha(ctx, rows) };
   const splitFile = path.join(runDir, 'split.json');
   if (existsSync(splitFile)) {
@@ -678,10 +695,22 @@ export async function runGepa({ home = classifHome(), repoClassif = classifDir(p
     if (!c) throw new Error(`classif-l4-gepa: journal admits ${rec.child.id} but its candidate file is missing`);
     return c;
   });
-  const initPlanned = seeds.reduce((s, c) => { const l = loadCandidate(ctx, c.id, c.sha); return s + (l ? retryablePairs(ctx, l).length : uncachedCalls(ctx, c, split.pareto)); }, 0)
+  const loadedSeeds = seeds.map((c) => loadCandidate(ctx, c.id, c.sha));
+  const initPlanned = seeds.reduce((s, c, i) => s + (loadedSeeds[i] ? retryablePairs(ctx, loadedSeeds[i]).length : uncachedCalls(ctx, c, split.pareto)), 0)
     + loadedChildren.reduce((s, c) => s + retryablePairs(ctx, c).length, 0);
-  if (!budget.fits(initPlanned + finalReserve)) {
-    throw new Error(`classif-l4-gepa: MAX_CALLS ${maxCalls} cannot hold the initial population (${initPlanned} calls) plus one final evaluation (${finalReserve}); remaining ${budget.remaining()}`);
+  // Review GEPA B4: a fresh run reserves one full final evaluation; a resumed run (population on
+  // disk) reserves only the UNCACHED final calls of the cheapest candidate still eligible for the
+  // final choice (0 when none is), so a run stopped during its final choice resumes under the
+  // same MAX_CALLS. The fixed reserve still gates every new iteration.
+  let startReserve = finalReserve;
+  if (loadedSeeds.every(Boolean)) {
+    const known = [...loadedSeeds, ...loadedChildren];
+    const eligible = paretoFront(known, split.pareto).map((x) => known.find((c) => c.id === x.id))
+      .filter((c) => totalScore(c.scores, split.pareto).misses === 0 && !c.ineligible.length);
+    startReserve = eligible.length ? Math.min(...eligible.map((c) => uncachedCalls(ctx, c, split.feedback))) : 0;
+  }
+  if (!budget.fits(initPlanned + startReserve)) {
+    throw new Error(`classif-l4-gepa: MAX_CALLS ${maxCalls} cannot hold the initial population (${initPlanned} calls) plus the final evaluation (${startReserve}); remaining ${budget.remaining()}`);
   }
   const candidates = [];
   for (const s of seeds) {
@@ -876,7 +905,10 @@ export async function main(argv = process.argv.slice(2), { seat = callSeat } = {
     if (!/^\d+$/.test(v)) throw new Error(`classif-l4-gepa: ${name} must be a non-negative integer (got ${v})`);
     return Number(v);
   };
+  const backoff = flag('--quota-backoff-ms');
+  if (backoff !== null && !/^\d+(,\d+)*$/.test(backoff)) throw new Error(`classif-l4-gepa: --quota-backoff-ms must be a comma list of milliseconds (got ${backoff})`);
   const manifest = await runGepa({ k, run: flag('--run') || null, seed: flag('--seed') || null, maxCalls: num('--max-calls', DEFAULT_MAX_CALLS),
+    quotaBackoffMs: backoff ? backoff.split(',').map(Number) : QUOTA_BACKOFF_MS,
     maxIterations: num('--max-iterations', null), maxSkipped: num('--max-skipped', MAX_SKIPPED), concurrency: num('--concurrency', 2), seat });
   process.stdout.write(`${JSON.stringify(manifest, null, 2)}\n`);
   return manifest;
