@@ -173,6 +173,8 @@ describeDb("stored reader approval and single-use exchange", () => {
     const fields = new URL(approvalUrl).searchParams;
     fields.set("releaseId", f.releaseId);
     fields.set("profileFingerprint", fingerprintReaderProfile((await f.stored().authority.getProfile(f.artifactId))!));
+    // J1.3a: only an explicit choice records the consent and opens.
+    fields.set("decision", "grant");
     const body = fields.toString();
     const approve = (origin: string, cookieHeader = appCookie) => request(new URL(approvalUrl).origin + new URL(approvalUrl).pathname, {
       method: "POST", headers: { cookie: cookieHeader, origin, "content-type": "application/x-www-form-urlencoded" }, body,

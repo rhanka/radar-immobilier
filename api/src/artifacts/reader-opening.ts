@@ -6,13 +6,14 @@ import { SESSION_COOKIE_NAME, verifySession } from "../services/auth/session.js"
 import { fingerprintReaderProfile, type AuthorityReader } from "./reader-profile.js";
 import { mintGrant, type GrantIssuer } from "./preview-grant.js";
 import { validateTicketForExchange } from "./preview-exchange.js";
-import { mintInitCookie, mintRetryCookie, mintSessionCookie, parseCookieHeader, PREVIEW_INIT_COOKIE, PREVIEW_RETRY_COOKIE, readSessionClaims } from "./preview-session.js";
+import { clearConsentPendingCookie, mintConsentPendingCookie, mintInitCookie, mintRetryCookie, mintSessionCookie, parseCookieHeader, PREVIEW_INIT_COOKIE, PREVIEW_RETRY_COOKIE, readConsentPending, readSessionClaims } from "./preview-session.js";
+import { readerEventEmitter, type ReaderEventSink } from "./reader-event-log.js";
 import { parseContentHost } from "./content-host.js";
 import { applyReaderContentHeaders } from "./content-isolation.js";
 import { DESIGN_KIT_ASSETS, designKitAssetUrl, type DesignKitAsset } from "@radar/artifacts-host";
 import { createDesignKitApp } from "./design-kit.js";
 import type { SharedReaderTickets } from "./reader-tickets.js";
-import { BASKET_READ_SCOPE_ID, basketsScopesForPage, type ReaderConsentService } from "./reader-consent.js";
+import { basketsScopesForPage, type ReaderConsentService } from "./reader-consent.js";
 import type { PwIdentityDomain } from "./write-intent-principal.js";
 import { samePwIdentityDomain } from "./write-intent-principal.js";
 
@@ -107,6 +108,39 @@ export function refusedReaderOpeningHtml(): string {
     `</div></main></body></html>`;
 }
 
+/** Shared neutral page frame on the control origin (kit stylesheets, approval layout). */
+function controlPage(title: string, paragraphs: readonly string[]): string {
+  return `<!doctype html><html lang="fr" data-st-theme="sent-tech"><head><meta charset="utf-8">` +
+    `<meta name="viewport" content="width=device-width, initial-scale=1">` +
+    `<title>${title} — Radar immobilier</title>` +
+    approvalStylesheetLinks() +
+    `<style>${APPROVAL_STYLE}</style></head><body><main class="reader-approve">` +
+    `<div class="st-card reader-approve__card">` +
+    `<p class="reader-approve__eyebrow">Radar immobilier</p>` +
+    `<h1>${title}</h1>` + paragraphs.map((text) => `<p>${text}</p>`).join("") +
+    `</div></main></body></html>`;
+}
+
+/**
+ * Lot J1.3a: explicit consent-ledger error (French, no identifiers). The
+ * reader is told that nothing was recorded and nothing opened — never an
+ * « Autorisé » state the ledger does not hold.
+ */
+export function consentErrorHtml(): string {
+  return controlPage("Accord non enregistré", [
+    "Votre accord n’a pas pu être vérifié ni enregistré pour le moment. La page n’a pas été ouverte et aucun accès n’a été accordé.",
+    "Réessayez dans quelques instants depuis le lien d’origine.",
+  ]);
+}
+
+/** Lot J1.3a: a submission without an explicit choice (stale screen) — nothing recorded, nothing opened. */
+export function consentDecisionInvalidHtml(): string {
+  return controlPage("Choix non reçu", [
+    "Ce formulaire n’est plus à jour : aucun choix n’a été reçu. Rien n’a été enregistré et la page n’a pas été ouverte.",
+    "Rouvrez la page depuis son lien d’origine pour faire votre choix.",
+  ]);
+}
+
 function wantsBrowserExchange(c: Context): boolean {
   return (c.req.header("accept") ?? "").includes("text/html");
 }
@@ -128,14 +162,18 @@ export function createReaderOpening(deps: {
    */
   reconcile?: (input: { sub: string; email?: string; emailVerified: boolean; issuer: string }) => Promise<unknown>;
   /**
-   * Reader consent: durable BASKETS consent. The opening (Gate A) persists
-   * nothing and always renders its neutral screen; the baskets screen below
-   * records the first-party gesture, and GET /consent skips its screen when
-   * a live baskets row plus the fresh approval above already cover the
-   * reader. Absent keeps the sealed-session flow only (fail-open reads).
+   * Reader consent: durable BASKETS consent (J1.3a). The single first-party
+   * gesture (opening screen, or the deferred consent screen) records the
+   * acknowledgement before any ticket; GET /approve and GET /consent skip
+   * their screen while live rows plus the fresh approval cover the reader,
+   * for every release of the artifact. A ledger failure is an explicit
+   * error. Absent, the screen shows on every opening and records nothing.
    */
   consent?: ReaderConsentService;
+  /** J1.3a typed journal (closed shape, see reader-event-log.ts). Absent, nothing is logged. */
+  events?: ReaderEventSink;
 }) {
+  const emit = readerEventEmitter(deps.events);
   const application = new Hono();
   const content = new Hono();
   application.use("*", bodyLimit({ maxSize: 4096 }));
@@ -269,18 +307,69 @@ export function createReaderOpening(deps: {
     delete clientParams.requestedRelease;
     return approval(c, { ...clientParams, ...resolved });
   }
-  application.get("/approve", async (c) => {
+  type OpeningInput = NonNullable<Awaited<ReturnType<typeof approval>>>;
+  type ScreenVariant = "opening" | "consent";
+  /** Same-origin session gate shared by both screens: login round-trip when absent. */
+  async function requireAppSession(c: Context): Promise<Response | null> {
     const token = parseCookieHeader(c.req.header("cookie"), SESSION_COOKIE_NAME);
-    if (!token || !await verifySession(token, { sessionSecret: deps.auth.sessionSecret })) {
-      const origin = validContentOriginShape(c.req.query("origin"));
-      if (!origin || !deps.auth.enabled || c.req.header("authorization")) return c.json({ error: "unauthenticated" }, 401);
-      const returnTo = "/api/v1/artifacts/reader/resume?" + new URLSearchParams({ origin });
-      return c.redirect("/api/v1/auth/login?" + new URLSearchParams({ returnTo }), 303);
+    if (token && await verifySession(token, { sessionSecret: deps.auth.sessionSecret })) return null;
+    const origin = validContentOriginShape(c.req.query("origin"));
+    if (!origin || !deps.auth.enabled || c.req.header("authorization")) return c.json({ error: "unauthenticated" }, 401);
+    const returnTo = "/api/v1/artifacts/reader/resume?" + new URLSearchParams({ origin });
+    return c.redirect("/api/v1/auth/login?" + new URLSearchParams({ returnTo }), 303);
+  }
+  /**
+   * J1.3a grant once: the screen is skipped only when EVERY scope this page
+   * needs has a live ledger row at the current scope version, re-read now
+   * (fresh rights were already re-read by approval()). Covers the same
+   * artifact and any of its releases (rows are per artifact). Throws on a
+   * ledger failure: the caller answers an explicit error, never a grant.
+   */
+  async function consentCovers(input: OpeningInput): Promise<boolean> {
+    if (!deps.consent) return false;
+    for (const scopeId of basketsScopesForPage(input.writeIdentity !== undefined)) {
+      if (!await deps.consent.hasLiveConsent(input.readerSub, input.artifactId, scopeId)) return false;
     }
-    const input = await openingInput(c, c.req.query());
-    if (!input) return refusal(c);
-    // Gate A persists nothing: the neutral opening screen renders on every
-    // opening. The baskets consent below never skips this screen.
+    return true;
+  }
+  /**
+   * J1.3a revocation wording: driven by the ledger only (a revoked row for
+   * one of the scopes this page needs), never by a client parameter or a
+   * cookie value. Throws on a ledger failure.
+   */
+  async function consentWasRevoked(input: OpeningInput): Promise<boolean> {
+    if (!deps.consent?.hasRevokedConsent) return false;
+    for (const scopeId of basketsScopesForPage(input.writeIdentity !== undefined)) {
+      if (await deps.consent.hasRevokedConsent(input.readerSub, input.artifactId, scopeId)) return true;
+    }
+    return false;
+  }
+  async function toExchange(c: Context, input: OpeningInput, code: string, scope: "baskets" | "document" = "baskets") {
+    const ticket = await deps.tickets.mint(scope === "baskets"
+      ? { ...input, basketScope: true } : { ...input, consentDeclined: true });
+    emit({ surface: "opening", code, status: 303 });
+    return c.redirect(`${input.origin}/__reader/exchange?ticket=${ticket.ticket}`, 303);
+  }
+  /**
+   * J1.3a: a ledger failure is an explicit error page, never « Autorisé »
+   * and never a ticket. Same neutral bytes for read and write failures; the
+   * typed code goes to the journal only.
+   */
+  function ledgerError(c: Context, code: "consent_ledger_unavailable" | "consent_ledger_write_failed") {
+    emit({ surface: "opening", code, status: 503 });
+    if (!wantsBrowserExchange(c)) return c.json({ error: code }, 503);
+    c.header("Content-Security-Policy", APPROVAL_BASE_CSP);
+    return c.html(consentErrorHtml(), 503);
+  }
+  /**
+   * J1.3a: one first-party screen on the control origin. The opening and
+   * the deferred 403 entry render the same decision (read the reader's own
+   * baskets, plus write-prepare when the page may prepare actions), so the
+   * first opening takes a single gesture and every later opening of this
+   * artifact, any release, takes none until revocation.
+   */
+  function screen(c: Context, input: OpeningInput, variant: ScreenVariant, revoked: boolean) {
+    emit({ surface: "opening", code: revoked ? "consent_screen_revoked" : "consent_screen", status: 200 });
     // no-referrer makes Chromium send Origin: null on the confirmation POST.
     // Keep the same-origin CSRF check usable without sending referrers off-site.
     c.header("Referrer-Policy", "same-origin");
@@ -288,60 +377,29 @@ export function createReaderOpening(deps: {
     // artifact origin may receive the redirect from this same-origin POST.
     c.header("Content-Security-Policy", `default-src 'none'; style-src 'self' '${APPROVAL_STYLE_HASH}'; ` +
       `form-action 'self' ${input.origin}; frame-ancestors 'none'; base-uri 'none'`);
-    // Lot I2: neutral opening screen. No basket consent here (deferred to
-    // the first H5 call via /__reader/consent) and no author identity: the
-    // page opens the document, files and shell-state under the reader's
-    // rights, nothing more.
-    return c.html(`<!doctype html><html lang="fr" data-st-theme="sent-tech"><head><meta charset="utf-8">` +
-      `<meta name="viewport" content="width=device-width, initial-scale=1">` +
-      `<title>Ouvrir la page — Radar immobilier</title>` +
-      approvalStylesheetLinks() +
-      `<style>${APPROVAL_STYLE}</style></head><body><main class="reader-approve">` +
-      `<div class="st-card reader-approve__card">` +
-      `<p class="reader-approve__eyebrow">Radar immobilier</p>` +
-      `<h1>Ouvrir la page</h1>` +
-      `<p>Cette page partagée s'ouvre avec vos droits actuels.</p>` +
-      (input.writeIdentity ? `<p>Cette page peut préparer des actions. Chaque écriture exige votre confirmation dans l’application.</p>` : "") +
-      `<form method="post"><input type="hidden" name="artifactId" value="${escape(input.artifactId)}">` +
-      `<input type="hidden" name="binding" value="${escape(input.browserBinding)}">` +
-      `<input type="hidden" name="origin" value="${escape(input.origin)}">` +
-      `<input type="hidden" name="releaseId" value="${escape(input.releaseId)}">` +
-      `<input type="hidden" name="profileFingerprint" value="${escape(input.profileFingerprint)}">` +
-      `<button class="st-button st-button--primary st-button--md" type="submit">Ouvrir la page</button></form>` +
-      `</div></main></body></html>`);
-  });
-  application.post("/approve", async (c) => {
-    if (!deps.auth.enabled || c.req.header("origin") !== deps.auth.appBaseUrl) return c.json({ error: "forbidden_origin" }, 403);
-    const input = await openingInput(c, await c.req.parseBody());
-    if (!input) return refusal(c);
-    // Gate A persists nothing: confirming the opening mints the
-    // document-only ticket and records no consent row.
-    const ticket = await deps.tickets.mint(input);
-    return c.redirect(`${input.origin}/__reader/exchange?ticket=${ticket.ticket}`, 303);
-  });
-  /**
-   * Lot I2: deferred basket consent. The opening above grants the document
-   * only; the FIRST H5 business call (`baskets.context/search/state`,
-   * `workspaces.list`) answers `basket_consent_required`, and the bridge
-   * navigates here top-level. Same DS page as the former opening screen,
-   * moved: it consents to read the READER's own baskets, then mints a
-   * basket-scoped session and replays the call once.
-   */
-  function consentPage(input: { artifactId: string; browserBinding: string; origin: string;
-    releaseId: string; profileFingerprint: string; writeIdentity?: unknown }): string {
+    return c.html(consentPage(input, variant, revoked));
+  }
+  function consentPage(input: OpeningInput, variant: ScreenVariant, revoked: boolean): string {
+    const title = variant === "opening" ? "Ouvrir la page" : "Autoriser la lecture de vos paniers";
     return `<!doctype html><html lang="fr" data-st-theme="sent-tech"><head><meta charset="utf-8">` +
       `<meta name="viewport" content="width=device-width, initial-scale=1">` +
-      `<title>Autoriser la lecture de vos paniers — Radar immobilier</title>` +
+      `<title>${title} — Radar immobilier</title>` +
       approvalStylesheetLinks() +
       `<style>${APPROVAL_STYLE}</style></head><body><main class="reader-approve">` +
       `<div class="st-card reader-approve__card">` +
       `<p class="reader-approve__eyebrow">Radar immobilier</p>` +
-      `<h1>Autoriser la lecture de vos paniers</h1>` +
-      `<p>Cette page lit vos propres paniers avec vos droits actuels, jamais ceux de l'auteur.</p>` +
+      `<h1>${title}</h1>` +
+      (revoked
+        ? `<p>Votre accord précédent pour cette page a été retiré. Elle ne lit plus vos paniers tant que vous ne l’autorisez pas de nouveau.</p>`
+        : "") +
+      (variant === "opening"
+        ? `<p>Cette page partagée s'ouvre avec vos droits actuels et lit vos propres paniers, jamais ceux de l'auteur.</p>`
+        : `<p>Cette page lit vos propres paniers avec vos droits actuels, jamais ceux de l'auteur.</p>`) +
       (input.writeIdentity
         ? `<p>Cette page peut aussi préparer des modifications dans vos paniers. Chaque écriture exige votre confirmation dans l’application.</p>`
         : "") +
-      `<p>Cet accord est mémorisé pour cette page jusqu’à sa révocation. ` +
+      `<p>Sans votre accord, la page s’ouvre sans lire vos paniers.</p>` +
+      `<p>Cet accord est mémorisé pour cette page jusqu’à sa révocation, y compris pour ses prochaines versions. ` +
       `Vous pouvez le retirer à tout moment dans les réglages de votre compte, ` +
       `ou demander à votre assistant de retirer votre consentement de lecture.</p>` +
       `<form method="post"><input type="hidden" name="artifactId" value="${escape(input.artifactId)}">` +
@@ -349,49 +407,68 @@ export function createReaderOpening(deps: {
       `<input type="hidden" name="origin" value="${escape(input.origin)}">` +
       `<input type="hidden" name="releaseId" value="${escape(input.releaseId)}">` +
       `<input type="hidden" name="profileFingerprint" value="${escape(input.profileFingerprint)}">` +
-      `<button class="st-button st-button--primary st-button--md" type="submit">Autoriser et ouvrir</button></form>` +
+      `<button class="st-button st-button--primary st-button--md" type="submit" name="decision" value="grant">Autoriser et ouvrir</button> ` +
+      `<button class="st-button st-button--secondary st-button--md" type="submit" name="decision" value="refuse">Ne pas autoriser</button></form>` +
       `</div></main></body></html>`;
   }
-  application.get("/consent", async (c) => {
-    const token = parseCookieHeader(c.req.header("cookie"), SESSION_COOKIE_NAME);
-    if (!token || !await verifySession(token, { sessionSecret: deps.auth.sessionSecret })) {
-      const origin = validContentOriginShape(c.req.query("origin"));
-      if (!origin || !deps.auth.enabled || c.req.header("authorization")) return c.json({ error: "unauthenticated" }, 401);
-      const returnTo = "/api/v1/artifacts/reader/resume?" + new URLSearchParams({ origin });
-      return c.redirect("/api/v1/auth/login?" + new URLSearchParams({ returnTo }), 303);
-    }
+  async function showOrSkip(c: Context, variant: ScreenVariant) {
+    const unauthenticated = await requireAppSession(c);
+    if (unauthenticated) return unauthenticated;
     const input = await openingInput(c, c.req.query());
     if (!input) return refusal(c);
-    // Gate B: a live baskets row plus the fresh approval above (getRights
-    // re-read on this call) skips the screen — cross-device and next-day
-    // included. A suspended account never reaches this line (approval
-    // refuses first); a revoked consent renders the screen again.
-    if (deps.consent && await deps.consent.hasLiveConsent(
-      input.readerSub, input.artifactId, BASKET_READ_SCOPE_ID).catch(() => false)) {
-      const ticket = await deps.tickets.mint({ ...input, basketScope: true });
-      return c.redirect(`${input.origin}/__reader/exchange?ticket=${ticket.ticket}`, 303);
-    }
-    c.header("Referrer-Policy", "same-origin");
-    c.header("Content-Security-Policy", `default-src 'none'; style-src 'self' '${APPROVAL_STYLE_HASH}'; ` +
-      `form-action 'self' ${input.origin}; frame-ancestors 'none'; base-uri 'none'`);
-    return c.html(consentPage(input));
-  });
-  application.post("/consent", async (c) => {
+    let covered: boolean;
+    let revoked = false;
+    try {
+      covered = await consentCovers(input);
+      if (!covered) revoked = await consentWasRevoked(input);
+    } catch { return ledgerError(c, "consent_ledger_unavailable"); }
+    if (covered) return toExchange(c, input, "consent_reused");
+    return screen(c, input, variant, revoked);
+  }
+  async function decide(c: Context) {
     if (!deps.auth.enabled || c.req.header("origin") !== deps.auth.appBaseUrl) return c.json({ error: "forbidden_origin" }, 403);
-    const input = await openingInput(c, await c.req.parseBody());
+    const body = await c.req.parseBody();
+    const input = await openingInput(c, body);
     if (!input) return refusal(c);
-    // The click is the first-party gesture: persist the BASKETS consent
-    // (read, plus write-prepare when the page may prepare actions — a
-    // read-only page never triggers a write-prepare ask). The opening
-    // itself is never persisted. A ledger failure never blocks the
-    // consented call; the screen simply shows again next time.
-    if (deps.consent) {
-      await deps.consent.grantScopes(input.readerSub, input.artifactId,
-        basketsScopesForPage(input.writeIdentity !== undefined)).catch(() => undefined);
+    // Only an explicit choice from the current screen counts. A screen
+    // rendered before J1.3a (no `decision` field, no baskets wording) or
+    // any other value records nothing and mints nothing.
+    if (body.decision !== "grant" && body.decision !== "refuse") {
+      emit({ surface: "opening", code: "consent_decision_invalid", status: 400 });
+      if (!wantsBrowserExchange(c)) return c.json({ error: "decision_required" }, 400);
+      return c.html(consentDecisionInvalidHtml(), 400);
     }
-    const ticket = await deps.tickets.mint({ ...input, basketScope: true });
-    return c.redirect(`${input.origin}/__reader/exchange?ticket=${ticket.ticket}`, 303);
-  });
+    if (body.decision === "refuse") {
+      // Conductor decision (rule I2 kept for refusal): « Ne pas autoriser »
+      // opens the DOCUMENT ONLY and records nothing. Basket calls answer the
+      // typed basket_consent_declined; « Réouvrir » reaches the consent screen.
+      return toExchange(c, input, "consent_refused", "document");
+    }
+    // The click is the first-party gesture: the durable acknowledgement
+    // (scope + scope version) is recorded BEFORE any ticket exists. A
+    // ledger failure stops here with an explicit error.
+    if (deps.consent) {
+      try {
+        await deps.consent.grantScopes(input.readerSub, input.artifactId,
+          basketsScopesForPage(input.writeIdentity !== undefined));
+      } catch { return ledgerError(c, "consent_ledger_write_failed"); }
+    }
+    return toExchange(c, input, "consent_recorded");
+  }
+  application.get("/approve", (c) => showOrSkip(c, "opening"));
+  application.post("/approve", (c) => decide(c));
+  /**
+   * Deferred entry: a typed `basket_consent_required` 403 (session minted
+   * before this lot, revoked consent) navigates top-level to
+   * `/__reader/consent`, which lands here. Same decision as the opening.
+   */
+  application.get("/consent", (c) => showOrSkip(c, "consent"));
+  application.post("/consent", (c) => decide(c));
+  /** Live page session sealed for THIS content host, else null. */
+  function boundSession(c: Context) {
+    const session = readSessionClaims(c.req.header("cookie"), deps.sessionSecret, (deps.now ?? Date.now)());
+    return session?.resource && `https://${c.req.header("host")}` === `https://${session.resource.host}` ? session : null;
+  }
   content.get("/__reader/start", async (c) => {
     const host = parseContentHost(c.req.header("host"), deps.contentBase);
     // Lot I2: no existence check before authentication. Every well-formed
@@ -400,6 +477,14 @@ export function createReaderOpening(deps: {
     // pre-auth 303 to the version host (which revealed existence and the
     // releaseId) is gone; only malformed/foreign hosts stay 404.
     if (host.kind !== "content" || !deps.auth.enabled) return c.json({ error: "not_found" }, 404);
+    // J1.3a: « Réouvrir la page » after a typed consent refusal on this host
+    // (old bridges included) goes straight to the consent entry instead of a
+    // document-only opening that would answer the same 403 again. Only with
+    // a live session bound to this host; otherwise the normal opening runs
+    // (and its screen is the same consent decision).
+    if (readConsentPending(c.req.header("cookie")) && boundSession(c)) {
+      return c.redirect("/__reader/consent", 303);
+    }
     const binding = randomBytes(32).toString("hex");
     // 10-minute binding window aligned with the ticket TTL (DB default) and
     // the approval page lifetime: a tab opened from a Claude link is often
@@ -414,10 +499,9 @@ export function createReaderOpening(deps: {
     // Entry to the deferred basket consent: requires the document session
     // minted at opening (same host). Without it, restart the opening; the
     // consent page itself re-verifies approval and ACL before consenting.
-    const session = readSessionClaims(c.req.header("cookie"), deps.sessionSecret, (deps.now ?? Date.now)());
-    const bound = session?.resource && `https://${c.req.header("host")}` ===
-      `https://${session.resource.host}`;
-    if (!session || !bound) {
+    const session = boundSession(c);
+    const pending = readConsentPending(c.req.header("cookie"));
+    if (!session) {
       if (!wantsBrowserExchange(c)) return c.json({ error: "unauthenticated" }, 401);
       return c.redirect("/__reader/start", 303);
     }
@@ -425,6 +509,8 @@ export function createReaderOpening(deps: {
     const artifactId = resolved?.artifactId ?? session.artifactId;
     const binding = randomBytes(32).toString("hex");
     c.header("Set-Cookie", mintInitCookie(binding));
+    // The pending marker is consumed here: one consent entry per refusal.
+    if (pending) c.header("Set-Cookie", clearConsentPendingCookie(), { append: true });
     return c.redirect(`${deps.auth.appBaseUrl}/api/v1/artifacts/reader/consent?` +
       new URLSearchParams({ artifactId, binding, origin: `https://${c.req.header("host")}` }), 303);
   });
@@ -467,6 +553,13 @@ export function createReaderOpening(deps: {
       ...(writeIdentity ? { writeIdentity } : {}) }, deps.sessionSecret));
     c.header("Set-Cookie", `${PREVIEW_INIT_COOKIE}=; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=0`, { append: true });
     c.header("Set-Cookie", `${PREVIEW_RETRY_COOKIE}=; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=0`, { append: true });
+    // J1.3a: a document-only session born from « Ne pas autoriser » marks
+    // the host as declined; any other exchange clears a stale marker.
+    if (ticket.consentDeclined === true) {
+      c.header("Set-Cookie", mintConsentPendingCookie("declined"), { append: true });
+    } else if (readConsentPending(c.req.header("cookie"))) {
+      c.header("Set-Cookie", clearConsentPendingCookie(), { append: true });
+    }
     return c.redirect(`/?grant=${encodeURIComponent(grant)}`, 303);
   });
   return { application, content };

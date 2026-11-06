@@ -46,12 +46,26 @@ export function writePrepareConsentRefusal(c: { json: (body: unknown, status: nu
     retryable: false, action: "consent_baskets" }, requestId: randomUUID() }, 403);
 }
 
-async function hasLiveWritePrepareConsent(deps: Pick<PageListenerDeps, "basketConsent">,
-  readerSub: string, artifactId: string): Promise<boolean> {
-  if (!deps.basketConsent) return true;
+/**
+ * J1.3a: a consent-ledger outage is an explicit typed 503, never absorbed
+ * into a consent refusal the reader cannot satisfy. Still fail-closed.
+ */
+export function consentLedgerUnavailable(c: { json: (body: unknown, status: number) => Response }): Response {
+  return c.json({ ok: false, error: { code: "consent_ledger_unavailable",
+    message: "The consent ledger is unavailable.", retryable: true, action: "retry_later" },
+  requestId: randomUUID() }, 503);
+}
+
+/** Gate B write-prepare decision as a response, or null when a live row covers the call. */
+export async function writePrepareConsentGate(c: { json: (body: unknown, status: number) => Response },
+  gate: BasketConsentGate | undefined, readerSub: string, artifactId: unknown): Promise<Response | null> {
+  if (!gate) return null;
+  if (typeof artifactId !== "string") return writePrepareConsentRefusal(c);
+  let allowed: boolean;
   try {
-    return await deps.basketConsent.hasLiveConsent(readerSub, artifactId, BASKET_WRITE_PREPARE_SCOPE_ID);
-  } catch { return false; }
+    allowed = await gate.hasLiveConsent(readerSub, artifactId, BASKET_WRITE_PREPARE_SCOPE_ID);
+  } catch { return consentLedgerUnavailable(c); }
+  return allowed ? null : writePrepareConsentRefusal(c);
 }
 
 const INTERNAL_HEADERS = ["x-preview-write-grant", "x-preview-session"];
@@ -137,9 +151,8 @@ export function pageWriteListenerRoute(deps: PageListenerDeps | null): Hono {
         throw new FacetError(403, "csrf_refused");
       }
       // Gate B: no write grant without a live write-prepare consent row.
-      if (!await hasLiveWritePrepareConsent(deps, page.grant.readerSub, page.grant.artifactId)) {
-        return writePrepareConsentRefusal(c);
-      }
+      const gated = await writePrepareConsentGate(c, deps.basketConsent, page.grant.readerSub, page.grant.artifactId);
+      if (gated) return gated;
       const grant = await mintPageWriteGrant(page, deps, (deps.nowMs ?? Date.now)());
       const headers = forwardHeaders(c, grant);
       headers.set("host", page.grant.host);
