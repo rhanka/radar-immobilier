@@ -88,7 +88,7 @@ test('review M2: a codex home is prepared once per process, atomically, auth nev
   const src = path.join(home, 'auth-src.json');
   writeFileSync(src, '{"v":1}');
   const dir = ensureCodexHome('luna-6-low', { model: 'gpt-6-luna', effort: 'low', home, authSrc: src });
-  assert.equal(dir, codexHomeDir('luna-6-low', home));
+  assert.equal(dir, codexHomeDir('luna-6-low'));
   assert.equal(readFileSync(path.join(dir, 'auth.json'), 'utf8'), '{"v":1}');
   // The seat refreshes its token, the source changes, the config is touched: a second call of the
   // same process rewrites nothing.

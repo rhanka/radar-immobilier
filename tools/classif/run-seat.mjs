@@ -13,10 +13,20 @@ import { classifHome, testOnlyEnv } from './lib/paths.mjs';
 import { privateDir } from './lib/paths.mjs';
 
 const SCRUB = /(_API_KEY|_AUTH_TOKEN|_API_BASE|_BASE_URL|_SECRET_KEY|_ACCESS_KEY)$|^(ANTHROPIC_|OPENAI_|GEMINI_|CLAUDE_CODE_USE_|AWS_|GOOGLE_CLOUD_|GOOGLE_APPLICATION_CREDENTIALS|GOOGLE_GENAI_USE_VERTEXAI|VERTEX|SCRAPE_S3_|REFERENCE_C_KEY|CLASSIF_EVAL_KEY|CLASSIF_BLIND_KEY|MISTRAL_|VIBE_ACTIVE_MODEL)/;
-export function seatEnv(extra = {}) {
-  const env = {};
-  for (const [k, v] of Object.entries(process.env)) if (!SCRUB.test(k)) env[k] = v;
-  return { ...env, ...extra };
+/**
+ * Seat environment: the process env scrubbed of provider keys and cloud variables, of every
+ * CLASSIF_* variable and of every variable whose value carries the $CLASSIF_HOME path (review
+ * GEPA R4: a seat that can run a command must not learn where the pilot files are), plus the
+ * route's own `extra` variables.
+ */
+export function seatEnv(extra = {}, env = process.env) {
+  const home = classifHome(env);
+  const out = {};
+  for (const [k, v] of Object.entries(env)) {
+    if (SCRUB.test(k) || /^CLASSIF_/.test(k) || (typeof v === 'string' && v.includes(home))) continue;
+    out[k] = v;
+  }
+  return { ...out, ...extra };
 }
 
 const lastJson = (stdout) => {
@@ -105,23 +115,44 @@ export const ROUTES = {
   }])),
 };
 
-// Isolated CODEX_HOME for the astra seat (review §10): $CLASSIF_HOME/seat-homes/astra/
-// (mode 700). Holds a config with NO mcp_servers and only the auth file copied from
-// ~/.codex/auth.json (mode 600). codex reads CODEX_HOME (verified 2026-11-05: unknown
-// CODEX_HOME warns, isolated home with copied auth connects, doctor reports auth mode
-// chatgpt). The seat env sets CODEX_HOME to this dir, so the seat never sees the user's
-// ~/.codex/config.toml MCP servers.
-// Every codex seat (astra-max, sol-6.1-low, luna-6-low) gets its OWN home under
-// $CLASSIF_HOME/seat-homes/<dir>/ (astra keeps its historical 'astra' directory).
-const CODEX_HOME_DIRS = { 'astra-max': 'astra' };
+// Isolated CODEX_HOME per codex seat (review §10, review GEPA R4): ~/.local/share/
+// radar-classif-seats/<seat>/ (mode 700), OUTSIDE $CLASSIF_HOME so the CODEX_HOME value a seat
+// sees never points at the pilot files. Holds a config with NO mcp_servers and the auth file
+// (mode 600). codex reads CODEX_HOME (verified 2026-11-05: unknown CODEX_HOME warns, isolated
+// home with copied auth connects, doctor reports auth mode chatgpt), so the seat never sees the
+// user's ~/.codex/config.toml MCP servers. The former homes ($CLASSIF_HOME/seat-homes/<dir>,
+// astra in 'astra') are only read once, to migrate their auth.json.
+const LEGACY_CODEX_HOME_DIRS = { 'astra-max': 'astra' };
 
-export function codexHomeDir(seat, home = classifHome()) {
-  return path.join(home, 'seat-homes', CODEX_HOME_DIRS[seat] ?? seat);
+/**
+ * Root of the isolated codex homes. The CLASSIF_SEAT_HOMES hook is test-only, and REQUIRED in
+ * test mode (fail closed: a hermetic test never writes the real seat homes).
+ */
+export function seatHomesRoot(env = process.env) {
+  const o = testOnlyEnv(env, 'CLASSIF_SEAT_HOMES');
+  if (o === undefined && env.CLASSIF_TEST_MODE === '1') throw new Error('test mode requires CLASSIF_SEAT_HOMES (never the real seat homes)');
+  return path.resolve(o ?? path.join(os.homedir(), '.local', 'share', 'radar-classif-seats'));
 }
 
-export function astraCodexHomeDir(home = classifHome()) {
-  return codexHomeDir('astra-max', home);
+export function codexHomeDir(seat, root = seatHomesRoot()) {
+  return path.join(root, seat);
 }
+
+export function legacyCodexHomeDir(seat, home = classifHome()) {
+  return path.join(home, 'seat-homes', LEGACY_CODEX_HOME_DIRS[seat] ?? seat);
+}
+
+export function astraCodexHomeDir(root = seatHomesRoot()) {
+  return codexHomeDir('astra-max', root);
+}
+
+const isInside = (child, parent) => {
+  const rel = path.relative(parent, child);
+  return rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel));
+};
+
+/** Exact command that refreshes a codex seat auth from ~/.codex/auth.json (review GEPA R5). */
+export const seatAuthRefreshCommand = (seat) => `make classif-seat-auth-refresh SEAT=${seat} ENV=preprod`;
 
 /**
  * Tool features switched off in every isolated codex config (`[features]`, review GEPA B1c).
@@ -166,8 +197,8 @@ const PREPARED_CODEX_HOMES = new Set();
 
 export const ASTRA_ISOLATED_CONFIG = codexIsolatedConfig({ name: 'Astra', model: 'gpt-6-astra', effort: 'max' });
 
-export function ensureAstraHome(home = classifHome(), opts = {}) {
-  return ensureCodexHome('astra-max', { model: 'gpt-6-astra', effort: 'max', name: 'Astra', home, ...opts });
+export function ensureAstraHome(opts = {}) {
+  return ensureCodexHome('astra-max', { model: 'gpt-6-astra', effort: 'max', name: 'Astra', ...opts });
 }
 
 /**
@@ -176,11 +207,15 @@ export function ensureAstraHome(home = classifHome(), opts = {}) {
  * seat home has none — never again during the run, so a token codex refreshed inside the seat
  * home is never overwritten by an older ~/.codex/auth.json, and 2 calls in flight never see a
  * torn file. Later calls of the same process return the prepared directory untouched.
+ * A missing auth is taken from the former home inside $CLASSIF_HOME when it holds one
+ * (migration), else from ~/.codex/auth.json. Refused when the home would sit in $CLASSIF_HOME.
  * The test-only CLASSIF_ASTRA_AUTH_SRC hook (CLASSIF_TEST_MODE=1) serves every codex seat.
  */
-export function ensureCodexHome(seat, { model, effort, name = seat, home = classifHome(), authSrc = testOnlyEnv(process.env, 'CLASSIF_ASTRA_AUTH_SRC') ?? null } = {}) {
-  const dir = codexHomeDir(seat, home);
+export function ensureCodexHome(seat, { model, effort, name = seat, home = classifHome(), root = seatHomesRoot(), authSrc = testOnlyEnv(process.env, 'CLASSIF_ASTRA_AUTH_SRC') ?? null } = {}) {
+  const dir = codexHomeDir(seat, root);
   if (PREPARED_CODEX_HOMES.has(dir)) return dir;
+  if (isInside(dir, home)) throw new Error(`${seat} isolation refused: seat home ${dir} is inside CLASSIF_HOME`);
+  privateDir(root);
   privateDir(dir);
   atomicPrivateWrite(path.join(dir, 'config.toml'), codexIsolatedConfig({ name, model, effort }));
   // Review D1/D2: hermetic tests set CLASSIF_ASTRA_AUTH_SRC to a fake auth file in
@@ -189,11 +224,35 @@ export function ensureCodexHome(seat, { model, effort, name = seat, home = class
   const src = authSrc ?? path.join(os.homedir(), '.codex', 'auth.json');
   const dst = path.join(dir, 'auth.json');
   if (!fs.existsSync(dst)) {
-    if (!src || !fs.existsSync(src)) throw new Error(`${seat === 'astra-max' ? 'astra' : seat} isolation refused: no auth to copy (${src} absent and ${dst} absent)`);
-    atomicPrivateWrite(dst, fs.readFileSync(src));
+    const legacy = path.join(legacyCodexHomeDir(seat, home), 'auth.json');
+    const from = fs.existsSync(legacy) ? legacy : src;
+    if (!from || !fs.existsSync(from)) throw new Error(`${seat === 'astra-max' ? 'astra' : seat} isolation refused: no auth to copy (${src} absent and ${dst} absent)`);
+    atomicPrivateWrite(dst, fs.readFileSync(from));
   }
   PREPARED_CODEX_HOMES.add(dir);
   return dir;
+}
+
+/**
+ * `make classif-seat-auth-refresh SEAT=<seat>`: atomically replaces the auth of one codex seat
+ * home with ~/.codex/auth.json (after a new login of the owner, or a stale or revoked seat
+ * token). A running process reads it at its next call (one codex process per call).
+ */
+export function refreshCodexAuth(seat, { root = seatHomesRoot(), home = classifHome(), authSrc = testOnlyEnv(process.env, 'CLASSIF_ASTRA_AUTH_SRC') ?? null } = {}) {
+  if (!ROUTES[seat] || ROUTES[seat].parse !== parseCodex) throw new Error(`seat auth refresh refused: ${seat} is not a codex seat (${Object.keys(ROUTES).filter((r) => ROUTES[r].parse === parseCodex).join(',')})`);
+  const dir = codexHomeDir(seat, root);
+  if (isInside(dir, home)) throw new Error(`seat auth refresh refused: seat home ${dir} is inside CLASSIF_HOME`);
+  const src = authSrc ?? path.join(os.homedir(), '.codex', 'auth.json');
+  if (!fs.existsSync(src)) throw new Error(`seat auth refresh refused: ${src} absent (log in with codex first)`);
+  privateDir(root);
+  privateDir(dir);
+  atomicPrivateWrite(path.join(dir, 'auth.json'), fs.readFileSync(src));
+  return dir;
+}
+
+/** A failed codex call whose output reads as an authentication failure (stale or revoked seat token). */
+export function looksLikeAuthFailure(code, text) {
+  return code !== 0 && /\b401\b|unauthori[sz]ed|authentication|auth(?:orization)? (?:error|failed|expired)|token (?:expired|is expired|refresh)|refresh[_ ]token|not logged in|log ?in again|codex login/i.test(String(text ?? ''));
 }
 
 /**
@@ -356,14 +415,24 @@ export function callSeat(label, prompt, { timeoutMs = 900000, base = process.env
   fs.mkdirSync(seatBase, { recursive: true, mode: 0o700 });
   const dir = fs.mkdtempSync(path.join(seatBase, codex ? 'classif-codex-seat-' : 'seat-'));
   const work = path.join(dir, 'work');
-  fs.mkdirSync(work);
   const file = path.join(dir, 'prompt.md');
-  fs.writeFileSync(file, prompt, { mode: 0o600 });
-  const { cmd, args, env, stdin } = r.build(work, file, prompt);
+  // Review GEPA R3: the seat dir (it holds the prompt) is removed whatever fails before the
+  // child runs — writing the prompt, building the command (a codex home refusal) or spawning.
+  const cleanup = () => fs.rmSync(dir, { recursive: true, force: true });
+  let built;
+  try {
+    fs.mkdirSync(work);
+    fs.writeFileSync(file, prompt, { mode: 0o600 });
+    built = r.build(work, file, prompt);
+  } catch (e) { cleanup(); throw e; }
+  const { cmd, args, env, stdin } = built;
   const started = Date.now();
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     // detached: the child leads its own process group so the timeout kill reaches descendants.
-    const child = spawnImpl(cmd, args, { cwd: work, env: seatEnv(env), stdio: ['pipe', 'pipe', 'pipe'], detached: true });
+    let child;
+    try {
+      child = spawnImpl(cmd, args, { cwd: work, env: seatEnv(env), stdio: ['pipe', 'pipe', 'pipe'], detached: true });
+    } catch (e) { cleanup(); reject(e); return; }
     let out = '';
     let err = '';
     let settled = false;
@@ -376,11 +445,13 @@ export function callSeat(label, prompt, { timeoutMs = 900000, base = process.env
       const latencyMs = Date.now() - started;
       let parsed = { text: '', usage: null };
       try { parsed = r.parse(out, work); } catch { /* keep empty */ }
-      fs.rmSync(dir, { recursive: true, force: true });
+      cleanup();
       // Review §10: the astra --json event stream stays in the raw record (the run.mjs raw
       // file saves this whole object), so tool-event audits are reproducible.
       const rawJsonl = codex ? out : undefined;
-      resolve({ code, latencyMs, timedOut, ...parsed, ...(rawJsonl !== undefined ? { rawJsonl } : {}), stderrTail: err.slice(-600), stdoutTail: parsed.text ? undefined : out.slice(-600) });
+      const authError = codex && looksLikeAuthFailure(code, `${err}\n${out.slice(-4000)}`);
+      resolve({ code, latencyMs, timedOut, ...parsed, ...(rawJsonl !== undefined ? { rawJsonl } : {}), ...(authError ? { authError: true } : {}),
+        stderrTail: err.slice(-600), stdoutTail: parsed.text ? undefined : out.slice(-600) });
     };
     // Timeout: SIGTERM to the group, then SIGKILL to the group after killEscalationMs.
     const timer = setTimeout(() => {

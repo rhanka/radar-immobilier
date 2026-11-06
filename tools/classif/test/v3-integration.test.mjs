@@ -67,6 +67,9 @@ test('integration §5/§10: fake astra seat keeps the event stream and counts to
   process.env.CLASSIF_HOME = home;
   process.env.CLASSIF_TEST_MODE = '1';
   process.env.CLASSIF_ASTRA_AUTH_SRC = fakeAuth;
+  const prevSeats = process.env.CLASSIF_SEAT_HOMES;
+  const seats = tmp();
+  process.env.CLASSIF_SEAT_HOMES = seats;
   try {
     const ok = await callSeat('astra-max', 'prompt', { base, timeoutMs: 30000,
       spawnImpl: fakeSpawnImpl({ stdout: benignAstraStream, lastMessage: '{"code":"S-A"}\n' }) });
@@ -81,8 +84,10 @@ test('integration §5/§10: fake astra seat keeps the event stream and counts to
     if (prevHome === undefined) delete process.env.CLASSIF_HOME; else process.env.CLASSIF_HOME = prevHome;
     if (prevSrc === undefined) delete process.env.CLASSIF_ASTRA_AUTH_SRC; else process.env.CLASSIF_ASTRA_AUTH_SRC = prevSrc;
     if (prevMode === undefined) delete process.env.CLASSIF_TEST_MODE; else process.env.CLASSIF_TEST_MODE = prevMode;
+    if (prevSeats === undefined) delete process.env.CLASSIF_SEAT_HOMES; else process.env.CLASSIF_SEAT_HOMES = prevSeats;
     rmSync(base, { recursive: true, force: true });
     rmSync(home, { recursive: true, force: true });
+    rmSync(seats, { recursive: true, force: true });
   }
 });
 

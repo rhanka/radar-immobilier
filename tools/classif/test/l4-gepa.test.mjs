@@ -172,8 +172,8 @@ test('gepa seats: sol-6.1-low and luna-6-low on the isolated codex route, mistra
     assert.ok(built.args.includes(path.join(work, 'last-message.md')));
     assert.equal(built.args[built.args.length - 1], '-', 'prompt on stdin');
     assert.equal(built.stdin, 'synthetic prompt');
-    assert.equal(built.env.CODEX_HOME, codexHomeDir(label, home), 'own CODEX_HOME per seat');
-    assert.ok(built.env.CODEX_HOME.startsWith(home));
+    assert.equal(built.env.CODEX_HOME, codexHomeDir(label), 'own CODEX_HOME per seat');
+    assert.ok(!built.env.CODEX_HOME.startsWith(home), 'outside CLASSIF_HOME');
     const cfg = readFileSync(path.join(built.env.CODEX_HOME, 'config.toml'), 'utf8');
     assert.ok(!/^\s*\[mcp_servers/m.test(cfg), 'no mcp_servers');
     assert.match(cfg, new RegExp(`model = "${model}"`));
@@ -181,8 +181,8 @@ test('gepa seats: sol-6.1-low and luna-6-low on the isolated codex route, mistra
     assert.equal(readFileSync(path.join(built.env.CODEX_HOME, 'auth.json'), 'utf8'), '{"fake":"auth-for-hermetic-tests"}');
     assert.equal(seatFamily(label), 'codex');
   }
-  assert.notEqual(codexHomeDir('sol-6.1-low', home), codexHomeDir('luna-6-low', home));
-  assert.equal(codexHomeDir('astra-max', home), path.join(home, 'seat-homes', 'astra'), 'astra keeps its home');
+  assert.notEqual(codexHomeDir('sol-6.1-low'), codexHomeDir('luna-6-low'));
+  assert.equal(codexHomeDir('astra-max'), path.join(process.env.CLASSIF_SEAT_HOMES, 'astra-max'));
   assert.equal(ROUTES['mistral-large-4-low'].effort, 'low');
   assert.match(ROUTES['mistral-large-4-low'].route, /VIBE_HOME=<classif>\/vibe\/low/);
   for (const r of GEPA_ROUTES) assert.ok(ROUTES[r], `${r} is a run-seat route`);

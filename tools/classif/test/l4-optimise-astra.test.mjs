@@ -67,7 +67,7 @@ test('override astra seat: optimiser prompt on stdin of the isolated codex route
   assert.deepEqual(s.args.slice(0, 7), ['exec', '-m', 'gpt-6-astra', '-c', 'model_reasoning_effort=max', '-s', 'read-only']);
   assert.equal(s.args[s.args.length - 1], '-');
   assert.deepEqual(s.workEntries, [], 'empty cwd');
-  assert.equal(s.codexHome, astraCodexHomeDir(home), 'isolated CODEX_HOME');
+  assert.equal(s.codexHome, astraCodexHomeDir(), 'isolated CODEX_HOME (outside CLASSIF_HOME)');
   assert.equal(readFileSync(s.seen, 'utf8'), buildOptimiserPrompt(MATERIALS_SENT), 'same firewall prompt, delivered on stdin');
   assert.equal(m.proposalSha256[0], sha256(LONG.trim()), 'very long proposal kept whole');
   assert.ok(a.fake.byKind('rec')[0].prompt.includes(LONG.trim()));
