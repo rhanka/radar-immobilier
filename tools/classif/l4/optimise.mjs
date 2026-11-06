@@ -11,17 +11,27 @@
 // is shingle-checked (no verbatim golden excerpt, review §C) before it lands in
 // tools/classif/l4/prompts/P<k+1>.md; its sha is recorded in the repo manifest. The conductor
 // commits the frozen prompt (freeze + commit before the blind run).
+//
+// Bounded REPAIR pass: when the shingle check refuses the fused prompt, the same reconciler
+// seat gets at most MAX_REPAIRS rewrite calls. A repair prompt carries ONLY a fixed generic
+// instruction plus the candidate prompt the model itself produced: never the offending
+// shingle, a hit position, nor any sealed or golden text. Still refused after the last
+// repair: fail closed, as before. Every call is cached by prompt sha, so a re-run replays
+// the proposals, the reconciliation and any completed repair without a new paid call.
 import path from 'node:path';
 import process from 'node:process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { ROUTES, callSeat, parseJsonObject } from '../run-seat.mjs';
+import { callSeat, parseJsonObject } from '../run-seat.mjs';
 import { appendJsonlRecord, parseJsonlTolerant } from '../lib/jsonl.mjs';
 import { sha256 } from '../lib/render.mjs';
-import { CLASSIF_DIR, classifHome, privateDir } from '../lib/paths.mjs';
+import { classifDir, classifHome, privateDir } from '../lib/paths.mjs';
 import { assertNoVerbatim } from '../lib/freeze.mjs';
 import { check as budgetCheck } from '../lib/budget.mjs';
 
 export const OPTIMISERS = ['muse-wonder-max', 'opus-5.5-max'];
+export const RECONCILER = 'muse-wonder-max';
+export const MAX_REPAIRS = 2;
+export const REPAIR_INSTRUCTION = 'The candidate prompt contains text copied verbatim from source documents; rewrite every example or quoted passage in your own general words, never quote document text, keep all rules.';
 export const TUNING_KEYS = ['tuningRef', 'tuningOutputs', 'errors', 'aggregates', 'currentPrompt'];
 
 /**
@@ -69,6 +79,53 @@ ${proposals[1].trim()}
 ---`;
 }
 
+/**
+ * Repair prompt: the fixed generic instruction plus the candidate ONLY. Its single input is
+ * the candidate the model produced, so no shingle, hit detail, sealed or golden text can
+ * reach the model through it.
+ */
+export function buildRepairPrompt(candidate) {
+  return `${REPAIR_INSTRUCTION} Same task, same answer schema (one JSON object per item: verdict, code, ambiguous, citation; verdict = registry partition of the code). Output the full rewritten prompt ONLY: no prose, no fences.
+
+## Candidate prompt
+---
+${candidate.trim()}
+---`;
+}
+
+/** true when the text passes the shingle check; a verbatim refusal returns false, any other error (missing guard) rethrows. */
+function passesShingleCheck(text, home, what) {
+  try {
+    assertNoVerbatim(text, home, { what });
+    return true;
+  } catch (e) {
+    if (/^freeze refused:/.test(e.message)) return false;
+    throw e;
+  }
+}
+
+/**
+ * Shingle-checks the fused prompt; on refusal runs up to `maxRepairs` repair calls on the
+ * reconciler seat (phase l4-opt-s<k>-repair<n>, budget-checked before each call). Each repair
+ * rewrites the latest candidate. Returns { text, repairs }; throws (fail closed) when the
+ * candidate is still refused after the last repair.
+ */
+export async function shingleCheckWithRepair({ home, callsLog, k, fusedText, call = seatCall, maxRepairs = MAX_REPAIRS }) {
+  const what = `prompt P${Number(k) + 1}`;
+  let text = fusedText;
+  let repairs = 0;
+  while (!passesShingleCheck(text, home, what)) {
+    if (repairs >= maxRepairs) assertNoVerbatim(text, home, { what: `${what} after ${repairs} repair(s)` });
+    repairs++;
+    process.stderr.write(`classif-l4-optimise: shingle check refused ${what}; repair ${repairs}/${maxRepairs}\n`);
+    budgetCheck(home, 1);
+    const repaired = parseProposal(await call(home, callsLog, `l4-opt-s${k}-repair${repairs}`, RECONCILER, buildRepairPrompt(text)));
+    if (!repaired) throw new Error(`repair ${repairs} returned no usable prompt`);
+    text = repaired;
+  }
+  return { text, repairs };
+}
+
 /** Extracts the proposed prompt text from an optimiser answer (raw text wins, JSON wrapped ok). */
 export function parseProposal(text) {
   const t = String(text ?? '').replace(/```(?:markdown|md|text)?/g, '').trim();
@@ -80,8 +137,8 @@ export function parseProposal(text) {
 }
 
 // Review §8: optimiser calls cached like amend cachedCall — a crash never repays a
-// returned proposal (keyed by prompt sha256).
-async function seatCall(home, callsLog, phase, annotator, prompt) {
+// returned proposal (keyed by prompt sha256). `seat` is the paid seat (callSeat; a fake in tests).
+async function seatCall(home, callsLog, phase, annotator, prompt, seat = callSeat) {
   const key = sha256(prompt).slice(0, 16);
   const file = path.join(home, 'l4', 'opt-raw', `${phase}.${annotator}.${key}.json`);
   if (existsSync(file)) {
@@ -90,7 +147,7 @@ async function seatCall(home, callsLog, phase, annotator, prompt) {
   }
   mkdirSync(path.dirname(file), { recursive: true, mode: 0o700 });
   appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: true, phase, annotator });
-  const r = await callSeat(annotator, prompt, { base: privateDir(path.join(home, 'l4', 'seat-tmp')), timeoutMs: 3600000 });
+  const r = await seat(annotator, prompt, { base: privateDir(path.join(home, 'l4', 'seat-tmp')), timeoutMs: 3600000 });
   appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase, annotator, exitCode: r.code,
     latencyMs: r.latencyMs, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null });
   if (r.code !== 0) throw new Error(`optimiser ${annotator} failed with seat exit ${r.code}`);
@@ -98,7 +155,9 @@ async function seatCall(home, callsLog, phase, annotator, prompt) {
   return r.text;
 }
 
-export async function main(argv = process.argv.slice(2)) {
+export async function main(argv = process.argv.slice(2), { seat = callSeat } = {}) {
+  const call = (h, log, phase, annotator, p) => seatCall(h, log, phase, annotator, p, seat);
+  const repoClassif = classifDir(process.env);
   const k = argv.includes('--series') ? argv[argv.indexOf('--series') + 1] : process.env.SERIES;
   if (!k) { process.stderr.write('classif-l4-optimise: pass SERIES=<k>\n'); process.exit(2); }
   const deferred = argv.includes('--deferred') ? argv[argv.indexOf('--deferred') + 1].split(',').filter(Boolean) : [];
@@ -106,10 +165,10 @@ export async function main(argv = process.argv.slice(2)) {
   if (optimisers.length < 2) { process.stderr.write('classif-l4-optimise: refusing with fewer than 2 optimisers (single-author prompts break the reconciliation rule)\n'); process.exit(2); }
   const home = classifHome();
   const dir = path.join(home, 'l4', `series-${k}`);
-  const currentPrompt = readFileSync(path.join(CLASSIF_DIR, 'l4', 'prompts', `P${k}.md`), 'utf8');
+  const currentPrompt = readFileSync(path.join(repoClassif, 'l4', 'prompts', `P${k}.md`), 'utf8');
   const ref = parseJsonlTolerant(readFileSync(path.join(home, 'l3b', 'reference-d.jsonl'), 'utf8'));
   const tuningRef = ref.filter((r) => r.half === 'tuning' && r.status === 'resolved').map((r) => ({ itemId: r.itemId, code: r.code, verdict: r.verdict }));
-  const devManifest = JSON.parse(readFileSync(path.join(CLASSIF_DIR, 'l4', 'manifests', `series-${k}-dev.json`), 'utf8'));
+  const devManifest = JSON.parse(readFileSync(path.join(repoClassif, 'l4', 'manifests', `series-${k}-dev.json`), 'utf8'));
   const tuningOutputs = {};
   for (const route of devManifest.routes) {
     tuningOutputs[route] = parseJsonlTolerant(readFileSync(path.join(dir, `dev-${route}.jsonl`), 'utf8'));
@@ -118,30 +177,31 @@ export async function main(argv = process.argv.slice(2)) {
   // Review N7: refuse the overwrite BEFORE any paid call or budget check — a frozen
   // P(k+1) must fail before burning optimiser calls (the cache softened the old order).
   const next = Number(k) + 1;
-  const outPrompt = path.join(CLASSIF_DIR, 'l4', 'prompts', `P${next}.md`);
+  const outPrompt = path.join(repoClassif, 'l4', 'prompts', `P${next}.md`);
   if (existsSync(outPrompt)) throw new Error(`classif-l4-optimise: refusing to overwrite frozen prompt ${outPrompt}`);
-  // D5: 2 proposals + 1 reconciliation = 3 calls.
-  budgetCheck(home, optimisers.length + 1);
+  // D5: 2 proposals + 1 reconciliation + at most MAX_REPAIRS repairs (planned up front, and
+  // re-checked before each repair call).
+  budgetCheck(home, optimisers.length + 1 + MAX_REPAIRS);
   const callsLog = path.join(home, 'l2', 'calls.jsonl');
   const prompt = buildOptimiserPrompt({ tuningRef, tuningOutputs, errors, aggregates: devManifest.aggregates, currentPrompt });
   const proposals = [];
   for (const o of optimisers) {
-    const text = await seatCall(home, callsLog, `l4-opt-s${k}`, o, prompt);
+    const text = await call(home, callsLog, `l4-opt-s${k}`, o, prompt);
     const parsed = parseProposal(text);
     if (!parsed) throw new Error(`optimiser ${o} returned no usable prompt (too short or JSON-only)`);
     proposals.push(parsed);
   }
-  const fused = await seatCall(home, callsLog, `l4-opt-s${k}-reconcile`, 'muse-wonder-max', buildReconciliationPrompt(proposals));
+  const fused = await call(home, callsLog, `l4-opt-s${k}-reconcile`, RECONCILER, buildReconciliationPrompt(proposals));
   const fusedText = parseProposal(fused);
   if (!fusedText) throw new Error('reconciliation returned no usable prompt');
-  // Review §C: no verbatim golden excerpt in any prompt — shingle check before the freeze.
-  assertNoVerbatim(fusedText, home, { what: `prompt P${Number(k) + 1}` });
-  writeFileSync(outPrompt, `${fusedText.trim()}\n`);
+  // Review §C: no verbatim golden excerpt in any prompt — shingle check (bounded repair) before the freeze.
+  const { text: frozenText, repairs } = await shingleCheckWithRepair({ home, callsLog, k, fusedText, call });
+  writeFileSync(outPrompt, `${frozenText.trim()}\n`);
   const manifest = { kind: 'l4-optimise', series: k, next: `P${next}`, createdAt: new Date().toISOString(),
-    optimisers, proposalSha256: proposals.map((p) => sha256(p)), promptSha256: sha256(`${fusedText.trim()}\n`),
-    tuningItems: tuningRef.length, shingleCheck: 'pass (0 verbatim shingles from the sealed set)' };
-  mkdirSync(path.join(CLASSIF_DIR, 'l4', 'manifests'), { recursive: true });
-  writeFileSync(path.join(CLASSIF_DIR, 'l4', 'manifests', `series-${k}-optimise.json`), `${JSON.stringify(manifest, null, 1)}\n`);
+    optimisers, proposalSha256: proposals.map((p) => sha256(p)), promptSha256: sha256(`${frozenText.trim()}\n`),
+    tuningItems: tuningRef.length, repairs, shingleCheck: 'pass (0 verbatim shingles from the sealed set)' };
+  mkdirSync(path.join(repoClassif, 'l4', 'manifests'), { recursive: true });
+  writeFileSync(path.join(repoClassif, 'l4', 'manifests', `series-${k}-optimise.json`), `${JSON.stringify(manifest, null, 1)}\n`);
   process.stdout.write(`${JSON.stringify(manifest, null, 2)}\n`);
   return manifest;
 }
