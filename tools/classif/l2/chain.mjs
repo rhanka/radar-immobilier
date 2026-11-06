@@ -76,7 +76,7 @@ export async function main(argv = process.argv.slice(2)) {
     while (spawnSync('systemctl', ['--user', 'is-active', '--quiet', waitUnit]).status === 0) await sleep(30000);
   }
 
-  if (stage === 'blind') return blindStage({ home, active, deferred, concurrency, status, argv });
+  if (stage === 'blind') return blindStage({ home, active, deferred, concurrency, status });
 
   for (let pass = 1; pass <= 5; pass++) {
     const mode = MODES[pass];
@@ -152,7 +152,7 @@ function freeze(home, guide, status) {
  * converged (no stop rule, no amendment: the blind half never feeds the guide). Requires the
  * committed split and the frozen guide; refuses when the blind half is already sealed.
  */
-async function blindStage({ home, active, deferred, concurrency, status, argv }) {
+async function blindStage({ home, active, deferred, concurrency, status }) {
   const split = requireSplit();
   // Review §4 + §11a: shared fail-closed FINAL guard (sha-checked, manifest required).
   const { assertFinalGuide } = await import('../lib/freeze.mjs');
