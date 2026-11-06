@@ -17,7 +17,7 @@ import { appendJsonlRecord, parseJsonlTolerant } from '../lib/jsonl.mjs';
 import { sha256, stableStringify } from '../lib/render.mjs';
 import { EVAL_DIR_DEFAULT, classifDir, repoRoot, testOnlyEnv, classifHome, privateDir } from '../lib/paths.mjs';
 import { EVAL_ROUTES, devPrompt, parseDevAnswer } from './dev.mjs';
-import { pertinentMasked, seriesVerdict, shownStats } from './metrics.mjs';
+import { pertinentMasked, recallRegressed, seriesVerdict, shownStats } from './metrics.mjs';
 import { check as budgetCheck } from '../lib/budget.mjs';
 import { assertNoVerbatim } from '../lib/freeze.mjs';
 import { loadCodes } from '../l2/run.mjs';
@@ -133,10 +133,63 @@ export function assessInfraRerun({ home, outDir, k, promptSha, route, blindIds, 
   return { route, model, effort, resume: false, previousAnswered, maxAnswered, counts, reason };
 }
 
-export function buildBlindManifest({ k, promptSha, routes, blindItems, aggregatesSha256, infraReruns = [] }) {
+/**
+ * Blind recall baseline of a series declaring recallNonRegression (owner rule 06/11), read
+ * inside the executor from the PRIVATE `series-<baseline>-aggregates.json` (aggregates only).
+ * Per route: the baseline recall point estimate, or 'unknown' when the file, the route or its
+ * recall is missing, or when the baseline route is infra-failed (failure share above the
+ * failure ceiling — a failed row counts as shown, so its recall is not a measure — or an
+ * audited infra re-run of it not yet completed). Returns null when the field is absent.
+ * Exported for the non-regression tests.
+ */
+export function loadBlindRecallBaseline({ seriesSpec, outDir, home, routes, items }) {
+  const r = seriesSpec?.recallNonRegression;
+  if (r === undefined) return null;
+  const b = String(r.baselineSeries);
+  let agg = null;
+  try {
+    const a = JSON.parse(readFileSync(path.join(outDir, `series-${b}-aggregates.json`), 'utf8'));
+    if (String(a.series) === b && a.perRoute && typeof a.perRoute === 'object') agg = a;
+  } catch { /* unknown */ }
+  const ceiling = seriesSpec.failureCeiling ?? 0.1;
+  const log = readAudit(home);
+  const recall = {};
+  for (const route of routes) {
+    const p = agg?.perRoute?.[route];
+    const { model, effort } = ROUTES[route] ?? {};
+    const ofBaseline = (e) => e.model === model && e.effort === effort && String(e.purpose ?? '').includes(`l4-blind-s${b}`);
+    const allowances = log.filter((e) => e.action === 'blind-rerun-infra' && ofBaseline(e)).length;
+    const runs = log.filter((e) => e.action === 'blind-run' && ofBaseline(e)).length;
+    const pendingRerun = allowances > 0 && runs <= allowances;
+    const infraFailed = !Number.isInteger(p?.failures) || !items || p.failures / items > ceiling;
+    recall[route] = (typeof p?.recall === 'number' && !infraFailed && !pendingRerun) ? p.recall : 'unknown';
+  }
+  return { baselineSeries: r.baselineSeries, tolerance: r.tolerance, recall };
+}
+
+/**
+ * Blind route verdict with the recall non-regression gate: below the baseline recall minus the
+ * tolerance is `fail` (seriesVerdict); an 'unknown' baseline turns a `pass` into
+ * `indeterminate` (never pass) and keeps a `fail` the route earned on its own failures or floors.
+ * Without baseline the verdict and the route entry are unchanged. Exported for the tests.
+ */
+export function blindRouteVerdict({ stats, failures, items }, seriesSpec, baseline, route) {
+  const spec = { recallFloor: seriesSpec.floors?.recall ?? 0, precisionFloor: seriesSpec.floors?.precision ?? 0, failureCeiling: seriesSpec.failureCeiling ?? 0.1 };
+  if (!baseline) return { verdict: seriesVerdict({ stats, failures, items }, spec) };
+  const base = baseline.recall[route] ?? 'unknown';
+  if (base === 'unknown') {
+    const v = seriesVerdict({ stats, failures, items }, spec);
+    return { verdict: v === 'pass' ? 'indeterminate' : v, regressed: false, baselineRecall: 'unknown' };
+  }
+  const verdict = seriesVerdict({ stats, failures, items }, { ...spec, baselineRecall: base, recallTolerance: baseline.tolerance });
+  return { verdict, regressed: recallRegressed(stats?.recall, base, baseline.tolerance), baselineRecall: base };
+}
+
+export function buildBlindManifest({ k, promptSha, routes, blindItems, aggregatesSha256, infraReruns = [], recallNonRegression = null }) {
   return { kind: 'l4-blind', series: k, createdAt: new Date().toISOString(), promptSha256: promptSha,
     routes, blindItems, aggregatesSha256,
     ...(infraReruns.length ? { infraReruns: infraReruns.map(({ route, previousAnswered, reason }) => ({ route, previousAnswered, reason })) } : {}),
+    ...(recallNonRegression ? { recallNonRegression: { baselineSeries: recallNonRegression.baselineSeries, tolerance: recallNonRegression.tolerance } } : {}),
     note: 'blind aggregates sealed in $CLASSIF_HOME/blind/ (owner only); S113 is golden-exposed and excluded from selection' };
 }
 
@@ -192,6 +245,9 @@ export async function main(argv = process.argv.slice(2)) {
   const callsLog = path.join(home, 'l2', 'calls.jsonl');
   const seatTmp = privateDir(path.join(home, 'l4', 'seat-tmp'));
   const outDir = privateDir(blindDir(home));
+  // Recall non-regression (owner rule 06/11): blind baseline of the same routes, read from the
+  // private aggregates of the baseline series (null when the series does not declare it).
+  const recallBaseline = loadBlindRecallBaseline({ seriesSpec, outDir, home, routes, items: blind.length });
   // Infrastructure re-run eligibility, before the budget plan and any seat call: every
   // named route must qualify (typed refusal otherwise) and pass the guard's prompt checks
   // as if its allowance were already recorded. A refusal makes no seat call, writes no
@@ -319,12 +375,11 @@ function readdirSyncSafe(dir) {
     const statsWithUnresolved = shownStats(blind.map((b, i) => ({ ref: b.verdict, pred: rows[i].failed ? { failed: true } : rows[i].pred, unresolved: false })),
       { recallSupport: supports.recall ?? 30, precisionSupport: supports.precision ?? 30 });
     const failures = rows.filter((r) => r.failed).length;
-    const verdict = seriesVerdict({ stats, failures, items: rows.length },
-      { recallFloor: seriesSpec.floors?.recall ?? 0, precisionFloor: seriesSpec.floors?.precision ?? 0, failureCeiling: seriesSpec.failureCeiling ?? 0.1 });
-    writeFileSync(routeFile, JSON.stringify({ series: k, route, model, effort, promptSha256: promptSha, stats, withUnresolved: statsWithUnresolved, failures, verdict }, null, 1), { mode: 0o600 });
+    const gate = blindRouteVerdict({ stats, failures, items: rows.length }, seriesSpec, recallBaseline, route);
+    writeFileSync(routeFile, JSON.stringify({ series: k, route, model, effort, promptSha256: promptSha, stats, withUnresolved: statsWithUnresolved, failures, ...gate }, null, 1), { mode: 0o600 });
     audit({ action: 'blind-run', purpose: `l4-blind-s${k}`, promptSha256: promptSha, model, effort, items: rows.length, failures,
       ...(infra ? { infraRerun: true } : {}) }, { home, env: process.env });
-    return { ...stats, withUnresolved: statsWithUnresolved, failures, verdict };
+    return { ...stats, withUnresolved: statsWithUnresolved, failures, ...gate };
   };
   const sequential = argv.includes('--sequential');
   const perRoute = {};
@@ -409,6 +464,14 @@ function readdirSyncSafe(dir) {
   // Review §1 (D3 adaptation ban): blind aggregates stay in $CLASSIF_HOME/blind/ (owner
   // only). The repo manifest and stdout carry NO scores — only the aggregates sha256.
   // Review D3: canonical key order, so a resumed restore at equal data hashes identically.
+  // The non-regression gate is re-applied to every route (fresh or resumed) against the
+  // baseline read at this run, so a resumed route never keeps a stale baseline verdict.
+  if (recallBaseline) {
+    for (const route of routes) {
+      const e = perRoute[route];
+      perRoute[route] = { ...e, ...blindRouteVerdict({ stats: e, failures: e.failures, items: blind.length }, seriesSpec, recallBaseline, route) };
+    }
+  }
   const aggregates = { perRoute, s113 };
   const aggregatesSha256 = sha256(stableStringify(aggregates));
   writeFileSync(path.join(outDir, `series-${k}-aggregates.json`), JSON.stringify({ series: k, promptSha256: promptSha, aggregatesSha256, ...aggregates }, null, 1), { mode: 0o600 });
@@ -416,7 +479,7 @@ function readdirSyncSafe(dir) {
   // Infra re-runs come from the audit, so a later resume keeps them in the manifest.
   const infraReruns = readAudit(home).filter((e) => e.action === 'blind-rerun-infra' && e.promptSha256 === promptSha
     && String(e.purpose ?? '').includes(`l4-blind-s${k}`) && routes.includes(e.route));
-  const manifest = buildBlindManifest({ k, promptSha, routes, blindItems: blind.length, aggregatesSha256, infraReruns });
+  const manifest = buildBlindManifest({ k, promptSha, routes, blindItems: blind.length, aggregatesSha256, infraReruns, recallNonRegression: recallBaseline });
   mkdirSync(path.join(classifDir(process.env), 'l4', 'manifests'), { recursive: true });
   writeFileSync(path.join(classifDir(process.env), 'l4', 'manifests', `series-${k}-blind.json`), `${JSON.stringify(manifest, null, 1)}\n`);
   process.stdout.write(`${JSON.stringify(manifest, null, 2)}\n`);
