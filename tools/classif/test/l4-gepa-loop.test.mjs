@@ -326,11 +326,15 @@ test('review R2: a child whose answers carry tool events is rejected and consume
   const m = await runGepa({ home, k: K, maxIterations: 2, seat: f.seat, log: quiet });
   const j = journal(home);
   assert.deepEqual([j[0].status, j[0].reason, j[0].child.consumed], ['rejected', 'tool-events', true]);
-  assert.equal(j[0].child.toolEvents, 6, 'every sol answer of the 6-case mini-batch carried tool events');
   assert.deepEqual([j[1].status, j[1].reason], ['rejected', 'tool-events-consumed']);
   const childCalls = f.evalCalls().filter((s) => /MARK:tooly/.test(s.prompt));
-  assert.equal(childCalls.length, 6 * 5, 'the consumed child is evaluated once, on its mini-batch only');
-  assert.equal(evalCacheFiles(home, j[0].child.sha), 6 * 4, 'the tool-event answers are not cached');
+  // R2-bis: the evaluation stops at the first tool event — sol launches at most its 2 in-flight
+  // calls, no route launches a call after it, and the 6 × 5 mini-batch is never paid in full.
+  const solCalls = childCalls.filter((s) => s.label === 'sol-6.1-low');
+  assert.ok(solCalls.length >= 1 && solCalls.length <= 2, `sol calls ${solCalls.length}`);
+  assert.equal(j[0].child.toolEvents, solCalls.length);
+  assert.ok(childCalls.length < 6 * 5, `child calls ${childCalls.length} < 30`);
+  assert.equal(evalCacheFiles(home, j[0].child.sha), childCalls.length - solCalls.length, 'the tool-event answers are not cached');
   assert.ok(m.result);
   const again = fakeSeat({ mutation: () => `${RULES}MARK:tooly`, override: tool });
   await runGepa({ home, k: K, maxIterations: 2, seat: again.seat, log: quiet });
