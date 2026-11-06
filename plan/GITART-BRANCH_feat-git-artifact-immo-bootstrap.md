@@ -36,5 +36,5 @@
 - [x] Lot 1 (OP2): proof run: clean install + build pass, app build byte-identical to origin/main, closure measured.
 - [x] Lot 2 (OP1/P7): artifact-ref exclusion on push/pull_request workflows; protected-environment ref guards; A1 registry note.
 - [x] Lot 2 (OP1/P7): version-tag jobs prove main ancestry before any secret (review E2); E1/M1 documented.
-- [ ] Lot 3: descriptor, pre-flight and workflow-guard tests through `make -f tools/make/git-artifact.mk test`, wired in CI.
+- [x] Lot 3: 20 node tests (descriptor and build env, pre-flight, workflow guards) and 4 tag-ancestry checks via `make -f tools/make/git-artifact.mk test`, wired in CI.
 - [ ] Conductor: environment branch policies via `gh api`, CI, merge with a merge commit.
