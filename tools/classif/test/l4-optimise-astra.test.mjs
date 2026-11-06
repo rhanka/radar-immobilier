@@ -10,7 +10,7 @@ import { buildOptimiserPrompt, main } from '../l4/optimise.mjs';
 import { astraCodexHomeDir, callSeat } from '../run-seat.mjs';
 import { sha256 } from '../lib/render.mjs';
 import { withTempHome } from './hermetic-helpers.mjs';
-import { CLEAN1, K, MATERIALS, OVERRIDE, fakeSeat, manifestFile, setup } from './l4-optimise-fixture.mjs';
+import { CLEAN1, K, MATERIALS_SENT, OVERRIDE, fakeSeat, manifestFile, setup } from './l4-optimise-fixture.mjs';
 
 // Fake `codex` child: reads the prompt on stdin, records it, writes -o last-message.md and a
 // --json event stream (reasoning item first, optional tool event, then the agent message).
@@ -67,7 +67,7 @@ test('override astra seat: optimiser prompt on stdin of the isolated codex route
   assert.equal(s.args[s.args.length - 1], '-');
   assert.deepEqual(s.workEntries, [], 'empty cwd');
   assert.equal(s.codexHome, astraCodexHomeDir(home), 'isolated CODEX_HOME');
-  assert.equal(readFileSync(s.seen, 'utf8'), buildOptimiserPrompt(MATERIALS), 'same firewall prompt, delivered on stdin');
+  assert.equal(readFileSync(s.seen, 'utf8'), buildOptimiserPrompt(MATERIALS_SENT), 'same firewall prompt, delivered on stdin');
   assert.equal(m.proposalSha256[0], sha256(LONG.trim()), 'very long proposal kept whole');
   assert.ok(a.fake.byKind('rec')[0].prompt.includes(LONG.trim()));
   assert.ok(existsSync(manifestFile(repo)));

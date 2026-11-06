@@ -24,6 +24,12 @@
 // non-default selection is written to the manifest with a `deviation` text. A seat answer
 // carrying tool events (astra codex stream) is refused and never cached (fail-closed tool
 // policy, as for the L2 votes).
+//
+// Recall-first objective (owner rule 06/11, binding: « a lower recall is a regression »): the
+// optimiser and reconciliation prompts state the HARD CONSTRAINT (zero tuning P/S item
+// predicted non_pertinent, tuning recall >= the best tuning recall of any previous series),
+// list EVERY tuning miss per route, and give the baseline prompt (best recall series) next to
+// the current one. Precision is improved only under that constraint.
 import path from 'node:path';
 import process from 'node:process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -33,12 +39,13 @@ import { sha256 } from '../lib/render.mjs';
 import { classifDir, classifHome, privateDir } from '../lib/paths.mjs';
 import { assertNoVerbatim } from '../lib/freeze.mjs';
 import { check as budgetCheck } from '../lib/budget.mjs';
+import { bestRecallBaseline, shownMisses } from './metrics.mjs';
 
 export const OPTIMISERS = ['muse-wonder-max', 'opus-5.5-max'];
 export const RECONCILER = 'muse-wonder-max';
 export const MAX_REPAIRS = 2;
 export const REPAIR_INSTRUCTION = 'The candidate prompt contains text copied verbatim from source documents; rewrite every example or quoted passage in your own general words, never quote document text, keep all rules.';
-export const TUNING_KEYS = ['tuningRef', 'tuningOutputs', 'errors', 'aggregates', 'currentPrompt'];
+export const TUNING_KEYS = ['tuningRef', 'tuningOutputs', 'errors', 'aggregates', 'currentPrompt', 'baselinePrompt'];
 /** Seats an override may name: the max-effort routes of run-seat.mjs. */
 export const MAX_SEATS = Object.entries(ROUTES).filter(([, r]) => r.effort === 'max').map(([label]) => label);
 export const OWNER_DEVIATION_0611 = {
@@ -46,6 +53,33 @@ export const OWNER_DEVIATION_0611 = {
   reconciler: 'opus-5.5-max',
   text: 'owner 06/11: Muse weekly quota exhausted until 08/11 — Astra max replaces Muse Wonder max as optimiser; Opus 5.5 max reconciles',
 };
+
+/**
+ * Recall-first objective (owner rule 06/11, binding): « a lower recall is a regression ».
+ * Stated verbatim in the optimiser and the reconciliation prompts.
+ */
+export const HARD_CONSTRAINT = 'HARD CONSTRAINT (recall first, non-negotiable): zero tuning-half item whose expected verdict is pertinent or a_surveiller may be predicted non_pertinent, and the tuning shown recall of every route must stay greater than or equal to the baseline (the best tuning recall of any previous series). The ONLY penalised error is a pertinent/a_surveiller item predicted non_pertinent; a pertinent <-> a_surveiller confusion is NOT penalised. Precision is improved ONLY under that constraint: reject any rule that could turn a single pertinent/a_surveiller item into non_pertinent, and when in doubt keep the item shown (a_surveiller) rather than discard it.';
+
+/**
+ * Objective section from the tuning materials: the hard constraint, the baseline recall and
+ * EVERY tuning miss per route (reference P/S → predicted non_pertinent) with its expected
+ * code. Tuning material only (the firewall of buildOptimiserPrompt guards the inputs).
+ */
+export function buildObjective({ tuningOutputs = {}, baselinePrompt = null } = {}) {
+  const base = baselinePrompt
+    ? `Baseline: series ${baselinePrompt.series} (prompt ${baselinePrompt.version}), best tuning shown recall of any previous series = ${Number(baselinePrompt.best).toFixed(3)}; per-route baseline recall: ${Object.entries(baselinePrompt.recall ?? {}).map(([r, v]) => `${r} ${Number(v).toFixed(3)}`).join(', ') || 'none'}.`
+    : 'Baseline: no earlier series recall on record; the constraint is zero tuning miss.';
+  const misses = Object.entries(tuningOutputs).map(([route, rows]) => {
+    const list = shownMisses(rows);
+    return `## ${route}: ${list.length} miss(es)\n${list.length ? list.map((o) => `- ${o.itemId}: expected ${o.ref} (${o.refVerdict}) → predicted ${o.pred?.code ?? '?'} (non_pertinent)`).join('\n') : '- none'}`;
+  }).join('\n\n');
+  return `OBJECTIVE, in strict priority order.
+${HARD_CONSTRAINT}
+${base}
+
+Tuning misses per route (expected pertinent/a_surveiller → predicted non_pertinent), EVERY one listed; each must become shown (pertinent or a_surveiller) without creating a new one:
+${misses || '- no route output'}`;
+}
 
 const sameList = (a, b) => a.length === b.length && a.every((v, i) => v === b[i]);
 
@@ -77,15 +111,25 @@ export function resolveSeats({ optimisers = null, reconciler = null, deviation =
 export function buildOptimiserPrompt(materials) {
   const blindKeys = Object.keys(materials).filter((k) => !TUNING_KEYS.includes(k) || /blind/i.test(k));
   if (blindKeys.length) throw new Error(`optimiser firewall: refusing blind material (${blindKeys.join(',')})`);
-  const { tuningRef, tuningOutputs, errors, aggregates, currentPrompt } = materials;
+  const { tuningRef, tuningOutputs, errors, aggregates, currentPrompt, baselinePrompt = null } = materials;
+  const baselineSection = !baselinePrompt ? ''
+    : baselinePrompt.text
+      ? `\nBaseline prompt ${baselinePrompt.version} (series ${baselinePrompt.series}, the best tuning recall so far). You MAY restart from it instead of the current prompt when the current prompt lost recall:
+---
+${baselinePrompt.text.trim()}
+---
+`
+      : `\nThe current prompt is itself the baseline (series ${baselinePrompt.series}, the best tuning recall so far).\n`;
   return `You improve a municipal regulatory classification prompt for a residential densification radar (Québec).
 You see ONLY the tuning half: ${tuningRef.length} tuning reference rows (expected code and verdict per item, unresolved rows excluded from scoring), the tuning outputs and errors of the evaluated routes, and the tuning aggregates (Annex M metrics). The blind half exists but you will NEVER see it: do not ask for it, do not guess its content.
+
+${buildObjective({ tuningOutputs, baselinePrompt })}
 
 Current prompt P (frozen):
 ---
 ${currentPrompt.trim()}
 ---
-
+${baselineSection}
 Tuning reference (item_id, expected code/verdict):
 ${tuningRef.map((r) => `- ${r.itemId}: ${r.code} (${r.verdict})`).join('\n')}
 
@@ -98,12 +142,15 @@ ${Object.entries(tuningOutputs).map(([route, list]) => `## ${route}\n${list.slic
 Tuning errors per route (item_id, expected → predicted, failures and code errors included, first 60 per route):
 ${Object.entries(errors).map(([route, list]) => `## ${route}\n${list.slice(0, 60).map((e) => `- ${e.itemId}: ${e.ref} (${e.refVerdict}) → ${e.predCode ?? e.pred ?? 'FAILED'} (${e.pred ?? e.why ?? ''})${e.failed ? ' [failure]' : ''}`).join('\n')}`).join('\n\n')}
 
-Propose the FULL next prompt P(k+1): same task, same answer schema (one JSON object per item: verdict, code, ambiguous, citation; verdict = registry partition of the code), improved ONLY from the tuning evidence above. General rules, never item-specific tricks, never a copied tuning example. Return ONLY the prompt text, no prose, no fences.`;
+Propose the FULL next prompt P(k+1): same task, same answer schema (one JSON object per item: verdict, code, ambiguous, citation; verdict = registry partition of the code), improved ONLY from the tuning evidence above and under the HARD CONSTRAINT first, precision second. General rules, never item-specific tricks, never a copied tuning example. Return ONLY the prompt text, no prose, no fences.`;
 }
 
-// `labels` names the candidate authors; the default keeps the prompt (and its cache sha) byte-identical.
-export function buildReconciliationPrompt(proposals, labels = OPTIMISERS) {
-  return `You fuse two candidate classification prompts into ONE single common prompt. Both candidates address the same task (municipal regulatory items, verdict+code JSON per item, verdict = registry partition of the code). Keep every improvement both agree on; when they disagree, keep the rule best supported by the tuning evidence quoted in the candidates, never both variants. Output the single fused prompt ONLY: full text, no prose, no fences, no tuning example copied verbatim.
+// `labels` names the candidate authors. `objective` is the recall-first objective section
+// (buildObjective from the tuning materials); the default states the hard constraint alone.
+export function buildReconciliationPrompt(proposals, labels = OPTIMISERS, objective = buildObjective()) {
+  return `You fuse two candidate classification prompts into ONE single common prompt. Both candidates address the same task (municipal regulatory items, verdict+code JSON per item, verdict = registry partition of the code). Keep every improvement both agree on; when they disagree, the rule that keeps more pertinent/a_surveiller items shown wins over the rule that gains precision; otherwise keep the rule best supported by the tuning evidence, never both variants. Output the single fused prompt ONLY: full text, no prose, no fences, no tuning example copied verbatim.
+
+${objective}
 
 ## Candidate A (${labels[0]})
 ---
@@ -173,6 +220,25 @@ export function parseProposal(text) {
   return t;
 }
 
+/**
+ * Recall baseline of the optimiser (owner rule 06/11): over the tuning dev manifests of series
+ * 0..k (metrics only), the series with the best tuning recall among non-failed routes (earliest
+ * on a tie) and its frozen prompt. `text` is null when the baseline is the current series.
+ * Returns null when no dev manifest carries an eligible route.
+ */
+export function loadBaselinePrompt(repoClassif, k) {
+  const manifests = [];
+  for (let j = 0; j <= Number(k); j++) {
+    const f = path.join(repoClassif, 'l4', 'manifests', `series-${j}-dev.json`);
+    if (existsSync(f)) manifests.push({ series: j, aggregates: JSON.parse(readFileSync(f, 'utf8')).aggregates });
+  }
+  const b = bestRecallBaseline(manifests);
+  if (!b) return null;
+  const version = `P${b.series}`;
+  const text = b.series === Number(k) ? null : readFileSync(path.join(repoClassif, 'l4', 'prompts', `${version}.md`), 'utf8');
+  return { series: b.series, version, best: b.best, recall: b.perRoute, text };
+}
+
 // Review §8: optimiser calls cached like amend cachedCall — a crash never repays a
 // returned proposal (keyed by prompt sha256). `seat` is the paid seat (callSeat; a fake in tests).
 async function seatCall(home, callsLog, phase, annotator, prompt, seat = callSeat) {
@@ -226,7 +292,9 @@ export async function main(argv = process.argv.slice(2), { seat = callSeat } = {
   // re-checked before each repair call).
   budgetCheck(home, optimisers.length + 1 + MAX_REPAIRS);
   const callsLog = path.join(home, 'l2', 'calls.jsonl');
-  const prompt = buildOptimiserPrompt({ tuningRef, tuningOutputs, errors, aggregates: devManifest.aggregates, currentPrompt });
+  const baselinePrompt = loadBaselinePrompt(repoClassif, k);
+  const materials = { tuningRef, tuningOutputs, errors, aggregates: devManifest.aggregates, currentPrompt, ...(baselinePrompt ? { baselinePrompt } : {}) };
+  const prompt = buildOptimiserPrompt(materials);
   const proposals = [];
   for (const o of optimisers) {
     const text = await call(home, callsLog, `l4-opt-s${k}`, o, prompt);
@@ -234,7 +302,7 @@ export async function main(argv = process.argv.slice(2), { seat = callSeat } = {
     if (!parsed) throw new Error(`optimiser ${o} returned no usable prompt (too short or JSON-only)`);
     proposals.push(parsed);
   }
-  const fused = await call(home, callsLog, `l4-opt-s${k}-reconcile`, reconciler, buildReconciliationPrompt(proposals, optimisers));
+  const fused = await call(home, callsLog, `l4-opt-s${k}-reconcile`, reconciler, buildReconciliationPrompt(proposals, optimisers, buildObjective(materials)));
   const fusedText = parseProposal(fused);
   if (!fusedText) throw new Error('reconciliation returned no usable prompt');
   // Review §C: no verbatim golden excerpt in any prompt — shingle check (bounded repair) before the freeze.
@@ -243,7 +311,11 @@ export async function main(argv = process.argv.slice(2), { seat = callSeat } = {
   const manifest = { kind: 'l4-optimise', series: k, next: `P${next}`, createdAt: new Date().toISOString(),
     optimisers, reconciler, ...(deviation ? { deviation } : {}),
     proposalSha256: proposals.map((p) => sha256(p)), promptSha256: sha256(`${frozenText.trim()}\n`),
-    tuningItems: tuningRef.length, repairs, shingleCheck: 'pass (0 verbatim shingles from the sealed set)' };
+    tuningItems: tuningRef.length, repairs,
+    objective: { rule: 'recall first: zero tuning P/S item predicted non_pertinent, tuning recall >= baseline; precision only under that constraint',
+      baselineSeries: baselinePrompt?.series ?? null, baselineVersion: baselinePrompt?.version ?? null, baselineRecall: baselinePrompt?.best ?? null,
+      tuningMisses: Object.fromEntries(Object.entries(tuningOutputs).map(([route, rows]) => [route, shownMisses(rows).length])) },
+    shingleCheck: 'pass (0 verbatim shingles from the sealed set)' };
   mkdirSync(path.join(repoClassif, 'l4', 'manifests'), { recursive: true });
   writeFileSync(path.join(repoClassif, 'l4', 'manifests', `series-${k}-optimise.json`), `${JSON.stringify(manifest, null, 1)}\n`);
   process.stdout.write(`${JSON.stringify(manifest, null, 2)}\n`);
