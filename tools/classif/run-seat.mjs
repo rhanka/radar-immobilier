@@ -123,7 +123,21 @@ export function astraCodexHomeDir(home = classifHome()) {
   return codexHomeDir('astra-max', home);
 }
 
-/** Isolated codex config of one seat: NO mcp_servers, web search disabled, read-only sandbox. */
+/**
+ * Tool features switched off in every isolated codex config (`[features]`, review GEPA B1c).
+ * Checked against `codex features list` (codex-cli 0.163.0, isolated CODEX_HOME, no model
+ * call): every name below reads `false` once disabled EXCEPT `unified_exec`, which codex
+ * keeps enabled whatever the config says. Disabling tools by config is therefore NOT a proven
+ * barrier: the binding barrier stays the parse-time rejection — any tool, command, file or
+ * unknown event in the --json stream makes the call a failure (never an accepted answer, never
+ * cached), plus the read-only sandbox and an empty cwd outside $CLASSIF_HOME.
+ */
+export const CODEX_DISABLED_FEATURES = ['shell_tool', 'unified_exec', 'unified_exec_tty', 'shell_snapshot', 'apps', 'plugins', 'remote_plugin',
+  'plugin_sharing', 'multi_agent', 'image_generation', 'view_image', 'browser_use', 'browser_use_external', 'browser_use_full_cdp_access',
+  'computer_use', 'code_mode_host', 'code_mode_interrupt', 'skill_search', 'skill_mcp_dependency_install', 'sleep_tool', 'hooks',
+  'tool_suggest', 'tool_call_mcp_elicitation', 'goals', 'in_app_browser', 'in_app_local_automation', 'workspace_dependencies', 'worktrees'];
+
+/** Isolated codex config of one seat: NO mcp_servers, web search disabled, read-only sandbox, tool features off. */
 export function codexIsolatedConfig({ name, model, effort }) {
   return `# Classification pilot — isolated ${name} seat (review §10).
 # NO mcp_servers section: any MCP exposure fails the call (parseCodex counts it).
@@ -133,8 +147,22 @@ model_reasoning_effort = "${effort}"
 web_search = "disabled"
 approval_policy = "never"
 sandbox_mode = "read-only"
+
+[features]
+${CODEX_DISABLED_FEATURES.map((f) => `${f} = false`).join('\n')}
 `;
 }
+
+/** Atomic private write: temp file in the same directory, then rename (no torn read). */
+function atomicPrivateWrite(file, data) {
+  const tmpFile = `${file}.tmp-${process.pid}-${Date.now()}`;
+  fs.writeFileSync(tmpFile, data, { mode: 0o600 });
+  fs.chmodSync(tmpFile, 0o600);
+  fs.renameSync(tmpFile, file);
+}
+
+/** Seat homes already prepared by this process (review GEPA M2): one preparation per run and seat. */
+const PREPARED_CODEX_HOMES = new Set();
 
 export const ASTRA_ISOLATED_CONFIG = codexIsolatedConfig({ name: 'Astra', model: 'gpt-6-astra', effort: 'max' });
 
@@ -143,31 +171,51 @@ export function ensureAstraHome(home = classifHome(), opts = {}) {
 }
 
 /**
- * Writes (every call) the isolated config of one codex seat and copies the auth file.
+ * Prepares the isolated home of one codex seat ONCE per process (review GEPA M2): the config is
+ * written atomically (temp file + rename), the auth file is copied atomically only when the
+ * seat home has none — never again during the run, so a token codex refreshed inside the seat
+ * home is never overwritten by an older ~/.codex/auth.json, and 2 calls in flight never see a
+ * torn file. Later calls of the same process return the prepared directory untouched.
  * The test-only CLASSIF_ASTRA_AUTH_SRC hook (CLASSIF_TEST_MODE=1) serves every codex seat.
  */
 export function ensureCodexHome(seat, { model, effort, name = seat, home = classifHome(), authSrc = testOnlyEnv(process.env, 'CLASSIF_ASTRA_AUTH_SRC') ?? null } = {}) {
   const dir = codexHomeDir(seat, home);
+  if (PREPARED_CODEX_HOMES.has(dir)) return dir;
   privateDir(dir);
-  fs.writeFileSync(path.join(dir, 'config.toml'), codexIsolatedConfig({ name, model, effort }), { mode: 0o600 });
+  atomicPrivateWrite(path.join(dir, 'config.toml'), codexIsolatedConfig({ name, model, effort }));
   // Review D1/D2: hermetic tests set CLASSIF_ASTRA_AUTH_SRC to a fake auth file in
   // test mode (CLASSIF_TEST_MODE=1) — production refuses the hook, the real
   // ~/.codex/auth.json is never read in tests.
   const src = authSrc ?? path.join(os.homedir(), '.codex', 'auth.json');
   const dst = path.join(dir, 'auth.json');
-  if (src && fs.existsSync(src)) {
-    fs.copyFileSync(src, dst);
-    fs.chmodSync(dst, 0o600);
-  } else if (!fs.existsSync(dst)) {
-    throw new Error(`${seat === 'astra-max' ? 'astra' : seat} isolation refused: no auth to copy (${src} absent and ${dst} absent)`);
+  if (!fs.existsSync(dst)) {
+    if (!src || !fs.existsSync(src)) throw new Error(`${seat === 'astra-max' ? 'astra' : seat} isolation refused: no auth to copy (${src} absent and ${dst} absent)`);
+    atomicPrivateWrite(dst, fs.readFileSync(src));
   }
+  PREPARED_CODEX_HOMES.add(dir);
   return dir;
+}
+
+/**
+ * Base of the per-call seat directory of a codex seat (review GEPA B1b): the system temp dir,
+ * never $CLASSIF_HOME (a relative read from the cwd must not reach the private pilot files).
+ * Fails closed when the temp dir sits inside $CLASSIF_HOME. callSeat creates one mkdtemp
+ * directory per call under it (empty work cwd) and removes it when the call ends.
+ */
+export function codexSeatBase(env = process.env) {
+  const base = path.resolve(os.tmpdir());
+  const rel = path.relative(classifHome(env), base);
+  if (rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel))) {
+    throw new Error(`codex seat refused: temp dir ${base} is inside CLASSIF_HOME (set TMPDIR outside it)`);
+  }
+  return base;
 }
 
 // codex exec --json: one JSON event per line; the model's final message is also written to
 // last-message.md (-o). Usage rides on turn completion events. Fail-closed tool accounting
 // (review §10): every tool/command/MCP/web-search/file event counts, and any UNKNOWN event
-// or item type counts too — the caller nulls the vote when toolEvents > 0.
+// or item type counts too — every caller treats toolEvents > 0 as a FAILED call (L2 nulls the
+// vote, L4 dev/blind/S113/GEPA count it failed and never cache it, the optimiser refuses it).
 export const CODEX_KNOWN_EVENT_TYPES = new Set([
   'thread.started', 'turn.started', 'turn.completed', 'turn.failed',
   'item.started', 'item.updated', 'item.completed',
@@ -301,8 +349,12 @@ export function killSeatTree(child, sig = 'SIGTERM') {
 export function callSeat(label, prompt, { timeoutMs = 900000, base = process.env.CLASSIF_SEAT_TMP ?? os.tmpdir(), killEscalationMs = 15000, closeGraceMs = 30000, spawnImpl = spawn } = {}) {
   const r = ROUTES[label];
   if (!r) throw new Error(`unknown route ${label}`);
-  fs.mkdirSync(base, { recursive: true, mode: 0o700 });
-  const dir = fs.mkdtempSync(path.join(base, 'seat-'));
+  // Codex seats can run commands: their cwd is an empty per-call dir OUTSIDE $CLASSIF_HOME,
+  // whatever base the caller passed (review GEPA B1b).
+  const codex = r.parse === parseCodex;
+  const seatBase = codex ? codexSeatBase() : base;
+  fs.mkdirSync(seatBase, { recursive: true, mode: 0o700 });
+  const dir = fs.mkdtempSync(path.join(seatBase, codex ? 'classif-codex-seat-' : 'seat-'));
   const work = path.join(dir, 'work');
   fs.mkdirSync(work);
   const file = path.join(dir, 'prompt.md');
@@ -327,7 +379,7 @@ export function callSeat(label, prompt, { timeoutMs = 900000, base = process.env
       fs.rmSync(dir, { recursive: true, force: true });
       // Review §10: the astra --json event stream stays in the raw record (the run.mjs raw
       // file saves this whole object), so tool-event audits are reproducible.
-      const rawJsonl = r.parse === parseCodex ? out : undefined;
+      const rawJsonl = codex ? out : undefined;
       resolve({ code, latencyMs, timedOut, ...parsed, ...(rawJsonl !== undefined ? { rawJsonl } : {}), stderrTail: err.slice(-600), stdoutTail: parsed.text ? undefined : out.slice(-600) });
     };
     // Timeout: SIGTERM to the group, then SIGKILL to the group after killEscalationMs.
