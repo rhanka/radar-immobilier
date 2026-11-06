@@ -11,7 +11,7 @@ import process from 'node:process';
 import { MAX_RETRIES, runGepa, stratifiedSplit } from '../l4/gepa.mjs';
 import { GEPA_ROUTES } from '../l4/gepa-common.mjs';
 import { parseSeatResult } from '../l4/dev.mjs';
-import { ROUTES, countVibeToolEvents } from '../run-seat.mjs';
+import { ROUTES, codexErrorEnvelope, countVibeToolEvents, looksLikeMaxPrice, looksLikeQuotaFailure } from '../run-seat.mjs';
 import { loadCodes } from '../l2/run.mjs';
 import { buildFingerprints } from '../lib/fingerprint.mjs';
 import { initTempRepo, withTempHome, writeRepoFile } from './hermetic-helpers.mjs';
@@ -188,4 +188,47 @@ test('N1: a 429 is retried after a bounded backoff before it counts; the retries
   assert.ok(retried.every((c) => c.phase === `l4-gepa-s${K}.eval` && typeof c.backoffMs === 'number'));
   const p0 = JSON.parse(readFileSync(path.join(home, 'l4', `gepa-s${K}`, 'candidates', 'P0.json'), 'utf8'));
   assert.equal(p0.pareto[target]['glm-5.3-low'].failed, false, 'the answer after the backoff counts, not the 429');
+}));
+
+test('B5 (quota-cap replay): a quota retry never takes the budget of reserved calls; a batch filling the cap ends at callsSpent <= MAX_CALLS', withTempHome(async (home) => {
+  const repo = setup(home);
+  const qIds = SPLIT.feedback.slice(0, 3);
+  const hit = new Set();
+  const override = (label, mark, id) => {
+    if (label === 'glm-5.3-low' && mark === 'seed-0' && qIds.includes(id) && !hit.has(id)) { hit.add(id); return { code: 1, text: '', stderrTail: 'HTTP 429 Too Many Requests' }; }
+    return null;
+  };
+  // 1200 seed calls + 360 for one finalist = 1560: the final batch fills the cap exactly.
+  const m = await runGepa({ home, k: K, maxIterations: 0, maxCalls: 1560, quotaBackoffMs: [0, 0, 0], sleep: async () => {}, seat: fakeSeat(override).seat, log: quiet });
+  assert.ok(m.callsSpent <= 1560, `callsSpent ${m.callsSpent} <= 1560`);
+  assert.equal(m.callsSpent, 1560);
+  assert.ok(existsSync(manifestFile(repo)));
+  const calls = readFileSync(path.join(home, 'l2', 'calls.jsonl'), 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l));
+  assert.equal(calls.filter((c) => c.intent === true && c.attempt).length, 0, 'no retry could fit next to the reserved calls');
+  assert.equal(calls.filter((c) => c.intent === false && c.quota).length, 3, 'the 3 quota failures are returned as they are');
+}));
+
+test('N6: quota detection reads stderr and the CLI error envelope only; a vibe --max-price stop is an answer failure, never retried', withTempHome(async (home) => {
+  assert.ok(looksLikeQuotaFailure({ code: 1, stderrTail: 'HTTP 429 Too Many Requests' }));
+  assert.ok(looksLikeQuotaFailure({ code: 1, errorEnvelope: 'insufficient_quota: You exceeded your current quota' }));
+  assert.ok(!looksLikeQuotaFailure({ code: 1, text: 'the model wrote about a 429 rate limit', stdoutTail: 'quota 402' }), 'the answer and stdout are never read');
+  assert.ok(!looksLikeQuotaFailure({ code: 0, stderrTail: 'HTTP 429' }));
+  const maxPrice = { code: 1, stderrTail: 'Stopped: --max-price 0.50 reached (budget exhausted for this call)' };
+  assert.ok(looksLikeMaxPrice(maxPrice) && !looksLikeQuotaFailure(maxPrice));
+  assert.deepEqual(parseSeatResult(maxPrice, loadCodes()), { verdict: null, code: null, failed: true, why: 'max-price', infra: false });
+  assert.equal(codexErrorEnvelope('{"type":"turn.failed","error":{"message":"429 Too Many Requests"}}\n{"type":"item.completed","item":{"type":"agent_message","text":"429"}}'), '429 Too Many Requests');
+  // Loop: 3 max-price stops on a 48-case batch (the infra allowance is 2) — cached as answers, no retry, no breaker.
+  setup(home);
+  const ids = SPLIT.pareto.slice(0, 3);
+  const attempts = new Map();
+  const override = (label, mark, id) => {
+    if (label !== 'mistral-large-4-low' || mark !== 'seed-0' || !ids.includes(id)) return null;
+    attempts.set(id, (attempts.get(id) ?? 0) + 1);
+    return maxPrice;
+  };
+  const m = await runGepa({ home, k: K, maxIterations: 0, quotaBackoffMs: [0, 0, 0], sleep: async () => { throw new Error('no backoff expected'); }, seat: fakeSeat(override).seat, log: quiet });
+  assert.ok(m.result);
+  assert.deepEqual([...attempts.values()], [1, 1, 1], 'never retried, never re-paid');
+  const p0 = JSON.parse(readFileSync(path.join(home, 'l4', `gepa-s${K}`, 'candidates', 'P0.json'), 'utf8'));
+  for (const id of ids) assert.deepEqual([p0.pareto[id]['mistral-large-4-low'].failed, p0.pareto[id]['mistral-large-4-low'].infra], [true, false]);
 }));
