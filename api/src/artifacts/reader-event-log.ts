@@ -1,4 +1,5 @@
 import { isReaderOperation } from "./reader-operations.js";
+import { CLASSIFICATION_CODES } from "../services/facets/classification-errors.js";
 
 /**
  * Lot J1.3a: typed reader journal.
@@ -28,8 +29,11 @@ export interface ReaderEvent {
 export type ReaderEventSink = (event: ReaderEvent) => void;
 
 /**
- * Closed list of codes the journal may carry. Anything else, including a
- * well-formed string echoed from a response body, becomes `unclassified`.
+ * ONE closed list of codes the reader journal may carry: the closed
+ * classification table (classificationFailure, shared with the J1.2d/e
+ * named reader ops) plus the reader-host and consent codes below. Anything
+ * else, including a well-formed string echoed from a response body,
+ * becomes `unclassified`.
  */
 export const READER_EVENT_CODES: ReadonlySet<string> = new Set([
   // H5 success.
@@ -37,18 +41,17 @@ export const READER_EVENT_CODES: ReadonlySet<string> = new Set([
   // Opening and consent flow (control origin).
   "consent_screen", "consent_screen_revoked", "consent_reused", "consent_recorded",
   "consent_refused", "consent_decision_invalid", "consent_ledger_unavailable", "consent_ledger_write_failed",
-  // Gate B and reader envelope codes.
+  // Gate B codes.
   "basket_consent_required", "basket_consent_declined",
-  "invalid_query", "invalid_cursor", "incompatible_continuation", "workspace_required", "workspace_ambiguous",
-  "workspace_missing", "unauthenticated", "session_expired", "account_not_approved", "workspace_not_authorized",
-  "capability_required", "delegated_scope_refused", "target_not_found", "snapshot_changed", "cursor_expired",
-  "reveal_required", "request_too_large", "request_uri_too_long", "internal_error", "upstream_bad_payload",
-  "signal_capability_unavailable", "lot_cutover_closed", "personal_history_unresolved", "transport_unavailable",
-  "catalog_unavailable", "projection_revision_unstable", "projection_payload_too_large",
-  // Legacy string errors of the reader content host.
-  "capability_unavailable", "collection_not_found", "forbidden", "forbidden_origin", "geo_bbox_required",
-  "geo_governed_listing_unreachable", "geo_governed_not_served", "geo_proxy_error", "invalid_authority",
-  "invalid_params", "method_not_allowed", "not_found", "range_not_satisfiable", "unknown_operation",
+  // Closed classification table (single source: classification-errors.ts).
+  ...CLASSIFICATION_CODES,
+  // Codes the bridge maps that sit outside the classification table.
+  "workspace_missing",
+  // Reader content host codes (legacy string errors, named ops, budgets).
+  "capability_unavailable", "collection_not_found", "document_not_found", "forbidden", "forbidden_origin",
+  "geo_bbox_required", "geo_field_not_served", "geo_governed_listing_unreachable", "geo_governed_not_served",
+  "geo_proxy_error", "invalid_authority", "invalid_params", "method_not_allowed", "not_found",
+  "payload_too_large", "range_not_satisfiable", "rate_limited", "unknown_operation", "unsupported_media_type",
   // Status-derived fallbacks.
   "http_400", "http_401", "http_403", "http_404", "http_405", "http_409", "http_413", "http_414",
   "http_429", "http_500", "http_502", "http_503", "http_504",
@@ -60,7 +63,8 @@ export function sanitizeReaderEvent(event: ReaderEvent): ReaderEvent {
   const code = READER_EVENT_CODES.has(event.code) ? event.code : "unclassified";
   const status = Number.isInteger(event.status) && event.status >= 100 && event.status <= 599 ? event.status : 0;
   const out: { -readonly [K in keyof ReaderEvent]: ReaderEvent[K] } = { surface: event.surface, code, status };
-  if (event.op !== undefined) out.op = isReaderOperation(event.op) ? event.op : "unknown_operation";
+  // Same unknown-op label as the J1.2d/e access journal.
+  if (event.op !== undefined) out.op = isReaderOperation(event.op) ? event.op : "unknown";
   if (event.requestId !== undefined && REQUEST_ID_RE.test(event.requestId)) out.requestId = event.requestId.toLowerCase();
   if (event.count !== undefined && Number.isInteger(event.count) && event.count >= 0) out.count = event.count;
   return out;
