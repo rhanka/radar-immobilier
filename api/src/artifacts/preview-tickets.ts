@@ -34,6 +34,8 @@ export interface PreviewTicket {
   readonly returnTarget: string;
   /** Lot I2: consent tickets carry the basket scope into the minted session. */
   readonly basketScope?: true;
+  /** J1.3a: document-only ticket minted on « Ne pas autoriser » (nothing recorded). */
+  readonly consentDeclined?: true;
   readonly expiresAt: number;
 }
 
@@ -50,6 +52,8 @@ export interface TicketMint {
   readonly returnTarget: string;
   /** Lot I2: consent tickets carry the basket scope into the minted session. */
   readonly basketScope?: true;
+  /** J1.3a: document-only ticket minted on « Ne pas autoriser » (nothing recorded). */
+  readonly consentDeclined?: true;
 }
 
 export interface TicketStoreOptions {
