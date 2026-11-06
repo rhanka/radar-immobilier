@@ -9,7 +9,8 @@ import { fingerprintReaderProfile, type AuthorityReader, type ReaderProfile } fr
 import { consentDecisionInvalidHtml, consentErrorHtml, createReaderOpening } from "./reader-opening.js";
 import { createTicketStore } from "./preview-tickets.js";
 import { BASKET_READ_SCOPE_ID, type ReaderConsentService } from "./reader-consent.js";
-import { readerFailureCode, sanitizeReaderEvent, type ReaderEvent } from "./reader-event-log.js";
+import { READER_EVENT_CODES, readerFailureCode, sanitizeReaderEvent, type ReaderEvent } from "./reader-event-log.js";
+import { CLASSIFICATION_CODES } from "../services/facets/classification-errors.js";
 import type { AuthConfig } from "../config.js";
 
 /**
@@ -123,7 +124,9 @@ function buildWorld() {
     getArtifactIdForRelease: async (releaseId) => releaseId === authority.current() ? ARTIFACT : null });
   const readOperation = (async () => ({ ok: true as const,
     workspaces: [{ id: WORKSPACE, slug: "team", label: "Team",
-      signals: { availability: { state: "open" as const } } }] })) as never;
+      signals: { availability: { state: "open" as const } },
+      workspace: { id: WORKSPACE, slug: "team", label: "Team" },
+      moderateArchive: false, manageMembers: false }] })) as never;
   const files = [RELEASE_1, RELEASE_2].flatMap((releaseId) => [
     { artifactId: ARTIFACT, releaseId, path: "/index.html",
       body: `<!doctype html><html><head></head><body>shared ${releaseId}<script src="/reader.js"></script></body></html>` },
@@ -241,7 +244,7 @@ describe("J1.3a consent once, no loop", () => {
     // The very first business call reads the reader's data: no 403, no second screen.
     const first = await h5(world, credentials);
     expect(first.status).toBe(200);
-    expect(((await first.json()) as { workspaces: Array<{ id: string }> }).workspaces[0]?.id).toBe(WORKSPACE);
+    expect(((await first.json()) as { workspaces: Array<{ workspace: { id: string } }> }).workspaces[0]?.workspace.id).toBe(WORKSPACE);
   });
 
   it("should reopen the same artifact with no prompt", async () => {
@@ -493,6 +496,9 @@ describe("J1.3a consent once, no loop", () => {
     expect(readerFailureCode(null, 503)).toBe("http_503");
     expect(readerFailureCode(null, 418)).toBe("unclassified");
     expect(sanitizeReaderEvent({ surface: "h5", code: "some_city_slug", status: 200, op: "secret.op" }))
-      .toEqual({ surface: "h5", code: "unclassified", status: 200, op: "unknown_operation" });
+      .toEqual({ surface: "h5", code: "unclassified", status: 200, op: "unknown" });
+    // Merged list: every closed classification code and the named-op codes are journaled as is.
+    for (const code of CLASSIFICATION_CODES) expect(READER_EVENT_CODES.has(code)).toBe(true);
+    expect(readerFailureCode({ error: "rate_limited" }, 429)).toBe("rate_limited");
   });
 });

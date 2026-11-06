@@ -32,6 +32,8 @@ const errors = {
   projection_payload_too_large: [503, "The projection payload is too large.", "contact_operator"],
 } as const;
 export type ClassificationCode = keyof typeof errors;
+/** The closed classification table, as a code list (shared with the reader journal). */
+export const CLASSIFICATION_CODES: readonly ClassificationCode[] = Object.freeze(Object.keys(errors) as ClassificationCode[]);
 export class ClassificationError extends Error {
   constructor(public code: ClassificationCode, public suggestedLimit?: number) { super(code); }
 }
