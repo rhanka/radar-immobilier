@@ -38,7 +38,8 @@ import {
 } from "./content-host.js";
 import { mintGrant, verifyGrant, type GrantIssuer } from "./preview-grant.js";
 import { renewGrant } from "./preview-renewal.js";
-import { readSessionClaims } from "./preview-session.js";
+import { mintConsentPendingCookie, readConsentPending, readSessionClaims } from "./preview-session.js";
+import { readerEventEmitter, readerFailureCode, type ReaderEventSink } from "./reader-event-log.js";
 import { adaptGrantToReader, canInvoke, type ApiReaderContext } from "./reader-context.js";
 import type { AuthorityReader } from "./reader-profile.js";
 import { validateReaderResponse } from "./reader-responses.js";
@@ -180,6 +181,11 @@ export interface ContentServeDeps {
    * reader can see. Absent keeps the op closed (503, no store read).
    */
   readonly readDocument?: ReaderDocumentRead;
+  /**
+   * Lot J1.3a: typed reader journal (closed shape: code, status, operation
+   * name, request id, row count). Absent, nothing is logged.
+   */
+  readonly readerEvents?: ReaderEventSink;
   /** PW-C page write listener (prepare/status); absent keeps writes closed. */
   readonly pageWrite?: Hono;
   readonly writePageSurface?: WritePageSurface;
@@ -245,6 +251,20 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
    */
   function basketConsentRefusal(c: Context) {
     applyReaderContentHeaders(c);
+    // J1.3a: the reader chose « Ne pas autoriser » for this page session.
+    // Answer a distinct typed code: every bridge (current and legacy) maps
+    // it to a plain refusal with « Réouvrir », never to an automatic
+    // navigation that would put the consent screen back on every load.
+    // « Réouvrir » still reaches the consent screen (marker kept).
+    if (readConsentPending(c.req.header("cookie")) === "declined") {
+      return c.json({ ok: false, error: { code: "basket_consent_declined",
+        message: "Basket reading was not authorized for this page. Reopen the page to authorize it.",
+        retryable: false, action: "reopen_to_consent" }, requestId: randomUUID() }, 403);
+    }
+    // J1.3a: remember the typed refusal on this host so a « Réouvrir la
+    // page » (old bridges included) lands on the consent screen instead of
+    // a document-only opening that would answer this 403 again.
+    c.header("Set-Cookie", mintConsentPendingCookie("required"), { append: true });
     return c.json({ ok: false, error: { code: "basket_consent_required",
       message: "Basket reading needs a one-time consent.",
       retryable: false, action: "consent_baskets" }, requestId: randomUUID() }, 403);
@@ -255,13 +275,34 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
    * hint only — the live store row at the current scope version is
    * authority, re-read here on every call (design §3.3).
    */
-  async function hasLiveBasketConsent(reader: AuthorizedReader): Promise<boolean> {
-    if (!reader.basketScope) return false;
-    if (!deps.basketConsent) return true;
+  async function basketConsentState(reader: AuthorizedReader): Promise<"live" | "required" | "revoked" | "unavailable"> {
+    if (!reader.basketScope) return "required";
+    if (!deps.basketConsent) return "live";
     try {
+      // A basket-scoped session was minted on a recorded consent: a missing
+      // row now means it was revoked since.
       return await deps.basketConsent.hasLiveConsent(
-        reader.readerSub, reader.artifactId, BASKET_READ_SCOPE_ID);
-    } catch { return false; }
+        reader.readerSub, reader.artifactId, BASKET_READ_SCOPE_ID) ? "live" : "revoked";
+    } catch { return "unavailable"; }
+  }
+
+  /**
+   * J1.3a: a ledger outage still fails closed, but as an explicit typed
+   * error, never as a consent prompt the reader cannot satisfy.
+   */
+  function consentLedgerUnavailable(c: Context) {
+    applyReaderContentHeaders(c);
+    return c.json({ ok: false, error: { code: "consent_ledger_unavailable",
+      message: "The consent ledger is unavailable.", retryable: true, action: "retry_later" },
+    requestId: randomUUID() }, 503);
+  }
+
+  /** Gate B outcome as a response, or null when the live consent covers the call. */
+  async function basketGate(c: Context, reader: AuthorizedReader): Promise<Response | null> {
+    const state = await basketConsentState(reader);
+    if (state === "live") return null;
+    if (state === "unavailable") return consentLedgerUnavailable(c);
+    return basketConsentRefusal(c);
   }
 
   function stillOpen(reader: AuthorizedReader): boolean {
@@ -394,6 +435,29 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     } catch { /* journaling never fails a read */ }
   });
 
+  // J1.3a: typed journal of every H5 outcome, registered outside the
+  // classification below so it records the code the page actually receives.
+  // Closed shape only (see reader-event-log.ts): never a city, signal,
+  // query, basket, workspace or reader identifier.
+  const emit = readerEventEmitter(deps.readerEvents);
+  if (deps.readerEvents) app.use("/__reader/api/*", async (c, next) => {
+    await next();
+    const op = c.req.path.slice("/__reader/api/".length);
+    const status = c.res.status;
+    const body = status >= 400 || isWorkspaceReadOperation(op)
+      ? await c.res.clone().json().catch(() => null) as Record<string, unknown> | null : null;
+    const requestId = body && typeof body.requestId === "string" ? body.requestId : undefined;
+    if (status < 400) {
+      // Row count only on the bounded workspace reads (no geo payload parse).
+      const rows = !isWorkspaceReadOperation(op) ? undefined : body && Array.isArray(body.items) ? body.items.length
+        : body && Array.isArray(body.workspaces) ? body.workspaces.length : undefined;
+      emit({ surface: "h5", code: "ok", status, op, ...(requestId ? { requestId } : {}),
+        ...(rows !== undefined ? { count: rows } : {}) });
+      return;
+    }
+    emit({ surface: "h5", code: readerFailureCode(body, status), status, op, ...(requestId ? { requestId } : {}) });
+  });
+
   app.use("/__reader/api/*", async (c, next) => {
     if (c.req.method !== "GET" || !isWorkspaceReadOperation(c.req.path.slice("/__reader/api/".length))) return next();
     try {
@@ -494,7 +558,8 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     if (!deps.writePageSurface) return c.json({ error: "capability_unavailable" }, 503);
     const reader = await authorized(c);
     if (!reader || !canInvoke(reader, "signals.protected-read", reader.releaseId)) return c.json({ error: "unauthenticated" }, 401);
-    if (!await hasLiveBasketConsent(reader)) return basketConsentRefusal(c);
+    const gated = await basketGate(c, reader);
+    if (gated) return gated;
     try {
       const params = new URL(c.req.url).searchParams;
       params.delete("grant");
@@ -530,7 +595,8 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     if (url.searchParams.has("grant")) return c.json({ error: "invalid_query" }, 400);
     const auth = await authorized(c, true);
     if (!auth) return c.json({ error: "unauthenticated" }, 401);
-    if (!await hasLiveBasketConsent(auth)) return basketConsentRefusal(c);
+    const gated = await basketGate(c, auth);
+    if (gated) return gated;
     if (!canInvoke(auth, "signals.protected-read", auth.releaseId)) return c.json({ error: "forbidden" }, 403);
     if (!deps.readDocument) return c.json({ error: "capability_unavailable" }, 503);
     if (!await authorityCurrent(auth)) return c.json({ error: "unauthenticated" }, 401);
@@ -594,7 +660,10 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     // call carries the one-time consent instead. Gate B re-reads the live
     // store row on every call: revocation refuses here at once, even under
     // a live cookie.
-    if (isGateBOperation(op) && !await hasLiveBasketConsent(auth)) return basketConsentRefusal(c);
+    if (isGateBOperation(op)) {
+      const gated = await basketGate(c, auth);
+      if (gated) return gated;
+    }
     if (op === "status.closed.v1") {
       applyReaderContentHeaders(c);
       return c.json({ error: "capability_unavailable" }, 503);
