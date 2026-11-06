@@ -47,6 +47,19 @@ export function parseDevAnswer(text, codes) {
   return { verdict: j.verdict, code, failed: false, why: null };
 }
 
+/**
+ * One seat result → parsed answer, fail closed (review GEPA B1a): a non-zero exit or a timeout,
+ * and ANY tool event (command, file read, MCP, web, unknown event) are failed calls of class
+ * `infra` — never an accepted answer, never cached. A completed call is parsed by
+ * parseDevAnswer; an invalid answer (no-json, unknown-code, verdict-not-partition) is a failure
+ * of class `answer` (the model answered, badly). Failures count as shown (Annex M).
+ */
+export function parseSeatResult(r, codes) {
+  if (r.code !== 0) return { verdict: null, code: null, failed: true, why: `exit-${r.code}`, infra: true };
+  if ((r.toolEvents ?? 0) > 0) return { verdict: null, code: null, failed: true, why: 'tool-events', infra: true };
+  return { ...parseDevAnswer(r.text, codes), infra: false };
+}
+
 async function pool(tasks, n) {
   const out = new Array(tasks.length);
   let i = 0;
@@ -153,8 +166,8 @@ export async function main(argv = process.argv.slice(2)) {
       appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: true, phase: `l4-dev-s${k}`, route, itemId: item.itemId });
       const r = await callSeat(route, prompt, { base: seatTmp, timeoutMs: 1800000 });
       appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: `l4-dev-s${k}`, route, itemId: item.itemId,
-        exitCode: r.code, latencyMs: r.latencyMs, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null });
-      const parsed = r.code === 0 ? parseDevAnswer(r.text, codes) : { verdict: null, code: null, failed: true, why: `exit-${r.code}` };
+        exitCode: r.code, latencyMs: r.latencyMs, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null, toolEvents: r.toolEvents ?? null });
+      const parsed = parseSeatResult(r, codes);
       const row = { itemId: item.itemId, ref: item.code, refVerdict: item.verdict, unresolved: item.status === 'unresolved',
         pred: parsed.failed ? null : { verdict: parsed.verdict, code: parsed.code }, failed: parsed.failed, why: parsed.why,
         usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null };
@@ -189,7 +202,9 @@ export async function main(argv = process.argv.slice(2)) {
     const failures = rows.filter((r) => r.failed).length;
     // GEPA series: pass only with 0 miss and failures within the ceiling (no floor).
     if (seriesSpec.method === GEPA_METHOD) {
-      const g = gepaRouteVerdict({ misses: shownMisses(rows).length, failures, items: rows.length }, specFailureCeiling);
+      // Failure share over the RESOLVED rows (the rows a miss can be counted on).
+      const resolved = rows.filter((r) => !r.unresolved);
+      const g = gepaRouteVerdict({ misses: shownMisses(rows).length, failures: resolved.filter((r) => r.failed).length, items: resolved.length }, specFailureCeiling);
       aggregates[route] = { ...stats, failures, withUnresolved: statsWithUnresolved, misses: g.misses, verdict: g.verdict,
         costUsd: rows.reduce((s, r) => s + (r.costUsd ?? 0), 0), items: rows.length };
       continue;
