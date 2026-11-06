@@ -4,9 +4,11 @@
 // indeterminate supports and the budget snapshot. Changing any of them after opening a
 // half makes the series exploratory.
 import path from 'node:path';
+import process from 'node:process';
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { classifDir, repoRoot } from '../lib/paths.mjs';
+import { GEPA_FAILURE_CEILING, GEPA_METHOD, GEPA_ROUTES } from './gepa-common.mjs';
 
 export const SERIES_MANIFEST_KIND = 'l4-series';
 
@@ -17,7 +19,9 @@ export function seriesManifestFile(k, env = process.env) {
 /** Loads and validates the pre-registered series manifest: tracked, clean, kind-checked.
     Review §9b/c: routes, halves sha, floors in ]0,1], failure ceiling in ]0,1] and supports
     shapes are validated — a `floors:{}` no longer passes with floors at 0.
-    Review §9: halves are REQUIRED (a manifest without frozen halves refuses). */
+    Review §9: halves are REQUIRED (a manifest without frozen halves refuses).
+    GEPA series (`method: 'gepa'`): routes = the 5 GEPA routes, failureCeiling <= 5 %, no
+    floors (precision reported, never a floor), no recallNonRegression (own verdict). */
 export function loadSeriesManifest(k, env = process.env) {
   const file = seriesManifestFile(k, env);
   const repo = repoRoot(env);
@@ -28,7 +32,9 @@ export function loadSeriesManifest(k, env = process.env) {
   if (git('diff', '--quiet', 'HEAD', '--', rel).status !== 0) throw new Error(`series ${k} refused: ${rel} differs from the committed version`);
   const m = JSON.parse(readFileSync(file, 'utf8'));
   if (m.kind !== SERIES_MANIFEST_KIND) throw new Error(`series ${k} refused: ${rel} kind must be ${SERIES_MANIFEST_KIND}`);
-  for (const key of ['promptSha256', 'routes', 'floors', 'failureCeiling', 'supports']) {
+  if (m.method !== undefined && m.method !== GEPA_METHOD) throw new Error(`series ${k} refused: ${rel} method must be '${GEPA_METHOD}' when set`);
+  const gepa = m.method === GEPA_METHOD;
+  for (const key of ['promptSha256', 'routes', ...(gepa ? [] : ['floors']), 'failureCeiling', 'supports']) {
     if (m[key] === undefined) throw new Error(`series ${k} refused: ${rel} misses pre-registered '${key}'`);
   }
   if (typeof m.promptSha256 !== 'string' || !/^[0-9a-f]{64}$/.test(m.promptSha256)) throw new Error(`series ${k} refused: ${rel} promptSha256 must be a 64-hex sha`);
@@ -36,7 +42,8 @@ export function loadSeriesManifest(k, env = process.env) {
     throw new Error(`series ${k} refused: ${rel} routes must be a non-empty string array`);
   }
   const in01 = (x) => typeof x === 'number' && Number.isFinite(x) && x > 0 && x <= 1;
-  if (!m.floors || typeof m.floors !== 'object' || !in01(m.floors.recall) || !in01(m.floors.precision)) {
+  if (gepa) assertGepaSeriesShape(m, k, rel);
+  else if (!m.floors || typeof m.floors !== 'object' || !in01(m.floors.recall) || !in01(m.floors.precision)) {
     throw new Error(`series ${k} refused: ${rel} floors.recall/precision must be numbers in ]0,1]`);
   }
   if (!in01(m.failureCeiling)) throw new Error(`series ${k} refused: ${rel} failureCeiling must be a number in ]0,1]`);
@@ -50,6 +57,30 @@ export function loadSeriesManifest(k, env = process.env) {
   }
   if (m.recallNonRegression !== undefined) assertRecallNonRegressionShape(m.recallNonRegression, k, rel);
   return m;
+}
+
+/** GEPA series shape: exactly the GEPA routes, a failure ceiling in ]0, 5 %], no floors, no recallNonRegression. */
+export function assertGepaSeriesShape(m, k, rel = `series-${k}.json`) {
+  const want = [...GEPA_ROUTES].sort().join(',');
+  if ([...new Set(m.routes)].sort().join(',') !== want || m.routes.length !== GEPA_ROUTES.length) {
+    throw new Error(`series ${k} refused: ${rel} gepa routes must be exactly [${GEPA_ROUTES.join(',')}]`);
+  }
+  if (typeof m.failureCeiling !== 'number' || !(m.failureCeiling > 0) || m.failureCeiling > GEPA_FAILURE_CEILING) {
+    throw new Error(`series ${k} refused: ${rel} gepa failureCeiling must be in ]0,${GEPA_FAILURE_CEILING}]`);
+  }
+  if (m.floors !== undefined) throw new Error(`series ${k} refused: ${rel} gepa series carry no floors (precision is reported, never a floor)`);
+  if (m.recallNonRegression !== undefined) throw new Error(`series ${k} refused: ${rel} gepa series carry their own verdict (no recallNonRegression)`);
+}
+
+/**
+ * Route universe hint before the full manifest load: 'gepa' when series-<k>.json exists and
+ * declares method gepa, 'classic' otherwise (the full load still validates everything).
+ */
+export function seriesMethod(k, env = process.env) {
+  try {
+    const m = JSON.parse(readFileSync(seriesManifestFile(k, env), 'utf8'));
+    return m?.method === GEPA_METHOD ? GEPA_METHOD : 'classic';
+  } catch { return 'classic'; }
 }
 
 /**
