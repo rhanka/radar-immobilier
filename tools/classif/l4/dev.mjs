@@ -28,9 +28,12 @@ import { loadCodes } from '../l2/run.mjs';
 export const EVAL_ROUTES = ['muse-spark-1.3-low', 'muse-spark-1.3-medium', 'opus-5.5-low', 'opus-5.5-medium',
   'mistral-large-4-medium', 'glm-5.3-low', 'gemini-4-argon-low', 'gemini-4-argon-medium'];
 
-/** Builds the evaluated prompt: frozen series prompt + one item. Exported for tests. */
+/**
+ * Builds the evaluated prompt: frozen series prompt + one item. Exported for tests. S113 rows
+ * carry `evalId` instead of `itemId` (they used to be sent as "item_id: undefined").
+ */
 export function devPrompt(frozenPrompt, item) {
-  return `${frozenPrompt.trim()}\n\n## Item to classify\n\n### item_id: ${item.itemId}\n\n${item.input}\n`;
+  return `${frozenPrompt.trim()}\n\n## Item to classify\n\n### item_id: ${item.itemId ?? item.evalId}\n\n${item.input}\n`;
 }
 
 /**
