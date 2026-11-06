@@ -3,6 +3,10 @@ name: Branch policy
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened]
+    branches-ignore: ['artifact/**']
+
+permissions:
+  contents: read
 
 jobs:
   enforce:
@@ -10,7 +14,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      # G0 v3 §5 P7: no branch code runs for an `artifact/**` PR head. A
+      # skipped required check would report success, so this required check
+      # instead FAILS from the event context alone (no checkout, no secret):
+      # an artifact branch is never merged without leaving the artifact prefix.
+      - name: Refuse a pull request from an artifact branch
+        if: ${{ startsWith(github.head_ref, 'artifact/') }}
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          echo "::error::Pull requests from artifact/** ($HEAD_REF) are refused: re-branch the change outside artifact/ to run CI."
+          exit 1
+
       - name: Checkout
+        if: ${{ !startsWith(github.head_ref, 'artifact/') }}
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
