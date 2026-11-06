@@ -20,8 +20,10 @@ import type { ArtifactReaderStore } from "@sentropic/artifacts/server/reader-sto
  * Gate B (design §2): every business call re-reads the store — a sealed
  * session claim is at most a routing hint, never authority — so revocation
  * is effective at the very next H5 call, even under a live cookie (design
- * §3.3). Document opening (Gate A) persists nothing: the neutral screen
- * shows on every opening, renewal stays silent on fresh rights alone.
+ * §3.3). Lot J1.3a: the opening screen is the single first-party gesture;
+ * it records these baskets scopes BEFORE any ticket and is skipped while
+ * the rows live (every release of the artifact); renewal stays silent on
+ * fresh rights alone.
  *
  * Consent rows never record data use: no basket identifier, no query, no
  * page data, no session/device/network data. Revocation keeps history:
@@ -71,12 +73,18 @@ export interface ReaderConsentService extends BasketConsentGate {
   findLiveConsent(readerAccountId: string, artifactId: string,
     scopeId: string): Promise<ReaderConsentRecord | undefined>;
   /**
-   * First-party gesture on the control-origin baskets screen; converges on
-   * a live row per scope. A ledger failure never blocks the consented call;
-   * the screen simply shows again next time.
+   * First-party gesture on the control-origin screen; converges on a live
+   * row per scope. J1.3a: awaited before the ticket; a ledger failure
+   * rejects and the caller answers an explicit error, never a grant.
    */
   grantScopes(readerAccountId: string, artifactId: string,
     scopeIds: readonly string[]): Promise<ReaderConsentRecord[]>;
+  /**
+   * J1.3a: true when the ledger holds a revoked row for this scope at the
+   * current scope version (drives the revocation wording only, never
+   * authority). Absent, the wording never shows.
+   */
+  hasRevokedConsent?(readerAccountId: string, artifactId: string, scopeId: string): Promise<boolean>;
 }
 
 export function readerConsentKey(storageScopeId: string, readerAccountId: string,
@@ -104,6 +112,10 @@ export function createReaderConsentService(pool: pg.Pool, storageScopeId: string
     findLiveConsent,
     hasLiveConsent: async (readerAccountId, artifactId, scopeId) =>
       consentAllowsBaskets(await findLiveConsent(readerAccountId, artifactId, scopeId)),
+    hasRevokedConsent: async (readerAccountId, artifactId, scopeId) => (await pool.query(
+      `SELECT 1 FROM artifacts.reader_consents WHERE storage_scope_id=$1 AND reader_account_id=$2
+        AND artifact_id=$3 AND scope_id=$4 AND scope_version=$5 AND revoked_at IS NOT NULL LIMIT 1`,
+      [storageScopeId, readerAccountId, artifactId, scopeId, BASKET_SCOPE_VERSION])).rowCount === 1,
     grantScopes: async (readerAccountId, artifactId, scopeIds) => {
       const granted: ReaderConsentRecord[] = [];
       for (const scopeId of scopeIds) {

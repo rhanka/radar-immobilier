@@ -11,6 +11,7 @@ import { listGeoCities } from "./services/geo/geo-features.js";
 import { createReaderContentApp } from "./artifacts/content-serve.js";
 import { resolveReaderCursorKeyring } from "./artifacts/reader-cursor-keyring.js";
 import { createReaderOpening } from "./artifacts/reader-opening.js";
+import { consoleReaderEventSink } from "./artifacts/reader-event-log.js";
 import { createPublishedWriteRuntime } from "./artifacts/published-write-runtime.js";
 import { pageWriteListenerRoute } from "./artifacts/write-intent-page-listener.js";
 import { loadConfig, resolveAuthConfig, resolveTemConfig } from "./config.js";
@@ -132,6 +133,8 @@ const readerOpening = contentHost.enabled && artifactsControl?.readerStorage && 
   ? createReaderOpening({ ...artifactsControl.readerStorage, auth, contentBase: contentHost.contentBase,
     issuer: readerIssuer, grantSecret: readerGrantSecret, sessionSecret: readerSessionSecret,
     ...(artifactsControl.readerConsent ? { consent: artifactsControl.readerConsent } : {}),
+    // J1.3a: typed reader journal (closed shape, no city/signal/query).
+    events: consoleReaderEventSink,
     ...(publishedWrite ? { writeDomain: publishedWrite.domain, permitsWrite: publishedWrite.permitsWrite } : {}),
     // Lot I1 (R1/a): JIT before getRights; disabled without trusted issuers.
     ...(admission.trustedIssuers.length > 0
@@ -186,6 +189,7 @@ const readerContent = contentHost.enabled && artifactsControl?.readerStorage && 
     // Gate B: the H5 dispatch re-reads the durable baskets consent on
     // every business call (revocation effective at the next call).
     ...(artifactsControl.readerConsent ? { basketConsent: artifactsControl.readerConsent } : {}),
+    readerEvents: consoleReaderEventSink,
     ...(readerOpening ? { openingContent: readerOpening.content } : {}),
     ...artifactsControl.readerStorage,
     readDocument: readerDocumentRead,

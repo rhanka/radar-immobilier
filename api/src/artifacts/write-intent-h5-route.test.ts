@@ -52,4 +52,14 @@ describe("h5 write receiver", () => {
       error: { code: "basket_consent_required", action: "consent_baskets" } });
     expect(gate).toHaveBeenCalledWith("reader", "artifact-1", "baskets.write.prepare");
   });
+
+  it("should answer a ledger failure with a typed 503, never a consent refusal (J1.3a)", async () => {
+    const gate = vi.fn(async () => { throw new Error("ledger down"); });
+    const app = writeIntentH5Route(depsFor(gate));
+    const grant = await mintWriteGrant(GRANT, SECRET, 1000);
+    const failed = await app.request(await prepareRequest(grant));
+    expect(failed.status).toBe(503);
+    expect(await failed.json()).toMatchObject({ ok: false,
+      error: { code: "consent_ledger_unavailable", retryable: true } });
+  });
 });

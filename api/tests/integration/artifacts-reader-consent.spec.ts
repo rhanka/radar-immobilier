@@ -10,7 +10,8 @@ import { GRANT_SECRET, ISSUER, SESSION_SECRET } from "../../src/artifacts/reader
 /**
  * Reader consent, immo side — durable BASKETS consent (reader-consent
  * design, central decision), never the opening screen.
- * - every opening renders the neutral screen and records nothing;
+ * - J1.3a: the opening is the single gesture; it records the baskets
+ *   consent before the ticket and is skipped while the row lives;
  * - the baskets screen persists `baskets.read` and states memorization
  *   until revocation plus where to revoke;
  * - GET /consent skips its screen while a live row plus fresh rights covers
@@ -66,33 +67,43 @@ describe("reader consent baskets persistence", () => {
     return `/consent?binding=${binding}&origin=${encodeURIComponent(`https://${artifactId}.${CONTENT_BASE}`)}`;
   }
 
-  it("should screen every opening and record nothing", async () => {
+  it("should record the consent on the first opening and skip the next opening (J1.3a)", async () => {
     const application = opening();
     const session = await cookie(reader);
     const origin = `https://${artifactId}.${CONTENT_BASE}`;
 
-    // First opening: the neutral screen, no consent row.
+    // First opening: the single screen, no consent row yet.
     const first = await application.request(approveQuery(randomBytes(32).toString("hex")),
       { headers: { cookie: session, ...BROWSER } });
     expect(first.status).toBe(200);
     const fields = hiddenFields(await first.text());
     expect(fields.artifactId).toBe(artifactId);
 
-    // The click mints the document ticket and records nothing.
+    expect(await consent().hasLiveConsent(reader, artifactId, BASKET_READ_SCOPE_ID)).toBe(false);
+
+    // The click records the baskets consent, then mints the ticket.
     const posted = await application.request("/approve", { method: "POST",
       headers: { cookie: session, origin: auth.appBaseUrl, "content-type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({ artifactId, binding: fields.binding!,
-        origin, releaseId: fields.releaseId!, profileFingerprint: fields.profileFingerprint! }) });
+        origin, releaseId: fields.releaseId!, profileFingerprint: fields.profileFingerprint!, decision: "grant" }) });
     expect(posted.status).toBe(303);
     expect(posted.headers.get("location")).toContain("/__reader/exchange?ticket=");
-    expect(await consent().hasLiveConsent(reader, artifactId, BASKET_READ_SCOPE_ID)).toBe(false);
+    expect(await consent().hasLiveConsent(reader, artifactId, BASKET_READ_SCOPE_ID)).toBe(true);
 
-    // Second opening with a fresh binding: the screen again — Gate A
-    // persists nothing and the baskets consent never skips it.
+    // Second opening with a fresh binding: no screen while the row lives.
     const second = await application.request(approveQuery(randomBytes(32).toString("hex")),
       { headers: { cookie: session, ...BROWSER } });
-    expect(second.status).toBe(200);
-    expect(await second.text()).toContain("Ouvrir la page");
+    expect(second.status).toBe(303);
+    expect(second.headers.get("location")).toContain("/__reader/exchange?ticket=");
+
+    // Reset for the next case: revoke through the API.
+    const api = controlRoute({ auth, accounts: h.pool, backend: h.control,
+      storageScope: h.config.storageScope });
+    const revoked = await api.request("/revoke_reader_consent", { method: "POST",
+      headers: { cookie: session, origin: auth.appBaseUrl, "content-type": "application/json" },
+      body: JSON.stringify({ artifactId, idempotencyKey: randomUUID() }) });
+    expect(revoked.status).toBe(200);
+    expect(await consent().hasLiveConsent(reader, artifactId, BASKET_READ_SCOPE_ID)).toBe(false);
   });
 
   it("should persist baskets consent on the baskets screen, skip it while live, screen again after API revocation", async () => {
@@ -111,11 +122,21 @@ describe("reader consent baskets persistence", () => {
     expect(html).toContain("réglages de votre compte");
     const fields = hiddenFields(html);
 
+    // J1.3a: a submission without an explicit decision (stale screen)
+    // records nothing and mints nothing.
+    const stale = await application.request("/consent", { method: "POST",
+      headers: { cookie: session, origin: auth.appBaseUrl, "content-type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ artifactId, binding: fields.binding!,
+        origin, releaseId: fields.releaseId!, profileFingerprint: fields.profileFingerprint! }) });
+    expect(stale.status).toBe(400);
+    expect(stale.headers.get("location")).toBeNull();
+    expect(await consent().hasLiveConsent(reader, artifactId, BASKET_READ_SCOPE_ID)).toBe(false);
+
     // 2. The click persists the BASKETS consent and mints the basket ticket.
     const posted = await application.request("/consent", { method: "POST",
       headers: { cookie: session, origin: auth.appBaseUrl, "content-type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({ artifactId, binding: fields.binding!,
-        origin, releaseId: fields.releaseId!, profileFingerprint: fields.profileFingerprint! }) });
+        origin, releaseId: fields.releaseId!, profileFingerprint: fields.profileFingerprint!, decision: "grant" }) });
     expect(posted.status).toBe(303);
     expect(posted.headers.get("location")).toContain("/__reader/exchange?ticket=");
     expect(await consent().hasLiveConsent(reader, artifactId, BASKET_READ_SCOPE_ID)).toBe(true);
@@ -140,7 +161,10 @@ describe("reader consent baskets persistence", () => {
     const third = await application.request(consentQuery(randomBytes(32).toString("hex")),
       { headers: { cookie: session, ...BROWSER } });
     expect(third.status).toBe(200);
-    expect(await third.text()).toContain("Autoriser la lecture de vos paniers");
+    const thirdHtml = await third.text();
+    expect(thirdHtml).toContain("Autoriser la lecture de vos paniers");
+    // J1.3a: the revocation wording comes from the ledger row itself.
+    expect(thirdHtml).toContain("Votre accord précédent pour cette page a été retiré");
   });
 
   it("should refuse a suspended account even with a live consent row", async () => {
