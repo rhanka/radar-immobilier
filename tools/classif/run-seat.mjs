@@ -70,7 +70,8 @@ export const ROUTES = {
     build: (_dir, _file, prompt) => ({ cmd: 'claude', args: ['-p', '--model', 'claude-opus-5-5', '--effort', e, '--output-format', 'json',
       '--tools', '', '--setting-sources', 'project', '--no-session-persistence', '--system-prompt', NEUTRAL_SYSTEM,
       '--strict-mcp-config', '--mcp-config', '{"mcpServers":{}}'], stdin: prompt, env: { CLAUDE_CODE_DISABLE_CLAUDE_MDS: '1' } }),
-    parse: (stdout) => { const j = lastJson(stdout); return { text: j?.result ?? '', usage: j?.usage ?? null, costUsdApiEquivalent: j?.total_cost_usd ?? null, isError: j?.is_error ?? false }; },
+    parse: (stdout) => { const j = lastJson(stdout); return { text: j?.result ?? '', usage: j?.usage ?? null, costUsdApiEquivalent: j?.total_cost_usd ?? null, isError: j?.is_error ?? false,
+      errorEnvelope: j?.is_error ? String(j?.result ?? j?.error ?? '') : '' }; },
   }])),
   // Astra (ChatGPT seat, plan v3 owner decision 04/11): conductor-verified route
   // `codex exec -m gpt-6-astra -c model_reasoning_effort=max -s read-only`, empty cwd, scrubbed
@@ -254,9 +255,38 @@ export function refreshCodexAuth(seat, { root = seatHomesRoot(), home = classifH
  * A failed call whose output reads as a quota or rate limit (HTTP 402/429, quota, rate limit,
  * budget exhausted): retried with a bounded backoff by GEPA before it counts as a failure.
  */
-export function looksLikeQuotaFailure(r) {
+/**
+ * Error messages of the codex CLI envelope only (turn.failed / error events), never the model's
+ * answer text.
+ */
+export function codexErrorEnvelope(stdout) {
+  const out = [];
+  for (const line of String(stdout ?? '').split('\n')) {
+    let e;
+    try { e = JSON.parse(line); } catch { continue; }
+    if (e?.type === 'turn.failed' || e?.type === 'error') out.push(String(e?.error?.message ?? e?.message ?? JSON.stringify(e?.error ?? '')));
+  }
+  return out.join('\n');
+}
+
+/** Provider / infrastructure error sources of a failed call: stderr and the CLI error envelope, never the answer. */
+const errorSources = (r) => `${r?.stderrTail ?? ''}\n${r?.errorEnvelope ?? ''}`;
+
+/** vibe stopped on its own per-call price ceiling (--max-price): an answer failure, never a quota (review GEPA N6). */
+export function looksLikeMaxPrice(r) {
   if (!r || r.code === 0) return false;
-  return /\b(?:402|429)\b|quota|rate[ _-]?limit|too many requests|budget exhausted|insufficient[ _](?:quota|credit|balance)/i.test(`${r.stderrTail ?? ''}\n${r.stdoutTail ?? ''}\n${r.text ?? ''}`);
+  return /max[-_ ]?price|maximum price|price (?:limit|ceiling|cap)|cost (?:limit|ceiling|cap)/i.test(errorSources(r));
+}
+
+/**
+ * A failed call whose provider or infrastructure error reads as a quota or rate limit (HTTP
+ * 402/429, quota, rate limit, too many requests, insufficient quota/credit/balance), read from
+ * stderr and the CLI error envelope only — never the model's answer (review GEPA N6). A vibe
+ * --max-price stop is never a quota. Retried with a bounded backoff by GEPA before it counts.
+ */
+export function looksLikeQuotaFailure(r) {
+  if (!r || r.code === 0 || looksLikeMaxPrice(r)) return false;
+  return /\b(?:402|429)\b|quota|rate[ _-]?limit|too many requests|insufficient[ _](?:quota|credit|balance)/i.test(errorSources(r));
 }
 
 /** A failed codex call whose output reads as an authentication failure (stale or revoked seat token). */
@@ -353,7 +383,7 @@ export function parseCodex(stdout, dir) {
     try { walk(JSON.parse(line)); } catch { /* not json */ }
   }
   const { toolEvents, unknownTypes } = countCodexToolEvents(stdout);
-  return { text, usage, toolEvents, unknownTypes };
+  return { text, usage, toolEvents, unknownTypes, errorEnvelope: codexErrorEnvelope(stdout) };
 }
 
 /**
@@ -381,7 +411,8 @@ export function parseVibe(stdout, dir) {
   const models = Array.isArray(exp?.config?.models) ? exp.config.models : Object.values(exp?.config?.models ?? {});
   const model = models.find((m) => m?.alias === exp?.config?.active_model);
   return { text, usage: exp?.usage ?? null, costUsd: exp?.cost_usd ?? null, effectiveModel: exp?.config?.active_model ?? null,
-    effectiveThinking: model?.thinking ?? null, outcome: exp?.outcome ?? null, toolEvents: countVibeToolEvents(msgs) };
+    effectiveThinking: model?.thinking ?? null, outcome: exp?.outcome ?? null, toolEvents: countVibeToolEvents(msgs),
+    errorEnvelope: [exp?.outcome && !/^(?:success|completed|ok)$/i.test(String(exp.outcome)) ? exp.outcome : '', exp?.error ?? ''].filter(Boolean).map((v) => (typeof v === 'string' ? v : JSON.stringify(v))).join('\n') };
 }
 
 // agy stream-json output: one JSON event per line; the final "result" event carries the answer
@@ -395,7 +426,8 @@ function parseAgyStream(stdout) {
     if (e.event === 'result') result = e.result;
     else if (/tool/i.test(String(e.event ?? '')) || e.tool_call || e.toolCall) toolEvents++;
   }
-  return { text: result?.response ?? '', usage: result?.usage ?? null, status: result?.status ?? null, error: result?.error ?? null, toolEvents };
+  return { text: result?.response ?? '', usage: result?.usage ?? null, status: result?.status ?? null, error: result?.error ?? null, toolEvents,
+    errorEnvelope: result?.error ? (typeof result.error === 'string' ? result.error : JSON.stringify(result.error)) : '' };
 }
 
 // muse exec --json emits JSONL events; the final answer is the "text" of the completed
