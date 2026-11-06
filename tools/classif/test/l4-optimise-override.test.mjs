@@ -10,6 +10,7 @@ import { MAX_SEATS, OPTIMISERS, OWNER_DEVIATION_0611, RECONCILER, buildObjective
 import { ROUTES } from '../run-seat.mjs';
 import { REPO_ROOT, tmp, withTempHome } from './hermetic-helpers.mjs';
 import { CLEAN1, DIRTY, K, MATERIALS_SENT, OVERRIDE, callsLog, fakeSeat, manifestFile, setup } from './l4-optimise-fixture.mjs';
+import process from 'node:process';
 
 test('override: the known max seats are the run-seat.mjs max routes; defaults unchanged', () => {
   assert.deepEqual([...MAX_SEATS].sort(), ['astra-max', 'muse-wonder-max', 'opus-5.5-max']);

@@ -9,6 +9,8 @@ import path from 'node:path';
 import { loadCodes } from '../l2/run.mjs';
 import { EVAL_ROUTES } from '../l4/dev.mjs';
 import { commitAll, initTempRepo, readFixture, swapEnv, tmp, writeRepoFile, writeSeriesRepo } from './hermetic-helpers.mjs';
+import { Buffer } from 'node:buffer';
+import process from 'node:process';
 
 const NON_PERTINENT = [...loadCodes()].find(([, v]) => v === 'non_pertinent')[0];
 
