@@ -64,6 +64,7 @@ Lots L1 and L2 of the Steve-aligned classification pilot (plan-pilote-v2 §B-L1,
   - [x] Codex seat auth refresh: `make classif-seat-auth-refresh SEAT=<seat> ENV=preprod` copies `~/.codex/auth.json` atomically into the seat home (after a new codex login, or when a run stops on authentication errors), then resume the stopped run with the command named in the stop message.
   - [x] GEPA re-review 2 fixes: no breaker on retries nor on tool events outside a child, breaker over the whole batch, retries bounded to 2 per (candidate, route, case), parent tool events skip the iteration, child evaluation stops at its first tool event, vibe tool calls fail closed.
   - [x] GEPA re-review 3 fixes: a resumed run reserves only the uncached final calls (a stop during the final choice resumes under the same MAX_CALLS), bounded 402/429/quota backoff (`QUOTA_BACKOFF_MS`, default 30 s, 2 min, 5 min) before a failure counts, hermetic temp repos removed.
+  - [x] GEPA re-review 4 fixes: a quota retry only uses budget beyond the reserved calls not yet launched (MAX_CALLS held), quota detection from stderr and the CLI error envelope only, a vibe `--max-price` stop is an answer failure without retry.
   - [ ] Real GEPA run, freeze of the winner and pre-registration of the GEPA series (conductor, paid calls).
 
 - [x] **Gate**
