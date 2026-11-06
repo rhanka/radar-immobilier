@@ -1,0 +1,34 @@
+{
+ "kind": "l4-optimise",
+ "series": "2",
+ "next": "P3",
+ "createdAt": "2026-11-06T04:34:27.443Z",
+ "optimisers": [
+  "astra-max",
+  "opus-5.5-max"
+ ],
+ "reconciler": "opus-5.5-max",
+ "deviation": "owner 06/11: Muse weekly quota exhausted until 08/11 — Astra max replaces Muse Wonder max as optimiser; Opus 5.5 max reconciles",
+ "proposalSha256": [
+  "ea632f2ad043e72401427bd1b57bf7133d1f088372ce7ee3c3938a1f85e02ed5",
+  "05cd10b6d1060ba721c6a28f54735a89eaa5f3013359336f1a148697800135b6"
+ ],
+ "promptSha256": "762e164630cd48475fd3c0bc2fe79c3fad00a913d51be391fe6df4708606f6b6",
+ "tuningItems": 252,
+ "repairs": 0,
+ "objective": {
+  "rule": "recall first: zero tuning P/S item predicted non_pertinent, tuning recall >= baseline; precision only under that constraint",
+  "baselineSeries": 0,
+  "baselineVersion": "P0",
+  "baselineRecall": 1,
+  "tuningMisses": {
+   "muse-spark-1.3-low": 1,
+   "muse-spark-1.3-medium": 1,
+   "opus-5.5-low": 1,
+   "opus-5.5-medium": 1,
+   "mistral-large-4-medium": 0,
+   "glm-5.3-low": 0
+  }
+ },
+ "shingleCheck": "pass (0 verbatim shingles from the sealed set)"
+}
