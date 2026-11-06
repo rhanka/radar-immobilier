@@ -111,10 +111,15 @@ export function chiSquareHalves(a, b) {
  * (lower bounds ≥ floors); `fail` if either fails or the failure share exceeds the
  * pre-registered ceiling; `indeterminate` otherwise (supports unmet). Failures stay in
  * every denominator.
+ * Recall non-regression (owner rule 06/11, manifests declaring `recallNonRegression`): when
+ * `spec.baselineRecall` is a number, a recall point estimate below it (minus
+ * `spec.recallTolerance`) is `fail`, whatever the precision or the supports. Specs without
+ * a baseline (series 0-2) are unchanged.
  */
 export function seriesVerdict({ stats, failures, items }, spec) {
   const ceiling = spec?.failureCeiling ?? 0.1;
   if (items && failures / items > ceiling) return 'fail';
+  if (recallRegressed(stats?.recall, spec?.baselineRecall, spec?.recallTolerance ?? 0)) return 'fail';
   if (stats?.indeterminate?.recall || stats?.indeterminate?.precision) return 'indeterminate';
   const rf = spec?.recallFloor ?? 0;
   const pf = spec?.precisionFloor ?? 0;
@@ -161,4 +166,67 @@ export function compareRoutes(a, b) {
   }
   if (a.promptVersion !== b.promptVersion) return (b.promptVersion ?? '').localeCompare(a.promptVersion ?? '');
   return (a.costUsd ?? 0) - (b.costUsd ?? 0);
+}
+
+/**
+ * Recall misses (owner rule 06/11): the ONLY penalised error is a reference P/S item predicted
+ * non_pertinent (écarté). Rows in the dev-output shape { itemId, ref, refVerdict, unresolved,
+ * pred, failed }; a failure counts as shown (never a miss), P↔S confusion is not a miss.
+ */
+export function shownMisses(rows) {
+  return (rows ?? []).filter((r) => !r.unresolved && isShownRef(r.refVerdict) && !isShownPred(r.failed ? { failed: true } : r.pred));
+}
+
+/** true when `recall` is below the baseline recall minus the tolerance (both point estimates). */
+export function recallRegressed(recall, baselineRecall, tolerance = 0) {
+  if (typeof recall !== 'number' || typeof baselineRecall !== 'number') return false;
+  return recall < baselineRecall - (tolerance ?? 0) - 1e-12;
+}
+
+/**
+ * Recall-first comparison of one route against the baseline series (same route, same half):
+ * delta of the recall point estimates and the miss count. Counts only (repo-manifest safe).
+ */
+export function recallComparison({ recall, misses }, baselineRecall, { baselineSeries, tolerance = 0 } = {}) {
+  const has = typeof recall === 'number' && typeof baselineRecall === 'number';
+  return { baselineSeries, baselineRecall: baselineRecall ?? null, recall: recall ?? null,
+    delta: has ? recall - baselineRecall : null, tolerance, misses,
+    regressed: recallRegressed(recall, baselineRecall, tolerance) };
+}
+
+/**
+ * Best tuning recall over earlier series dev manifests ([{ series, aggregates }]): per series,
+ * the best recall among the routes whose verdict is not `fail` (a route that fails every item
+ * shows 100 % recall by construction, so it never sets the baseline). The baseline series is
+ * the argmax, the earliest one on a tie. Returns null when no series has an eligible route.
+ */
+export function bestRecallBaseline(devManifests) {
+  let out = null;
+  for (const { series, aggregates } of devManifests ?? []) {
+    const perRoute = {};
+    for (const [route, a] of Object.entries(aggregates ?? {})) {
+      if (a?.verdict !== 'fail' && typeof a?.recall === 'number') perRoute[route] = a.recall;
+    }
+    const vals = Object.values(perRoute);
+    if (!vals.length) continue;
+    const best = Math.max(...vals);
+    if (!out || best > out.best + 1e-12) out = { series: Number(series), best, perRoute };
+  }
+  return out;
+}
+
+/**
+ * Per-route recall-first comparison block of series-<k>-dev.json (manifests declaring
+ * recallNonRegression): recall delta against the baseline series (same route, same half) and
+ * the miss count. `perRoute` maps route → dev rows, `aggregates` route → { recall },
+ * `baseline` = { baselineSeries, tolerance, recall: { route: recall } }. Counts only: no item
+ * id, code or text reaches the repo manifest.
+ */
+export function buildRecallComparison(perRoute, aggregates, baseline) {
+  const out = {};
+  for (const [route, rows] of Object.entries(perRoute)) {
+    out[route] = recallComparison({ recall: aggregates[route]?.recall ?? null, misses: shownMisses(rows).length },
+      baseline.recall?.[route] ?? null, { baselineSeries: baseline.baselineSeries, tolerance: baseline.tolerance });
+  }
+  return out;
 }

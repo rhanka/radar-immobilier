@@ -48,7 +48,46 @@ export function loadSeriesManifest(k, env = process.env) {
   if (!m.halves || typeof m.halves !== 'object' || !hex64(m.halves.tuningSha256) || !hex64(m.halves.blindSha256)) {
     throw new Error(`series ${k} refused: ${rel} halves.{tuningSha256,blindSha256} must be 64-hex shas (freeze the halves before dev)`);
   }
+  if (m.recallNonRegression !== undefined) assertRecallNonRegressionShape(m.recallNonRegression, k, rel);
   return m;
+}
+
+/**
+ * Optional `recallNonRegression: { baselineSeries, metric: 'recall', tolerance }` (owner rule
+ * 06/11: a lower recall is a regression). Manifests without the field are unchanged.
+ * baselineSeries is an earlier series (integer, < k), tolerance a number in [0,1[.
+ */
+export function assertRecallNonRegressionShape(r, k, rel = `series-${k}.json`) {
+  const bad = (why) => { throw new Error(`series ${k} refused: ${rel} recallNonRegression ${why}`); };
+  if (!r || typeof r !== 'object' || Array.isArray(r)) bad('must be an object');
+  if (!Number.isInteger(r.baselineSeries) || r.baselineSeries < 0) bad('baselineSeries must be a non-negative integer');
+  if (/^\d+$/.test(String(k)) && r.baselineSeries >= Number(k)) bad(`baselineSeries must be an earlier series than ${k}`);
+  if (r.metric !== 'recall') bad("metric must be 'recall'");
+  if (typeof r.tolerance !== 'number' || !Number.isFinite(r.tolerance) || r.tolerance < 0 || r.tolerance >= 1) bad('tolerance must be a number in [0,1[');
+}
+
+/**
+ * Tuning-half recall baseline of a manifest declaring recallNonRegression: the per-route recall
+ * point estimates of the committed `series-<baselineSeries>-dev.json` (metrics-only manifest).
+ * Returns null when the field is absent. The blind-half comparison is the blind executor's
+ * (aggregates only), never this loader's.
+ */
+export function loadTuningRecallBaseline(seriesSpec, k, env = process.env) {
+  const r = seriesSpec?.recallNonRegression;
+  if (r === undefined) return null;
+  assertRecallNonRegressionShape(r, k);
+  const repo = repoRoot(env);
+  const file = path.join(classifDir(env), 'l4', 'manifests', `series-${r.baselineSeries}-dev.json`);
+  const rel = path.relative(repo, file);
+  if (!existsSync(file)) throw new Error(`series ${k} refused: recall baseline ${rel} absent`);
+  const git = (...a) => spawnSync('git', a, { cwd: repo, encoding: 'utf8' });
+  if (git('ls-files', '--error-unmatch', rel).status !== 0) throw new Error(`series ${k} refused: recall baseline ${rel} is not committed`);
+  if (git('diff', '--quiet', 'HEAD', '--', rel).status !== 0) throw new Error(`series ${k} refused: recall baseline ${rel} differs from the committed version`);
+  const dev = JSON.parse(readFileSync(file, 'utf8'));
+  if (dev.kind !== 'l4-dev' || !dev.aggregates || typeof dev.aggregates !== 'object') throw new Error(`series ${k} refused: recall baseline ${rel} is not an l4-dev manifest`);
+  const recall = {};
+  for (const [route, a] of Object.entries(dev.aggregates)) if (typeof a?.recall === 'number') recall[route] = a.recall;
+  return { baselineSeries: r.baselineSeries, tolerance: r.tolerance, half: 'tuning', recall };
 }
 
 /**
