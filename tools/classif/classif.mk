@@ -162,7 +162,7 @@ classif-l4-optimise: ## Classification pilot L4: 2 max optimisers + reconciliati
 	@test "$(ENV)" = "preprod" || { echo "[classif-l4-optimise] ENV=preprod required"; exit 2; }
 	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l4/optimise.mjs --series $(SERIES) $(if $(DEFERRED),--deferred $(DEFERRED),) $(if $(OPTIMISERS),--optimisers $(OPTIMISERS),) $(if $(RECONCILER),--reconciler $(RECONCILER),) $(if $(DEVIATION),--deviation '$(DEVIATION)',)
 
-classif-l4-blind: ## Classification pilot L4: executor-only blind-half scoring + S113 secondary (SERIES=k CLASSIF_ROLE=test-executor)
+classif-l4-blind: ## Classification pilot L4: executor-only blind-half scoring + S113 secondary (SERIES=k CLASSIF_ROLE=test-executor RERUN_INFRA_FAILED=route,route)
 	@test "$(ENV)" = "preprod" || { echo "[classif-l4-blind] ENV=preprod required"; exit 2; }
 	@test "$(CLASSIF_ROLE)" = "test-executor" || { echo "[classif-l4-blind] CLASSIF_ROLE=test-executor required"; exit 2; }
-	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l4/blind.mjs --series $(SERIES) $(if $(DEFERRED),--deferred $(DEFERRED),) --concurrency $(if $(CONCURRENCY),$(CONCURRENCY),2)
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l4/blind.mjs --series $(SERIES) $(if $(DEFERRED),--deferred $(DEFERRED),) --concurrency $(if $(CONCURRENCY),$(CONCURRENCY),2) $(if $(RERUN_INFRA_FAILED),--rerun-infra-failed $(RERUN_INFRA_FAILED),)
