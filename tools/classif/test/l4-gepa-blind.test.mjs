@@ -126,7 +126,7 @@ test('gepa blind gate: unresolved rows are not misses; classic blind manifests c
 test('review B1a: blind and S113 count a codex answer carrying a tool event as failed and never cache it', withTempHome(async (home) => {
   const s = await setupGepa(home);
   try {
-    const r = await blindPass(home, { k: K, routes: GEPA_ROUTES, fake: { FAKE_SOL_TOOL: 'b-003 undefined' } });
+    const r = await blindPass(home, { k: K, routes: GEPA_ROUTES, fake: { FAKE_SOL_TOOL: 'b-003 eval-1' } });
     assert.equal(r.error, null, r.error?.stack);
     const agg = readAggregates(home, K);
     assert.equal(agg.perRoute['sol-6.1-low'].failures, 1, 'the tool-event answer is a failure');
@@ -134,12 +134,11 @@ test('review B1a: blind and S113 count a codex answer carrying a tool event as f
     const files = readdirSync(path.join(home, 'blind'));
     assert.ok(!files.includes(`blind-s${K}-sol-6.1-low.b-003.json`), 'never cached');
     assert.ok(files.includes(`blind-s${K}-sol-6.1-low.b-004.json`));
-    // S113 prompts carry no item id (devPrompt reads itemId, S113 rows have evalId): the fake
-    // sees "undefined" and emits the command event on every S113 call of sol.
-    for (const e of ['eval-1', 'eval-2']) {
-      assert.ok(!files.includes(`s113-s${K}-sol-6.1-low.${e}.json`), 'S113: never cached either');
-      assert.ok(files.includes(`s113-s${K}-luna-6-low.${e}.json`));
-    }
+    // S113 prompts now carry the evalId as item_id (they used to read "undefined").
+    assert.ok(!files.includes(`s113-s${K}-sol-6.1-low.eval-1.json`), 'S113: never cached either');
+    assert.ok(files.includes(`s113-s${K}-sol-6.1-low.eval-2.json`));
+    const s113Calls = r.calls.filter((c) => c.intent && c.phase === `l4-s113-s${K}`);
+    assert.ok(s113Calls.length > 0);
     const results = r.calls.filter((c) => c.intent === false && c.route === 'sol-6.1-low' && c.itemId === 'b-003');
     assert.ok(results.every((c) => c.toolEvents > 0), 'the calls log keeps the tool-event count');
   } finally { s.cleanup(); }
