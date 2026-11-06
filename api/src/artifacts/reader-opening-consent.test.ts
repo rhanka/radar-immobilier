@@ -48,7 +48,9 @@ function buildWorld() {
     getArtifactIdForRelease: async (releaseId) => releaseId === RELEASE ? ARTIFACT : null });
   const readOperation = (async () => ({ ok: true as const,
     workspaces: [{ id: WORKSPACE, slug: "team", label: "Team",
-      signals: { availability: { state: "open" as const } } }] })) as never;
+      signals: { availability: { state: "open" as const } },
+      workspace: { id: WORKSPACE, slug: "team", label: "Team" },
+      moderateArchive: false, manageMembers: false }] })) as never;
   const app = createReaderContentApp({ authority: createFixtureAuthority(), readOperation,
     contentBase: BASE, grantSecret: GRANT_SECRET, sessionSecret: SESSION_SECRET,
     issuer: ISSUER, openingContent: opening.content,
@@ -160,7 +162,7 @@ describe("deferred basket consent opening", () => {
     const first = await app.request(`https://${ARTIFACT}.${BASE}${h5path}?grant=${grant2}`,
       { headers: { host: `${ARTIFACT}.${BASE}`, cookie: scopedCookie } });
     expect(first.status).toBe(200);
-    expect(((await first.json()) as { workspaces: Array<{ id: string }> }).workspaces[0]?.id).toBe(WORKSPACE);
+    expect(((await first.json()) as { workspaces: Array<{ workspace: { id: string } }> }).workspaces[0]?.workspace.id).toBe(WORKSPACE);
     const second = await app.request(`https://${ARTIFACT}.${BASE}${h5path}?grant=${grant2}`,
       { headers: { host: `${ARTIFACT}.${BASE}`, cookie: scopedCookie } });
     expect(second.status).toBe(200);

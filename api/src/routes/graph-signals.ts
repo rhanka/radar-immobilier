@@ -545,13 +545,19 @@ export async function toGraphSignalCard(
   node: Awaited<ReturnType<typeof getSignalNodesForCity>>[number],
   context: DocEnrichmentContext,
   citySlug?: string,
+  /**
+   * Per-ref enrichment failure journal. Absent, the app log line (city, node,
+   * ref). Artifact reader ops pass a typed callback with no business data
+   * (J1.2d/e §0.4): never a city, a node id or a storage key.
+   */
+  onRefFailed?: (error: unknown) => void,
 ): Promise<GraphSignalCard> {
   const props = (node.props ?? {}) as Record<string, unknown>;
   const docRefs = await enrichDocRefs(
     store,
     extractDocRefs(props, node.sourceRef),
     context,
-    (ref, error) => {
+    onRefFailed ? (_ref, error) => onRefFailed(error) : (ref, error) => {
       console.error(
         `[graph-signals] doc-ref enrichment failed (city=${citySlug ?? node.citySlug ?? "?"} node=${node.id} ref=${ref.rawRef ?? ref.docSha}):`,
         error,

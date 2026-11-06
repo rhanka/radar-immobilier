@@ -10,7 +10,9 @@ import type { ArtifactReaderStore } from "@sentropic/artifacts/server/reader-sto
  *
  * The persisted consent is the baskets consent, never the opening screen:
  * - `baskets.read` covers the H5 business reads (`workspaces.list.v1`,
- *   `baskets.context.v1`, `baskets.search.v1`, `baskets.state.v1`);
+ *   `baskets.context.v1`, `baskets.search.v1`, `baskets.state.v1`) and,
+ *   since scope v2, the J1.2d/e signal reads (`signals.by-city.v1`,
+ *   `signals.coherent-city.v1`, `documents.pv.v1`);
  * - `baskets.write.prepare` covers write-intent preparation only and never
  *   executes a write: every write keeps its own in-app confirmation, which
  *   re-checks this scope at confirmation time.
@@ -29,8 +31,13 @@ import type { ArtifactReaderStore } from "@sentropic/artifacts/server/reader-sto
 /** Host-declared baskets scope ids: what the persisted consent covers. */
 export const BASKET_READ_SCOPE_ID = "baskets.read";
 export const BASKET_WRITE_PREPARE_SCOPE_ID = "baskets.write.prepare";
-/** Scope version: widening the baskets contract bumps it and re-arms every screen. */
-export const BASKET_SCOPE_VERSION = "v1";
+/**
+ * Scope version: widening the baskets contract bumps it and re-arms every screen.
+ * v2 (J1.2d/e §0.4, §14.2): `baskets.read` now also covers the named Gate-B
+ * reader ops `signals.by-city.v1`, `signals.coherent-city.v1` and
+ * `documents.pv.v1`; every existing reader re-approves once.
+ */
+export const BASKET_SCOPE_VERSION = "v2";
 /** The two scopes are granted and revoked independently. */
 export const BASKET_CONSENT_SCOPES: readonly string[] = Object.freeze(
   [BASKET_READ_SCOPE_ID, BASKET_WRITE_PREPARE_SCOPE_ID]);
@@ -42,6 +49,9 @@ export const BASKET_CONSENT_SCOPES: readonly string[] = Object.freeze(
 export function consentScopeForReadOperation(op: string): string | null {
   switch (op) {
     case "workspaces.list.v1":
+    case "signals.by-city.v1":
+    case "signals.coherent-city.v1":
+    case "documents.pv.v1":
     case "baskets.context.v1":
     case "baskets.search.v1":
     case "baskets.state.v1":
