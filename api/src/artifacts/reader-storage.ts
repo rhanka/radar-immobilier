@@ -12,8 +12,11 @@ import { createSharedReaderTickets, type SharedReaderTickets } from "./reader-ti
 // operations `geo.cities.v1` / `geo.collection-items.v1` (municipal,
 // non-personal data — no basket consent). Isolated two-line change for the
 // I2-partage rebase; the revision bump re-approves existing readers.
+// J1.2d/e §14.2: `basket-read-v3` serves the Gate-B named reader ops
+// (by-city, coherent-city, documents.pv) under the same capabilities; the
+// revision bump re-approves every existing reader with BASKET_SCOPE_VERSION v2.
 export const BASKET_READER_PROFILE: ReaderProfile = {
-  name: "radar-baskets", policyRevision: "basket-read-v2", capabilities: ["signals.protected-read", "geo.read"],
+  name: "radar-baskets", policyRevision: "basket-read-v3", capabilities: ["signals.protected-read", "geo.read"],
 };
 
 export function createStoredReader(pool: pg.Pool, scope: string, contentBase: string,
