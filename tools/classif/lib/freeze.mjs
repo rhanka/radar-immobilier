@@ -9,6 +9,7 @@ import { requireFingerprints } from './draw.mjs';
 import { scanText } from './fingerprint.mjs';
 import { sha256 } from './render.mjs';
 import { classifDir } from './paths.mjs';
+import process from 'node:process';
 
 /** Throws when `text` shares a 12-word shingle with the sealed set. Returns the hit counts. */
 export function assertNoVerbatim(text, home, { what = 'candidate' } = {}) {

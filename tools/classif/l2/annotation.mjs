@@ -111,7 +111,7 @@ export function parseAnswers(text, items) {
 const anchorType = (it) => it.anchor?.type ?? (it.kind === 'pv' ? 'Source' : 'Signal');
 
 /** Engram Extraction for one call (all its items). `codes` maps code → verdict (registry). */
-export function toExtraction({ annotator, pass, guideVersion, pairs, codes, goldenRows = null }) {
+export function toExtraction({ annotator, pass, guideVersion, pairs, codes }) {
   const nodes = new Map();
   const edges = [];
   const evidence = [];

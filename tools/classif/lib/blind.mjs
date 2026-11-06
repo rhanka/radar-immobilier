@@ -12,6 +12,7 @@ import { chmodSync, existsSync, readFileSync } from 'node:fs';
 import { keyFromEnv, sha256, sealToFile, unseal } from './refc1.mjs';
 import { appendJsonlRecord, parseJsonlTolerant } from './jsonl.mjs';
 import { repoRoot, classifHome, privateDir } from './paths.mjs';
+import { Buffer } from 'node:buffer';
 
 export const blindDir = (home = classifHome()) => path.join(home, 'blind');
 export const sealedFile = (home = classifHome()) => path.join(blindDir(home), 'blind.sealed');

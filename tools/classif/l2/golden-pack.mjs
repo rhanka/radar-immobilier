@@ -19,6 +19,7 @@ import { keyFromEnv, readmeHashes, sha256, unseal } from '../lib/refc1.mjs';
 import { parseWorkbook, partition } from '../lib/triage.mjs';
 import { openEvalSet } from '../guard/evalset.mjs';
 import { CLASSIF_DIR, REFC_DIR, classifHome, privateDir } from '../lib/paths.mjs';
+import { Buffer } from 'node:buffer';
 
 export const PACK_FILES = { doc: 'golden.md', rows: 'rows.json', codes: 'codes.json' };
 

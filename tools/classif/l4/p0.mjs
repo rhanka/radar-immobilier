@@ -40,7 +40,7 @@ The verdict must be the partition of the code.
 `;
 }
 
-export async function main(argv = process.argv.slice(2)) {
+export async function main() {
   const home = classifHome();
   // Review §11a: shared fail-closed FINAL guard (missing/corrupt manifest refuses).
   const { assertFinalGuide } = await import('../lib/freeze.mjs');
