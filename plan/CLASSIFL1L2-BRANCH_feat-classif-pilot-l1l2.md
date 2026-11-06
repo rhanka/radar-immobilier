@@ -59,6 +59,7 @@ Lots L1 and L2 of the Steve-aligned classification pilot (plan-pilote-v2 §B-L1,
   - [x] GEPA loop on the tuning half only (`make classif-l4-gepa SERIES=k MAX_CALLS=5000 ENV=preprod`), fake-seat tests.
   - [x] GEPA dev and blind verdict (0 miss per route, call failures <= 5 %) for series marked `method: gepa`.
   - [x] CI lint of `tools/classif` (unused variables, explicit `node:` imports).
+  - [x] GEPA review fixes: tool events fail closed (dev, blind, S113, GEPA), codex cwd outside `$CLASSIF_HOME`, answer vs infra failures, final over every eligible candidate, codex home prepared once.
   - [ ] Real GEPA run, freeze of the winner and pre-registration of the GEPA series (conductor, paid calls).
 
 - [x] **Gate**
