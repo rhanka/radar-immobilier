@@ -1,6 +1,7 @@
 // Pre-flight ceilings (G0 v3 §4.1) and candidate digest (§4.3, DRAFT form).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { Buffer } from 'node:buffer';
 import { mkdirSync, mkdtempSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';

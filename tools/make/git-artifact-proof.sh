@@ -35,6 +35,7 @@ if [[ $build == artifact ]]; then npm run build:artifact; else npm run build -w 
   || { echo "build failed"; tail -40 "$out/$label-build.log"; exit 1; }
 echo "build_seconds=$(( $(date +%s) - start ))" | tee -a "$out/$label-toolchain.txt"
 node "$tools/git-artifact-dist.mjs" ui/dist index.html > "$out/$label-dist.json"
-cp -r ui/dist "$out/$label-ui-dist"
+# Kept under a `dist` directory so the repository lint ignore (**/dist/**) covers it.
+mkdir -p "$out/$label" && cp -r ui/dist "$out/$label/dist"
 node -e 'const s=require(process.argv[1]);console.log(`files=${s.fileCount} bytes=${s.totalBytes} largest=${s.largestFile.path}:${s.largestFile.bytes} digest=${s.candidateDigest} violations=${s.violations.length}`)' "$out/$label-dist.json" \
   | tee -a "$out/$label-toolchain.txt"
