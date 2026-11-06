@@ -1,5 +1,8 @@
 import { z } from "zod";
 import type { ReaderOperationName } from "./reader-operations.js";
+import { appMeResponseSchema } from "./reader-me.js";
+import { parseByCityResponse } from "./reader-by-city.js";
+import { parseCoherentCityResponse } from "./reader-coherent-city.js";
 import { Availability, FacetContextResponse } from "../services/facets/classification-context-contract.js";
 import { WorkspaceId } from "../services/facets/classification-query.js";
 import { SignalSearchResponse } from "../services/facets/classification-search-contract.js";
@@ -78,13 +81,23 @@ const geoCollectionItemsResponse = z.object({
 });
 
 
-/** Discovery exposes labels and signal/basket availability, never account or membership details. */
+/**
+ * J1.2d/e §3.3 server-side shape adapter output: what the app
+ * `parseWorkspacesResponse` accepts — nested workspace rows with constant
+ * read-only capabilities — served alongside the published v1 row (labels
+ * and signal/basket availability) that existing starter pages read. Never
+ * `accountId`, never `scope`, never the real capabilities.
+ */
 export const ReaderWorkspacesResponse = z.object({
   ok: z.literal(true),
   workspaces: z.array(z.object({
     id: WorkspaceId, slug: z.string(), label: z.string(),
     signals: z.object({ availability: Availability }).strict(),
-  }).strict()),
+    workspace: z.object({ id: WorkspaceId, slug: z.string(), label: z.string() }).strict(),
+    moderateArchive: z.literal(false),
+    manageMembers: z.literal(false),
+  }).strict().refine((row) => row.workspace.id === row.id && row.workspace.slug === row.slug
+    && row.workspace.label === row.label)).max(64),
 }).strict();
 
 /**
@@ -96,7 +109,10 @@ export const ReaderWorkspacesResponse = z.object({
  * - baskets.state.v1 -> SignalStateResponse
  */
 export function validateReaderResponse(op: ReaderOperationName, value: unknown, readerSub: string): Record<string, unknown> {
+  if (op === "app.me.v1") return appMeResponseSchema.parse(value);
   if (op === "workspaces.list.v1") return ReaderWorkspacesResponse.parse(value);
+  if (op === "signals.by-city.v1") return parseByCityResponse(value);
+  if (op === "signals.coherent-city.v1") return parseCoherentCityResponse(value);
   if (op === "geo.read.v1") return geoResponse.parse(value);
   if (op === "geo.cities.v1") return geoCitiesResponse.parse(value);
   if (op === "geo.collection-items.v1") return geoCollectionItemsResponse.parse(value);

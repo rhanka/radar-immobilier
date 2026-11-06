@@ -144,11 +144,12 @@ build: ## Build all workspaces
 	$(COMPOSE_RUN_API_NODEPS) npm run build --workspace=ui
 
 .PHONY: build-ui-artifact
-build-ui-artifact: ## Build the UI for artifact publication (base /, relay basemap, /__app API base)
+build-ui-artifact: ## Build the UI for artifact publication (named reader-op transport, relay basemap, /__app API base)
 	# NOTE: the build runs in the `api` one-off container, which forwards no
 	# VITE_* variable (only the `ui` service does), so the artifact variables
 	# are passed explicitly with -e. `make build` is untouched.
 	GITHUB_PAGES= $(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm --no-deps -T \
+	  -e VITE_ARTIFACT_MODE=1 \
 	  -e VITE_API_BASE_URL=/__app \
 	  -e VITE_BASEMAP_TILE_URL="/__artifacts/tiles/v1/osm/{z}/{x}/{y}" \
 	  api npm run build --workspace=ui

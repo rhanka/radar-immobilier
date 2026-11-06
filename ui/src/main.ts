@@ -9,6 +9,7 @@ import "./app.css";
 import { mount } from "svelte";
 import App from "./App.svelte";
 import { initializeMaplibreWorker } from "./lib/maps/maplibre-worker";
+import { bootArtifactTransport } from "./lib/net/artifact-boot";
 
 const target = document.getElementById("app");
 
@@ -17,6 +18,9 @@ if (!target) {
 }
 
 async function bootstrap(root: HTMLElement) {
+  // J1.2d/e: a no-op in the app build; the artifact build aliases it to the
+  // transport installer (see vite.config.ts). Runs before any component fetch.
+  bootArtifactTransport();
   await initializeMaplibreWorker();
   return mount(App, { target: root });
 }
