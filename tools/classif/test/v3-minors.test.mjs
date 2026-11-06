@@ -3,12 +3,13 @@
 // resume predicate. No paid call, temp repos/homes only, never the real checkout.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { sha256 } from '../lib/render.mjs';
 import { stableStringify } from '../lib/render.mjs';
 import { testOnlyEnv } from '../lib/paths.mjs';
 import { commitAll, initTempRepo, readFixture, splitShas, swapEnv, tmp, withTempHome, writeRepoFile } from './hermetic-helpers.mjs';
+import process from 'node:process';
 
 const TEST_HOOKS = ['CLASSIF_SPLIT_FILE', 'CLASSIF_REPO', 'CLASSIF_EVAL_DIR', 'CLASSIF_TEST_QUOTA_WAIT_MS', 'CLASSIF_ASTRA_AUTH_SRC', 'CLASSIF_VIBE_CONFIG_SRC'];
 
@@ -201,7 +202,7 @@ test('minors D3: stable stringify canonicalises key order', async () => {
 });
 
 // D3: the S113 plan and skip share one predicate (verified file + eval-run audit).
-test('minors D3: isS113Done needs the verified file and the audit', withTempHome(async (home) => {
+test('minors D3: isS113Done needs the verified file and the audit', withTempHome(async (_home) => {
   const { isS113Done } = await import('../l4/blind.mjs');
   const { ROUTES } = await import('../run-seat.mjs');
   const { model, effort } = ROUTES['glm-5.3-low'];

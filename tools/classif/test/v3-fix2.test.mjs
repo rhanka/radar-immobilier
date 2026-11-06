@@ -16,6 +16,7 @@ import { splitGrouped, seededRng } from '../l3/split.mjs';
 import { hasTracedAmend } from '../l2/converge.mjs';
 import { parseProposalList, parseBallot } from '../l2/amend.mjs';
 import { CLASSIF_DIR, commitAll, initTempRepo, readFixture, swapEnv, tmp, withTempHome, writeRepoFile, writeSeriesRepo } from './hermetic-helpers.mjs';
+import process from 'node:process';
 
 /** Minimal runPass home: 1 signal item, fake pack, profile prompt, empty fingerprints. */
 async function setupRunHome(home, itemId = 'fix2-i1') {

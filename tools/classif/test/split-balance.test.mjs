@@ -9,6 +9,8 @@ import path from 'node:path';
 import { chiSquareHalves } from '../l4/metrics.mjs';
 import { seededRng, splitGrouped } from '../l3/split.mjs';
 import { CLASSIF_DIR, commitAll, initTempRepo, swapEnv, withTempHome, writeRepoFile } from './hermetic-helpers.mjs';
+import console from 'node:console';
+import process from 'node:process';
 
 /** Real stratum totals of the reference set D draw (9 strata, 504 items). */
 export const STRATA_TOTALS = new Map([
@@ -134,7 +136,7 @@ test('split balance: real split.main draws balanced halves from the fixture', wi
   const signalPass = [];
   for (const c of cities) {
     for (const it of c.items) {
-      const [kind, verdict, bpass] = it.stratum.split('|');
+      const [kind, , bpass] = it.stratum.split('|');
       items.push({ itemId: it.id, kind, anchor: { id: `n-${it.id}`, citySlug: c.city }, input: `avis de motion du reglement 9001-9 afin de permettre six logements dans la zone H-9, dossier ${it.id}.` });
       if (kind === 'signal') signalPass.push({ itemId: it.id, pass: bpass });
     }

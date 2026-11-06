@@ -13,6 +13,7 @@ import { chiSquareHalves, cohenKappa, compareRoutes, cpLower, cpUpper, mcnemar, 
 import { buildOptimiserPrompt, parseProposal } from '../l4/optimise.mjs';
 import { devPrompt, parseDevAnswer } from '../l4/dev.mjs';
 import { newKey } from './fixture.mjs';
+import { URL } from 'node:url';
 
 const tmp = () => {
   try { return mkdtempSync(path.join(os.tmpdir(), 'v3-')); }

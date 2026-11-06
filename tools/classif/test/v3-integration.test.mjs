@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { EventEmitter } from 'node:events';
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { callSeat } from '../run-seat.mjs';
@@ -13,6 +13,7 @@ import { readDevItemCache } from '../l4/dev.mjs';
 import { loadGoldenPack } from '../l2/golden-pack.mjs';
 import { main as amendMain } from '../l2/amend.mjs';
 import { BUDGET_CAP, check as budgetCheck, spent, spentByPhase } from '../lib/budget.mjs';
+import process from 'node:process';
 
 const tmp = (prefix = 'v3int-') => {
   try { return mkdtempSync(path.join(os.tmpdir(), prefix)); }
