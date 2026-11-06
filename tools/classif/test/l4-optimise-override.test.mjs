@@ -6,10 +6,10 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
-import { MAX_SEATS, OPTIMISERS, OWNER_DEVIATION_0611, RECONCILER, buildOptimiserPrompt, buildReconciliationPrompt, main, resolveSeats } from '../l4/optimise.mjs';
+import { MAX_SEATS, OPTIMISERS, OWNER_DEVIATION_0611, RECONCILER, buildObjective, buildOptimiserPrompt, buildReconciliationPrompt, main, resolveSeats } from '../l4/optimise.mjs';
 import { ROUTES } from '../run-seat.mjs';
 import { REPO_ROOT, tmp, withTempHome } from './hermetic-helpers.mjs';
-import { CLEAN1, DIRTY, K, MATERIALS, OVERRIDE, callsLog, fakeSeat, manifestFile, setup } from './l4-optimise-fixture.mjs';
+import { CLEAN1, DIRTY, K, MATERIALS_SENT, OVERRIDE, callsLog, fakeSeat, manifestFile, setup } from './l4-optimise-fixture.mjs';
 
 test('override: the known max seats are the run-seat.mjs max routes; defaults unchanged', () => {
   assert.deepEqual([...MAX_SEATS].sort(), ['astra-max', 'muse-wonder-max', 'opus-5.5-max']);
@@ -51,7 +51,7 @@ test('override: astra-max + opus-5.5-max optimise, opus-5.5-max reconciles, all 
   assert.deepEqual(f.byKind('opt').map((s) => s.annotator), ['astra-max', 'opus-5.5-max']);
   assert.deepEqual(f.byKind('rec').map((s) => s.annotator), ['opus-5.5-max']);
   // Firewall unchanged: every optimiser seat gets exactly the buildOptimiserPrompt output.
-  for (const s of f.byKind('opt')) assert.equal(s.prompt, buildOptimiserPrompt(MATERIALS));
+  for (const s of f.byKind('opt')) assert.equal(s.prompt, buildOptimiserPrompt(MATERIALS_SENT));
   assert.match(f.byKind('rec')[0].prompt, /## Candidate A \(astra-max\)/);
   assert.match(f.byKind('rec')[0].prompt, /## Candidate B \(opus-5\.5-max\)/);
   const disk = JSON.parse(readFileSync(manifestFile(repo), 'utf8'));
@@ -70,7 +70,7 @@ test('override: the defaults are unchanged (muse-wonder-max + opus-5.5-max, muse
   const m = await main(['--series', K], { seat: f.seat });
   assert.deepEqual(f.byKind('opt').map((s) => s.annotator), ['muse-wonder-max', 'opus-5.5-max']);
   assert.deepEqual(f.byKind('rec').map((s) => s.annotator), ['muse-wonder-max']);
-  assert.equal(f.byKind('rec')[0].prompt, buildReconciliationPrompt([CLEAN1, CLEAN1]));
+  assert.equal(f.byKind('rec')[0].prompt, buildReconciliationPrompt([CLEAN1, CLEAN1], OPTIMISERS, buildObjective(MATERIALS_SENT)));
   const disk = JSON.parse(readFileSync(manifestFile(repo), 'utf8'));
   for (const man of [m, disk]) {
     assert.deepEqual(man.optimisers, ['muse-wonder-max', 'opus-5.5-max']);
