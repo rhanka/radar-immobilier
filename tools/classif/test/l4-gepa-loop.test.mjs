@@ -160,7 +160,7 @@ test('gepa loop: the run stops cleanly at the call cap and too small a cap refus
   const repo = setup(home);
   // Initial population = 5 seeds × 4 D_pareto cases × 5 routes = 100; final reserve = 6 × 5 = 30.
   const tiny = fakeSeat();
-  await assert.rejects(runGepa({ home, k: K, maxCalls: 129, seat: tiny.seat, log: quiet }), /MAX_CALLS 129 cannot hold the initial population \(100 calls\) plus one final evaluation \(30\)/);
+  await assert.rejects(runGepa({ home, k: K, maxCalls: 129, seat: tiny.seat, log: quiet }), /MAX_CALLS 129 cannot hold the initial population \(100 calls\) plus the final evaluation \(30\)/);
   assert.equal(tiny.seen.length, 0);
   const f = fakeSeat();
   const m = await runGepa({ home, k: K, maxCalls: 150, seat: f.seat, log: quiet });
