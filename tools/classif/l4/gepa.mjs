@@ -9,8 +9,11 @@
 //
 // Data: the TUNING half only (half === 'tuning', status resolved), split by a recorded seed
 // into D_feedback (~60 %, mutations) and D_pareto (~40 %, selection), stratified by verdict.
-// The blind half is never read: this module opens no blind file and imports no blind helper;
-// the split refuses any non-tuning row and the prompt builders refuse any non-allowed key or
+// l3b/reference-d.jsonl carries both halves (blind rows with their labels): readGepaTuning
+// drops every non-tuning row as soon as its line is parsed (same reader filter as dev.mjs and
+// optimise.mjs) — a blind row is never kept, returned nor sent to a seat. No blind-only file
+// (sealed set, blind/ aggregates, access log) is opened and no blind helper is imported; the
+// split refuses any non-tuning row and the prompt builders refuse any non-allowed key or
 // non-tuning trace (same firewall as optimise.mjs buildOptimiserPrompt).
 //
 // Loop: population = P0..P4. Each iteration draws a parent from the per-case Pareto front on
@@ -24,19 +27,29 @@
 // the 5 routes; rejected with more misses than the parent, or with equal misses and no less
 // noise; otherwise evaluated on D_pareto and added to the population.
 //
-// Final choice: the best front candidates with 0 miss on D_pareto are evaluated on the whole
-// tuning half (D_feedback too, 5 routes); only those with 0 miss in total are retained, the one
-// with the least noise wins. None retained → result `no-candidate`, no fallback. The winner is
+// Final choice: EVERY front candidate with 0 miss on D_pareto is evaluated on the whole tuning
+// half (D_feedback too, 5 routes), least D_pareto noise first, as long as the budget holds (the
+// manifest counts the ones left out). Only 0 miss in total with a failed-call share <= 5 % per
+// route (the blind gate rule) is retained, the least noise wins. None retained → result
+// `no-candidate` (flagged incomplete when candidates were left out), no fallback. The winner is
 // frozen as l4/prompts/P<k>.md (shingle-checked), the metrics-only manifest
 // l4/manifests/series-<k>-gepa.json records the run, and the winner's evaluated rows seed the
 // dev per-item cache of series k (same prompt bytes, same route, same item).
 //
+// Failures: an invalid answer (no-json, unknown-code, verdict-not-partition) counts as shown
+// and is cached as that answer; an infrastructure failure (exit, timeout, quota, any tool
+// event) is never cached and trips the in-flight breaker of its route (> max(1, 5 %) of a
+// batch: no further call launched, the run stops, a resume retries). A child beyond the 5 %
+// failed-call share on a route of its mini-batch is rejected (`answer-failures`).
+//
 // Budget: MAX_CALLS (default 5000) is a run cap enforced by lib/budget.mjs runBudget (phases
 // `l4-gepa-<run>.*`), on top of the pilot cap. An iteration starts only when its planned calls
-// plus the reserve of one final evaluation fit; the loop then stops cleanly and the final
-// choice uses what remains. Resume is idempotent: per-call caches, candidate files and the
-// iteration journal in $CLASSIF_HOME/l4/gepa-<run>/ (iterations.jsonl) replay every finished
-// step without a paid call.
+// plus the reserve of one final evaluation fit; the loop then stops cleanly (also after
+// MAX_SKIPPED consecutive skipped iterations) and the final choice uses what remains. Resume is
+// idempotent: per-call caches keyed by the sha of the full evaluated prompt and of the code
+// registry, candidate files and the iteration journal in $CLASSIF_HOME/l4/gepa-<run>/
+// (iterations.jsonl) replay every finished step without a paid call; infrastructure failures
+// kept on D_pareto are retried; a changed evaluation context refuses the resume.
 import path from 'node:path';
 import process from 'node:process';
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
@@ -47,7 +60,7 @@ import { classifDir, classifHome, privateDir } from '../lib/paths.mjs';
 import { assertNoVerbatim } from '../lib/freeze.mjs';
 import { runBudget } from '../lib/budget.mjs';
 import { loadCodes } from '../l2/run.mjs';
-import { devPrompt, parseDevAnswer } from './dev.mjs';
+import { devPrompt, parseSeatResult } from './dev.mjs';
 import { groupRoutesByFamily, runFamiliesParallel } from './families.mjs';
 import { shownMisses } from './metrics.mjs';
 import { MAX_REPAIRS, parseProposal, seatCall, shingleCheckWithRepair } from './optimise.mjs';
@@ -58,7 +71,7 @@ export const VERDICTS = ['pertinent', 'a_surveiller', 'non_pertinent'];
 export const FEEDBACK_SHARE = 0.6;
 export const MINIBATCH_SIZE = 30;
 export const CROSSOVER_EVERY = 3;
-export const FINAL_TOP = 3;
+export const MAX_SKIPPED = 5;
 export const DEFAULT_MAX_CALLS = 5000;
 export const EXCERPT_CHARS = 1500;
 export const JUSTIFICATION_CHARS = 300;
@@ -150,12 +163,18 @@ export function stratifiedSplit(rows, { seed, feedbackShare = FEEDBACK_SHARE } =
 }
 
 /**
- * Tuning rows with their frozen input. Same filter as optimise.mjs (half tuning, resolved);
- * no blind file is opened, and only tuning inputs leave this function.
+ * Resolved tuning rows with their frozen input. reference-d.jsonl holds both halves: each line
+ * is parsed and kept only when it is a resolved tuning row (the optimise.mjs filter), so no
+ * blind row survives the read; only tuning inputs leave this function.
  */
 export function readGepaTuning(home) {
-  const ref = parseJsonlTolerant(readFileSync(path.join(home, 'l3b', 'reference-d.jsonl'), 'utf8'));
-  const tuning = ref.filter((r) => r.half === 'tuning' && r.status === 'resolved');
+  const tuning = [];
+  for (const line of readFileSync(path.join(home, 'l3b', 'reference-d.jsonl'), 'utf8').split('\n')) {
+    if (!line.trim()) continue;
+    let r;
+    try { r = JSON.parse(line); } catch { continue; }
+    if (r?.half === 'tuning' && r.status === 'resolved') tuning.push(r);
+  }
   const ids = new Set(tuning.map((r) => r.itemId));
   const corpus = new Map();
   for (const i of parseJsonlTolerant(readFileSync(path.join(home, 'l0', 'dev-items.jsonl'), 'utf8'))) if (ids.has(i.itemId)) corpus.set(i.itemId, i.input);
@@ -224,11 +243,12 @@ export function admissionDecision(child, parent) {
 
 /**
  * Final choice over evaluated finalists ({ id, total: { misses, noise, failures } }): only 0
- * miss in total is retained, the least noise wins (then fewer failures, then rank order).
+ * miss in total and no route over the 5 % failed-call share is retained, the least noise wins
+ * (then fewer failures, then rank order).
  * Returns null when no finalist has 0 miss — no fallback.
  */
 export function finalChoice(finalists) {
-  const retained = finalists.filter((f) => f.status === 'evaluated' && f.total.misses === 0);
+  const retained = finalists.filter((f) => f.status === 'evaluated' && f.total.misses === 0 && !f.failureCeilingExceeded?.length);
   if (!retained.length) return null;
   return [...retained].sort((a, b) => a.total.noise - b.total.noise || a.total.failures - b.total.failures || a.rank - b.rank)[0];
 }
@@ -313,62 +333,71 @@ ${promptB.trim()}
 
 // ---------------------------------------------------------------- evaluation (5 routes)
 
-const evalCacheFile = (ctx, sha, route, itemId) => path.join(ctx.runDir, 'eval-cache', sha.slice(0, 16), route, `${itemId}.json`);
+/** sha of what was really sent for one case: the full devPrompt (template + candidate + item input) and the code registry. */
+function evalKey(ctx, cand, id) {
+  const k = `${cand.sha}|${id}`;
+  if (!ctx.evalKeys.has(k)) ctx.evalKeys.set(k, sha256(`${sha256(devPrompt(cand.text, ctx.refById.get(id)))}\n${ctx.codesSha}`));
+  return ctx.evalKeys.get(k);
+}
 
-function readEvalCache(ctx, sha, route, itemId) {
-  const f = evalCacheFile(ctx, sha, route, itemId);
+const evalCacheFile = (ctx, cand, route, itemId) => path.join(ctx.runDir, 'eval-cache', cand.sha.slice(0, 16), route, `${itemId}.json`);
+
+function readEvalCache(ctx, cand, route, itemId) {
+  const f = evalCacheFile(ctx, cand, route, itemId);
   if (!existsSync(f)) return null;
   try {
     const c = JSON.parse(readFileSync(f, 'utf8'));
-    if (c.promptSha256 === sha && c.route === route && c.itemId === itemId) return c.row;
+    if (c.promptSha256 === cand.sha && c.evalKey === evalKey(ctx, cand, itemId) && c.route === route && c.itemId === itemId) return c.row;
   } catch { /* corrupt cache: re-run */ }
   return null;
 }
 
 /** Uncached (route, item) calls of a candidate over `ids`. */
-export function uncachedCalls(ctx, sha, ids) {
+export function uncachedCalls(ctx, cand, ids) {
   let n = 0;
-  for (const route of ctx.routes) for (const id of ids) if (!readEvalCache(ctx, sha, route, id)) n++;
+  for (const route of ctx.routes) for (const id of ids) if (!readEvalCache(ctx, cand, route, id)) n++;
   return n;
 }
 
 /**
  * Evaluates a candidate on `ids` over every route (families in parallel, `concurrency` calls per
- * route). Returns { itemId: { route: row } }. Successful rows are cached per (prompt sha, route,
- * item); failures are not (retried on resume). Circuit breaker: a route failing more than
- * max(1, 5 %) of the batch stops the run (seat infrastructure, resume retries).
+ * route). Returns { itemId: { route: row } }. Two failure classes (review GEPA B2):
+ * - `answer` (no-json, unknown-code, verdict-not-partition): the model answered badly; counted
+ *   shown, CACHED as that answer, never trips the breaker;
+ * - `infra` (non-zero exit, timeout, quota, any tool event): never cached (retried on resume).
+ * Circuit breaker, in flight: once a route has more than max(1, 5 %) infra failures on the
+ * batch, no further call of that route is launched; the batch then stops the run.
  */
 export async function evaluateCandidate(ctx, cand, ids, step) {
-  ctx.budget.check(uncachedCalls(ctx, cand.sha, ids));
+  ctx.budget.check(uncachedCalls(ctx, cand, ids));
   const phase = `${ctx.phase}.eval`;
+  const allowed = Math.max(1, Math.floor(ids.length * GEPA_FAILURE_CEILING));
   const runRoute = async (route) => {
+    let infraFailures = 0;
+    let tripped = false;
     const rows = await pool(ids.map((id) => async () => {
-      const hit = readEvalCache(ctx, cand.sha, route, id);
+      const hit = readEvalCache(ctx, cand, route, id);
       if (hit) return hit;
-      const item = ctx.refById.get(id);
+      if (tripped) return null;
       appendJsonlRecord(ctx.callsLog, { at: new Date().toISOString(), intent: true, phase, route, itemId: id, candidate: cand.id, step });
-      const r = await ctx.seat(route, devPrompt(cand.text, item), { base: ctx.seatTmp, timeoutMs: 1800000 });
+      const r = await ctx.seat(route, devPrompt(cand.text, ctx.refById.get(id)), { base: ctx.seatTmp, timeoutMs: 1800000 });
       appendJsonlRecord(ctx.callsLog, { at: new Date().toISOString(), intent: false, phase, route, itemId: id, candidate: cand.id, step,
         exitCode: r.code, latencyMs: r.latencyMs ?? null, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null, toolEvents: r.toolEvents ?? null });
-      let parsed;
-      if (r.code !== 0) parsed = { failed: true, why: `exit-${r.code}` };
-      else if ((r.toolEvents ?? 0) > 0) parsed = { failed: true, why: 'tool-events' };
-      else parsed = parseDevAnswer(r.text, ctx.codes);
+      const parsed = parseSeatResult(r, ctx.codes);
+      if (parsed.infra && ++infraFailures > allowed) tripped = true;
       const j = parsed.failed ? null : parseJsonObject(r.text);
-      const row = { itemId: id, pred: parsed.failed ? null : { verdict: parsed.verdict, code: parsed.code }, failed: parsed.failed, why: parsed.why ?? null,
+      const row = { itemId: id, pred: parsed.failed ? null : { verdict: parsed.verdict, code: parsed.code }, failed: parsed.failed, infra: parsed.infra, why: parsed.why ?? null,
         justification: trunc(j?.justification ?? j?.citation ?? j?.reason ?? '', JUSTIFICATION_CHARS),
         usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null };
-      if (!row.failed) {
-        const f = evalCacheFile(ctx, cand.sha, route, id);
+      if (!row.infra) {
+        const f = evalCacheFile(ctx, cand, route, id);
         mkdirSync(path.dirname(f), { recursive: true, mode: 0o700 });
-        writeFileSync(f, JSON.stringify({ promptSha256: cand.sha, route, itemId: id, row }), { mode: 0o600 });
+        writeFileSync(f, JSON.stringify({ promptSha256: cand.sha, evalKey: evalKey(ctx, cand, id), route, itemId: id, row }), { mode: 0o600 });
       }
       return row;
     }), ctx.concurrency);
-    const failures = rows.filter((r) => r.failed).length;
-    const allowed = Math.max(1, Math.floor(ids.length * GEPA_FAILURE_CEILING));
-    if (failures > allowed) {
-      throw new Error(`classif-l4-gepa: route ${route} failed ${failures}/${ids.length} calls on ${step} (> ${allowed}): seat infrastructure, run stopped (a resume retries the failed calls)`);
+    if (tripped) {
+      throw new Error(`classif-l4-gepa: route ${route} had ${infraFailures} infrastructure failures on ${step} (> ${allowed} of ${ids.length}): no further call launched, run stopped (a resume retries them)`);
     }
     return rows;
   };
@@ -388,10 +417,10 @@ export function scoreEvals(evals, refById, routes = GEPA_ROUTES) {
 }
 
 const compactEvals = (evals) => Object.fromEntries(Object.entries(evals).map(([id, byRoute]) => [id,
-  Object.fromEntries(Object.entries(byRoute).map(([route, r]) => [route, { failed: r.failed, pred: r.pred }]))]));
+  Object.fromEntries(Object.entries(byRoute).map(([route, r]) => [route, { failed: r.failed, infra: !!r.infra, pred: r.pred }]))]));
 
 /** Per-route { misses, noise, failures, items } of compact evals. */
-function perRouteCounts(evalsList, refById, routes) {
+export function perRouteCounts(evalsList, refById, routes) {
   const out = Object.fromEntries(routes.map((r) => [r, { misses: 0, noise: 0, failures: 0, items: 0 }]));
   for (const evals of evalsList) {
     for (const [id, byRoute] of Object.entries(evals)) {
@@ -405,6 +434,11 @@ function perRouteCounts(evalsList, refById, routes) {
     }
   }
   return out;
+}
+
+/** Routes whose failed-call share (answer or infra) exceeds the GEPA ceiling (the blind gate rule). */
+export function overFailureCeiling(perRoute) {
+  return Object.entries(perRoute).filter(([, c]) => c.items && c.failures / c.items > GEPA_FAILURE_CEILING + 1e-12).map(([r]) => r);
 }
 
 // ---------------------------------------------------------------- run state
@@ -426,6 +460,22 @@ function loadCandidate(ctx, id, sha = null) {
   return { ...c, scores: scoreEvals(c.pareto, ctx.refById, ctx.routes) };
 }
 
+/** D_pareto cases of a candidate holding an infrastructure failure on some route. */
+const infraCases = (cand) => Object.keys(cand.pareto).filter((id) => Object.values(cand.pareto[id]).some((r) => r.infra));
+
+/**
+ * Re-runs the infrastructure failures a candidate kept on D_pareto (review GEPA m2): only those
+ * (route, case) pairs are uncached, so only they are paid. Returns the reloaded candidate.
+ */
+async function retryInfra(ctx, cand, step) {
+  const ids = infraCases(cand);
+  if (!ids.length) return cand;
+  ctx.log(`${cand.id}: retrying the infrastructure failures of ${ids.length} D_pareto case(s)`);
+  const evals = await evaluateCandidate(ctx, cand, ids, step);
+  saveCandidate(ctx, { ...cand, pareto: { ...cand.pareto, ...compactEvals(evals) } });
+  return loadCandidate(ctx, cand.id, cand.sha);
+}
+
 /** Known misses / noise cases of a candidate on D_feedback, from finished journal records only. */
 export function knownErrors(journal, candId, prior = {}) {
   const misses = new Set(prior.misses ?? []);
@@ -442,6 +492,14 @@ export function knownErrors(journal, candId, prior = {}) {
     }
   }
   return { misses: [...misses].sort(), noise: [...noise].sort() };
+}
+
+/** Number of consecutive `skipped` iterations at the end of the journal. */
+export function trailingSkipped(journal) {
+  const recs = [...journal].sort((a, b) => a.iter - b.iter);
+  let n = 0;
+  for (let i = recs.length - 1; i >= 0 && recs[i].status === 'skipped'; i--) n++;
+  return n;
 }
 
 /** Seed prior: the misses of seed P<j> on its series-j tuning dev outputs (tuning files only). */
@@ -480,14 +538,43 @@ async function proposal(ctx, iter, kind, prompt) {
   throw new Error(`classif-l4-gepa: iteration ${iter} ${kind}: no usable prompt (${tried.join('; ')})`);
 }
 
+/**
+ * Final selection (review GEPA M1): EVERY ranked candidate without miss on D_pareto is evaluated
+ * on the whole tuning half, in ranked order (least D_pareto noise first), as long as the budget
+ * holds; one that does not fit is `not-evaluated` (counted), the next ones are still tried
+ * (cached cases cost nothing). `ranked`: [{ base, pareto }]; `cost(e)` the uncached calls of e;
+ * `evaluate(e)` → { total, perRoute }. Returns { finalists, winner, coverage }.
+ */
+export async function finalSelection(ranked, { fits, cost, evaluate }) {
+  const finalists = [];
+  for (const [rank, e] of ranked.entries()) {
+    const base = { ...e.base, rank, pareto: e.pareto };
+    if (e.pareto.misses > 0) { finalists.push({ ...base, status: 'excluded', reason: 'misses-on-d-pareto' }); continue; }
+    if (!fits(cost(e))) { finalists.push({ ...base, status: 'not-evaluated', reason: 'budget' }); continue; }
+    const r = await evaluate(e);
+    const over = overFailureCeiling(r.perRoute);
+    finalists.push({ ...base, status: 'evaluated', ...r, ...(over.length ? { failureCeilingExceeded: over } : {}) });
+  }
+  const eligible = finalists.filter((x) => x.status !== 'excluded').length;
+  const notEvaluated = finalists.filter((x) => x.status === 'not-evaluated').length;
+  return { finalists, winner: finalChoice(finalists), coverage: { eligible, evaluated: eligible - notEvaluated, notEvaluated } };
+}
+
 // ---------------------------------------------------------------- the loop
+
+/** sha of the evaluation context of a run: code registry, devPrompt template, every tuning input. */
+function contextSha(ctx, rows) {
+  const template = sha256(devPrompt('<CANDIDATE>', { itemId: '<ITEM>', input: '<INPUT>' }));
+  const inputs = [...rows].sort((a, b) => (a.itemId < b.itemId ? -1 : 1)).map((r) => `${r.itemId}:${sha256(r.input)}`).join('\n');
+  return sha256(`${ctx.codesSha}\n${template}\n${inputs}`);
+}
 
 /**
  * Runs (or resumes) the GEPA loop and the final choice. `seat` replaces callSeat (tests).
  * Returns the repo manifest object.
  */
 export async function runGepa({ home = classifHome(), repoClassif = classifDir(process.env), k, run = null, seed = null, maxCalls = DEFAULT_MAX_CALLS,
-  maxIterations = null, finalTop = FINAL_TOP, concurrency = 2, seat = callSeat, log = (m) => process.stderr.write(`classif-l4-gepa: ${m}\n`) }) {
+  maxIterations = null, maxSkipped = MAX_SKIPPED, concurrency = 2, seat = callSeat, log = (m) => process.stderr.write(`classif-l4-gepa: ${m}\n`) }) {
   if (k === undefined || k === null || !/^\d+$/.test(String(k))) throw new Error('classif-l4-gepa: SERIES=<k> (integer) required');
   const runId = run ?? `s${k}`;
   if (!/^[A-Za-z0-9-]+$/.test(runId)) throw new Error(`classif-l4-gepa: RUN must be [A-Za-z0-9-]+ (got ${runId})`);
@@ -500,27 +587,39 @@ export async function runGepa({ home = classifHome(), repoClassif = classifDir(p
   const budget = runBudget(home, { prefix: `${phase}.`, cap: Number(maxCalls) });
   const rows = readGepaTuning(home);
   const refById = new Map(rows.map((r) => [r.itemId, r]));
-  const split = stratifiedSplit(rows, { seed: seedValue });
+  const codes = loadCodes();
+  const ctx = { home, runDir, phase, budget, refById, routes: GEPA_ROUTES, codes, codesSha: sha256(JSON.stringify([...codes].sort())), evalKeys: new Map(),
+    seat, concurrency, log, callsLog: path.join(home, 'l2', 'calls.jsonl'), seatTmp: privateDir(path.join(home, 'l4', 'seat-tmp')) };
+  const split = { ...stratifiedSplit(rows, { seed: seedValue }), contextSha256: contextSha(ctx, rows) };
   const splitFile = path.join(runDir, 'split.json');
   if (existsSync(splitFile)) {
     const prev = JSON.parse(readFileSync(splitFile, 'utf8'));
     if (prev.seed !== split.seed || prev.sha256.feedback !== split.sha256.feedback || prev.sha256.pareto !== split.sha256.pareto) {
       throw new Error(`classif-l4-gepa: run ${runId} was split with seed ${prev.seed} over other tuning rows (start a new RUN)`);
     }
+    if (prev.contextSha256 !== split.contextSha256) {
+      throw new Error(`classif-l4-gepa: run ${runId} was evaluated under another context (code registry, devPrompt template or tuning inputs changed): start a new RUN`);
+    }
   } else writeFileSync(splitFile, JSON.stringify(split, null, 1), { mode: 0o600 });
-  const ctx = { home, runDir, phase, budget, refById, routes: GEPA_ROUTES, codes: loadCodes(), seat, concurrency, log,
-    callsLog: path.join(home, 'l2', 'calls.jsonl'), seatTmp: privateDir(path.join(home, 'l4', 'seat-tmp')) };
   const journalFile = path.join(runDir, 'iterations.jsonl');
   const journal = readJsonlRecords(journalFile).filter((r) => Number.isInteger(r.iter) && r.status);
   const finalReserve = split.feedback.length * ctx.routes.length;
 
-  // Initial population P0..P4 on D_pareto (fails before any call when the cap cannot hold it).
+  // Initial population P0..P4 on D_pareto, then the admitted children; kept infra failures are
+  // retried (fails before any call when the cap cannot hold it).
   const seeds = SEED_PROMPTS.map((v) => {
     const text = readFileSync(path.join(repoClassif, 'l4', 'prompts', `${v}.md`), 'utf8');
     assertNoVerbatim(text, home, { what: `seed prompt ${v}` });
     return { id: v, origin: `seed:${v}`, parents: [], iter: null, text, sha: sha256(text) };
   });
-  const initPlanned = seeds.reduce((s, c) => s + (loadCandidate(ctx, c.id, c.sha) ? 0 : uncachedCalls(ctx, c.sha, split.pareto)), 0);
+  const admitted = journal.filter((r) => r.status === 'admitted').sort((a, b) => a.iter - b.iter);
+  const loadedChildren = admitted.map((rec) => {
+    const c = loadCandidate(ctx, rec.child.id, rec.child.sha);
+    if (!c) throw new Error(`classif-l4-gepa: journal admits ${rec.child.id} but its candidate file is missing`);
+    return c;
+  });
+  const initPlanned = seeds.reduce((s, c) => { const l = loadCandidate(ctx, c.id, c.sha); return s + (l ? infraCases(l).length * ctx.routes.length : uncachedCalls(ctx, c, split.pareto)); }, 0)
+    + loadedChildren.reduce((s, c) => s + infraCases(c).length * ctx.routes.length, 0);
   if (!budget.fits(initPlanned + finalReserve)) {
     throw new Error(`classif-l4-gepa: MAX_CALLS ${maxCalls} cannot hold the initial population (${initPlanned} calls) plus one final evaluation (${finalReserve}); remaining ${budget.remaining()}`);
   }
@@ -532,14 +631,10 @@ export async function runGepa({ home = classifHome(), repoClassif = classifDir(p
       const evals = await evaluateCandidate(ctx, s, split.pareto, `seed-${s.id}`);
       saveCandidate(ctx, { ...s, pareto: compactEvals(evals) });
       c = loadCandidate(ctx, s.id, s.sha);
-    }
+    } else c = await retryInfra(ctx, c, `retry-${s.id}`);
     candidates.push(c);
   }
-  for (const rec of journal.filter((r) => r.status === 'admitted').sort((a, b) => a.iter - b.iter)) {
-    const c = loadCandidate(ctx, rec.child.id, rec.child.sha);
-    if (!c) throw new Error(`classif-l4-gepa: journal admits ${rec.child.id} but its candidate file is missing`);
-    candidates.push(c);
-  }
+  for (const c of loadedChildren) candidates.push(await retryInfra(ctx, c, `retry-${c.id}`));
 
   // Iterations.
   let stop = null;
@@ -547,6 +642,7 @@ export async function runGepa({ home = classifHome(), repoClassif = classifDir(p
   for (let iter = 0; ; iter++) {
     if (doneIters.has(iter)) continue;
     if (maxIterations !== null && iter >= Number(maxIterations)) { stop = 'max-iterations'; break; }
+    if (trailingSkipped(journal) >= Number(maxSkipped)) { stop = 'stagnation'; break; }
     const rng = rngFor(split.seed, 'iteration', iter);
     const front = paretoFront(candidates, split.pareto);
     const kind = iter % CROSSOVER_EVERY === CROSSOVER_EVERY - 1 && front.length >= 2 ? 'crossover' : 'mutation';
@@ -556,7 +652,7 @@ export async function runGepa({ home = classifHome(), repoClassif = classifDir(p
     const prior = (c) => (c.origin.startsWith('seed:') ? seedPrior(home, c.id) : {});
     const known = parents.map((c) => knownErrors(journal, c.id, prior(c)));
     const minibatch = selectMinibatch(split.feedback, { misses: known.flatMap((e) => e.misses), noise: known.flatMap((e) => e.noise) }, rng);
-    const planned = parents.reduce((s, c) => s + uncachedCalls(ctx, c.sha, minibatch), 0) + MUTATION_CALLS_MAX
+    const planned = parents.reduce((s, c) => s + uncachedCalls(ctx, c, minibatch), 0) + MUTATION_CALLS_MAX
       + minibatch.length * ctx.routes.length + split.pareto.length * ctx.routes.length;
     if (!budget.fits(planned + finalReserve)) { stop = 'budget'; break; }
     log(`iteration ${iter} (${kind}): parents ${parentIds.join('+')}, mini-batch ${minibatch.length}, ${budget.spent()} run calls spent`);
@@ -596,8 +692,12 @@ export async function runGepa({ home = classifHome(), repoClassif = classifDir(p
     const child = { id: `i${iter}`, origin: `${kind}:${parentIds.join('+')}`, parents: parentIds, iter, text, sha: sha256(text) };
     const childEvals = await evaluateCandidate(ctx, child, minibatch, `i${iter}-child`);
     const childTotal = totalScore(scoreEvals(childEvals, refById, ctx.routes), minibatch);
-    const decision = admissionDecision(childTotal, parentTotals[bestParent]);
     const childRec = { id: child.id, sha: child.sha, seat: prop.seat, repairs: checked.repairs, minibatch: childTotal, ...errorsOf(childEvals, refById, ctx.routes) };
+    // A child whose answers break the format on a route beyond the ceiling would look "shown"
+    // everywhere: rejected (journaled), never a run stop (review GEPA B2).
+    const over = overFailureCeiling(perRouteCounts([compactEvals(childEvals)], refById, ctx.routes));
+    if (over.length) { finish('rejected', 'answer-failures', { child: { ...childRec, failureCeilingExceeded: over } }); continue; }
+    const decision = admissionDecision(childTotal, parentTotals[bestParent]);
     if (!decision.admitted) { finish('rejected', decision.reason, { child: childRec }); continue; }
     const paretoEvals = await evaluateCandidate(ctx, child, split.pareto, `i${iter}-pareto`);
     saveCandidate(ctx, { ...child, pareto: compactEvals(paretoEvals) });
@@ -607,68 +707,74 @@ export async function runGepa({ home = classifHome(), repoClassif = classifDir(p
   }
   log(`loop stopped (${stop}); ${candidates.length} candidates, ${budget.spent()} run calls spent`);
 
-  // Final choice on the whole tuning half.
+  // Final choice on the whole tuning half: infra failures kept on D_pareto by front candidates
+  // are retried first (when the budget holds), then every 0-miss candidate is evaluated.
   const allIds = [...split.feedback, ...split.pareto].sort();
-  const front = paretoFront(candidates, split.pareto);
-  const ranked = front.map((f) => ({ c: candidates.find((x) => x.id === f.id), wins: f.wins }))
-    .map((e, i) => ({ ...e, pareto: totalScore(e.c.scores, split.pareto), order: i }))
-    .sort((a, b) => compareScore(a.pareto, b.pareto) || a.pareto.failures - b.pareto.failures || a.order - b.order);
-  const finalists = [];
-  const finalEvals = new Map();
-  let evaluated = 0;
-  for (const [rank, e] of ranked.entries()) {
-    const base = { id: e.c.id, origin: e.c.origin, promptSha256: e.c.sha, wins: e.wins, rank, pareto: e.pareto };
-    if (e.pareto.misses > 0) { finalists.push({ ...base, status: 'excluded', reason: 'misses-on-d-pareto' }); continue; }
-    if (evaluated >= Number(finalTop)) { finalists.push({ ...base, status: 'not-evaluated', reason: 'final-top' }); continue; }
-    if (!budget.fits(uncachedCalls(ctx, e.c.sha, split.feedback))) { finalists.push({ ...base, status: 'not-covered', reason: 'budget' }); continue; }
-    const fb = await evaluateCandidate(ctx, e.c, split.feedback, `final-${e.c.id}`);
-    finalEvals.set(e.c.id, fb);
-    evaluated++;
-    const total = totalScore({ ...e.c.scores, ...scoreEvals(fb, refById, ctx.routes) }, allIds);
-    finalists.push({ ...base, status: 'evaluated', total, perRoute: perRouteCounts([e.c.pareto, compactEvals(fb)], refById, ctx.routes) });
+  for (const f of paretoFront(candidates, split.pareto)) {
+    const i = candidates.findIndex((c) => c.id === f.id);
+    if (infraCases(candidates[i]).length && budget.fits(infraCases(candidates[i]).length * ctx.routes.length)) candidates[i] = await retryInfra(ctx, candidates[i], `final-retry-${f.id}`);
   }
-  const winner = finalChoice(finalists);
+  const front = paretoFront(candidates, split.pareto);
+  const ranked = front.map((f, order) => {
+    const c = candidates.find((x) => x.id === f.id);
+    return { c, order, pareto: totalScore(c.scores, split.pareto), base: { id: c.id, origin: c.origin, promptSha256: c.sha, wins: f.wins } };
+  }).sort((a, b) => compareScore(a.pareto, b.pareto) || a.pareto.failures - b.pareto.failures || a.order - b.order);
+  const { finalists, winner, coverage } = await finalSelection(ranked, {
+    fits: (n) => budget.fits(n),
+    cost: (e) => uncachedCalls(ctx, e.c, split.feedback),
+    evaluate: async (e) => {
+      const fb = await evaluateCandidate(ctx, e.c, split.feedback, `final-${e.c.id}`);
+      return { total: totalScore({ ...e.c.scores, ...scoreEvals(fb, refById, ctx.routes) }, allIds),
+        perRoute: perRouteCounts([e.c.pareto, compactEvals(fb)], refById, ctx.routes) };
+    },
+  });
   const journalAll = readJsonlRecords(journalFile).filter((r) => Number.isInteger(r.iter) && r.status);
   const count = (pred) => journalAll.filter(pred).length;
+  const noCandidateReason = coverage.notEvaluated
+    ? `no evaluated candidate reached 0 miss on the whole tuning half (5 routes) within the failure ceiling; ${coverage.notEvaluated} eligible candidate(s) not evaluated (budget): result incomplete; no fallback`
+    : 'no front candidate reached 0 miss on the whole tuning half (5 routes) within the failure ceiling; no fallback';
   const manifest = { kind: 'l4-gepa', method: GEPA_METHOD, series: String(k), run: runId, createdAt: new Date().toISOString(),
     seed: split.seed, split: { feedback: split.feedback.length, pareto: split.pareto.length, feedbackShare: split.feedbackShare, strata: split.strata, sha256: split.sha256 },
+    contextSha256: split.contextSha256,
     routes: ctx.routes, mutator: GEPA_MUTATOR, reconciler: GEPA_RECONCILER,
-    objective: 'lexicographic: 0 miss (reference P/S predicted non_pertinent on any route, failed call = shown), then least noise (reference N predicted shown); P<->S not penalised',
+    objective: 'lexicographic: 0 miss (reference P/S predicted non_pertinent on any route, failed call = shown), then least noise (reference N predicted shown); P<->S not penalised; failed-call share per route <= 5 % (blind gate rule)',
     maxCalls: Number(maxCalls), callsSpent: budget.spent(), stop,
     iterations: { total: journalAll.length, mutation: count((r) => r.kind === 'mutation'), crossover: count((r) => r.kind === 'crossover'),
       admitted: count((r) => r.status === 'admitted'), rejected: count((r) => r.status === 'rejected'), skipped: count((r) => r.status === 'skipped') },
     population: candidates.map((c) => ({ id: c.id, origin: c.origin, promptSha256: c.sha, pareto: totalScore(c.scores, split.pareto) })),
     front: front.map((f) => ({ id: f.id, wins: f.wins })),
+    finalCoverage: coverage,
     finalists,
     result: winner
-      ? { status: 'selected', candidate: winner.id, origin: winner.origin, version: `P${k}`, promptSha256: winner.promptSha256, total: winner.total }
-      : { status: 'no-candidate', reason: 'no front candidate reached 0 miss on the whole tuning half (5 routes); no fallback' },
+      ? { status: 'selected', candidate: winner.id, origin: winner.origin, version: `P${k}`, promptSha256: winner.promptSha256, total: winner.total,
+        ...(coverage.notEvaluated ? { notEvaluated: coverage.notEvaluated } : {}) }
+      : { status: 'no-candidate', ...(coverage.notEvaluated ? { incomplete: true, notEvaluated: coverage.notEvaluated } : {}), reason: noCandidateReason },
     trackNote: 'per-item tuning outputs, split ids and the iteration journal stay private in $CLASSIF_HOME/l4/gepa-<run>/; this manifest carries counts only' };
   mkdirSync(path.join(repoClassif, 'l4', 'manifests'), { recursive: true });
   if (winner) {
-    const text = candidates.find((c) => c.id === winner.id).text;
-    assertNoVerbatim(text, home, { what: `gepa winner ${winner.id}` });
-    seedDevCache(ctx, { k, text, ids: allIds });
-    writeFileSync(outPrompt, `${text.trim()}\n`);
+    const cand = candidates.find((c) => c.id === winner.id);
+    assertNoVerbatim(cand.text, home, { what: `gepa winner ${winner.id}` });
+    seedDevCache(ctx, { k, cand, ids: allIds });
+    writeFileSync(outPrompt, `${cand.text.trim()}\n`);
   }
   writeFileSync(path.join(repoClassif, 'l4', 'manifests', `series-${k}-gepa.json`), `${JSON.stringify(manifest, null, 1)}\n`);
   return manifest;
 }
 
 /**
- * Seeds the dev per-item cache of series k with the winner's cached rows (dev.mjs
- * readDevItemCache key: series, prompt sha of P<k>.md, route, item). Same prompt bytes as
- * devPrompt(P<k>.md), so `make classif-l4-dev SERIES=k` replays them without a paid call.
- * Existing files are never overwritten; failures were never cached.
+ * Seeds the dev per-item cache of series k with the winner's cached answers (dev.mjs
+ * readDevItemCache key: series, prompt sha of P<k>.md, route, item). devPrompt trims the
+ * prompt, so the frozen P<k>.md sends the same bytes as the evaluated candidate and
+ * `make classif-l4-dev SERIES=k` replays them without a paid call. Only accepted answers are
+ * seeded (dev never caches a failure); existing files are never overwritten.
  */
-export function seedDevCache(ctx, { k, text, ids }) {
-  const frozen = `${text.trim()}\n`;
-  const sha = sha256(frozen);
+export function seedDevCache(ctx, { k, cand, ids }) {
+  const sha = sha256(`${cand.text.trim()}\n`);
   const dir = privateDir(path.join(ctx.home, 'l4', `series-${k}`));
   let seeded = 0;
   for (const route of ctx.routes) {
     for (const id of ids) {
-      const row = readEvalCache(ctx, sha, route, id);
+      const row = readEvalCache(ctx, cand, route, id);
       if (!row || row.failed) continue;
       const ref = ctx.refById.get(id);
       const devRow = { itemId: id, ref: ref.code, refVerdict: ref.verdict, unresolved: false, pred: row.pred, failed: false, why: null,
@@ -693,7 +799,7 @@ export async function main(argv = process.argv.slice(2), { seat = callSeat } = {
     return Number(v);
   };
   const manifest = await runGepa({ k, run: flag('--run') || null, seed: flag('--seed') || null, maxCalls: num('--max-calls', DEFAULT_MAX_CALLS),
-    maxIterations: num('--max-iterations', null), finalTop: num('--final-top', FINAL_TOP), concurrency: num('--concurrency', 2), seat });
+    maxIterations: num('--max-iterations', null), maxSkipped: num('--max-skipped', MAX_SKIPPED), concurrency: num('--concurrency', 2), seat });
   process.stdout.write(`${JSON.stringify(manifest, null, 2)}\n`);
   return manifest;
 }
