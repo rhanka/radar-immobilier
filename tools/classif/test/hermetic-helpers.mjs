@@ -54,6 +54,7 @@ export function withTempHome(fn) {
     // Codex seat homes live OUTSIDE CLASSIF_HOME (review GEPA R4): a sibling temp dir, never the
     // real ~/.local/share/radar-classif-seats.
     const seatHomes = tmp('hermetic-seats-');
+    const reposBefore = new Set(TEMP_REPOS);
     process.env.CLASSIF_SEAT_HOMES = seatHomes;
     process.env.CLASSIF_HOME = home;
     process.env.CLASSIF_TEST_MODE = '1';
@@ -72,13 +73,21 @@ export function withTempHome(fn) {
     writeFileSync(fakeVibe, 'active_model = ""\n');
     process.env.CLASSIF_VIBE_CONFIG_SRC = fakeVibe;
     try { await fn(home); }
-    finally { restoreEnv(saved); rmSync(home, { recursive: true, force: true }); rmSync(seatHomes, { recursive: true, force: true }); }
+    finally { restoreEnv(saved); rmSync(home, { recursive: true, force: true }); rmSync(seatHomes, { recursive: true, force: true });
+      for (const r of TEMP_REPOS) if (!reposBefore.has(r)) { rmSync(r, { recursive: true, force: true }); TEMP_REPOS.delete(r); }
+    }
   };
 }
 
-/** Fresh temp git repo (user config set so commits work). */
+// Review GEPA N5: every temp repo is removed — at the end of the withTempHome that created it,
+// and at process exit for the tests that run outside withTempHome.
+const TEMP_REPOS = new Set();
+process.on('exit', () => { for (const r of TEMP_REPOS) rmSync(r, { recursive: true, force: true }); });
+
+/** Fresh temp git repo (user config set so commits work); removed by withTempHome or at exit. */
 export function initTempRepo() {
   const repo = tmp('hermetic-repo-');
+  TEMP_REPOS.add(repo);
   spawnSync('git', ['init', '-q'], { cwd: repo });
   spawnSync('git', ['config', 'user.email', 't@t'], { cwd: repo });
   spawnSync('git', ['config', 'user.name', 't'], { cwd: repo });

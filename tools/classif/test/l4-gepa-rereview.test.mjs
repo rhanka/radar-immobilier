@@ -53,13 +53,14 @@ test('review R4: migration copies the auth of the former home in $CLASSIF_HOME, 
 
 test('review R3: the seat dir is removed when building the command or spawning fails', withTempHome(async (home) => {
   // No auth anywhere: the codex home preparation throws inside build.
-  const restores = [swapEnv('CLASSIF_ASTRA_AUTH_SRC', path.join(home, 'absent-auth.json')), swapEnv('CLASSIF_SEAT_HOMES', mkdtempSync(path.join(os.tmpdir(), 'rr-empty-seats-')))];
+  const emptySeats = mkdtempSync(path.join(os.tmpdir(), 'rr-empty-seats-'));
+  const restores = [swapEnv('CLASSIF_ASTRA_AUTH_SRC', path.join(home, 'absent-auth.json')), swapEnv('CLASSIF_SEAT_HOMES', emptySeats)];
   const base = os.tmpdir();
   const before = new Set(seatDirs(base));
   try {
     await assert.rejects(async () => callSeat('luna-6-low', 'secret item text', { spawnImpl: () => { throw new Error('never reached'); } }), /isolation refused: no auth to copy/);
     assert.deepEqual(seatDirs(base).filter((n) => !before.has(n)), [], 'no codex seat dir left behind');
-  } finally { while (restores.length) restores.pop()(); }
+  } finally { while (restores.length) restores.pop()(); rmSync(emptySeats, { recursive: true, force: true }); }
   const own = path.join(home, 'seat-base');
   await assert.rejects(callSeat('opus-5.5-low', 'secret item text', { base: own, spawnImpl: () => { throw new Error('spawn failed'); } }), /spawn failed/);
   assert.deepEqual(readdirSync(own), [], 'no seat dir left behind after a spawn failure');
