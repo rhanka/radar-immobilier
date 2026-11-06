@@ -1,0 +1,17 @@
+# Hermetic runner for the git-artifact proof and tests (no service, no secret,
+# no .env). The repository is mounted read-only only to reach the trusted
+# tools; the proof builds from a clean tree streamed on stdin.
+services:
+  node:
+    image: node:24-bookworm-slim
+    working_dir: /workspace
+    entrypoint: []
+    environment:
+      HOME: /tmp/home
+      npm_config_cache: /tmp/npm-cache
+    volumes:
+      - ../..:/workspace:ro
+      - ../../tmp/git-artifact-proof:/out
+      - modules:/workspace-modules
+volumes:
+  modules:

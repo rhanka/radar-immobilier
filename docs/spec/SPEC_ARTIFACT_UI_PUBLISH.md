@@ -11,12 +11,21 @@ already points at its future prefix.
 make build-ui-artifact ENV=<env>
 ```
 
-This produces `ui/dist` with the artifact variables only; the normal app
-build (`make build`) is unchanged:
+This runs the root `npm run build:artifact` script, the single source of the
+artifact variables, named by the root descriptor `sentropic.artifact.json`
+(G0 v3 §4.1: install at the root lockfile, script at the root, output
+`ui/dist`). The script runs `tools/make/ui-artifact-env.mjs`, which drops
+every inherited `VITE_*` variable (allowlist: exactly the three below), drops
+`GITHUB_PAGES` and `QA_HARNESS`, refuses the build when a `ui/.env*` file is
+present, and refuses the result when a dropped value appears in `ui/dist`.
+It produces `ui/dist` with the artifact variables only; the normal app build
+(`make build`) is unchanged:
 
 | Variable | App build (`make build`) | Artifact build (`make build-ui-artifact`) |
 |---|---|---|
-| `base` | `/` (or `/radar-immobilier/` under `GITHUB_PAGES=true`) | `/` (`GITHUB_PAGES` forced empty) |
+| `base` | `/` (or `/radar-immobilier/` under `GITHUB_PAGES=true`) | `/` (`GITHUB_PAGES` unset) |
+| `VITE_ARTIFACT_MODE` | unset | `1` (named reader-op transport) |
+| `QA_HARNESS` and every other `VITE_*` (e.g. `VITE_GEO_OGC_BASE_URL`, `VITE_RADAR_ONTOLOGY_WRITE_TOKEN`) | inherited | dropped (never inherited from the executor) |
 | `VITE_API_BASE_URL` | empty (same-origin via the Vite proxy) | `/__app` (future reader relay prefix, J1.2c) |
 | `VITE_BASEMAP_TILE_URL` | unset (OSM template `https://tile.openstreetmap.org/{z}/{x}/{y}.png`) | `/__artifacts/tiles/v1/osm/{z}/{x}/{y}` (same-origin tile relay) |
 
