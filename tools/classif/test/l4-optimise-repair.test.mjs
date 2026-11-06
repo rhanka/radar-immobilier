@@ -10,6 +10,7 @@ import { MAX_REPAIRS, REPAIR_INSTRUCTION, buildRepairPrompt, main } from '../l4/
 import { buildFingerprints, scanText } from '../lib/fingerprint.mjs';
 import { BUDGET_CAP, spent, spentByPhase } from '../lib/budget.mjs';
 import { initTempRepo, withTempHome, writeRepoFile } from './hermetic-helpers.mjs';
+import process from 'node:process';
 
 const K = '7';
 const SALT = 'repair-salt';

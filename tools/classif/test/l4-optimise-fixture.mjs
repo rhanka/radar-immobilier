@@ -6,6 +6,7 @@ import path from 'node:path';
 import { REPAIR_INSTRUCTION } from '../l4/optimise.mjs';
 import { buildFingerprints } from '../lib/fingerprint.mjs';
 import { initTempRepo, writeRepoFile } from './hermetic-helpers.mjs';
+import process from 'node:process';
 
 export const K = '7';
 export const SALT = 'override-salt';

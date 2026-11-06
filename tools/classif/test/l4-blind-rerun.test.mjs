@@ -9,6 +9,7 @@ import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { REPO_ROOT, tmp, withTempHome } from './hermetic-helpers.mjs';
 import { SCORE_KEYS, auditOf, blindIds, blindPass, callsOf, readAggregates, setupBlind } from './l4-blind-fixture.mjs';
+import process from 'node:process';
 
 const K = '97';
 const ROUTES3 = ['opus-5.5-low', 'mistral-large-4-medium', 'glm-5.3-low'];

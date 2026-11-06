@@ -4,6 +4,7 @@ import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, statSync, wri
 import os from 'node:os';
 import path from 'node:path';
 import { ASTRA_ISOLATED_CONFIG, CODEX_BENIGN_ITEM_TYPES, CODEX_KNOWN_EVENT_TYPES, ROUTES, astraCodexHomeDir, countCodexToolEvents, ensureAstraHome, seatEnv } from '../run-seat.mjs';
+import process from 'node:process';
 
 const tmp = () => {
   try { return mkdtempSync(path.join(os.tmpdir(), 'astra-')); }
@@ -96,7 +97,8 @@ test('astra isolation: dedicated CODEX_HOME, config with NO mcp_servers, auth co
     const dir = ensureAstraHome(home);
     assert.equal(dir, astraCodexHomeDir(home));
     assert.ok(dir.startsWith(home));
-    assert.ok(!dir.startsWith(path.join(os.homedir(), '.local', 'share', 'radar-classif')), 'must not write the real seat home');
+    // The real seat home is <real CLASSIF_HOME>/seat-homes (make classif-test puts TMPDIR under the real home).
+    assert.ok(!dir.startsWith(path.join(os.homedir(), '.local', 'share', 'radar-classif', 'seat-homes')), 'must not write the real seat home');
     assert.equal(statSync(dir).mode & 0o777 & 0o077, 0, 'seat home mode 700');
     const cfg = readFileSync(`${dir}/config.toml`, 'utf8');
     assert.ok(!/^\s*\[mcp_servers/m.test(cfg), 'isolated config holds NO mcp_servers section');

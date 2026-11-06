@@ -11,6 +11,8 @@ import { loadCodes } from '../l2/run.mjs';
 import { SEAT_FAMILY_ORDER, groupRoutesByFamily, runFamiliesParallel, seatFamily } from '../l4/families.mjs';
 import { EVAL_ROUTES } from '../l4/dev.mjs';
 import { commitAll, initTempRepo, readFixture, swapEnv, tmp, withTempHome, writeRepoFile, writeSeriesRepo } from './hermetic-helpers.mjs';
+import process from 'node:process';
+import { setTimeout } from 'node:timers';
 
 const SEATS = ['muse', 'claude', 'vibe', 'agy'];
 const NON_PERTINENT = [...loadCodes()].find(([, v]) => v === 'non_pertinent')[0];

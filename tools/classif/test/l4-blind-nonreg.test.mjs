@@ -10,6 +10,7 @@ import { blindRouteVerdict, loadBlindRecallBaseline } from '../l4/blind.mjs';
 import { audit } from '../lib/blind.mjs';
 import { withTempHome } from './hermetic-helpers.mjs';
 import { SCORE_KEYS, blindIds, blindPass, readAggregates, setupBlind } from './l4-blind-fixture.mjs';
+import process from 'node:process';
 
 const K = '5';
 const B = 4;
