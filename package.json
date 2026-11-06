@@ -50,6 +50,7 @@
     "katex": "0.18.2"
   },
   "scripts": {
+    "build:artifact": "node tools/make/ui-artifact-env.mjs npm run build -w ui",
     "data:polygons": "node --experimental-strip-types radar/data-prep/fetch-municipal-polygons.ts"
   }
 }
