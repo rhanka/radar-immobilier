@@ -16,7 +16,7 @@ import { ROUTES, callSeat } from '../run-seat.mjs';
 import { appendJsonlRecord, parseJsonlTolerant } from '../lib/jsonl.mjs';
 import { sha256, stableStringify } from '../lib/render.mjs';
 import { EVAL_DIR_DEFAULT, classifDir, repoRoot, testOnlyEnv, classifHome, privateDir } from '../lib/paths.mjs';
-import { EVAL_ROUTES, devPrompt, parseDevAnswer } from './dev.mjs';
+import { EVAL_ROUTES, devPrompt, parseSeatResult } from './dev.mjs';
 import { pertinentMasked, recallRegressed, seriesVerdict, shownMisses, shownStats } from './metrics.mjs';
 import { GEPA_METHOD, gepaRouteVerdict, gepaSeriesVerdict, seriesRouteUniverse } from './gepa-common.mjs';
 import { check as budgetCheck } from '../lib/budget.mjs';
@@ -195,7 +195,9 @@ export function blindRouteVerdict({ stats, failures, items }, seriesSpec, baseli
 export function gepaBlindRouteGate(blind, rows, ceiling) {
   const misses = shownMisses(blind.map((b, i) => ({ itemId: b.itemId, refVerdict: b.verdict, unresolved: b.status === 'unresolved',
     pred: rows[i].pred, failed: rows[i].failed }))).length;
-  return gepaRouteVerdict({ misses, failures: rows.filter((r) => r.failed).length, items: rows.length }, ceiling);
+  // Failure share over the RESOLVED blind rows (the rows a miss can be counted on).
+  const resolved = blind.map((b, i) => (b.status === 'unresolved' ? null : rows[i])).filter(Boolean);
+  return gepaRouteVerdict({ misses, failures: resolved.filter((r) => r.failed).length, items: resolved.length }, ceiling);
 }
 
 export function buildBlindManifest({ k, promptSha, routes, blindItems, aggregatesSha256, infraReruns = [], recallNonRegression = null, method = null }) {
@@ -374,8 +376,8 @@ function readdirSyncSafe(dir) {
       appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: true, phase: `l4-blind-s${k}`, route, itemId: item.itemId });
       const r = await callSeat(route, devPrompt(frozen, item), { base: seatTmp, timeoutMs: 1800000 });
       appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: `l4-blind-s${k}`, route, itemId: item.itemId,
-        exitCode: r.code, latencyMs: r.latencyMs, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null });
-      const parsed = r.code === 0 ? parseDevAnswer(r.text, codes) : { verdict: null, code: null, failed: true, why: `exit-${r.code}` };
+        exitCode: r.code, latencyMs: r.latencyMs, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null, toolEvents: r.toolEvents ?? null });
+      const parsed = parseSeatResult(r, codes);
       const row = { itemId: item.itemId, failed: parsed.failed, why: parsed.why ?? null,
         pred: parsed.failed ? null : { verdict: parsed.verdict, code: parsed.code } };
       // Review N4: failures are never cached — a transient seat failure is retried on
@@ -453,8 +455,8 @@ function readdirSyncSafe(dir) {
       appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: true, phase: `l4-s113-s${k}`, route, itemId: item.evalId });
       const r = await callSeat(route, devPrompt(frozen, item), { base: seatTmp, timeoutMs: 1800000 });
       appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: `l4-s113-s${k}`, route, itemId: item.evalId,
-        exitCode: r.code, latencyMs: r.latencyMs });
-      const parsed = r.code === 0 ? parseDevAnswer(r.text, codes) : { verdict: null, code: null, failed: true, why: `exit-${r.code}` };
+        exitCode: r.code, latencyMs: r.latencyMs, toolEvents: r.toolEvents ?? null });
+      const parsed = parseSeatResult(r, codes);
       const row = { failed: parsed.failed, pred: parsed.failed ? null : { verdict: parsed.verdict, code: parsed.code } };
       // Review N4: failures are never cached — retried on resume.
       if (!row.failed) {
