@@ -26,6 +26,9 @@ export const MATERIALS = {
   aggregates: { r1: { recall: 0.5 } },
   currentPrompt: `${RULES}\n`,
 };
+// What main() hands buildOptimiserPrompt for the fixture: the series-K dev manifest is the
+// only one on disk, so the baseline is the current series (no baseline prompt text).
+export const MATERIALS_SENT = { ...MATERIALS, baselinePrompt: { series: Number(K), version: `P${K}`, best: 0.5, recall: { r1: 0.5 }, text: null } };
 
 export function setup(home) {
   const repo = initTempRepo();
