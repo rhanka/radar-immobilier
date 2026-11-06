@@ -12,8 +12,11 @@
  * reserved 404). Every app path is either:
  * - mapped to one named op (`app.me.v1`, `workspaces.list.v1`,
  *   `signals.by-city.v1`, `signals.coherent-city.v1`);
+ * - the zoning layer (`qc-zonage-<slug>/items`) read through the governed
+ *   `geo.collection-items.v1` op (#1010), paged and reshaped by
+ *   `zonesCollectionResponseViaReader` for the unchanged `fetchZones`;
  * - a named source gap answered LOCALLY with a typed error and zero network
- *   call (zonage §7, zones §9, lots §8, CPTAQ §10): the views show their
+ *   call (zones §9, lots §8, CPTAQ §10): the views show their
  *   « indisponible » notices, never an empty dataset;
  * - refused locally and typed (`/api/documents/raw?…` — PDFs only travel
  *   through the server-built `documents.pv.v1` URL of the DTO; any other
@@ -25,17 +28,22 @@
  * behind a build-time constant that Vite folds away.
  */
 
+import { zonesCollectionResponseViaReader, type ReaderOpResult } from "$lib/maps/zones-reader-transport";
+
 export type ArtifactOperation =
+  | "geo.collection-items.v1"
   | "app.me.v1"
   | "workspaces.list.v1"
   | "signals.by-city.v1"
   | "signals.coherent-city.v1";
 
-/** Named gaps of the field review (§7–§10): refused locally, never relayed. */
-export type ArtifactSourceGap = "zonage" | "zones" | "lots" | "cptaq";
+/** Named gaps of the field review (§8–§10): refused locally, never relayed. */
+export type ArtifactSourceGap = "zones" | "lots" | "cptaq";
 
 export type ArtifactRoute =
   | { kind: "op"; op: ArtifactOperation; params: URLSearchParams }
+  /** Zoning items: app path (base stripped) for `zonesCollectionResponseViaReader`. */
+  | { kind: "zoning"; path: string }
   | { kind: "gap"; gap: ArtifactSourceGap }
   | { kind: "refused"; status: 400 | 404 | 405; code: string }
   | { kind: "passthrough" };
@@ -82,7 +90,10 @@ export function routeArtifactRequest(rawUrl: string, method: string, origin: str
   if (!(pathname === "/api" || pathname.startsWith("/api/"))) return { kind: "passthrough" };
   // Defence in depth: a storage key must never reach the reader host.
   if (pathname === "/api/documents/raw") return { kind: "refused", status: 400, code: "raw_document_refused" };
-  if (ZONAGE.test(pathname)) return { kind: "gap", gap: "zonage" };
+  if (ZONAGE.test(pathname)) {
+    return method.toUpperCase() === "GET" ? { kind: "zoning", path: `${pathname}${url.search}` }
+      : { kind: "refused", status: 405, code: "method_not_allowed" };
+  }
   if (LOTS.test(pathname)) return { kind: "gap", gap: "lots" };
   if (ZONES.test(pathname)) return { kind: "gap", gap: "zones" };
   const isGet = method.toUpperCase() === "GET";
@@ -186,7 +197,7 @@ export function createArtifactTransport(deps: ArtifactTransportDeps): typeof fet
     return renewing;
   }
 
-  async function callOperation(op: ArtifactOperation, params: URLSearchParams, init: RequestInit | undefined): Promise<Response> {
+  async function callOperation(op: ArtifactOperation, params: URLSearchParams, init: { signal?: AbortSignal | null } | undefined): Promise<Response> {
     if (!grant || now() - grantAt >= REFRESH_BEFORE_MS) await renew();
     const send = () => {
       const search = params.toString();
@@ -221,6 +232,20 @@ export function createArtifactTransport(deps: ArtifactTransportDeps): typeof fet
     if (init?.signal?.aborted) throw new DOMException("The operation was aborted.", "AbortError");
     if (route.kind === "gap") return sourceGapResponse(route.gap);
     if (route.kind === "refused") return jsonResponse(route.status, { ok: false, error: route.code });
+    if (route.kind === "zoning") {
+      // Pages of the governed zoning op through the same bridge call; a
+      // request the zoning mapping does not cover (bbox, norms) fails typed.
+      const invoke = async (op: "geo.collection-items.v1", params: Readonly<Record<string, string>>,
+        opInit?: { signal?: AbortSignal }): Promise<ReaderOpResult> => {
+        const response = await callOperation(op, new URLSearchParams(params), opInit);
+        const retryAfter = Number(response.headers.get("retry-after"));
+        return { status: response.status, body: await response.json().catch(() => null),
+          ...(Number.isFinite(retryAfter) && retryAfter > 0 ? { retryAfterSec: retryAfter } : {}) };
+      };
+      const mapped = await zonesCollectionResponseViaReader(route.path, invoke,
+        init?.signal ? { signal: init.signal } : {});
+      return mapped ?? jsonResponse(400, { ok: false, error: "zones_request_not_mapped" });
+    }
     return callOperation(route.op, route.params, init);
   };
 }
