@@ -178,3 +178,12 @@ GEPA_CONCURRENCY ?= 2
 classif-l4-gepa: ## Classification pilot L4: GEPA prompt optimisation, tuning half only (SERIES=k MAX_CALLS=5000 SEED= RUN= MAX_ITER= MAX_SKIPPED=5 GEPA_CONCURRENCY=2)
 	@test "$(ENV)" = "preprod" || { echo "[classif-l4-gepa] ENV=preprod required"; exit 2; }
 	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l4/gepa.mjs --series $(SERIES) --max-calls $(MAX_CALLS) --concurrency $(GEPA_CONCURRENCY) $(if $(SEED),--seed '$(SEED)',) $(if $(RUN),--run $(RUN),) $(if $(MAX_ITER),--max-iterations $(MAX_ITER),) $(if $(MAX_SKIPPED),--max-skipped $(MAX_SKIPPED),)
+
+# Codex seat auth (review GEPA R5): the isolated seat homes live in ~/.local/share/radar-classif-seats/<seat>
+# (outside $(CLASSIF_HOME)). After a new codex login, or when a run stops on authentication errors,
+# refresh the seat then resume the stopped run with the same command.
+.PHONY: classif-seat-auth-refresh
+classif-seat-auth-refresh: ## Classification pilot: copy ~/.codex/auth.json atomically into one codex seat home (SEAT=astra-max|sol-6.1-low|luna-6-low)
+	@test "$(ENV)" = "preprod" || { echo "[classif-seat-auth-refresh] ENV=preprod required"; exit 2; }
+	@test -n "$(SEAT)" || { echo "[classif-seat-auth-refresh] SEAT=<seat> required"; exit 2; }
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/seat-auth-refresh.mjs --seat $(SEAT)

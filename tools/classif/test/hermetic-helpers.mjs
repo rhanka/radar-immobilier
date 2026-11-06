@@ -50,7 +50,11 @@ export function withTempHome(fn) {
     const home = tmp('hermetic-home-');
     const saved = saveEnv(['CLASSIF_HOME', 'CLASSIF_TEST_MODE', 'CLASSIF_SPLIT_FILE', 'CLASSIF_REPO',
       'CLASSIF_EVAL_DIR', 'CLASSIF_TEST_QUOTA_WAIT_MS', 'CLASSIF_ROLE', 'CLASSIF_BLIND_KEY',
-      'CLASSIF_ACTOR', 'CLASSIF_ASTRA_AUTH_SRC', 'CLASSIF_VIBE_CONFIG_SRC', 'CLASSIF_EVAL_KEY']);
+      'CLASSIF_ACTOR', 'CLASSIF_ASTRA_AUTH_SRC', 'CLASSIF_VIBE_CONFIG_SRC', 'CLASSIF_EVAL_KEY', 'CLASSIF_SEAT_HOMES']);
+    // Codex seat homes live OUTSIDE CLASSIF_HOME (review GEPA R4): a sibling temp dir, never the
+    // real ~/.local/share/radar-classif-seats.
+    const seatHomes = tmp('hermetic-seats-');
+    process.env.CLASSIF_SEAT_HOMES = seatHomes;
     process.env.CLASSIF_HOME = home;
     process.env.CLASSIF_TEST_MODE = '1';
     delete process.env.CLASSIF_SPLIT_FILE;
@@ -68,7 +72,7 @@ export function withTempHome(fn) {
     writeFileSync(fakeVibe, 'active_model = ""\n');
     process.env.CLASSIF_VIBE_CONFIG_SRC = fakeVibe;
     try { await fn(home); }
-    finally { restoreEnv(saved); rmSync(home, { recursive: true, force: true }); }
+    finally { restoreEnv(saved); rmSync(home, { recursive: true, force: true }); rmSync(seatHomes, { recursive: true, force: true }); }
   };
 }
 

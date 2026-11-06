@@ -33,7 +33,7 @@
 import path from 'node:path';
 import process from 'node:process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { ROUTES, callSeat, parseJsonObject } from '../run-seat.mjs';
+import { ROUTES, callSeat, parseJsonObject, seatAuthRefreshCommand } from '../run-seat.mjs';
 import { appendJsonlRecord, parseJsonlTolerant } from '../lib/jsonl.mjs';
 import { sha256 } from '../lib/render.mjs';
 import { classifDir, classifHome, privateDir } from '../lib/paths.mjs';
@@ -255,7 +255,9 @@ export async function seatCall(home, callsLog, phase, annotator, prompt, seat = 
   const r = await seat(annotator, prompt, { base: privateDir(path.join(home, 'l4', 'seat-tmp')), timeoutMs: 3600000 });
   appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase, annotator, exitCode: r.code,
     latencyMs: r.latencyMs, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null, toolEvents: r.toolEvents ?? null });
-  if (r.code !== 0) throw new Error(`optimiser ${annotator} failed with seat exit ${r.code}`);
+  if (r.code !== 0) {
+    throw new Error(`optimiser ${annotator} failed with seat exit ${r.code}${r.authError ? `: authentication error, refresh the seat with \`${seatAuthRefreshCommand(annotator)}\` then re-run the same command` : ''}`);
+  }
   // Fail-closed tool policy (L2 parity): an answer produced with tool events is inadmissible and never cached.
   if ((r.toolEvents ?? 0) > 0) throw new Error(`optimiser ${annotator} answer refused: ${r.toolEvents} tool event(s) (fail-closed tool policy)`);
   writeFileSync(file, JSON.stringify({ promptSha256: sha256(prompt), text: r.text }), { mode: 0o600 });

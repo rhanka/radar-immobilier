@@ -29,6 +29,10 @@ test('astra-max route: conductor-verified codex argv, model and effort', () => {
   process.env.CLASSIF_HOME = home;
   process.env.CLASSIF_TEST_MODE = '1';
   process.env.CLASSIF_ASTRA_AUTH_SRC = fakeAuth;
+  // Codex seat homes outside CLASSIF_HOME (review GEPA R4), in a temp dir (never the real one).
+  const prevSeats = process.env.CLASSIF_SEAT_HOMES;
+  const seats = tmp();
+  process.env.CLASSIF_SEAT_HOMES = seats;
   try {
     const prompt = 'classify this synthetic item';
     const built = r.build(dir, path.join(dir, 'prompt.md'), prompt);
@@ -47,6 +51,8 @@ test('astra-max route: conductor-verified codex argv, model and effort', () => {
     if (prevHome === undefined) delete process.env.CLASSIF_HOME; else process.env.CLASSIF_HOME = prevHome;
     if (prevSrc === undefined) delete process.env.CLASSIF_ASTRA_AUTH_SRC; else process.env.CLASSIF_ASTRA_AUTH_SRC = prevSrc;
     if (prevMode === undefined) delete process.env.CLASSIF_TEST_MODE; else process.env.CLASSIF_TEST_MODE = prevMode;
+    if (prevSeats === undefined) delete process.env.CLASSIF_SEAT_HOMES; else process.env.CLASSIF_SEAT_HOMES = prevSeats;
+    rmSync(seats, { recursive: true, force: true });
     rmSync(dir, { recursive: true, force: true });
     rmSync(home, { recursive: true, force: true });
   }
@@ -93,12 +99,16 @@ test('astra isolation: dedicated CODEX_HOME, config with NO mcp_servers, auth co
   process.env.CLASSIF_HOME = home;
   process.env.CLASSIF_TEST_MODE = '1';
   process.env.CLASSIF_ASTRA_AUTH_SRC = fakeAuth;
+  // Codex seat homes outside CLASSIF_HOME (review GEPA R4), in a temp dir (never the real one).
+  const prevSeats = process.env.CLASSIF_SEAT_HOMES;
+  const seats = tmp();
+  process.env.CLASSIF_SEAT_HOMES = seats;
   try {
-    const dir = ensureAstraHome(home);
-    assert.equal(dir, astraCodexHomeDir(home));
-    assert.ok(dir.startsWith(home));
-    // The real seat home is <real CLASSIF_HOME>/seat-homes (make classif-test puts TMPDIR under the real home).
-    assert.ok(!dir.startsWith(path.join(os.homedir(), '.local', 'share', 'radar-classif', 'seat-homes')), 'must not write the real seat home');
+    const dir = ensureAstraHome({ home });
+    assert.equal(dir, astraCodexHomeDir(seats));
+    assert.ok(dir.startsWith(seats));
+    assert.ok(!dir.startsWith(home), 'the seat home sits outside CLASSIF_HOME');
+    assert.ok(!dir.startsWith(path.join(os.homedir(), '.local', 'share', 'radar-classif-seats')), 'must not write the real seat home');
     assert.equal(statSync(dir).mode & 0o777 & 0o077, 0, 'seat home mode 700');
     const cfg = readFileSync(`${dir}/config.toml`, 'utf8');
     assert.ok(!/^\s*\[mcp_servers/m.test(cfg), 'isolated config holds NO mcp_servers section');
@@ -107,9 +117,9 @@ test('astra isolation: dedicated CODEX_HOME, config with NO mcp_servers, auth co
     const work = tmp();
     try {
       const built = ROUTES['astra-max'].build(work, `${work}/prompt.md`, 'p');
-      assert.equal(built.env?.CODEX_HOME, astraCodexHomeDir(home));
-      assert.ok(String(built.env.CODEX_HOME).startsWith(home), 'CODEX_HOME must stay in the temp home');
-      assert.ok(String(built.env.CODEX_HOME).includes('seat-homes/astra'));
+      assert.equal(built.env?.CODEX_HOME, astraCodexHomeDir(seats));
+      assert.ok(String(built.env.CODEX_HOME).startsWith(seats), 'CODEX_HOME in the temp seat homes');
+      assert.ok(!String(built.env.CODEX_HOME).includes(home), 'CODEX_HOME never points into CLASSIF_HOME');
     } finally {
       rmSync(work, { recursive: true, force: true });
     }
@@ -122,6 +132,8 @@ test('astra isolation: dedicated CODEX_HOME, config with NO mcp_servers, auth co
     if (prevHome === undefined) delete process.env.CLASSIF_HOME; else process.env.CLASSIF_HOME = prevHome;
     if (prevSrc === undefined) delete process.env.CLASSIF_ASTRA_AUTH_SRC; else process.env.CLASSIF_ASTRA_AUTH_SRC = prevSrc;
     if (prevMode === undefined) delete process.env.CLASSIF_TEST_MODE; else process.env.CLASSIF_TEST_MODE = prevMode;
+    if (prevSeats === undefined) delete process.env.CLASSIF_SEAT_HOMES; else process.env.CLASSIF_SEAT_HOMES = prevSeats;
+    rmSync(seats, { recursive: true, force: true });
     rmSync(home, { recursive: true, force: true });
   }
 });

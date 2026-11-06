@@ -82,8 +82,8 @@ test('minors D1/D2: test-mode overrides steer to fixtures', withTempHome(async (
       assert.equal(testQuotaWaitMs(), 7);
     } finally { rQuota(); }
     // Fake auth copied into the isolated seat home (mode 600), never the real one.
-    const dir = ensureAstraHome(home);
-    assert.equal(dir, astraCodexHomeDir(home));
+    const dir = ensureAstraHome({ home });
+    assert.equal(dir, astraCodexHomeDir());
     assert.equal(readFileSync(path.join(dir, 'auth.json'), 'utf8'), '{"fake":"auth-for-hermetic-tests"}');
     // Fake vibe config expanded with the classification aliases.
     const vdir = vibeHome(home, 'low');
