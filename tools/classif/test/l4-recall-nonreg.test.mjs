@@ -10,6 +10,7 @@ import { selectBest } from '../l4/dev.mjs';
 import { assertRecallNonRegressionShape, loadSeriesManifest, loadTuningRecallBaseline } from '../l4/series.mjs';
 import { commitAll, readFixture, swapEnv, withTempHome, writeRepoFile, initTempRepo } from './hermetic-helpers.mjs';
 import { K, MATERIALS, OVERRIDE, fakeSeat, manifestFile, setup } from './l4-optimise-fixture.mjs';
+import process from 'node:process';
 
 const SPEC = { recallFloor: 0.8, precisionFloor: 0.5, failureCeiling: 0.05 };
 const stats = (recall, precision) => ({ recall, recallLB: recall - 0.03, precision, precisionLB: precision - 0.05,

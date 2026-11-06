@@ -11,6 +11,7 @@ import { astraCodexHomeDir, callSeat } from '../run-seat.mjs';
 import { sha256 } from '../lib/render.mjs';
 import { withTempHome } from './hermetic-helpers.mjs';
 import { CLEAN1, K, MATERIALS_SENT, OVERRIDE, fakeSeat, manifestFile, setup } from './l4-optimise-fixture.mjs';
+import process from 'node:process';
 
 // Fake `codex` child: reads the prompt on stdin, records it, writes -o last-message.md and a
 // --json event stream (reasoning item first, optional tool event, then the agent message).

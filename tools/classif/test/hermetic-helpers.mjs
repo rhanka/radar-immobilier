@@ -8,6 +8,8 @@ import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'nod
 import os from 'node:os';
 import path from 'node:path';
 import { sha256 } from '../lib/render.mjs';
+import { URL } from 'node:url';
+import process from 'node:process';
 
 export const REPO_ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', '..', '..');
 export const CLASSIF_DIR = path.join(REPO_ROOT, 'tools', 'classif');
