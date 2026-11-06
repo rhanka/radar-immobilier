@@ -10,7 +10,7 @@
 import path from 'node:path';
 import process from 'node:process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { callSeat, parseJsonObject } from '../run-seat.mjs';
+import { callSeat, looksLikeMaxPrice, parseJsonObject } from '../run-seat.mjs';
 import { appendJsonlRecord, parseJsonlTolerant } from '../lib/jsonl.mjs';
 import { sha256 } from '../lib/render.mjs';
 import { classifDir, classifHome, privateDir } from '../lib/paths.mjs';
@@ -58,6 +58,9 @@ export function parseDevAnswer(text, codes) {
  * of class `answer` (the model answered, badly). Failures count as shown (Annex M).
  */
 export function parseSeatResult(r, codes) {
+  // Review GEPA N6: a vibe --max-price stop is the model's answer exceeding the per-call ceiling —
+  // an answer failure (deterministic per item), never an infrastructure failure nor a retry.
+  if (r.code !== 0 && looksLikeMaxPrice(r)) return { verdict: null, code: null, failed: true, why: 'max-price', infra: false };
   if (r.code !== 0) return { verdict: null, code: null, failed: true, why: `exit-${r.code}`, infra: true };
   if ((r.toolEvents ?? 0) > 0) return { verdict: null, code: null, failed: true, why: 'tool-events', infra: true };
   return { ...parseDevAnswer(r.text, codes), infra: false };

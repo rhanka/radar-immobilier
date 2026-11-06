@@ -390,7 +390,8 @@ async function callOne(ctx, cand, route, id, step) {
     appendJsonlRecord(ctx.callsLog, { at: new Date().toISOString(), intent: false, phase, route, itemId: id, candidate: cand.id, step, ...(attempt ? { attempt, backoffMs } : {}),
       exitCode: r.code, latencyMs: r.latencyMs ?? null, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null, toolEvents: r.toolEvents ?? null,
       ...(looksLikeQuotaFailure(r) ? { quota: true } : {}) });
-    if (!looksLikeQuotaFailure(r) || attempt >= ctx.quotaBackoffMs.length || !ctx.budget.fits(1)) break;
+    // Review GEPA B5: a retry must fit next to the calls of the batch reserved but not launched yet.
+    if (!looksLikeQuotaFailure(r) || attempt >= ctx.quotaBackoffMs.length || !ctx.budget.fits(1 + ctx.pendingLaunches)) break;
     ctx.log(`${route} ${id}: quota or rate limit, retry ${attempt + 1}/${ctx.quotaBackoffMs.length} in ${ctx.quotaBackoffMs[attempt]} ms`);
     await ctx.sleep(ctx.quotaBackoffMs[attempt]);
   }
@@ -422,7 +423,17 @@ async function callOne(ctx, cand, route, id, step) {
  *   resume command (and the seat auth refresh when the failures read as authentication errors).
  */
 export async function evaluateCandidate(ctx, cand, ids, step, { child = false, lotSize = ids.length } = {}) {
-  ctx.budget.check(uncachedCalls(ctx, cand, ids));
+  const planned = uncachedCalls(ctx, cand, ids);
+  ctx.budget.check(planned);
+  // Review GEPA B5: shared count of the reserved calls not launched yet (a quota retry may only
+  // use budget beyond them); decremented at each launch or skip, cleared when the batch ends.
+  ctx.pendingLaunches = planned;
+  try {
+    return await evaluateBatch(ctx, cand, ids, step, { child, lotSize });
+  } finally { ctx.pendingLaunches = 0; }
+}
+
+async function evaluateBatch(ctx, cand, ids, step, { child, lotSize }) {
   const allowed = Math.max(1, Math.floor(lotSize * GEPA_FAILURE_CEILING));
   let childTool = false;
   const runRoute = async (route) => {
@@ -432,6 +443,7 @@ export async function evaluateCandidate(ctx, cand, ids, step, { child = false, l
     const rows = await pool(ids.map((id) => async () => {
       const hit = readEvalCache(ctx, cand, route, id);
       if (hit) return hit;
+      ctx.pendingLaunches = Math.max(0, ctx.pendingLaunches - 1);
       if (tripped || childTool) return null;
       const { row, authError } = await callOne(ctx, cand, route, id, step);
       if (authError) authFailures++;
@@ -542,10 +554,13 @@ async function retryInfra(ctx, cand, step) {
   for (const p of pairs) retries[retryKey(cand, p.route, p.id)] = (retries[retryKey(cand, p.route, p.id)] ?? 0) + 1;
   writeFileSync(retriesFile(ctx), JSON.stringify(retries), { mode: 0o600 });
   const pareto = JSON.parse(JSON.stringify(cand.pareto));
+  ctx.pendingLaunches = pairs.length;
   await pool(pairs.map((p) => async () => {
+    ctx.pendingLaunches = Math.max(0, ctx.pendingLaunches - 1);
     const { row } = await callOne(ctx, cand, p.route, p.id, step);
     pareto[p.id][p.route] = compactEvals({ [p.id]: { [p.route]: row } })[p.id][p.route];
   }), ctx.concurrency);
+  ctx.pendingLaunches = 0;
   saveCandidate(ctx, { ...cand, pareto });
   return loadCandidate(ctx, cand.id, cand.sha);
 }
@@ -666,7 +681,7 @@ export async function runGepa({ home = classifHome(), repoClassif = classifDir(p
   const codes = loadCodes();
   const ctx = { home, runDir, phase, budget, refById, routes: GEPA_ROUTES, codes, codesSha: sha256(JSON.stringify([...codes].sort())), evalKeys: new Map(),
     resumeCommand: `make classif-l4-gepa SERIES=${k} MAX_CALLS=${maxCalls} RUN=${runId} SEED='${seedValue}'${maxIterations !== null ? ` MAX_ITER=${maxIterations}` : ''} ENV=preprod`,
-    seat, concurrency, log, quotaBackoffMs: [...quotaBackoffMs], sleep, callsLog: path.join(home, 'l2', 'calls.jsonl'), seatTmp: privateDir(path.join(home, 'l4', 'seat-tmp')) };
+    seat, concurrency, log, quotaBackoffMs: [...quotaBackoffMs], sleep, pendingLaunches: 0, callsLog: path.join(home, 'l2', 'calls.jsonl'), seatTmp: privateDir(path.join(home, 'l4', 'seat-tmp')) };
   const split = { ...stratifiedSplit(rows, { seed: seedValue }), contextSha256: contextSha(ctx, rows) };
   const splitFile = path.join(runDir, 'split.json');
   if (existsSync(splitFile)) {
