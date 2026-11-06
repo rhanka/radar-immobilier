@@ -29,6 +29,8 @@ async function approvedExchangeUrl(app: ReturnType<Baskets["runtime"]>, f: Baske
   const fields = new URL(approvalUrl).searchParams;
   fields.set("releaseId", f.releaseId);
   fields.set("profileFingerprint", fingerprintReaderProfile((await f.stored().authority.getProfile(f.artifactId))!));
+  // J1.3a: only an explicit choice records the consent and opens.
+  fields.set("decision", "grant");
   const confirmation = await request(new URL(approvalUrl).origin + new URL(approvalUrl).pathname, {
     method: "POST", headers: { cookie: appCookie, origin: "https://app.example.test",
       "content-type": "application/x-www-form-urlencoded" }, body: fields.toString(),
