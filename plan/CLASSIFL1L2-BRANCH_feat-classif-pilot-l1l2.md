@@ -60,6 +60,8 @@ Lots L1 and L2 of the Steve-aligned classification pilot (plan-pilote-v2 §B-L1,
   - [x] GEPA dev and blind verdict (0 miss per route, call failures <= 5 %) for series marked `method: gepa`.
   - [x] CI lint of `tools/classif` (unused variables, explicit `node:` imports).
   - [x] GEPA review fixes: tool events fail closed (dev, blind, S113, GEPA), codex cwd outside `$CLASSIF_HOME`, answer vs infra failures, final over every eligible candidate, codex home prepared once.
+  - [x] GEPA re-review fixes: child rejected only at +2 failures vs its parent (5 % ceiling on D_pareto and on the final), child tool events reject and consume it, seat dir cleanup, seat env without `$CLASSIF_HOME`, codex seat homes in `~/.local/share/radar-classif-seats/<seat>`, S113 item id.
+  - [x] Codex seat auth refresh: `make classif-seat-auth-refresh SEAT=<seat> ENV=preprod` copies `~/.codex/auth.json` atomically into the seat home (after a new codex login, or when a run stops on authentication errors), then resume the stopped run with the command named in the stop message.
   - [ ] Real GEPA run, freeze of the winner and pre-registration of the GEPA series (conductor, paid calls).
 
 - [x] **Gate**
