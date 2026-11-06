@@ -23,7 +23,7 @@
  * Pur : aucun WebGL, aucune API, aucun Docker — maplibre + le sélecteur de fond
  * satellite sont mockés, `fetch` est stubé (rejet → try/catch du composant).
  */
-import { cleanup, render } from "@testing-library/svelte";
+import { cleanup, fireEvent, render } from "@testing-library/svelte";
 import { tick } from "svelte";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ExpressionSpecification } from "@maplibre/maplibre-gl-style-spec";
@@ -31,6 +31,8 @@ import type { ExpressionSpecification } from "@maplibre/maplibre-gl-style-spec";
 // ── Fake MapLibre : enregistre les handlers, permet de les fire à la demande ───
 const mapMocks = vi.hoisted(() => {
   const instances: FakeMap[] = [];
+  // Number of upcoming constructions that throw (WebGL unavailable, broken style).
+  const control = { failNextConstructs: 0 };
   class FakeMap {
     handlers = new Map<string, Array<(e?: any) => void>>();
     addSource = vi.fn();
@@ -55,6 +57,10 @@ const mapMocks = vi.hoisted(() => {
     easeTo = vi.fn();
     fitBounds = vi.fn();
     constructor(_options: unknown) {
+      if (control.failNextConstructs > 0) {
+        control.failNextConstructs -= 1;
+        throw new Error("Failed to initialize WebGL (test)");
+      }
       instances.push(this);
     }
     // Surcharge maplibre : on(type, handler) OU on(type, layer, handler).
@@ -72,7 +78,7 @@ const mapMocks = vi.hoisted(() => {
       for (const handler of this.handlers.get(type) ?? []) handler(e);
     }
   }
-  return { instances, FakeMap };
+  return { instances, control, FakeMap };
 });
 
 vi.mock("maplibre-gl", () => ({ Map: mapMocks.FakeMap }));
@@ -110,6 +116,7 @@ function citiesSourceCalls(map: { addSource: ReturnType<typeof vi.fn> }): number
 
 beforeEach(() => {
   mapMocks.instances.length = 0;
+  mapMocks.control.failNextConstructs = 0;
   vi.useFakeTimers();
   // `fetch` du GeoJSON municipal : rejet → try/catch interne du composant.
   vi.stubGlobal(
@@ -217,6 +224,57 @@ describe("GeoCityMapBase — résilience mapReady (repli si `load` ne fire pas)"
 
     // Le garde `mapSetupStarted` interdit la seconde pose (sinon « source already
     // exists » côté MapLibre réel).
+    expect(citiesSourceCalls(map)).toBe(1);
+  });
+
+  it("INIT FAILURE (#959): MapLibre init throws → explicit alert instead of an endless loading, « Réessayer » rebuilds the map", async () => {
+    mapMocks.control.failNextConstructs = 1;
+    const onReady = vi.fn();
+    const { container } = render(GeoCityMapBase, {
+      props: { fillColorExpression: FILL_COLOR, onReady },
+    });
+    await flushMicrotasks();
+    // No map could be built: no fallback timer will ever fire, the alert must show now.
+    expect(mapMocks.instances).toHaveLength(0);
+    expect(overlayText(container)).toBe(false);
+    const alert = container.querySelector('[data-testid="map-stalled"]');
+    expect(alert?.getAttribute("role")).toBe("alert");
+    expect(alert?.textContent).toContain("La carte n'a pas pu être chargée");
+    expect(alert?.textContent).toContain("Les signaux restent consultables");
+
+    await fireEvent.click(alert!.querySelector("button")!);
+    await flushMicrotasks();
+    expect(mapMocks.instances).toHaveLength(1);
+    expect(container.querySelector('[data-testid="map-stalled"]')).toBeNull();
+    mapMocks.instances[0].fire("load");
+    await flushMicrotasks();
+    expect(overlayText(container)).toBe(false);
+    expect(citiesSourceCalls(mapMocks.instances[0])).toBe(1);
+    expect(onReady).toHaveBeenCalledTimes(1);
+  });
+
+  it("STYLE ERROR (#959): a non-tile `error` before the style loads → alert right away, finalization still resumes on `style.load`", async () => {
+    const { container } = render(GeoCityMapBase, {
+      props: { fillColorExpression: FILL_COLOR },
+    });
+    await flushMicrotasks();
+    const map = mapMocks.instances[0];
+
+    // A tile error is not a style failure: the loading state stays.
+    map.fire("error", { sourceId: "osm-tiles", error: new Error("tile 404") });
+    await flushMicrotasks();
+    expect(container.querySelector('[data-testid="map-stalled"]')).toBeNull();
+
+    map.fire("error", { error: new Error("style is invalid") });
+    await flushMicrotasks();
+    expect(overlayText(container)).toBe(false);
+    expect(container.querySelector('[data-testid="map-stalled"]')?.textContent).toContain(
+      "La carte n'a pas pu être chargée",
+    );
+
+    map.fire("style.load");
+    await flushMicrotasks();
+    expect(container.querySelector('[data-testid="map-stalled"]')).toBeNull();
     expect(citiesSourceCalls(map)).toBe(1);
   });
 });
