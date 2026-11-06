@@ -66,3 +66,37 @@ export function check(home, planned, { cap = BUDGET_CAP } = {}) {
   }
   return { spent: s, planned, remaining: remaining - planned };
 }
+
+/** Calls spent by the phases named `prefix…` (intent records only, strict read: see spent). */
+export function spentByPrefix(home, prefix) {
+  return readCallsStrict(home).filter((r) => r?.intent !== false && String(r?.phase ?? '').startsWith(prefix)).length;
+}
+
+/**
+ * Run-scoped cap (GEPA MAX_CALLS): the calls of one run are the intent records whose phase
+ * starts with `prefix`; the run may spend at most `cap` of them AND stays under the pilot cap
+ * (D5). `remaining()` is the smaller of both margins; `check(planned)` throws (fail closed)
+ * when a planned batch would exceed either. A resumed run counts its earlier calls.
+ */
+export function runBudget(home, { prefix, cap, pilotCap = BUDGET_CAP }) {
+  if (!prefix) throw new Error('run budget refused: a phase prefix is required');
+  if (!Number.isInteger(cap) || cap <= 0) throw new Error(`run budget refused: cap must be a positive integer (got ${cap})`);
+  const state = () => {
+    const runSpent = spentByPrefix(home, prefix);
+    const pilotSpent = spent(home);
+    return { runSpent, pilotSpent, remaining: Math.min(cap - runSpent, pilotCap - pilotSpent) };
+  };
+  return {
+    prefix, cap,
+    spent: () => state().runSpent,
+    remaining: () => state().remaining,
+    fits: (planned) => planned <= state().remaining,
+    check(planned) {
+      const s = state();
+      if (planned > s.remaining) {
+        throw new Error(`run budget refused: ${s.runSpent} run calls spent (cap ${cap}), ${s.pilotSpent} pilot calls spent (cap ${pilotCap}), ${planned} planned > remaining ${s.remaining}`);
+      }
+      return { ...s, planned, remaining: s.remaining - planned };
+    },
+  };
+}
