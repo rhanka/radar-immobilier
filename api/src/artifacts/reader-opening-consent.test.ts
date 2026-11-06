@@ -8,10 +8,9 @@ import { createTicketStore } from "./preview-tickets.js";
 import type { AuthConfig } from "../config.js";
 
 /**
- * Lot I2 acceptance, automated part:
- * - a static shared page opens with zero basket screen;
- * - the first H5 call triggers the basket consent once, then reads the
- *   READER's own data;
+ * Lot I2 acceptance, automated part, as amended by J1.3a:
+ * - the opening is ONE screen that also covers the reader's own baskets,
+ *   so the first H5 call reads the READER's data with no second screen;
  * - refusals stay indistinguishable (unknown UUID vs restricted artifact,
  *   unknown vs non-reader) on every surface.
  * The Claude-conversation steps (no "Always allow" re-prompt, "share with
@@ -78,12 +77,12 @@ function hiddenFields(html: string): Record<string, string> {
 }
 
 function form(body: Record<string, string>): { body: URLSearchParams; headers: Record<string, string> } {
-  return { body: new URLSearchParams(body),
+  return { body: new URLSearchParams({ decision: "grant", ...body }),
     headers: { origin: "https://app.example.test", "content-type": "application/x-www-form-urlencoded" } };
 }
 
 describe("deferred basket consent opening", () => {
-  it("should open a static page with zero basket screen, then consent once and read the reader data", async () => {
+  it("should open the page in one gesture and read the reader data at once", async () => {
     const { application, app } = buildWorld();
     const session = await appSession("reader-alice");
 
@@ -94,13 +93,13 @@ describe("deferred basket consent opening", () => {
     const approveUrl = new URL(start.headers.get("location")!);
     const initCookie = cookieValue(start.headers.getSetCookie(), "__Host-preview-init");
 
-    // 2. Neutral opening screen: zero basket copy.
+    // 2. Single opening screen: names the reader's own baskets, no author identity.
     const approve = await application.request(`/approve${approveUrl.search}`,
       { headers: { cookie: session, ...BROWSER } });
     expect(approve.status).toBe(200);
     const approveBody = await approve.text();
     expect(approveBody).toContain("Ouvrir la page");
-    expect(approveBody).not.toContain("panier");
+    expect(approveBody).toContain("vos propres paniers");
     expect(approveBody).not.toContain("Auteur");
 
     // 3. Confirm the opening, exchange the ticket, open the static page.
@@ -123,42 +122,10 @@ describe("deferred basket consent opening", () => {
     expect(page.status).toBe(200);
     expect(await page.text()).toContain("shared");
 
-    // 4. First H5 call: typed consent refusal, exactly once.
+    // 4. The first H5 call reads the READER's data; later calls just work.
     const h5path = `/__reader/api/workspaces.list.v1`;
-    const refused = await app.request(`https://${ARTIFACT}.${BASE}${h5path}?grant=${grant}`,
-      { headers: { host: `${ARTIFACT}.${BASE}`, cookie: docCookie } });
-    expect(refused.status).toBe(403);
-    expect(((await refused.json()) as { error: { code: string } }).error.code).toBe("basket_consent_required");
-
-    // 5. Consent top-level: the moved DS page names the reader's own baskets.
-    const consentStart = await app.request(`https://${ARTIFACT}.${BASE}/__reader/consent`,
-      { headers: { host: `${ARTIFACT}.${BASE}`, cookie: docCookie, ...BROWSER } });
-    expect(consentStart.status).toBe(303);
-    const consentUrl = new URL(consentStart.headers.get("location")!);
-    const consentInit = cookieValue(consentStart.headers.getSetCookie(), "__Host-preview-init");
-    const consentPage = await application.request(`/consent${consentUrl.search}`,
-      { headers: { cookie: session, ...BROWSER } });
-    expect(consentPage.status).toBe(200);
-    const consentBody = await consentPage.text();
-    expect(consentBody).toContain("Autoriser la lecture de vos paniers");
-    expect(consentBody).toContain("vos propres paniers");
-
-    // 6. Consent POST replays through exchange into a basket-scoped session.
-    const consentFields = hiddenFields(consentBody);
-    const consentPosted = form({ artifactId: ARTIFACT, binding: consentFields.binding!,
-      origin: `https://${ARTIFACT}.${BASE}`, releaseId: consentFields.releaseId!,
-      profileFingerprint: consentFields.profileFingerprint! });
-    const consented = await application.request("/consent",
-      { method: "POST", headers: { cookie: session, ...consentPosted.headers }, body: consentPosted.body });
-    expect(consented.status).toBe(303);
-    const exchange2Url = new URL(consented.headers.get("location")!);
-    const exchanged2 = await app.request(`${exchange2Url.pathname}${exchange2Url.search}`,
-      { headers: { host: `${ARTIFACT}.${BASE}`, cookie: consentInit, ...BROWSER } });
-    expect(exchanged2.status).toBe(303);
-    const grant2 = new URL(exchanged2.headers.get("location")!, "https://x.test").searchParams.get("grant")!;
-    const scopedCookie = cookieValue(exchanged2.headers.getSetCookie(), "__Host-preview-session");
-
-    // 7. The replayed call reads the READER's data; later calls just work.
+    const grant2 = grant;
+    const scopedCookie = docCookie;
     const first = await app.request(`https://${ARTIFACT}.${BASE}${h5path}?grant=${grant2}`,
       { headers: { host: `${ARTIFACT}.${BASE}`, cookie: scopedCookie } });
     expect(first.status).toBe(200);

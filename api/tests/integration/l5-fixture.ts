@@ -84,6 +84,8 @@ export async function l5Fixture(write = true) {
   const profile = await storage.authority.getProfile(artifactId);
   const { fingerprintReaderProfile } = await import("../../src/artifacts/reader-profile.js");
   params.set("releaseId", releaseId); params.set("profileFingerprint", fingerprintReaderProfile(profile!));
+  // J1.3a: only an explicit choice records the consent and opens.
+  params.set("decision", "grant");
   const approved = await app.request(`${L5_DOMAIN.appOrigin}/api/v1/artifacts/reader/approve`, { method: "POST",
     headers: { host: new URL(L5_DOMAIN.appOrigin).host, cookie: login.cookie, origin: L5_DOMAIN.appOrigin,
       "content-type": "application/x-www-form-urlencoded" }, body: params.toString() });
