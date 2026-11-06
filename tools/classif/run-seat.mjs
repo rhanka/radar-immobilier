@@ -347,7 +347,24 @@ export function parseCodex(stdout, dir) {
   return { text, usage, toolEvents, unknownTypes };
 }
 
-function parseVibe(stdout, dir) {
+/**
+ * Tool accounting of a vibe transcript (review GEPA V1): every `role: 'tool'` message and every
+ * assistant message carrying tool calls (`tool_calls`, or a tool_call/tool_use/function_call
+ * content part) counts. parseSeatResult then makes the call a failure, as for codex.
+ */
+export function countVibeToolEvents(msgs) {
+  if (!Array.isArray(msgs)) return 0;
+  let n = 0;
+  for (const m of msgs) {
+    if (!m || typeof m !== 'object') continue;
+    if (m.role === 'tool' || /tool|function_call/i.test(String(m.type ?? ''))) { n++; continue; }
+    if (Array.isArray(m.tool_calls) && m.tool_calls.length) { n += m.tool_calls.length; continue; }
+    if (Array.isArray(m.content) && m.content.some((c) => /tool_call|tool_use|function_call/i.test(String(c?.type ?? '')))) n++;
+  }
+  return n;
+}
+
+export function parseVibe(stdout, dir) {
   const msgs = lastJson(stdout);
   const text = Array.isArray(msgs) ? msgs.filter((m) => m.role === 'assistant' && m.type === 'message').flatMap((m) => (m.content ?? []).filter((c) => c.type === 'text').map((c) => c.text)).join('\n') : '';
   let exp = null;
@@ -355,7 +372,7 @@ function parseVibe(stdout, dir) {
   const models = Array.isArray(exp?.config?.models) ? exp.config.models : Object.values(exp?.config?.models ?? {});
   const model = models.find((m) => m?.alias === exp?.config?.active_model);
   return { text, usage: exp?.usage ?? null, costUsd: exp?.cost_usd ?? null, effectiveModel: exp?.config?.active_model ?? null,
-    effectiveThinking: model?.thinking ?? null, outcome: exp?.outcome ?? null };
+    effectiveThinking: model?.thinking ?? null, outcome: exp?.outcome ?? null, toolEvents: countVibeToolEvents(msgs) };
 }
 
 // agy stream-json output: one JSON event per line; the final "result" event carries the answer
