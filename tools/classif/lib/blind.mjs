@@ -54,8 +54,11 @@ export function openBlindSet({ purpose, promptSha256 = null, model = null, effor
 }
 
 /** Guard before a run on the blind half (mirrors assertEvalRunAllowed).
-    Review D2: in test mode the temp repo applies (never the real checkout). */
-export function assertBlindRunAllowed({ promptFile, promptSha256, model, effort, home = classifHome(), repo = null }) {
+    Review D2: in test mode the temp repo applies (never the real checkout).
+    One run per (prompt sha, model, effort), plus exactly one more per audited
+    `blind-rerun-infra` allowance (l4/blind.mjs --rerun-infra-failed). `extraAllowance`
+    lets the re-run eligibility check run this guard before its allowance is written. */
+export function assertBlindRunAllowed({ promptFile, promptSha256, model, effort, home = classifHome(), repo = null, extraAllowance = 0 }) {
   const root = repo ?? repoRoot(process.env);
   const git = (...a) => spawnSync('git', a, { cwd: root, encoding: 'utf8' });
   const rel = path.relative(root, path.resolve(root, promptFile));
@@ -63,8 +66,11 @@ export function assertBlindRunAllowed({ promptFile, promptSha256, model, effort,
   if (sha256(readFileSync(path.join(root, rel))) !== promptSha256) throw new Error('blind run refused: prompt sha256 differs from the frozen prompt');
   if (git('ls-files', '--error-unmatch', rel).status !== 0) throw new Error(`blind run refused: ${rel} is not committed`);
   if (git('diff', '--quiet', 'HEAD', '--', rel).status !== 0) throw new Error(`blind run refused: ${rel} differs from the committed version`);
-  const previous = readAudit(home).filter((e) => e.action === 'blind-run' && e.promptSha256 === promptSha256 && e.model === model && e.effort === effort);
-  if (previous.length) throw new Error(`blind run refused: prompt ${promptSha256.slice(0, 12)} already run with ${model}/${effort} (${previous[0].at})`);
+  const log = readAudit(home);
+  const tuple = (e) => e.promptSha256 === promptSha256 && e.model === model && e.effort === effort;
+  const previous = log.filter((e) => e.action === 'blind-run' && tuple(e));
+  const allowances = log.filter((e) => e.action === 'blind-rerun-infra' && tuple(e)).length + extraAllowance;
+  if (previous.length > allowances) throw new Error(`blind run refused: prompt ${promptSha256.slice(0, 12)} already run with ${model}/${effort} (${previous[0].at})`);
   return { frozenIn: git('log', '-1', '--format=%H %cI', '--', rel).stdout.trim() };
 }
 
