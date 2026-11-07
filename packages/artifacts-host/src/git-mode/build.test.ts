@@ -1,138 +1,167 @@
-import { generateKeyPairSync, sign, verify } from "node:crypto";
+import { generateKeyPairSync } from "node:crypto";
 import type { GitBinding } from "@sentropic/artifacts";
 import { describe, expect, it, vi } from "vitest";
 import { createMemoryGitBindingStore } from "@sentropic/artifacts";
+import * as liveHost from "@sentropic/artifacts/live-host";
+import {
+  acceptHandoff, CANDIDATE_LIMITS, candidateDigest, encodeHandoffRequest, HANDOFF_LIFETIME_MS, LiveHostError, sealHandoff,
+  verifyReceipt, type AcceptOptions, type CandidateFile, type HandoffClaims, type HandoffReceipt, type HostRecheckView,
+} from "@sentropic/artifacts/live-host";
 import { createHostBuildApiClient, createMemoryJobStore } from "./build-api.js";
 import { composeGitMode, readGitModeConfig } from "./compose.js";
 import type { GitBuildPort } from "./provider-adapter.js";
-import {
-  createHandoffAcceptance, HANDOFF_MAX_LIFETIME_MS, type BuildHandoff, type HandoffCommitPort, type HandoffManifestFile,
-  type HostReceipt,
-} from "./handoff.js";
-import { candidateDigestOf, canonicalJson, verifyBuildHandoff } from "./handoff.contract.test-support.js";
 import { loadLiveHost } from "./live-host-adapter.js";
+import { createLiveHostEndpoints, FAIL_CLOSED_HOST_BUILD_LEDGER, type HostBuildLedger } from "./live-host-endpoints.js";
 
+/**
+ * SG4b handoff, host side, run against the PROVIDER code (`@sentropic/artifacts/live-host`, 0.2.20): the cases of the
+ * former immo contract reference (handoff.contract.test-support.ts, deleted with the pin) now assert that the
+ * package's sealHandoff / acceptHandoff / candidateDigest / verifyReceipt enforce them. immo runs no crypto of its own.
+ */
 const MiB = 1024 * 1024;
-const builder = generateKeyPairSync("ed25519");
-const host = generateKeyPairSync("ed25519");
+const builder = { kid: "sentropic-builder-1", ...generateKeyPairSync("ed25519") };
+const foreign = { kid: "sentropic-builder-1", ...generateKeyPairSync("ed25519") };
+const host = { kid: "immo-preprod-receipt-1", ...generateKeyPairSync("ed25519") };
 const NOW = Date.parse("2026-11-08T00:00:00.000Z");
 const SHA = "b".repeat(40);
-const binding: GitBinding = { artifactId: "11111111-1111-4111-8111-111111111111", storageScopeId: "s", repoId: "radar-immobilier",
+const IMAGE = "docker.io/sentropic/builder@sha256:" + "1".repeat(64);
+const ARTIFACT = "11111111-1111-4111-8111-111111111111";
+const binding: GitBinding = { artifactId: ARTIFACT, storageScopeId: "s", repoId: "radar-immobilier",
   branch: "artifact/p/alice000/triage-11111111", channel: "personal", personalPrincipalId: "alice", subPath: "",
   baseCommitSha: "a".repeat(40), headCommitSha: SHA, releaseCommitSha: null, autoPublish: true, executor: "sandbox",
   pendingJobId: "job-1", pendingCommitSha: SHA, state: "build_pending", generation: 2, version: 3, attachedBy: "alice",
   attachedAt: "2026-11-07T00:00:00.000Z", updatedAt: "2026-11-07T00:00:00.000Z" };
+const index: CandidateFile[] = [{ path: "index.html", bytes: new TextEncoder().encode("<!doctype html>") }];
 
-function handoff(files: HandoffManifestFile[] = [{ path: "index.html", mimeType: "text/html", size: 10, digest: "sha256:x" }],
-  overrides: Partial<Omit<BuildHandoff, "signature">> = {}, key = builder.privateKey): BuildHandoff {
-  const candidateDigest = candidateDigestOf(files);
-  const unsigned = { authorizationId: "auth-1", jobId: "job-1", storageScopeId: "s", artifactId: binding.artifactId,
-    bindingGeneration: 2, issuedAt: new Date(NOW - 1000).toISOString(), expiresAt: new Date(NOW + 9 * 60 * 1000).toISOString(),
-    candidateDigest, manifest: { files },
-    receipt: { candidateDigest, jobId: "job-1", releaseId: "r-1", manifestDigest: "sha256:m", executor: "sandbox" as const,
-      verification: "builder-attested" as const, producer: { runId: "run-1", attempt: 1 },
-      tuple: { commitSha: SHA, treeSha: "c".repeat(40), lockfileDigest: "l", descriptorDigest: "d", builderImageDigest: "i",
-        nodeVersion: "22", npmVersion: "10", publicEnvHashes: {} } },
-    ...overrides };
-  return { ...unsigned, signature: sign(null, Buffer.from(canonicalJson(unsigned)), key).toString("base64") };
+function seal(files: readonly CandidateFile[] = index, overrides: Partial<HandoffClaims> = {}, signer = builder) {
+  return sealHandoff({ scopeId: "s", artifactId: ARTIFACT, jobId: "job-1", kind: "explicit", runId: "run-1", attempt: 1,
+    generation: 2, commitSha: SHA, treeSha: "c".repeat(40), candidateDigest: candidateDigest(files), expectedReleaseId: null,
+    tuple: { commitSha: SHA, treeSha: "c".repeat(40), lockfileDigest: "l", descriptorDigest: "d", builderImageDigest: IMAGE,
+      nodeVersion: "22", npmVersion: "10", publicEnvHashes: {} }, ...overrides }, { kid: signer.kid, key: signer.privateKey }, NOW - 1000);
 }
-const check = (input: unknown, current: GitBinding | undefined = binding, now = NOW) =>
-  verifyBuildHandoff(input, { builderPublicKey: builder.publicKey, binding: current, now });
-const detail = (fn: () => unknown) => {
-  try { fn(); } catch (error) { return (error as { details?: { publicDetails?: { handoff?: string } } }).details?.publicDetails?.handoff; }
-  return "accepted";
-};
+/** The locked host rows of a pending, owner-requested job (what host-ledger.ts `view` returns). */
+function view(current: GitBinding = binding): HostRecheckView {
+  return { scopeId: "s", killSwitch: false, imageAllowlist: [IMAGE], currentReleaseId: null, headReachable: true,
+    binding: { artifactId: current.artifactId, state: current.state, generation: current.generation, executor: current.executor,
+      autoPublish: current.autoPublish, pendingJobId: current.pendingJobId, pendingCommitSha: current.pendingCommitSha },
+    job: { jobId: "job-1", state: "building", bindingGeneration: 2, commitSha: SHA, expectedCurrentReleaseId: null,
+      fence: { runId: "run-1", attempt: 1 } },
+    policy: { ownerAuthorized: true, automaticAuthorized: false, automaticEligible: false } };
+}
+function memoryHost(current: () => HostRecheckView = () => view(), now = NOW) {
+  const receipts = new Map<string, HandoffReceipt>();
+  const state = { releases: 0 };
+  const options: AcceptOptions = { scopeId: "s", builderKeys: (kid) => kid === builder.kid ? builder.publicKey : undefined,
+    receiptKey: { kid: host.kid, key: host.privateKey }, now: () => now,
+    ledger: { find: async (key) => receipts.get(key),
+      async transaction(key, work) {
+        const stored = receipts.get(key);
+        if (stored) return stored;
+        const receipt = await work();
+        receipts.set(key, receipt);
+        return receipt;
+      } },
+    view: () => current(),
+    async publish(_claims, files) { state.releases += 1; return { releaseId: `r-${state.releases}`, manifestDigest: "sha256:m",
+      storedDigest: candidateDigest(files) }; } };
+  return { options, state };
+}
+const refusal = async (promise: Promise<unknown>) => promise.then(() => "accepted",
+  (error: unknown) => error instanceof LiveHostError ? [error.code, error.reason].filter(Boolean).join(":") : String(error));
+const accept = (handoff = seal(), files: readonly CandidateFile[] = index, current?: () => HostRecheckView, now?: number) =>
+  refusal(acceptHandoff(memoryHost(current, now).options, handoff, files));
 
-describe("SG4b handoff verification (host side)", () => {
-  it("accepts a signed, live, single-job handoff within the release ceilings", () => {
-    expect(check(handoff()).handoff.jobId).toBe("job-1");
+describe("SG4b handoff verification (provider live-host, host side)", () => {
+  it("is the pinned provider subpath", async () => {
+    expect(await loadLiveHost()).toBe(liveHost);
+    expect(HANDOFF_LIFETIME_MS).toBe(10 * 60 * 1000);
+    expect(CANDIDATE_LIMITS).toEqual({ files: 255, fileBytes: 16 * MiB, totalBytes: 64 * MiB });
   });
 
-  it("refuses a bad signature, a foreign key and a tampered field", () => {
-    expect(detail(() => check({ ...handoff(), signature: "AAAA" }))).toBe("signature");
-    expect(detail(() => check(handoff(undefined, {}, host.privateKey)))).toBe("signature");
-    expect(detail(() => check({ ...handoff(), jobId: "job-2" }))).toBe("signature");
+  it("accepts a signed, live, single-job handoff and signs a receipt the builder verifies", async () => {
+    const handoff = seal();
+    const receipt = await acceptHandoff(memoryHost().options, handoff, index);
+    expect(receipt).toMatchObject({ kid: host.kid, jobId: "job-1", releaseId: "r-1", candidateDigest: handoff.claims.candidateDigest });
+    expect(() => verifyReceipt(receipt, (kid) => kid === host.kid ? host.publicKey : undefined, handoff.claims)).not.toThrow();
+    expect(() => verifyReceipt({ ...receipt, releaseId: "r-9" }, () => host.publicKey, handoff.claims)).toThrow(LiveHostError);
   });
 
-  it("refuses a lifetime above 10 minutes and an expired authorization", () => {
-    expect(detail(() => check(handoff(undefined, { expiresAt: new Date(NOW - 1000 + HANDOFF_MAX_LIFETIME_MS + 1).toISOString() }))))
-      .toBe("lifetime");
-    expect(detail(() => check(handoff(), binding, NOW + 9 * 60 * 1000))).toBe("expired");
+  it("refuses a bad signature, a foreign key and a tampered field", async () => {
+    expect(await accept({ ...seal(), signature: "AAAA" })).toBe("handoff_unauthenticated");
+    expect(await accept(seal(index, {}, foreign))).toBe("handoff_unauthenticated");
+    const tampered = seal();
+    expect(await accept({ ...tampered, claims: { ...tampered.claims, jobId: "job-2" } })).toBe("handoff_unauthenticated");
   });
 
-  it("refuses a handoff for another job, commit or generation of the binding", () => {
-    expect(detail(() => check(handoff(), { ...binding, pendingJobId: "job-9" }))).toBe("job");
-    expect(detail(() => check(handoff(), { ...binding, pendingCommitSha: "d".repeat(40) }))).toBe("job");
-    expect(detail(() => check(handoff(), { ...binding, generation: 3 }))).toBe("job");
-    expect(detail(() => verifyBuildHandoff(handoff(), { builderPublicKey: builder.publicKey, binding: undefined, now: NOW })))
-      .toBe("job");
+  it("refuses an expired authorization (10-minute single-use lifetime)", async () => {
+    expect(await accept(seal(), index, undefined, NOW - 1000 + HANDOFF_LIFETIME_MS)).toBe("handoff_expired");
+    expect(await accept(seal(), index, undefined, NOW - 1000 + HANDOFF_LIFETIME_MS - 1)).toBe("accepted");
+  });
+
+  it("refuses a handoff for another job, commit or generation of the binding", async () => {
+    expect(await accept(seal(), index, () => view({ ...binding, pendingJobId: "job-9" }))).toBe("handoff_mismatch:job_not_pending");
+    expect(await accept(seal(), index, () => view({ ...binding, pendingCommitSha: "d".repeat(40) })))
+      .toBe("handoff_mismatch:job_not_pending");
+    expect(await accept(seal(), index, () => view({ ...binding, generation: 3 }))).toBe("handoff_mismatch:generation_mismatch");
+    expect(await accept(seal(), index, () => ({ ...view(), imageAllowlist: [] }))).toBe("handoff_mismatch:image_not_allowed");
+    expect(await accept(seal(), index, () => ({ ...view(), killSwitch: true }))).toBe("handoff_mismatch:publication_paused");
   });
 
   it("enforces 255 files, 16 MiB per file and 64 MiB per release at the exact boundaries", () => {
-    const many = (count: number, size = 1) => Array.from({ length: count }, (_, i) => ({ path: `f${i}.js`, mimeType: "text/javascript", size, digest: `d${i}` }));
-    expect(detail(() => check(handoff(many(255))))).toBe("accepted");
-    expect(detail(() => check(handoff(many(256))))).toBe("file_count");
-    expect(detail(() => check(handoff([{ path: "a.png", mimeType: "image/png", size: 16 * MiB, digest: "a" }])))).toBe("accepted");
-    expect(detail(() => check(handoff([{ path: "a.png", mimeType: "image/png", size: 16 * MiB + 1, digest: "a" }])))).toBe("file_bytes");
-    expect(detail(() => check(handoff(many(4, 16 * MiB))))).toBe("accepted");
-    expect(detail(() => check(handoff([...many(4, 16 * MiB), { path: "x", mimeType: "text/css", size: 1, digest: "x" }]))))
-      .toBe("release_bytes");
+    const shared = new Uint8Array(16 * MiB);
+    const many = (count: number, bytes = new Uint8Array(1)) => Array.from({ length: count }, (_, i) => ({ path: `f${i}.js`, bytes }));
+    const digest = (files: CandidateFile[]) => { try { candidateDigest(files); return "accepted"; }
+      catch (error) { return (error as LiveHostError).code; } };
+    expect(digest(many(255))).toBe("accepted");
+    expect(digest(many(256))).toBe("candidate_invalid");
+    expect(digest([{ path: "a.png", bytes: shared }])).toBe("accepted");
+    expect(digest([{ path: "a.png", bytes: new Uint8Array(16 * MiB + 1) }])).toBe("candidate_invalid");
+    expect(digest(many(4, shared))).toBe("accepted");
+    expect(digest([...many(4, shared), { path: "x.css", bytes: new Uint8Array(1) }])).toBe("candidate_invalid");
   });
 
-  it("refuses a candidate digest that does not cover the manifest", () => {
-    const files = [{ path: "index.html", mimeType: "text/html", size: 10, digest: "sha256:x" }];
-    const forged = handoff(files, { manifest: { files: [{ ...files[0]!, size: 11 }] } });
-    expect(detail(() => check(forged))).toBe("candidate_digest");
+  it("refuses candidate bytes that the sealed digest does not cover", async () => {
+    expect(await accept(seal(), [{ path: "index.html", bytes: new TextEncoder().encode("<!doctype html>!") }]))
+      .toBe("candidate_bytes_mismatch");
   });
 });
 
-describe("SG4b acceptance and signed host receipt", () => {
-  function memoryCommit(): HandoffCommitPort & { releases: number } {
-    const receipts = new Map<string, HostReceipt>();
-    const port = { releases: 0, async commit({ handoff: h }: Parameters<HandoffCommitPort["commit"]>[0]) {
-      const existing = receipts.get(h.authorizationId);
-      if (existing) return { receipt: existing, replayed: true };
-      port.releases += 1;
-      const receipt = { authorizationId: h.authorizationId, jobId: h.jobId, releaseId: h.receipt.releaseId,
-        candidateDigest: h.candidateDigest, committedAt: new Date(NOW).toISOString() };
-      receipts.set(h.authorizationId, receipt);
-      return { receipt, replayed: false };
-    } };
-    return port;
-  }
-
-  // Stand-ins for the provider live-host verifier and receipt signer (0.2.20).
-  const ports = {
-    verify: (input: unknown, context: { binding: GitBinding | undefined; now: number }) =>
-      verifyBuildHandoff(input, { ...context, builderPublicKey: builder.publicKey }),
-    signReceipt: (receipt: HostReceipt) => sign(null, Buffer.from(canonicalJson(receipt)), host.privateKey).toString("base64"),
-  };
-
-  it("commits once, signs the receipt and replays the same receipt for the same authorization", async () => {
-    const commit = memoryCommit();
-    const acceptance = createHandoffAcceptance({ ...ports, binding: async () => binding, commit, now: () => NOW });
-    const first = await acceptance.accept(handoff());
-    const second = await acceptance.accept(handoff());
-    expect(first.replayed).toBe(false);
-    expect(second.replayed).toBe(true);
-    expect(second.receipt).toEqual(first.receipt);
-    expect(commit.releases).toBe(1);
-    expect(verify(null, Buffer.from(canonicalJson(first.receipt)), host.publicKey, Buffer.from(first.signature, "base64"))).toBe(true);
+describe("SG4b acceptance and signed host receipt (provider acceptHandoff)", () => {
+  it("commits once and replays the same signed receipt for the same authorization", async () => {
+    const memory = memoryHost();
+    const first = await acceptHandoff(memory.options, seal(), index);
+    const second = await acceptHandoff(memory.options, seal(), index);
+    expect(second).toEqual(first);
+    expect(memory.state.releases).toBe(1);
+    const other = seal(index, { attempt: 2, runId: "run-2" });
+    expect(await refusal(acceptHandoff(memory.options, other, index))).toBe("handoff_replayed");
   });
 
-  it("fails closed without a durable commit port", async () => {
-    const acceptance = createHandoffAcceptance({ ...ports, binding: async () => binding, now: () => NOW });
-    await expect(acceptance.accept(handoff())).rejects.toMatchObject({ kind: "provider_unavailable" });
+  it("fails closed without a durable ledger (503, nothing decoded or published)", async () => {
+    const keys = { builderKeys: new Map([[builder.kid, builder.publicKey]]), receiptKey: { kid: host.kid, key: host.privateKey } };
+    const endpoints = createLiveHostEndpoints({ module: liveHost, scopeId: "s", keys, now: () => NOW });
+    expect(await endpoints.handoff(encodeHandoffRequest(seal(), index))).toEqual({ status: 503, body: { error: "capability_unavailable" } });
+    await expect(FAIL_CLOSED_HOST_BUILD_LEDGER.view(seal().claims)).rejects.toMatchObject({ kind: "provider_unavailable" });
   });
 
-  it("fails closed without the provider live-host verifier and signer (0.2.18)", async () => {
-    expect(await loadLiveHost()).toBeUndefined();
-    const commit = memoryCommit();
-    await expect(createHandoffAcceptance({ binding: async () => binding, commit, now: () => NOW }).accept(handoff()))
-      .rejects.toMatchObject({ kind: "provider_unavailable" });
-    await expect(createHandoffAcceptance({ verify: ports.verify, binding: async () => binding, commit, now: () => NOW })
-      .accept(handoff())).rejects.toMatchObject({ kind: "provider_unavailable" });
-    expect(commit.releases).toBe(0);
+  it("authenticates the handoff before decoding any candidate file (review 1030-r2 m3)", async () => {
+    const keys = { builderKeys: new Map([[builder.kid, builder.publicKey]]), receiptKey: { kid: host.kid, key: host.privateKey } };
+    const memory = memoryHost();
+    const ledger: HostBuildLedger = { admitJob: async () => null, ledger: memory.options.ledger,
+      view: async (claims) => memory.options.view(claims), publish: (claims, files) => memory.options.publish(claims, files) };
+    const parseHandoffRequest = vi.fn(liveHost.parseHandoffRequest);
+    const endpoints = createLiveHostEndpoints({ module: { ...liveHost, parseHandoffRequest }, scopeId: "s", keys, ledger, now: () => NOW });
+    const big = [{ path: "big.bin", bytes: new Uint8Array(8 * MiB) }];
+    const forged = encodeHandoffRequest({ ...seal(big), signature: "AAAA" }, big);
+    expect(await endpoints.handoff(forged)).toEqual({ status: 401, body: { v: 1, error: "handoff_unauthenticated" } });
+    expect(await endpoints.handoff(encodeHandoffRequest(seal(big, {}, foreign), big)))
+      .toEqual({ status: 401, body: { v: 1, error: "handoff_unauthenticated" } });
+    expect(parseHandoffRequest).not.toHaveBeenCalled();
+    expect(await endpoints.handoff({ v: 1, handoff: seal(), files: "x" })).toEqual({ status: 400, body: { v: 1, error: "request_invalid" } });
+    expect(await endpoints.handoff({ v: 2 })).toEqual({ status: 400, body: { v: 1, error: "request_invalid" } });
+    const accepted = await endpoints.handoff(encodeHandoffRequest(seal(), index));
+    expect(accepted).toMatchObject({ status: 200, body: { v: 1, receipt: { kid: host.kid, releaseId: "r-1" } } });
+    expect(memory.state.releases).toBe(1);
   });
 });
 

@@ -8,7 +8,7 @@ import {
   artifactProfileDescriptor, compileHostArtifactProfile, HOST_ARTIFACT_PROFILE,
 } from "../p0b-profile.js";
 
-/** What the 0.2.20 pin will declare once M1 is qualified (fixture only). */
+/** Every git tool routed by 0.2.20 (fixture, equal to the pinned routing). */
 const ROUTED_0220: Record<GitArtifactTool, readonly string[]> = Object.fromEntries(GIT_ARTIFACT_TOOLS.map((tool) =>
   [tool, ["0.2.20"]])) as unknown as Record<GitArtifactTool, readonly string[]>;
 
@@ -28,14 +28,16 @@ describe("git mode flag", () => {
     }
   });
 
-  it("refuses every stage on the pinned provider (fail-closed until the 0.2.20 qualification)", () => {
+  it("qualifies every stage on the pinned 0.2.20 and refuses them on any other provider (fail-closed)", () => {
+    expect(ARTIFACT_PROVIDER_VERSION).toBe("0.2.20");
+    expect(GIT_TOOL_PROVIDER_ROUTING).toEqual(Object.fromEntries(GIT_ARTIFACT_TOOLS.map((tool) =>
+      [tool, /git_commit|live_/.test(tool) ? ["0.2.18", "0.2.20"] : ["0.2.20"]])));
     for (const stage of ["bindings", "build", "live"]) {
-      expect(() => resolveGitMode({ [ARTIFACTS_GIT_MODE_ENV]: stage }, ARTIFACT_PROVIDER_VERSION))
-        .toThrow("artifact_git_mode_provider_unqualified");
-      expect(() => resolveGitMode({ [ARTIFACTS_GIT_MODE_ENV]: stage }, "0.2.20"))
-        .toThrow("artifact_git_mode_provider_unqualified");
+      expect(resolveGitMode({ [ARTIFACTS_GIT_MODE_ENV]: stage }, ARTIFACT_PROVIDER_VERSION).unrouted).toEqual([]);
+      for (const other of ["0.2.18", "0.2.19", "0.3.0"]) {
+        expect(() => resolveGitMode({ [ARTIFACTS_GIT_MODE_ENV]: stage }, other)).toThrow("artifact_git_mode_provider_unqualified");
+      }
     }
-    expect(GIT_TOOL_PROVIDER_ROUTING.artifacts_git_attach).toEqual([]);
   });
 
   it("selects cumulative stages, never artifacts_list_app_sources (unrouted)", () => {
@@ -96,10 +98,12 @@ describe("git mode flag", () => {
     }
   });
 
-  it("refuses to boot with the flag on under the pinned provider", async () => {
+  it("boots with the flag on under the pinned 0.2.20 and selects exactly the stage tools", async () => {
     vi.resetModules();
     vi.stubEnv(ARTIFACTS_GIT_MODE_ENV, "bindings");
-    await expect(import("../p0b-profile.js")).rejects.toThrow("artifact_git_mode_provider_unqualified");
+    const profile = await import("../p0b-profile.js");
+    expect(profile.ARTIFACT_GIT_MODE.tools).toEqual(["artifacts_git_attach", "artifacts_fetch_app_source"]);
+    expect(profile.HOST_ARTIFACT_PROFILE.selectedCapabilities).toEqual(expect.arrayContaining(["artifacts_git_attach"]));
   });
 
   it("compiles a profile that routes the selected git tools", () => {
