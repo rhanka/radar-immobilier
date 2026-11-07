@@ -20,6 +20,7 @@ import { assertP0bStorage, p0bPorts, sharePrincipal } from "./p0b-ports.js";
 import type { ArtifactDeleteConfirmation } from "./delete-confirmation.js";
 import { createArtifactReadMetadata } from "./read-metadata.js";
 import { replayLegacyDelete } from "./legacy-delete-replay.js";
+import type { GitModeDeps } from "./git-mode/compose.js";
 
 /**
  * A prepared publication must finalize within this window: past it, the
@@ -64,6 +65,8 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
   uploadPage?: HttpAppDeps["uploadPage"];
   /** Preparation window; defaults to PREPARATION_WINDOW_MS. Derive it with resolvePublishDeadlines. */
   preparationWindowMs?: number;
+  /** Git mode dependencies (deps.git, gitTools); empty when IMMO_ARTIFACTS_GIT_MODE is off. */
+  gitMode?: GitModeDeps;
 }) {
   const { pool, scope, blobs, profile, coordinator } = options;
   const preparationWindowMs = options.preparationWindowMs ?? PREPARATION_WINDOW_MS;
@@ -128,6 +131,7 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
       locks: { "artifact-lifecycle": [lock("artifacts", "id")], acl: [lock("artifact_access", "artifact_id")],
         "current-pointer": [lock("artifact_current", "artifact_id")] } },
     ...(options.publicationUrls ? { publicationUrls: options.publicationUrls } : {}),
+    ...options.gitMode,
   });
   const execute: typeof app.execute = async (request, invocation: ArtifactInvocationContext) => {
     try {

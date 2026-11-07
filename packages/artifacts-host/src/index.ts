@@ -119,3 +119,5 @@ export {
   mapKitAssetUrl,
   type MapKitAsset,
 } from "./map-kit.js";
+export * from "./git-mode/index.js";
+export { ARTIFACT_GIT_MODE, GIT_MODE_ARTIFACT_TOOLS } from "./p0b-profile.js";
