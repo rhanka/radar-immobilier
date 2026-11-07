@@ -1,7 +1,7 @@
 # Feature: Artifacts provider 0.2.17 and application content mode
 
 ## Objective
-Pin `@sentropic/artifacts@0.2.17` and serve immo artifacts with the provider's application content mode (CSP and extension MIME map from the package), removing the immo-local copies added in #1008.
+Pin `@sentropic/artifacts@0.2.17` and serve immo artifacts with the provider's application content mode (release CSP from the package), removing the immo-local CSP copy added in #1008. The immo extension MIME map stays local in this branch: the provider `EXTENSION_TO_MIME` is not exported by 0.2.17 (adopted with the 0.2.18 pin, branch ART0218).
 
 ## Scope / Guardrails
 - Scope limited to the provider pin, provider qualification lists and the immo release-file CSP/MIME seam.
