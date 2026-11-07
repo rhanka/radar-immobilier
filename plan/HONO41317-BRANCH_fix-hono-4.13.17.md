@@ -55,6 +55,6 @@ Upgrade `hono` from 4.13.13 to `^4.13.17` (latest 4.x) as a single copy hoisted 
   - [x] Lock: single `node_modules/hono` 4.13.17 (integrity `sha512-vZIcbkvj…Fh05kQ==`), no nested copy.
   - [x] Unit test: wildcard middlewares (api `protect`, content-deny denial) still answer a path with an encoded line terminator; the content-deny case fails on 4.13.13.
 
-- [ ] **Lot N — Final validation**
+- [x] **Lot N — Final validation**
   - [x] Lot gate: typecheck, lint, api (415 files / 4340 tests) and immo-mcp (72 files / 592 tests) suites (`tools/artifact-host.mk`, `ENV=test-hono41317`, stack removed with `down -v`).
-  - [ ] Push branch and open the PR to `main`.
+  - [x] Push branch and open the PR to `main` (#1017, merged).

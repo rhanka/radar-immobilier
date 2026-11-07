@@ -53,6 +53,6 @@ Upgrade `@hono/node-server` to `^2.1.6` (fixes GHSA-jpvv-r467-5p4w: a backslash 
   - [x] Lock: single `node_modules/@hono/node-server` 2.1.6 (integrity `sha512-p/KH9Mnf…hLKjQ==`), no nested copy.
   - [x] Unit test: a backslash in the request path is rejected (400) by `getRequestListener` instead of being routed.
 
-- [ ] **Lot N — Final validation**
+- [x] **Lot N — Final validation**
   - [x] Lot gate: typecheck, lint, api (414 files / 4338 tests) and immo-mcp (72 files / 592 tests) suites (`tools/artifact-host.mk`, `ENV=test-hono216`, stack removed with `down -v`).
-  - [ ] Push branch and open the PR to `main`.
+  - [x] Push branch and open the PR to `main` (#1016, merged).

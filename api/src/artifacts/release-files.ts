@@ -14,6 +14,7 @@
  * digest-verified S3 blobs. The in-memory provider below is for module tests.
  */
 import { createHash } from "node:crypto";
+import { HOST_MIME_TYPES } from "@radar/artifacts-host";
 import { contentHeaders, type ContentMode } from "@sentropic/artifacts/content/headers";
 import { mimeTypeForPath } from "@sentropic/artifacts/server/mime";
 import { parse, type DefaultTreeAdapterMap } from "parse5";
@@ -71,6 +72,11 @@ export function releaseCspForHtml(html: string): string {
  * tiles, .wasm, images, PDF, MP4). As in reader-storage, text types carry
  * `charset=utf-8` and binary types are served bare; an unmapped extension
  * falls back to `application/octet-stream`.
+ *
+ * This resolves a type for any path; it does not decide what is served.
+ * Production (reader-storage) only serves a committed file whose manifest
+ * type is in `HOST_MIME_TYPES` (@radar/artifacts-host) and 404s the rest;
+ * createMemoryReleaseFiles applies the same gate.
  */
 export function contentTypeForPath(path: string): string {
   const mimeType = mimeTypeForPath(path);
@@ -95,13 +101,24 @@ export function normalizeReleasePath(rawPath: string): string | null {
   return normalized;
 }
 
+/**
+ * Same gate as reader-storage: a path whose resolved type is outside
+ * `HOST_MIME_TYPES` (e.g. .wasm, .pbf, .avif, .ico, .woff, .ttf, .otf, .webm,
+ * or an unmapped extension) is never served by the in-memory provider, so a
+ * module test cannot pass on a type production refuses.
+ */
+function isHostServedPath(path: string): boolean {
+  const mimeType = mimeTypeForPath(path);
+  return mimeType !== undefined && HOST_MIME_TYPES.includes(mimeType);
+}
+
 export function createMemoryReleaseFiles(
   entries: ReadonlyArray<{ artifactId: string; releaseId: string; path: string; body: string | Uint8Array }>,
 ): ReleaseFileProvider {
   const files = new Map<string, ReleaseFile>();
   for (const entry of entries) {
     const normalized = normalizeReleasePath(entry.path.startsWith("/") ? entry.path : `/${entry.path}`);
-    if (!normalized) continue;
+    if (!normalized || !isHostServedPath(normalized)) continue;
     files.set(`${entry.artifactId}/${entry.releaseId}/${normalized}`, {
       body: entry.body,
       contentType: contentTypeForPath(normalized),
