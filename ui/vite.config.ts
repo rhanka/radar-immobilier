@@ -12,6 +12,15 @@ const qaHarness = process.env.QA_HARNESS === "1";
 // J1.2d/e: build the real UI as an artifact (`VITE_ARTIFACT_MODE=1`): app
 // paths go through the named reader ops (src/lib/net/artifact-transport.ts).
 const artifactMode = process.env.VITE_ARTIFACT_MODE === "1";
+// Artifact basemap tiles (immo owns VITE_BASEMAP_TILE_URL). The build wrapper
+// tools/make/ui-artifact-env.mjs sets it for `build:artifact`; the LIVE dev
+// server on the builder pod runs this config without the wrapper and the host
+// no longer passes it, so artifact mode defaults it here to the SAME value
+// (tools/make/git-artifact-descriptor.test.mjs checks both paths agree). An
+// explicit environment value (the wrapper's) always wins.
+export const ARTIFACT_BASEMAP_TILE_URL = "/__artifacts/tiles/v1/osm/{z}/{x}/{y}";
+const artifactBasemapDefault = artifactMode && !process.env.VITE_BASEMAP_TILE_URL?.trim()
+  ? ARTIFACT_BASEMAP_TILE_URL : undefined;
 const harnessInput = qaHarness
   ? {
       main: fileURLToPath(new URL("./index.html", import.meta.url)),
@@ -62,6 +71,8 @@ const harnessInput = qaHarness
 
 export default defineConfig({
   base,
+  ...(artifactBasemapDefault
+    ? { define: { "import.meta.env.VITE_BASEMAP_TILE_URL": JSON.stringify(artifactBasemapDefault) } } : {}),
   plugins: [svelte()],
   resolve: {
     conditions: ["browser", "svelte", "module", "import", "default"],
