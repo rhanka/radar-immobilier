@@ -40,3 +40,44 @@
         name: radar-artifacts-upload-page-preprod
         key: secret
         optional: true
+# Git-backed artifact mode, PREPROD ONLY (docs/operator/git-artifact-mode.md).
+# Secret radar-artifacts-git-preprod is minted by the conductor through the
+# documented rotation cycle (never in git); optional references keep the
+# process alive and close the matching port (fail-closed) while a key is absent.
+# radar-immo-mcp: git tools and live service (no receipt key, no live edge keyring).
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: IMMO_ARTIFACTS_SERVICE_OAUTH_CLIENT_ID
+    valueFrom:
+      secretKeyRef:
+        name: radar-artifacts-git-preprod
+        key: IMMO_ARTIFACTS_SERVICE_OAUTH_CLIENT_ID
+        optional: true
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: IMMO_ARTIFACTS_SERVICE_OAUTH_CLIENT_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: radar-artifacts-git-preprod
+        key: IMMO_ARTIFACTS_SERVICE_OAUTH_CLIENT_SECRET
+        optional: true
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: IMMO_ARTIFACTS_GIT_CURSOR_KEY
+    valueFrom:
+      secretKeyRef:
+        name: radar-artifacts-git-preprod
+        key: IMMO_ARTIFACTS_GIT_CURSOR_KEY
+        optional: true
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: IMMO_ARTIFACTS_LIVE_DRAFT_KEYS
+    valueFrom:
+      secretKeyRef:
+        name: radar-artifacts-git-preprod
+        key: IMMO_ARTIFACTS_LIVE_DRAFT_KEYS
+        optional: true
