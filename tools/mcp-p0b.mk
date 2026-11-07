@@ -7,7 +7,7 @@ RUN_DATABASE_API := $(COMPOSE) run --rm --no-deps -T --entrypoint '' -e P0B_DATA
 .DEFAULT_GOAL := verify
 INSTALL := npm ci --cache /tmp/immo-p0c-npm
 SOURCE ?= /home/antoinefa/src/sentropic/tmp/worktrees/artifacts-parity-p0b/packages/artifacts
-P0B_VERSION ?= 0.2.16
+P0B_VERSION ?= 0.2.17
 
 .PHONY: prepare lock registry verify candidate integration database-check test-api down-api
 prepare: guard
@@ -23,9 +23,9 @@ lock: guard
 registry: guard
 	@$(CHECK) 'npm --cache /tmp/immo-p0c-npm view @sentropic/artifacts@$(P0B_VERSION) version'
 integrity: guard
-	@$(CHECK) 'actual=$$(npm --cache /tmp/immo-p0c-npm view @sentropic/artifacts@0.2.16 dist.integrity); test "$$actual" = "sha512-acHg17csCM3R25Kb0sn4l2C8mF/1IuNqOGyq7jNr87ZQIG4nnE2CLQaEm6H2QIs0lFQobvk7hu5PSZ+YEWsTkw==" && printf "%s\n" "$$actual"'
+	@$(CHECK) 'actual=$$(npm --cache /tmp/immo-p0c-npm view @sentropic/artifacts@0.2.17 dist.integrity); test "$$actual" = "sha512-8eEGwkDTqusY6Bh6oZrhJBEv/BmotSAo1aq2bmvQzkAYbOl3PsD2hw2EEkHyOcv4vUyZtREifM/Uo1ruq+YLZQ==" && printf "%s\n" "$$actual"'
 upstream: guard
-	@$(CHECK) 'mkdir -p tmp/mcp-p0c/upstream && npm --cache /tmp/immo-p0c-npm pack @sentropic/artifacts@0.2.16 --pack-destination /tmp && tar -xzf /tmp/sentropic-artifacts-0.2.16.tgz -C tmp/mcp-p0c/upstream'
+	@$(CHECK) 'mkdir -p tmp/mcp-p0c/upstream && npm --cache /tmp/immo-p0c-npm pack @sentropic/artifacts@0.2.17 --pack-destination /tmp && tar -xzf /tmp/sentropic-artifacts-0.2.17.tgz -C tmp/mcp-p0c/upstream'
 verify: guard
 ifeq ($(CANDIDATE),1)
 	@$(MAKE) --no-print-directory -f tools/mcp-p0b.mk candidate P0B_VERSION='$(P0B_VERSION)' SOURCE='$(SOURCE)' ENV=$(ENV)
