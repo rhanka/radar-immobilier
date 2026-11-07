@@ -49,8 +49,8 @@ Prepare the immo side of the git-backed artifact mode (A-LIVE v2, enablement pla
   - [x] `IMMO_ARTIFACTS_GIT_MODE` stages `off|bindings|build|live`, provider routing table (fail-closed), profile/selection/scopes/effective profile/overlay config gated by the flag.
   - [x] A1 registry with the A-LIVE §3.1 refusals; SG0-app lease broker client (`/github-app/broker/lease`); per-user code rights, GitHub human directory, write-scope context; `deps.git` + `gitTools` composition.
   - [x] Authoring guide `gitMode` section (flag on only) with the enforced ceilings.
-- [ ] **Lot 2 — M3-I build**
-  - [ ] Host build API client (`sandbox` only); SG4b handoff verification (signature, 10-minute lifetime, job/commit/generation, 255 files / 16 MiB / 64 MiB, candidate digest), single-commit acceptance port (fail-closed), host-signed receipt.
+- [x] **Lot 2 — M3-I build**
+  - [x] Host build API client (`sandbox` only); SG4b handoff verification (signature, 10-minute lifetime, job/commit/generation, 255 files / 16 MiB / 64 MiB, candidate digest), single-commit acceptance port (fail-closed), host-signed receipt.
 - [ ] **Lot 3 — M4-I live (stubs)**
   - [ ] `0037_artifacts_live_drafts` (provider 0011) and `0038_artifacts_live_invitations`.
   - [ ] Per-user live authority, invitations (create/list/revoke), content-host reader gate; `LiveService` composition with fail-closed keys, no worker, `qualified=false`.

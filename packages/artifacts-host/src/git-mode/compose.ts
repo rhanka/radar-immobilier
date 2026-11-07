@@ -13,6 +13,7 @@ import {
   type GitHumanEntry,
 } from "./identity.js";
 import { createLeaseBrokerClient, FAIL_CLOSED_LEASES } from "./lease-broker.js";
+import { createHostBuildApiClient } from "./build-api.js";
 import { gitToolServiceFactory, GIT_TOOLS_DEP_KEY, type GitBuildPort, type GitToolService, type GitToolsDeps } from "./provider-adapter.js";
 import { createImmoGitRegistry, IMMO_GIT_OUTPUT_DIR, IMMO_GIT_REPO_ID } from "./registry.js";
 
@@ -28,7 +29,8 @@ import { createImmoGitRegistry, IMMO_GIT_OUTPUT_DIR, IMMO_GIT_REPO_ID } from "./
  * IMMO_ARTIFACTS_GIT_INSTALLATION_REF, IMMO_ARTIFACTS_GIT_BROKER_ORIGIN,
  * IMMO_ARTIFACTS_GIT_BROKER_TOKEN (secret), IMMO_ARTIFACTS_GIT_CURSOR_KEY
  * (secret), IMMO_ARTIFACTS_GIT_CODE_READERS, IMMO_ARTIFACTS_GIT_HUMANS,
- * IMMO_ARTIFACTS_GIT_COMMITTER_NAME, IMMO_ARTIFACTS_GIT_COMMITTER_EMAIL.
+ * IMMO_ARTIFACTS_GIT_COMMITTER_NAME, IMMO_ARTIFACTS_GIT_COMMITTER_EMAIL;
+ * M3-I: IMMO_ARTIFACTS_BUILDER_ORIGIN, IMMO_ARTIFACTS_BUILDER_TOKEN (secret).
  */
 export interface GitModeConfig {
   readonly installationRef?: string | undefined;
@@ -38,6 +40,9 @@ export interface GitModeConfig {
   readonly codeReaders: readonly string[];
   readonly humans: readonly GitHumanEntry[];
   readonly committer?: GitIdentity | undefined;
+  /** M3-I: Sentropic builder service (host build API); absent keeps git_publish closed. */
+  readonly builderOrigin?: string | undefined;
+  readonly builderToken?: string | undefined;
 }
 
 const optional = (value: string | undefined) => value?.trim() ? value.trim() : undefined;
@@ -54,6 +59,8 @@ export function readGitModeConfig(env: NodeJS.ProcessEnv): GitModeConfig {
     codeReaders: (env.IMMO_ARTIFACTS_GIT_CODE_READERS ?? "").split(",").map((entry) => entry.trim()).filter(Boolean),
     humans: parseGitHumanEntries(env.IMMO_ARTIFACTS_GIT_HUMANS),
     committer: name && email ? { name, email } : undefined,
+    builderOrigin: optional(env.IMMO_ARTIFACTS_BUILDER_ORIGIN),
+    builderToken: optional(env.IMMO_ARTIFACTS_BUILDER_TOKEN),
   };
 }
 
@@ -140,10 +147,18 @@ export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
       return codeRights.canReadCode({ storageScopeId: target.storageScopeId, repoId: target.repoId, actorId: target.principalId });
     },
   }) : FAIL_CLOSED_GIT_PORT);
+  // M3-I: git_publish is selected only from the `build` stage; the sandbox
+  // executor is admitted only once the builder origin and token are set.
+  const builderToken = config.builderToken;
+  const build = ports.build ?? (input.resolution.tools.includes("artifacts_git_publish")
+    ? createHostBuildApiClient({ origin: config.builderOrigin,
+      identity: builderToken ? { authorization: async () => `Bearer ${builderToken}` } : undefined,
+      ...(ports.fetch ? { fetch: ports.fetch } : {}) })
+    : undefined);
   const factory = ports.gitToolFactory ?? gitToolServiceFactory();
   const gitTools = withHostGitPolicy(factory({ bindings, registry, codeRights, git, outputDir: IMMO_GIT_OUTPUT_DIR,
     authorize: createGitToolAuthorize({ owners: ports.owners ?? createPostgresArtifactOwners(pool), codeRights,
       repoId: IMMO_GIT_REPO_ID, hasWriteScope }),
-    ...(ports.build ? { build: ports.build } : {}) }));
+    ...(build ? { build } : {}) }));
   return { git: { bindings, codeRights }, [GIT_TOOLS_DEP_KEY]: gitTools };
 }
