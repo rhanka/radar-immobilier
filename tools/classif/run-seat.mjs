@@ -494,6 +494,8 @@ export function callSeat(label, prompt, { timeoutMs = 900000, base = process.env
     let out = '';
     let err = '';
     let settled = false;
+    // The seat binary is absent from PATH (spawn ENOENT, exit -2): reported as `binaryMissing`.
+    let binaryMissing = false;
     const finish = (code, timedOut) => {
       if (settled) return;
       settled = true;
@@ -508,7 +510,9 @@ export function callSeat(label, prompt, { timeoutMs = 900000, base = process.env
       // file saves this whole object), so tool-event audits are reproducible.
       const rawJsonl = codex ? out : undefined;
       const authError = codex && looksLikeAuthFailure(code, `${err}\n${out.slice(-4000)}`);
-      resolve({ code, latencyMs, timedOut, ...parsed, ...(rawJsonl !== undefined ? { rawJsonl } : {}), ...(authError ? { authError: true } : {}),
+      const missing = binaryMissing || code === -2;
+      resolve({ code: missing && (code === null || code === 0) ? -2 : code, latencyMs, timedOut, ...parsed, ...(rawJsonl !== undefined ? { rawJsonl } : {}), ...(authError ? { authError: true } : {}),
+        ...(missing ? { binaryMissing: cmd } : {}),
         stderrTail: err.slice(-600), stdoutTail: parsed.text ? undefined : out.slice(-600) });
     };
     // Timeout: SIGTERM to the group, then SIGKILL to the group after killEscalationMs.
@@ -521,7 +525,7 @@ export function callSeat(label, prompt, { timeoutMs = 900000, base = process.env
     const force = setTimeout(() => { killSeatTree(child, 'SIGKILL'); finish(null, true); }, timeoutMs + closeGraceMs);
     child.stdout.on('data', (d) => { out += d; });
     child.stderr.on('data', (d) => { err += d; });
-    child.on('error', (e) => { err += String(e.message); });
+    child.on('error', (e) => { err += String(e.message); if (e?.code === 'ENOENT') binaryMissing = true; });
     child.on('close', (code) => finish(code, false));
     // An early seat exit while the prompt is still piped raises EPIPE on stdin: a failure
     // of this call only (recorded in err), never an unhandled exception killing the runner.

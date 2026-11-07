@@ -5,13 +5,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { EventEmitter } from 'node:events';
 import os from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
-import { MAX_RETRIES, runGepa, stratifiedSplit } from '../l4/gepa.mjs';
+import { setImmediate } from 'node:timers';
+import { MAX_RETRIES, gepaResumeCheck, runGepa, stratifiedSplit } from '../l4/gepa.mjs';
 import { GEPA_ROUTES } from '../l4/gepa-common.mjs';
 import { parseSeatResult } from '../l4/dev.mjs';
-import { ROUTES, codexErrorEnvelope, countVibeToolEvents, looksLikeMaxPrice, looksLikeQuotaFailure } from '../run-seat.mjs';
+import { ROUTES, callSeat, codexErrorEnvelope, countVibeToolEvents, looksLikeMaxPrice, looksLikeQuotaFailure } from '../run-seat.mjs';
 import { loadCodes } from '../l2/run.mjs';
 import { buildFingerprints } from '../lib/fingerprint.mjs';
 import { initTempRepo, withTempHome, writeRepoFile } from './hermetic-helpers.mjs';
@@ -231,3 +233,54 @@ test('N6: quota detection reads stderr and the CLI error envelope only; a vibe -
   const p0 = JSON.parse(readFileSync(path.join(home, 'l4', `gepa-s${K}`, 'candidates', 'P0.json'), 'utf8'));
   for (const id of ids) assert.deepEqual([p0.pareto[id]['mistral-large-4-low'].failed, p0.pareto[id]['mistral-large-4-low'].infra], [true, false]);
 }));
+
+test('owner 4 routes: a missing seat binary stops the run at its first call; the resume reuses the answers of the other routes (run s5 case)', withTempHome(async (home) => {
+  const repo = setup(home);
+  // Every seed misses p0 on mistral (no candidate: the run can be resumed again afterwards).
+  const miss = (label, mark, id) => (mark.startsWith('seed') && label === 'mistral-large-4-low' && id === 'p0' ? { code: 0, text: JSON.stringify({ verdict: 'non_pertinent', code: CODE.non_pertinent }) } : null);
+  const absent = fakeSeat((label, mark, id) => (label === 'sol-6.1-low' ? { code: -2, text: '', binaryMissing: 'codex' } : miss(label, mark, id)));
+  await assert.rejects(runGepa({ home, k: K, maxIterations: 0, seat: absent.seat, log: quiet }),
+    /codex not found in PATH \(codex introuvable dans PATH\) for route sol-6.1-low on seed-P0: seat infrastructure, run stopped at the first call/);
+  // Stopped at the first answer: only the calls already in flight (concurrency 2) were launched, not 3+ for a breaker.
+  assert.ok(absent.seen.filter((c) => c.label === 'sol-6.1-low').length <= 2);
+  const check = gepaResumeCheck({ home, k: K });
+  assert.deepEqual([check.splitMatches, check.contextMatches, check.candidatesOnDisk], [true, true, 0]);
+  // Every route stopped launching at the missing binary; what the others answered is cached.
+  const answered = absent.seen.filter((c) => c.label !== 'sol-6.1-low').map((c) => `${c.label}|${c.id}`);
+  assert.equal(check.cachedParetoAnswers.P0['sol-6.1-low'], 0);
+  assert.equal(GEPA_ROUTES.reduce((n, r) => n + check.cachedParetoAnswers.P0[r], 0), answered.length);
+  // Resume, codex back on the PATH: P0 pays its 48 sol calls and only the cases not answered yet.
+  const g = fakeSeat(miss);
+  const m = await runGepa({ home, k: K, maxIterations: 0, seat: g.seat, log: quiet });
+  assert.ok(existsSync(manifestFile(repo)));
+  const p0 = g.seen.filter((c) => c.mark === 'seed-0' && SPLIT.pareto.includes(c.id));
+  assert.equal(p0.filter((c) => c.label === 'sol-6.1-low').length, 48);
+  assert.equal(p0.length, 4 * 48 - answered.length);
+  assert.ok(!p0.some((c) => answered.includes(`${c.label}|${c.id}`)), 'an answered call is never repaid');
+  assert.deepEqual(m.routes, GEPA_ROUTES);
+  // A candidate file still holding a luna row (5-route era) loads, and luna is never retried.
+  const f = path.join(home, 'l4', `gepa-s${K}`, 'candidates', 'P1.json');
+  const p1 = JSON.parse(readFileSync(f, 'utf8'));
+  p1.pareto[SPLIT.pareto[0]]['luna-6-low'] = { failed: true, infra: true, pred: null };
+  writeFileSync(f, JSON.stringify(p1));
+  const again = fakeSeat(miss);
+  await runGepa({ home, k: K, maxIterations: 0, seat: again.seat, log: quiet });
+  assert.equal(again.seen.length, 0, 'no luna call, nothing repaid');
+}));
+
+test('callSeat reports a seat binary absent from PATH (spawn ENOENT, exit -2) as binaryMissing', async () => {
+  const base = mkdtempSync(path.join(os.tmpdir(), 'enoent-'));
+  try {
+    const spawnImpl = () => {
+      const child = new EventEmitter();
+      child.stdout = new EventEmitter();
+      child.stderr = new EventEmitter();
+      child.stdin = { on() {}, end() { setImmediate(() => { child.emit('error', Object.assign(new Error('spawn claude ENOENT'), { code: 'ENOENT' })); child.emit('close', -2); }); } };
+      child.kill = () => {};
+      return child;
+    };
+    const r = await callSeat('opus-5.5-low', 'p', { base, spawnImpl });
+    assert.deepEqual([r.code, r.binaryMissing], [-2, 'claude']);
+    assert.equal(parseSeatResult(r, loadCodes()).infra, true);
+  } finally { rmSync(base, { recursive: true, force: true }); }
+});
