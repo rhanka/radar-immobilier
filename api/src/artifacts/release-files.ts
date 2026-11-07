@@ -15,6 +15,7 @@
  */
 import { createHash } from "node:crypto";
 import { contentHeaders, type ContentMode } from "@sentropic/artifacts/content/headers";
+import { mimeTypeForPath } from "@sentropic/artifacts/server/mime";
 import { parse, type DefaultTreeAdapterMap } from "parse5";
 
 export interface ReleaseFile {
@@ -62,39 +63,19 @@ export function releaseCspForHtml(html: string): string {
     mode: RELEASE_CONTENT_MODE, scriptHashes })["content-security-policy"]!;
 }
 
-// The provider extension map (EXTENSION_TO_MIME, 0.2.17) lives in
-// `server/mime`, which the package does not export: this map mirrors it.
-const CONTENT_TYPES: Record<string, string> = {
-  ".html": "text/html; charset=utf-8",
-  ".js": "text/javascript; charset=utf-8",
-  ".mjs": "text/javascript; charset=utf-8",
-  ".css": "text/css; charset=utf-8",
-  ".json": "application/json",
-  // J1.1 — the real UI ships these: .geojson (municipal outlines),
-  // .mjs (pdf.js module worker), .woff2 (bundled fonts), .pbf (vector
-  // tiles, proxy octets only) and .wasm (reserved, none shipped today).
-  ".geojson": "application/json",
-  ".pbf": "application/x-protobuf",
-  ".wasm": "application/wasm",
-  // Files parity LOT 1 — binary release assets, served byte-identical under
-  // nosniff; SVG/PDF additionally get a sandboxed document CSP at serve time.
-  // Files parity LOT 2 — variable fonts and funnel videos ride the same
-  // channel (magic-byte verified at commit, declared type served).
-  ".svg": "image/svg+xml",
-  ".png": "image/png",
-  ".jpg": "image/jpeg",
-  ".jpeg": "image/jpeg",
-  ".gif": "image/gif",
-  ".webp": "image/webp",
-  ".pdf": "application/pdf",
-  ".woff2": "font/woff2",
-  ".mp4": "video/mp4",
-};
-
+/**
+ * Release content types come from the provider extension map
+ * (`mimeTypeForPath` / `EXTENSION_TO_MIME`, exported from
+ * `@sentropic/artifacts/server/mime` since 0.2.18). It covers every asset
+ * type the real UI ships (.geojson, .mjs pdf.js worker, .woff2 fonts, .pbf
+ * tiles, .wasm, images, PDF, MP4). As in reader-storage, text types carry
+ * `charset=utf-8` and binary types are served bare; an unmapped extension
+ * falls back to `application/octet-stream`.
+ */
 export function contentTypeForPath(path: string): string {
-  const dot = path.lastIndexOf(".");
-  const ext = dot === -1 ? "" : path.slice(dot).toLowerCase();
-  return CONTENT_TYPES[ext] ?? "application/octet-stream";
+  const mimeType = mimeTypeForPath(path);
+  if (mimeType === undefined) return "application/octet-stream";
+  return mimeType.startsWith("text/") ? `${mimeType}; charset=utf-8` : mimeType;
 }
 
 export function normalizeReleasePath(rawPath: string): string | null {

@@ -9,6 +9,7 @@ import {
   RELEASE_CONTENT_MODE,
 } from "./release-files.js";
 import { APPLICATION_HTML_CSP, contentHeaders } from "@sentropic/artifacts/content/headers";
+import { EXTENSION_TO_MIME } from "@sentropic/artifacts/server/mime";
 import { READER_CONTENT_HEADERS } from "./content-isolation.js";
 
 describe("published release files", () => {
@@ -54,6 +55,27 @@ describe("published release files", () => {
     expect(contentTypeForPath("inter-latin-wght-normal-Dx4kXJAl.woff2")).toBe("font/woff2");
     expect(contentTypeForPath("tiles.pbf")).toBe("application/x-protobuf");
     expect(contentTypeForPath("module.wasm")).toBe("application/wasm");
+  });
+
+  it("should resolve every served release type through the provider extension map", () => {
+    // The immo-local table removed in 0.2.18 adoption: same served type for each entry.
+    const served: Record<string, string> = {
+      ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8",
+      ".mjs": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8",
+      ".json": "application/json", ".geojson": "application/json",
+      ".pbf": "application/x-protobuf", ".wasm": "application/wasm",
+      ".svg": "image/svg+xml", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
+      ".gif": "image/gif", ".webp": "image/webp", ".pdf": "application/pdf",
+      ".woff2": "font/woff2", ".mp4": "video/mp4",
+    };
+    for (const [ext, type] of Object.entries(served)) {
+      expect(contentTypeForPath(`asset${ext}`)).toBe(type);
+      expect(contentTypeForPath(`ASSET${ext.toUpperCase()}`)).toBe(type);
+      expect(type.split(";")[0]).toBe(EXTENSION_TO_MIME[ext as keyof typeof EXTENSION_TO_MIME]);
+    }
+    expect(contentTypeForPath("README")).toBe("application/octet-stream");
+    expect(contentTypeForPath("archive.zip")).toBe("application/octet-stream");
+    expect(contentTypeForPath("dir.v2/file")).toBe("application/octet-stream");
   });
 
   it("should authorize release sub-resources and H5 calls without opening isolation", () => {
