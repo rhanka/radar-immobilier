@@ -35,6 +35,8 @@ Prepare the immo side of the git-backed artifact mode (A-LIVE v2, enablement pla
 - `clarification` (conductor, Δ4): live is multi-user. Each user edits their own personal binding; invited live readers (code rights required, session- and generation-bound, revocable) read only; a third party never writes to another user's binding; the artifacts access enum is not widened.
 - `attention`: `artifacts_list_app_sources` stays unrouted in 0.2.19 (M1 changelog): selected by no stage until a provider routes it.
 - `attention`: the 0.3.0 allowance removal (A-LIVE §10) belongs to the 0.2.19 pin commit.
+- `clarification` (s-archi): all host-executed or host-verified crypto comes from `@sentropic/artifacts/live-host` (0.2.20); the `content/live-assertion` subpath is abandoned.
+- `deferred`: GB1 install-script rows need the integrity values of #1029 (15 of the 19 entries lack `integrity` on `origin/main`).
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch** — one draft PR, one commit per milestone (M2-I, M3-I, M4-I), then the plan/doc commit and the preprod flag commit.
@@ -51,8 +53,11 @@ Prepare the immo side of the git-backed artifact mode (A-LIVE v2, enablement pla
   - [x] Authoring guide `gitMode` section (flag on only) with the enforced ceilings.
 - [x] **Lot 2 — M3-I build**
   - [x] Host build API client (`sandbox` only); SG4b handoff verification (signature, 10-minute lifetime, job/commit/generation, 255 files / 16 MiB / 64 MiB, candidate digest), single-commit acceptance port (fail-closed), host-signed receipt.
-- [ ] **Lot 3 — M4-I live (stubs)**
-  - [ ] `0037_artifacts_live_drafts` (provider 0011) and `0038_artifacts_live_invitations`.
-  - [ ] Per-user live authority, invitations (create/list/revoke), content-host reader gate; `LiveService` composition with fail-closed keys, no worker, `qualified=false`.
-- [ ] **Lot 4 — Gate**: typecheck, lint, artifacts-host / immo-mcp / provenance / binding-store integration tests via Make.
-- [ ] **Lot 5 — Conductor**: 0.2.19 qualification commit, preprod flag-on, owner MCP-only test.
+- [x] **Lot 3 — M4-I live (stubs)**
+  - [x] `0037_artifacts_live_drafts` (provider 0011) and `0038_artifacts_live_invitations`.
+  - [x] Per-user live authority, invitations (create/list/revoke), content-host reader gate; `LiveService` composition with fail-closed keys, no worker, `qualified=false`.
+  - [x] Live edge revocation: sockets closed first, fence pushed to `/_live-control/v1` with retry, failure surfaced.
+  - [x] One provider seam `@sentropic/artifacts/live-host` (0.2.20) for handoff verification, receipt/assertion signing, candidate digest; no immo crypto (local SG4b checks kept as test-support contract reference only).
+- [x] **Lot 4 — Gate**: typecheck, lint, artifacts-host / immo-mcp / provenance / binding-store integration tests via Make.
+- [ ] **Lot 5 — GB1 rows**: after #1029 merges, generate the 19 disabled install-script rows from the lock (`make -f tools/make/git-artifact.mk gb1-rows`), with the divergence test.
+- [ ] **Lot 6 — Conductor**: 0.2.19 (+0.2.20) qualification commit, preprod flag-on, owner MCP-only test.

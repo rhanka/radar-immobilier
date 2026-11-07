@@ -10,7 +10,7 @@ import {
 
 /** What the 0.2.19 pin will declare once M1 is qualified (fixture only). */
 const ROUTED_0219: Record<GitArtifactTool, readonly string[]> = Object.fromEntries(GIT_ARTIFACT_TOOLS.map((tool) =>
-  [tool, ["0.2.19"]])) as Record<GitArtifactTool, readonly string[]>;
+  [tool, ["0.2.19"]])) as unknown as Record<GitArtifactTool, readonly string[]>;
 
 describe("git mode flag", () => {
   afterEach(() => { vi.unstubAllEnvs(); vi.resetModules(); });

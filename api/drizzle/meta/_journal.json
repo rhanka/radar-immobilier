@@ -253,6 +253,20 @@
       "when": 1793000000006,
       "tag": "0036_artifacts_git_bindings",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1793000000007,
+      "tag": "0037_artifacts_live_drafts",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1793000000008,
+      "tag": "0038_artifacts_live_invitations",
+      "breakpoints": true
     }
   ]
 }

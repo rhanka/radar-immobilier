@@ -7,3 +7,7 @@ export * from "./provider-adapter.js";
 export * from "./compose.js";
 export * from "./build-api.js";
 export * from "./handoff.js";
+export * from "./live-authority.js";
+export * from "./live.js";
+export * from "./live-edge.js";
+export * from "./live-host-adapter.js";
