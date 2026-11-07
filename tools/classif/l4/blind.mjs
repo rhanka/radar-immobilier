@@ -12,7 +12,8 @@
 import path from 'node:path';
 import process from 'node:process';
 import { chmodSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, writeFileSync } from 'node:fs';
-import { ROUTES, callSeat } from '../run-seat.mjs';
+import { ROUTES, callSeat, isCodexSeat } from '../run-seat.mjs';
+import { CODEX_QUOTA_PAUSE_DEFAULT, createQuotaGuard, parseQuotaPause, quotaFields } from '../lib/codex-quota.mjs';
 import { appendJsonlRecord, parseJsonlTolerant } from '../lib/jsonl.mjs';
 import { sha256, stableStringify } from '../lib/render.mjs';
 import { EVAL_DIR_DEFAULT, classifDir, repoRoot, testOnlyEnv, classifHome, privateDir } from '../lib/paths.mjs';
@@ -217,6 +218,10 @@ export async function main(argv = process.argv.slice(2)) {
   const universe = seriesRouteUniverse(seriesMethod(k), EVAL_ROUTES);
   const routes = universe.filter((r) => !deferred.includes(r));
   const concurrency = Number(argv.includes('--concurrency') ? argv[argv.indexOf('--concurrency') + 1] : 2);
+  // ChatGPT quota guard (codex seats share the weekly quota with the production detection).
+  const quotaPause = parseQuotaPause(argv.includes('--codex-quota-pause') ? argv[argv.indexOf('--codex-quota-pause') + 1] : undefined);
+  const quotaGuard = createQuotaGuard({ threshold: quotaPause, isCodex: isCodexSeat });
+  const resumeCommand = `make classif-l4-blind SERIES=${k} CLASSIF_ROLE=test-executor${deferred.length ? ` DEFERRED=${deferred.join(',')}` : ''}${quotaPause !== CODEX_QUOTA_PAUSE_DEFAULT ? ` CODEX_QUOTA_PAUSE=${quotaPause}` : ''} ENV=preprod`;
   // Infrastructure re-run (fail closed): named routes only, each one an executed route.
   const rerunRoutes = argv.includes('--rerun-infra-failed')
     ? [...new Set(String(argv[argv.indexOf('--rerun-infra-failed') + 1] ?? '').split(',').filter(Boolean))] : [];
@@ -373,10 +378,12 @@ function readdirSyncSafe(dir) {
     const rows = await pool(blind.map((item) => async () => {
       const hit = loadBlindCached(item.itemId);
       if (hit) return hit;
+      if (quotaGuard.blocks(route)) return null;
       appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: true, phase: `l4-blind-s${k}`, route, itemId: item.itemId });
       const r = await callSeat(route, devPrompt(frozen, item), { base: seatTmp, timeoutMs: 1800000 });
       appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: `l4-blind-s${k}`, route, itemId: item.itemId,
-        exitCode: r.code, latencyMs: r.latencyMs, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null, toolEvents: r.toolEvents ?? null });
+        exitCode: r.code, latencyMs: r.latencyMs, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null, toolEvents: r.toolEvents ?? null, ...quotaFields(r) });
+      quotaGuard.observe(route, r.rateLimits);
       const parsed = parseSeatResult(r, codes);
       const row = { itemId: item.itemId, failed: parsed.failed, why: parsed.why ?? null,
         pred: parsed.failed ? null : { verdict: parsed.verdict, code: parsed.code } };
@@ -388,6 +395,8 @@ function readdirSyncSafe(dir) {
       }
       return row;
     }), concurrency);
+    // Answered items are cached above; a paused codex route stops before its blind-run audit.
+    if (quotaGuard.paused && isCodexSeat(route)) throw quotaGuard.error(resumeCommand);
     // Review §9a: indeterminate supports come from the pre-registered series manifest.
     const supports = seriesSpec.supports ?? {};
     const stats = shownStats(blind.map((b, i) => ({ ref: b.verdict, pred: rows[i].failed ? { failed: true } : rows[i].pred, unresolved: b.status === 'unresolved' })),
@@ -452,10 +461,12 @@ function readdirSyncSafe(dir) {
     const rows = await pool(inputs.map((item) => async () => {
       const hit = loadS113Cached(item.evalId);
       if (hit) return hit;
+      if (quotaGuard.blocks(route)) return null;
       appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: true, phase: `l4-s113-s${k}`, route, itemId: item.evalId });
       const r = await callSeat(route, devPrompt(frozen, item), { base: seatTmp, timeoutMs: 1800000 });
       appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: `l4-s113-s${k}`, route, itemId: item.evalId,
-        exitCode: r.code, latencyMs: r.latencyMs, toolEvents: r.toolEvents ?? null });
+        exitCode: r.code, latencyMs: r.latencyMs, toolEvents: r.toolEvents ?? null, ...quotaFields(r) });
+      quotaGuard.observe(route, r.rateLimits);
       const parsed = parseSeatResult(r, codes);
       const row = { failed: parsed.failed, pred: parsed.failed ? null : { verdict: parsed.verdict, code: parsed.code } };
       // Review N4: failures are never cached — retried on resume.
@@ -465,6 +476,7 @@ function readdirSyncSafe(dir) {
       }
       return row;
     }), concurrency);
+    if (quotaGuard.paused && isCodexSeat(route)) throw quotaGuard.error(resumeCommand);
     const exp = inputs.map((i) => expById.get(i.evalId));
     const s113supports = seriesSpec.supports ?? {};
     const s113stats = shownStats(inputs.map((item, i) => ({ ref: exp[i].verdict, pred: rows[i].failed ? { failed: true } : rows[i].pred, unresolved: false })),
