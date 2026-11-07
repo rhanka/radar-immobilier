@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
+import { candidateDigest, LiveHostError } from "@sentropic/artifacts/live-host";
 import { createPostgresGitBindingStore } from "@sentropic/artifacts/adapters/postgres";
 import type { GitBinding } from "@sentropic/artifacts";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -20,10 +21,8 @@ import {
  * stay digest-addressed orphans with no release reference, reclaimed by the
  * same orphan sweep as the provider's own publications.
  */
-class FakeLiveHostError extends Error { constructor(readonly code: string, readonly reason?: string) { super(code); } }
-const digestOf = (files: readonly CandidateFile[]) => createHash("sha256")
-  .update(JSON.stringify([...files].sort((a, b) => a.path < b.path ? -1 : 1)
-    .map((file) => [file.path, file.bytes.byteLength, createHash("sha256").update(file.bytes).digest("hex")]))).digest("hex");
+/** Provider live-host code (0.2.20): the stored bytes are digested and refused exactly like a real handoff. */
+const digestOf = candidateDigest;
 const IMAGE = "docker.io/library/node@sha256:add5c17c14752c54d2f3d519ec46a3815684d41c33f198bcb09fb998f7dcbf68";
 const SHA = "c".repeat(40);
 
@@ -60,11 +59,12 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("SG4b host build ledger on the im
     return createPostgresHostBuildLedger({ pool: fixture.pool, scopeId: "p0b", blobs: fixture.blobs, candidateDigest: digestOf,
       headReachable: async () => true, ownerAuthorized: async (principal) => principal === "alice",
       imageAllowlist: overrides.imageAllowlist ?? [IMAGE], killSwitch: () => false,
-      refuse: (code, reason) => new FakeLiveHostError(code, reason) });
+      refuse: (code, reason) => new LiveHostError(code, reason) });
   }
   const claimsFor = (artifactId: string, jobId: string, expectedReleaseId: string | null, files: CandidateFile[]): HandoffClaims => ({
     v: 1, kid: "sentropic-builder-1", scopeId: "p0b", artifactId, jobId, kind: "explicit", runId: "run-1", attempt: 1, generation: 1,
-    commitSha: SHA, treeSha: "e".repeat(40), tuple: { builderImageDigest: IMAGE }, candidateDigest: digestOf(files),
+    commitSha: SHA, treeSha: "e".repeat(40), tuple: { commitSha: SHA, treeSha: "e".repeat(40), lockfileDigest: "l", descriptorDigest: "d",
+      builderImageDigest: IMAGE, nodeVersion: "22", npmVersion: "10", publicEnvHashes: {} }, candidateDigest: digestOf(files),
     expectedReleaseId, nonce: randomUUID(), sealedAt: Date.now(), expiresAt: Date.now() + 600_000 });
   const files: CandidateFile[] = [
     { path: "index.html", bytes: new TextEncoder().encode("<!doctype html><title>triage</title>") },
@@ -139,7 +139,7 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("SG4b host build ledger on the im
       await ledger.publish(claims, files);
       throw new Error("unreachable");
     }).catch((error: unknown) => error);
-    expect(failure).toBeInstanceOf(FakeLiveHostError);
+    expect(failure).toBeInstanceOf(LiveHostError);
     expect(failure).toMatchObject({ code: "handoff_mismatch", reason: "release_conflict" });
     expect((await fixture.pool.query("SELECT count(*)::int AS n FROM artifacts.releases WHERE artifact_id = $1", [artifactId])).rows[0].n).toBe(before);
     expect(await ledger.ledger.find(`job-${jobId}`)).toBeUndefined();
