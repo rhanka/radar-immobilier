@@ -3,7 +3,7 @@ import {
   resolveArtifactsStorageConfig, type ArtifactsConfigInput, type ArtifactsPoolParams,
   createArtifactAdmissionAuthority, readActivationEnv, resolveActivationConfig,
   ARTIFACT_P0B, createDeleteConfirmation, readUploadPageWiring,
-  ARTIFACT_GIT_MODE, createLiveHostEndpoints, loadLiveHost, readLiveHostKeys,
+  ARTIFACT_GIT_MODE, createLiveHostEndpoints, loadLiveHost, readLiveHostKeys, composeHostBuildLedger,
 } from "@radar/artifacts-host";
 import type { AuthConfig } from "../config.js";
 import type { Logger } from "../logger.js";
@@ -66,9 +66,12 @@ export async function startArtifactControl(options: {
     logger.info({ storageScope: parsed.storageScope, s3Bucket: parsed.s3Bucket }, "artifact control enabled");
     // Git mode stage `build` and later: the inbound SG4b host build API for
     // the Sentropic builder. Flag off (default): not composed, not mounted.
+    const liveHostModule = ARTIFACT_GIT_MODE.tools.includes("artifacts_git_publish") ? await loadLiveHost() : undefined;
     const liveHost = ARTIFACT_GIT_MODE.tools.includes("artifacts_git_publish")
-      ? createLiveHostEndpoints({ module: await loadLiveHost(), scopeId: parsed.storageScope,
-        keys: readLiveHostKeys(process.env) })
+      ? createLiveHostEndpoints({ module: liveHostModule, scopeId: parsed.storageScope,
+        keys: readLiveHostKeys(process.env),
+        ledger: composeHostBuildLedger({ pool, storageScopeId: parsed.storageScope, blobs: host.blobs,
+          module: liveHostModule, env: process.env }) })
       : undefined;
     const composed = host as typeof host & { uploadPageService?: UploadPageService;
       uploadPageConfig?: { controlOrigin: string; s3Origins: readonly string[] } };
