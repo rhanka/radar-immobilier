@@ -78,4 +78,5 @@ data:
   IMMO_ARTIFACTS_LIVE_HOST_KID: "immo-preprod-live-1"
   IMMO_ARTIFACTS_LIVE_HOST: "pages.preprod.immo.sent-tech.ca"
   IMMO_ARTIFACTS_LIVE_CONTROL_URL: "https://pages.preprod.immo.sent-tech.ca/_live-control/v1"
+  # Inert until the live draft keyring is referenced (stage `live`).
   IMMO_ARTIFACTS_LIVE_DRAFT_KEY_CURRENT: "v1"
