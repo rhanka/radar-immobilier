@@ -69,6 +69,11 @@ data:
   # @sentropic/artifacts 0.2.20 qualification commit: on 0.2.18 the stage
   # refuses to boot (artifact_git_mode_provider_unqualified).
   IMMO_ARTIFACTS_GIT_MODE: "bindings"
+  # Owner identity for the git-backed mode (owner rhanka; preprod OIDC sub of fabien.antoine@gmail.com).
+  IMMO_ARTIFACTS_GIT_COMMITTER_NAME: "rhanka"
+  IMMO_ARTIFACTS_GIT_COMMITTER_EMAIL: "24390932+rhanka@users.noreply.github.com"
+  IMMO_ARTIFACTS_GIT_CODE_READERS: "1b9b9e15-2956-4df4-9ee1-a42273f0d096"
+  IMMO_ARTIFACTS_GIT_HUMANS: '[{"principalId":"1b9b9e15-2956-4df4-9ee1-a42273f0d096","name":"rhanka","email":"24390932+rhanka@users.noreply.github.com"}]'
   # Non-secret git mode configuration (preprod values, Sentropic 2026-11-07).
   # Builder hostId on the Sentropic side: immo-preprod.
   IMMO_ARTIFACTS_SERVICE_OAUTH_TOKEN_ENDPOINT: "https://preprod.auth.sent-tech.ca/api/v1/auth/oauth/token"
