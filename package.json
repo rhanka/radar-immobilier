@@ -11,7 +11,7 @@
     "packages/*"
   ],
   "dependencies": {
-    "@sentropic/artifacts": "0.2.16",
+    "@sentropic/artifacts": "0.2.17",
     "@sentropic/mcp-platform": "0.4.2"
   },
   "devDependencies": {
