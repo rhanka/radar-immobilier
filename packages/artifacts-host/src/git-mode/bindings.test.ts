@@ -79,7 +79,7 @@ describe("per-user identity ports", () => {
   it("grants code rights to listed, approved principals only", async () => {
     const rights = createImmoCodeRights({ readers: ["alice", "bob"], repoId: IMMO_GIT_REPO_ID,
       isApproved: async (sub) => sub === "alice" });
-    const ask = (actorId: string, repoId = IMMO_GIT_REPO_ID) => rights.canReadCode({ storageScopeId: SCOPE, repoId, actorId });
+    const ask = (actorId: string, repoId: string = IMMO_GIT_REPO_ID) => rights.canReadCode({ storageScopeId: SCOPE, repoId, actorId });
     expect(await ask("alice")).toBe(true);
     expect(await ask("bob")).toBe(false);
     expect(await ask("mallory")).toBe(false);
