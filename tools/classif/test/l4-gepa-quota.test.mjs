@@ -3,14 +3,17 @@
 // reached rate limit, resume without repaying, quota status. Hermetic, fake codex outputs only.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { spawn } from 'node:child_process';
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
 import { runGepa } from '../l4/gepa.mjs';
 import { GEPA_ROUTES } from '../l4/gepa-common.mjs';
-import { countCodexToolEvents, parseCodex } from '../run-seat.mjs';
-import { CodexQuotaPause, extractCodexRateLimits, parseQuotaPause, quotaStatus } from '../lib/codex-quota.mjs';
+import { callSeat, codexHomeDir, countCodexToolEvents, parseCodex } from '../run-seat.mjs';
+import { parseSeatResult } from '../l4/dev.mjs';
+import { loadCodes } from '../l2/run.mjs';
+import { CodexQuotaPause, extractCodexRateLimits, parseQuotaPause, quotaFields, quotaStatus } from '../lib/codex-quota.mjs';
 import { formatQuotaStatus } from '../quota-status.mjs';
 import { buildFingerprints } from '../lib/fingerprint.mjs';
 import { initTempRepo, withTempHome, writeRepoFile } from './hermetic-helpers.mjs';
@@ -141,3 +144,92 @@ test('quota status: last measurement per codex seat from calls.jsonl, unknown wh
     assert.match(text, /luna-6-low: unknown/);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
+
+// ---- session file source (real codex: rate_limits only in $CODEX_HOME/sessions/.../rollout-*.jsonl)
+
+const CODE_MODE = 'Code Mode is unavailable because code-mode host is disabled for this session. Enable the code_mode_host feature to use it.';
+
+test('quota: the "Code Mode is unavailable" error item is benign (no tool event, the call is accepted); other error items still count', () => {
+  const stream = [
+    { type: 'thread.started', thread_id: 't-1' },
+    { type: 'turn.started' },
+    { type: 'item.completed', item: { id: 'item_0', type: 'error', message: CODE_MODE } },
+    { type: 'item.completed', item: { id: 'item_1', type: 'agent_message', text: '{"verdict":"pertinent","code":"P-DENSITE"}' } },
+    { type: 'turn.completed', usage: { input_tokens: 3, output_tokens: 2 } },
+  ].map((e) => JSON.stringify(e)).join('\n');
+  assert.equal(countCodexToolEvents(stream).toolEvents, 0);
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'codemode-'));
+  try {
+    const r = parseCodex(stream, dir);
+    assert.equal(r.toolEvents, 0);
+    assert.deepEqual(parseSeatResult({ code: 0, ...r }, loadCodes()), { verdict: 'pertinent', code: 'P-DENSITE', failed: false, why: null, infra: false });
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+  assert.equal(countCodexToolEvents(JSON.stringify({ type: 'item.completed', item: { type: 'error', message: 'tool call failed: cat' } })).toolEvents, 1);
+});
+
+/** Fake codex (node): writes a realistic session file (prompt + token_count) unless FAKE_NO_SESSION, then answers. */
+const FAKE_CODEX = `
+const fs = require('fs'); const path = require('path');
+const args = process.argv.slice(2); const out = args[args.indexOf('-o') + 1];
+let input = ''; process.stdin.on('data', (d) => { input += d; }).on('end', () => {
+  const tid = process.env.FAKE_NO_THREAD ? null : '01a1b366-fbf9-7503-896f-' + String(Date.now()).slice(-12);
+  const dir = path.join(process.env.CODEX_HOME, 'sessions', '2026', '11', '06');
+  fs.mkdirSync(dir, { recursive: true });
+  const file = path.join(dir, 'rollout-2026-11-06T19-27-13-' + (tid ?? 'nothread') + '.jsonl');
+  fs.writeFileSync(file, [
+    { type: 'session_meta', payload: { id: tid, instructions: null } },
+    { type: 'response_item', payload: { type: 'message', role: 'user', content: [{ type: 'input_text', text: input }] } },
+    { type: 'event_msg', payload: { type: 'token_count', info: null, rate_limits: { limit_id: 'codex', limit_name: null,
+      primary: { used_percent: Number(process.env.FAKE_USED ?? 86), window_minutes: 10080, resets_at: 1794440618 }, secondary: null,
+      credits: { has_credits: false, unlimited: false, balance: '0' }, plan_type: 'pro', rate_limit_reached_type: null } } },
+  ].map((e) => JSON.stringify(e)).join('\\n') + '\\n');
+  if (tid) process.stdout.write(JSON.stringify({ type: 'thread.started', thread_id: tid }) + '\\n');
+  process.stdout.write(JSON.stringify({ type: 'item.completed', item: { id: 'item_0', type: 'error', message: ${JSON.stringify(CODE_MODE)} } }) + '\\n');
+  if (process.env.FAKE_EXIT) process.exit(Number(process.env.FAKE_EXIT));
+  const id = (/### item_id: (\\S+)/.exec(input) ?? [])[1] ?? 'x';
+  fs.writeFileSync(out, JSON.stringify({ verdict: id.startsWith('n') ? 'non_pertinent' : 'pertinent', code: id.startsWith('n') ? 'N-ADMIN' : 'P-DENSITE' }));
+  process.stdout.write(JSON.stringify({ type: 'turn.completed', usage: { input_tokens: 3 } }) + '\\n');
+});`;
+
+function fakeCodexSpawn(home, env = {}) {
+  const script = path.join(home, 'fake-codex.cjs');
+  writeFileSync(script, FAKE_CODEX);
+  return (_cmd, args, o) => spawn(process.execPath, [script, ...args], { ...o, env: { ...o.env, ...env } });
+}
+const sessionFiles = (codexHome) => {
+  const out = [];
+  const walk = (d) => { for (const e of readdirSync(d, { withFileTypes: true })) { const p = path.join(d, e.name); if (e.isDirectory()) walk(p); else out.push(p); } };
+  try { walk(path.join(codexHome, 'sessions')); } catch { /* none */ }
+  return out;
+};
+const sessionDirs = (codexHome) => { try { return readdirSync(path.join(codexHome, 'sessions')); } catch { return []; } };
+
+test('quota: callSeat reads rate_limits from the session file of the call, then no session file stays (success, failure, no thread id)', withTempHome(async (home) => {
+  const codexHome = codexHomeDir('sol-6.1-low');
+  const ok = await callSeat('sol-6.1-low', 'prompt secret\n### item_id: p1\n', { spawnImpl: fakeCodexSpawn(home, { FAKE_USED: '86' }) });
+  assert.equal(ok.code, 0);
+  assert.equal(ok.toolEvents, 0, 'the Code Mode notice is no tool event');
+  assert.deepEqual(ok.rateLimits, { primary: { used_percent: 86, window_minutes: 10080, resets_at: 1794440618 }, plan_type: 'pro', rate_limit_reached_type: null });
+  assert.deepEqual(quotaFields(ok), { quotaUsedPercent: 86, quotaResetsAt: new Date(1794440618 * 1000).toISOString() });
+  assert.deepEqual(sessionFiles(codexHome), [], 'session file deleted after a success');
+  assert.deepEqual(sessionDirs(codexHome), [], 'empty date directories removed');
+  const bad = await callSeat('sol-6.1-low', 'prompt secret', { spawnImpl: fakeCodexSpawn(home, { FAKE_EXIT: '1' }) });
+  assert.equal(bad.code, 1);
+  assert.equal(bad.rateLimits.primary.used_percent, 86, 'the quota is read even from a failed call');
+  assert.deepEqual(sessionFiles(codexHome), [], 'session file deleted after a failure');
+  const noThread = await callSeat('sol-6.1-low', 'prompt secret', { spawnImpl: fakeCodexSpawn(home, { FAKE_NO_THREAD: '1' }) });
+  assert.equal(noThread.rateLimits.primary.used_percent, 86);
+  assert.deepEqual(sessionFiles(codexHome), [], 'without a thread id the files of the call are found by snapshot and deleted');
+}));
+
+test('quota: integration — a realistic session file at 86 % trips the guard through the real callSeat, and the file is deleted', withTempHome(async (home) => {
+  setup(home);
+  const spawnImpl = fakeCodexSpawn(home, { FAKE_USED: '86' });
+  const fallback = fakeSeat(() => undefined);
+  const seat = (label, prompt, opts) => (label === 'sol-6.1-low' ? callSeat(label, prompt, { ...opts, spawnImpl }) : fallback.seat(label, prompt));
+  await assert.rejects(runGepa({ home, k: K, maxIterations: 0, seat, log: quiet }),
+    (e) => e instanceof CodexQuotaPause && /sol-6\.1-low reports 86% of the weekly ChatGPT quota used/.test(e.message));
+  assert.deepEqual(sessionFiles(codexHomeDir('sol-6.1-low')), [], 'no session file (prompt text) left on disk');
+  const logged = calls(home).filter((c) => c.intent === false && c.route === 'sol-6.1-low');
+  assert.ok(logged.length >= 1 && logged.every((c) => c.quotaUsedPercent === 86 && c.toolEvents === 0 && c.exitCode === 0));
+}));
