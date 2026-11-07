@@ -132,7 +132,7 @@ describe("git mode composition", () => {
     expect(composeGitMode({ resolution: GIT_MODE_OFF, pool, storageScopeId: SCOPE, config })).toEqual({});
   });
 
-  it("composes deps.git and the 0.2.19 git tools with fakes, failing closed on missing configuration", async () => {
+  it("composes deps.git and the 0.2.20 git tools with fakes, failing closed on missing configuration", async () => {
     let captured: GitToolsDeps | undefined;
     const bindings = createMemoryGitBindingStore();
     const deps = composeGitMode({ resolution: LIVE, pool, storageScopeId: SCOPE, config,
