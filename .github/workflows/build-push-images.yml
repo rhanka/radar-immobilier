@@ -1152,6 +1152,15 @@ jobs:
             # off main while the DB transition is frozen; any other file in the
             # diff refuses the promotion.
             echo "hotfix OK — v1.2.16 = v1.2.15 + @hono/node-server security fix (lock only)"
+          elif [ "${{ steps.vars.outputs.tag }}" = "v1.2.17" ] \
+            && git merge-base --is-ancestor v1.2.16 "$GITHUB_SHA" \
+            && [ -z "$(git diff --name-only v1.2.16 "$GITHUB_SHA" -- . \
+                 ':!package-lock.json' \
+                 ':!.github/workflows/build-push-images.yml')" ]; then
+            # One-off owner-approved security hotfix (2026-11-07, GHSA-h7mg-cq63-vhpq,
+            # GHSA-4m76-xfj5-7975, GHSA-46wx-v44x-9hh2): v1.2.17 = v1.2.16 + hono
+            # 4.13.17 (lock only). Any other file in the diff refuses the promotion.
+            echo "hotfix OK — v1.2.17 = v1.2.16 + hono framework security fix (lock only)"
           else
             echo "::error title=Promote refused — tag not on main::commit $GITHUB_SHA (tag ${{ steps.vars.outputs.tag }}) is NOT an ancestor of origin/main. Only main-merged, CI-validated commits may reach prod."
             exit 1
