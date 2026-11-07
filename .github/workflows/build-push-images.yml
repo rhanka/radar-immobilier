@@ -1142,6 +1142,16 @@ jobs:
           git fetch --no-tags origin main
           if git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
             echo "ancestry OK — $GITHUB_SHA is on origin/main"
+          elif [ "${{ steps.vars.outputs.tag }}" = "v1.2.16" ] \
+            && git merge-base --is-ancestor v1.2.15 "$GITHUB_SHA" \
+            && [ -z "$(git diff --name-only v1.2.15 "$GITHUB_SHA" -- . \
+                 ':!package-lock.json' \
+                 ':!.github/workflows/build-push-images.yml')" ]; then
+            # One-off owner-approved security hotfix (2026-11-07, GHSA-jpvv-r467-5p4w):
+            # v1.2.16 = v1.2.15 + @hono/node-server 1.19.18 (lock only). Prod stays
+            # off main while the DB transition is frozen; any other file in the
+            # diff refuses the promotion.
+            echo "hotfix OK — v1.2.16 = v1.2.15 + @hono/node-server security fix (lock only)"
           else
             echo "::error title=Promote refused — tag not on main::commit $GITHUB_SHA (tag ${{ steps.vars.outputs.tag }}) is NOT an ancestor of origin/main. Only main-merged, CI-validated commits may reach prod."
             exit 1
