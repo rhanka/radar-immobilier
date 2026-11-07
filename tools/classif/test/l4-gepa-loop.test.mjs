@@ -34,14 +34,14 @@ const PARETO_N = SPLIT.pareto.find((id) => id.startsWith('n'));
 const FEEDBACK_P = SPLIT.feedback.find((id) => id.startsWith('p'));
 
 /**
- * Behaviours by MARK: seed → luna-6-low discards every P/S item (misses), every N shown;
+ * Behaviours by MARK: seed → mistral-large-4-low discards every P/S item (misses), every N shown;
  * noisy → 0 miss, every N shown; child → 0 miss, noise on one D_pareto N case only;
  * clean (and flaky*, tooly, made faulty by an override) → 0 miss, 0 noise; bad → glm-5.3-low alone discards one D_feedback P case.
  */
 function predict(mark, route, itemId) {
   const ref = REF.get(itemId);
   const shownRef = ref !== 'non_pertinent';
-  if (mark.startsWith('seed')) return shownRef && route === 'luna-6-low' ? 'non_pertinent' : shownRef ? ref : 'a_surveiller';
+  if (mark.startsWith('seed')) return shownRef && route === 'mistral-large-4-low' ? 'non_pertinent' : shownRef ? ref : 'a_surveiller';
   if (mark.startsWith('noisy')) return shownRef ? ref : 'a_surveiller';
   if (mark.startsWith('child')) return shownRef ? ref : itemId === PARETO_N ? 'a_surveiller' : 'non_pertinent';
   if (/^(clean|flaky|tooly)/.test(mark)) return shownRef ? ref : 'non_pertinent';
@@ -111,12 +111,12 @@ test('gepa loop: verbatim child repaired, admitted, crossover, 0-miss winner; ma
   assert.equal(j[1].status, 'admitted');
   assert.equal(j[2].parents.length, 2);
   assert.notEqual(j[2].parents[0], j[2].parents[1]);
-  // Final choice: 0 miss on the 10 cases × 5 routes, least noise among the evaluated finalists.
+  // Final choice: 0 miss on the 10 cases × 4 routes, least noise among the evaluated finalists.
   assert.equal(m.result.status, 'selected');
   assert.equal(m.result.total.misses, 0);
   const evaluated = m.finalists.filter((x) => x.status === 'evaluated' && x.total.misses === 0);
   assert.equal(m.result.total.noise, Math.min(...evaluated.map((x) => x.total.noise)));
-  assert.ok(m.finalists.filter((x) => x.id.startsWith('P')).every((x) => x.status === 'excluded'), 'seeds miss on luna-6-low');
+  assert.ok(m.finalists.filter((x) => x.id.startsWith('P')).every((x) => x.status === 'excluded'), 'seeds miss on mistral-large-4-low');
   assert.equal(sha256(readFileSync(outPrompt(repo), 'utf8')), m.result.promptSha256);
   assert.deepEqual(repoManifest(repo), m);
   // Repo manifest: counts only, never an item id or an excerpt.
@@ -143,11 +143,11 @@ test('gepa loop: verbatim child repaired, admitted, crossover, 0-miss winner; ma
 
 test('gepa loop: a resumed run replays finished steps without any repeated paid call', withTempHome(async (home) => {
   setup(home);
-  // 100 seed calls, then iteration 0: parent 30, child mini-batch 30, child D_pareto 20 → crash on the 180th.
-  const first = fakeSeat({ failAt: 180 });
+  // 80 seed calls, then iteration 0: parent 24, child mini-batch 24, child D_pareto 16 → crash on the 144th.
+  const first = fakeSeat({ failAt: 144 });
   await assert.rejects(runGepa({ home, k: K, maxIterations: 2, seat: first.seat, log: quiet }), /fake crash/);
   assert.ok(!existsSync(path.join(home, 'l4', `gepa-s${K}`, 'iterations.jsonl')), 'the crashed iteration is not journaled');
-  const answered = new Set(first.evalCalls().filter((_s, i) => i !== 179).map((s) => `${s.label}|${s.prompt}`));
+  const answered = new Set(first.evalCalls().filter((_s, i) => i !== 143).map((s) => `${s.label}|${s.prompt}`));
   const second = fakeSeat();
   const m = await runGepa({ home, k: K, maxIterations: 2, seat: second.seat, log: quiet });
   assert.equal(m.result.status, 'selected');
@@ -158,16 +158,16 @@ test('gepa loop: a resumed run replays finished steps without any repeated paid 
 
 test('gepa loop: the run stops cleanly at the call cap and too small a cap refuses before any call', withTempHome(async (home) => {
   const repo = setup(home);
-  // Initial population = 5 seeds × 4 D_pareto cases × 5 routes = 100; final reserve = 6 × 5 = 30.
+  // Initial population = 5 seeds × 4 D_pareto cases × 4 routes = 80; final reserve = 6 × 4 = 24.
   const tiny = fakeSeat();
-  await assert.rejects(runGepa({ home, k: K, maxCalls: 129, seat: tiny.seat, log: quiet }), /MAX_CALLS 129 cannot hold the initial population \(100 calls\) plus the final evaluation \(30\)/);
+  await assert.rejects(runGepa({ home, k: K, maxCalls: 103, seat: tiny.seat, log: quiet }), /MAX_CALLS 103 cannot hold the initial population \(80 calls\) plus the final evaluation \(24\)/);
   assert.equal(tiny.seen.length, 0);
   const f = fakeSeat();
   const m = await runGepa({ home, k: K, maxCalls: 150, seat: f.seat, log: quiet });
   assert.equal(m.stop, 'budget');
   assert.equal(m.iterations.total, 0);
-  assert.equal(m.callsSpent, 100);
-  // Every seed misses on luna-6-low: no front candidate at 0 miss → no candidate, no fallback.
+  assert.equal(m.callsSpent, 80);
+  // Every seed misses on mistral-large-4-low: no front candidate at 0 miss → no candidate, no fallback.
   assert.equal(m.result.status, 'no-candidate');
   assert.ok(m.finalists.every((x) => x.status === 'excluded' && x.reason === 'misses-on-d-pareto'));
   assert.ok(!existsSync(outPrompt(repo)));
@@ -232,7 +232,7 @@ test('review B2: invalid answers count as shown, are cached and never stop the r
   assert.deepEqual([j[0].status, j[0].reason], ['rejected', 'answer-failures']);
   // The seed parent already fails every glm case (out of format): only the other routes fail 2+ more.
   assert.deepEqual(j[0].child.failureMarginExceeded, GEPA_ROUTES.filter((r) => r !== 'glm-5.3-low'), 'every route failing 2+ more calls than the parent');
-  assert.equal(evalCacheFiles(home, j[0].child.sha), 6 * 5, 'invalid answers are cached as answers');
+  assert.equal(evalCacheFiles(home, j[0].child.sha), 6 * 4, 'invalid answers are cached as answers');
   assert.ok(candidate(home, 'P0').pareto[SPLIT.pareto[0]]['glm-5.3-low'].failed);
   assert.equal(candidate(home, 'P0').pareto[SPLIT.pareto[0]]['glm-5.3-low'].infra, false);
   assert.equal(m.result.status, 'no-candidate');
@@ -244,13 +244,13 @@ test('review B2: invalid answers count as shown, are cached and never stop the r
 test('review B2/m6: infrastructure failures trip the breaker in flight; the resume pays only what was not answered', withTempHome(async (home) => {
   setup(home);
   let down = true;
-  const override = (label) => (down && label === 'luna-6-low' ? { code: 1, text: '' } : null);
+  const override = (label) => (down && label === 'opus-5.5-low' ? { code: 1, text: '' } : null);
   const f = fakeSeat({ override });
-  await assert.rejects(runGepa({ home, k: K, maxIterations: 1, seat: f.seat, log: quiet }), /route luna-6-low had 2 infrastructure failures on seed-P0 \(> 1 of 4\): no further call launched/);
-  const luna = f.evalCalls().filter((s) => s.label === 'luna-6-low');
-  assert.equal(luna.length, 2, 'the 3rd and 4th luna calls are never launched');
+  await assert.rejects(runGepa({ home, k: K, maxIterations: 1, seat: f.seat, log: quiet }), /route opus-5.5-low had 2 infrastructure failures on seed-P0 \(> 1 of 4\): no further call launched/);
+  const opus = f.evalCalls().filter((s) => s.label === 'opus-5.5-low');
+  assert.equal(opus.length, 2, 'the 3rd and 4th opus calls are never launched');
   down = false;
-  const answered = new Set(f.evalCalls().filter((s) => s.label !== 'luna-6-low').map((s) => `${s.label}|${s.prompt}`));
+  const answered = new Set(f.evalCalls().filter((s) => s.label !== 'opus-5.5-low').map((s) => `${s.label}|${s.prompt}`));
   const g = fakeSeat({ override });
   const m = await runGepa({ home, k: K, maxIterations: 1, seat: g.seat, log: quiet });
   assert.ok(m.result);
@@ -266,7 +266,7 @@ test('review B1a/m2: a tool-event answer is an uncached infra failure, retried o
   await runGepa({ home, k: K, maxCalls: 150, seat: fakeSeat({ override }).seat, log: quiet });
   const row = candidate(home, 'P1').pareto[target]['sol-6.1-low'];
   assert.deepEqual([row.failed, row.infra], [true, true], 'a well-formed answer with a tool event is refused');
-  assert.equal(evalCacheFiles(home, candidate(home, 'P1').sha), 4 * 5 - 1, 'the refused answer is not cached');
+  assert.equal(evalCacheFiles(home, candidate(home, 'P1').sha), 4 * 4 - 1, 'the refused answer is not cached');
   tools = false;
   const g = fakeSeat({ override });
   await runGepa({ home, k: K, maxCalls: 150, seat: g.seat, log: quiet });
@@ -329,11 +329,11 @@ test('review R2: a child whose answers carry tool events is rejected and consume
   assert.deepEqual([j[1].status, j[1].reason], ['rejected', 'tool-events-consumed']);
   const childCalls = f.evalCalls().filter((s) => /MARK:tooly/.test(s.prompt));
   // R2-bis: the evaluation stops at the first tool event — sol launches at most its 2 in-flight
-  // calls, no route launches a call after it, and the 6 × 5 mini-batch is never paid in full.
+  // calls, no route launches a call after it, and the 6 × 4 mini-batch is never paid in full.
   const solCalls = childCalls.filter((s) => s.label === 'sol-6.1-low');
   assert.ok(solCalls.length >= 1 && solCalls.length <= 2, `sol calls ${solCalls.length}`);
   assert.equal(j[0].child.toolEvents, solCalls.length);
-  assert.ok(childCalls.length < 6 * 5, `child calls ${childCalls.length} < 30`);
+  assert.ok(childCalls.length < 6 * 4, `child calls ${childCalls.length} < 24`);
   assert.equal(evalCacheFiles(home, j[0].child.sha), childCalls.length - solCalls.length, 'the tool-event answers are not cached');
   assert.ok(m.result);
   const again = fakeSeat({ mutation: () => `${RULES}MARK:tooly`, override: tool });
@@ -343,8 +343,8 @@ test('review R2: a child whose answers carry tool events is rejected and consume
 
 test('review R5: a breaker stop on authentication errors names the seat refresh and the exact resume command', withTempHome(async (home) => {
   setup(home);
-  const override = (label) => (label === 'luna-6-low' ? { code: 1, text: '', authError: true } : null);
+  const override = (label) => (label === 'sol-6.1-low' ? { code: 1, text: '', authError: true } : null);
   await assert.rejects(runGepa({ home, k: K, maxCalls: 900, seat: fakeSeat({ override }).seat, log: quiet }),
-    (e) => e.message.includes('`make classif-seat-auth-refresh SEAT=luna-6-low ENV=preprod`')
+    (e) => e.message.includes('`make classif-seat-auth-refresh SEAT=sol-6.1-low ENV=preprod`')
       && e.message.includes(`\`make classif-l4-gepa SERIES=${K} MAX_CALLS=900 RUN=s${K} SEED='gepa-s${K}' ENV=preprod\``));
 }));

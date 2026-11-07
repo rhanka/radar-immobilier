@@ -60,13 +60,13 @@ test('gepa firewall: the split and the prompt builders refuse anything from the 
 test('gepa score: a miss on a single route counts, a failed call counts as shown, P<->S is not penalised', () => {
   const allShown = Object.fromEntries(GEPA_ROUTES.map((r) => [r, P('pertinent')]));
   assert.deepEqual(caseScore('pertinent', allShown), S(0, 0));
-  assert.deepEqual(caseScore('pertinent', { ...allShown, 'luna-6-low': P('non_pertinent') }), S(1, 0), 'one route out of five is a miss');
+  assert.deepEqual(caseScore('pertinent', { ...allShown, 'sol-6.1-low': P('non_pertinent') }), S(1, 0), 'one route out of four is a miss');
   assert.deepEqual(caseScore('a_surveiller', { ...allShown, 'glm-5.3-low': P('non_pertinent'), 'sol-6.1-low': P('non_pertinent') }), S(2, 0));
   assert.deepEqual(caseScore('a_surveiller', allShown), S(0, 0), 'P predicted for an S reference is not penalised');
   assert.deepEqual(caseScore('pertinent', { ...allShown, 'opus-5.5-low': { failed: true } }), S(0, 0, 1), 'a failure is shown, never a miss');
-  assert.deepEqual(caseScore('non_pertinent', { ...allShown, 'opus-5.5-low': { failed: true } }), S(0, 5, 1), 'a failure on an N reference is noise');
+  assert.deepEqual(caseScore('non_pertinent', { ...allShown, 'opus-5.5-low': { failed: true } }), S(0, 4, 1), 'a failure on an N reference is noise');
   assert.deepEqual(caseScore('non_pertinent', Object.fromEntries(GEPA_ROUTES.map((r) => [r, P('non_pertinent')]))), S(0, 0));
-  assert.deepEqual(caseScore('pertinent', { 'opus-5.5-low': P('pertinent') }), S(0, 0, 4), 'a missing route counts as a failed call');
+  assert.deepEqual(caseScore('pertinent', { 'opus-5.5-low': P('pertinent') }), S(0, 0, 3), 'a missing route counts as a failed call');
   assert.deepEqual(routeOutcome('pertinent', null), { miss: 0, noise: 0, failed: 1 });
 });
 
@@ -117,7 +117,7 @@ test('gepa traces: misses first then noise, with expected, prediction and justif
   const row = (verdict, j = '') => ({ failed: false, pred: { verdict, code: verdict === 'non_pertinent' ? 'N-ADMIN' : 'P-DENSITE' }, justification: j });
   const all = (v) => Object.fromEntries(GEPA_ROUTES.map((r) => [r, row(v)]));
   const traces = buildTraces({ n1: all('pertinent'), p1: { ...all('pertinent'), 'sol-6.1-low': row('non_pertinent', 'rien de résidentiel') }, p2: all('pertinent') }, refById);
-  assert.deepEqual(traces.map((t) => [t.itemId, t.kind, t.count]), [['p1', 'miss', 1], ['n1', 'noise', 5]]);
+  assert.deepEqual(traces.map((t) => [t.itemId, t.kind, t.count]), [['p1', 'miss', 1], ['n1', 'noise', 4]]);
   assert.equal(traces[0].predictions.find((p) => p.route === 'sol-6.1-low').justification, 'rien de résidentiel');
   assert.equal(traces[0].excerpt, 'texte p1');
 });
@@ -136,7 +136,9 @@ test('gepa verdicts: a route passes only with 0 miss and failures within 5 %; th
   assert.equal(gepaRouteVerdict({ misses: 1, failures: 0, items: 100 }).verdict, 'fail');
   const pass = Object.fromEntries(GEPA_ROUTES.map((r) => [r, { verdict: 'pass' }]));
   assert.equal(gepaSeriesVerdict(pass).verdict, 'pass');
-  assert.deepEqual(gepaSeriesVerdict({ ...pass, 'luna-6-low': { verdict: 'fail' } }), { verdict: 'fail', missing: [], failing: ['luna-6-low'] });
+  assert.deepEqual(gepaSeriesVerdict({ ...pass, 'sol-6.1-low': { verdict: 'fail' } }), { verdict: 'fail', missing: [], failing: ['sol-6.1-low'] });
+  assert.deepEqual(GEPA_ROUTES, ['opus-5.5-low', 'glm-5.3-low', 'sol-6.1-low', 'mistral-large-4-low'], 'owner: sol, not luna');
+  assert.ok(!GEPA_ROUTES.includes('luna-6-low'));
   const { 'glm-5.3-low': _gone, ...four } = pass;
   assert.deepEqual(gepaSeriesVerdict(four).missing, ['glm-5.3-low']);
 });

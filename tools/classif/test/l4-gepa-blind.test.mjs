@@ -1,6 +1,6 @@
 // GEPA series in dev and blind (series-<k>.json method gepa): hermetic, fake data only
-// (l4-blind-fixture.mjs PATH seats + a fake `codex` for sol-6.1-low / luna-6-low). The blind
-// verdict passes only with 0 blind miss on each of the 5 GEPA routes and a call failure share
+// (l4-blind-fixture.mjs PATH seats + a fake `codex` for sol-6.1-low). The blind
+// verdict passes only with 0 blind miss on each of the 4 GEPA routes and a call failure share
 // <= 5 %; precision is reported in the private aggregates, never a floor. Classic series are
 // unchanged (their own tests run as before).
 import { test } from 'node:test';
@@ -84,15 +84,15 @@ test('gepa blind: pass on every route at 0 miss, precision reported privately, r
 test('gepa blind: one miss on a single route fails it, over 5 % failures fails it, the series fails', withTempHome(async (home) => {
   const s = await setupGepa(home);
   try {
-    const r = await blindPass(home, { k: K, routes: GEPA_ROUTES, fake: { FAKE_LUNA_NP: 'b-007', FAKE_MISTRAL: answering(N - 3) } });
+    const r = await blindPass(home, { k: K, routes: GEPA_ROUTES, fake: { FAKE_SOL_NP: 'b-007', FAKE_MISTRAL: answering(N - 3) } });
     assert.equal(r.error, null, r.error?.stack);
     const agg = readAggregates(home, K);
-    assert.deepEqual([agg.perRoute['luna-6-low'].verdict, agg.perRoute['luna-6-low'].misses], ['fail', 1]);
-    assert.ok(agg.perRoute['luna-6-low'].recall > 0.97, 'a high recall does not rescue a single miss');
+    assert.deepEqual([agg.perRoute['sol-6.1-low'].verdict, agg.perRoute['sol-6.1-low'].misses], ['fail', 1]);
+    assert.ok(agg.perRoute['sol-6.1-low'].recall > 0.97, 'a high recall does not rescue a single miss');
     assert.deepEqual([agg.perRoute['mistral-large-4-low'].verdict, agg.perRoute['mistral-large-4-low'].misses, agg.perRoute['mistral-large-4-low'].failureShare],
       ['fail', 0, 3 / 40], 'failures count as shown (no miss) but exceed the 5 % ceiling');
-    for (const route of ['opus-5.5-low', 'glm-5.3-low', 'sol-6.1-low']) assert.equal(agg.perRoute[route].verdict, 'pass');
-    assert.deepEqual([agg.gepa.verdict, agg.gepa.failing.sort()], ['fail', ['luna-6-low', 'mistral-large-4-low']]);
+    for (const route of ['opus-5.5-low', 'glm-5.3-low']) assert.equal(agg.perRoute[route].verdict, 'pass');
+    assert.deepEqual([agg.gepa.verdict, agg.gepa.failing.sort()], ['fail', ['mistral-large-4-low', 'sol-6.1-low']]);
   } finally { s.cleanup(); }
 }));
 
@@ -130,7 +130,7 @@ test('review B1a: blind and S113 count a codex answer carrying a tool event as f
     assert.equal(r.error, null, r.error?.stack);
     const agg = readAggregates(home, K);
     assert.equal(agg.perRoute['sol-6.1-low'].failures, 1, 'the tool-event answer is a failure');
-    assert.equal(agg.perRoute['luna-6-low'].failures, 0);
+    assert.equal(agg.perRoute['glm-5.3-low'].failures, 0);
     const files = readdirSync(path.join(home, 'blind'));
     assert.ok(!files.includes(`blind-s${K}-sol-6.1-low.b-003.json`), 'never cached');
     assert.ok(files.includes(`blind-s${K}-sol-6.1-low.b-004.json`));
@@ -151,15 +151,15 @@ test('review B1a: dev counts a codex answer carrying a tool event as failed and 
     writeFileSync(path.join(home, 'l3b', 'reference-d.jsonl'), `${JSON.stringify({ itemId: 'rr-tuning-1', half: 'tuning', status: 'resolved', code: 'P-DENSITE', verdict: 'pertinent' })}\n`);
     appendFileSync(path.join(home, 'l0', 'dev-items.jsonl'), `${JSON.stringify({ itemId: 'rr-tuning-1', input: 'texte tuning six logements zone H-9.' })}\n`);
     const { main } = await import('../l4/dev.mjs');
-    const restore = swapEnv('FAKE_LUNA_TOOL', 'rr-tuning-1');
+    const restore = swapEnv('FAKE_SOL_TOOL', 'rr-tuning-1');
     let m;
     try { m = await main(['--series', K, '--concurrency', '2']); } finally { restore(); }
-    assert.equal(m.aggregates['luna-6-low'].failures, 1);
-    assert.deepEqual([m.aggregates['luna-6-low'].verdict, m.aggregates['luna-6-low'].misses], ['fail', 0], '1/1 failures exceed the ceiling');
+    assert.equal(m.aggregates['sol-6.1-low'].failures, 1);
+    assert.deepEqual([m.aggregates['sol-6.1-low'].verdict, m.aggregates['sol-6.1-low'].misses], ['fail', 0], '1/1 failures exceed the ceiling');
     const dir = path.join(home, 'l4', `series-${K}`);
-    const row = JSON.parse(readFileSync(path.join(dir, 'dev-luna-6-low.jsonl'), 'utf8').trim());
+    const row = JSON.parse(readFileSync(path.join(dir, 'dev-sol-6.1-low.jsonl'), 'utf8').trim());
     assert.deepEqual([row.failed, row.why, row.pred], [true, 'tool-events', null]);
-    assert.ok(!existsSync(path.join(dir, 'dev-luna-6-low.rr-tuning-1.json')), 'never cached');
-    assert.ok(existsSync(path.join(dir, 'dev-sol-6.1-low.rr-tuning-1.json')));
+    assert.ok(!existsSync(path.join(dir, 'dev-sol-6.1-low.rr-tuning-1.json')), 'never cached');
+    assert.ok(existsSync(path.join(dir, 'dev-glm-5.3-low.rr-tuning-1.json')));
   } finally { s.cleanup(); }
 }));
