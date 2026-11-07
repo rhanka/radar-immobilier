@@ -39,7 +39,7 @@
     "@sentropic/cluster-mesh": "0.22.1",
     "@sentropic/mcp-auth": "0.2.1",
     "@sentropic/oauth-verify": "^0.1.0",
-    "hono": "^4.13.13",
+    "hono": "^4.13.17",
     "jose": "^5.10.0",
     "pg": "^8.12.0",
     "zod": "^4.6.6"
