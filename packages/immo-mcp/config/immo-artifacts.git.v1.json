@@ -1,0 +1,149 @@
+{
+  "overlay": "immo-artifacts.git.v1",
+  "note": "Git-backed artifact mode overlay. Merged only for the git tools selected by IMMO_ARTIFACTS_GIT_MODE (default off: nothing is merged).",
+  "toolScopes": {
+    "artifacts_git_attach": "immo:artifacts:write",
+    "artifacts_fetch_app_source": "immo:artifacts:read",
+    "artifacts_git_publish": "immo:artifacts:write",
+    "artifacts_git_commit": "immo:artifacts:write",
+    "artifacts_live_write": "immo:artifacts:write",
+    "artifacts_live_read": "immo:artifacts:read",
+    "artifacts_live_reset": "immo:artifacts:write",
+    "artifacts_live_status": "immo:artifacts:read",
+    "artifacts_live_control": "immo:artifacts:write"
+  },
+  "selection": [
+    {
+      "tool": "artifacts_git_attach",
+      "operation": "git_attach",
+      "method": "POST",
+      "path": "/git_attach",
+      "command": "git_attach"
+    },
+    {
+      "tool": "artifacts_fetch_app_source",
+      "operation": "fetch_app_source",
+      "method": "POST",
+      "path": "/fetch_app_source",
+      "command": "fetch_app_source"
+    },
+    {
+      "tool": "artifacts_git_publish",
+      "operation": "git_publish",
+      "method": "POST",
+      "path": "/git_publish",
+      "command": "git_publish"
+    },
+    {
+      "tool": "artifacts_git_commit",
+      "operation": "git_commit",
+      "method": "POST",
+      "path": "/git_commit",
+      "command": "git_commit"
+    },
+    {
+      "tool": "artifacts_live_write",
+      "operation": "live_write",
+      "method": "POST",
+      "path": "/live_write",
+      "command": "live_write"
+    },
+    {
+      "tool": "artifacts_live_read",
+      "operation": "live_read",
+      "method": "POST",
+      "path": "/live_read",
+      "command": "live_read"
+    },
+    {
+      "tool": "artifacts_live_reset",
+      "operation": "live_reset",
+      "method": "POST",
+      "path": "/live_reset",
+      "command": "live_reset"
+    },
+    {
+      "tool": "artifacts_live_status",
+      "operation": "live_status",
+      "method": "POST",
+      "path": "/live_status",
+      "command": "live_status"
+    },
+    {
+      "tool": "artifacts_live_control",
+      "operation": "live_control",
+      "method": "POST",
+      "path": "/live_control",
+      "command": "live_control"
+    }
+  ],
+  "effectiveProfile": {
+    "artifacts_git_attach": {
+      "required": [
+        "artifactId",
+        "idempotencyKey"
+      ],
+      "binding": "own personal branch artifact/p/<id8-principal>/<slug>-<id8> of the A1 registry; code rights, write scope and GitHub linkage required"
+    },
+    "artifacts_fetch_app_source": {
+      "required": [],
+      "source": "files at a server-resolved commit; current code rights required"
+    },
+    "artifacts_git_publish": {
+      "required": [
+        "artifactId",
+        "commitSha",
+        "expectedCurrentReleaseId",
+        "idempotencyKey"
+      ],
+      "build": "sandbox executor on the Sentropic builder; SG4b handoff verified and committed by immo in one transaction"
+    },
+    "artifacts_git_commit": {
+      "required": [
+        "artifactId",
+        "expectedHeadSha",
+        "message",
+        "idempotencyKey"
+      ],
+      "commit": "commits the caller's own live draft under expectedHeadSha; never another user's binding"
+    },
+    "artifacts_live_write": {
+      "required": [
+        "artifactId",
+        "expectedHeadSha",
+        "expectedLiveRevision",
+        "idempotencyKey"
+      ],
+      "live": "the caller's own personal binding only; builder_unavailable until a qualified worker exists"
+    },
+    "artifacts_live_read": {
+      "required": [
+        "artifactId"
+      ],
+      "live": "binding owner, or an invitee with an active session-bound invitation and current code rights"
+    },
+    "artifacts_live_reset": {
+      "required": [
+        "artifactId",
+        "expectedHeadSha",
+        "expectedLiveRevision",
+        "idempotencyKey"
+      ],
+      "live": "the caller's own personal binding only"
+    },
+    "artifacts_live_status": {
+      "required": [
+        "artifactId"
+      ],
+      "live": "binding owner, or an invitee with an active session-bound invitation and current code rights"
+    },
+    "artifacts_live_control": {
+      "required": [
+        "artifactId",
+        "action",
+        "idempotencyKey"
+      ],
+      "live": "the caller's own personal binding only"
+    }
+  }
+}

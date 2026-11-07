@@ -23,6 +23,10 @@ export function artifactEnv(env) {
   const kept = {};
   const dropped = {};
   for (const [k, v] of Object.entries(env)) {
+    // An inherited value equal to the allowlisted one is not a leak: the
+    // bundle legitimately carries it (ui/vite.config.ts defaults the same
+    // basemap URL for the live dev server, which runs without this wrapper).
+    if (Object.hasOwn(ARTIFACT_ENV, k) && v === ARTIFACT_ENV[k]) continue;
     if (k.startsWith('VITE_') || DROPPED.includes(k)) dropped[k] = v;
     else kept[k] = v;
   }

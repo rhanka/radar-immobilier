@@ -1,4 +1,5 @@
 import { ARTIFACTS_PROVIDER_VERSION, compileArtifactsProfile, RADAR_ARTIFACTS_PROFILE } from "@sentropic/artifacts/mcp-core";
+import { gitProfileOperations, resolveGitMode, type GitArtifactTool } from "./git-mode/flag.js";
 
 /** Package qualification and deployment qualification are separate switches. */
 export const ARTIFACT_PROVIDER_VERSION: string = ARTIFACTS_PROVIDER_VERSION;
@@ -54,6 +55,14 @@ export const PART1_ARTIFACT_TOOLS = ["artifacts_list_versions", "artifacts_rever
  * the API reader flow; this tool only withdraws.
  */
 export const CONSENT_ARTIFACT_TOOLS = ["artifacts_revoke_reader_consent"] as const;
+/**
+ * Git-backed artifact mode (IMMO_ARTIFACTS_GIT_MODE, default off). Off: no
+ * git tool is selected and the profile is byte-identical to the flag-less
+ * build. On: the stage tools the pinned provider routes; an unqualified
+ * provider refuses at boot (git-mode/flag.ts).
+ */
+export const ARTIFACT_GIT_MODE = resolveGitMode(process.env, ARTIFACT_PROVIDER_VERSION);
+export const GIT_MODE_ARTIFACT_TOOLS: readonly GitArtifactTool[] = ARTIFACT_GIT_MODE.tools;
 export const ACTIVE_ARTIFACT_TOOLS = Object.freeze([
   ...BASE_ARTIFACT_TOOLS, ...(ARTIFACT_P0B ? P0B_ARTIFACT_TOOLS : []),
   ...(ARTIFACT_P0B ? UPLOAD_ARTIFACT_TOOLS : []),
@@ -61,6 +70,7 @@ export const ACTIVE_ARTIFACT_TOOLS = Object.freeze([
   ...(ARTIFACT_P0B ? SHARING_ARTIFACT_TOOLS : []),
   ...(ARTIFACT_P0B ? CONSENT_ARTIFACT_TOOLS : []),
   ...(ARTIFACT_PART1 ? PART1_ARTIFACT_TOOLS : []),
+  ...GIT_MODE_ARTIFACT_TOOLS,
 ]);
 /**
  * Files parity LOT 1 — immo release ceilings (server maxima, never above):
@@ -95,7 +105,8 @@ export const HOST_MIME_TYPES: readonly string[] = Object.freeze([
   "font/woff2",
   "video/mp4",
 ]);
-export function compileHostArtifactProfile(descriptor = ARTIFACT_PROFILE_DESCRIPTOR) {
+export function compileHostArtifactProfile(descriptor = ARTIFACT_PROFILE_DESCRIPTOR,
+  gitTools: readonly GitArtifactTool[] = GIT_MODE_ARTIFACT_TOOLS) {
   const p0b = descriptor.profileRevisionId !== "immo-artifacts.v1";
   return compileArtifactsProfile({ ...RADAR_ARTIFACTS_PROFILE,
     ...descriptor,
@@ -106,7 +117,8 @@ export function compileHostArtifactProfile(descriptor = ARTIFACT_PROFILE_DESCRIP
       ...(p0b ? UPLOAD_PAGE_ARTIFACT_TOOLS : []),
       ...(p0b ? SHARING_ARTIFACT_TOOLS : []),
       ...(p0b ? CONSENT_ARTIFACT_TOOLS : []),
-      ...(descriptor.resultEnvelopeVersion === 2 ? PART1_ARTIFACT_TOOLS : [])],
+      ...(descriptor.resultEnvelopeVersion === 2 ? PART1_ARTIFACT_TOOLS : []),
+      ...gitTools],
     operations: [...RADAR_ARTIFACTS_PROFILE.operations.map((entry) => entry.operation === "publish"
       ? { ...entry, limits: { ...entry.limits, releaseFilesMax: RELEASE_FILES_MAX,
         releaseFileBytesMax: RELEASE_FILE_BYTES_MAX, releaseTotalBytesMax: RELEASE_TOTAL_BYTES_MAX } }
@@ -129,7 +141,10 @@ export function compileHostArtifactProfile(descriptor = ARTIFACT_PROFILE_DESCRIP
       // profile already declares the schema (artifactId, optional scope,
       // required idempotencyKey), the host only selects it.
       { operation: "revoke_reader_consent", limits: { idempotencyKeyMaxUnits: 256 }, defaults: {} },
-    ] : [])],
+    ] : []),
+    // Git mode: one operation entry per selected git tool, none when off.
+    ...gitProfileOperations(gitTools.filter((tool) => !RADAR_ARTIFACTS_PROFILE.operations
+      .some((entry) => entry.operation === tool.slice("artifacts_".length))))],
     contractRevisions: { ...RADAR_ARTIFACTS_PROFILE.contractRevisions,
       ...(ARTIFACT_P0B ? { immo: descriptor.profileRevisionId } : {}) },
   });
