@@ -14,6 +14,7 @@ import { appendJsonlRecord, parseJsonlTolerant } from '../lib/jsonl.mjs';
 import { sha256 } from '../lib/render.mjs';
 import { classifDir, repoRoot, testOnlyEnv, classifHome, privateDir } from '../lib/paths.mjs';
 import { check as checkBudget } from '../lib/budget.mjs';
+import { quotaFields } from '../lib/codex-quota.mjs';
 import { PROFILE_DIR, validateExtraction } from '../lib/engram.mjs';
 import { spawnSync } from 'node:child_process';
 import { buildPrompt, itemValidity, loadPack, parseAnswers, toExtraction } from './annotation.mjs';
@@ -194,7 +195,7 @@ export async function runPass({ pass, mode = 'independent', guide = 'G0', annota
       pairs = parseAnswers(r.text, lot.items);
       const answered = pairs.filter((p) => p.answer).length;
       appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: phase ?? `pass${pass}`, pass, mode, guide, annotator, lotId: lot.lotId, items: lot.items.length, attempt: attempts,
-        exitCode: r.code, latencyMs: r.latencyMs, reused, answered, toolEvents: r.toolEvents ?? null, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null });
+        exitCode: r.code, latencyMs: r.latencyMs, reused, answered, toolEvents: r.toolEvents ?? null, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null, ...(reused ? {} : quotaFields(r)) });
       if (r.code === 0 && answered > 0 && !(r.toolEvents > 0)) break;
     }
     // Explicit exit policy, logged: a non-zero seat exit makes every vote of the lot

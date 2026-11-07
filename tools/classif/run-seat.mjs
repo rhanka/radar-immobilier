@@ -11,6 +11,7 @@ import process from 'node:process';
 import { ALIASES, LEVELS, vibeHome } from './lib/vibe-home.mjs';
 import { classifHome, testOnlyEnv } from './lib/paths.mjs';
 import { privateDir } from './lib/paths.mjs';
+import { extractCodexRateLimits } from './lib/codex-quota.mjs';
 
 const SCRUB = /(_API_KEY|_AUTH_TOKEN|_API_BASE|_BASE_URL|_SECRET_KEY|_ACCESS_KEY)$|^(ANTHROPIC_|OPENAI_|GEMINI_|CLAUDE_CODE_USE_|AWS_|GOOGLE_CLOUD_|GOOGLE_APPLICATION_CREDENTIALS|GOOGLE_GENAI_USE_VERTEXAI|VERTEX|SCRAPE_S3_|REFERENCE_C_KEY|CLASSIF_EVAL_KEY|CLASSIF_BLIND_KEY|MISTRAL_|VIBE_ACTIVE_MODEL)/;
 /**
@@ -151,6 +152,9 @@ const isInside = (child, parent) => {
   const rel = path.relative(parent, child);
   return rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel));
 };
+
+/** Codex seats (ChatGPT quota shared with the production immo detection): astra-max, sol-6.1-low, luna-6-low. */
+export const isCodexSeat = (label) => ROUTES[label]?.parse === parseCodex;
 
 /** Exact command that refreshes a codex seat auth from ~/.codex/auth.json (review GEPA R5). */
 export const seatAuthRefreshCommand = (seat) => `make classif-seat-auth-refresh SEAT=${seat} ENV=preprod`;
@@ -336,6 +340,8 @@ export function countCodexToolEvents(stdout) {
     try { e = JSON.parse(line); } catch { toolEvents++; unknownTypes.push('<non-json>'); continue; }
     const type = e?.type ?? e?.event ?? null;
     if (!type || typeof type !== 'string') { toolEvents++; unknownTypes.push('<missing-type>'); continue; }
+    // Quota metering (`token_count`, carrying `rate_limits`) is benign; any other unknown type still counts.
+    if (type === 'token_count' || (type === 'event_msg' && e?.payload?.type === 'token_count')) continue;
     if (!CODEX_KNOWN_EVENT_TYPES.has(type)) { toolEvents++; unknownTypes.push(type); continue; }
     if (type.startsWith('item.')) {
       const item = e?.item ?? e?.data ?? e;
@@ -383,7 +389,7 @@ export function parseCodex(stdout, dir) {
     try { walk(JSON.parse(line)); } catch { /* not json */ }
   }
   const { toolEvents, unknownTypes } = countCodexToolEvents(stdout);
-  return { text, usage, toolEvents, unknownTypes, errorEnvelope: codexErrorEnvelope(stdout) };
+  return { text, usage, toolEvents, unknownTypes, errorEnvelope: codexErrorEnvelope(stdout), rateLimits: extractCodexRateLimits(stdout) };
 }
 
 /**
