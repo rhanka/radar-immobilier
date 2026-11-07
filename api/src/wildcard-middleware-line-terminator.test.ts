@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createApp } from "./app.js";
 import { createContentDenyApp } from "./artifacts/content-deny.js";
+import { HOST as READER_HOST, makeApp as makeReaderApp } from "./artifacts/reader-test-fixture.js";
 import type { AuthConfig } from "./config.js";
 import type { Database } from "./db/client.js";
 import type { ObjectStore } from "./storage/object-store.js";
@@ -20,6 +21,11 @@ import type { ObjectStore } from "./storage/object-store.js";
  * not supported by RegExpRouter, so SmartRouter currently selects
  * TrieRouter and the guard already ran. Its case pins that outcome whatever
  * router SmartRouter ends up selecting.
+ *
+ * The reader content app (RegExpRouter too) gates every path with
+ * `app.use("*", …)` before its `app.get("*", serveRelease)` catch-all: the
+ * gate answers `/api/*` with a typed 401 and refuses an authority header
+ * with a typed 400, under the reader isolation headers.
  */
 const LINE_TERMINATOR_PATHS = [
   "/api/v1/opportunites%0A",
@@ -63,6 +69,24 @@ describe("wildcard middleware with an encoded line terminator in the path", () =
       expect(res.status, path).toBe(404);
       expect(await res.json(), path).toEqual({ error: "not_found" });
       expect(res.headers.get("cache-control"), path).toBe("no-store");
+    }
+  });
+
+  it("still runs the reader content gate (app.use('*', gate))", async () => {
+    const app = makeReaderApp();
+    const request = (path: string, headers: Record<string, string> = {}) =>
+      app.request(`http://${READER_HOST}${path}`, { headers: { host: READER_HOST, ...headers } });
+    for (const path of ["/api/v1/auth/me%0A", "/api/%E2%80%A8", "/api/v1/workspaces%0D"]) {
+      const res = await request(path);
+      expect(res.status, path).toBe(401);
+      expect(await res.json(), path).toEqual({ error: "unauthenticated" });
+      expect(res.headers.get("cache-control"), path).toBe("private, no-store");
+      expect(res.headers.get("x-content-type-options"), path).toBe("nosniff");
+    }
+    for (const path of ["/index.html%0A", "/%E2%80%A9"]) {
+      const res = await request(path, { authorization: "Bearer forged" });
+      expect(res.status, path).toBe(400);
+      expect(await res.json(), path).toEqual({ error: "invalid_authority" });
     }
   });
 });
