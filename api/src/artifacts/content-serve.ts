@@ -1020,7 +1020,7 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     if (!deps.releaseFiles && (c.req.path === "/" || c.req.path === "/index.html")) {
       applyReaderContentHeaders(c);
       c.header("Content-Type", "text/html; charset=utf-8");
-      // The base RELEASE_CSP no longer carries the example script hash: the
+      // The base APPLICATION_HTML_CSP never carries the example script hash: the
       // technical example gets its own inline-script hash like any release.
       c.header("Content-Security-Policy", releaseCspForHtml(READER_EXAMPLE_HTML));
       return c.html(READER_EXAMPLE_HTML);

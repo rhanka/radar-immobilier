@@ -36,7 +36,7 @@ Pin `@sentropic/artifacts@0.2.17` and serve immo artifacts with the provider's a
   - Declare exception ID `ART0217-EXn` in `## Feedback Loop` before touching any conditional/forbidden path.
 
 ## Feedback Loop
-- `attention`: the 0.2.17 npm package ships the content mode and the MIME map only. The generic grant contract (J1.3b route, neutral screen, typed 403 with `scopeId`) and the OAuth job fix live in the sentropic application (PR #930), not in the package; immo keeps its own #1009 consent screen.
+- `attention`: the 0.2.17 npm package ships the content mode and the MIME map only, and the MIME map is not reachable from any export subpath. The generic grant contract (J1.3b route, neutral screen, typed 403 with `scopeId`) and the OAuth job fix live in the sentropic application (PR #930), not in the package; immo keeps its own #1009 consent screen.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + cherry-pick** (default for orthogonal tasks; single final test cycle)
@@ -52,16 +52,16 @@ Pin `@sentropic/artifacts@0.2.17` and serve immo artifacts with the provider's a
   - [x] Create worktree `./tmp/artifacts-0217-app-mode` from `origin/main`.
   - [x] Read #1008, #1009, #1011, #1012 and the 0.2.17 package (CHANGELOG, typings, runtime diff vs 0.2.16).
 
-- [ ] **Lot 1 — Provider pin 0.2.17**
+- [x] **Lot 1 — Provider pin 0.2.17**
   - [x] Pin `@sentropic/artifacts` 0.2.17 in `package.json` and the lockfile (`make install`).
   - [x] Qualify 0.2.17 in the P0b/strict provider lists, profile configs and the P0b Make tooling.
-  - [ ] Lot gate: `make typecheck`, `make lint`, scoped `make test-api` / package tests.
+  - [x] Lot gate: `make typecheck`, `make lint`, scoped `make test-api` / package tests.
 
-- [ ] **Lot 2 — Application content mode from the provider**
-  - [ ] Build the release CSP from `contentHeaders({ mode: "application", scriptHashes })` and `APPLICATION_HTML_CSP`.
-  - [ ] Resolve release content types through the provider `mimeTypeForPath`.
-  - [ ] Delete the immo-local CSP literal and extension map.
-  - [ ] Lot gate: `make typecheck`, `make lint`, `make test-api SCOPE=src/artifacts`, artifacts integration specs.
+- [x] **Lot 2 — Application content mode from the provider**
+  - [x] Build the release CSP from `contentHeaders({ mode: "application", scriptHashes })` and `APPLICATION_HTML_CSP`.
+  - [x] Keep the immo extension map: the provider `EXTENSION_TO_MIME` lives in the unexported `server/mime` subpath (0.2.17).
+  - [x] Delete the immo-local CSP literal (`RELEASE_CSP`).
+  - [x] Lot gate: `make typecheck`, `make lint`, `make test-api SCOPE=src/artifacts`, artifacts integration specs.
 
 - [ ] **Lot N — Final validation**
   - [ ] Push branch and open the PR to `main`.

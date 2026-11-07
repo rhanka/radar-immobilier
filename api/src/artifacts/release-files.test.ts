@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import {
   contentTypeForPath,
@@ -5,8 +6,10 @@ import {
   normalizeReleaseHtml,
   normalizeReleasePath,
   releaseCspForHtml,
-  RELEASE_CSP,
+  RELEASE_CONTENT_MODE,
 } from "./release-files.js";
+import { APPLICATION_HTML_CSP, contentHeaders } from "@sentropic/artifacts/content/headers";
+import { READER_CONTENT_HEADERS } from "./content-isolation.js";
 
 describe("published release files", () => {
   it("should normalize paths and block traversal", () => {
@@ -37,7 +40,8 @@ describe("published release files", () => {
   });
 
   it("should serve the generic application CSP (J1.0 §6, no profile opt-in)", () => {
-    expect(RELEASE_CSP).toBe(
+    expect(RELEASE_CONTENT_MODE).toBe("application");
+    expect(APPLICATION_HTML_CSP).toBe(
       "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; " +
       "img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob:; connect-src 'self'; " +
       "worker-src 'self'; child-src 'self'; frame-src 'none'; frame-ancestors 'none'; " +
@@ -53,11 +57,24 @@ describe("published release files", () => {
   });
 
   it("should authorize release sub-resources and H5 calls without opening isolation", () => {
-    expect(RELEASE_CSP).toContain("script-src 'self'");
-    expect(RELEASE_CSP).toContain("style-src 'self' 'unsafe-inline'");
-    expect(RELEASE_CSP).toContain("connect-src 'self'");
-    expect(RELEASE_CSP).toContain("worker-src 'self'");
-    expect(RELEASE_CSP).toContain("frame-ancestors 'none'");
+    expect(APPLICATION_HTML_CSP).toContain("script-src 'self'");
+    expect(APPLICATION_HTML_CSP).toContain("style-src 'self' 'unsafe-inline'");
+    expect(APPLICATION_HTML_CSP).toContain("connect-src 'self'");
+    expect(APPLICATION_HTML_CSP).toContain("worker-src 'self'");
+    expect(APPLICATION_HTML_CSP).toContain("frame-ancestors 'none'");
     expect(releaseCspForHtml("<html><body>ok</body></html>")).not.toContain("sha256-");
+  });
+
+  it("should take the release CSP from the provider application mode", () => {
+    expect(READER_CONTENT_HEADERS["Content-Security-Policy"]).toBe(APPLICATION_HTML_CSP);
+    expect(releaseCspForHtml("<html><body>ok</body></html>")).toBe(APPLICATION_HTML_CSP);
+    const script = "document.body.textContent='ok'";
+    const hash = `'sha256-${createHash("sha256").update(script).digest("base64")}'`;
+    const csp = releaseCspForHtml(`<script>${script}</script>`);
+    expect(csp).toBe(contentHeaders({ mimeType: "text/html", size: 0, mode: "application",
+      scriptHashes: [hash] })["content-security-policy"]);
+    expect(csp).toContain(`script-src 'self' ${hash};`);
+    expect(csp).toContain("worker-src 'self'");
+    expect(csp).not.toContain("unsafe-eval");
   });
 });

@@ -14,6 +14,7 @@
  * digest-verified S3 blobs. The in-memory provider below is for module tests.
  */
 import { createHash } from "node:crypto";
+import { contentHeaders, type ContentMode } from "@sentropic/artifacts/content/headers";
 import { parse, type DefaultTreeAdapterMap } from "parse5";
 
 export interface ReleaseFile {
@@ -30,22 +31,20 @@ export interface ReleaseFileProvider {
 }
 
 /**
- * Generic application CSP (J1.0 report §6, owner decision 05/11: every immo
- * artifact runs in application mode, no profile opt-in). Served as the base
- * header on every content path; per-release inline script hashes are added
- * by releaseCspForHtml when an HTML file carries inline script.
+ * Provider application content mode (@sentropic/artifacts 0.2.17, owner
+ * decision 05/11: every immo artifact runs in application mode, no profile
+ * opt-in). The base header on every content path is the provider's
+ * APPLICATION_HTML_CSP (the J1.0 policy); per-release inline script hashes
+ * are added by releaseCspForHtml when an HTML file carries inline script.
  */
-export const RELEASE_CSP =
-  `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; ` +
-  `img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob:; connect-src 'self'; ` +
-  `worker-src 'self'; child-src 'self'; frame-src 'none'; frame-ancestors 'none'; ` +
-  `object-src 'none'; base-uri 'none'; form-action 'none'`;
+export const RELEASE_CONTENT_MODE: ContentMode = "application";
 
 /**
  * Authorize only the inline script bytes of this immutable release: script-src
  * never carries unsafe-inline. Inline <style> is NOT hashed: style-src already
  * carries 'unsafe-inline' (Svelte style attributes, pdf.js runtime <style>),
  * and any style hash would make CSP2/3 browsers ignore that 'unsafe-inline'.
+ * The provider appends the hashes to script-src only.
  */
 export function releaseCspForHtml(html: string): string {
   const scriptHashes: string[] = [];
@@ -57,10 +56,14 @@ export function releaseCspForHtml(html: string): string {
     if ("childNodes" in node) node.childNodes.forEach(visit);
     if ("content" in node) visit(node.content);
   };
-  visit(parse(normalizeReleaseHtml(html)));
-  return RELEASE_CSP.replace("script-src 'self'", `script-src 'self' ${scriptHashes.join(" ")}`);
+  const normalized = normalizeReleaseHtml(html);
+  visit(parse(normalized));
+  return contentHeaders({ mimeType: "text/html", size: Buffer.byteLength(normalized),
+    mode: RELEASE_CONTENT_MODE, scriptHashes })["content-security-policy"]!;
 }
 
+// The provider extension map (EXTENSION_TO_MIME, 0.2.17) lives in
+// `server/mime`, which the package does not export: this map mirrors it.
 const CONTENT_TYPES: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",

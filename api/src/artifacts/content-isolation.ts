@@ -6,14 +6,15 @@
  * Embedding stays unavailable. Publisher/MCP credentials never enter
  * served bytes or headers.
  *
- * L3 release CSP: published HTML/CSS/JS sets load as same-origin
+ * Release CSP: the provider application mode (APPLICATION_HTML_CSP,
+ * @sentropic/artifacts 0.2.17). Published HTML/CSS/JS sets load as same-origin
  * sub-resources (script-src/style-src 'self') and call H5 over the same
  * origin (connect-src 'self'). The technical example inline script is
- * allowed by its hash through releaseCspForHtml at serve time. Workers,
- * frames and objects stay refused.
+ * allowed by its hash through releaseCspForHtml at serve time. Workers are
+ * same-origin only; service workers, frames and objects stay refused.
  */
 import type { Context, MiddlewareHandler } from "hono";
-import { RELEASE_CSP } from "./release-files.js";
+import { APPLICATION_HTML_CSP } from "@sentropic/artifacts/content/headers";
 
 export const READER_CONTENT_HEADERS: Record<string, string> = {
   "Cache-Control": "private, no-store",
@@ -22,7 +23,7 @@ export const READER_CONTENT_HEADERS: Record<string, string> = {
   "X-Frame-Options": "DENY",
   "Cross-Origin-Opener-Policy": "same-origin",
   "Cross-Origin-Resource-Policy": "same-origin",
-  "Content-Security-Policy": RELEASE_CSP,
+  "Content-Security-Policy": APPLICATION_HTML_CSP,
 };
 
 export function applyReaderContentHeaders(c: Context): void {
