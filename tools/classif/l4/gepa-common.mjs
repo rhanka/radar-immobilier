@@ -2,7 +2,7 @@
 // optimiser loop (l4/gepa.mjs), the series manifest loader, dev and blind. No disk read, no
 // model call.
 //
-// Lexicographic objective, per case and aggregated over the 5 evaluation routes:
+// Lexicographic objective, per case and aggregated over the 4 evaluation routes:
 //   1. misses: reference pertinent/a_surveiller predicted non_pertinent, on ANY route (each
 //      route counts); a failed call counts as shown (metrics.mjs isShownPred), never a miss;
 //   2. noise: reference non_pertinent predicted shown (a failed call counts as shown).
@@ -10,8 +10,11 @@
 import { isShownPred, isShownRef } from './metrics.mjs';
 
 export const GEPA_METHOD = 'gepa';
-/** Mandatory evaluation routes: a miss on any of them counts. */
-export const GEPA_ROUTES = ['opus-5.5-low', 'glm-5.3-low', 'sol-6.1-low', 'luna-6-low', 'mistral-large-4-low'];
+/**
+ * Mandatory evaluation routes: a miss on any of them counts. Owner decision (« on prend sol pas
+ * luna »): 4 routes; luna-6-low stays a run-seat.mjs seat but is no GEPA route.
+ */
+export const GEPA_ROUTES = ['opus-5.5-low', 'glm-5.3-low', 'sol-6.1-low', 'mistral-large-4-low'];
 /** Reflective mutation / crossover seat, and its reconciliation + fallback seat. */
 export const GEPA_MUTATOR = 'astra-max';
 export const GEPA_RECONCILER = 'opus-5.5-max';

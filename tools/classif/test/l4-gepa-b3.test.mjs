@@ -75,9 +75,9 @@ test('B3 (retry-trip replay): 2 persistent tool events on a 48-case D_pareto nev
 
 test('B3b: retries are bounded per (candidate, route, case) over the run; past the bound the failure is definitive', withTempHome(async (home) => {
   setup(home);
-  // Every seed misses p0 on luna (no candidate, so the run can be resumed); P1 keeps 2 persistent tool events.
+  // Every seed misses p0 on mistral (no candidate, so the run can be resumed); P1 keeps 2 persistent tool events.
   const override = (label, mark, id) => {
-    if (mark.startsWith('seed') && label === 'luna-6-low' && id === 'p0') return { code: 0, text: JSON.stringify({ verdict: 'non_pertinent', code: CODE.non_pertinent }) };
+    if (mark.startsWith('seed') && label === 'mistral-large-4-low' && id === 'p0') return { code: 0, text: JSON.stringify({ verdict: 'non_pertinent', code: CODE.non_pertinent }) };
     if (mark === 'seed-1' && label === 'sol-6.1-low' && TOOL_IDS.includes(id)) return { ...okAnswer(id), toolEvents: 1 };
     return null;
   };
@@ -98,8 +98,8 @@ test('B3b: retries are bounded per (candidate, route, case) over the run; past t
 
 test('B3d: the infra breaker counts over the whole batch (48 cases: 2 failures pass, 3 stop the run)', withTempHome(async (home) => {
   setup(home);
-  const down = (n) => (label, mark, id) => (mark === 'seed-0' && label === 'luna-6-low' && SPLIT.pareto.slice(0, n).includes(id) ? { code: 1, text: '' } : null);
-  await assert.rejects(runGepa({ home, k: K, maxIterations: 0, seat: fakeSeat(down(3)).seat, log: quiet }), /route luna-6-low had 3 infrastructure failures on seed-P0 \(> 2 of 48\)/);
+  const down = (n) => (label, mark, id) => (mark === 'seed-0' && label === 'opus-5.5-low' && SPLIT.pareto.slice(0, n).includes(id) ? { code: 1, text: '' } : null);
+  await assert.rejects(runGepa({ home, k: K, maxIterations: 0, seat: fakeSeat(down(3)).seat, log: quiet }), /route opus-5.5-low had 3 infrastructure failures on seed-P0 \(> 2 of 48\)/);
   const home2 = mkdtempSync(path.join(os.tmpdir(), 'b3-home-'));
   try {
     setup(home2);
@@ -144,21 +144,20 @@ test('B4 (final-reserve replay): a breaker stop during the final choice resumes 
   const infraIds = SPLIT.feedback.filter((x) => x.startsWith('p')).slice(0, 4);
   let down = true;
   const override = (label, _mark, id) => (down && label === 'sol-6.1-low' && infraIds.includes(id) ? { code: 1, text: '' } : null);
-  // 1200 seed calls + 360 final reserve fit in 1610; the final evaluation of P0 trips (4 > 3 of 72).
-  await assert.rejects(runGepa({ home, k: K, maxIterations: 0, maxCalls: 1610, seat: fakeSeat(override).seat, log: quiet }),
+  // 960 seed calls + 288 final reserve fit in 1298; the final evaluation of P0 trips (4 > 3 of 72).
+  await assert.rejects(runGepa({ home, k: K, maxIterations: 0, maxCalls: 1298, seat: fakeSeat(override).seat, log: quiet }),
     /route sol-6.1-low had 4 infrastructure failures on final-P0 \(> 3 of 72\)/);
   assert.ok(!existsSync(manifestFile(repo)));
   down = false;
   const f = fakeSeat(override);
-  const m = await runGepa({ home, k: K, maxIterations: 0, maxCalls: 1610, seat: f.seat, log: quiet });
+  const m = await runGepa({ home, k: K, maxIterations: 0, maxCalls: 1298, seat: f.seat, log: quiet });
   assert.ok(existsSync(manifestFile(repo)), 'the resume writes the manifest');
   assert.equal(m.result.status, 'selected');
-  // Only the final calls of P0 left unanswered by the stop are paid: the rest of sol, and luna
-  // (same codex family, run after sol, never started once sol tripped).
-  assert.ok(f.seen.every((c) => c.mark === 'seed-0' && SPLIT.feedback.includes(c.id) && ['sol-6.1-low', 'luna-6-low'].includes(c.label)));
+  // Only the final calls of P0 left unanswered by the stop are paid: the rest of sol.
+  assert.ok(f.seen.every((c) => c.mark === 'seed-0' && SPLIT.feedback.includes(c.id) && c.label === 'sol-6.1-low'));
   assert.ok(infraIds.every((id) => f.seen.some((c) => c.label === 'sol-6.1-low' && c.id === id)), 'the failed calls are retried');
-  assert.ok(f.seen.length <= 2 * 72);
-  assert.ok(m.callsSpent <= 1610);
+  assert.ok(f.seen.length <= 72);
+  assert.ok(m.callsSpent <= 1298);
   assert.ok(m.finalCoverage.notEvaluated > 0, 'the candidates the budget could not cover are counted');
 }));
 
@@ -198,10 +197,10 @@ test('B5 (quota-cap replay): a quota retry never takes the budget of reserved ca
     if (label === 'glm-5.3-low' && mark === 'seed-0' && qIds.includes(id) && !hit.has(id)) { hit.add(id); return { code: 1, text: '', stderrTail: 'HTTP 429 Too Many Requests' }; }
     return null;
   };
-  // 1200 seed calls + 360 for one finalist = 1560: the final batch fills the cap exactly.
-  const m = await runGepa({ home, k: K, maxIterations: 0, maxCalls: 1560, quotaBackoffMs: [0, 0, 0], sleep: async () => {}, seat: fakeSeat(override).seat, log: quiet });
-  assert.ok(m.callsSpent <= 1560, `callsSpent ${m.callsSpent} <= 1560`);
-  assert.equal(m.callsSpent, 1560);
+  // 960 seed calls + 288 for one finalist = 1248: the final batch fills the cap exactly.
+  const m = await runGepa({ home, k: K, maxIterations: 0, maxCalls: 1248, quotaBackoffMs: [0, 0, 0], sleep: async () => {}, seat: fakeSeat(override).seat, log: quiet });
+  assert.ok(m.callsSpent <= 1248, `callsSpent ${m.callsSpent} <= 1248`);
+  assert.equal(m.callsSpent, 1248);
   assert.ok(existsSync(manifestFile(repo)));
   const calls = readFileSync(path.join(home, 'l2', 'calls.jsonl'), 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l));
   assert.equal(calls.filter((c) => c.intent === true && c.attempt).length, 0, 'no retry could fit next to the reserved calls');
