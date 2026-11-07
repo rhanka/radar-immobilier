@@ -6,9 +6,11 @@ import { createHostBuildApiClient } from "./build-api.js";
 import { composeGitMode, readGitModeConfig } from "./compose.js";
 import type { GitBuildPort } from "./provider-adapter.js";
 import {
-  candidateDigestOf, canonicalJson, createHandoffAcceptance, HANDOFF_MAX_LIFETIME_MS, verifyBuildHandoff,
-  type BuildHandoff, type HandoffCommitPort, type HandoffManifestFile, type HostReceipt,
+  createHandoffAcceptance, HANDOFF_MAX_LIFETIME_MS, type BuildHandoff, type HandoffCommitPort, type HandoffManifestFile,
+  type HostReceipt,
 } from "./handoff.js";
+import { candidateDigestOf, canonicalJson, verifyBuildHandoff } from "./handoff.contract.test-support.js";
+import { loadLiveHost } from "./live-host-adapter.js";
 
 const MiB = 1024 * 1024;
 const builder = generateKeyPairSync("ed25519");
@@ -62,7 +64,8 @@ describe("SG4b handoff verification (host side)", () => {
     expect(detail(() => check(handoff(), { ...binding, pendingJobId: "job-9" }))).toBe("job");
     expect(detail(() => check(handoff(), { ...binding, pendingCommitSha: "d".repeat(40) }))).toBe("job");
     expect(detail(() => check(handoff(), { ...binding, generation: 3 }))).toBe("job");
-    expect(detail(() => check(handoff(), undefined))).toBe("job");
+    expect(detail(() => verifyBuildHandoff(handoff(), { builderPublicKey: builder.publicKey, binding: undefined, now: NOW })))
+      .toBe("job");
   });
 
   it("enforces 255 files, 16 MiB per file and 64 MiB per release at the exact boundaries", () => {
@@ -98,10 +101,16 @@ describe("SG4b acceptance and signed host receipt", () => {
     return port;
   }
 
+  // Stand-ins for the provider live-host verifier and receipt signer (0.2.20).
+  const ports = {
+    verify: (input: unknown, context: { binding: GitBinding | undefined; now: number }) =>
+      verifyBuildHandoff(input, { ...context, builderPublicKey: builder.publicKey }),
+    signReceipt: (receipt: HostReceipt) => sign(null, Buffer.from(canonicalJson(receipt)), host.privateKey).toString("base64"),
+  };
+
   it("commits once, signs the receipt and replays the same receipt for the same authorization", async () => {
     const commit = memoryCommit();
-    const acceptance = createHandoffAcceptance({ builderPublicKey: builder.publicKey, hostReceiptKey: host.privateKey,
-      binding: async () => binding, commit, now: () => NOW });
+    const acceptance = createHandoffAcceptance({ ...ports, binding: async () => binding, commit, now: () => NOW });
     const first = await acceptance.accept(handoff());
     const second = await acceptance.accept(handoff());
     expect(first.replayed).toBe(false);
@@ -112,9 +121,18 @@ describe("SG4b acceptance and signed host receipt", () => {
   });
 
   it("fails closed without a durable commit port", async () => {
-    const acceptance = createHandoffAcceptance({ builderPublicKey: builder.publicKey, hostReceiptKey: host.privateKey,
-      binding: async () => binding, now: () => NOW });
+    const acceptance = createHandoffAcceptance({ ...ports, binding: async () => binding, now: () => NOW });
     await expect(acceptance.accept(handoff())).rejects.toMatchObject({ kind: "provider_unavailable" });
+  });
+
+  it("fails closed without the provider live-host verifier and signer (0.2.18)", async () => {
+    expect(await loadLiveHost()).toBeUndefined();
+    const commit = memoryCommit();
+    await expect(createHandoffAcceptance({ binding: async () => binding, commit, now: () => NOW }).accept(handoff()))
+      .rejects.toMatchObject({ kind: "provider_unavailable" });
+    await expect(createHandoffAcceptance({ verify: ports.verify, binding: async () => binding, commit, now: () => NOW })
+      .accept(handoff())).rejects.toMatchObject({ kind: "provider_unavailable" });
+    expect(commit.releases).toBe(0);
   });
 });
 
