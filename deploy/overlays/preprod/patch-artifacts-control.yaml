@@ -21,3 +21,9 @@ data:
   ARTIFACTS_READER_AUDIENCE: "https://preprod.immo.sent-tech.ca/reader"
   ARTIFACTS_READER_TIER: "preprod"
   CLASSIFICATION_CURSOR_KEY_ID: "preprod-v1"
+  # Git-backed artifact mode, PREPROD ONLY (docs/operator/git-artifact-mode.md).
+  # Same value on radar-immo-mcp (patch-immo-mcp-config.yaml): both compose the
+  # artifacts host and the profile digest depends on it. Requires the
+  # @sentropic/artifacts 0.2.20 qualification commit: on 0.2.18 the stage
+  # refuses to boot (artifact_git_mode_provider_unqualified).
+  IMMO_ARTIFACTS_GIT_MODE: "bindings"
