@@ -28,9 +28,8 @@ Do not set the flag before that pin is deployed.
 
 Blast radius: the flag is read when `@radar/artifacts-host` is imported, so a
 refusal stops the whole radar-api or radar-immo-mcp process, not only the git
-mode. With the flag off (unset, empty or `off`) no `IMMO_ARTIFACTS_GIT_*` /
-`IMMO_ARTIFACTS_BUILDER_*` value is read: a malformed one cannot stop the
-process. With the flag on, a malformed value (half-set committer, invalid
+mode. With the flag off (unset, empty or `off`) no other `IMMO_ARTIFACTS_*`
+value of this page is read: a malformed one cannot stop the process. With the flag on, a malformed value (half-set committer, invalid
 cursor key, non-JSON humans list) refuses the start of the whole process.
 
 ## Configuration
@@ -38,16 +37,37 @@ cursor key, non-JSON humans list) refuses the start of the whole process.
 All optional and read only when the flag is on. A missing value never
 crashes the host: the matching port refuses at call time with a typed error.
 
-| Variable | Kind | Effect when absent |
-|---|---|---|
-| `IMMO_ARTIFACTS_GIT_INSTALLATION_REF` | config | registry empty: `git_repo_not_registered` |
-| `IMMO_ARTIFACTS_GIT_BROKER_ORIGIN` | config (https origin of the cluster-mesh router) | leases refuse: `provider_unavailable` |
-| `IMMO_ARTIFACTS_GIT_BROKER_TOKEN` | secret (host service identity for `/github-app/broker/lease`) | leases refuse |
-| `IMMO_ARTIFACTS_GIT_CURSOR_KEY` | secret (base64, 32 bytes, source cursor MAC) | GitPort refuses: `provider_unavailable` |
-| `IMMO_ARTIFACTS_GIT_COMMITTER_NAME` / `_EMAIL` | config (GitHub noreply) | GitPort refuses |
-| `IMMO_ARTIFACTS_GIT_CODE_READERS` | config (comma-separated OIDC subs) | nobody holds code rights |
-| `IMMO_ARTIFACTS_GIT_HUMANS` | config (JSON `[{principalId,name,email}]`, noreply emails) | no human linkage: writes `access_denied` |
-| `IMMO_ARTIFACTS_BUILDER_ORIGIN` / `IMMO_ARTIFACTS_BUILDER_TOKEN` | config / secret (host build API) | `git_publish` sandbox not admitted: `builder_unavailable` |
+Every variable below is immo-owned and read by radar-api and radar-immo-mcp
+(same values on both). Preprod values are given where they are fixed.
+
+| Variable | Kind | Format | Effect when absent |
+|---|---|---|---|
+| `IMMO_ARTIFACTS_GIT_MODE` | config | `off` \| `bindings` \| `build` \| `live` | off |
+| `IMMO_ARTIFACTS_SERVICE_OAUTH_TOKEN_ENDPOINT` | config | https URL; preprod `https://preprod.auth.sent-tech.ca/api/v1/auth/oauth/token` | broker and builder calls refuse |
+| `IMMO_ARTIFACTS_SERVICE_OAUTH_CLIENT_ID` | config | OAuth client id registered by Sentropic in the IdP | broker and builder calls refuse |
+| `IMMO_ARTIFACTS_SERVICE_OAUTH_CLIENT_SECRET` | **secret** | client secret (client_credentials, HTTP Basic); scopes `github-app:broker` and `artifacts:builder` | broker and builder calls refuse |
+| `IMMO_ARTIFACTS_SERVICE_OAUTH_RESOURCE` | config, optional | RFC 8707 resource URI (Sentropic `OAUTH_SERVICE_RESOURCE_URI`) | omitted from the token request |
+| `IMMO_ARTIFACTS_GIT_BROKER_ORIGIN` | config | https origin; preprod `https://preprod.sentropic.sent-tech.ca` (path `/api/v1/github-app/broker/lease` is fixed) | leases refuse: `provider_unavailable` |
+| `IMMO_ARTIFACTS_GIT_INSTALLATION_REF` | config | `enroll_<uuid>` from the owner enrollment (status `ready`) | registry empty: `git_repo_not_registered` |
+| `IMMO_ARTIFACTS_GIT_CURSOR_KEY` | **secret** | base64, at least 32 bytes (source cursor MAC) | GitPort refuses: `provider_unavailable` |
+| `IMMO_ARTIFACTS_GIT_COMMITTER_NAME` | config | committer display name | GitPort refuses |
+| `IMMO_ARTIFACTS_GIT_COMMITTER_EMAIL` | config | GitHub noreply address `<id>+<login>@users.noreply.github.com` | GitPort refuses |
+| `IMMO_ARTIFACTS_GIT_CODE_READERS` | config | comma-separated OIDC subs holding code rights | nobody holds code rights |
+| `IMMO_ARTIFACTS_GIT_HUMANS` | config | JSON `[{"principalId","name","email"}]`, one entry per editing user, noreply emails | no human linkage: writes `access_denied` |
+| `IMMO_ARTIFACTS_BUILDER_URL` | config | https base; preprod `https://preprod.sentropic.sent-tech.ca/api/v1/artifacts/builder` | `git_publish` sandbox not admitted: `builder_unavailable` |
+| `IMMO_ARTIFACTS_BUILDER_HANDOFF_PUBLIC_KEYS` | config (public) | `kid=base64(SPKI DER)` Ed25519, comma-separated during a rotation; provided by Sentropic | `/live-host/v1/*` refuse |
+| `IMMO_ARTIFACTS_RECEIPT_SIGNING_KEY` | **secret** | base64 PKCS#8 DER, Ed25519 private key (public key + kid handed to Sentropic) | handoff answers 503 |
+| `IMMO_ARTIFACTS_RECEIPT_KEY_ID` | config | kid of the receipt key, e.g. `immo-preprod-receipt-1` | handoff answers 503 |
+| `IMMO_ARTIFACTS_LIVE_HOST_KEYS` | **secret** | HMAC keyring `kid=base64url[,kid=base64url]`, each at least 32 bytes; same value in Sentropic `APP_ARTIFACT_LIVE_HOST_KEYS` | no live signer: pushes refuse |
+| `IMMO_ARTIFACTS_LIVE_HOST_KID` | config | signing kid; preprod `immo-preprod-live-1` | no live signer |
+| `IMMO_ARTIFACTS_LIVE_HOST` | config | pages domain; preprod `pages.preprod.immo.sent-tech.ca` | pushes refuse |
+| `IMMO_ARTIFACTS_LIVE_CONTROL_URL` | config | https URL ending `/_live-control/v1`; preprod `https://pages.preprod.immo.sent-tech.ca/_live-control/v1` | pushes refuse |
+| `IMMO_ARTIFACTS_LIVE_DRAFT_KEYS` | **secret** | sealed keyring `version=base64url(32 raw bytes)[,...]` | draft keys refuse: `provider_unavailable` |
+| `IMMO_ARTIFACTS_LIVE_DRAFT_KEY_CURRENT` | config | the version used for new drafts (must be listed) | start refuses when the keyring is set |
+
+Inbound host base given to Sentropic: `https://preprod.immo.sent-tech.ca/api/v1/artifacts`
+(radar-api public origin; `POST .../live-host/v1/job` and `.../live-host/v1/handoff`,
+mounted only from the `build` stage on).
 
 Secrets follow the documented rotation cycle: minted by the owner of the
 service they authenticate to (Sentropic for the broker and builder tokens,
@@ -68,12 +88,16 @@ old one. A cursor key rotation invalidates open source cursors only.
 
 ## GB1 build qualification
 
-Every sandbox build job request carries `buildQualification`:
-`postinstallAllowlist: []` and one DISABLED row (package, version,
-integrity) per lockfile install-script entry, generated from
+`packages/artifacts-host/src/git-mode/gb1-install-script-rows.json` is immo's
+GB1 qualification: `postinstallAllowlist: []` and one DISABLED row (package,
+version, integrity) per lockfile install-script entry, generated from
 `package-lock.json` by `make -f tools/make/git-artifact.mk gb1-rows`.
 `gb1-qualification.test.ts` fails when the lock and the rows diverge:
 regenerate after any lockfile change that touches an install-script entry.
+Transport to the builder: `source-gap`. The W7 build request is exactly
+`{ artifactId, jobId }` and the job answer is `{ v: 1, job }`; neither carries
+the rows, so the builder side must read them (or receive them) by a path
+still to be agreed with Sentropic.
 
 ## Not yet composed (fail-closed)
 
@@ -81,6 +105,10 @@ regenerate after any lockfile change that touches an install-script entry.
 - SG4b handoff verification, host receipt signing, live assertion and control
   signing, candidate digest: provider subpath `@sentropic/artifacts/live-host`
   (0.2.20, `live-host-adapter.ts`); immo implements none of this crypto.
+- Host job and publication ledger (`HostBuildJobStore`, `HostBuildLedger`):
+  job persistence before `POST /v1/builds`, attempt fence, receipt ledger and
+  the publish step in one transaction. Fail-closed: `git_publish` and the
+  inbound `/live-host/v1/*` routes answer `provider_unavailable` / 503.
 - Live edge revocation: sockets held by the immo content host are closed first,
   then `POST /_live-control/v1` (`x-live-host-control`) is pushed with
   3 attempts; every response body is drained, a non-2xx answer is retried and
