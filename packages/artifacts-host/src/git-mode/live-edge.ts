@@ -1,3 +1,6 @@
+import {
+  ASSERTION_HEADER, CONTROL_HEADER, LIVE_KEY_ID, type LiveAssertionClaims, type LiveControlClaims,
+} from "@sentropic/artifacts/live-host";
 import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-contract";
 import type { LiveInvitation } from "./live-authority.js";
 import { loadLiveHost, type LiveHostModule } from "./live-host-adapter.js";
@@ -7,8 +10,9 @@ import { loadLiveHost, type LiveHostModule } from "./live-host-adapter.js";
  *
  * - Assertions and control messages are signed ONLY by the provider
  *   subpath `@sentropic/artifacts/live-host` (0.2.20, live-host-adapter.ts).
- *   immo carries no crypto of its own for them: until the subpath is
- *   published the signer adapter fails closed.
+ *   immo carries no crypto of its own for them; the claim shapes are the
+ *   package's (a control claim carries no generation or route epoch: the
+ *   fence format is reserved to the Sentropic controller).
  * - Revocation (invitation or session): the host first closes every proxied
  *   browser socket it holds for that invitee or session (the host owns the
  *   browser socket), then pushes the revocation to artifact-content's fence
@@ -19,19 +23,10 @@ import { loadLiveHost, type LiveHostModule } from "./live-host-adapter.js";
  *   surfaced with the last status, the sockets being already closed.
  */
 export const LIVE_CONTROL_PATH = "/_live-control/v1" as const;
-export const LIVE_CONTROL_HEADER = "x-live-host-control" as const;
-export const LIVE_ASSERTION_HEADER = "x-live-host-assertion" as const;
-
-export interface LiveAssertionClaims {
-  v: 1; kid: string; host: string; artifactId: string; storageScopeId: string; sessionId: string;
-  generation: number; routeEpoch: number; podUid: string; podName: string; sourceRevision: number;
-  principalId: string; role: "binding_owner" | "invitee"; invitationId: string; invitationEpoch: number; invitationExp: number;
-  iat: number; exp: number;
-}
-export interface LiveControlClaims {
-  v: 1; kid: string; host: string; artifactId: string; op: "revoke_session" | "revoke_invitation" | "fence";
-  sessionId: string; invitationId: string; epoch: number; generation: number; routeEpoch: number; iat: number; exp: number;
-}
+export const LIVE_CONTROL_HEADER = CONTROL_HEADER;
+export const LIVE_ASSERTION_HEADER = ASSERTION_HEADER;
+/** Claim shapes of the provider live format (`@sentropic/artifacts/live-host`), no local copy. */
+export type { LiveAssertionClaims, LiveControlClaims } from "@sentropic/artifacts/live-host";
 
 export interface LiveAssertionSigner {
   signAssertion(claims: LiveAssertionClaims): string;
@@ -43,7 +38,7 @@ export const FAIL_CLOSED_LIVE_SIGNER: LiveAssertionSigner = Object.freeze({
   signControl(): never { throw new ArtifactOperationError("provider_unavailable"); },
 });
 
-/** Provider signer bound to the host key; fail-closed when the export is absent (0.2.18). */
+/** Provider signer bound to the host key; fail-closed when the export is absent or the key is short. */
 export function liveSignerFrom(module: LiveHostModule | undefined, key: Uint8Array | undefined): LiveAssertionSigner {
   if (!module || typeof module.signLiveAssertion !== "function" || typeof module.signLiveControl !== "function" ||
     !key || key.byteLength < 32) return FAIL_CLOSED_LIVE_SIGNER;
@@ -132,12 +127,12 @@ export function createLiveRevocation(deps: { readonly sockets: LiveSocketRegistr
     async invitation(invitation: LiveInvitation) {
       const closed = deps.sockets.closeInvitation(invitation.artifactId, invitation.invitationId);
       await deps.push({ artifactId: invitation.artifactId, op: "revoke_invitation", sessionId: "",
-        invitationId: invitation.invitationId, epoch: invitation.epoch, generation: 0, routeEpoch: 0 });
+        invitationId: invitation.invitationId, epoch: invitation.epoch });
       return { closed };
     },
     async session(artifactId: string, sessionId: string) {
       const closed = deps.sockets.closeSession(artifactId, sessionId);
-      await deps.push({ artifactId, op: "revoke_session", sessionId, invitationId: "", epoch: 0, generation: 0, routeEpoch: 0 });
+      await deps.push({ artifactId, op: "revoke_session", sessionId, invitationId: "", epoch: 0 });
       return { closed };
     },
   };
@@ -154,7 +149,6 @@ export function createLiveRevocation(deps: { readonly sockets: LiveSocketRegistr
  *   (preprod `https://pages.preprod.immo.sent-tech.ca/_live-control/v1`).
  * Absent: no signer and no control URL, every push refuses (fail-closed).
  */
-const LIVE_KEY_ID = /^[A-Za-z0-9._:-]{1,128}$/;
 
 export function parseLiveHostKeyring(raw: string | undefined): ReadonlyMap<string, Uint8Array> {
   const keys = new Map<string, Uint8Array>();
