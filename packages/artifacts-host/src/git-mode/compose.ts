@@ -1,19 +1,21 @@
 import {
   createGitHubForge, createGitPort, type GitBindingStore, type GitCodeRightsPort, type GitHumanDirectory,
-  type GitIdentity, type GitInstallationLeasePort, type GitPort,
+  type GitIdentity, type GitInstallationLeasePort, type GitPort, type LiveKeyPort, type LiveStore, type LiveWorkerPort,
 } from "@sentropic/artifacts";
 import { createPostgresGitBindingStore } from "@sentropic/artifacts/adapters/postgres";
 import type { HttpAppDeps } from "@sentropic/artifacts/http";
 import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-contract";
 import type pg from "pg";
 import { createGitToolAuthorize, createPostgresArtifactOwners, type ArtifactOwnerPort } from "./authority.js";
-import type { GitModeResolution } from "./flag.js";
+import { GIT_LIVE_TOOLS, type GitModeResolution } from "./flag.js";
 import {
   createImmoCodeRights, createStaticGitHumanDirectory, invocationHasWriteScope, parseCursorKey, parseGitHumanEntries,
   type GitHumanEntry,
 } from "./identity.js";
 import { createLeaseBrokerClient, FAIL_CLOSED_LEASES } from "./lease-broker.js";
 import { createHostBuildApiClient } from "./build-api.js";
+import { composeLiveService } from "./live.js";
+import { createPostgresLiveInvitationStore, createPostgresLiveSessions, type LiveInvitationStore, type LiveSessionPort } from "./live-authority.js";
 import { gitToolServiceFactory, GIT_TOOLS_DEP_KEY, type GitBuildPort, type GitToolService, type GitToolsDeps } from "./provider-adapter.js";
 import { createImmoGitRegistry, IMMO_GIT_OUTPUT_DIR, IMMO_GIT_REPO_ID } from "./registry.js";
 
@@ -77,11 +79,19 @@ export interface GitModePorts {
   readonly gitToolFactory?: (deps: GitToolsDeps) => GitToolService;
   /** M3-I: sandbox build executor (host build API client). Absent: git_publish refuses. */
   readonly build?: GitBuildPort;
+  /** M4-I: live ports; absent ones default to Postgres stores and fail-closed keys, no worker. */
+  readonly liveStore?: LiveStore;
+  readonly liveKeys?: LiveKeyPort;
+  readonly liveWorker?: LiveWorkerPort;
+  readonly invitations?: LiveInvitationStore;
+  readonly sessions?: LiveSessionPort;
+  readonly liveQualified?: () => boolean;
 }
 
 export interface GitModeDeps {
   readonly git?: NonNullable<HttpAppDeps["git"]>;
   readonly [GIT_TOOLS_DEP_KEY]?: GitToolService;
+  readonly live?: NonNullable<HttpAppDeps["live"]>;
 }
 
 const unavailable = (): never => { throw new ArtifactOperationError("provider_unavailable"); };
@@ -160,5 +170,12 @@ export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
     authorize: createGitToolAuthorize({ owners: ports.owners ?? createPostgresArtifactOwners(pool), codeRights,
       repoId: IMMO_GIT_REPO_ID, hasWriteScope }),
     ...(build ? { build } : {}) }));
-  return { git: { bindings, codeRights }, [GIT_TOOLS_DEP_KEY]: gitTools };
+  const liveSelected = input.resolution.tools.some((tool) => (GIT_LIVE_TOOLS as readonly string[]).includes(tool));
+  const live = liveSelected ? composeLiveService({ pool, git, bindings, registry, codeRights, directory, hasWriteScope,
+    invitations: ports.invitations ?? createPostgresLiveInvitationStore(pool),
+    sessions: ports.sessions ?? createPostgresLiveSessions(pool),
+    ...(ports.liveStore ? { store: ports.liveStore } : {}), ...(ports.liveKeys ? { keys: ports.liveKeys } : {}),
+    ...(ports.liveWorker ? { worker: ports.liveWorker } : {}), ...(ports.liveQualified ? { qualified: ports.liveQualified } : {}) })
+    : undefined;
+  return { git: { bindings, codeRights }, [GIT_TOOLS_DEP_KEY]: gitTools, ...(live ? { live } : {}) };
 }
