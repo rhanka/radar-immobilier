@@ -8,7 +8,8 @@ import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-sta
 import { computeManifestDigest, type RegistryDefinition } from "@sentropic/cluster-mesh/mcp/registry";
 import { projectArtifactHttpOutcome } from "@sentropic/artifacts/http";
 import { assertContentIdsDisjoint, checkAdmission, createArtifactControl, HOST_ARTIFACT_PROFILE, ARTIFACT_PROFILE_DESCRIPTOR, ARTIFACT_STRICT, ARTIFACT_PART1,
-  artifactRefusalResponse, projectContentUrls, projectListVersionsAuthors, validateArtifactInput, type AdmissionAuthority, type ListVersionsDirectory } from "@radar/artifacts-host";
+  artifactRefusalResponse, projectContentUrls, projectListVersionsAuthors, validateArtifactInput, withInvocationScopes,
+  type AdmissionAuthority, type ListVersionsDirectory } from "@radar/artifacts-host";
 import { ARTIFACT_INVOCATION_SCOPES, ARTIFACT_TOOL_SCOPES, acceptedArtifactScopes, hasArtifactScope,
   isArtifactToolName, STRICT_ARTIFACT_SCOPE_POLICY, type ArtifactScopePolicy } from "./artifact-profile.js";
 import { AUTHORING_GUIDE_SNIPPET, getAuthoringGuide } from "./artifact-authoring-guide.js";
@@ -75,6 +76,17 @@ const STABLE_TOOL_SUMMARIES: Readonly<Record<string, string>> = {
   artifacts_revoke_reader_consent: "Withdraw the caller's own persistent opening consent for a Radar page.",
   artifacts_list_versions: "List the retained releases of a Radar page.",
   artifacts_revert: "Republish a retained release as the current release.",
+  // Git mode (IMMO_ARTIFACTS_GIT_MODE): served only when the flag selects
+  // them; frozen at birth like every summary above.
+  artifacts_git_attach: "Attach a Radar page to its own personal branch of the IMMO repository, or pause, resume or detach it.",
+  artifacts_fetch_app_source: "Read IMMO application source files at a server-resolved commit.",
+  artifacts_git_publish: "Build one commit of the page's branch on the builder and publish it as a release.",
+  artifacts_git_commit: "Commit your own live draft to the page's branch.",
+  artifacts_live_write: "Apply edits to your own live source tree.",
+  artifacts_live_read: "Read a live source snapshot of a page you own or were invited to.",
+  artifacts_live_reset: "Discard your own uncommitted live draft.",
+  artifacts_live_status: "Inspect the live state of a page you own or were invited to.",
+  artifacts_live_control: "Start or stop the live session of your own page.",
 };
 
 /**
@@ -306,7 +318,8 @@ export function bindArtifactProvider(options: {
           await projectListVersionsAuthors(body, scope, options.directory);
         }
       } else {
-        const outcome = await executor.execute({ tool, args, invocation });
+        // Git mode: the host write scope of this call reaches the git ports through the scope context.
+        const outcome = await withInvocationScopes(request.principal.scopes, () => executor.execute({ tool, args, invocation }));
         if (!outcome.ok) {
           if (admission && outcome.failure.conflict?.currentSource !== undefined) {
             try {

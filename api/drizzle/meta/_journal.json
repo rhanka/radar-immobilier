@@ -246,6 +246,13 @@
       "when": 1793000000005,
       "tag": "0035_artifacts_upload_pages",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1793000000006,
+      "tag": "0036_artifacts_git_bindings",
+      "breakpoints": true
     }
   ]
 }
