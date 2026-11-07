@@ -22,9 +22,11 @@ compiled profile digest depends on it.
 
 Boot refusals (fail-closed): any other value (`artifact_git_mode_invalid`);
 a stage whose anchor tool the pinned provider does not route
-(`artifact_git_mode_provider_unqualified`). On 0.2.18 every stage refuses;
-the 0.2.20 pin adds `0.2.20` to `GIT_TOOL_PROVIDER_ROUTING` (`flag.ts`).
-Do not set the flag before that pin is deployed.
+(`artifact_git_mode_provider_unqualified`). The pinned provider is 0.2.20,
+which routes every git tool (`GIT_TOOL_PROVIDER_ROUTING`, `flag.ts`); on any
+other version (0.2.18 included) every stage refuses. Do not set the flag on an
+environment that still runs an image pinned to 0.2.18, and apply migration
+`0040_artifacts_git_attach_intents` first (`db-migrate` Job of the train).
 
 Blast radius: the flag is read when `@radar/artifacts-host` is imported, so a
 refusal stops the whole radar-api or radar-immo-mcp process, not only the git
@@ -58,6 +60,8 @@ Every variable below is immo-owned and read by radar-api and radar-immo-mcp
 | `IMMO_ARTIFACTS_BUILDER_HANDOFF_PUBLIC_KEYS` | config (public) | `kid=base64(SPKI DER)` Ed25519, comma-separated during a rotation; provided by Sentropic | `/live-host/v1/*` refuse |
 | `IMMO_ARTIFACTS_RECEIPT_SIGNING_KEY` | **secret** | base64 PKCS#8 DER, Ed25519 private key (public key + kid handed to Sentropic) | handoff answers 503 |
 | `IMMO_ARTIFACTS_RECEIPT_KEY_ID` | config | kid of the receipt key, e.g. `immo-preprod-receipt-1` | handoff answers 503 |
+| `IMMO_ARTIFACTS_BUILDER_IMAGE_ALLOWLIST` | config | exact builder image digests admitted, comma-separated (`<image>@sha256:<64 hex>`, given by Sentropic per builder release) | empty: every handoff refused `handoff_mismatch` / `image_not_allowed` (fail-closed) |
+| `IMMO_ARTIFACTS_SANDBOX_PUBLICATION_PAUSED` | config | `true` pauses every sandbox publication (operator kill switch); any other value or unset: not paused | not paused |
 | `IMMO_ARTIFACTS_LIVE_HOST_KEYS` | **secret** | HMAC keyring `kid=base64url[,kid=base64url]`, each at least 32 bytes; same value in Sentropic `APP_ARTIFACT_LIVE_HOST_KEYS` | no live signer: pushes refuse |
 | `IMMO_ARTIFACTS_LIVE_HOST_KID` | config | signing kid; preprod `immo-preprod-live-1` | no live signer |
 | `IMMO_ARTIFACTS_LIVE_HOST` | config | pages domain; preprod `pages.preprod.immo.sent-tech.ca` | pushes refuse |
@@ -74,6 +78,30 @@ service they authenticate to (Sentropic for the broker and builder tokens,
 immo for the cursor key), stored in the deployment secret, recorded by name
 only, rotated by minting a new value, rolling the workload and revoking the
 old one. A cursor key rotation invalidates open source cursors only.
+
+The builder image allowlist rotates with the builder: Sentropic announces the
+new digest, immo adds it next to the current one (both admitted during the
+overlap), rolls radar-api, then removes the old digest once no job of the old
+image is pending. Setting `IMMO_ARTIFACTS_SANDBOX_PUBLICATION_PAUSED=true` and
+rolling radar-api stops every handoff (`publication_paused`) without touching
+the bindings; builds already started are refused at handoff, not lost.
+
+## Known limitation: object-store orphans of a refused handoff
+
+The handoff publication writes the candidate blobs to S3 and re-reads them
+INSIDE the Postgres transaction (`host-ledger.ts` `publish`), so the advisory
+lock and the `FOR UPDATE` rows of the binding and the job are held for the S3
+round trips (up to 64 MiB). S3 is not transactional: when the transaction rolls
+back (release conflict, failed recheck, stored-bytes mismatch), the blobs
+already written stay in the bucket as digest-addressed objects with no release
+reference. They are never served and are reclaimed by the same orphan sweep as
+the provider's own publications. Accepted for the preprod qualification; the
+lock time grows with S3 latency.
+
+The handoff route authenticates the builder signature and evidence before it
+decodes any candidate file (probe on the provider `acceptHandoff`, which reads
+the ledger only after authentication); the JSON body itself stays capped at
+96 MiB (`HOST_HANDOFF_BODY_MAX_BYTES`).
 
 ## Authorization (Δ4)
 
@@ -101,23 +129,33 @@ version, at most 64 KiB. Regenerate after any lockfile change:
 `gb1-qualification.test.ts` fails when the file and the lock diverge. The path
 is an A1 refused write path: a branch can never change it.
 
-## Not yet composed (fail-closed)
+## Provider pieces (0.2.20)
 
-- `createGitToolService` and `deps.gitTools`: provider 0.2.20 (`provider-adapter.ts`).
-- SG4b handoff verification, host receipt signing, live assertion and control
-  signing, candidate digest: provider subpath `@sentropic/artifacts/live-host`
-  (0.2.20, `live-host-adapter.ts`); immo implements none of this crypto.
+- `createGitToolService` and `deps.gitTools`: statically imported from
+  `@sentropic/artifacts` (`provider-adapter.ts`).
+- SG4b handoff acceptance and receipt signing, live assertion and control
+  signing, candidate digest, host build API: statically imported from
+  `@sentropic/artifacts/live-host` (`live-host-adapter.ts`); immo implements
+  none of this crypto.
+- Package migration `0012_git_attach_intents` is carried as
+  `api/drizzle/0040_artifacts_git_attach_intents.sql` (lock-timeout prefix and
+  idempotence rewrite, pinned by `artifacts-provenance.spec.ts`).
+
 - Host job and publication ledger (`HostBuildJobStore`, `HostBuildLedger`):
   job persistence before `POST /v1/builds`, attempt fence, receipt ledger and
-  the publish step in one transaction. Fail-closed: `git_publish` and the
+  the publish step in one transaction; composed by radar-api from the `build`
+  stage on. Without the receipt key or the builder keys, `git_publish` and the
   inbound `/live-host/v1/*` routes answer `provider_unavailable` / 503.
 - Live edge revocation: sockets held by the immo content host are closed first,
-  then `POST /_live-control/v1` (`x-live-host-control`) is pushed with
-  3 attempts; every response body is drained, a non-2xx answer is retried and
-  the final failure is surfaced (`provider_unavailable`, last status). The
-  control URL of the edge is not configured yet.
-- SG4b commit port (release + git release index + receipt + baseline in one
-  transaction, durable single-use authorization ledger): `FAIL_CLOSED_HANDOFF_COMMIT`.
+  then `POST /_live-control/v1` (`x-live-host-control`, claims of the provider
+  live format: `op`, `sessionId`, `invitationId`, `epoch`, no generation or
+  route epoch) is pushed with 3 attempts; every response body is drained, a
+  non-2xx answer is retried and the final failure is surfaced
+  (`provider_unavailable`, last status).
+
+## Not yet composed (fail-closed)
+
+- Live edge control URL: not configured yet (pushes refuse).
 - Live draft keys (KMS or sealed secret): `FAIL_CLOSED_LIVE_KEYS`; live worker
   (host build/live API client): absent; worker qualification: `false`.
 - HTTP mounting of the handoff acceptance, of the invitation operations and of

@@ -5,6 +5,10 @@ import { canonicalManifest, manifestDigest } from "@sentropic/artifacts/codecs";
 import { mimeTypeForPath } from "@sentropic/artifacts/server/mime";
 import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-contract";
 import { createPostgresPublicationUnitWriter, type PublicationBlobStore } from "@sentropic/artifacts/server/publication";
+import {
+  candidateDigest as providerCandidateDigest, LiveHostError, type AttemptFence, type CandidateFile, type HandoffClaims,
+  type HandoffReceipt, type HostJob, type HostLedger, type HostRecheckView,
+} from "@sentropic/artifacts/live-host";
 import { createPostgresHostJobStore } from "./host-jobs.js";
 import { composeGitAccess, readGitModeConfig, type GitModeConfig } from "./compose.js";
 import { IMMO_GIT_OUTPUT_DIR, IMMO_GIT_REPO_ID } from "./registry.js";
@@ -14,42 +18,26 @@ import { IMMO_GIT_OUTPUT_DIR, IMMO_GIT_REPO_ID } from "./registry.js";
  * 0039_artifacts_host_build_ledger.
  *
  * Implements the `HostLedger` and `AcceptOptions` (`view`, `publish`)
- * contract of `@sentropic/artifacts/live-host` (types mirrored below from
- * sentropic feat/artifacts-live-host 8ce4700e4; TODO(0.2.20): import them from
- * the package and delete the mirrors). `transaction(jobKey, work)` runs
+ * contract of `@sentropic/artifacts/live-host` (types imported from the
+ * package, 0.2.20). `transaction(jobKey, work)` runs
  * `work` in ONE Postgres transaction: `view` and `publish` reuse that
  * transaction's client, so the recheck, the release, its blobs references,
  * the current pointer, the git release index, the binding baseline, the job
  * state and the stored receipt commit or roll back together. A replay of a
  * committed job key returns the stored receipt; nothing is written twice.
+ *
+ * Known limitation (S3 orphans): `publish` writes and re-reads the candidate
+ * blobs (up to 64 MiB) INSIDE that transaction, holding the advisory lock and
+ * the `FOR UPDATE` rows of the binding and the job; S3 latency lengthens the
+ * lock time. S3 is not transactional: on a rollback (release conflict, failed
+ * recheck, stored-bytes mismatch) the blobs already written stay as
+ * digest-addressed orphans with no release reference, reclaimed by the same
+ * orphan sweep as the provider's own publications.
  */
 
-// --- Mirrors of @sentropic/artifacts/live-host (8ce4700e4) -----------------
-export interface AttemptFence { runId: string; attempt: number }
-export interface HostJob { jobId: string; generation: number; headSha: string; expectedReleaseId: string | null }
-export interface HostRecheckView {
-  scopeId: string;
-  killSwitch: boolean;
-  imageAllowlist: readonly string[];
-  currentReleaseId: string | null;
-  headReachable: boolean;
-  binding: { artifactId: string; state: string; generation: number; executor: string; autoPublish: boolean;
-    pendingJobId: string | null; pendingCommitSha: string | null };
-  job: { jobId: string; state: string; bindingGeneration: number; commitSha: string; expectedCurrentReleaseId: string | null;
-    fence: AttemptFence | null } | undefined;
-  policy: { ownerAuthorized: boolean; automaticAuthorized: boolean; automaticEligible: boolean };
-}
-export interface HandoffClaims {
-  v: 1; kid: string; scopeId: string; artifactId: string; jobId: string; kind: "explicit" | "idle"; runId: string;
-  attempt: number; generation: number; commitSha: string; treeSha: string; tuple: { builderImageDigest: string } & Record<string, unknown>;
-  candidateDigest: string; expectedReleaseId: string | null; nonce: string; sealedAt: number; expiresAt: number;
-}
-export interface HandoffReceipt {
-  v: 1; kid: string; nonce: string; scopeId: string; artifactId: string; jobId: string; runId: string; attempt: number;
-  commitSha: string; candidateDigest: string; releaseId: string; manifestDigest: string; committedAt: number; signature: string;
-}
-export interface CandidateFile { readonly path: string; readonly bytes: Uint8Array }
-// ---------------------------------------------------------------------------
+export type {
+  AttemptFence, CandidateFile, HandoffClaims, HandoffReceipt, HostJob, HostLedger, HostRecheckView,
+} from "@sentropic/artifacts/live-host";
 
 /** Actor recorded on the binding audit for a builder publication. */
 export const SANDBOX_PUBLISHER = "sentropic:sandbox-builder" as const;
@@ -160,7 +148,7 @@ export function createPostgresHostBuildLedger(options: HostBuildLedgerOptions) {
         return decided.job;
       });
     },
-    ledger: {
+    ledger: Object.freeze<HostLedger>({
       async find(jobKey: string): Promise<HandoffReceipt | undefined> {
         const row = (await pool.query<{ receipt: HandoffReceipt }>(
           "SELECT receipt FROM artifacts.host_build_receipts WHERE job_key = $1", [jobKey])).rows[0];
@@ -179,7 +167,7 @@ export function createPostgresHostBuildLedger(options: HostBuildLedgerOptions) {
           return receipt;
         });
       },
-    },
+    }),
     /** AcceptOptions.view: the locked durable state, inside the ledger transaction. */
     async view(claims: HandoffClaims): Promise<HostRecheckView> {
       const client = txClient();
@@ -253,8 +241,8 @@ export type PostgresHostBuildLedger = ReturnType<typeof createPostgresHostBuildL
 /**
  * Production composition of the ledger from the git mode configuration
  * (radar-api, stage `build`+ only):
- * - `candidateDigest` from the provider live-host subpath; absent (0.2.18):
- *   no ledger, the endpoints answer 503;
+ * - `candidateDigest` and `LiveHostError` from the provider live-host
+ *   subpath (0.2.20); a module without them: no ledger, the endpoints answer 503;
  * - head reachability through the immo GitPort (lease from SG0-app);
  * - owner authority: current code rights of the binding owner;
  * - IMMO_ARTIFACTS_BUILDER_IMAGE_ALLOWLIST: exact builder image digests,
@@ -263,20 +251,22 @@ export type PostgresHostBuildLedger = ReturnType<typeof createPostgresHostBuildL
  */
 export function composeHostBuildLedger(input: {
   readonly pool: pg.Pool; readonly storageScopeId: string; readonly blobs: PublicationBlobStore;
-  readonly module: { readonly candidateDigest?: unknown; readonly LiveHostError?: unknown } | undefined;
+  /** Provider live-host subpath (default: the pinned package); a missing export keeps the ledger closed. */
+  readonly module?: { readonly candidateDigest?: unknown; readonly LiveHostError?: unknown } | undefined;
   readonly env: NodeJS.ProcessEnv;
   readonly config?: GitModeConfig;
 }): PostgresHostBuildLedger | undefined {
-  const candidateDigest = input.module?.candidateDigest;
-  const LiveHostError = input.module?.LiveHostError;
-  if (typeof candidateDigest !== "function" || typeof LiveHostError !== "function") return undefined;
+  const module = "module" in input ? input.module : { candidateDigest: providerCandidateDigest, LiveHostError };
+  const candidateDigest = module?.candidateDigest;
+  const RefusalError = module?.LiveHostError;
+  if (typeof candidateDigest !== "function" || typeof RefusalError !== "function") return undefined;
   const access = composeGitAccess({ pool: input.pool, storageScopeId: input.storageScopeId,
     config: input.config ?? readGitModeConfig(input.env) });
   return createPostgresHostBuildLedger({ pool: input.pool, scopeId: input.storageScopeId, blobs: input.blobs,
     candidateDigest: candidateDigest as (files: readonly CandidateFile[]) => string,
     imageAllowlist: (input.env.IMMO_ARTIFACTS_BUILDER_IMAGE_ALLOWLIST ?? "").split(",").map((entry) => entry.trim()).filter(Boolean),
     killSwitch: () => input.env.IMMO_ARTIFACTS_SANDBOX_PUBLICATION_PAUSED === "true",
-    refuse: (code, reason) => new (LiveHostError as new (code: string, reason?: string) => Error)(code, reason),
+    refuse: (code, reason) => new (RefusalError as new (code: string, reason?: string) => Error)(code, reason),
     ownerAuthorized: (principalId) => access.codeRights.canReadCode({ storageScopeId: input.storageScopeId,
       repoId: IMMO_GIT_REPO_ID, actorId: principalId }),
     async headReachable(binding, commitSha) {
