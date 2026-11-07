@@ -3,6 +3,7 @@ import {
   resolveArtifactsStorageConfig, type ArtifactsConfigInput, type ArtifactsPoolParams,
   createArtifactAdmissionAuthority, readActivationEnv, resolveActivationConfig,
   ARTIFACT_P0B, createDeleteConfirmation, readUploadPageWiring,
+  ARTIFACT_GIT_MODE, createLiveHostEndpoints, loadLiveHost, readLiveHostKeys,
 } from "@radar/artifacts-host";
 import type { AuthConfig } from "../config.js";
 import type { Logger } from "../logger.js";
@@ -63,10 +64,17 @@ export async function startArtifactControl(options: {
       createArtifactAdmissionAuthority(pool, readActivation, parsed.storageScope),
       { directory: createAccountDirectory(pool) });
     logger.info({ storageScope: parsed.storageScope, s3Bucket: parsed.s3Bucket }, "artifact control enabled");
+    // Git mode stage `build` and later: the inbound SG4b host build API for
+    // the Sentropic builder. Flag off (default): not composed, not mounted.
+    const liveHost = ARTIFACT_GIT_MODE.tools.includes("artifacts_git_publish")
+      ? createLiveHostEndpoints({ module: await loadLiveHost(), scopeId: parsed.storageScope,
+        keys: readLiveHostKeys(process.env) })
+      : undefined;
     const composed = host as typeof host & { uploadPageService?: UploadPageService;
       uploadPageConfig?: { controlOrigin: string; s3Origins: readonly string[] } };
     return { auth, accounts: pool, backend, readActivation, storageScope: parsed.storageScope,
       ...(confirmation ? { confirmation } : {}),
+      ...(liveHost ? { liveHost } : {}),
       // Browser upload page (LOT 2): same ledger as the provider, mounted on
       // the control origin with the control session rules. The page store
       // backs the session↔owner binding enforced by the route before every

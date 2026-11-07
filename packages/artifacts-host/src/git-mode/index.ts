@@ -12,5 +12,7 @@ export * from "./live.js";
 export * from "./live-edge.js";
 export * from "./live-host-adapter.js";
 export * from "./gb1-qualification.js";
-export * from "./gb1-host-build.js";
 export * from "./live-capacity.js";
+export * from "./service-token.js";
+export * from "./live-keys.js";
+export * from "./live-host-endpoints.js";

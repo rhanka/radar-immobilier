@@ -12,6 +12,7 @@ import {
   readAccountStatus,
   type AccountStatusQueryable,
   type ActivationConfig,
+  type LiveHostEndpoints,
   type ArtifactControl,
   type MembershipQueryable,
   type ArtifactDeleteConfirmation,
@@ -67,6 +68,8 @@ export interface ControlRouteDeps {
   readonly readerStorage?: ReturnType<typeof createStoredReader>;
   readonly readerConsent?: ReaderConsentService;
   readonly confirmation?: ArtifactDeleteConfirmation;
+  /** Inbound SG4b host build API (git mode stage `build` and later only). */
+  readonly liveHost?: LiveHostEndpoints | undefined;
 }
 
 export const CONTROL_MAX_BODY_BYTES = 2 * 1024 * 1024;
