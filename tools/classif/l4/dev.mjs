@@ -10,7 +10,8 @@
 import path from 'node:path';
 import process from 'node:process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { callSeat, looksLikeMaxPrice, parseJsonObject } from '../run-seat.mjs';
+import { callSeat, isCodexSeat, looksLikeMaxPrice, parseJsonObject } from '../run-seat.mjs';
+import { CODEX_QUOTA_PAUSE_DEFAULT, createQuotaGuard, parseQuotaPause, quotaFields } from '../lib/codex-quota.mjs';
 import { appendJsonlRecord, parseJsonlTolerant } from '../lib/jsonl.mjs';
 import { sha256 } from '../lib/render.mjs';
 import { classifDir, classifHome, privateDir } from '../lib/paths.mjs';
@@ -112,6 +113,10 @@ export async function main(argv = process.argv.slice(2)) {
   // A GEPA series (series-<k>.json method gepa) evaluates the 4 GEPA routes instead.
   const routes = seriesRouteUniverse(seriesMethod(k), EVAL_ROUTES).filter((r) => !deferred.includes(r));
   const concurrency = Number(argv.includes('--concurrency') ? argv[argv.indexOf('--concurrency') + 1] : 2);
+  // ChatGPT quota guard (codex seats share the weekly quota with the production detection).
+  const quotaPause = parseQuotaPause(argv.includes('--codex-quota-pause') ? argv[argv.indexOf('--codex-quota-pause') + 1] : undefined);
+  const quotaGuard = createQuotaGuard({ threshold: quotaPause, isCodex: isCodexSeat });
+  const resumeCommand = `make classif-l4-dev SERIES=${k}${deferred.length ? ` DEFERRED=${deferred.join(',')}` : ''}${quotaPause !== CODEX_QUOTA_PAUSE_DEFAULT ? ` CODEX_QUOTA_PAUSE=${quotaPause}` : ''} ENV=preprod`;
   const home = classifHome();
   const promptFile = path.join(classifDir(process.env), 'l4', 'prompts', `P${k}.md`);
   if (!existsSync(promptFile)) { process.stderr.write(`classif-l4-dev: frozen prompt P${k} missing (run make classif-l4-p0 / optimise first)\n`); process.exit(2); }
@@ -168,11 +173,13 @@ export async function main(argv = process.argv.slice(2)) {
     const rows = await pool(tuning.map((item) => async () => {
       const hit = loadCached(item.itemId);
       if (hit) return hit;
+      if (quotaGuard.blocks(route)) return null;
       const prompt = devPrompt(frozen, item);
       appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: true, phase: `l4-dev-s${k}`, route, itemId: item.itemId });
       const r = await callSeat(route, prompt, { base: seatTmp, timeoutMs: 1800000 });
       appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: `l4-dev-s${k}`, route, itemId: item.itemId,
-        exitCode: r.code, latencyMs: r.latencyMs, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null, toolEvents: r.toolEvents ?? null });
+        exitCode: r.code, latencyMs: r.latencyMs, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null, toolEvents: r.toolEvents ?? null, ...quotaFields(r) });
+      quotaGuard.observe(route, r.rateLimits);
       const parsed = parseSeatResult(r, codes);
       const row = { itemId: item.itemId, ref: item.code, refVerdict: item.verdict, unresolved: item.status === 'unresolved',
         pred: parsed.failed ? null : { verdict: parsed.verdict, code: parsed.code }, failed: parsed.failed, why: parsed.why,
@@ -184,6 +191,8 @@ export async function main(argv = process.argv.slice(2)) {
       }
       return row;
     }), concurrency);
+    // Answered items are cached above; a paused codex route stops the run before any aggregate.
+    if (quotaGuard.paused && isCodexSeat(route)) throw quotaGuard.error(resumeCommand);
     writeFileSync(outFile, `${rows.map((r) => JSON.stringify(r)).join('\n')}\n`, { mode: 0o600 });
     return rows;
   };
