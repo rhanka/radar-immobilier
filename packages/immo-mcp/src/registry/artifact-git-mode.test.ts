@@ -67,6 +67,7 @@ describe("git mode tables, flag on (fakes)", () => {
       releaseTotalBytesMax: 64 * 1024 * 1024, gitCommitBytesMax: 8 * 1024 * 1024, liveWriteBytesMax: 2 * 1024 * 1024 });
     expect(section.path.join(" ")).toContain("OWN page and branch");
     expect(section.path.join(" ")).toContain("Invited live readers");
+    expect(section.path.join(" ")).toContain("liveState.state = queued");
     expect(section.refusedWritePaths).toContain("ui/dist/**");
     const bindingsOnly = gitAuthoringSection({ stage: "bindings", tools: ["artifacts_git_attach"], unrouted: [] })!;
     expect(bindingsOnly.path.join(" ")).not.toContain("Invited live readers");
