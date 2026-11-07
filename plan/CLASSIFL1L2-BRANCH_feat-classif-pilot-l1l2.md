@@ -67,6 +67,7 @@ Lots L1 and L2 of the Steve-aligned classification pilot (plan-pilote-v2 §B-L1,
   - [x] GEPA re-review 4 fixes: a quota retry only uses budget beyond the reserved calls not yet launched (MAX_CALLS held), quota detection from stderr and the CLI error envelope only, a vibe `--max-price` stop is an answer failure without retry.
   - [x] Owner decision (« on prend sol pas luna »): GEPA routes = opus-5.5-low, glm-5.3-low, sol-6.1-low, mistral-large-4-low (luna-6-low stays a seat); a seat binary absent from PATH stops the run at its first call; a resume keeps the cache across the route change (the context sha does not cover the routes).
   - [x] ChatGPT quota guard of the codex seats (shared with the production immo detection): rate_limits logged per codex call (`quotaUsedPercent`, `quotaResetsAt`), dev, blind and GEPA stop launching codex calls at `CODEX_QUOTA_PAUSE` (default 85 %) or on a reached rate limit, with the exact resume; `make classif-quota-status ENV=preprod` shows the last measurement per seat.
+  - [x] Quota source fixed after a real call: codex writes `rate_limits` only to its session file — the codex seats run without `--ephemeral`, callSeat reads the session file (rate_limits keys only) then deletes it in a finally; the "Code Mode is unavailable" error item is benign.
   - [ ] Real GEPA run, freeze of the winner and pre-registration of the GEPA series (conductor, paid calls).
 
 - [x] **Gate**

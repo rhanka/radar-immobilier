@@ -170,7 +170,8 @@ test('gepa seats: sol-6.1-low and luna-6-low on the isolated codex route, mistra
     const built = r.build(work, path.join(work, 'prompt.md'), 'synthetic prompt');
     assert.equal(built.cmd, 'codex');
     assert.deepEqual(built.args.slice(0, 7), ['exec', '-m', model, '-c', 'model_reasoning_effort=low', '-s', 'read-only']);
-    for (const f of ['--skip-git-repo-check', '--ephemeral', '--json', '-o']) assert.ok(built.args.includes(f), f);
+    for (const f of ['--skip-git-repo-check', '--json', '-o']) assert.ok(built.args.includes(f), f);
+    assert.ok(!built.args.includes('--ephemeral'), 'the session file is the quota source (read then deleted)');
     assert.ok(built.args.includes(path.join(work, 'last-message.md')));
     assert.equal(built.args[built.args.length - 1], '-', 'prompt on stdin');
     assert.equal(built.stdin, 'synthetic prompt');
