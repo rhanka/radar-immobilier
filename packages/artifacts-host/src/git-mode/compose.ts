@@ -17,6 +17,7 @@ import { createHostBuildApiClient, type HostBuildJobStore } from "./build-api.js
 import { createSealedLiveKeys, parseLiveDraftKeyring, type LiveDraftKeyring } from "./live-keys.js";
 import { SERVICE_SCOPE_BROKER, SERVICE_SCOPE_BUILDER, serviceTokenSource, type ServiceTokenConfig } from "./service-token.js";
 import { composeLiveService } from "./live.js";
+import { createPostgresHostJobStore } from "./host-jobs.js";
 import { createPostgresLiveInvitationStore, createPostgresLiveSessions, type LiveInvitationStore, type LiveSessionPort } from "./live-authority.js";
 import { gitToolServiceFactory, GIT_TOOLS_DEP_KEY, type GitBuildPort, type GitToolService, type GitToolsDeps } from "./provider-adapter.js";
 import { createImmoGitRegistry, IMMO_GIT_OUTPUT_DIR, IMMO_GIT_REPO_ID } from "./registry.js";
@@ -154,8 +155,13 @@ export function composeGitModeFromEnv(input: Omit<ComposeGitModeInput, "config">
   return composeGitMode({ ...rest, config: config ?? readGitModeConfig(env) });
 }
 
-export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
-  if (input.resolution.stage === "off") return {};
+/**
+ * Git access shared by the git tools, the live service and the SG4b host
+ * ledger: binding store, code rights, A1 registry, human directory, leases
+ * and the GitPort (fail-closed pieces when the configuration is incomplete).
+ */
+export function composeGitAccess(input: { readonly pool: pg.Pool; readonly storageScopeId: string;
+  readonly config: GitModeConfig; readonly ports?: GitModePorts }) {
   const { pool, storageScopeId, config } = input;
   const ports = input.ports ?? {};
   const hasWriteScope = ports.hasWriteScope ?? invocationHasWriteScope;
@@ -179,13 +185,21 @@ export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
       return codeRights.canReadCode({ storageScopeId: target.storageScopeId, repoId: target.repoId, actorId: target.principalId });
     },
   }) : FAIL_CLOSED_GIT_PORT);
+  return { ports, hasWriteScope, bindings, codeRights, registry, directory, leases, git };
+}
+
+export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
+  if (input.resolution.stage === "off") return {};
+  const { pool, storageScopeId, config } = input;
+  const { ports, hasWriteScope, bindings, codeRights, registry, directory, git } = composeGitAccess(input);
   // M3-I: git_publish is selected only from the `build` stage; the sandbox
   // executor is admitted only once the builder base URL is set; the service
   // token source itself fails closed while the OAuth client is unconfigured.
   const build = ports.build ?? (input.resolution.tools.includes("artifacts_git_publish")
     ? createHostBuildApiClient({ baseUrl: config.builderUrl,
       identity: serviceTokenSource(config.service ?? {}, SERVICE_SCOPE_BUILDER, ports.fetch),
-      ...(ports.jobs ? { jobs: ports.jobs } : {}), ...(ports.fetch ? { fetch: ports.fetch } : {}) })
+      jobs: ports.jobs ?? createPostgresHostJobStore({ pool, scopeId: storageScopeId }),
+      ...(ports.fetch ? { fetch: ports.fetch } : {}) })
     : undefined);
   const factory = ports.gitToolFactory ?? gitToolServiceFactory();
   const gitTools = withHostGitPolicy(factory({ bindings, registry, codeRights, git, outputDir: IMMO_GIT_OUTPUT_DIR,

@@ -1,6 +1,7 @@
 import { createPrivateKey, createPublicKey, type KeyObject } from "node:crypto";
 import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-contract";
 import type { LiveHostModule } from "./live-host-adapter.js";
+import type { AttemptFence, CandidateFile, HandoffClaims, HandoffReceipt, HostJob, HostRecheckView } from "./host-ledger.js";
 
 /**
  * Inbound SG4b host build API (builder -> immo), W7 contract:
@@ -61,24 +62,25 @@ export function readLiveHostKeys(env: NodeJS.ProcessEnv): LiveHostKeys {
 }
 
 /**
- * Host job and publication ledger: the locked binding/job rows, the attempt
- * fence, the receipt ledger (find/transaction by job key) and the publish step
- * (store bytes, write release + git release index + receipt + baseline,
- * re-read). TODO(M3-I durable ledger): Postgres implementation; until then
- * every builder call answers 503.
+ * Host job and publication ledger (host-ledger.ts, Postgres): job admission
+ * with the attempt fence, the receipt ledger (find/transaction by job key) and
+ * the AcceptOptions `view`/`publish` steps, all inside the ledger transaction.
+ * Without a ledger every builder call answers 503.
  */
 export interface HostBuildLedger {
-  view(scopeId: string, artifactId: string, jobId: string): Promise<unknown>;
-  admitFence(scopeId: string, artifactId: string, jobId: string, fence: { runId: string; attempt: number }): Promise<void>;
-  readonly ledger: { find(jobKey: string): Promise<unknown>; transaction(jobKey: string, work: () => Promise<unknown>): Promise<unknown> };
-  publish(claims: unknown, files: readonly unknown[]): Promise<{ releaseId: string; manifestDigest: string; storedDigest: string }>;
+  admitJob(artifactId: string, jobId: string,
+    decide: (view: HostRecheckView) => { job: HostJob; fence: AttemptFence } | null): Promise<HostJob | null>;
+  readonly ledger: { find(jobKey: string): Promise<HandoffReceipt | undefined>;
+    transaction(jobKey: string, work: () => Promise<HandoffReceipt>): Promise<HandoffReceipt> };
+  view(claims: HandoffClaims): Promise<HostRecheckView>;
+  publish(claims: HandoffClaims, files: readonly CandidateFile[]): Promise<{ releaseId: string; manifestDigest: string; storedDigest: string }>;
 }
 
 const closed = (): never => { throw new ArtifactOperationError("provider_unavailable"); };
 export const FAIL_CLOSED_HOST_BUILD_LEDGER: HostBuildLedger = Object.freeze({
-  view: async () => closed(), admitFence: async () => closed(),
+  admitJob: async () => closed(),
   ledger: Object.freeze({ find: async () => closed(), transaction: async () => closed() }),
-  publish: async () => closed(),
+  view: async () => closed(), publish: async () => closed(),
 });
 
 export interface HostEndpointResponse { readonly status: number; readonly body: unknown }
@@ -93,13 +95,16 @@ const REFUSAL_STATUS: Readonly<Record<string, number>> = Object.freeze({
   request_invalid: 400, handoff_unauthenticated: 401, handoff_expired: 410, handoff_mismatch: 409, handoff_replayed: 409,
   handoff_evidence_missing: 422, candidate_invalid: 422, candidate_bytes_mismatch: 422, receipt_invalid: 422,
 });
+const HOST_REFUSAL_REASON: Readonly<Record<string, string>> = Object.freeze({
+  pointer_conflict: "release_conflict", gone: "policy_refused", not_found: "job_not_pending",
+});
 const UNAVAILABLE: HostEndpointResponse = Object.freeze({ status: 503, body: Object.freeze({ error: "capability_unavailable" }) });
 
 export function createLiveHostEndpoints(input: {
   readonly module: LiveHostModule | undefined;
   readonly scopeId: string;
   readonly keys: LiveHostKeys;
-  readonly ledger?: HostBuildLedger;
+  readonly ledger?: HostBuildLedger | undefined;
   readonly now?: () => number;
 }) {
   const ledger = input.ledger ?? FAIL_CLOSED_HOST_BUILD_LEDGER;
@@ -112,7 +117,12 @@ export function createLiveHostEndpoints(input: {
   const refusalOf = fn(input.module, "refusalOf");
   const refusal = (error: unknown): HostEndpointResponse => {
     const body = refusalOf?.(error as never) as { error?: string } | undefined;
-    return body?.error ? { status: REFUSAL_STATUS[body.error] ?? 422, body } : UNAVAILABLE;
+    if (body?.error) return { status: REFUSAL_STATUS[body.error] ?? 422, body };
+    // Defense in depth: a host operation refusal that escaped as ArtifactOperationError still gets a closed,
+    // non-retryable body instead of a 503 the builder would retry forever.
+    const kind = error instanceof ArtifactOperationError ? String(error.kind) : "";
+    const reason = HOST_REFUSAL_REASON[kind];
+    return reason ? { status: 409, body: { v: 1, error: "handoff_mismatch", reason } } : UNAVAILABLE;
   };
   return {
     async job(body: unknown): Promise<HostEndpointResponse> {
@@ -120,12 +130,10 @@ export function createLiveHostEndpoints(input: {
       try {
         const claims = verifyJobRequest(body as never, { scopeId: input.scopeId, builderKeys, now: now() } as never) as {
           artifactId: string; jobId: string; fence: { runId: string; attempt: number } };
-        const view = await ledger.view(input.scopeId, claims.artifactId, claims.jobId);
-        const resolved = resolvePendingJob(view as never, claims.jobId as never, claims.fence as never) as
-          { job: unknown; fence: { runId: string; attempt: number } } | null;
-        if (!resolved) return { status: 409, body: { v: 1, error: "handoff_mismatch", reason: "job_not_pending" } };
-        await ledger.admitFence(input.scopeId, claims.artifactId, claims.jobId, resolved.fence);
-        return { status: 200, body: { v: 1, job: resolved.job } };
+        const job = await ledger.admitJob(claims.artifactId, claims.jobId, (view) =>
+          resolvePendingJob(view as never, claims.jobId as never, claims.fence as never) as { job: HostJob; fence: AttemptFence } | null);
+        if (!job) return { status: 409, body: { v: 1, error: "handoff_mismatch", reason: "job_not_pending" } };
+        return { status: 200, body: { v: 1, job } };
       } catch (error) { return refusal(error); }
     },
     async handoff(body: unknown): Promise<HostEndpointResponse> {
@@ -135,8 +143,8 @@ export function createLiveHostEndpoints(input: {
           files: unknown[] };
         const receipt = await acceptHandoff({ scopeId: input.scopeId, builderKeys, receiptKey: input.keys.receiptKey, now,
           ledger: ledger.ledger,
-          view: (claims: { artifactId: string; jobId: string }) => ledger.view(input.scopeId, claims.artifactId, claims.jobId),
-          publish: (claims: unknown, candidate: readonly unknown[]) => ledger.publish(claims, candidate) } as never,
+          view: (claims: HandoffClaims) => ledger.view(claims),
+          publish: (claims: HandoffClaims, candidate: readonly CandidateFile[]) => ledger.publish(claims, candidate) } as never,
         handoff as never, files as never);
         return { status: 200, body: { v: 1, receipt } };
       } catch (error) { return refusal(error); }

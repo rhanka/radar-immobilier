@@ -1,4 +1,5 @@
 import { generateKeyPairSync } from "node:crypto";
+import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-contract";
 import { describe, expect, it, vi } from "vitest";
 import { createLiveHostEndpoints, FAIL_CLOSED_HOST_BUILD_LEDGER, readLiveHostKeys, type HostBuildLedger } from "./live-host-endpoints.js";
 
@@ -20,9 +21,14 @@ const module = {
 };
 const ledger = (pending: boolean): HostBuildLedger & { admitted: unknown[] } => {
   const admitted: unknown[] = [];
-  return { admitted, view: async () => ({ pending }), admitFence: async (...args) => { admitted.push(args); },
+  return { admitted,
+    admitJob: async (artifactId, jobId, decide) => {
+      const decided = decide({ pending } as never);
+      if (decided) admitted.push([artifactId, jobId, decided.fence]);
+      return decided?.job ?? null;
+    },
     ledger: { find: async () => undefined, transaction: async (_key, work) => work() },
-    publish: async () => ({ releaseId: "rel", manifestDigest: "m", storedDigest: "s" }) };
+    view: async () => ({ pending }) as never, publish: async () => ({ releaseId: "rel", manifestDigest: "m", storedDigest: "s" }) };
 };
 
 describe("inbound SG4b host build API", () => {
@@ -45,7 +51,7 @@ describe("inbound SG4b host build API", () => {
     const endpoints = createLiveHostEndpoints({ module, scopeId: "s", keys, ledger: store });
     expect(await endpoints.job({ claims: {} })).toEqual({ status: 200, body: { v: 1,
       job: { jobId: "j", generation: 1, headSha: "h", expectedReleaseId: null } } });
-    expect(store.admitted).toEqual([["s", "a", "j", { runId: "r", attempt: 1 }]]);
+    expect(store.admitted).toEqual([["a", "j", { runId: "r", attempt: 1 }]]);
     expect(module.verifyJobRequest).toHaveBeenCalledWith({ claims: {} }, expect.objectContaining({ scopeId: "s" }));
   });
 
@@ -55,11 +61,19 @@ describe("inbound SG4b host build API", () => {
     expect(await endpoints.job({})).toEqual({ status: 409, body: { v: 1, error: "handoff_mismatch", reason: "job_not_pending" } });
   });
 
+  it("maps a host operation refusal escaping as ArtifactOperationError to a closed 409 body", async () => {
+    for (const [kind, reason] of [["pointer_conflict", "release_conflict"], ["gone", "policy_refused"], ["not_found", "job_not_pending"]]) {
+      const endpoints = createLiveHostEndpoints({ module: { ...module,
+        acceptHandoff: async () => { throw new ArtifactOperationError(kind as never); } }, scopeId: "s", keys, ledger: ledger(true) });
+      expect(await endpoints.handoff({ v: 1 })).toEqual({ status: 409, body: { v: 1, error: "handoff_mismatch", reason } });
+    }
+  });
+
   it("accepts a handoff with immo's receipt key, and answers 503 without a ledger or a receipt key", async () => {
     const endpoints = createLiveHostEndpoints({ module, scopeId: "s", keys, ledger: ledger(true) });
     expect(await endpoints.handoff({ v: 1 })).toEqual({ status: 200, body: { v: 1,
       receipt: { v: 1, kid: "immo-preprod-receipt-1", releaseId: "rel" } } });
-    const closed = createLiveHostEndpoints({ module: { ...module, acceptHandoff: async () => FAIL_CLOSED_HOST_BUILD_LEDGER.publish(null, []) },
+    const closed = createLiveHostEndpoints({ module: { ...module, acceptHandoff: async () => FAIL_CLOSED_HOST_BUILD_LEDGER.publish(null as never, []) },
       scopeId: "s", keys });
     expect((await closed.handoff({ v: 1 })).status).toBe(503);
     expect((await createLiveHostEndpoints({ module, scopeId: "s", keys: { builderKeys: keys.builderKeys } }).handoff({})).status).toBe(503);
