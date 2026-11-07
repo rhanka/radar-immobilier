@@ -1,0 +1,102 @@
+{
+  "v": 1,
+  "lockSha256": "f660fb983ee9ea7f0f89e0e8e1f0559378d4c83c2051772b0931d7d3605db7eb",
+  "postinstallAllowlist": [],
+  "scriptQualification": [
+    {
+      "package": "@sentropic/engram",
+      "version": "0.21.2",
+      "integrity": "sha512-RtifmT4E9to98b9zW9s0cLL/yajsu5ZQ+PwzjPD4iIXjKn+2dlYyamx5j7yXeCgNKAMoXQTKstdVljwp2nri1A=="
+    },
+    {
+      "package": "esbuild",
+      "version": "0.25.12",
+      "integrity": "sha512-bbPBYYrtZbkt6Os6FiTLCTFxvq4tt3JKall1vRwshA3fdVztsLAatFaZobhkBC8/BrPetoa0oksYoKXoG4ryJg=="
+    },
+    {
+      "package": "esbuild",
+      "version": "0.28.2",
+      "integrity": "sha512-HKVLS8dvII+xoKW9kmqxbRKrnWEXfJJr/FZhhJmiqIB0e053QNYFqOBouTMO/k5sID4MvCiUCvv8b9M4h32wIA=="
+    },
+    {
+      "package": "fsevents",
+      "version": "2.3.2",
+      "integrity": "sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA=="
+    },
+    {
+      "package": "fsevents",
+      "version": "2.3.3",
+      "integrity": "sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw=="
+    },
+    {
+      "package": "tesseract.js",
+      "version": "7.0.0",
+      "integrity": "sha512-exPBkd+z+wM1BuMkx/Bjv43OeLBxhL5kKWsz/9JY+DXcXdiBjiAch0V49QR3oAJqCaL5qURE0vx9Eo+G5YE7mA=="
+    },
+    {
+      "package": "tree-sitter-c",
+      "version": "0.23.6",
+      "integrity": "sha512-0dxXKznVyUA0s6PjNolJNs2yF87O5aL538A/eR6njA5oqX3C3vH4vnx3QdOKwuUdpKEcFdHuiDpRKLLCA/tjvQ=="
+    },
+    {
+      "package": "tree-sitter-c",
+      "version": "0.24.1",
+      "integrity": "sha512-lkYwWN3SRecpvaeqmFKkuPNR3ZbtnvHU+4XAEEkJdrp3JfSp2pBrhXOtvfsENUneye76g889Y0ddF2DM0gEDpA=="
+    },
+    {
+      "package": "tree-sitter-cpp",
+      "version": "0.23.4",
+      "integrity": "sha512-qR5qUDyhZ5jJ6V8/umiBxokRbe89bCGmcq/dk94wI4kN86qfdV8k0GHIUEKaqWgcu42wKal5E97LKpLeVW8sKw=="
+    },
+    {
+      "package": "tree-sitter-go",
+      "version": "0.25.0",
+      "integrity": "sha512-APBc/Dq3xz/e35Xpkhb1blu5UgW+2E3RyGWawZSCNcbGwa7jhSQPS8KsUupuzBla8PCo8+lz9W/JDJjmfRa2tw=="
+    },
+    {
+      "package": "tree-sitter-java",
+      "version": "0.23.5",
+      "integrity": "sha512-Yju7oQ0Xx7GcUT01mUglPP+bYfvqjNCGdxqigTnew9nLGoII42PNVP3bHrYeMxswiCRM0yubWmN5qk+zsg0zMA=="
+    },
+    {
+      "package": "tree-sitter-javascript",
+      "version": "0.23.1",
+      "integrity": "sha512-/bnhbrTD9frUYHQTiYnPcxyHORIw157ERBa6dqzaKxvR/x3PC4Yzd+D1pZIMS6zNg2v3a8BZ0oK7jHqsQo9fWA=="
+    },
+    {
+      "package": "tree-sitter-javascript",
+      "version": "0.25.0",
+      "integrity": "sha512-1fCbmzAskZkxcZzN41sFZ2br2iqTYP3tKls1b/HKGNPQUVOpsUxpmGxdN/wMqAk3jYZnYBR1dd/y/0avMeU7dw=="
+    },
+    {
+      "package": "tree-sitter-lua",
+      "version": "2.1.3",
+      "integrity": "sha512-BmRSRI0Y4J47cE2cODyXsPiueDSAnIrFLJqOP/gKIJhGa4HoGpvEccmNuhAEVGtCrgaHGhaIkWeqiMGCgQ0cfw=="
+    },
+    {
+      "package": "tree-sitter-php",
+      "version": "0.24.2",
+      "integrity": "sha512-zwgAePc/HozNaWOOfwRAA+3p8yhuehRw8Fb7vn5qd2XjiIc93uJPryDTMYTSjBRjVIUg/KY6pM3rRzs8dSwKfw=="
+    },
+    {
+      "package": "tree-sitter-python",
+      "version": "0.25.0",
+      "integrity": "sha512-eCmJx6zQa35GxaCtQD+wXHOhYqBxEL+bp71W/s3fcDMu06MrtzkVXR437dRrCrbrDbyLuUDJpAgycs7ncngLXw=="
+    },
+    {
+      "package": "tree-sitter-ruby",
+      "version": "0.23.1",
+      "integrity": "sha512-d9/RXgWjR6HanN7wTYhS5bpBQLz1VkH048Vm3CodPGyJVnamXMGb8oEhDypVCBq4QnHui9sTXuJBBP3WtCw5RA=="
+    },
+    {
+      "package": "tree-sitter-rust",
+      "version": "0.24.0",
+      "integrity": "sha512-NWemUDf629Tfc90Y0Z55zuwPCAHkLxWnMf2RznYu4iBkkrQl2o/CHGB7Cr52TyN5F1DAx8FmUnDtCy9iUkXZEQ=="
+    },
+    {
+      "package": "tree-sitter-typescript",
+      "version": "0.23.2",
+      "integrity": "sha512-e04JUUKxTT53/x3Uq1zIL45DoYKVfHH4CZqwgZhPg5qYROl5nQjV+85ruFzFGZxu+QeFVbRTPDRnqL9UbU4VeA=="
+    }
+  ]
+}

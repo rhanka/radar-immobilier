@@ -88,16 +88,18 @@ old one. A cursor key rotation invalidates open source cursors only.
 
 ## GB1 build qualification
 
-`packages/artifacts-host/src/git-mode/gb1-install-script-rows.json` is immo's
-GB1 qualification: `postinstallAllowlist: []` and one DISABLED row (package,
-version, integrity) per lockfile install-script entry, generated from
-`package-lock.json` by `make -f tools/make/git-artifact.mk gb1-rows`.
-`gb1-qualification.test.ts` fails when the lock and the rows diverge:
-regenerate after any lockfile change that touches an install-script entry.
-Transport to the builder: `source-gap`. The W7 build request is exactly
-`{ artifactId, jobId }` and the job answer is `{ v: 1, job }`; neither carries
-the rows, so the builder side must read them (or receive them) by a path
-still to be agreed with Sentropic.
+`artifact-build/gb1-qualification.json` (Sentropic decision 2026-11-07) has
+exactly the keys `{ "v": 1, "lockSha256", "postinstallAllowlist": [],
+"scriptQualification": [ { "package", "version", "integrity" } ] }`:
+`lockSha256` is the sha256 hex of the `package-lock.json` bytes of the same
+commit, and the rows are the lockfile install-script entries (19 today, the 15
+`allowScripts` packages) with their literal SRI, sorted by package then
+version, at most 64 KiB. Regenerate after any lockfile change:
+
+    make -f tools/make/git-artifact.mk gb1-rows ENV=test-<slug>
+
+`gb1-qualification.test.ts` fails when the file and the lock diverge. The path
+is an A1 refused write path: a branch can never change it.
 
 ## Not yet composed (fail-closed)
 
