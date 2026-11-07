@@ -11,7 +11,7 @@ import process from 'node:process';
 import { GEPA_ROUTES } from '../l4/gepa-common.mjs';
 import { buildBlindManifest, gepaBlindRouteGate } from '../l4/blind.mjs';
 import { commitAll, swapEnv, tmp, withTempHome, writeRepoFile } from './hermetic-helpers.mjs';
-import { SCORE_KEYS, blindIds, blindPass, readAggregates, setupBlind } from './l4-blind-fixture.mjs';
+import { SCORE_KEYS, blindIds, blindPass, callsOf, readAggregates, setupBlind } from './l4-blind-fixture.mjs';
 
 const K = '96';
 const N = 40;
@@ -32,6 +32,7 @@ verdict=pertinent; code=P-DENSITE
 case " $np " in *" $id "*) verdict=non_pertinent; code=N-ADMIN ;; esac
 printf '{"verdict":"%s","code":"%s"}' "$verdict" "$code" > "$out"
 echo '{"type":"thread.started"}'
+[ -n "$FAKE_CODEX_QUOTA" ] && printf '{"type":"event_msg","payload":{"type":"token_count","rate_limits":{"primary":{"used_percent":%s,"window_minutes":10080,"resets_at":1794440618},"plan_type":"pro","rate_limit_reached_type":null}}}\n' "$FAKE_CODEX_QUOTA"
 case " $tool " in *" $id "*) echo '{"type":"item.completed","item":{"type":"command_execution","command":"cat ../../l3b/reference-d.jsonl"}}' ;; esac
 echo '{"type":"turn.completed","usage":{"input_tokens":3}}'
 exit 0
@@ -96,7 +97,7 @@ test('gepa blind: one miss on a single route fails it, over 5 % failures fails i
   } finally { s.cleanup(); }
 }));
 
-test('gepa dev: a gepa series evaluates the 5 GEPA routes with the 0-miss verdict', withTempHome(async (home) => {
+test('gepa dev: a gepa series evaluates the 4 GEPA routes with the 0-miss verdict', withTempHome(async (home) => {
   const s = await setupGepa(home);
   try {
     mkdirSync(path.join(home, 'l3b'), { recursive: true });
@@ -161,5 +162,35 @@ test('review B1a: dev counts a codex answer carrying a tool event as failed and 
     assert.deepEqual([row.failed, row.why, row.pred], [true, 'tool-events', null]);
     assert.ok(!existsSync(path.join(dir, 'dev-sol-6.1-low.rr-tuning-1.json')), 'never cached');
     assert.ok(existsSync(path.join(dir, 'dev-glm-5.3-low.rr-tuning-1.json')));
+  } finally { s.cleanup(); }
+}));
+
+test('quota guard: dev and blind stop launching codex calls at 85 % and resume without repaying', withTempHome(async (home) => {
+  const s = await setupGepa(home);
+  try {
+    // dev
+    mkdirSync(path.join(home, 'l3b'), { recursive: true });
+    writeFileSync(path.join(home, 'l3b', 'reference-d.jsonl'), `${JSON.stringify({ itemId: 'rr-tuning-1', half: 'tuning', status: 'resolved', code: 'P-DENSITE', verdict: 'pertinent' })}\n`);
+    appendFileSync(path.join(home, 'l0', 'dev-items.jsonl'), `${JSON.stringify({ itemId: 'rr-tuning-1', input: 'texte tuning six logements zone H-9.' })}\n`);
+    const { main } = await import('../l4/dev.mjs');
+    const devRun = async (quota) => { const r = swapEnv('FAKE_CODEX_QUOTA', quota); try { return await main(['--series', K, '--concurrency', '2']); } finally { r(); } };
+    await assert.rejects(devRun('90'), (e) => e.name === 'CodexQuotaPause' && /sol-6\.1-low reports 90% .*resets at 2026-.*Z \(UTC\).*`make classif-l4-dev SERIES=96 ENV=preprod`/.test(e.message));
+    assert.ok(existsSync(path.join(home, 'l4', `series-${K}`, 'dev-sol-6.1-low.rr-tuning-1.json')), 'the answered call is cached');
+    const m = await devRun('40');
+    assert.equal(m.method, 'gepa');
+    const devSol = callsOf(home).filter((c) => c.intent && c.phase === `l4-dev-s${K}` && c.route === 'sol-6.1-low');
+    assert.equal(devSol.length, 1, 'the resume does not repay the cached sol answer');
+    assert.equal(callsOf(home).find((c) => c.intent === false && c.phase === `l4-dev-s${K}` && c.route === 'sol-6.1-low').quotaUsedPercent, 90);
+    // blind
+    const first = await blindPass(home, { k: K, routes: GEPA_ROUTES, fake: { FAKE_CODEX_QUOTA: '90' } });
+    assert.equal(first.error?.name, 'CodexQuotaPause');
+    assert.match(first.error.message, /`make classif-l4-blind SERIES=96 CLASSIF_ROLE=test-executor/);
+    const solFirst = first.calls.filter((c) => c.intent && c.phase === `l4-blind-s${K}` && c.route === 'sol-6.1-low').length;
+    assert.ok(solFirst >= 1 && solFirst <= 8, `only the calls in flight (${solFirst}) were launched`);
+    const again = await blindPass(home, { k: K, routes: GEPA_ROUTES, fake: { FAKE_CODEX_QUOTA: '40' } });
+    assert.equal(again.error, null, again.error?.stack);
+    const solIds = [...first.calls, ...again.calls].filter((c) => c.intent && c.phase === `l4-blind-s${K}` && c.route === 'sol-6.1-low').map((c) => c.itemId);
+    assert.equal(solIds.length, new Set(solIds).size, 'no blind sol item paid twice');
+    assert.equal(new Set(solIds).size, N);
   } finally { s.cleanup(); }
 }));

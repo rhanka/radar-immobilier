@@ -62,7 +62,8 @@ import path from 'node:path';
 import process from 'node:process';
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { setTimeout as sleepMs } from 'node:timers/promises';
-import { callSeat, looksLikeQuotaFailure, parseJsonObject, seatAuthRefreshCommand } from '../run-seat.mjs';
+import { callSeat, isCodexSeat, looksLikeQuotaFailure, parseJsonObject, seatAuthRefreshCommand } from '../run-seat.mjs';
+import { CODEX_QUOTA_PAUSE_DEFAULT, CodexQuotaPause, createQuotaGuard, parseQuotaPause, quotaFields } from '../lib/codex-quota.mjs';
 import { appendJsonlRecord, parseJsonlTolerant, readJsonlRecords } from '../lib/jsonl.mjs';
 import { sha256 } from '../lib/render.mjs';
 import { classifDir, classifHome, privateDir } from '../lib/paths.mjs';
@@ -389,7 +390,9 @@ async function callOne(ctx, cand, route, id, step) {
     r = await ctx.seat(route, prompt, { base: ctx.seatTmp, timeoutMs: 1800000 });
     appendJsonlRecord(ctx.callsLog, { at: new Date().toISOString(), intent: false, phase, route, itemId: id, candidate: cand.id, step, ...(attempt ? { attempt, backoffMs } : {}),
       exitCode: r.code, latencyMs: r.latencyMs ?? null, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null, toolEvents: r.toolEvents ?? null,
-      ...(looksLikeQuotaFailure(r) ? { quota: true } : {}) });
+      ...(looksLikeQuotaFailure(r) ? { quota: true } : {}), ...quotaFields(r) });
+    // ChatGPT quota guard: a codex measurement over the threshold pauses every codex seat.
+    if (ctx.quotaGuard.observe(route, r.rateLimits)) break;
     // Review GEPA B5: a retry must fit next to the calls of the batch reserved but not launched yet.
     if (!looksLikeQuotaFailure(r) || attempt >= ctx.quotaBackoffMs.length || !ctx.budget.fits(1 + ctx.pendingLaunches)) break;
     ctx.log(`${route} ${id}: quota or rate limit, retry ${attempt + 1}/${ctx.quotaBackoffMs.length} in ${ctx.quotaBackoffMs[attempt]} ms`);
@@ -446,7 +449,7 @@ async function evaluateBatch(ctx, cand, ids, step, { child, lotSize }) {
       const hit = readEvalCache(ctx, cand, route, id);
       if (hit) return hit;
       ctx.pendingLaunches = Math.max(0, ctx.pendingLaunches - 1);
-      if (tripped || childTool || missing) return null;
+      if (tripped || childTool || missing || ctx.quotaGuard.blocks(route)) return null;
       const { row, authError, binaryMissing } = await callOne(ctx, cand, route, id, step);
       if (binaryMissing) { missing = missing ?? { route, binary: binaryMissing }; return row; }
       if (authError) authFailures++;
@@ -461,7 +464,8 @@ async function evaluateBatch(ctx, cand, ids, step, { child, lotSize }) {
     return rows;
   };
   let byRoute;
-  try { byRoute = await runFamiliesParallel(groupRoutesByFamily(ctx.routes), runRoute); } catch (e) { if (!missing) throw e; }
+  try { byRoute = await runFamiliesParallel(groupRoutesByFamily(ctx.routes), runRoute); } catch (e) { if (!missing && !ctx.quotaGuard.paused) throw e; }
+  if (ctx.quotaGuard.paused) throw ctx.quotaGuard.error(ctx.resumeCommand);
   if (missing) {
     throw new Error(`classif-l4-gepa: ${missing.binary} not found in PATH (${missing.binary} introuvable dans PATH) for route ${missing.route} on ${step}: seat infrastructure, run stopped at the first call. Put ${missing.binary} on the PATH of the launching shell or unit, then resume with \`${ctx.resumeCommand}\` (answered calls are cached)`);
   }
@@ -565,12 +569,16 @@ async function retryInfra(ctx, cand, step) {
   let missing = null;
   await pool(pairs.map((p) => async () => {
     ctx.pendingLaunches = Math.max(0, ctx.pendingLaunches - 1);
-    if (missing) return;
+    if (missing || ctx.quotaGuard.blocks(p.route)) return;
     const { row, binaryMissing } = await callOne(ctx, cand, p.route, p.id, step);
     if (binaryMissing) { missing = missing ?? { route: p.route, binary: binaryMissing }; return; }
     pareto[p.id][p.route] = compactEvals({ [p.id]: { [p.route]: row } })[p.id][p.route];
   }), ctx.concurrency);
   ctx.pendingLaunches = 0;
+  if (ctx.quotaGuard.paused) {
+    saveCandidate(ctx, { ...cand, pareto });
+    throw ctx.quotaGuard.error(ctx.resumeCommand);
+  }
   if (missing) {
     saveCandidate(ctx, { ...cand, pareto });
     throw new Error(`classif-l4-gepa: ${missing.binary} not found in PATH (${missing.binary} introuvable dans PATH) for route ${missing.route} on ${step}: run stopped. Put ${missing.binary} on the PATH, then resume with \`${ctx.resumeCommand}\``);
@@ -628,12 +636,16 @@ async function proposal(ctx, iter, kind, prompt) {
   const tried = [];
   for (const [seat, suffix] of [[GEPA_MUTATOR, ''], [GEPA_RECONCILER, '-fallback']]) {
     try {
+      if (ctx.quotaGuard.blocks(seat)) throw ctx.quotaGuard.error(ctx.resumeCommand);
       ctx.budget.check(1);
-      const text = parseProposal(await seatCall(ctx.home, ctx.callsLog, `${phase}${suffix}`, seat, prompt, ctx.seat, { rawDir }));
+      const text = parseProposal(await seatCall(ctx.home, ctx.callsLog, `${phase}${suffix}`, seat, prompt, ctx.seat,
+        { rawDir, onResult: (r) => ctx.quotaGuard.observe(seat, r.rateLimits) }));
+      // The answer of the call that reached the threshold is cached (mut-raw): a resume reuses it.
+      if (ctx.quotaGuard.paused) throw ctx.quotaGuard.error(ctx.resumeCommand);
       if (text) return { text, seat };
       tried.push(`${seat}: no usable prompt`);
     } catch (e) {
-      if (/run budget refused|pilot budget refused/.test(e.message)) throw e;
+      if (e instanceof CodexQuotaPause || /run budget refused|pilot budget refused/.test(e.message)) throw e;
       tried.push(`${seat}: ${e.message}`);
     }
     ctx.log(`iteration ${iter} ${kind}: ${tried[tried.length - 1]}`);
@@ -678,7 +690,7 @@ function contextSha(ctx, rows) {
  * Returns the repo manifest object.
  */
 export async function runGepa({ home = classifHome(), repoClassif = classifDir(process.env), k, run = null, seed = null, maxCalls = DEFAULT_MAX_CALLS,
-  maxIterations = null, maxSkipped = MAX_SKIPPED, concurrency = 2, quotaBackoffMs = QUOTA_BACKOFF_MS, sleep = sleepMs, seat = callSeat,
+  maxIterations = null, maxSkipped = MAX_SKIPPED, concurrency = 2, quotaBackoffMs = QUOTA_BACKOFF_MS, sleep = sleepMs, seat = callSeat, codexQuotaPause = CODEX_QUOTA_PAUSE_DEFAULT,
   log = (m) => process.stderr.write(`classif-l4-gepa: ${m}\n`) }) {
   if (k === undefined || k === null || !/^\d+$/.test(String(k))) throw new Error('classif-l4-gepa: SERIES=<k> (integer) required');
   const runId = run ?? `s${k}`;
@@ -694,8 +706,9 @@ export async function runGepa({ home = classifHome(), repoClassif = classifDir(p
   const refById = new Map(rows.map((r) => [r.itemId, r]));
   const codes = loadCodes();
   const ctx = { home, runDir, phase, budget, refById, routes: GEPA_ROUTES, codes, codesSha: sha256(JSON.stringify([...codes].sort())), evalKeys: new Map(),
-    resumeCommand: `make classif-l4-gepa SERIES=${k} MAX_CALLS=${maxCalls} RUN=${runId} SEED='${seedValue}'${maxIterations !== null ? ` MAX_ITER=${maxIterations}` : ''} ENV=preprod`,
-    seat, concurrency, log, quotaBackoffMs: [...quotaBackoffMs], sleep, pendingLaunches: 0, callsLog: path.join(home, 'l2', 'calls.jsonl'), seatTmp: privateDir(path.join(home, 'l4', 'seat-tmp')) };
+    resumeCommand: `make classif-l4-gepa SERIES=${k} MAX_CALLS=${maxCalls} RUN=${runId} SEED='${seedValue}'${maxIterations !== null ? ` MAX_ITER=${maxIterations}` : ''}${codexQuotaPause !== CODEX_QUOTA_PAUSE_DEFAULT ? ` CODEX_QUOTA_PAUSE=${codexQuotaPause}` : ''} ENV=preprod`,
+    seat, concurrency, log, quotaBackoffMs: [...quotaBackoffMs], sleep, pendingLaunches: 0,
+    quotaGuard: createQuotaGuard({ threshold: parseQuotaPause(codexQuotaPause), isCodex: isCodexSeat }), callsLog: path.join(home, 'l2', 'calls.jsonl'), seatTmp: privateDir(path.join(home, 'l4', 'seat-tmp')) };
   const split = { ...stratifiedSplit(rows, { seed: seedValue }), contextSha256: contextSha(ctx, rows) };
   const splitFile = path.join(runDir, 'split.json');
   if (existsSync(splitFile)) {
@@ -964,7 +977,8 @@ export async function main(argv = process.argv.slice(2), { seat = callSeat } = {
   if (backoff !== null && !/^\d+(,\d+)*$/.test(backoff)) throw new Error(`classif-l4-gepa: --quota-backoff-ms must be a comma list of milliseconds (got ${backoff})`);
   const manifest = await runGepa({ k, run: flag('--run') || null, seed: flag('--seed') || null, maxCalls: num('--max-calls', DEFAULT_MAX_CALLS),
     quotaBackoffMs: backoff ? backoff.split(',').map(Number) : QUOTA_BACKOFF_MS,
-    maxIterations: num('--max-iterations', null), maxSkipped: num('--max-skipped', MAX_SKIPPED), concurrency: num('--concurrency', 2), seat });
+    maxIterations: num('--max-iterations', null), maxSkipped: num('--max-skipped', MAX_SKIPPED), concurrency: num('--concurrency', 2),
+    codexQuotaPause: parseQuotaPause(flag('--codex-quota-pause')), seat });
   process.stdout.write(`${JSON.stringify(manifest, null, 2)}\n`);
   return manifest;
 }
