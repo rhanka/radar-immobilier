@@ -19,6 +19,7 @@ Prepare the immo side of the git-backed artifact mode (A-LIVE v2, enablement pla
   - `api/drizzle/0036_artifacts_git_bindings.sql`, `api/drizzle/0037_artifacts_live_drafts.sql`, `api/drizzle/0038_artifacts_live_invitations.sql`, `api/drizzle/meta/_journal.json`
   - `api/tests/integration/artifacts-provenance.spec.ts`
   - `docs/operator/git-artifact-mode.md`
+  - `tools/make/git-artifact.mk`, `tools/make/git-artifact-gb1-rows.mjs` (GB1 rows generator)
   - `deploy/overlays/preprod/**` (flag-on commit only, GITMODE-EX2)
   - `plan/GITMODE-BRANCH_feat-artifacts-git-mode.md`
 - **Forbidden Paths (must not change in this branch)**:
@@ -36,7 +37,7 @@ Prepare the immo side of the git-backed artifact mode (A-LIVE v2, enablement pla
 - `attention`: `artifacts_list_app_sources` stays unrouted in 0.2.19 (M1 changelog): selected by no stage until a provider routes it.
 - `attention`: the 0.3.0 allowance removal (A-LIVE §10) belongs to the 0.2.19 pin commit.
 - `clarification` (s-archi): all host-executed or host-verified crypto comes from `@sentropic/artifacts/live-host` (0.2.20); the `content/live-assertion` subpath is abandoned.
-- `deferred`: GB1 install-script rows need the integrity values of #1029 (15 of the 19 entries lack `integrity` on `origin/main`).
+- `acknowledge`: #1029 merged; the 19 GB1 DISABLED rows (15 package names, `allowScripts`) are generated from the merged lock; `postinstallAllowlist` stays `[]`.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch** — one draft PR, one commit per milestone (M2-I, M3-I, M4-I), then the plan/doc commit and the preprod flag commit.
@@ -59,5 +60,5 @@ Prepare the immo side of the git-backed artifact mode (A-LIVE v2, enablement pla
   - [x] Live edge revocation: sockets closed first, fence pushed to `/_live-control/v1` with retry, failure surfaced.
   - [x] One provider seam `@sentropic/artifacts/live-host` (0.2.20) for handoff verification, receipt/assertion signing, candidate digest; no immo crypto (local SG4b checks kept as test-support contract reference only).
 - [x] **Lot 4 — Gate**: typecheck, lint, artifacts-host / immo-mcp / provenance / binding-store integration tests via Make.
-- [ ] **Lot 5 — GB1 rows**: after #1029 merges, generate the 19 disabled install-script rows from the lock (`make -f tools/make/git-artifact.mk gb1-rows`), with the divergence test.
+- [x] **Lot 5 — GB1 rows**: after #1029 merged (rebased on `621e8d2c4`), generated the 19 disabled install-script rows from the lock (`make -f tools/make/git-artifact.mk gb1-rows`), with the divergence test.
 - [ ] **Lot 6 — Conductor**: 0.2.19 (+0.2.20) qualification commit, preprod flag-on, owner MCP-only test.
