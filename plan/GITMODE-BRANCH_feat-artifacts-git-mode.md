@@ -19,7 +19,7 @@ Prepare the immo side of the git-backed artifact mode (A-LIVE v2, enablement pla
   - `api/drizzle/0036_artifacts_git_bindings.sql`, `api/drizzle/0037_artifacts_live_drafts.sql`, `api/drizzle/0038_artifacts_live_invitations.sql`, `api/drizzle/meta/_journal.json`
   - `api/tests/integration/artifacts-provenance.spec.ts`
   - `docs/operator/git-artifact-mode.md`
-  - `tools/make/git-artifact.mk`, `tools/make/git-artifact-gb1-rows.mjs` (GB1 rows generator)
+  - `tools/make/git-artifact.mk`, `tools/make/git-artifact-gb1-rows.mjs` (GB1 rows generator), `artifact-build/gb1-qualification.json`
   - `api/src/app.ts`, `api/src/artifacts/control-route.ts`, `api/src/artifacts/control-route-startup.ts`, `api/src/artifacts/live-host-route*.ts` (inbound SG4b routes, stage `build`+ only)
   - `ui/vite.config.ts`, `tools/make/ui-artifact-env.mjs`, `tools/make/git-artifact-descriptor.test.mjs` (live basemap default)
   - `plan/GITMODE-BRANCH_feat-artifacts-git-mode.md`

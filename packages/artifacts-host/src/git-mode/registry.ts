@@ -33,6 +33,9 @@ export const IMMO_GIT_REFUSED_WRITE_PATHS: readonly string[] = Object.freeze([
   ".yarnrc*",
   "**/.yarnrc*",
   "ui/dist/**",
+  // GB1 qualification of the locked install (Sentropic decision 2026-11-07):
+  // host-generated from the lock, never writable by a branch.
+  "artifact-build/gb1-qualification.json",
 ]);
 
 export interface ImmoGitRegistryInput {

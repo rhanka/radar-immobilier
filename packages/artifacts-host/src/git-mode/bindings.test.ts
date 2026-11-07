@@ -30,6 +30,7 @@ describe("A1 registry", () => {
     expect(entry!.writablePaths).toEqual(["ui/**", "packages/radar-domain/src/**", "packages/radar-scoring/src/**",
       "packages/radar-sources/src/**"]);
     expect(IMMO_GIT_REFUSED_WRITE_PATHS).toContain("packages/immo-mcp/**");
+    expect(entry!.refusedWritePaths).toContain("artifact-build/gb1-qualification.json");
   });
 
   it("is empty until the SG0-app enrollment gives an installation reference", async () => {
