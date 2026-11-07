@@ -1,8 +1,8 @@
 // Seat-family parallelism for L4 (dev + blind): routes sharing a seat backend run
 // sequentially (per-seat limit of 2 concurrent calls unchanged), families run in
 // parallel. Grouping is by route prefix: muse (muse-spark-*), claude (opus-*),
-// vibe (mistral-*, glm-*), agy (gemini-*), codex (sol-*, luna-*: the GEPA ChatGPT low seats,
-// one ChatGPT seat backend, so they run sequentially). Unknown prefixes get their own family
+// vibe (mistral-*, glm-*), agy (gemini-*), codex (sol-*, luna-*: the ChatGPT low seats, one
+// ChatGPT seat backend, so they run sequentially; sol is the GEPA one). Unknown prefixes get their own family
 // so a new route never shares a seat budget with an unrelated backend.
 export const SEAT_FAMILY_ORDER = ['muse', 'claude', 'vibe', 'agy'];
 

@@ -20,7 +20,7 @@ export function seriesManifestFile(k, env = process.env) {
     Review §9b/c: routes, halves sha, floors in ]0,1], failure ceiling in ]0,1] and supports
     shapes are validated — a `floors:{}` no longer passes with floors at 0.
     Review §9: halves are REQUIRED (a manifest without frozen halves refuses).
-    GEPA series (`method: 'gepa'`): routes = the 5 GEPA routes, failureCeiling <= 5 %, no
+    GEPA series (`method: 'gepa'`): routes = the 4 GEPA routes, failureCeiling <= 5 %, no
     floors (precision reported, never a floor), no recallNonRegression (own verdict). */
 export function loadSeriesManifest(k, env = process.env) {
   const file = seriesManifestFile(k, env);
