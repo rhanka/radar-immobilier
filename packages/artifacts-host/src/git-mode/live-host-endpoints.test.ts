@@ -40,7 +40,7 @@ describe("inbound SG4b host build API", () => {
     expect(() => readLiveHostKeys({ IMMO_ARTIFACTS_BUILDER_HANDOFF_PUBLIC_KEYS: "k=AAAA" })).toThrow("artifact_builder_handoff_keys_invalid");
   });
 
-  it("answers 503 while the provider live-host subpath is absent (0.2.18)", async () => {
+  it("answers 503 while no provider live-host module is injected", async () => {
     const endpoints = createLiveHostEndpoints({ module: undefined, scopeId: "s", keys });
     expect(await endpoints.job({})).toEqual({ status: 503, body: { error: "capability_unavailable" } });
     expect((await endpoints.handoff({})).status).toBe(503);
