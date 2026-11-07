@@ -71,6 +71,7 @@ export function gitAuthoringSection(mode: GitModeResolution): AuthoringGuideGitM
       ...(has("artifacts_live_write") ? [
         "Edit only through live: artifacts_live_write applies edits to your own live tree (expectedHeadSha + expectedLiveRevision), artifacts_live_read / artifacts_live_status inspect it, artifacts_live_reset discards the draft, artifacts_live_control starts or stops the session. Without a qualified worker live_write answers builder_unavailable.",
         "artifacts_git_commit commits your live draft on your branch under expectedHeadSha; the built output (ui/dist) is never committed.",
+        "When every live slot is taken or no worker is qualified, live calls refuse with builder_unavailable and liveState.state = queued or builder_unavailable: tell the Product Owner, then retry later with the same idempotencyKey; never wait silently.",
       ] : ["Live editing is not enabled in this stage: the branch tree can be read, not edited, through this catalogue."]),
       ...(has("artifacts_git_publish") ? [
         "artifacts_git_publish({artifactId, commitSha, expectedCurrentReleaseId, idempotencyKey}) builds that commit on the Sentropic builder (npm ci --ignore-scripts, npm run build:artifact, output ui/dist) and returns a jobId; IMMO verifies the builder handoff and publishes the release atomically.",
