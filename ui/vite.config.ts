@@ -86,6 +86,11 @@ export default defineConfig({
       { find: "$lib", replacement: fileURLToPath(new URL("./src/lib", import.meta.url)) },
     ],
   },
+  // `vite dev` (A-LIVE builder pod): the dep optimizer cannot pre-bundle the
+  // `?url` import of the maplibre worker inside @sentropic/geo-ui-svelte and the
+  // dev server exits at startup. Serve that package unbundled instead
+  // (measured by the sentropic pod-4live run on cc9f7ce2c).
+  optimizeDeps: { exclude: ["@sentropic/geo-ui-svelte"] },
   build: harnessInput ? { rollupOptions: { input: harnessInput } } : {},
   server: {
     host: "0.0.0.0",
