@@ -2,7 +2,8 @@ import { createMemoryGitBindingStore, type GitBinding } from "@sentropic/artifac
 import { describe, expect, it, vi } from "vitest";
 import { createLiveInvitationService, createMemoryLiveInvitationStore } from "./live-authority.js";
 import {
-  createLiveFencePusher, createLiveRevocation, createLiveSocketRegistry, FAIL_CLOSED_LIVE_SIGNER, liveSignerFrom, loadLiveSigner,
+  composeLiveEdgeRevocation, createLiveFencePusher, createLiveRevocation, createLiveSocketRegistry, FAIL_CLOSED_LIVE_SIGNER,
+  liveSignerFrom, loadLiveSigner, parseLiveHostKeyring, readLiveEdgeConfig,
   LIVE_CONTROL_HEADER, type LiveAssertionSigner,
 } from "./live-edge.js";
 import { createImmoGitRegistry, IMMO_GIT_REPO_ID } from "./registry.js";
@@ -133,5 +134,37 @@ describe("live revocation: sockets closed, fence pushed", () => {
     await service.revoke(caller, { artifactId: ARTIFACT, invitationId: created.invitationId });
     expect(open.close).toHaveBeenCalled();
     expect(push).toHaveBeenCalledWith(expect.objectContaining({ op: "revoke_invitation", invitationId: created.invitationId, epoch: 2 }));
+  });
+});
+
+describe("live edge configuration", () => {
+  const key = Buffer.alloc(32, 9).toString("base64url");
+  it("reads the HMAC keyring, the signing kid, the pages host and the control URL", () => {
+    const config = readLiveEdgeConfig({ IMMO_ARTIFACTS_LIVE_HOST_KEYS: `immo-preprod-live-1=${key},immo-preprod-live-0=${key}`,
+      IMMO_ARTIFACTS_LIVE_HOST_KID: "immo-preprod-live-1", IMMO_ARTIFACTS_LIVE_HOST: "pages.preprod.immo.sent-tech.ca",
+      IMMO_ARTIFACTS_LIVE_CONTROL_URL: "https://pages.preprod.immo.sent-tech.ca/_live-control/v1" });
+    expect(config.kid).toBe("immo-preprod-live-1");
+    expect(config.key?.byteLength).toBe(32);
+    expect(String(config.controlUrl)).toBe("https://pages.preprod.immo.sent-tech.ca/_live-control/v1");
+    expect(parseLiveHostKeyring(undefined).size).toBe(0);
+  });
+
+  it("refuses short keys, an unknown kid and a foreign control path", () => {
+    expect(() => parseLiveHostKeyring(`k=${Buffer.alloc(16).toString("base64url")}`)).toThrow("artifact_live_host_keys_invalid");
+    expect(() => readLiveEdgeConfig({ IMMO_ARTIFACTS_LIVE_HOST_KEYS: `a=${key}`, IMMO_ARTIFACTS_LIVE_HOST_KID: "b" }))
+      .toThrow("artifact_live_host_kid_invalid");
+    expect(() => readLiveEdgeConfig({ IMMO_ARTIFACTS_LIVE_CONTROL_URL: "https://pages.example/other" }))
+      .toThrow("artifact_live_control_url_invalid");
+  });
+
+  it("keeps the composed revocation closed on 0.2.18 (no live-host signer) while still closing sockets", async () => {
+    const sockets = createLiveSocketRegistry();
+    const open = socket();
+    sockets.register({ artifactId: ARTIFACT, sessionId: "sess", principalId: "alice" }, open);
+    const revocation = await composeLiveEdgeRevocation(readLiveEdgeConfig({ IMMO_ARTIFACTS_LIVE_HOST_KEYS: `immo-preprod-live-1=${key}`,
+      IMMO_ARTIFACTS_LIVE_HOST_KID: "immo-preprod-live-1", IMMO_ARTIFACTS_LIVE_HOST: "pages.test",
+      IMMO_ARTIFACTS_LIVE_CONTROL_URL: "https://pages.test/_live-control/v1" }), sockets, (async () => new Response(null, { status: 204 })) as never);
+    await expect(revocation.session(ARTIFACT, "sess")).rejects.toMatchObject({ kind: "provider_unavailable" });
+    expect(open.close).toHaveBeenCalled();
   });
 });

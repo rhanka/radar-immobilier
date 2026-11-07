@@ -142,3 +142,59 @@ export function createLiveRevocation(deps: { readonly sockets: LiveSocketRegistr
     },
   };
 }
+
+/**
+ * Live edge configuration (W9, preprod values in docs/operator/git-artifact-mode.md):
+ * - IMMO_ARTIFACTS_LIVE_HOST_KEYS: HMAC keyring `kid=base64url[,kid=base64url]`,
+ *   each key at least 32 bytes; rotation by kid overlap (old and new listed);
+ * - IMMO_ARTIFACTS_LIVE_HOST_KID: the kid that signs now (preprod `immo-preprod-live-1`);
+ * - IMMO_ARTIFACTS_LIVE_HOST: the pages domain claimed in assertions and
+ *   control messages (preprod `pages.preprod.immo.sent-tech.ca`);
+ * - IMMO_ARTIFACTS_LIVE_CONTROL_URL: the control endpoint
+ *   (preprod `https://pages.preprod.immo.sent-tech.ca/_live-control/v1`).
+ * Absent: no signer and no control URL, every push refuses (fail-closed).
+ */
+const LIVE_KEY_ID = /^[A-Za-z0-9._:-]{1,128}$/;
+
+export function parseLiveHostKeyring(raw: string | undefined): ReadonlyMap<string, Uint8Array> {
+  const keys = new Map<string, Uint8Array>();
+  for (const entry of (raw ?? "").split(",").map((part) => part.trim()).filter(Boolean)) {
+    const separator = entry.indexOf("=");
+    const kid = entry.slice(0, separator);
+    const value = entry.slice(separator + 1);
+    const key = Buffer.from(value, "base64url");
+    if (separator < 1 || !LIVE_KEY_ID.test(kid) || keys.has(kid) || key.byteLength < 32 ||
+      key.toString("base64url") !== value.replace(/=+$/, "")) throw new Error("artifact_live_host_keys_invalid");
+    keys.set(kid, new Uint8Array(key));
+  }
+  return keys;
+}
+
+export interface LiveEdgeConfig {
+  readonly kid?: string | undefined;
+  readonly key?: Uint8Array | undefined;
+  readonly host?: string | undefined;
+  readonly controlUrl?: URL | undefined;
+}
+
+export function readLiveEdgeConfig(env: NodeJS.ProcessEnv): LiveEdgeConfig {
+  const keys = parseLiveHostKeyring(env.IMMO_ARTIFACTS_LIVE_HOST_KEYS);
+  const kid = env.IMMO_ARTIFACTS_LIVE_HOST_KID?.trim() || undefined;
+  if (kid !== undefined && !keys.has(kid)) throw new Error("artifact_live_host_kid_invalid");
+  const control = env.IMMO_ARTIFACTS_LIVE_CONTROL_URL?.trim();
+  const controlUrl = control ? new URL(control) : undefined;
+  if (controlUrl && (controlUrl.protocol !== "https:" || controlUrl.pathname !== LIVE_CONTROL_PATH || controlUrl.search)) {
+    throw new Error("artifact_live_control_url_invalid");
+  }
+  return { kid, key: kid ? keys.get(kid) : undefined, host: env.IMMO_ARTIFACTS_LIVE_HOST?.trim() || undefined, controlUrl };
+}
+
+/** Fence pusher and revocation from the configuration and the provider signer (fail-closed when incomplete). */
+export async function composeLiveEdgeRevocation(config: LiveEdgeConfig, sockets: LiveSocketRegistry,
+  fetcher?: typeof fetch): Promise<ReturnType<typeof createLiveRevocation>> {
+  const signer = await loadLiveSigner(config.key);
+  const controlUrl = config.controlUrl;
+  const push = createLiveFencePusher({ signer, kid: config.kid ?? "", host: config.host ?? "",
+    controlUrl: controlUrl && config.kid && config.host ? () => controlUrl : undefined, ...(fetcher ? { fetch: fetcher } : {}) });
+  return createLiveRevocation({ sockets, push });
+}

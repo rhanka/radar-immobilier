@@ -3,14 +3,16 @@ import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-cont
 
 /**
  * SG0-app lease broker client (D0: Sentropic provides the broker, immo
- * consumes it). Wire contract: cluster-mesh `createGitHubAppRouter`,
- * `POST /github-app/broker/lease` with exactly
+ * consumes it). Wire contract: cluster-mesh `createGitHubAppRouter`, mounted
+ * by the Sentropic API at `POST <origin>/api/v1/github-app/broker/lease`
+ * (preprod origin https://preprod.sentropic.sent-tech.ca) with exactly
  * `{ installationRef, repoId, storageScopeId }`; the broker authenticates the
- * host service identity and binds it server-side to `{ storageScopeId,
- * repoId }`. The answer is a single-repository lease
+ * host service identity — an OAuth client_credentials service token with
+ * scope `github-app:broker` (service-token.ts) — and binds it server-side to
+ * `{ storageScopeId, repoId }` (GITHUB_APP_BROKER_BINDINGS_JSON, Sentropic). The answer is a single-repository lease
  * (`contents: write`, `metadata: read`), never an App key or a PAT.
  *
- * `/github-app/broker/verify` verifies inbound webhook signatures; immo does
+ * `/api/v1/github-app/broker/verify` verifies inbound webhook signatures; immo does
  * not consume webhooks, so this client does not call it.
  *
  * Every failure is `provider_unavailable` (fail-closed). The lease token is
@@ -22,13 +24,15 @@ export interface HostServiceIdentity {
 }
 
 export interface LeaseBrokerOptions {
-  /** Public HTTPS origin of the Sentropic cluster-mesh router, e.g. https://sentropic.example. */
+  /** Public HTTPS origin of the Sentropic API, e.g. https://preprod.sentropic.sent-tech.ca. */
   readonly origin: string;
   readonly identity: HostServiceIdentity;
   readonly fetch?: typeof fetch;
   readonly now?: () => number;
   readonly timeoutMs?: number;
 }
+
+export const BROKER_LEASE_PATH = "/api/v1/github-app/broker/lease" as const;
 
 const unavailable = () => new ArtifactOperationError("provider_unavailable");
 
@@ -53,7 +57,7 @@ export function createLeaseBrokerClient(options: LeaseBrokerOptions): GitInstall
   if (origin.protocol !== "https:" || origin.pathname !== "/" || origin.search || origin.hash) {
     throw new Error("artifact_git_broker_origin_invalid");
   }
-  const endpoint = new URL("/github-app/broker/lease", origin);
+  const endpoint = new URL(BROKER_LEASE_PATH, origin);
   const fetcher = options.fetch ?? fetch;
   const now = options.now ?? Date.now;
   return {

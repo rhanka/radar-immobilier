@@ -12,6 +12,7 @@ import { writeIntentAppRoute } from "./artifacts/write-intent-app-route.js";
 import type { ContentHostConfig } from "./artifacts/content-config.js";
 import { controlRoute, type ControlRouteDeps } from "./artifacts/control-route.js";
 import { uploadPageRoute } from "./artifacts/upload-page-route.js";
+import { liveHostRoute } from "./artifacts/live-host-route.js";
 import { chatRoute } from "./routes/chat.js";
 import { automationRoute } from "./routes/automation.js";
 import { sourcesRoute, type SourcesDeps } from "./routes/sources.js";
@@ -138,6 +139,9 @@ export function createApp(deps: AppDeps): Hono {
   // Control requests use the official cookie guard before general bearer auth.
   if (deps.auth?.enabled) {
     if (deps.artifactsControl) {
+      // Git mode stage `build`+: inbound SG4b host build API (builder-signed
+      // bodies, no session). Absent while IMMO_ARTIFACTS_GIT_MODE is off.
+      if (deps.artifactsControl.liveHost) app.route("/api/v1/artifacts", liveHostRoute(deps.artifactsControl.liveHost));
       app.route("/api/v1/artifacts/control", controlRoute(deps.artifactsControl));
       // Browser upload pages (files parity LOT 2) ride the control origin
       // with the same session rules; without the page service the routes

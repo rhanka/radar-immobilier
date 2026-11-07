@@ -20,6 +20,8 @@ Prepare the immo side of the git-backed artifact mode (A-LIVE v2, enablement pla
   - `api/tests/integration/artifacts-provenance.spec.ts`
   - `docs/operator/git-artifact-mode.md`
   - `tools/make/git-artifact.mk`, `tools/make/git-artifact-gb1-rows.mjs` (GB1 rows generator)
+  - `api/src/app.ts`, `api/src/artifacts/control-route.ts`, `api/src/artifacts/control-route-startup.ts`, `api/src/artifacts/live-host-route*.ts` (inbound SG4b routes, stage `build`+ only)
+  - `ui/vite.config.ts`, `tools/make/ui-artifact-env.mjs`, `tools/make/git-artifact-descriptor.test.mjs` (live basemap default)
   - `plan/GITMODE-BRANCH_feat-artifacts-git-mode.md`
 - **Forbidden Paths (must not change in this branch)**:
   - `Makefile`, `docker-compose*.yml`, `rules/**`, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`
@@ -61,4 +63,11 @@ Prepare the immo side of the git-backed artifact mode (A-LIVE v2, enablement pla
   - [x] One provider seam `@sentropic/artifacts/live-host` (0.2.20) for handoff verification, receipt/assertion signing, candidate digest; no immo crypto (local SG4b checks kept as test-support contract reference only).
 - [x] **Lot 4 — Gate**: typecheck, lint, artifacts-host / immo-mcp / provenance / binding-store integration tests via Make.
 - [x] **Lot 5 — GB1 rows**: after #1029 merged (rebased on `621e8d2c4`), generated the 19 disabled install-script rows from the lock (`make -f tools/make/git-artifact.mk gb1-rows`), with the divergence test.
-- [ ] **Lot 6 — Conductor**: 0.2.20 qualification commit, preprod flag-on, owner MCP-only test.
+- [x] **Lot 6 — Sentropic integration values (2026-11-07)**
+  - [x] One OAuth client_credentials token source (scopes `github-app:broker`, `artifacts:builder`), cached until expiry, fail-closed.
+  - [x] Broker on `/api/v1/github-app/broker/lease`; builder client `POST /v1/builds {artifactId, jobId}` (202/200) and `GET /v1/builds/<artifactId>/<jobId>` after persisting the job (fail-closed job store).
+  - [x] Inbound `POST /api/v1/artifacts/live-host/v1/job` and `/handoff` on radar-api (stage `build`+), provider `verifyJobRequest`/`resolvePendingJob`/`parseHandoffRequest`/`acceptHandoff`, Ed25519 builder keys and immo receipt key from env, fail-closed ledger.
+  - [x] Live edge HMAC keyring (`kid=base64url`), pages host and control URL; sealed `LiveKeyPort` (HKDF per binding).
+  - [x] `VITE_BASEMAP_TILE_URL` defaulted by `ui/vite.config.ts` in artifact mode for the live dev server; wrapper and dist check unchanged in effect.
+  - [x] Exact env var list in `docs/operator/git-artifact-mode.md`.
+- [ ] **Lot 7 — Conductor**: 0.2.20 qualification commit, preprod flag-on, owner MCP-only test.

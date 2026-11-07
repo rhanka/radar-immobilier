@@ -13,7 +13,9 @@ import {
   type GitHumanEntry,
 } from "./identity.js";
 import { createLeaseBrokerClient, FAIL_CLOSED_LEASES } from "./lease-broker.js";
-import { createHostBuildApiClient } from "./build-api.js";
+import { createHostBuildApiClient, type HostBuildJobStore } from "./build-api.js";
+import { createSealedLiveKeys, parseLiveDraftKeyring, type LiveDraftKeyring } from "./live-keys.js";
+import { SERVICE_SCOPE_BROKER, SERVICE_SCOPE_BUILDER, serviceTokenSource, type ServiceTokenConfig } from "./service-token.js";
 import { composeLiveService } from "./live.js";
 import { createPostgresLiveInvitationStore, createPostgresLiveSessions, type LiveInvitationStore, type LiveSessionPort } from "./live-authority.js";
 import { gitToolServiceFactory, GIT_TOOLS_DEP_KEY, type GitBuildPort, type GitToolService, type GitToolsDeps } from "./provider-adapter.js";
@@ -27,24 +29,27 @@ import { createImmoGitRegistry, IMMO_GIT_OUTPUT_DIR, IMMO_GIT_REPO_ID } from "./
  * host: the matching port fails closed at call time with a typed refusal
  * (`provider_unavailable`, `git_repo_not_registered`, `access_denied`).
  *
- * Configuration (all optional, documented in docs/operator/git-artifact-mode.md):
- * IMMO_ARTIFACTS_GIT_INSTALLATION_REF, IMMO_ARTIFACTS_GIT_BROKER_ORIGIN,
- * IMMO_ARTIFACTS_GIT_BROKER_TOKEN (secret), IMMO_ARTIFACTS_GIT_CURSOR_KEY
- * (secret), IMMO_ARTIFACTS_GIT_CODE_READERS, IMMO_ARTIFACTS_GIT_HUMANS,
- * IMMO_ARTIFACTS_GIT_COMMITTER_NAME, IMMO_ARTIFACTS_GIT_COMMITTER_EMAIL;
- * M3-I: IMMO_ARTIFACTS_BUILDER_ORIGIN, IMMO_ARTIFACTS_BUILDER_TOKEN (secret).
+ * Configuration (all optional, read only when the flag is on; the exact list
+ * and formats are in docs/operator/git-artifact-mode.md): the OAuth service
+ * client (IMMO_ARTIFACTS_SERVICE_OAUTH_*), the SG0-app broker and installation
+ * (IMMO_ARTIFACTS_GIT_BROKER_ORIGIN, IMMO_ARTIFACTS_GIT_INSTALLATION_REF), the
+ * GitPort (IMMO_ARTIFACTS_GIT_CURSOR_KEY, _COMMITTER_*, _CODE_READERS, _HUMANS),
+ * the builder (IMMO_ARTIFACTS_BUILDER_URL) and the live draft keys
+ * (IMMO_ARTIFACTS_LIVE_DRAFT_KEYS, IMMO_ARTIFACTS_LIVE_DRAFT_KEY_CURRENT).
  */
 export interface GitModeConfig {
   readonly installationRef?: string | undefined;
   readonly brokerOrigin?: string | undefined;
-  readonly brokerToken?: string | undefined;
+  /** OAuth client_credentials service client (scopes github-app:broker and artifacts:builder). */
+  readonly service?: ServiceTokenConfig | undefined;
   readonly cursorKey?: Uint8Array | undefined;
   readonly codeReaders: readonly string[];
   readonly humans: readonly GitHumanEntry[];
   readonly committer?: GitIdentity | undefined;
-  /** M3-I: Sentropic builder service (host build API); absent keeps git_publish closed. */
-  readonly builderOrigin?: string | undefined;
-  readonly builderToken?: string | undefined;
+  /** M3-I: Sentropic builder service base URL; absent keeps git_publish closed. */
+  readonly builderUrl?: string | undefined;
+  /** M4-I: sealed live draft master keys (version -> 32 bytes) and the current version. */
+  readonly liveDraftKeys?: LiveDraftKeyring | undefined;
 }
 
 const optional = (value: string | undefined) => value?.trim() ? value.trim() : undefined;
@@ -56,13 +61,16 @@ export function readGitModeConfig(env: NodeJS.ProcessEnv): GitModeConfig {
   return {
     installationRef: optional(env.IMMO_ARTIFACTS_GIT_INSTALLATION_REF),
     brokerOrigin: optional(env.IMMO_ARTIFACTS_GIT_BROKER_ORIGIN),
-    brokerToken: optional(env.IMMO_ARTIFACTS_GIT_BROKER_TOKEN),
+    service: { tokenEndpoint: optional(env.IMMO_ARTIFACTS_SERVICE_OAUTH_TOKEN_ENDPOINT),
+      clientId: optional(env.IMMO_ARTIFACTS_SERVICE_OAUTH_CLIENT_ID),
+      clientSecret: optional(env.IMMO_ARTIFACTS_SERVICE_OAUTH_CLIENT_SECRET),
+      resource: optional(env.IMMO_ARTIFACTS_SERVICE_OAUTH_RESOURCE) },
     cursorKey: parseCursorKey(env.IMMO_ARTIFACTS_GIT_CURSOR_KEY),
     codeReaders: (env.IMMO_ARTIFACTS_GIT_CODE_READERS ?? "").split(",").map((entry) => entry.trim()).filter(Boolean),
     humans: parseGitHumanEntries(env.IMMO_ARTIFACTS_GIT_HUMANS),
     committer: name && email ? { name, email } : undefined,
-    builderOrigin: optional(env.IMMO_ARTIFACTS_BUILDER_ORIGIN),
-    builderToken: optional(env.IMMO_ARTIFACTS_BUILDER_TOKEN),
+    builderUrl: optional(env.IMMO_ARTIFACTS_BUILDER_URL),
+    liveDraftKeys: parseLiveDraftKeyring(env.IMMO_ARTIFACTS_LIVE_DRAFT_KEYS, env.IMMO_ARTIFACTS_LIVE_DRAFT_KEY_CURRENT),
   };
 }
 
@@ -79,6 +87,8 @@ export interface GitModePorts {
   readonly gitToolFactory?: (deps: GitToolsDeps) => GitToolService;
   /** M3-I: sandbox build executor (host build API client). Absent: git_publish refuses. */
   readonly build?: GitBuildPort;
+  /** M3-I: host job store; absent: the fail-closed store (git_publish refuses). */
+  readonly jobs?: HostBuildJobStore;
   /** M4-I: live ports; absent ones default to Postgres stores and fail-closed keys, no worker. */
   readonly liveStore?: LiveStore;
   readonly liveKeys?: LiveKeyPort;
@@ -157,10 +167,9 @@ export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
     } });
   const registry = createImmoGitRegistry({ storageScopeId, installationRef: config.installationRef });
   const directory = ports.directory ?? createStaticGitHumanDirectory(config.humans);
-  const brokerToken = config.brokerToken;
-  const leases = ports.leases ?? (config.brokerOrigin && brokerToken
-    ? createLeaseBrokerClient({ origin: config.brokerOrigin, identity: { authorization: async () => `Bearer ${brokerToken}` },
-      ...(ports.fetch ? { fetch: ports.fetch } : {}) })
+  const leases = ports.leases ?? (config.brokerOrigin
+    ? createLeaseBrokerClient({ origin: config.brokerOrigin,
+      identity: serviceTokenSource(config.service ?? {}, SERVICE_SCOPE_BROKER, ports.fetch), ...(ports.fetch ? { fetch: ports.fetch } : {}) })
     : FAIL_CLOSED_LEASES);
   const git = ports.git ?? (config.cursorKey && config.committer ? createGitPort({
     registry, leases, forge: createGitHubForge(), directory, committer: config.committer, cursorKey: config.cursorKey,
@@ -171,12 +180,12 @@ export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
     },
   }) : FAIL_CLOSED_GIT_PORT);
   // M3-I: git_publish is selected only from the `build` stage; the sandbox
-  // executor is admitted only once the builder origin and token are set.
-  const builderToken = config.builderToken;
+  // executor is admitted only once the builder base URL is set; the service
+  // token source itself fails closed while the OAuth client is unconfigured.
   const build = ports.build ?? (input.resolution.tools.includes("artifacts_git_publish")
-    ? createHostBuildApiClient({ origin: config.builderOrigin,
-      identity: builderToken ? { authorization: async () => `Bearer ${builderToken}` } : undefined,
-      ...(ports.fetch ? { fetch: ports.fetch } : {}) })
+    ? createHostBuildApiClient({ baseUrl: config.builderUrl,
+      identity: serviceTokenSource(config.service ?? {}, SERVICE_SCOPE_BUILDER, ports.fetch),
+      ...(ports.jobs ? { jobs: ports.jobs } : {}), ...(ports.fetch ? { fetch: ports.fetch } : {}) })
     : undefined);
   const factory = ports.gitToolFactory ?? gitToolServiceFactory();
   const gitTools = withHostGitPolicy(factory({ bindings, registry, codeRights, git, outputDir: IMMO_GIT_OUTPUT_DIR,
@@ -187,7 +196,8 @@ export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
   const live = liveSelected ? composeLiveService({ pool, git, bindings, registry, codeRights, directory, hasWriteScope,
     invitations: ports.invitations ?? createPostgresLiveInvitationStore(pool),
     sessions: ports.sessions ?? createPostgresLiveSessions(pool),
-    ...(ports.liveStore ? { store: ports.liveStore } : {}), ...(ports.liveKeys ? { keys: ports.liveKeys } : {}),
+    ...(ports.liveStore ? { store: ports.liveStore } : {}),
+    ...(ports.liveKeys ?? config.liveDraftKeys ? { keys: ports.liveKeys ?? createSealedLiveKeys(config.liveDraftKeys!) } : {}),
     ...(ports.liveWorker ? { worker: ports.liveWorker } : {}), ...(ports.liveQualified ? { qualified: ports.liveQualified } : {}) })
     : undefined;
   return { git: { bindings, codeRights }, [GIT_TOOLS_DEP_KEY]: gitTools, ...(live ? { live } : {}) };
