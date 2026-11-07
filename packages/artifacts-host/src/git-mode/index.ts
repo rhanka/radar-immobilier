@@ -5,3 +5,5 @@ export * from "./identity.js";
 export * from "./authority.js";
 export * from "./provider-adapter.js";
 export * from "./compose.js";
+export * from "./build-api.js";
+export * from "./handoff.js";
