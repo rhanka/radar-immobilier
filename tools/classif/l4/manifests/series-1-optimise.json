@@ -1,0 +1,18 @@
+{
+ "kind": "l4-optimise",
+ "series": "1",
+ "next": "P2",
+ "createdAt": "2026-11-06T02:38:53.465Z",
+ "optimisers": [
+  "muse-wonder-max",
+  "opus-5.5-max"
+ ],
+ "proposalSha256": [
+  "ef4c2bc8a691ee791e13237fb9ef4718d4d2259118d41769cb05810d5a6218f2",
+  "8de17f1e9482d0f1e45cd5d3fa2a648a044ac1b1b3d1fd80f4c836ba53a15053"
+ ],
+ "promptSha256": "c0ba6a671141b251a3393a6884deb2aaa5b055087658b3277e0c19d468f30b2f",
+ "tuningItems": 252,
+ "repairs": 1,
+ "shingleCheck": "pass (0 verbatim shingles from the sealed set)"
+}

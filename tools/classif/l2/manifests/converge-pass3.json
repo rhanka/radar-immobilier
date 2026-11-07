@@ -1,0 +1,49 @@
+{
+ "pass": 3,
+ "createdAt": "2026-11-05T10:01:07.153Z",
+ "deferred": [],
+ "gaps": [],
+ "metrics": {
+  "items": 504,
+  "alphaVerdict": 0.8978392540214666,
+  "alphaCode": 0.874197686532746,
+  "verdictUnanimity": 0.9285714285714286,
+  "verdictConverged": 1,
+  "codeUnanimity": 0.8571428571428571,
+  "codeConverged": 0.9841269841269841,
+  "nonConvergedCode": 8,
+  "nonConvergedVerdict": 0,
+  "executionFailures": 0,
+  "ambiguous33": 140,
+  "missingInfoFlagged": 18,
+  "changedShare": 0.17006802721088435,
+  "reannotatedVotes": 294
+ },
+ "residuals": {
+  "count": 202,
+  "causes": {
+   "definition-gap": 122,
+   "code-pair-confusion": 52,
+   "data-outside-immo": 16,
+   "golden-set-conflict": 10,
+   "missing-information": 2
+  },
+  "unclassified": [],
+  "unclassifiedCount": 0,
+  "mapSha256": "8c8ebadeeb6b1043661206cf5283b0b7b8a5f87d962e616f209cbb6a76d9d2ea",
+  "fallbackToDefinitionGap": 2
+ },
+ "stop": {
+  "stop": false,
+  "why": "resolution continues"
+ },
+ "budget": {
+  "spent": 922,
+  "cap": 22000
+ },
+ "reannotatedThisPass": {
+  "muse-wonder-max": 98,
+  "astra-max": 98,
+  "opus-5.5-max": 98
+ }
+}

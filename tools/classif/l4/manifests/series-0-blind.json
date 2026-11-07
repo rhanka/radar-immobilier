@@ -1,0 +1,17 @@
+{
+ "kind": "l4-blind",
+ "series": "0",
+ "createdAt": "2026-11-06T01:30:06.797Z",
+ "promptSha256": "a60713366128ae4348a45a7323d0b0984cef87ca6cb33eda15073c045235b016",
+ "routes": [
+  "muse-spark-1.3-low",
+  "muse-spark-1.3-medium",
+  "opus-5.5-low",
+  "opus-5.5-medium",
+  "mistral-large-4-medium",
+  "glm-5.3-low"
+ ],
+ "blindItems": 252,
+ "aggregatesSha256": "4e2369a9dab13e86fdfb5f4061fdcdc14a303f3f4166dd6efe42ba103dc9bb4b",
+ "note": "blind aggregates sealed in $CLASSIF_HOME/blind/ (owner only); S113 is golden-exposed and excluded from selection"
+}

@@ -1,0 +1,50 @@
+{
+ "lot": "L1",
+ "kind": "guide-G0",
+ "createdAt": "2026-10-31T20:49:36.429Z",
+ "author": "opus-5.5-max (isolated claude -p)",
+ "calls": 1,
+ "promptSha256": "3cf3581bacf6189716be44068ab9e673dc5188b87fbe41817e1fdf7ac778ab08",
+ "pack": {
+  "criteriaSha256": "4d480937912986676ccc6366979116c72a0985df3cd919193162e3ccf2efd8fc",
+  "definitionsSha256": "556c7147bd6ce01586225cd498ce42335147edca08aa61e9a6ee21ca315d6267"
+ },
+ "guideG0Sha256": "b8f922e62ea44b63f10f4f5e39fc28b3581c9338578347fa36fe8a136abd887c",
+ "guideWords": 1240,
+ "latencyMs": 1911819,
+ "usage": {
+  "input_tokens": 4,
+  "cache_creation_input_tokens": 4488,
+  "cache_read_input_tokens": 3762,
+  "output_tokens": 234906,
+  "output_tokens_details": {
+   "thinking_tokens": 231496
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 4488,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "global",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 106906,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 4156,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 4156
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "note": "Guide text and pack stay private ($CLASSIF_HOME/l1/pack): they derive from Steve's text."
+}
