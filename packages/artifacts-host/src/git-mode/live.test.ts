@@ -147,6 +147,17 @@ describe("live invitations", () => {
       .rejects.toMatchObject({ kind: "access_denied" });
   });
 
+  it("caps an invitation at the announced session end and refuses one for an ended session", async () => {
+    const ending = { ...deps(), sessions: { current: async (binding: GitBinding) => ({
+      liveSessionId: `session-${binding.artifactId}-${binding.generation}`, expiresAt: new Date(NOW + 10 * 60_000).toISOString() }) } };
+    const capped = await createLiveInvitationService(ending).create(caller("alice"), { artifactId: A_ALICE, inviteeId: "carol" });
+    expect(capped.expiresAt).toBe(new Date(NOW + 10 * 60_000).toISOString());
+    now = NOW + 10 * 60_000;
+    await expect(createLiveAuthorize(ending)(inv("carol"), A_ALICE)).rejects.toMatchObject({ kind: "access_denied" });
+    await expect(createLiveInvitationService(ending).create(caller("alice"), { artifactId: A_ALICE, inviteeId: "carol" }))
+      .rejects.toMatchObject({ kind: "git_not_attached" });
+  });
+
   it("does not let an invitation on one binding open another", async () => {
     await createLiveInvitationService(deps()).create(caller("alice"), { artifactId: A_ALICE, inviteeId: "carol" });
     await expect(createLiveAuthorize(deps())(inv("carol"), A_BOB)).rejects.toMatchObject({ kind: "access_denied" });

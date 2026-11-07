@@ -26,7 +26,7 @@ export type GitModeStage = (typeof GIT_MODE_STAGES)[number];
 export const GIT_BINDING_TOOLS = ["artifacts_git_attach", "artifacts_fetch_app_source"] as const;
 /**
  * `artifacts_list_app_sources` is deliberately absent: no provider routes it
- * (0.2.19 included), so it is never selected, scoped or served.
+ * (0.2.20 included), so it is never selected, scoped or served.
  */
 /** M3-I: server-side build and publication of a bound commit. */
 export const GIT_BUILD_TOOLS = ["artifacts_git_publish"] as const;
@@ -55,8 +55,8 @@ const STAGE_ANCHORS: Readonly<Record<GitModeStage, readonly GitArtifactTool[]>> 
  * Provider versions whose `createHttpArtifactApp` routes each git tool.
  *
  * - git_commit and live_* ride `deps.live` since 0.2.18.
- * - fetch_app_source, git_attach and git_publish are routed by 0.2.19
- *   (`deps.gitTools`, M1). TODO(0.2.19): add "0.2.19" to these three entries
+ * - fetch_app_source, git_attach and git_publish are routed by 0.2.20
+ *   (`deps.gitTools`, M1). TODO(0.2.20): add "0.2.20" to these three entries
  *   (and to the live entries) in the pin PR, after qualification. Until then
  *   the list stays empty, so the `bindings`, `build` and `live` stages refuse
  *   at boot (fail-closed default).

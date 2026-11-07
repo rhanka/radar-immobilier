@@ -5,7 +5,8 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { p0bFixture } from "../p0b.test-support.js";
 
 /**
- * 0036_artifacts_git_bindings (byte copy of the provider 0010) on the immo
+ * 0036_artifacts_git_bindings (provider 0010 plus the lock-timeout prefix and the
+ * replay-idempotence rewrite, see artifacts-provenance.spec.ts) on the immo
  * artifacts schema: the provider binding store writes a binding, its audit
  * event and its replay receipt in one transaction, and the audit stays
  * append-only.

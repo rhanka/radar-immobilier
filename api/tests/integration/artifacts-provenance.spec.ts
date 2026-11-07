@@ -13,16 +13,18 @@ const migrations = [
 
 /**
  * Provider migrations that are NOT replay-idempotent, adopted through one
- * fixed idempotence rewrite (every immo migration must replay on a
- * prod-restore journal drift, see migrate-idempotence.spec.ts). The provider
- * file is pinned by hash and the immo file must equal exactly the rewrite of
- * it: no other byte may differ.
+ * fixed rewrite: the immo lock-timeout prefix (same convention as 0032-0035
+ * and 0038: a blocked lock fails the migration after 5 s instead of queueing
+ * every reader of artifacts.releases behind it) plus the idempotence rewrite
+ * (every immo migration must replay on a prod-restore journal drift, see
+ * migrate-idempotence.spec.ts). The provider file is pinned by hash and the
+ * immo file must equal exactly the rewrite of it: no other byte may differ.
  */
 const derivedMigrations = [
   // M2-I: SG1 bindings, audit and release index. Inert until the git mode flag selects a tool.
   ["0036_artifacts_git_bindings", "0010_git_bindings.sql",
     "896947eec4898a0918bab2f5d236718095296952ea37c1012fa448c779041de1",
-    "b2c4b1cf4eadd747464afa8548c36b40ee3b99b549aa2c267fd70dfbcc466c60"],
+    "465b3b22d12e4b299d5711338056649a718dde3ec6e1572d36d138ec4a48a571"],
 ] as const;
 
 const IDEMPOTENCE_REWRITE: readonly (readonly [RegExp, string])[] = [
@@ -33,7 +35,9 @@ const IDEMPOTENCE_REWRITE: readonly (readonly [RegExp, string])[] = [
   [/^CREATE FUNCTION /gm, "CREATE OR REPLACE FUNCTION "],
   [/^CREATE TRIGGER /gm, "CREATE OR REPLACE TRIGGER "],
 ];
-const idempotent = (sql: string) => IDEMPOTENCE_REWRITE.reduce((text, [pattern, value]) => text.replace(pattern, value), sql);
+const LOCK_TIMEOUT_PREFIX = "SET LOCAL lock_timeout = '5s';\n--> statement-breakpoint\n";
+const rewrite = (sql: string) => LOCK_TIMEOUT_PREFIX +
+  IDEMPOTENCE_REWRITE.reduce((text, [pattern, value]) => text.replace(pattern, value), sql);
 
 const sha256 = (bytes: Buffer) => createHash("sha256").update(bytes).digest("hex");
 const provider = (source: string) => readFileSync(createRequire(import.meta.url).resolve(`@sentropic/artifacts/migrations/${source}`));
@@ -48,12 +52,12 @@ describe("artifact migration provenance", () => {
     expect(bytes.equals(provider(source))).toBe(true);
     expect(sha256(bytes)).toBe(expected);
   });
-  it.each(derivedMigrations)("derives %s from the pinned package migration by the idempotence rewrite only",
+  it.each(derivedMigrations)("derives %s from the pinned package migration by the lock-timeout and idempotence rewrite only",
     (tag, source, providerHash, expected) => {
       const original = provider(source);
       expect(sha256(original)).toBe(providerHash);
       const bytes = copy(tag);
-      expect(bytes.toString("utf8")).toBe(idempotent(original.toString("utf8")));
+      expect(bytes.toString("utf8")).toBe(rewrite(original.toString("utf8")));
       expect(sha256(bytes)).toBe(expected);
     });
   it("appends unique increasing timestamps after every earlier migration", () => {

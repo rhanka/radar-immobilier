@@ -44,9 +44,14 @@ export interface LiveInvitationStore {
   revoke(storageScopeId: string, artifactId: string, invitationId: string, at: string): Promise<LiveInvitation | undefined>;
 }
 
-/** Current live session of a binding generation; undefined while dormant or stopped. */
+/**
+ * Current live session of a binding generation; undefined while dormant or
+ * stopped. `expiresAt` is the session end when the controller announces one
+ * (A-LIVE v2 Amendment 1: no maximum lifetime, idle stop owned by the
+ * controller, so usually absent); an invitation never outlives it.
+ */
 export interface LiveSessionPort {
-  current(binding: GitBinding): Promise<{ liveSessionId: string } | undefined>;
+  current(binding: GitBinding): Promise<{ liveSessionId: string; expiresAt?: string } | undefined>;
 }
 
 export function isInvitationActive(invitation: LiveInvitation, binding: GitBinding, liveSessionId: string | undefined, now: number) {
@@ -136,7 +141,11 @@ export function createLiveReaderGate(deps: Pick<LiveAuthorityDeps, "bindings" | 
   };
 }
 
-/** Invitation ceilings: one hour by default, eight hours at most, and never past the session. */
+/**
+ * Invitation ceilings: one hour by default, eight hours at most, capped at
+ * the announced session end, and void as soon as the session id or the
+ * binding generation changes (isInvitationActive).
+ */
 export const LIVE_INVITATION_DEFAULT_TTL_MS = 60 * 60 * 1000;
 export const LIVE_INVITATION_MAX_TTL_MS = 8 * 60 * 60 * 1000;
 export const LIVE_INVITATION_READ_SCOPE = "immo:artifacts:read" as const;
@@ -171,10 +180,13 @@ export function createLiveInvitationService(deps: Pick<LiveAuthorityDeps, "bindi
       if (!await deps.codeRights.canReadCode({ storageScopeId: binding.storageScopeId, repoId: binding.repoId,
         actorId: input.inviteeId })) denied();
       const at = now();
+      const sessionEnd = session.expiresAt === undefined ? Number.POSITIVE_INFINITY : Date.parse(session.expiresAt);
+      if (!(sessionEnd > at)) throw new ArtifactOperationError("git_not_attached");
+      const expiresAt = Math.min(at + ttl, sessionEnd);
       const invitation: LiveInvitation = { invitationId: randomUUID(), storageScopeId: binding.storageScopeId,
         artifactId: binding.artifactId, bindingGeneration: binding.generation, liveSessionId: session.liveSessionId,
         inviteeId: input.inviteeId, grantorId: caller.actorId, createdAt: new Date(at).toISOString(),
-        expiresAt: new Date(at + ttl).toISOString(), revokedAt: null, epoch: 1 };
+        expiresAt: new Date(expiresAt).toISOString(), revokedAt: null, epoch: 1 };
       await deps.invitations.insert(invitation);
       return invitation;
     },
@@ -257,13 +269,14 @@ export function createPostgresLiveInvitationStore(pool: Queryable): LiveInvitati
 export function createPostgresLiveSessions(pool: Queryable): LiveSessionPort {
   return {
     async current(binding) {
-      const result = await pool.query<{ live_session_id: string | null; phase: string | null }>(`SELECT
-        record->'runtime'->>'liveSessionId' AS live_session_id, record->'runtime'->>'phase' AS phase
+      const result = await pool.query<{ live_session_id: string | null; phase: string | null; ends_at: string | null }>(`SELECT
+        record->'runtime'->>'liveSessionId' AS live_session_id, record->'runtime'->>'phase' AS phase,
+        record->'runtime'->>'maximumLifetimeAt' AS ends_at
         FROM artifacts.live_drafts WHERE storage_scope_id = $1 AND artifact_id = $2 AND binding_generation = $3`,
       [binding.storageScopeId, binding.artifactId, binding.generation]);
       const row = result.rows[0];
       if (!row?.live_session_id || ["DORMANT", "DECOMMISSIONING", "FAILED"].includes(row.phase ?? "")) return undefined;
-      return { liveSessionId: row.live_session_id };
+      return { liveSessionId: row.live_session_id, ...(row.ends_at ? { expiresAt: row.ends_at } : {}) };
     },
   };
 }

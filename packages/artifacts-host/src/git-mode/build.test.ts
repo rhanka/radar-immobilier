@@ -3,6 +3,7 @@ import type { GitBinding } from "@sentropic/artifacts";
 import { describe, expect, it, vi } from "vitest";
 import { createMemoryGitBindingStore } from "@sentropic/artifacts";
 import { createHostBuildApiClient } from "./build-api.js";
+import { IMMO_HOST_BUILD_QUALIFICATION } from "./gb1-host-build.js";
 import { composeGitMode, readGitModeConfig } from "./compose.js";
 import type { GitBuildPort } from "./provider-adapter.js";
 import {
@@ -156,7 +157,11 @@ describe("host build API client", () => {
     await expect(client.request(job)).resolves.toEqual({ jobId: "job-1", state: "build_pending" });
     const [url, init] = fetcher.mock.calls[0]! as unknown as [URL, RequestInit];
     expect(String(url)).toBe("https://builder.example/artifacts/builder/v1/jobs");
-    expect(JSON.parse(String(init.body))).toEqual(job);
+    const body = JSON.parse(String(init.body));
+    expect(body).toEqual({ ...job, buildQualification: IMMO_HOST_BUILD_QUALIFICATION });
+    expect(body.buildQualification.postinstallAllowlist).toEqual([]);
+    expect(body.buildQualification.installScriptRows).toHaveLength(19);
+    expect(body.buildQualification.installScriptRows.every((row: { scripts: string }) => row.scripts === "disabled")).toBe(true);
   });
 
   it("fails closed on builder errors and malformed answers", async () => {

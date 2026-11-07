@@ -2,13 +2,13 @@ import * as provider from "@sentropic/artifacts";
 import type { GitBindingStore, GitCodeRightsPort, GitPort, GitRepositoryRegistry } from "@sentropic/artifacts";
 
 /**
- * Isolation seam for the 0.2.19 provider symbols (M1: `createGitToolService`
+ * Isolation seam for the 0.2.20 provider symbols (M1: `createGitToolService`
  * and the `gitTools` dependency of `createHttpArtifactApp`, which route
  * fetch_app_source, git_attach and git_publish).
  *
  * The shapes below mirror the M1 wagon (`server/git-tools-contracts.ts`,
  * sentropic `feat/artifacts-route-git-tools`) structurally.
- * TODO(0.2.19): replace them with `import type { GitToolService, GitToolsDeps,
+ * TODO(0.2.20): replace them with `import type { GitToolService, GitToolsDeps,
  * GitBuildPort, ... } from "@sentropic/artifacts"` in the pin PR and delete
  * the local copies. Until then the factory lookup fails closed: under 0.2.18
  * `createGitToolService` does not exist and the composition refuses.

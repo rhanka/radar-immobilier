@@ -1,4 +1,5 @@
 import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-contract";
+import { IMMO_HOST_BUILD_QUALIFICATION } from "./gb1-host-build.js";
 import type { HostServiceIdentity } from "./lease-broker.js";
 import type { GitBuildExecutor, GitBuildJobRequest, GitBuildJobState, GitBuildPort } from "./provider-adapter.js";
 
@@ -11,7 +12,9 @@ import type { GitBuildExecutor, GitBuildJobRequest, GitBuildJobState, GitBuildPo
  * outside the persisted job identity.
  *
  * Wire draft, to align with M3-B: `POST <origin>/artifacts/builder/v1/jobs`,
- * body = GitBuildJobRequest, answer `{ jobId, state }`. The same
+ * body = GitBuildJobRequest plus `buildQualification` (GB1: empty
+ * postinstallAllowlist and the DISABLED install-script rows generated from
+ * the lock), answer `{ jobId, state }`. The same
  * `(requestedBy, idempotencyKey)` must return the same job (builder side).
  *
  * Only `sandbox` is admitted, and only when the builder is configured:
@@ -22,6 +25,8 @@ export interface HostBuildApiOptions {
   readonly identity?: HostServiceIdentity | undefined;
   readonly fetch?: typeof fetch;
   readonly timeoutMs?: number;
+  /** GB1 qualification sent with every job; defaults to the rows generated from the lock. */
+  readonly qualification?: typeof IMMO_HOST_BUILD_QUALIFICATION;
 }
 
 const STATES: readonly GitBuildJobState[] = ["build_pending", "building", "published", "build_failed", "cancelled"];
@@ -45,7 +50,7 @@ export function createHostBuildApiClient(options: HostBuildApiOptions): GitBuild
       try {
         response = await fetcher(endpoint, { method: "POST", redirect: "error",
           headers: { "content-type": "application/json", authorization: await options.identity!.authorization() },
-          body: JSON.stringify(job), signal: AbortSignal.timeout(options.timeoutMs ?? 10_000) });
+          body: JSON.stringify({ ...job, buildQualification: options.qualification ?? IMMO_HOST_BUILD_QUALIFICATION }), signal: AbortSignal.timeout(options.timeoutMs ?? 10_000) });
       } catch { throw new ArtifactOperationError("provider_unavailable"); }
       if (response.status !== 200 && response.status !== 201) throw new ArtifactOperationError("provider_unavailable");
       let body: unknown;

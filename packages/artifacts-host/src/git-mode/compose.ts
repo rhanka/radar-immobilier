@@ -22,7 +22,7 @@ import { createImmoGitRegistry, IMMO_GIT_OUTPUT_DIR, IMMO_GIT_REPO_ID } from "./
 /**
  * Host composition of the git mode (D0: immo composes the package locally).
  * Flag off: no dependency at all, so `createHttpArtifactApp` receives exactly
- * the flag-less deps. Flag on: `deps.git` (binding projection) and the 0.2.19
+ * the flag-less deps. Flag on: `deps.git` (binding projection) and the 0.2.20
  * `gitTools` executors. A missing piece of configuration never crashes the
  * host: the matching port fails closed at call time with a typed refusal
  * (`provider_unavailable`, `git_repo_not_registered`, `access_denied`).
@@ -129,6 +129,19 @@ export interface ComposeGitModeInput {
   readonly storageScopeId: string;
   readonly config: GitModeConfig;
   readonly ports?: GitModePorts;
+}
+
+/**
+ * Host entry point. Flag off: returns no dependency WITHOUT reading the git
+ * configuration, so a malformed or incomplete IMMO_ARTIFACTS_GIT_* value can
+ * never stop radar-api or immo-mcp while the mode is off.
+ */
+export function composeGitModeFromEnv(input: Omit<ComposeGitModeInput, "config"> & {
+  readonly env: NodeJS.ProcessEnv; readonly config?: GitModeConfig | undefined;
+}): GitModeDeps {
+  if (input.resolution.stage === "off") return {};
+  const { env, config, ...rest } = input;
+  return composeGitMode({ ...rest, config: config ?? readGitModeConfig(env) });
 }
 
 export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
