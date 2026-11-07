@@ -67,18 +67,32 @@ describe("live revocation: sockets closed, fence pushed", () => {
     const sockets = createLiveSocketRegistry();
     const invitee = socket();
     sockets.register({ artifactId: ARTIFACT, sessionId: "sess", principalId: "carol", invitationId: "inv-1" }, invitee);
+    const refused = new Response("refused", { status: 404 });
+    const unavailable = new Response("busy", { status: 503 });
     const fetcher = vi.fn()
       .mockRejectedValueOnce(new Error("reset"))
-      .mockResolvedValueOnce(new Response(null, { status: 404 }))
-      .mockResolvedValueOnce(new Response(null, { status: 503 }));
+      .mockResolvedValueOnce(refused)
+      .mockResolvedValueOnce(unavailable);
     const push = createLiveFencePusher({ signer, kid: "k1", host: "pages.test", fetch: fetcher as never,
       controlUrl: () => new URL("https://edge.internal/_live-control/v1"), sleep: noSleep });
     await expect(createLiveRevocation({ sockets, push }).invitation({ invitationId: "inv-1", storageScopeId: SCOPE,
       artifactId: ARTIFACT, bindingGeneration: 1, liveSessionId: "sess", inviteeId: "carol", grantorId: "alice",
-      createdAt: "", expiresAt: "", revokedAt: "x", epoch: 2 })).rejects.toMatchObject({ kind: "provider_unavailable" });
+      createdAt: "", expiresAt: "", revokedAt: "x", epoch: 2 })).rejects.toMatchObject({ kind: "provider_unavailable",
+      details: { publicDetails: { fence: "push_failed", status: 503 } } });
     expect(fetcher).toHaveBeenCalledTimes(3);
+    expect(refused.bodyUsed).toBe(true);
+    expect(unavailable.bodyUsed).toBe(true);
     expect(invitee.close).toHaveBeenCalled();
     expect(sockets.size()).toBe(0);
+  });
+
+  it("treats any 2xx as pushed and drains its body", async () => {
+    const accepted = new Response("ok", { status: 200 });
+    const push = createLiveFencePusher({ signer, kid: "k1", host: "pages.test", fetch: (async () => accepted) as never,
+      controlUrl: () => new URL("https://edge.internal/_live-control/v1"), sleep: noSleep });
+    await expect(push({ artifactId: ARTIFACT, op: "fence", sessionId: "", invitationId: "", epoch: 0, generation: 2,
+      routeEpoch: 1 })).resolves.toBeUndefined();
+    expect(accepted.bodyUsed).toBe(true);
   });
 
   it("succeeds on a retry after a transient failure", async () => {

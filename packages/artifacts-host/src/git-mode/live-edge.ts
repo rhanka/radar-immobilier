@@ -13,8 +13,10 @@ import { loadLiveHost, type LiveHostModule } from "./live-host-adapter.js";
  *   browser socket it holds for that invitee or session (the host owns the
  *   browser socket), then pushes the revocation to artifact-content's fence
  *   channel: `POST /_live-control/v1` with the signed `x-live-host-control`
- *   header, answered 204 (any refusal is a bare 404). A push is retried; a
- *   final failure is surfaced, the sockets being already closed.
+ *   header, answered 204 (any refusal is a bare 404). Every response body is
+ *   read to completion (no connection held between attempts); a non-2xx
+ *   answer or a transport error is retried, and the final failure is
+ *   surfaced with the last status, the sockets being already closed.
  */
 export const LIVE_CONTROL_PATH = "/_live-control/v1" as const;
 export const LIVE_CONTROL_HEADER = "x-live-host-control" as const;
@@ -105,6 +107,7 @@ export function createLiveFencePusher(options: LiveFencePushOptions) {
   return async (claims: Omit<LiveControlClaims, "v" | "kid" | "host" | "iat" | "exp">): Promise<void> => {
     if (!options.controlUrl) throw new ArtifactOperationError("provider_unavailable", { publicDetails: { fence: "unconfigured" } });
     const url = options.controlUrl(claims.artifactId);
+    let lastStatus = 0;
     for (let attempt = 0; attempt < attempts; attempt += 1) {
       if (attempt > 0) await sleep(backoff(attempt - 1));
       const iat = Math.floor(now() / 1000);
@@ -112,10 +115,13 @@ export function createLiveFencePusher(options: LiveFencePushOptions) {
       try {
         const response = await fetcher(url, { method: "POST", redirect: "error", headers: { [LIVE_CONTROL_HEADER]: token },
           signal: AbortSignal.timeout(5000) });
-        if (response.status === 204) return;
-      } catch { /* retried */ }
+        lastStatus = response.status;
+        // Drain the body (bounded by the edge's empty answers) before deciding.
+        await response.arrayBuffer().catch(() => undefined);
+        if (response.ok) return;
+      } catch { lastStatus = 0; /* transport error, retried */ }
     }
-    throw new ArtifactOperationError("provider_unavailable", { publicDetails: { fence: "push_failed" } });
+    throw new ArtifactOperationError("provider_unavailable", { publicDetails: { fence: "push_failed", status: lastStatus } });
   };
 }
 export type LiveFencePush = ReturnType<typeof createLiveFencePusher>;

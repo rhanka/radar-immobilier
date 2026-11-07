@@ -1,3 +1,5 @@
+SET LOCAL lock_timeout = '5s';
+--> statement-breakpoint
 -- SG1, G0 FROZEN v3 §2. Additive; live sessions have a separate later migration.
 CREATE UNIQUE INDEX IF NOT EXISTS artifacts_id_scope_git ON artifacts.artifacts(id, storage_scope_id);
 CREATE TABLE IF NOT EXISTS artifacts.git_bindings (

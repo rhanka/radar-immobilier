@@ -26,7 +26,7 @@ import { createTimeoutBlobStore, createTimeoutS3Client, DEFAULT_S3_BUDGET, withS
 import { HOST_ARTIFACT_PROFILE, HOST_MIME_TYPES, isArtifactMutation, RELEASE_FILE_BYTES_MAX, RELEASE_FILES_MAX, RELEASE_TOTAL_BYTES_MAX } from "./p0b-profile.js";
 import type { ArtifactDeleteConfirmation } from "./delete-confirmation.js";
 import { ARTIFACT_GIT_MODE } from "./p0b-profile.js";
-import { composeGitMode, readGitModeConfig, type GitModeConfig, type GitModePorts } from "./git-mode/compose.js";
+import { composeGitModeFromEnv, type GitModeConfig, type GitModePorts } from "./git-mode/compose.js";
 
 /**
  * S3 sockets kept warm for a publish. Every file costs one PUT and one
@@ -141,8 +141,8 @@ export async function composeArtifactHost(
     const signer = options.uploads?.signer ?? createS3UploadSigner({ client, bucket: config.s3Bucket });
     const uploadPages = options.uploads?.pages ?? createPostgresUploadPageStore(pool);
     const gitResolution = options.gitMode?.resolution ?? ARTIFACT_GIT_MODE;
-    const gitMode = gitResolution.stage === "off" ? {} : composeGitMode({ resolution: gitResolution, pool,
-      storageScopeId: config.storageScope, config: options.gitMode?.config ?? readGitModeConfig(process.env),
+    const gitMode = composeGitModeFromEnv({ resolution: gitResolution, pool, storageScopeId: config.storageScope,
+      env: process.env, config: options.gitMode?.config,
       ...(options.gitMode?.ports ? { ports: options.gitMode.ports } : {}) });
     const domain = await createCommitDomain({ pool, scope: config.storageScope, blobs, coordinator,
       profile, preparationWindowMs, gitMode,

@@ -23,13 +23,20 @@ compiled profile digest depends on it.
 Boot refusals (fail-closed): any other value (`artifact_git_mode_invalid`);
 a stage whose anchor tool the pinned provider does not route
 (`artifact_git_mode_provider_unqualified`). On 0.2.18 every stage refuses;
-the 0.2.19 pin adds `0.2.19` to `GIT_TOOL_PROVIDER_ROUTING` (`flag.ts`).
+the 0.2.20 pin adds `0.2.20` to `GIT_TOOL_PROVIDER_ROUTING` (`flag.ts`).
 Do not set the flag before that pin is deployed.
+
+Blast radius: the flag is read when `@radar/artifacts-host` is imported, so a
+refusal stops the whole radar-api or radar-immo-mcp process, not only the git
+mode. With the flag off (unset, empty or `off`) no `IMMO_ARTIFACTS_GIT_*` /
+`IMMO_ARTIFACTS_BUILDER_*` value is read: a malformed one cannot stop the
+process. With the flag on, a malformed value (half-set committer, invalid
+cursor key, non-JSON humans list) refuses the start of the whole process.
 
 ## Configuration
 
-All optional. A missing value never crashes the host: the matching port
-refuses at call time with a typed error.
+All optional and read only when the flag is on. A missing value never
+crashes the host: the matching port refuses at call time with a typed error.
 
 | Variable | Kind | Effect when absent |
 |---|---|---|
@@ -59,16 +66,26 @@ old one. A cursor key rotation invalidates open source cursors only.
 - Anyone else is refused; a third party never writes to another user's binding.
 - `git_attach` executor: default `sandbox`; `caller` and `ci` are refused.
 
+## GB1 build qualification
+
+Every sandbox build job request carries `buildQualification`:
+`postinstallAllowlist: []` and one DISABLED row (package, version,
+integrity) per lockfile install-script entry, generated from
+`package-lock.json` by `make -f tools/make/git-artifact.mk gb1-rows`.
+`gb1-qualification.test.ts` fails when the lock and the rows diverge:
+regenerate after any lockfile change that touches an install-script entry.
+
 ## Not yet composed (fail-closed)
 
-- `createGitToolService` and `deps.gitTools`: provider 0.2.19 (`provider-adapter.ts`).
+- `createGitToolService` and `deps.gitTools`: provider 0.2.20 (`provider-adapter.ts`).
 - SG4b handoff verification, host receipt signing, live assertion and control
   signing, candidate digest: provider subpath `@sentropic/artifacts/live-host`
   (0.2.20, `live-host-adapter.ts`); immo implements none of this crypto.
 - Live edge revocation: sockets held by the immo content host are closed first,
-  then `POST /_live-control/v1` (`x-live-host-control`, 204) is pushed with
-  3 attempts; a final failure is surfaced (`provider_unavailable`). The control
-  URL of the edge is not configured yet.
+  then `POST /_live-control/v1` (`x-live-host-control`) is pushed with
+  3 attempts; every response body is drained, a non-2xx answer is retried and
+  the final failure is surfaced (`provider_unavailable`, last status). The
+  control URL of the edge is not configured yet.
 - SG4b commit port (release + git release index + receipt + baseline in one
   transaction, durable single-use authorization ledger): `FAIL_CLOSED_HANDOFF_COMMIT`.
 - Live draft keys (KMS or sealed secret): `FAIL_CLOSED_LIVE_KEYS`; live worker
