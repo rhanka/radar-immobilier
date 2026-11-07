@@ -6,9 +6,9 @@
 #   make -f tools/make/git-artifact.mk down ENV=test-git-artifact
 GIT_ARTIFACT_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/../..)
 REF ?= HEAD
-GB1_ROWS := packages/artifacts-host/src/git-mode/gb1-install-script-rows.json
+GB1_ROWS := artifact-build/gb1-qualification.json
 .PHONY: proof test down gb1-rows
-# GB1 DISABLED install-script qualification rows, generated from package-lock.json (never by hand).
+# GB1 qualification (artifact-build/gb1-qualification.json), generated from package-lock.json (never by hand).
 gb1-rows:
 	@case "$(ENV)" in test-*) ;; *) echo 'ENV must be test-*'; exit 2;; esac
 	@cd "$(GIT_ARTIFACT_ROOT)" && COMPOSE_DISABLE_ENV_FILE=1 docker compose --env-file /dev/null -p "radar-$(ENV)" -f tools/make/git-artifact.compose.yml run --rm --no-deps -T node node tools/make/git-artifact-gb1-rows.mjs > "$(GB1_ROWS)"
