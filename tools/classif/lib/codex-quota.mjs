@@ -1,6 +1,8 @@
 // Shared ChatGPT quota guard (codex seats sol-6.1-low, astra-max, luna-6-low): those seats share
-// the weekly ChatGPT quota with the production immo daily detection. Every codex call reports the
-// quota in its --json stream (`token_count` event, `rate_limits`); the pilot pauses its codex
+// the weekly ChatGPT quota with the production immo daily detection. codex writes the quota
+// (`token_count` event, `rate_limits`) to the session file of each call, not to the --json stdout
+// (verified on a real call): callSeat reads it then deletes it; stdout stays a secondary source.
+// The pilot pauses its codex
 // seats once a call reports `used_percent >= CODEX_QUOTA_PAUSE` (default 85) or a non-null
 // `rate_limit_reached_type`. No model call here: parsing, logging fields, guard state, status.
 import { existsSync, readFileSync } from 'node:fs';
