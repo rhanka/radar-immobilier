@@ -16,3 +16,5 @@ export * from "./live-capacity.js";
 export * from "./service-token.js";
 export * from "./live-keys.js";
 export * from "./live-host-endpoints.js";
+export * from "./host-ledger.js";
+export * from "./host-jobs.js";

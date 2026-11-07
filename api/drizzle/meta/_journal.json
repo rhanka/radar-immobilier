@@ -267,6 +267,13 @@
       "when": 1793000000008,
       "tag": "0038_artifacts_live_invitations",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1793000000009,
+      "tag": "0039_artifacts_host_build_ledger",
+      "breakpoints": true
     }
   ]
 }
