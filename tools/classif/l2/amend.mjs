@@ -12,6 +12,7 @@ import { sha256 } from '../lib/render.mjs';
 import { appendJsonlRecord } from '../lib/jsonl.mjs';
 import { classifDir, repoRoot, testOnlyEnv, classifHome, privateDir } from '../lib/paths.mjs';
 import { check as checkBudget } from '../lib/budget.mjs';
+import { quotaFields } from '../lib/codex-quota.mjs';
 import { assertNoVerbatim } from '../lib/freeze.mjs';
 import { atomicWrite, ANNOTATORS, loadDevItems } from './run.mjs';
 import { latestVotes } from './converge.mjs';
@@ -142,7 +143,7 @@ ${digest}
     const r = await cachedCall(home, a, 'propose', proposePrompt, seatTmp,
       { log: callsLog, rec: { phase: `amend-${to}`, pass: n, step: 'propose', annotator: a } });
     appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: `amend-${to}`, pass: n, step: 'propose', annotator: a,
-      exitCode: r.code, latencyMs: r.latencyMs, reused: Boolean(r.reused), toolEvents: r.toolEvents ?? null, usage: r.usage ?? null });
+      exitCode: r.code, latencyMs: r.latencyMs, reused: Boolean(r.reused), toolEvents: r.toolEvents ?? null, usage: r.usage ?? null, ...(r.reused ? {} : quotaFields(r)) });
     calls.push({ annotator: a, step: 'propose', exitCode: r.code, latencyMs: r.latencyMs, reused: Boolean(r.reused), toolEvents: r.toolEvents ?? null });
     if (r.code !== 0) process.stderr.write(`[amend] ${a} propose seat exit code ${r.code}: proposals inadmissible (fail-closed exit policy)\n`);
     if ((r.toolEvents ?? 0) > 0) process.stderr.write(`[amend] ${a} propose tool events ${r.toolEvents}: proposals inadmissible (fail-closed tool policy)\n`);
@@ -161,7 +162,7 @@ ${union.map((x) => `- ${x.id}: ${x.rule} (rationale: ${x.rationale})`).join('\n'
     const r = await cachedCall(home, a, 'vote', votePrompt, seatTmp,
       { log: callsLog, rec: { phase: `amend-${to}`, pass: n, step: 'vote', annotator: a } });
     appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: `amend-${to}`, pass: n, step: 'vote', annotator: a,
-      exitCode: r.code, latencyMs: r.latencyMs, reused: Boolean(r.reused), toolEvents: r.toolEvents ?? null, usage: r.usage ?? null });
+      exitCode: r.code, latencyMs: r.latencyMs, reused: Boolean(r.reused), toolEvents: r.toolEvents ?? null, usage: r.usage ?? null, ...(r.reused ? {} : quotaFields(r)) });
     calls.push({ annotator: a, step: 'vote', exitCode: r.code, latencyMs: r.latencyMs, reused: Boolean(r.reused), toolEvents: r.toolEvents ?? null });
     if (r.code !== 0) process.stderr.write(`[amend] ${a} vote seat exit code ${r.code}: ballot inadmissible (fail-closed exit policy)\n`);
     if ((r.toolEvents ?? 0) > 0) process.stderr.write(`[amend] ${a} vote tool events ${r.toolEvents}: ballot inadmissible (fail-closed tool policy)\n`);

@@ -144,6 +144,16 @@ classif-l3b-reference: ## Classification pilot L3b: reference set D (provenances
 	@test "$(CLASSIF_ROLE)" = "test-executor" || { echo "[classif-l3b-reference] CLASSIF_ROLE=test-executor required"; exit 2; }
 	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l3/reference-d.mjs
 
+# ChatGPT quota guard: the codex seats (astra-max, sol-6.1-low, luna-6-low) share the weekly quota
+# with the production immo detection. dev, blind and GEPA stop launching codex calls, and stop the
+# run, once a call reports at least CODEX_QUOTA_PAUSE % used (default 85) or a reached rate limit.
+CODEX_QUOTA_PAUSE ?=
+CODEX_QUOTA_FLAG = $(if $(CODEX_QUOTA_PAUSE),--codex-quota-pause $(CODEX_QUOTA_PAUSE),)
+.PHONY: classif-quota-status
+classif-quota-status: ## Classification pilot: last known ChatGPT quota per codex seat (percent, reset UTC, age) from calls.jsonl, no call
+	@test "$(ENV)" = "preprod" || { echo "[classif-quota-status] ENV=preprod required"; exit 2; }
+	@CODEX_QUOTA_PAUSE=$(CODEX_QUOTA_PAUSE) $(CLASSIF_NODE) $(CLASSIF_DIR)/quota-status.mjs
+
 # L4 — P0 + prompt-tuning series with blind evaluation (plan v3 C/D, Annex M in l4/ANNEX-M.md).
 # SERIES=k last; P0 is builder-authored (0 LLM); dev runs tuning only; blind is executor-only.
 SERIES ?= 0
@@ -154,7 +164,7 @@ classif-l4-p0: ## Classification pilot L4: author baseline P0 from guide FINAL (
 
 classif-l4-dev: ## Classification pilot L4: tuning-half evaluation of every route (SERIES=k DEFERRED= CONCURRENCY=2)
 	@test "$(ENV)" = "preprod" || { echo "[classif-l4-dev] ENV=preprod required"; exit 2; }
-	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l4/dev.mjs --series $(SERIES) $(if $(DEFERRED),--deferred $(DEFERRED),) --concurrency $(if $(CONCURRENCY),$(CONCURRENCY),2)
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l4/dev.mjs --series $(SERIES) $(if $(DEFERRED),--deferred $(DEFERRED),) --concurrency $(if $(CONCURRENCY),$(CONCURRENCY),2) $(CODEX_QUOTA_FLAG)
 
 # Seat override (recorded method deviation in the optimise manifest): OPTIMISERS=a,b RECONCILER=x
 # among the max seats of run-seat.mjs; DEVIATION="<reason>" unless it is the recorded owner 06/11 choice.
@@ -165,7 +175,7 @@ classif-l4-optimise: ## Classification pilot L4: 2 max optimisers + reconciliati
 classif-l4-blind: ## Classification pilot L4: executor-only blind-half scoring + S113 secondary (SERIES=k CLASSIF_ROLE=test-executor RERUN_INFRA_FAILED=route,route)
 	@test "$(ENV)" = "preprod" || { echo "[classif-l4-blind] ENV=preprod required"; exit 2; }
 	@test "$(CLASSIF_ROLE)" = "test-executor" || { echo "[classif-l4-blind] CLASSIF_ROLE=test-executor required"; exit 2; }
-	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l4/blind.mjs --series $(SERIES) $(if $(DEFERRED),--deferred $(DEFERRED),) --concurrency $(if $(CONCURRENCY),$(CONCURRENCY),2) $(if $(RERUN_INFRA_FAILED),--rerun-infra-failed $(RERUN_INFRA_FAILED),)
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l4/blind.mjs --series $(SERIES) $(if $(DEFERRED),--deferred $(DEFERRED),) --concurrency $(if $(CONCURRENCY),$(CONCURRENCY),2) $(if $(RERUN_INFRA_FAILED),--rerun-infra-failed $(RERUN_INFRA_FAILED),) $(CODEX_QUOTA_FLAG)
 
 # L4 GEPA — population of prompts (P0..P4), reflective mutation by astra-max (fallback and
 # repair opus-5.5-max), per-case Pareto selection on the tuning half only, 4 evaluation routes
@@ -177,9 +187,9 @@ GEPA_CONCURRENCY ?= 2
 # QUOTA_BACKOFF_MS = delays before each retry of a 402/429/quota failure (default 30000,120000,300000).
 QUOTA_BACKOFF_MS ?=
 .PHONY: classif-l4-gepa
-classif-l4-gepa: ## Classification pilot L4: GEPA prompt optimisation, tuning half only (SERIES=k MAX_CALLS=5000 SEED= RUN= MAX_ITER= MAX_SKIPPED=5 QUOTA_BACKOFF_MS= GEPA_CONCURRENCY=2)
+classif-l4-gepa: ## Classification pilot L4: GEPA prompt optimisation, tuning half only (SERIES=k MAX_CALLS=5000 SEED= RUN= MAX_ITER= MAX_SKIPPED=5 QUOTA_BACKOFF_MS= CODEX_QUOTA_PAUSE=85 GEPA_CONCURRENCY=2)
 	@test "$(ENV)" = "preprod" || { echo "[classif-l4-gepa] ENV=preprod required"; exit 2; }
-	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l4/gepa.mjs --series $(SERIES) --max-calls $(MAX_CALLS) --concurrency $(GEPA_CONCURRENCY) $(if $(SEED),--seed '$(SEED)',) $(if $(RUN),--run $(RUN),) $(if $(MAX_ITER),--max-iterations $(MAX_ITER),) $(if $(MAX_SKIPPED),--max-skipped $(MAX_SKIPPED),) $(if $(QUOTA_BACKOFF_MS),--quota-backoff-ms $(QUOTA_BACKOFF_MS),)
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l4/gepa.mjs --series $(SERIES) --max-calls $(MAX_CALLS) --concurrency $(GEPA_CONCURRENCY) $(if $(SEED),--seed '$(SEED)',) $(if $(RUN),--run $(RUN),) $(if $(MAX_ITER),--max-iterations $(MAX_ITER),) $(if $(MAX_SKIPPED),--max-skipped $(MAX_SKIPPED),) $(if $(QUOTA_BACKOFF_MS),--quota-backoff-ms $(QUOTA_BACKOFF_MS),) $(CODEX_QUOTA_FLAG)
 
 # Codex seat auth (review GEPA R5): the isolated seat homes live in ~/.local/share/radar-classif-seats/<seat>
 # (outside $(CLASSIF_HOME)). After a new codex login, or when a run stops on authentication errors,

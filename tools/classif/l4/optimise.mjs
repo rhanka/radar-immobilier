@@ -39,6 +39,7 @@ import { sha256 } from '../lib/render.mjs';
 import { classifDir, classifHome, privateDir } from '../lib/paths.mjs';
 import { assertNoVerbatim } from '../lib/freeze.mjs';
 import { check as budgetCheck } from '../lib/budget.mjs';
+import { quotaFields } from '../lib/codex-quota.mjs';
 import { bestRecallBaseline, shownMisses } from './metrics.mjs';
 
 export const OPTIMISERS = ['muse-wonder-max', 'opus-5.5-max'];
@@ -243,7 +244,7 @@ export function loadBaselinePrompt(repoClassif, k) {
 // Review §8: optimiser calls cached like amend cachedCall — a crash never repays a
 // returned proposal (keyed by prompt sha256). `seat` is the paid seat (callSeat; a fake in tests).
 // `rawDir` moves the cache (GEPA keeps it inside its run directory).
-export async function seatCall(home, callsLog, phase, annotator, prompt, seat = callSeat, { rawDir = path.join(home, 'l4', 'opt-raw') } = {}) {
+export async function seatCall(home, callsLog, phase, annotator, prompt, seat = callSeat, { rawDir = path.join(home, 'l4', 'opt-raw'), onResult = null } = {}) {
   const key = sha256(prompt).slice(0, 16);
   const file = path.join(rawDir, `${phase}.${annotator}.${key}.json`);
   if (existsSync(file)) {
@@ -254,7 +255,8 @@ export async function seatCall(home, callsLog, phase, annotator, prompt, seat = 
   appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: true, phase, annotator });
   const r = await seat(annotator, prompt, { base: privateDir(path.join(home, 'l4', 'seat-tmp')), timeoutMs: 3600000 });
   appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase, annotator, exitCode: r.code,
-    latencyMs: r.latencyMs, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null, toolEvents: r.toolEvents ?? null });
+    latencyMs: r.latencyMs, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null, toolEvents: r.toolEvents ?? null, ...quotaFields(r) });
+  if (onResult) onResult(r);
   if (r.code !== 0) {
     throw new Error(`optimiser ${annotator} failed with seat exit ${r.code}${r.authError ? `: authentication error, refresh the seat with \`${seatAuthRefreshCommand(annotator)}\` then re-run the same command` : ''}`);
   }
