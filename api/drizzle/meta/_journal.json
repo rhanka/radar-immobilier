@@ -274,6 +274,13 @@
       "when": 1793000000009,
       "tag": "0039_artifacts_host_build_ledger",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1793000000010,
+      "tag": "0040_artifacts_git_attach_intents",
+      "breakpoints": true
     }
   ]
 }

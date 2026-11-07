@@ -1,7 +1,9 @@
 import { createPrivateKey, createPublicKey, type KeyObject } from "node:crypto";
 import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-contract";
 import type { LiveHostModule } from "./live-host-adapter.js";
-import type { AttemptFence, CandidateFile, HandoffClaims, HandoffReceipt, HostJob, HostRecheckView } from "./host-ledger.js";
+import type {
+  AcceptOptions, AttemptFence, CandidateFile, HandoffClaims, HostJob, HostLedger, HostRecheckView,
+} from "@sentropic/artifacts/live-host";
 
 /**
  * Inbound SG4b host build API (builder -> immo), W7 contract:
@@ -13,9 +15,14 @@ import type { AttemptFence, CandidateFile, HandoffClaims, HandoffReceipt, HostJo
  *
  * - job: `verifyJobRequest` (Ed25519 builder key by kid, fresh, this scope),
  *   then `resolvePendingJob` on the locked host rows; answers `{ v: 1, job }`.
- * - handoff: `parseHandoffRequest`, then `acceptHandoff` (authentication,
- *   evidence, replay, recheck, publish in ONE host transaction, receipt signed
- *   with immo's Ed25519 receipt key); answers `{ v: 1, receipt }`.
+ * - handoff: the builder signature and the evidence are authenticated FIRST,
+ *   before any candidate file is decoded (review 1030-r2 m3): the provider
+ *   exports no standalone handoff verifier, so `acceptHandoff` runs once on
+ *   a probe ledger that stops at its first ledger read (which the package
+ *   performs only after authentication, and before it touches the bytes).
+ *   Then `parseHandoffRequest` decodes the files and `acceptHandoff` runs
+ *   for real (replay, recheck, publish in ONE host transaction, receipt
+ *   signed with immo's Ed25519 receipt key); answers `{ v: 1, receipt }`.
  * Refusals are the package's closed `{ v: 1, error, reason? }` bodies; any
  * other failure is a 503 without detail. All verification code comes from the
  * provider (no immo crypto).
@@ -25,7 +32,7 @@ import type { AttemptFence, CandidateFile, HandoffClaims, HandoffReceipt, HostJo
  * several during a rotation), IMMO_ARTIFACTS_RECEIPT_SIGNING_KEY (base64
  * PKCS#8 DER, Ed25519) and IMMO_ARTIFACTS_RECEIPT_KEY_ID.
  */
-export const HOST_BUILD_PATHS = Object.freeze({ job: "/live-host/v1/job", handoff: "/live-host/v1/handoff" });
+export { HOST_BUILD_PATHS } from "@sentropic/artifacts/live-host";
 export const HOST_JOB_BODY_MAX_BYTES = 8 * 1024;
 /** 64 MiB of candidate bytes in base64 plus the JSON envelope. */
 export const HOST_HANDOFF_BODY_MAX_BYTES = 96 * 1024 * 1024;
@@ -70,10 +77,9 @@ export function readLiveHostKeys(env: NodeJS.ProcessEnv): LiveHostKeys {
 export interface HostBuildLedger {
   admitJob(artifactId: string, jobId: string,
     decide: (view: HostRecheckView) => { job: HostJob; fence: AttemptFence } | null): Promise<HostJob | null>;
-  readonly ledger: { find(jobKey: string): Promise<HandoffReceipt | undefined>;
-    transaction(jobKey: string, work: () => Promise<HandoffReceipt>): Promise<HandoffReceipt> };
+  readonly ledger: HostLedger;
   view(claims: HandoffClaims): Promise<HostRecheckView>;
-  publish(claims: HandoffClaims, files: readonly CandidateFile[]): Promise<{ releaseId: string; manifestDigest: string; storedDigest: string }>;
+  publish(claims: HandoffClaims, files: readonly CandidateFile[]): ReturnType<AcceptOptions["publish"]>;
 }
 
 const closed = (): never => { throw new ArtifactOperationError("provider_unavailable"); };
@@ -98,6 +104,10 @@ const REFUSAL_STATUS: Readonly<Record<string, number>> = Object.freeze({
 const HOST_REFUSAL_REASON: Readonly<Record<string, string>> = Object.freeze({
   pointer_conflict: "release_conflict", gone: "policy_refused", not_found: "job_not_pending",
 });
+/** Thrown by the probe ledger: the handoff passed authentication and evidence. */
+const AUTHENTICATED = Object.freeze(new Error("handoff_authenticated_probe"));
+const record = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
 const UNAVAILABLE: HostEndpointResponse = Object.freeze({ status: 503, body: Object.freeze({ error: "capability_unavailable" }) });
 
 export function createLiveHostEndpoints(input: {
@@ -139,9 +149,17 @@ export function createLiveHostEndpoints(input: {
     async handoff(body: unknown): Promise<HostEndpointResponse> {
       if (!parseHandoffRequest || !acceptHandoff || !refusalOf || !input.keys.receiptKey) return UNAVAILABLE;
       try {
+        const accept = { scopeId: input.scopeId, builderKeys, receiptKey: input.keys.receiptKey, now };
+        // Authenticate before decoding: a malformed envelope is refused by parseHandoffRequest at its first
+        // check (no file decoded); a well-formed one is authenticated by the probe before its files are decoded.
+        if (record(body) && body.v === 1 && record(body.handoff)) {
+          await Promise.resolve(acceptHandoff({ ...accept, ledger: { find: async () => { throw AUTHENTICATED; },
+            transaction: async () => closed() }, view: async () => closed(), publish: async () => closed() } as never,
+          body.handoff as never, [] as never)).catch((error: unknown) => { if (error !== AUTHENTICATED) throw error; });
+        }
         const { handoff, files } = parseHandoffRequest(body as never) as { handoff: { claims: { artifactId: string; jobId: string } };
           files: unknown[] };
-        const receipt = await acceptHandoff({ scopeId: input.scopeId, builderKeys, receiptKey: input.keys.receiptKey, now,
+        const receipt = await acceptHandoff({ ...accept,
           ledger: ledger.ledger,
           view: (claims: HandoffClaims) => ledger.view(claims),
           publish: (claims: HandoffClaims, candidate: readonly CandidateFile[]) => ledger.publish(claims, candidate) } as never,

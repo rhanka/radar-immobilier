@@ -25,6 +25,10 @@ const derivedMigrations = [
   ["0036_artifacts_git_bindings", "0010_git_bindings.sql",
     "896947eec4898a0918bab2f5d236718095296952ea37c1012fa448c779041de1",
     "465b3b22d12e4b299d5711338056649a718dde3ec6e1572d36d138ec4a48a571"],
+  // SG3 git_attach intents (0.2.20): branch_created audit column + attach intent table. Inert until the flag selects git_attach.
+  ["0040_artifacts_git_attach_intents", "0012_git_attach_intents.sql",
+    "8cfb72c5337dcf6305909af52d789940d1944bcf5fca4e4e2d845d745c8d19f8",
+    "621fa02397f0002f9e5e06bca1076be0a1c105d87342d14379f4bf4beb92ea02"],
 ] as const;
 
 const IDEMPOTENCE_REWRITE: readonly (readonly [RegExp, string])[] = [
@@ -32,6 +36,7 @@ const IDEMPOTENCE_REWRITE: readonly (readonly [RegExp, string])[] = [
   [/^CREATE INDEX (?!IF NOT EXISTS )/gm, "CREATE INDEX IF NOT EXISTS "],
   [/^CREATE TABLE (?!IF NOT EXISTS )/gm, "CREATE TABLE IF NOT EXISTS "],
   [/ ADD COLUMN (?!IF NOT EXISTS )/g, " ADD COLUMN IF NOT EXISTS "],
+  [/^ALTER TABLE (\S+) ADD CONSTRAINT (\S+)/gm, "ALTER TABLE $1 DROP CONSTRAINT IF EXISTS $2, ADD CONSTRAINT $2"],
   [/^CREATE FUNCTION /gm, "CREATE OR REPLACE FUNCTION "],
   [/^CREATE TRIGGER /gm, "CREATE OR REPLACE TRIGGER "],
 ];
