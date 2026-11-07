@@ -56,7 +56,7 @@ export interface HandoffCommitPort {
 }
 
 /**
- * TODO(0.2.19 / M3-B): compose with the provider publication unit writer and
+ * TODO(0.2.20 / M3-B): compose with the provider publication unit writer and
  * `artifacts.git_release_index` inside the release transaction, plus a durable
  * single-use authorization ledger. Until then acceptance refuses.
  */
