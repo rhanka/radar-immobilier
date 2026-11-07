@@ -115,3 +115,41 @@ test('the app build is untouched and the Make target delegates to the one recipe
   assert.equal(/-e VITE_/.test(target), false, 'no second copy of the artifact variables');
   assert.ok(makefile.includes('\t$(COMPOSE_RUN_API_NODEPS) npm run build --workspace=ui\n'), 'make build unchanged');
 });
+
+// VITE_BASEMAP_TILE_URL is immo-owned (A-LIVE W4: the host no longer passes it).
+// The build wrapper sets it; the LIVE dev server loads ui/vite.config.ts
+// without the wrapper, so the config must default the same value itself.
+async function loadUiConfig(env) {
+  const saved = { ...process.env };
+  try {
+    for (const k of Object.keys(process.env)) if (k.startsWith('VITE_')) delete process.env[k];
+    Object.assign(process.env, env);
+    const { loadConfigFromFile } = await import('vite');
+    const loaded = await loadConfigFromFile({ command: 'serve', mode: 'development' }, 'ui/vite.config.ts', 'ui', 'silent');
+    return loaded.config;
+  } finally {
+    for (const k of Object.keys(process.env)) if (!(k in saved)) delete process.env[k];
+    Object.assign(process.env, saved);
+  }
+}
+
+test('the live dev server (vite config without the wrapper) exposes the wrapper basemap URL', async () => {
+  const live = await loadUiConfig({ VITE_ARTIFACT_MODE: '1', VITE_API_BASE_URL: '/__app' });
+  assert.equal(live.define?.['import.meta.env.VITE_BASEMAP_TILE_URL'], JSON.stringify(ARTIFACT_ENV.VITE_BASEMAP_TILE_URL));
+  const app = await loadUiConfig({});
+  assert.equal(app.define?.['import.meta.env.VITE_BASEMAP_TILE_URL'], undefined);
+});
+
+test('the wrapper build keeps its own value and its dist check does not flag the shared basemap URL', async () => {
+  const { env, dropped } = artifactEnv({ PATH: '/usr/bin', VITE_BASEMAP_TILE_URL: ARTIFACT_ENV.VITE_BASEMAP_TILE_URL });
+  assert.equal(env.VITE_BASEMAP_TILE_URL, ARTIFACT_ENV.VITE_BASEMAP_TILE_URL);
+  assert.equal('VITE_BASEMAP_TILE_URL' in dropped, false);
+  const wrapped = await loadUiConfig(Object.fromEntries(Object.entries(env).filter(([k]) => k.startsWith('VITE_'))));
+  assert.equal(wrapped.define?.['import.meta.env.VITE_BASEMAP_TILE_URL'], undefined);
+  const dist = mkdtempSync(join(tmpdir(), 'ui-artifact-basemap-'));
+  writeFileSync(join(dist, 'a.js'), `const t=${JSON.stringify(ARTIFACT_ENV.VITE_BASEMAP_TILE_URL)};`);
+  assert.deepEqual(leaks(dist, dropped), []);
+  const foreign = artifactEnv({ VITE_BASEMAP_TILE_URL: 'https://tiles.invalid/{z}/{x}/{y}' });
+  assert.equal(foreign.env.VITE_BASEMAP_TILE_URL, ARTIFACT_ENV.VITE_BASEMAP_TILE_URL);
+  assert.ok('VITE_BASEMAP_TILE_URL' in foreign.dropped);
+});

@@ -1,0 +1,282 @@
+import { randomUUID } from "node:crypto";
+import type { GitBinding, GitBindingStore, GitCodeRightsPort, GitHumanDirectory, GitRepositoryRegistry, LiveAuthority, LiveInvocation } from "@sentropic/artifacts";
+import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-contract";
+import { GIT_HOST_WRITE_SCOPE } from "./identity.js";
+import { IMMO_GIT_OUTPUT_DIR } from "./registry.js";
+
+/**
+ * Live authority, invitations and the content-host reader gate (M4-I, Δ4).
+ *
+ * - Each user edits THEIR OWN personal binding: the binding owner is the
+ *   acting user (`personalPrincipalId`), never a platform owner. Writes need
+ *   current code rights, the host write scope and a GitHub linkage.
+ * - Invited live readers: an explicit invitation by the binding owner,
+ *   bound to the binding, its live session and its generation, with an
+ *   expiry and a revocation epoch. The invitee must hold current code rights.
+ *   Invitees read (live_read, live_status) and never edit or publish.
+ * - Anyone else, including other code-rights holders without an invitation,
+ *   is refused (`access_denied`); a different principal never writes to
+ *   someone else's binding (co-editing would be a contract change).
+ *
+ * Revocation and expiry are evaluated on every call: there is no cached
+ * authority, so a revoked invitee is refused on the next call.
+ */
+
+export interface LiveInvitation {
+  readonly invitationId: string;
+  readonly storageScopeId: string;
+  readonly artifactId: string;
+  readonly bindingGeneration: number;
+  readonly liveSessionId: string;
+  readonly inviteeId: string;
+  readonly grantorId: string;
+  readonly createdAt: string;
+  readonly expiresAt: string;
+  readonly revokedAt: string | null;
+  /** Incremented on revocation; carried in the live edge host assertion (W9). */
+  readonly epoch: number;
+}
+
+export interface LiveInvitationStore {
+  insert(invitation: LiveInvitation): Promise<void>;
+  list(storageScopeId: string, artifactId: string): Promise<LiveInvitation[]>;
+  /** Sets revokedAt and bumps the epoch; undefined when unknown. Idempotent on an already revoked row. */
+  revoke(storageScopeId: string, artifactId: string, invitationId: string, at: string): Promise<LiveInvitation | undefined>;
+}
+
+/**
+ * Current live session of a binding generation; undefined while dormant or
+ * stopped. `expiresAt` is the session end when the controller announces one
+ * (A-LIVE v2 Amendment 1: no maximum lifetime, idle stop owned by the
+ * controller, so usually absent); an invitation never outlives it.
+ */
+export interface LiveSessionPort {
+  current(binding: GitBinding): Promise<{ liveSessionId: string; expiresAt?: string } | undefined>;
+}
+
+export function isInvitationActive(invitation: LiveInvitation, binding: GitBinding, liveSessionId: string | undefined, now: number) {
+  return invitation.revokedAt === null && Date.parse(invitation.expiresAt) > now &&
+    invitation.storageScopeId === binding.storageScopeId && invitation.artifactId === binding.artifactId &&
+    invitation.bindingGeneration === binding.generation && liveSessionId !== undefined && invitation.liveSessionId === liveSessionId;
+}
+
+export interface LiveAuthorityDeps {
+  readonly bindings: GitBindingStore;
+  readonly registry: GitRepositoryRegistry;
+  readonly codeRights: GitCodeRightsPort;
+  readonly directory: GitHumanDirectory;
+  readonly invitations: LiveInvitationStore;
+  readonly sessions: LiveSessionPort;
+  readonly hasWriteScope: () => boolean;
+  /** Worker qualification (GB4 / M4-lite). False until qualified: live_write answers builder_unavailable. */
+  readonly qualified: () => boolean;
+  readonly now?: () => number;
+}
+
+const denied = (): never => { throw new ArtifactOperationError("access_denied"); };
+
+async function bindingContext(deps: Pick<LiveAuthorityDeps, "bindings" | "registry">, storageScopeId: string, artifactId: string) {
+  const binding = await deps.bindings.get(storageScopeId, artifactId);
+  if (!binding || binding.state === "detached") throw new ArtifactOperationError("git_not_attached");
+  if (binding.channel !== "personal" || !binding.personalPrincipalId) return denied();
+  const repository = await deps.registry.get(binding.storageScopeId, binding.repoId);
+  if (!repository) throw new ArtifactOperationError("git_repo_not_registered");
+  return { binding, repository, ownerId: binding.personalPrincipalId };
+}
+
+async function activeInvitation(deps: Pick<LiveAuthorityDeps, "invitations" | "sessions">, binding: GitBinding,
+  principalId: string, now: number) {
+  const session = await deps.sessions.current(binding);
+  const rows = await deps.invitations.list(binding.storageScopeId, binding.artifactId);
+  return rows.find((row) => row.inviteeId === principalId && isInvitationActive(row, binding, session?.liveSessionId, now));
+}
+
+export function createLiveAuthorize(deps: LiveAuthorityDeps) {
+  const now = deps.now ?? Date.now;
+  return async (invocation: LiveInvocation, artifactId: string): Promise<LiveAuthority> => {
+    const { binding, repository, ownerId } = await bindingContext(deps, invocation.storageScopeId, artifactId);
+    const canReadCode = await deps.codeRights.canReadCode({ storageScopeId: binding.storageScopeId,
+      repoId: binding.repoId, actorId: invocation.actorId });
+    const target = { storageScopeId: binding.storageScopeId, repoId: binding.repoId, branch: binding.branch,
+      subPath: binding.subPath, principalId: invocation.actorId, outputDir: IMMO_GIT_OUTPUT_DIR };
+    const portRepository = { storageScopeId: repository.storageScopeId, repoId: repository.repoId, locator: repository.locator,
+      installationRef: repository.installationRef, branchPrefix: repository.branchPrefix, allowedSubPaths: repository.allowedSubPaths,
+      canWrite: repository.canWrite, writablePaths: repository.writablePaths, refusedWritePaths: repository.refusedWritePaths };
+    if (invocation.actorId === ownerId) {
+      return { binding, ownerId, canReadCode, repository: portRepository, target, invited: false,
+        canWrite: canReadCode && repository.canWrite && deps.hasWriteScope(),
+        humanLinked: await deps.directory.resolve({ storageScopeId: binding.storageScopeId, principalId: invocation.actorId }) !== null,
+        qualified: deps.qualified() };
+    }
+    // Not the binding owner: only an active invitee with current code rights, read-only.
+    if (!canReadCode || !await activeInvitation(deps, binding, invocation.actorId, now())) return denied();
+    return { binding, ownerId, canReadCode: true, canWrite: false, humanLinked: false, invited: true,
+      qualified: deps.qualified(), repository: portRepository, target };
+  };
+}
+
+export type LiveReaderRole =
+  | { readonly role: "binding_owner"; readonly principalId: string; readonly bindingGeneration: number }
+  | { readonly role: "invitee"; readonly principalId: string; readonly bindingGeneration: number;
+    readonly invitationId: string; readonly epoch: number; readonly expiresAt: string; readonly liveSessionId: string };
+
+/**
+ * Content-host live reader gate (A-LIVE §8.2): the binding owner or an active
+ * invitee, both with current code rights. Null refuses. The live edge host
+ * assertion (W9) carries the returned role, invitation id, epoch and expiry.
+ */
+export function createLiveReaderGate(deps: Pick<LiveAuthorityDeps, "bindings" | "registry" | "codeRights" | "invitations" | "sessions" | "now">) {
+  const now = deps.now ?? Date.now;
+  return async (storageScopeId: string, artifactId: string, principalId: string): Promise<LiveReaderRole | null> => {
+    let context;
+    try { context = await bindingContext(deps, storageScopeId, artifactId); } catch { return null; }
+    const { binding, ownerId } = context;
+    if (!await deps.codeRights.canReadCode({ storageScopeId, repoId: binding.repoId, actorId: principalId })) return null;
+    if (principalId === ownerId) return { role: "binding_owner", principalId, bindingGeneration: binding.generation };
+    const session = await deps.sessions.current(binding);
+    const invitation = (await deps.invitations.list(storageScopeId, artifactId))
+      .find((row) => row.inviteeId === principalId && isInvitationActive(row, binding, session?.liveSessionId, now()));
+    return invitation ? { role: "invitee", principalId, bindingGeneration: binding.generation, invitationId: invitation.invitationId,
+      epoch: invitation.epoch, expiresAt: invitation.expiresAt, liveSessionId: invitation.liveSessionId } : null;
+  };
+}
+
+/**
+ * Invitation ceilings: one hour by default, eight hours at most, capped at
+ * the announced session end, and void as soon as the session id or the
+ * binding generation changes (isInvitationActive).
+ */
+export const LIVE_INVITATION_DEFAULT_TTL_MS = 60 * 60 * 1000;
+export const LIVE_INVITATION_MAX_TTL_MS = 8 * 60 * 60 * 1000;
+export const LIVE_INVITATION_READ_SCOPE = "immo:artifacts:read" as const;
+export const LIVE_INVITATION_WRITE_SCOPE = GIT_HOST_WRITE_SCOPE;
+
+export interface InvitationCaller { readonly actorId: string; readonly storageScopeId: string; readonly scopes: readonly string[] }
+
+/**
+ * Host-owned invitation operations (create, list, revoke), scoped by binding,
+ * live session and generation. They use the immo artifact scopes and do not
+ * widen the artifacts access enum (set_access stays read grants only).
+ */
+export function createLiveInvitationService(deps: Pick<LiveAuthorityDeps, "bindings" | "registry" | "codeRights" | "invitations" | "sessions" | "now"> & {
+  /** Live edge revocation (live-edge.ts): close the invitee's sockets, then push the fence. Errors are surfaced. */
+  readonly onRevoked?: (invitation: LiveInvitation) => Promise<unknown>;
+}) {
+  const now = deps.now ?? Date.now;
+  const ownBinding = async (caller: InvitationCaller, artifactId: string, scope: string) => {
+    if (!caller.scopes.includes(scope)) denied();
+    const context = await bindingContext(deps, caller.storageScopeId, artifactId);
+    if (context.ownerId !== caller.actorId) denied();
+    return context;
+  };
+  return {
+    async create(caller: InvitationCaller, input: { artifactId: string; inviteeId: string; ttlMs?: number }) {
+      const { binding } = await ownBinding(caller, input.artifactId, LIVE_INVITATION_WRITE_SCOPE);
+      const ttl = input.ttlMs ?? LIVE_INVITATION_DEFAULT_TTL_MS;
+      if (!input.inviteeId.trim() || input.inviteeId === caller.actorId || !Number.isSafeInteger(ttl) || ttl < 1 ||
+        ttl > LIVE_INVITATION_MAX_TTL_MS) throw new ArtifactOperationError("invalid_request");
+      const session = await deps.sessions.current(binding);
+      if (!session) throw new ArtifactOperationError("git_not_attached");
+      if (!await deps.codeRights.canReadCode({ storageScopeId: binding.storageScopeId, repoId: binding.repoId,
+        actorId: input.inviteeId })) denied();
+      const at = now();
+      const sessionEnd = session.expiresAt === undefined ? Number.POSITIVE_INFINITY : Date.parse(session.expiresAt);
+      if (!(sessionEnd > at)) throw new ArtifactOperationError("git_not_attached");
+      const expiresAt = Math.min(at + ttl, sessionEnd);
+      const invitation: LiveInvitation = { invitationId: randomUUID(), storageScopeId: binding.storageScopeId,
+        artifactId: binding.artifactId, bindingGeneration: binding.generation, liveSessionId: session.liveSessionId,
+        inviteeId: input.inviteeId, grantorId: caller.actorId, createdAt: new Date(at).toISOString(),
+        expiresAt: new Date(expiresAt).toISOString(), revokedAt: null, epoch: 1 };
+      await deps.invitations.insert(invitation);
+      return invitation;
+    },
+    async list(caller: InvitationCaller, input: { artifactId: string }) {
+      const { binding } = await ownBinding(caller, input.artifactId, LIVE_INVITATION_READ_SCOPE);
+      const session = await deps.sessions.current(binding);
+      return (await deps.invitations.list(binding.storageScopeId, binding.artifactId))
+        .map((row) => ({ ...row, active: isInvitationActive(row, binding, session?.liveSessionId, now()) }));
+    },
+    async revoke(caller: InvitationCaller, input: { artifactId: string; invitationId: string }) {
+      const { binding } = await ownBinding(caller, input.artifactId, LIVE_INVITATION_WRITE_SCOPE);
+      const revoked = await deps.invitations.revoke(binding.storageScopeId, binding.artifactId, input.invitationId,
+        new Date(now()).toISOString());
+      if (!revoked) throw new ArtifactOperationError("not_found");
+      // The durable revocation already refuses the invitee on its next call; the edge is tightened next.
+      await deps.onRevoked?.(revoked);
+      return revoked;
+    },
+  };
+}
+
+export function createMemoryLiveInvitationStore(): LiveInvitationStore {
+  const rows = new Map<string, LiveInvitation>();
+  return {
+    async insert(invitation) {
+      if (rows.has(invitation.invitationId)) throw new ArtifactOperationError("invalid_request");
+      rows.set(invitation.invitationId, structuredClone(invitation));
+    },
+    async list(storageScopeId, artifactId) {
+      return [...rows.values()].filter((row) => row.storageScopeId === storageScopeId && row.artifactId === artifactId)
+        .map((row) => structuredClone(row));
+    },
+    async revoke(storageScopeId, artifactId, invitationId, at) {
+      const row = rows.get(invitationId);
+      if (!row || row.storageScopeId !== storageScopeId || row.artifactId !== artifactId) return undefined;
+      const next = row.revokedAt === null ? { ...row, revokedAt: at, epoch: row.epoch + 1 } : row;
+      rows.set(invitationId, next);
+      return structuredClone(next);
+    },
+  };
+}
+
+interface Queryable { query<R extends object>(text: string, values: unknown[]): Promise<{ rows: R[] }> }
+interface InvitationRow {
+  invitation_id: string; storage_scope_id: string; artifact_id: string; binding_generation: string | number;
+  live_session_id: string; invitee_id: string; grantor_id: string; created_at: Date; expires_at: Date;
+  revoked_at: Date | null; epoch: string | number;
+}
+const fromRow = (row: InvitationRow): LiveInvitation => ({ invitationId: row.invitation_id, storageScopeId: row.storage_scope_id,
+  artifactId: row.artifact_id, bindingGeneration: Number(row.binding_generation), liveSessionId: row.live_session_id,
+  inviteeId: row.invitee_id, grantorId: row.grantor_id, createdAt: row.created_at.toISOString(),
+  expiresAt: row.expires_at.toISOString(), revokedAt: row.revoked_at?.toISOString() ?? null, epoch: Number(row.epoch) });
+
+/** Durable store over artifacts.live_invitations (immo migration 0038). */
+export function createPostgresLiveInvitationStore(pool: Queryable): LiveInvitationStore {
+  return {
+    async insert(invitation) {
+      await pool.query(`INSERT INTO artifacts.live_invitations (invitation_id, storage_scope_id, artifact_id, binding_generation,
+        live_session_id, invitee_id, grantor_id, created_at, expires_at, revoked_at, epoch)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,NULL,$10)`, [invitation.invitationId, invitation.storageScopeId, invitation.artifactId,
+        invitation.bindingGeneration, invitation.liveSessionId, invitation.inviteeId, invitation.grantorId, invitation.createdAt,
+        invitation.expiresAt, invitation.epoch]);
+    },
+    async list(storageScopeId, artifactId) {
+      const result = await pool.query<InvitationRow>(`SELECT * FROM artifacts.live_invitations
+        WHERE storage_scope_id = $1 AND artifact_id = $2 ORDER BY created_at, invitation_id`, [storageScopeId, artifactId]);
+      return result.rows.map(fromRow);
+    },
+    async revoke(storageScopeId, artifactId, invitationId, at) {
+      const result = await pool.query<InvitationRow>(`UPDATE artifacts.live_invitations
+        SET revoked_at = COALESCE(revoked_at, $4::timestamptz), epoch = CASE WHEN revoked_at IS NULL THEN epoch + 1 ELSE epoch END
+        WHERE storage_scope_id = $1 AND artifact_id = $2 AND invitation_id = $3 RETURNING *`,
+      [storageScopeId, artifactId, invitationId, at]);
+      return result.rows[0] ? fromRow(result.rows[0]) : undefined;
+    },
+  };
+}
+
+/** Live session of the current generation, read from the provider draft record (0037). */
+export function createPostgresLiveSessions(pool: Queryable): LiveSessionPort {
+  return {
+    async current(binding) {
+      const result = await pool.query<{ live_session_id: string | null; phase: string | null; ends_at: string | null }>(`SELECT
+        record->'runtime'->>'liveSessionId' AS live_session_id, record->'runtime'->>'phase' AS phase,
+        record->'runtime'->>'maximumLifetimeAt' AS ends_at
+        FROM artifacts.live_drafts WHERE storage_scope_id = $1 AND artifact_id = $2 AND binding_generation = $3`,
+      [binding.storageScopeId, binding.artifactId, binding.generation]);
+      const row = result.rows[0];
+      if (!row?.live_session_id || ["DORMANT", "DECOMMISSIONING", "FAILED"].includes(row.phase ?? "")) return undefined;
+      return { liveSessionId: row.live_session_id, ...(row.ends_at ? { expiresAt: row.ends_at } : {}) };
+    },
+  };
+}

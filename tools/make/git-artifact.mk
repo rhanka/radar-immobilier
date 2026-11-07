@@ -2,10 +2,17 @@
 # Usage (ENV last, test-* only):
 #   make -f tools/make/git-artifact.mk proof [REF=<git ref>] ENV=test-git-artifact
 #   make -f tools/make/git-artifact.mk test ENV=test-git-artifact
+#   make -f tools/make/git-artifact.mk gb1-rows ENV=test-git-artifact
 #   make -f tools/make/git-artifact.mk down ENV=test-git-artifact
 GIT_ARTIFACT_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/../..)
 REF ?= HEAD
-.PHONY: proof test down
+GB1_ROWS := artifact-build/gb1-qualification.json
+.PHONY: proof test down gb1-rows
+# GB1 qualification (artifact-build/gb1-qualification.json), generated from package-lock.json (never by hand).
+gb1-rows:
+	@case "$(ENV)" in test-*) ;; *) echo 'ENV must be test-*'; exit 2;; esac
+	@cd "$(GIT_ARTIFACT_ROOT)" && COMPOSE_DISABLE_ENV_FILE=1 docker compose --env-file /dev/null -p "radar-$(ENV)" -f tools/make/git-artifact.compose.yml run --rm --no-deps -T node node tools/make/git-artifact-gb1-rows.mjs > "$(GB1_ROWS)"
+	@$(MAKE) --no-print-directory -f "$(GIT_ARTIFACT_ROOT)/tools/make/git-artifact.mk" down ENV="$(ENV)"
 proof:
 	@cd "$(GIT_ARTIFACT_ROOT)" && ENV="$(ENV)" bash tools/make/git-artifact-verify.sh proof "$(REF)"
 test:

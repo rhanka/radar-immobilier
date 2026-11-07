@@ -8,6 +8,7 @@
 import { ACTIVE_ARTIFACT_TOOLS, ARTIFACT_PROFILE_DESCRIPTOR, ARTIFACT_P0B, ARTIFACT_STRICT, ARTIFACT_PART1,
   RELEASE_FILES_MAX, RELEASE_FILE_BYTES_MAX, RELEASE_TOTAL_BYTES_MAX, HOST_MIME_TYPES } from "@radar/artifacts-host";
 export { ARTIFACT_PROVIDER_VERSION } from "@radar/artifacts-host";
+import { GIT_EFFECTIVE_REQUIRED, gitEffectiveProfile, gitSelection, gitToolScope, type GitOperation } from "./artifact-git-profile.js";
 export const ARTIFACT_PROVIDER_ID = "sentropic.artifacts" as const;
 export const ARTIFACT_PROFILE_REVISION = ARTIFACT_PROFILE_DESCRIPTOR.profileRevisionId;
 
@@ -54,6 +55,16 @@ const ALL_TOOL_SCOPES: Record<ArtifactToolName, string> = {
   artifacts_revoke_reader_consent: ARTIFACT_WRITE_SCOPE,
   artifacts_list_versions: ARTIFACT_READ_SCOPE,
   artifacts_revert: ARTIFACT_WRITE_SCOPE,
+  // Git mode (IMMO_ARTIFACTS_GIT_MODE): only selected git tools reach ARTIFACT_TOOL_SCOPES.
+  artifacts_git_attach: gitToolScope("artifacts_git_attach"),
+  artifacts_fetch_app_source: gitToolScope("artifacts_fetch_app_source"),
+  artifacts_git_publish: gitToolScope("artifacts_git_publish"),
+  artifacts_git_commit: gitToolScope("artifacts_git_commit"),
+  artifacts_live_write: gitToolScope("artifacts_live_write"),
+  artifacts_live_read: gitToolScope("artifacts_live_read"),
+  artifacts_live_reset: gitToolScope("artifacts_live_reset"),
+  artifacts_live_status: gitToolScope("artifacts_live_status"),
+  artifacts_live_control: gitToolScope("artifacts_live_control"),
 };
 export const ARTIFACT_TOOL_SCOPES = Object.freeze(Object.fromEntries(
   ARTIFACT_TOOL_NAMES.map((name) => [name, ALL_TOOL_SCOPES[name]]))) as Readonly<Record<ArtifactToolName, string>>;
@@ -96,7 +107,7 @@ export function hasArtifactScope(tool: ArtifactToolName, scopes: readonly string
 
 export interface ArtifactSelectionEntry {
   readonly tool: ArtifactToolName;
-  readonly operation: "ensure" | "publish" | "list" | "meta" | "get_source" | "set_access" | "delete" | "create_upload" | "commit_upload" | "publish_bundle" | "create_upload_page" | "list_assets" | "publish_bundle_v2" | "lookup_people" | "list_access" | "revoke_reader_consent" | "list_versions" | "revert";
+  readonly operation: "ensure" | "publish" | "list" | "meta" | "get_source" | "set_access" | "delete" | "create_upload" | "commit_upload" | "publish_bundle" | "create_upload_page" | "list_assets" | "publish_bundle_v2" | "lookup_people" | "list_access" | "revoke_reader_consent" | "list_versions" | "revert" | GitOperation;
   readonly method: "POST" | "GET";
   readonly path: string;
   readonly command: ArtifactSelectionEntry["operation"];
@@ -129,6 +140,7 @@ export const ARTIFACT_SELECTION: readonly ArtifactSelectionEntry[] = [
     { tool: "artifacts_list_versions", operation: "list_versions", method: "POST", path: "/list_versions", command: "list_versions" },
     { tool: "artifacts_revert", operation: "revert", method: "POST", path: "/revert", command: "revert" },
   ] as const : []),
+  ...gitSelection(),
 ];
 
 export const ARTIFACT_LIMITS = {
@@ -196,6 +208,7 @@ const ALL_EFFECTIVE_REQUIRED: Record<ArtifactToolName, readonly string[]> = {
   artifacts_revoke_reader_consent: ["artifactId", "idempotencyKey"],
   artifacts_list_versions: ["artifactId"],
   artifacts_revert: ["artifactId", "targetReleaseId", "expectedCurrentReleaseId", "idempotencyKey"],
+  ...GIT_EFFECTIVE_REQUIRED,
 };
 export const ARTIFACT_EFFECTIVE_REQUIRED = Object.fromEntries(ARTIFACT_TOOL_NAMES.map((name) =>
   [name, ALL_EFFECTIVE_REQUIRED[name]])) as Record<ArtifactToolName, readonly string[]>;
@@ -291,6 +304,7 @@ export function artifactEffectiveProfile() {
       metadata: ["title", "description", "icon"],
       contentSource: "exactly one of files or edits",
     } : {}),
+    ...gitEffectiveProfile(),
     closedArguments: [...ARTIFACT_FORBIDDEN_CALLER_FIELDS],
     callerKey: {
       type: "string",

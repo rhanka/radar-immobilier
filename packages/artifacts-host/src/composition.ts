@@ -25,6 +25,8 @@ import { projectArtifactWriteFailure } from "@sentropic/artifacts/server/outcome
 import { createTimeoutBlobStore, createTimeoutS3Client, DEFAULT_S3_BUDGET, withS3Deadline } from "./s3-timeout.js";
 import { HOST_ARTIFACT_PROFILE, HOST_MIME_TYPES, isArtifactMutation, RELEASE_FILE_BYTES_MAX, RELEASE_FILES_MAX, RELEASE_TOTAL_BYTES_MAX } from "./p0b-profile.js";
 import type { ArtifactDeleteConfirmation } from "./delete-confirmation.js";
+import { ARTIFACT_GIT_MODE } from "./p0b-profile.js";
+import { composeGitModeFromEnv, type GitModeConfig, type GitModePorts } from "./git-mode/compose.js";
 
 /**
  * S3 sockets kept warm for a publish. Every file costs one PUT and one
@@ -71,6 +73,13 @@ export interface ArtifactHostOptions {
    * exchange and file endpoints keep working.
    */
   readonly uploadPage?: UploadPageRouteConfig;
+  /**
+   * Git-backed artifact mode. Ignored while IMMO_ARTIFACTS_GIT_MODE is off;
+   * production leaves it absent (config from the environment, Postgres and
+   * HTTP ports); tests inject the resolution, config and fakes.
+   */
+  readonly gitMode?: { readonly resolution?: typeof ARTIFACT_GIT_MODE; readonly config?: GitModeConfig;
+    readonly ports?: GitModePorts };
 }
 
 export async function composeArtifactHost(
@@ -131,8 +140,12 @@ export async function composeArtifactHost(
     const staging = options.uploads?.staging ?? createS3StagingStore({ client, bucket: config.s3Bucket });
     const signer = options.uploads?.signer ?? createS3UploadSigner({ client, bucket: config.s3Bucket });
     const uploadPages = options.uploads?.pages ?? createPostgresUploadPageStore(pool);
+    const gitResolution = options.gitMode?.resolution ?? ARTIFACT_GIT_MODE;
+    const gitMode = composeGitModeFromEnv({ resolution: gitResolution, pool, storageScopeId: config.storageScope,
+      env: process.env, config: options.gitMode?.config,
+      ...(options.gitMode?.ports ? { ports: options.gitMode.ports } : {}) });
     const domain = await createCommitDomain({ pool, scope: config.storageScope, blobs, coordinator,
-      profile, preparationWindowMs,
+      profile, preparationWindowMs, gitMode,
       uploads: { sessions: uploadSessions, staging, signer },
       ...(options.uploadPage ? { uploadPage: { pages: uploadPages, ...options.uploadPage } } : {}),
       ...(options.confirmation ? { confirmation: options.confirmation } : {}),
