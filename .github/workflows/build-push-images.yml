@@ -1161,6 +1161,20 @@ jobs:
             # GHSA-4m76-xfj5-7975, GHSA-46wx-v44x-9hh2): v1.2.17 = v1.2.16 + hono
             # 4.13.17 (lock only). Any other file in the diff refuses the promotion.
             echo "hotfix OK — v1.2.17 = v1.2.16 + hono framework security fix (lock only)"
+          elif [ "${{ steps.vars.outputs.tag }}" = "v1.2.18" ] \
+            && git merge-base --is-ancestor v1.2.17 "$GITHUB_SHA" \
+            && [ -z "$(git diff --name-only v1.2.17 "$GITHUB_SHA" -- . \
+                 ':!package-lock.json' \
+                 ':!.github/workflows/build-push-images.yml')" ]; then
+            # One-off owner-approved security hotfix (2026-11-07): v1.2.18 = v1.2.17 +
+            # lock-only bumps within declared ranges — dompurify 3.4.17
+            # (GHSA-cg2g-xh64-v4q7, GHSA-mrv2-3pqr-j5jr, GHSA-c6gr-qvv4-5v3f),
+            # body-parser 2.4.0 (GHSA-27r3-jxmh-p828), fast-uri 3.1.9
+            # (GHSA-w74x-v6f9-j3xg, GHSA-xhq7-xmqj-769h, GHSA-wjr9-j795-jxcr,
+            # GHSA-333x-w4r6-6crp), ip-address 10.7.5 (GHSA-rxp7-6hxx-x8q5),
+            # qs 6.16.1 (GHSA-6pq8-jhm2-2vcw). Any other file in the diff refuses
+            # the promotion.
+            echo "hotfix OK — v1.2.18 = v1.2.17 + dompurify/body-parser/fast-uri/ip-address/qs security fixes (lock only)"
           else
             echo "::error title=Promote refused — tag not on main::commit $GITHUB_SHA (tag ${{ steps.vars.outputs.tag }}) is NOT an ancestor of origin/main. Only main-merged, CI-validated commits may reach prod."
             exit 1
