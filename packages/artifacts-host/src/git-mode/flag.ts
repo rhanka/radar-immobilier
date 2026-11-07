@@ -54,25 +54,24 @@ const STAGE_ANCHORS: Readonly<Record<GitModeStage, readonly GitArtifactTool[]>> 
 /**
  * Provider versions whose `createHttpArtifactApp` routes each git tool.
  *
- * - git_commit and live_* ride `deps.live` since 0.2.18.
+ * - git_commit and live_* ride `deps.live` since 0.2.18 (qualified with
+ *   0.2.20 in the pin PR).
  * - fetch_app_source, git_attach and git_publish are routed by 0.2.20
- *   (`deps.gitTools`, M1). TODO(0.2.20): add "0.2.20" to these three entries
- *   (and to the live entries) in the pin PR, after qualification. Until then
- *   the list stays empty, so the `bindings`, `build` and `live` stages refuse
- *   at boot (fail-closed default).
+ *   (`deps.gitTools`, M1). On any other pinned version the `bindings`,
+ *   `build` and `live` stages refuse at boot (fail-closed default).
  * - A stage tool missing from a provider's routing is dropped from the
  *   selection and reported as `unrouted`; a missing anchor refuses the stage.
  */
 export const GIT_TOOL_PROVIDER_ROUTING: Readonly<Record<GitArtifactTool, readonly string[]>> = Object.freeze({
-  artifacts_git_attach: [],
-  artifacts_fetch_app_source: [],
-  artifacts_git_publish: [],
-  artifacts_git_commit: ["0.2.18"],
-  artifacts_live_write: ["0.2.18"],
-  artifacts_live_read: ["0.2.18"],
-  artifacts_live_reset: ["0.2.18"],
-  artifacts_live_status: ["0.2.18"],
-  artifacts_live_control: ["0.2.18"],
+  artifacts_git_attach: ["0.2.20"],
+  artifacts_fetch_app_source: ["0.2.20"],
+  artifacts_git_publish: ["0.2.20"],
+  artifacts_git_commit: ["0.2.18", "0.2.20"],
+  artifacts_live_write: ["0.2.18", "0.2.20"],
+  artifacts_live_read: ["0.2.18", "0.2.20"],
+  artifacts_live_reset: ["0.2.18", "0.2.20"],
+  artifacts_live_status: ["0.2.18", "0.2.20"],
+  artifacts_live_control: ["0.2.18", "0.2.20"],
 });
 
 export interface GitModeResolution {

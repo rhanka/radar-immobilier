@@ -1,4 +1,5 @@
 import { createMemoryGitBindingStore, type GitBinding } from "@sentropic/artifacts";
+import { verifyLiveControl } from "@sentropic/artifacts/live-host";
 import { describe, expect, it, vi } from "vitest";
 import { createLiveInvitationService, createMemoryLiveInvitationStore } from "./live-authority.js";
 import {
@@ -15,18 +16,19 @@ const socket = () => ({ close: vi.fn() });
 const noSleep = async () => {};
 
 describe("live signer adapter (provider export only)", () => {
-  it("fails closed while the provider does not export live-assertion (0.2.18)", async () => {
-    const loaded = await loadLiveSigner(new Uint8Array(32));
-    expect(loaded).toBe(FAIL_CLOSED_LIVE_SIGNER);
-    expect(() => loaded.signControl({} as never)).toThrow();
+  it("binds the provider live-host signer (0.2.20) and fails closed without the export or with a short key", async () => {
+    expect(await loadLiveSigner(new Uint8Array(32))).not.toBe(FAIL_CLOSED_LIVE_SIGNER);
+    expect(await loadLiveSigner(undefined)).toBe(FAIL_CLOSED_LIVE_SIGNER);
+    expect(liveSignerFrom(undefined, new Uint8Array(32))).toBe(FAIL_CLOSED_LIVE_SIGNER);
+    expect(() => FAIL_CLOSED_LIVE_SIGNER.signControl({} as never)).toThrow();
     expect(liveSignerFrom({ signLiveAssertion: () => "x", signLiveControl: () => "y" }, new Uint8Array(16))).toBe(FAIL_CLOSED_LIVE_SIGNER);
   });
 
   it("binds the provider signer to the host key", () => {
     const signLiveControl = vi.fn(() => "c1.token");
     const bound = liveSignerFrom({ signLiveAssertion: () => "v1.token", signLiveControl }, new Uint8Array(32));
-    expect(bound.signControl({ op: "fence" } as never)).toBe("c1.token");
-    expect(signLiveControl).toHaveBeenCalledWith({ op: "fence" }, new Uint8Array(32));
+    expect(bound.signControl({ op: "revoke_session" } as never)).toBe("c1.token");
+    expect(signLiveControl).toHaveBeenCalledWith({ op: "revoke_session" }, new Uint8Array(32));
   });
 });
 
@@ -91,8 +93,8 @@ describe("live revocation: sockets closed, fence pushed", () => {
     const accepted = new Response("ok", { status: 200 });
     const push = createLiveFencePusher({ signer, kid: "k1", host: "pages.test", fetch: (async () => accepted) as never,
       controlUrl: () => new URL("https://edge.internal/_live-control/v1"), sleep: noSleep });
-    await expect(push({ artifactId: ARTIFACT, op: "fence", sessionId: "", invitationId: "", epoch: 0, generation: 2,
-      routeEpoch: 1 })).resolves.toBeUndefined();
+    await expect(push({ artifactId: ARTIFACT, op: "revoke_session", sessionId: "sess", invitationId: "", epoch: 0 }))
+      .resolves.toBeUndefined();
     expect(accepted.bodyUsed).toBe(true);
   });
 
@@ -100,13 +102,13 @@ describe("live revocation: sockets closed, fence pushed", () => {
     const fetcher = vi.fn().mockRejectedValueOnce(new Error("reset")).mockResolvedValueOnce(new Response(null, { status: 204 }));
     const push = createLiveFencePusher({ signer, kid: "k1", host: "pages.test", fetch: fetcher as never,
       controlUrl: () => new URL("https://edge.internal/_live-control/v1"), sleep: noSleep });
-    await expect(push({ artifactId: ARTIFACT, op: "revoke_session", sessionId: "sess", invitationId: "", epoch: 0,
-      generation: 0, routeEpoch: 0 })).resolves.toBeUndefined();
+    await expect(push({ artifactId: ARTIFACT, op: "revoke_session", sessionId: "sess", invitationId: "", epoch: 0 }))
+      .resolves.toBeUndefined();
     expect(fetcher).toHaveBeenCalledTimes(2);
   });
 
   it("refuses to push while the edge or the signer is not configured", async () => {
-    const claims = { artifactId: ARTIFACT, op: "revoke_session" as const, sessionId: "s", invitationId: "", epoch: 0, generation: 0, routeEpoch: 0 };
+    const claims = { artifactId: ARTIFACT, op: "revoke_session" as const, sessionId: "s", invitationId: "", epoch: 0 };
     await expect(createLiveFencePusher({ signer, kid: "k", host: "h" })(claims)).rejects.toMatchObject({ kind: "provider_unavailable" });
     await expect(createLiveFencePusher({ signer: FAIL_CLOSED_LIVE_SIGNER, kid: "k", host: "h",
       controlUrl: () => new URL("https://edge.internal/x") })(claims)).rejects.toMatchObject({ kind: "provider_unavailable" });
@@ -157,14 +159,26 @@ describe("live edge configuration", () => {
       .toThrow("artifact_live_control_url_invalid");
   });
 
-  it("keeps the composed revocation closed on 0.2.18 (no live-host signer) while still closing sockets", async () => {
+  it("pushes revocations the edge verifies with the provider live format (exact claim set, 0.2.20)", async () => {
     const sockets = createLiveSocketRegistry();
     const open = socket();
     sockets.register({ artifactId: ARTIFACT, sessionId: "sess", principalId: "alice" }, open);
-    const revocation = await composeLiveEdgeRevocation(readLiveEdgeConfig({ IMMO_ARTIFACTS_LIVE_HOST_KEYS: `immo-preprod-live-1=${key}`,
+    const tokens: string[] = [];
+    const fetcher = vi.fn(async (_url: URL, init: RequestInit) => {
+      tokens.push((init.headers as Record<string, string>)[LIVE_CONTROL_HEADER]!);
+      return new Response(null, { status: 204 });
+    });
+    const config = readLiveEdgeConfig({ IMMO_ARTIFACTS_LIVE_HOST_KEYS: `immo-preprod-live-1=${key}`,
       IMMO_ARTIFACTS_LIVE_HOST_KID: "immo-preprod-live-1", IMMO_ARTIFACTS_LIVE_HOST: "pages.test",
-      IMMO_ARTIFACTS_LIVE_CONTROL_URL: "https://pages.test/_live-control/v1" }), sockets, (async () => new Response(null, { status: 204 })) as never);
-    await expect(revocation.session(ARTIFACT, "sess")).rejects.toMatchObject({ kind: "provider_unavailable" });
+      IMMO_ARTIFACTS_LIVE_CONTROL_URL: "https://pages.test/_live-control/v1" });
+    const revocation = await composeLiveEdgeRevocation(config, sockets, fetcher as never);
+    await expect(revocation.session(ARTIFACT, "sess")).resolves.toEqual({ closed: 1 });
+    await revocation.invitation({ invitationId: "inv-1", storageScopeId: SCOPE, artifactId: ARTIFACT, bindingGeneration: 1,
+      liveSessionId: "sess", inviteeId: "carol", grantorId: "alice", createdAt: "", expiresAt: "", revokedAt: "x", epoch: 2 });
     expect(open.close).toHaveBeenCalled();
+    const verify = (token: string) => verifyLiveControl(token, { key: (kid) => kid === "immo-preprod-live-1" ? config.key : undefined,
+      now: () => Date.now() });
+    expect(verify(tokens[0]!)).toMatchObject({ op: "revoke_session", sessionId: "sess", invitationId: "", epoch: 0, host: "pages.test" });
+    expect(verify(tokens[1]!)).toMatchObject({ op: "revoke_invitation", sessionId: "", invitationId: "inv-1", epoch: 2 });
   });
 });
