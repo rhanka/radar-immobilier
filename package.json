@@ -52,5 +52,22 @@
   "scripts": {
     "build:artifact": "node tools/make/ui-artifact-env.mjs npm run build -w ui",
     "data:polygons": "node --experimental-strip-types radar/data-prep/fetch-municipal-polygons.ts"
+  },
+  "allowScripts": {
+    "@sentropic/engram": false,
+    "esbuild": false,
+    "fsevents": false,
+    "tesseract.js": false,
+    "tree-sitter-c": false,
+    "tree-sitter-cpp": false,
+    "tree-sitter-go": false,
+    "tree-sitter-java": false,
+    "tree-sitter-javascript": false,
+    "tree-sitter-lua": false,
+    "tree-sitter-php": false,
+    "tree-sitter-python": false,
+    "tree-sitter-ruby": false,
+    "tree-sitter-rust": false,
+    "tree-sitter-typescript": false
   }
 }
