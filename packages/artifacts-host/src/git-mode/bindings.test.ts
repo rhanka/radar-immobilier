@@ -1,4 +1,4 @@
-import { createMemoryGitBindingStore, type GitCodeRightsPort, type GitPort } from "@sentropic/artifacts";
+import { createGitToolService, createMemoryGitBindingStore, type GitCodeRightsPort, type GitPort } from "@sentropic/artifacts";
 import { describe, expect, it, vi } from "vitest";
 import { createGitToolAuthorize } from "./authority.js";
 import { composeGitMode, FAIL_CLOSED_GIT_PORT, IMMO_GIT_DEFAULT_EXECUTOR, readGitModeConfig, withHostGitPolicy,
@@ -187,8 +187,8 @@ describe("git mode composition", () => {
     expect(seen[0]).toMatchObject({ executor: "sandbox" });
   });
 
-  it("refuses to compose the git tools on a provider without createGitToolService (0.2.18)", () => {
-    expect(() => gitToolServiceFactory()).toThrow("artifact_git_tools_provider_missing");
-    expect(() => gitToolServiceFactory({ createGitToolService: () => ({}) })).not.toThrow();
+  it("composes the git tools with the provider createGitToolService (0.2.20), refusing a provider without it", () => {
+    expect(gitToolServiceFactory()).toBe(createGitToolService);
+    expect(() => gitToolServiceFactory({})).toThrow("artifact_git_tools_provider_missing");
   });
 });
