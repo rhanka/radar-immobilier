@@ -147,7 +147,8 @@ test('quota status: last measurement per codex seat from calls.jsonl, unknown wh
 
 // ---- session file source (real codex: rate_limits only in $CODEX_HOME/sessions/.../rollout-*.jsonl)
 
-const CODE_MODE = 'Code Mode is unavailable because code-mode host is disabled for this session. Enable the code_mode_host feature to use it.';
+// Exact notice captured from a real codex-cli 0.163.0 call (2026-11-07).
+const CODE_MODE = 'Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`.';
 
 test('quota: the "Code Mode is unavailable" error item is benign (no tool event, the call is accepted); other error items still count', () => {
   const stream = [
