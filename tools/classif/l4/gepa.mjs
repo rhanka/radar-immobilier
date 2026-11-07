@@ -3,9 +3,9 @@
 // (owner-validated method: population of prompts, reflective mutation, per-case Pareto selection).
 //
 // Objective (lexicographic, l4/gepa-common.mjs): 1. zero miss — a reference pertinent or
-// a_surveiller predicted non_pertinent on ANY of the 5 evaluation routes counts (a failed call
+// a_surveiller predicted non_pertinent on ANY of the 4 evaluation routes counts (a failed call
 // counts as shown); 2. then minimise noise — a reference non_pertinent predicted shown. A
-// pertinent <-> a_surveiller confusion is not penalised. A case score sums the 5 routes.
+// pertinent <-> a_surveiller confusion is not penalised. A case score sums the 4 routes.
 //
 // Data: the TUNING half only (half === 'tuning', status resolved), split by a recorded seed
 // into D_feedback (~60 %, mutations) and D_pareto (~40 %, selection), stratified by verdict.
@@ -24,11 +24,11 @@
 // iteration in three is a crossover of two front parents instead. Fallback and repair seat:
 // opus-5.5-max; every candidate passes assertNoVerbatim with the bounded repair of
 // optimise.mjs (2 rewrites at most). Admission: the child is evaluated on the mini-batch over
-// the 5 routes; rejected with more misses than the parent, or with equal misses and no less
+// the 4 routes; rejected with more misses than the parent, or with equal misses and no less
 // noise; otherwise evaluated on D_pareto and added to the population.
 //
 // Final choice: EVERY front candidate with 0 miss on D_pareto is evaluated on the whole tuning
-// half (D_feedback too, 5 routes), least D_pareto noise first, as long as the budget holds (the
+// half (D_feedback too, 4 routes), least D_pareto noise first, as long as the budget holds (the
 // manifest counts the ones left out). Only 0 miss in total with a failed-call share <= 5 % per
 // route (the blind gate rule) is retained, the least noise wins. None retained → result
 // `no-candidate` (flagged incomplete when candidates were left out), no fallback. The winner is
@@ -344,7 +344,7 @@ ${promptB.trim()}
 ---`;
 }
 
-// ---------------------------------------------------------------- evaluation (5 routes)
+// ---------------------------------------------------------------- evaluation (4 routes)
 
 /** sha of what was really sent for one case: the full devPrompt (template + candidate + item input) and the code registry. */
 function evalKey(ctx, cand, id) {
@@ -405,7 +405,7 @@ async function callOne(ctx, cand, route, id, step) {
     mkdirSync(path.dirname(f), { recursive: true, mode: 0o700 });
     writeFileSync(f, JSON.stringify({ promptSha256: cand.sha, evalKey: evalKey(ctx, cand, id), route, itemId: id, row }), { mode: 0o600 });
   }
-  return { row, authError: !!r.authError };
+  return { row, authError: !!r.authError, binaryMissing: r.binaryMissing ?? null };
 }
 
 /**
@@ -436,6 +436,8 @@ export async function evaluateCandidate(ctx, cand, ids, step, { child = false, l
 async function evaluateBatch(ctx, cand, ids, step, { child, lotSize }) {
   const allowed = Math.max(1, Math.floor(lotSize * GEPA_FAILURE_CEILING));
   let childTool = false;
+  // A seat binary absent from PATH stops every route at its first call (no further launch).
+  let missing = null;
   const runRoute = async (route) => {
     let infraFailures = 0;
     let authFailures = 0;
@@ -444,8 +446,9 @@ async function evaluateBatch(ctx, cand, ids, step, { child, lotSize }) {
       const hit = readEvalCache(ctx, cand, route, id);
       if (hit) return hit;
       ctx.pendingLaunches = Math.max(0, ctx.pendingLaunches - 1);
-      if (tripped || childTool) return null;
-      const { row, authError } = await callOne(ctx, cand, route, id, step);
+      if (tripped || childTool || missing) return null;
+      const { row, authError, binaryMissing } = await callOne(ctx, cand, route, id, step);
+      if (binaryMissing) { missing = missing ?? { route, binary: binaryMissing }; return row; }
       if (authError) authFailures++;
       if (row.tool && child) childTool = true;
       if (row.infra && !row.tool && ++infraFailures > allowed) tripped = true;
@@ -457,7 +460,11 @@ async function evaluateBatch(ctx, cand, ids, step, { child, lotSize }) {
     }
     return rows;
   };
-  const byRoute = await runFamiliesParallel(groupRoutesByFamily(ctx.routes), runRoute);
+  let byRoute;
+  try { byRoute = await runFamiliesParallel(groupRoutesByFamily(ctx.routes), runRoute); } catch (e) { if (!missing) throw e; }
+  if (missing) {
+    throw new Error(`classif-l4-gepa: ${missing.binary} not found in PATH (${missing.binary} introuvable dans PATH) for route ${missing.route} on ${step}: seat infrastructure, run stopped at the first call. Put ${missing.binary} on the PATH of the launching shell or unit, then resume with \`${ctx.resumeCommand}\` (answered calls are cached)`);
+  }
   const out = Object.fromEntries(ids.map((id) => [id, {}]));
   for (const route of ctx.routes) byRoute.get(route).forEach((row, i) => { out[ids[i]][route] = row; });
   return out;
@@ -534,7 +541,7 @@ export function retryablePairs(ctx, cand) {
   const retries = readRetries(ctx);
   const out = [];
   for (const [id, byRoute] of Object.entries(cand.pareto)) {
-    for (const [route, r] of Object.entries(byRoute)) if (r?.infra && (retries[retryKey(cand, route, id)] ?? 0) < MAX_RETRIES) out.push({ route, id });
+    for (const [route, r] of Object.entries(byRoute)) if (ctx.routes.includes(route) && r?.infra && (retries[retryKey(cand, route, id)] ?? 0) < MAX_RETRIES) out.push({ route, id });
   }
   return out;
 }
@@ -555,12 +562,19 @@ async function retryInfra(ctx, cand, step) {
   writeFileSync(retriesFile(ctx), JSON.stringify(retries), { mode: 0o600 });
   const pareto = JSON.parse(JSON.stringify(cand.pareto));
   ctx.pendingLaunches = pairs.length;
+  let missing = null;
   await pool(pairs.map((p) => async () => {
     ctx.pendingLaunches = Math.max(0, ctx.pendingLaunches - 1);
-    const { row } = await callOne(ctx, cand, p.route, p.id, step);
+    if (missing) return;
+    const { row, binaryMissing } = await callOne(ctx, cand, p.route, p.id, step);
+    if (binaryMissing) { missing = missing ?? { route: p.route, binary: binaryMissing }; return; }
     pareto[p.id][p.route] = compactEvals({ [p.id]: { [p.route]: row } })[p.id][p.route];
   }), ctx.concurrency);
   ctx.pendingLaunches = 0;
+  if (missing) {
+    saveCandidate(ctx, { ...cand, pareto });
+    throw new Error(`classif-l4-gepa: ${missing.binary} not found in PATH (${missing.binary} introuvable dans PATH) for route ${missing.route} on ${step}: run stopped. Put ${missing.binary} on the PATH, then resume with \`${ctx.resumeCommand}\``);
+  }
   saveCandidate(ctx, { ...cand, pareto });
   return loadCandidate(ctx, cand.id, cand.sha);
 }
@@ -853,8 +867,8 @@ export async function runGepa({ home = classifHome(), repoClassif = classifDir(p
   const journalAll = readJsonlRecords(journalFile).filter((r) => Number.isInteger(r.iter) && r.status);
   const count = (pred) => journalAll.filter(pred).length;
   const noCandidateReason = coverage.notEvaluated
-    ? `no evaluated candidate reached 0 miss on the whole tuning half (5 routes) within the failure ceiling; ${coverage.notEvaluated} eligible candidate(s) not evaluated (budget): result incomplete; no fallback`
-    : 'no front candidate reached 0 miss on the whole tuning half (5 routes) within the failure ceiling; no fallback';
+    ? `no evaluated candidate reached 0 miss on the whole tuning half (4 routes) within the failure ceiling; ${coverage.notEvaluated} eligible candidate(s) not evaluated (budget): result incomplete; no fallback`
+    : 'no front candidate reached 0 miss on the whole tuning half (4 routes) within the failure ceiling; no fallback';
   const manifest = { kind: 'l4-gepa', method: GEPA_METHOD, series: String(k), run: runId, createdAt: new Date().toISOString(),
     seed: split.seed, split: { feedback: split.feedback.length, pareto: split.pareto.length, feedbackShare: split.feedbackShare, strata: split.strata, sha256: split.sha256 },
     contextSha256: split.contextSha256,
@@ -881,6 +895,32 @@ export async function runGepa({ home = classifHome(), repoClassif = classifDir(p
   }
   writeFileSync(path.join(repoClassif, 'l4', 'manifests', `series-${k}-gepa.json`), `${JSON.stringify(manifest, null, 1)}\n`);
   return manifest;
+}
+
+/**
+ * Read-only resume check of a run (no seat call, no write): does a resume under the CURRENT
+ * routes accept the run state (same seed, same split, same evaluation context — the context sha
+ * covers the code registry, the devPrompt template and the tuning inputs, NOT the route list) and
+ * how much of the cache it reuses. Returns counts only.
+ */
+export function gepaResumeCheck({ home = classifHome(), repoClassif = classifDir(process.env), k, run = null, seed = null }) {
+  const runId = run ?? `s${k}`;
+  const runDir = path.join(home, 'l4', `gepa-${runId}`);
+  const rows = readGepaTuning(home);
+  const codes = loadCodes();
+  const ctx = { runDir, refById: new Map(rows.map((r) => [r.itemId, r])), routes: GEPA_ROUTES, codesSha: sha256(JSON.stringify([...codes].sort())), evalKeys: new Map() };
+  const split = { ...stratifiedSplit(rows, { seed: seed ?? `gepa-s${k}` }), contextSha256: contextSha(ctx, rows) };
+  const splitFile = path.join(runDir, 'split.json');
+  const prev = existsSync(splitFile) ? JSON.parse(readFileSync(splitFile, 'utf8')) : null;
+  const seeds = SEED_PROMPTS.map((v) => { const text = readFileSync(path.join(repoClassif, 'l4', 'prompts', `${v}.md`), 'utf8'); return { id: v, text, sha: sha256(text) }; });
+  const cache = Object.fromEntries(seeds.map((c) => [c.id, Object.fromEntries(GEPA_ROUTES.map((r) => [r,
+    split.pareto.filter((id) => readEvalCache(ctx, c, r, id)).length]))]));
+  return { run: runId, routes: GEPA_ROUTES, splitFile: Boolean(prev), seedMatches: prev?.seed === split.seed,
+    splitMatches: Boolean(prev) && prev.sha256?.feedback === split.sha256.feedback && prev.sha256?.pareto === split.sha256.pareto,
+    contextMatches: prev?.contextSha256 === split.contextSha256, pareto: split.pareto.length, feedback: split.feedback.length,
+    candidatesOnDisk: existsSync(path.join(runDir, 'candidates')) ? readdirSync(path.join(runDir, 'candidates')).length : 0,
+    journal: existsSync(path.join(runDir, 'iterations.jsonl')), frozenPrompt: existsSync(path.join(repoClassif, 'l4', 'prompts', `P${k}.md`)),
+    cachedParetoAnswers: cache };
 }
 
 /**
