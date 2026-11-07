@@ -80,27 +80,28 @@ export const ROUTES = {
   // mcp_servers, auth copied from ~/.codex/auth.json). Machine flags added for parsing only:
   // `--json` (JSONL events on stdout) and `-o last-message.md` (the model's final message on
   // disk); the prompt goes through stdin (`-`, no 128 KB argument limit).
-  // `--skip-git-repo-check` allows the empty non-repo cwd; `--ephemeral` keeps session files
-  // out of the seat. codex reads CODEX_HOME (verified: unknown CODEX_HOME warns, isolated
+  // `--skip-git-repo-check` allows the empty non-repo cwd. No `--ephemeral`: the quota
+  // (`rate_limits`) is only written to the session file, which callSeat reads (rate_limits keys
+  // only) then DELETES after every call (it holds the prompt). codex reads CODEX_HOME (verified: unknown CODEX_HOME warns, isolated
   // home with copied auth.json connects, `codex doctor` auth mode chatgpt).
   'astra-max': {
     family: 'Astra', model: 'gpt-6-astra', effort: 'max', route: 'codex exec -m gpt-6-astra -c model_reasoning_effort=max -s read-only, isolated CODEX_HOME, empty cwd, scrubbed env (--json + -o last-message.md for parsing, prompt on stdin)',
     build: (dir, _file, prompt) => ({ cmd: 'codex', args: ['exec', '-m', 'gpt-6-astra', '-c', 'model_reasoning_effort=max', '-s', 'read-only',
-      '--skip-git-repo-check', '--ephemeral', '--json', '-o', path.join(dir, 'last-message.md'), '-'], stdin: prompt,
+      '--skip-git-repo-check', '--json', '-o', path.join(dir, 'last-message.md'), '-'], stdin: prompt,
       env: { CODEX_HOME: ensureAstraHome() } }),
     parse: parseCodex,
   },
   // GEPA evaluation seats (owner decision, GEPA method): two low-effort ChatGPT models on the
   // same isolated codex route as astra-max — own CODEX_HOME per seat (config with NO
-  // mcp_servers, copied auth), empty cwd, scrubbed env, read-only sandbox, --ephemeral,
-  // --json + -o last-message.md for parsing, prompt on stdin, parseCodex (fail-closed tools).
+  // mcp_servers, copied auth), empty cwd, scrubbed env, read-only sandbox, session file read for
+  // the quota then deleted, --json + -o last-message.md for parsing, prompt on stdin, parseCodex (fail-closed tools).
   ...Object.fromEntries([
     ['sol-6.1-low', 'Sol 6.1', 'gpt-6.1-sol'],
     ['luna-6-low', 'Luna 6', 'gpt-6-luna'],
   ].map(([label, family, model]) => [label, {
     family, model, effort: 'low', route: `codex exec -m ${model} -c model_reasoning_effort=low -s read-only, isolated CODEX_HOME, empty cwd, scrubbed env (--json + -o last-message.md for parsing, prompt on stdin)`,
     build: (dir, _file, prompt) => ({ cmd: 'codex', args: ['exec', '-m', model, '-c', 'model_reasoning_effort=low', '-s', 'read-only',
-      '--skip-git-repo-check', '--ephemeral', '--json', '-o', path.join(dir, 'last-message.md'), '-'], stdin: prompt,
+      '--skip-git-repo-check', '--json', '-o', path.join(dir, 'last-message.md'), '-'], stdin: prompt,
       env: { CODEX_HOME: ensureCodexHome(label, { model, effort: 'low' }) } }),
     parse: parseCodex,
   }])),
@@ -152,6 +153,80 @@ const isInside = (child, parent) => {
   const rel = path.relative(parent, child);
   return rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel));
 };
+
+// ---- codex session files (quota source, review GEPA quota guard) ----
+// Without --ephemeral, codex writes $CODEX_HOME/sessions/YYYY/MM/DD/rollout-<ts>-<thread id>.jsonl.
+// It holds the prompt (item text, blind items included): callSeat reads its rate_limits lines
+// only, then deletes it and its empty directories in a finally, success or failure.
+export const CODEX_SESSION_STALE_MS = 2 * 3600 * 1000;
+
+function listSessionFiles(root) {
+  const out = [];
+  const walk = (d) => {
+    let entries = [];
+    try { entries = fs.readdirSync(d, { withFileTypes: true }); } catch { return; }
+    for (const e of entries) {
+      const p = path.join(d, e.name);
+      if (e.isDirectory()) walk(p); else if (e.name.endsWith('.jsonl')) out.push(p);
+    }
+  };
+  walk(root);
+  return out;
+}
+
+function pruneEmptyDirs(root) {
+  const walk = (d) => {
+    let entries = [];
+    try { entries = fs.readdirSync(d, { withFileTypes: true }); } catch { return; }
+    for (const e of entries) if (e.isDirectory()) walk(path.join(d, e.name));
+    if (d !== root) { try { fs.rmdirSync(d); } catch { /* not empty */ } }
+  };
+  walk(root);
+}
+
+/** Session files currently under a codex home (snapshot before a call). */
+export const codexSessionFiles = (codexHome) => (codexHome ? listSessionFiles(path.join(codexHome, 'sessions')) : []);
+
+/** Thread id of a codex --json stdout (thread.started), or null. */
+export function codexThreadId(stdout) {
+  for (const line of String(stdout ?? '').split('\n')) {
+    if (!line.includes('thread.started')) continue;
+    try { const e = JSON.parse(line); if (e?.type === 'thread.started') return e.thread_id ?? e.session_id ?? e.id ?? null; } catch { /* next */ }
+  }
+  return null;
+}
+
+/**
+ * The session file(s) of one call — named after its thread id, else the files that appeared
+ * since `before` — are read for rate_limits only, then deleted with their empty directories
+ * (finally: even when reading fails). Returns the last rate_limits found, or null.
+ */
+export function takeCodexSession({ codexHome, stdout, before = new Set() }) {
+  if (!codexHome) return null;
+  const root = path.join(codexHome, 'sessions');
+  if (!fs.existsSync(root)) return null;
+  const tid = codexThreadId(stdout);
+  const files = listSessionFiles(root).filter((f) => (tid ? path.basename(f).includes(tid) : !before.has(f)));
+  let rateLimits = null;
+  try {
+    for (const f of files) {
+      try { rateLimits = extractCodexRateLimits(fs.readFileSync(f, 'utf8')) ?? rateLimits; } catch { /* unreadable: still deleted */ }
+    }
+  } finally {
+    for (const f of files) fs.rmSync(f, { force: true });
+    pruneEmptyDirs(root);
+  }
+  return rateLimits;
+}
+
+/** Deletes session files left by a killed process (older than CODEX_SESSION_STALE_MS). */
+export function sweepStaleCodexSessions(codexHome, now = Date.now()) {
+  const root = path.join(codexHome, 'sessions');
+  for (const f of listSessionFiles(root)) {
+    try { if (now - fs.statSync(f).mtimeMs > CODEX_SESSION_STALE_MS) fs.rmSync(f, { force: true }); } catch { /* gone */ }
+  }
+  if (fs.existsSync(root)) pruneEmptyDirs(root);
+}
 
 /** Codex seats (ChatGPT quota shared with the production immo detection): astra-max, sol-6.1-low, luna-6-low. */
 export const isCodexSeat = (label) => ROUTES[label]?.parse === parseCodex;
@@ -234,6 +309,7 @@ export function ensureCodexHome(seat, { model, effort, name = seat, home = class
     if (!from || !fs.existsSync(from)) throw new Error(`${seat === 'astra-max' ? 'astra' : seat} isolation refused: no auth to copy (${src} absent and ${dst} absent)`);
     atomicPrivateWrite(dst, fs.readFileSync(from));
   }
+  sweepStaleCodexSessions(dir);
   PREPARED_CODEX_HOMES.add(dir);
   return dir;
 }
@@ -328,6 +404,13 @@ export const CODEX_KNOWN_EVENT_TYPES = new Set([
 // error items, or any unknown type) is a tool event.
 export const CODEX_BENIGN_ITEM_TYPES = new Set(['agent_message', 'reasoning']);
 
+/**
+ * `error` items codex emits on EVERY call of the isolated seats, unrelated to tools (the tool
+ * features are disabled): benign by exact notice only — any other error item still counts.
+ */
+export const CODEX_BENIGN_ERROR_NOTICES = [/^Code Mode is unavailable because code-mode host is disabled/];
+const benignErrorItem = (item) => item?.type === 'error' && CODEX_BENIGN_ERROR_NOTICES.some((re) => re.test(String(item.message ?? item.text ?? '')));
+
 const CODEX_TOOL_KEY = /(tool_call|toolcall|function_call|exec_command|shell_command|command_execution|file_change|mcp|web_search|websearch)/i;
 
 export function countCodexToolEvents(stdout) {
@@ -347,6 +430,7 @@ export function countCodexToolEvents(stdout) {
       const item = e?.item ?? e?.data ?? e;
       const itype = item?.type ?? null;
       if (!itype || typeof itype !== 'string') { toolEvents++; unknownTypes.push(`${type}:<missing-item-type>`); continue; }
+      if (benignErrorItem(item)) continue;
       if (!CODEX_BENIGN_ITEM_TYPES.has(itype)) { toolEvents++; continue; }
       // Fail closed on a tool payload nested inside a benign item (keys only, never the
       // model text: the word "tool" in prose must not count).
@@ -490,6 +574,7 @@ export function callSeat(label, prompt, { timeoutMs = 900000, base = process.env
     built = r.build(work, file, prompt);
   } catch (e) { cleanup(); throw e; }
   const { cmd, args, env, stdin } = built;
+  const sessionsBefore = codex ? new Set(codexSessionFiles(env?.CODEX_HOME)) : null;
   const started = Date.now();
   return new Promise((resolve, reject) => {
     // detached: the child leads its own process group so the timeout kill reaches descendants.
@@ -512,6 +597,14 @@ export function callSeat(label, prompt, { timeoutMs = 900000, base = process.env
       let parsed = { text: '', usage: null };
       try { parsed = r.parse(out, work); } catch { /* keep empty */ }
       cleanup();
+      // Quota source: the session file of this call (stdout stays the secondary source); the
+      // file is deleted whatever happens.
+      if (codex) {
+        try {
+          const fromSession = takeCodexSession({ codexHome: env?.CODEX_HOME, stdout: out, before: sessionsBefore });
+          if (fromSession) parsed = { ...parsed, rateLimits: fromSession };
+        } catch { /* session cleanup is best effort, rate limits stay from stdout */ }
+      }
       // Review §10: the astra --json event stream stays in the raw record (the run.mjs raw
       // file saves this whole object), so tool-event audits are reproducible.
       const rawJsonl = codex ? out : undefined;
