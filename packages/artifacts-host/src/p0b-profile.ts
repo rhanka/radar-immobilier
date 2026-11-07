@@ -2,7 +2,7 @@ import { ARTIFACTS_PROVIDER_VERSION, compileArtifactsProfile, RADAR_ARTIFACTS_PR
 
 /** Package qualification and deployment qualification are separate switches. */
 export const ARTIFACT_PROVIDER_VERSION: string = ARTIFACTS_PROVIDER_VERSION;
-export const ARTIFACT_P0B_VERSIONS: readonly string[] = Object.freeze(["0.2.5", "0.2.6", "0.3.0", "0.2.8", "0.2.9", "0.2.10", "0.2.12", "0.2.13", "0.2.15", "0.2.16"]);
+export const ARTIFACT_P0B_VERSIONS: readonly string[] = Object.freeze(["0.2.5", "0.2.6", "0.3.0", "0.2.8", "0.2.9", "0.2.10", "0.2.12", "0.2.13", "0.2.15", "0.2.16", "0.2.17"]);
 export const ARTIFACT_P0B = ARTIFACT_P0B_VERSIONS.includes(ARTIFACT_PROVIDER_VERSION);
 if (ARTIFACT_PROVIDER_VERSION !== "0.2.2" && !ARTIFACT_P0B) throw new Error("artifact_provider_version_unqualified");
 export function artifactProfileDescriptor(env: NodeJS.ProcessEnv = process.env) {
@@ -13,7 +13,7 @@ export function artifactProfileDescriptor(env: NodeJS.ProcessEnv = process.env) 
   }
   const strict = revision === "immo-artifacts.cas.v2" || revision === "immo-artifacts.v2";
   if ((revision === "immo-artifacts.v1") !== !ARTIFACT_P0B) throw new Error("artifact_profile_provider_mismatch");
-  if (strict && ARTIFACT_PROVIDER_VERSION !== "0.2.9" && ARTIFACT_PROVIDER_VERSION !== "0.2.10" && ARTIFACT_PROVIDER_VERSION !== "0.2.12" && ARTIFACT_PROVIDER_VERSION !== "0.2.13" && ARTIFACT_PROVIDER_VERSION !== "0.2.15" && ARTIFACT_PROVIDER_VERSION !== "0.2.16") {
+  if (strict && ARTIFACT_PROVIDER_VERSION !== "0.2.9" && ARTIFACT_PROVIDER_VERSION !== "0.2.10" && ARTIFACT_PROVIDER_VERSION !== "0.2.12" && ARTIFACT_PROVIDER_VERSION !== "0.2.13" && ARTIFACT_PROVIDER_VERSION !== "0.2.15" && ARTIFACT_PROVIDER_VERSION !== "0.2.16" && ARTIFACT_PROVIDER_VERSION !== "0.2.17") {
     throw new Error("artifact_strict_provider_unqualified");
   }
   if (revision === "immo-artifacts.v2" &&
