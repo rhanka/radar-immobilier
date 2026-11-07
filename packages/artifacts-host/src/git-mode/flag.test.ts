@@ -81,7 +81,7 @@ describe("git mode flag", () => {
   it("starts with the flag off whatever garbage the git configuration holds", async () => {
     const garbage = { IMMO_ARTIFACTS_GIT_CURSOR_KEY: "!!not-base64", IMMO_ARTIFACTS_GIT_HUMANS: "{",
       IMMO_ARTIFACTS_GIT_COMMITTER_NAME: "half", IMMO_ARTIFACTS_GIT_BROKER_ORIGIN: "http://broker.example/path",
-      IMMO_ARTIFACTS_BUILDER_ORIGIN: "ftp://builder", IMMO_ARTIFACTS_GIT_INSTALLATION_REF: " " };
+      IMMO_ARTIFACTS_BUILDER_URL: "ftp://builder", IMMO_ARTIFACTS_LIVE_DRAFT_KEYS: "v1=short", IMMO_ARTIFACTS_GIT_INSTALLATION_REF: " " };
     for (const flag of [undefined, "", "off"]) {
       vi.resetModules();
       vi.unstubAllEnvs();

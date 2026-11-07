@@ -2,8 +2,7 @@ import { generateKeyPairSync, sign, verify } from "node:crypto";
 import type { GitBinding } from "@sentropic/artifacts";
 import { describe, expect, it, vi } from "vitest";
 import { createMemoryGitBindingStore } from "@sentropic/artifacts";
-import { createHostBuildApiClient } from "./build-api.js";
-import { IMMO_HOST_BUILD_QUALIFICATION } from "./gb1-host-build.js";
+import { createHostBuildApiClient, createMemoryJobStore } from "./build-api.js";
 import { composeGitMode, readGitModeConfig } from "./compose.js";
 import type { GitBuildPort } from "./provider-adapter.js";
 import {
@@ -137,40 +136,55 @@ describe("SG4b acceptance and signed host receipt", () => {
   });
 });
 
-describe("host build API client", () => {
+describe("host build API client (W7)", () => {
   const job = { storageScopeId: "s", artifactId: binding.artifactId, repoId: "radar-immobilier", branch: binding.branch,
     subPath: "", commitSha: SHA, bindingGeneration: 2, expectedCurrentReleaseId: null, executor: "sandbox" as const,
     requestedBy: "alice", idempotencyKey: "k" };
+  const identity = { authorization: async () => "Bearer service-token" };
+  const BASE = "https://builder.example/api/v1/artifacts/builder";
 
   it("admits only the sandbox executor, and only when the builder is configured", async () => {
     expect(await createHostBuildApiClient({}).admits("sandbox")).toBe(false);
-    const client = createHostBuildApiClient({ origin: "https://builder.example", identity: { authorization: async () => "Bearer b" } });
+    const client = createHostBuildApiClient({ baseUrl: BASE, identity });
     expect(await client.admits("sandbox")).toBe(true);
     expect(await client.admits("caller")).toBe(false);
     expect(await client.admits("ci")).toBe(false);
   });
 
-  it("posts the persisted job identity and returns the builder job", async () => {
-    const fetcher = vi.fn(async () => new Response(JSON.stringify({ jobId: "job-1", state: "build_pending" }), { status: 201 }));
-    const client = createHostBuildApiClient({ origin: "https://builder.example", fetch: fetcher as never,
-      identity: { authorization: async () => "Bearer b" } });
-    await expect(client.request(job)).resolves.toEqual({ jobId: "job-1", state: "build_pending" });
+  it("persists the job, then posts exactly { artifactId, jobId } to /v1/builds (202 or 200)", async () => {
+    const jobs = createMemoryJobStore();
+    const fetcher = vi.fn(async (_url: URL, init: RequestInit) => {
+      const body = JSON.parse(String(init.body)) as { jobId: string };
+      return new Response(JSON.stringify({ jobId: body.jobId, state: "build_pending" }), { status: 202 });
+    });
+    const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs, fetch: fetcher as never });
+    const first = await client.request(job);
+    expect(first.state).toBe("build_pending");
     const [url, init] = fetcher.mock.calls[0]! as unknown as [URL, RequestInit];
-    expect(String(url)).toBe("https://builder.example/artifacts/builder/v1/jobs");
-    const body = JSON.parse(String(init.body));
-    expect(body).toEqual({ ...job, buildQualification: IMMO_HOST_BUILD_QUALIFICATION });
-    expect(body.buildQualification.postinstallAllowlist).toEqual([]);
-    expect(body.buildQualification.installScriptRows).toHaveLength(19);
-    expect(body.buildQualification.installScriptRows.every((row: { scripts: string }) => row.scripts === "disabled")).toBe(true);
+    expect(String(url)).toBe(`${BASE}/v1/builds`);
+    expect(init.method).toBe("POST");
+    expect(JSON.parse(String(init.body))).toEqual({ artifactId: job.artifactId, jobId: first.jobId });
+    expect(String(init.body).length).toBeLessThanOrEqual(2048);
+    expect((init.headers as Record<string, string>).authorization).toBe("Bearer service-token");
+    expect(jobs.jobs.get(first.jobId)).toEqual(job);
+    expect((await client.request(job)).jobId).toBe(first.jobId);
   });
 
-  it("fails closed on builder errors and malformed answers", async () => {
-    for (const answer of [new Response("{}", { status: 503 }), new Response(JSON.stringify({ jobId: "j", state: "weird" }))]) {
-      const client = createHostBuildApiClient({ origin: "https://builder.example", fetch: (async () => answer) as never,
-        identity: { authorization: async () => "Bearer b" } });
+  it("reads a build status from /v1/builds/<artifactId>/<jobId>", async () => {
+    const fetcher = vi.fn(async () => new Response(JSON.stringify({ jobId: "j1", state: "published", releaseId: "r1" }), { status: 200 }));
+    const client = createHostBuildApiClient({ baseUrl: BASE, identity, fetch: fetcher as never });
+    await expect(client.status(job.artifactId, "j1")).resolves.toEqual({ jobId: "j1", state: "published", releaseId: "r1" });
+    expect(String((fetcher.mock.calls[0] as unknown as [URL])[0])).toBe(`${BASE}/v1/builds/${job.artifactId}/j1`);
+  });
+
+  it("fails closed on builder errors, malformed answers and a missing job store", async () => {
+    for (const answer of [new Response("{}", { status: 503 }), new Response(JSON.stringify({ jobId: "x", state: "weird" }), { status: 202 })]) {
+      const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs: createMemoryJobStore(), fetch: (async () => answer) as never });
       await expect(client.request(job)).rejects.toMatchObject({ kind: "provider_unavailable" });
     }
+    await expect(createHostBuildApiClient({ baseUrl: BASE, identity }).request(job)).rejects.toMatchObject({ kind: "provider_unavailable" });
     await expect(createHostBuildApiClient({}).request(job)).rejects.toMatchObject({ kind: "provider_unavailable" });
+    expect(() => createHostBuildApiClient({ baseUrl: "http://builder.example", identity })).toThrow("artifact_git_builder_url_invalid");
   });
 });
 
@@ -184,9 +198,9 @@ describe("build stage composition", () => {
         gitToolFactory: (deps) => { build = deps.build; return { execute: async () => ({}) }; } } });
     return build!;
   };
-  it("hands git_publish a build port that stays closed until the builder is configured", async () => {
+  it("hands git_publish a build port that stays closed until the builder URL is configured", async () => {
     expect(await compose({}).admits("sandbox")).toBe(false);
-    const configured = compose({ IMMO_ARTIFACTS_BUILDER_ORIGIN: "https://builder.example", IMMO_ARTIFACTS_BUILDER_TOKEN: "t" });
+    const configured = compose({ IMMO_ARTIFACTS_BUILDER_URL: "https://preprod.sentropic.sent-tech.ca/api/v1/artifacts/builder" });
     expect(await configured.admits("sandbox")).toBe(true);
     for (const executor of ["caller", "ci"] as const) expect(await configured.admits(executor)).toBe(false);
   });

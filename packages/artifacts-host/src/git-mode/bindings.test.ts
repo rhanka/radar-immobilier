@@ -46,7 +46,7 @@ describe("SG0-app lease broker client", () => {
     await expect(client.acquire({ storageScopeId: SCOPE, repoId: IMMO_GIT_REPO_ID, installationRef: "inst" })).resolves
       .toEqual(lease);
     const [url, init] = fetcher.mock.calls[0]!;
-    expect(String(url)).toBe("https://sentropic.example/github-app/broker/lease");
+    expect(String(url)).toBe("https://sentropic.example/api/v1/github-app/broker/lease");
     expect(init.redirect).toBe("error");
     expect((init.headers as Record<string, string>).authorization).toBe("Bearer host-token");
     expect(Object.keys(JSON.parse(String(init.body))).sort()).toEqual(["installationRef", "repoId", "storageScopeId"]);
@@ -153,7 +153,8 @@ describe("git mode composition", () => {
         IMMO_ARTIFACTS_GIT_COMMITTER_NAME: "radar-immobilier artifacts",
         IMMO_ARTIFACTS_GIT_COMMITTER_EMAIL: "1+radar@users.noreply.github.com",
         IMMO_ARTIFACTS_GIT_INSTALLATION_REF: "inst", IMMO_ARTIFACTS_GIT_BROKER_ORIGIN: "https://s.example",
-        IMMO_ARTIFACTS_GIT_BROKER_TOKEN: "t" }),
+        IMMO_ARTIFACTS_SERVICE_OAUTH_TOKEN_ENDPOINT: "https://auth.example/api/v1/auth/oauth/token",
+        IMMO_ARTIFACTS_SERVICE_OAUTH_CLIENT_ID: "immo-host", IMMO_ARTIFACTS_SERVICE_OAUTH_CLIENT_SECRET: "s" }),
       ports: { bindings: createMemoryGitBindingStore(), gitToolFactory: (input) => { git = input.git; return { execute: async () => ({}) }; } } });
     expect(git).toBeDefined();
     expect(git).not.toBe(FAIL_CLOSED_GIT_PORT);
