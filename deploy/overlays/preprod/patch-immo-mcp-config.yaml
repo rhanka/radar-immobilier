@@ -68,7 +68,7 @@ data:
   # artifacts host and the profile digest depends on it. Requires the
   # @sentropic/artifacts 0.2.20 qualification commit: on 0.2.18 the stage
   # refuses to boot (artifact_git_mode_provider_unqualified).
-  IMMO_ARTIFACTS_GIT_MODE: "bindings"
+  IMMO_ARTIFACTS_GIT_MODE: "live"
   # Owner identity for the git-backed mode (owner rhanka; preprod OIDC sub of fabien.antoine@gmail.com).
   IMMO_ARTIFACTS_GIT_COMMITTER_NAME: "rhanka"
   IMMO_ARTIFACTS_GIT_COMMITTER_EMAIL: "24390932+rhanka@users.noreply.github.com"
