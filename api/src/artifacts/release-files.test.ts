@@ -10,6 +10,7 @@ import {
 } from "./release-files.js";
 import { APPLICATION_HTML_CSP, contentHeaders } from "@sentropic/artifacts/content/headers";
 import { EXTENSION_TO_MIME } from "@sentropic/artifacts/server/mime";
+import { HOST_MIME_TYPES } from "@radar/artifacts-host";
 import { READER_CONTENT_HEADERS } from "./content-isolation.js";
 
 describe("published release files", () => {
@@ -76,6 +77,38 @@ describe("published release files", () => {
     expect(contentTypeForPath("README")).toBe("application/octet-stream");
     expect(contentTypeForPath("archive.zip")).toBe("application/octet-stream");
     expect(contentTypeForPath("dir.v2/file")).toBe("application/octet-stream");
+  });
+
+  it("should pin the served type of the extensions newly resolved by the 0.2.18 provider map", () => {
+    // Off-map (application/octet-stream) before 0.2.18; all binary, so served bare.
+    const resolved: Record<string, string> = {
+      ".avif": "image/avif", ".ico": "image/x-icon", ".woff": "font/woff",
+      ".ttf": "font/ttf", ".otf": "font/otf", ".webm": "video/webm",
+    };
+    for (const [ext, type] of Object.entries(resolved)) {
+      expect(contentTypeForPath(`asset${ext}`)).toBe(type);
+      expect(contentTypeForPath(`ASSET${ext.toUpperCase()}`)).toBe(type);
+      expect(type).toBe(EXTENSION_TO_MIME[ext as keyof typeof EXTENSION_TO_MIME]);
+    }
+  });
+
+  it("should gate the in-memory provider by HOST_MIME_TYPES like reader-storage", async () => {
+    const refused = ["/module.wasm", "/tiles.pbf", "/hero.avif", "/favicon.ico", "/font.woff",
+      "/font.ttf", "/font.otf", "/clip.webm", "/archive.zip", "/README"];
+    const served = ["/index.html", "/app.js", "/worker.mjs", "/styles.css", "/data.json",
+      "/municipalities.geojson", "/logo.svg", "/a.png", "/a.jpg", "/a.gif", "/a.webp", "/doc.pdf",
+      "/font.woff2", "/clip.mp4"];
+    const provider = createMemoryReleaseFiles([...refused, ...served].map((path) =>
+      ({ artifactId: "a1", releaseId: "r1", path, body: "x" })));
+    for (const path of refused) {
+      expect(HOST_MIME_TYPES).not.toContain(EXTENSION_TO_MIME[path.slice(path.lastIndexOf(".")) as keyof typeof EXTENSION_TO_MIME]);
+      await expect(provider.getFile("a1", "r1", path), path).resolves.toBeNull();
+    }
+    for (const path of served) {
+      const file = await provider.getFile("a1", "r1", path);
+      expect(file, path).not.toBeNull();
+      expect(HOST_MIME_TYPES, path).toContain(file!.contentType.split(";")[0]);
+    }
   });
 
   it("should authorize release sub-resources and H5 calls without opening isolation", () => {
