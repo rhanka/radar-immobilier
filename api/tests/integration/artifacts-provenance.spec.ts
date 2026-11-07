@@ -6,6 +6,8 @@ import { describe, expect, it } from "vitest";
 const migrations = [
   ["0015_artifacts_core", "0001_artifacts.sql", "7b12713b949a956ad0b4c370a16e80fb4625a99a5097769ed0653df5973dc533"],
   ["0016_artifacts_lifecycle", "0002_lifecycle.sql", "fdfbe97f84774b47a207e66915f7426926650e85b6dbb9a4d80272591df624fd"],
+  // Git-backed artifacts (M2-I): SG1 bindings, audit and release index. Inert until the git mode flag selects a tool.
+  ["0036_artifacts_git_bindings", "0010_git_bindings.sql", "896947eec4898a0918bab2f5d236718095296952ea37c1012fa448c779041de1"],
 ] as const;
 const journal = JSON.parse(readFileSync(new URL("../../drizzle/meta/_journal.json", import.meta.url), "utf8")) as {
   entries: { tag: string; when: number }[];

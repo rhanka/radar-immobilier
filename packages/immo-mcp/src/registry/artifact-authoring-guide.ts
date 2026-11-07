@@ -22,6 +22,8 @@ import {
   designKitAssetUrl,
   mapKitAssetUrl,
   ARTIFACT_P0B, ARTIFACT_PROFILE_DESCRIPTOR, ARTIFACT_STRICT, ARTIFACT_PART1,
+  ARTIFACT_GIT_MODE, IMMO_GIT_REFUSED_WRITE_PATHS, IMMO_GIT_WRITABLE_PATHS,
+  RELEASE_FILES_MAX, RELEASE_FILE_BYTES_MAX, RELEASE_TOTAL_BYTES_MAX, type GitModeResolution,
 } from "@radar/artifacts-host";
 import {
   STARTER_APP_CSS,
@@ -33,8 +35,64 @@ import { FRAMEWORK_STARTERS, FRAMEWORK_BUILD_RULE } from "./framework-starters.j
 import { ARTIFACT_LIST_ORDER } from "./artifact-read-schema.js";
 
 export const AUTHORING_GUIDE_ID = "immo-artifact-authoring" as const;
-export const AUTHORING_GUIDE_REVISION = ARTIFACT_STRICT ? `2026-11-05-${ARTIFACT_PROFILE_DESCRIPTOR.profileRevisionId}`
+const BASE_GUIDE_REVISION = ARTIFACT_STRICT ? `2026-11-05-${ARTIFACT_PROFILE_DESCRIPTOR.profileRevisionId}`
   : ARTIFACT_P0B ? "2026-11-05-p0b-r7" : "2026-11-05-r7";
+/** Git mode adds a suffix only when the flag is on; off keeps the historical revision. */
+export const AUTHORING_GUIDE_REVISION = ARTIFACT_GIT_MODE.stage === "off" ? BASE_GUIDE_REVISION
+  : `${BASE_GUIDE_REVISION}-git-${ARTIFACT_GIT_MODE.stage}`;
+
+export interface AuthoringGuideGitMode {
+  readonly stage: string;
+  readonly tools: readonly string[];
+  readonly unavailableTools: readonly string[];
+  readonly path: readonly string[];
+  readonly writablePaths: readonly string[];
+  readonly refusedWritePaths: readonly string[];
+  readonly ceilings: Readonly<Record<string, number>>;
+}
+
+/**
+ * Git-backed path of the guide (served only when IMMO_ARTIFACTS_GIT_MODE is
+ * on). Ceilings are the enforced values: release 255 files / 16 MiB per file
+ * / 64 MiB per release (GB1 boundary), source page 1 MiB per file and 8 MiB
+ * per page (provider GitPort defaults), git_commit 255 paths / 8 MiB, live
+ * write 255 paths / 2 MiB, commit message 16384 UTF-16 units.
+ */
+export function gitAuthoringSection(mode: GitModeResolution): AuthoringGuideGitMode | undefined {
+  if (mode.stage === "off") return undefined;
+  const has = (tool: string) => (mode.tools as readonly string[]).includes(tool);
+  return {
+    stage: mode.stage,
+    tools: [...mode.tools],
+    unavailableTools: [...mode.unrouted],
+    path: [
+      "Each user works on their OWN page and branch: artifacts_ensure, then artifacts_git_attach({artifactId, idempotencyKey}) creates the personal branch artifact/p/<id8-principal>/<slug>-<id8> from main. You never edit another user's binding.",
+      "Read the real application source with artifacts_fetch_app_source (artifactId resolves the bound branch); it needs current code rights. Oversized files are reported as omitted, not truncated.",
+      ...(has("artifacts_live_write") ? [
+        "Edit only through live: artifacts_live_write applies edits to your own live tree (expectedHeadSha + expectedLiveRevision), artifacts_live_read / artifacts_live_status inspect it, artifacts_live_reset discards the draft, artifacts_live_control starts or stops the session. Without a qualified worker live_write answers builder_unavailable.",
+        "artifacts_git_commit commits your live draft on your branch under expectedHeadSha; the built output (ui/dist) is never committed.",
+      ] : ["Live editing is not enabled in this stage: the branch tree can be read, not edited, through this catalogue."]),
+      ...(has("artifacts_git_publish") ? [
+        "artifacts_git_publish({artifactId, commitSha, expectedCurrentReleaseId, idempotencyKey}) builds that commit on the Sentropic builder (npm ci --ignore-scripts, npm run build:artifact, output ui/dist) and returns a jobId; IMMO verifies the builder handoff and publishes the release atomically.",
+      ] : ["Publication of a branch commit is not enabled in this stage."]),
+      ...(has("artifacts_live_read") ? ["Invited live readers (binding-owner invitation, session- and generation-bound, revocable, current code rights) can read and watch a live session; they never edit or publish."] : []),
+    ],
+    writablePaths: [...IMMO_GIT_WRITABLE_PATHS],
+    refusedWritePaths: [...IMMO_GIT_REFUSED_WRITE_PATHS],
+    ceilings: {
+      releaseFilesMax: RELEASE_FILES_MAX,
+      releaseFileBytesMax: RELEASE_FILE_BYTES_MAX,
+      releaseTotalBytesMax: RELEASE_TOTAL_BYTES_MAX,
+      sourceFileBytesMax: 1024 * 1024,
+      sourcePageBytesMax: 8 * 1024 * 1024,
+      gitCommitPathsMax: 255,
+      gitCommitBytesMax: 8 * 1024 * 1024,
+      liveWritePathsMax: 255,
+      liveWriteBytesMax: 2 * 1024 * 1024,
+      gitMessageMaxUnits: 16384,
+    },
+  };
+}
 export const STARTER_VERSION = "1.1.0" as const;
 export const STRICT_ARTIFACT_GUIDE = "This profile requires expectedCurrentReleaseId for artifacts_publish, artifacts_revert and artifacts_delete. First read the artifact with artifacts_get or artifacts_list. For a first publication, send expectedCurrentReleaseId: null only after that read returns currentReleaseId: null. For an update, read the observed release with artifacts_get_source, edit those files, and send its releaseId as expectedCurrentReleaseId. Conversation files alone do not establish the current release. For a revert or deletion, send the currentReleaseId observed by your read. On conflict, re-read and reconcile before submitting a changed command with a new idempotencyKey. For a lost response or commitState: unknown, reconcile with the same idempotencyKey and unchanged command before attempting a new write. Read resultEnvelopeVersion in this guide: version 1 keeps business fields at the root; version 2 places them in output and the guide in output.authoringGuide.";
 
@@ -152,6 +210,8 @@ export interface AuthoringGuide {
   readonly artifactDiscovery: Readonly<{ displayLabel: string; listOrder: string; timestamps: string; links: string; state: string }>;
   readonly artifactLifecycle?: Readonly<{ descriptor: typeof ARTIFACT_PROFILE_DESCRIPTOR;
     edit: readonly string[]; share: readonly string[]; delete: readonly string[] }>;
+  /** Present only when IMMO_ARTIFACTS_GIT_MODE is on. */
+  readonly gitMode?: AuthoringGuideGitMode;
   readonly lifecycle: Readonly<{
     editing: readonly string[];
     unavailableTools: readonly string[];
@@ -164,7 +224,9 @@ let cached: AuthoringGuide | undefined;
 
 export function getAuthoringGuide(): AuthoringGuide {
   if (!cached) {
+    const gitMode = gitAuthoringSection(ARTIFACT_GIT_MODE);
     cached = freeze<AuthoringGuide>({
+      ...(gitMode ? { gitMode } : {}),
       guideId: AUTHORING_GUIDE_ID,
       descriptor: ARTIFACT_PROFILE_DESCRIPTOR,
       revision: AUTHORING_GUIDE_REVISION,
