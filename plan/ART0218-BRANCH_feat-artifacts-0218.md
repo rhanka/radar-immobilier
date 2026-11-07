@@ -38,6 +38,7 @@ Pin `@sentropic/artifacts@0.2.18` and resolve release content types through the 
 - `ART0218-EX1`: fix the objective of `plan/ART0217-BRANCH_feat-artifacts-0217-app-mode.md` (review minor on #1014: the MIME map was kept local in 0.2.17).
 - `attention`: the provider map carries bare media types; immo keeps the serving rule of `reader-storage` (`text/*` gets `charset=utf-8`, binary bare, `application/octet-stream` off-map). Equivalent for all 17 previously mapped extensions; `.avif`, `.ico`, `.woff`, `.ttf`, `.otf`, `.webm` now resolve to their provider type instead of octet-stream (in-memory test provider only; production serves the committed manifest type).
 - `attention`: the provider catalogue grows from 24 to 35 tools; no immo test pins the provider catalogue count. The served definitions stay locked by `artifact-tool-definitions-hash.test.ts`.
+- `attention`: the package migrations `0010_git_bindings.sql` and `0011_live_drafts.sql` shipped by 0.2.18 are intentionally NOT adopted: immo keeps its own `api/drizzle` migrations (provenance checked by `api/tests/integration/artifacts-provenance.spec.ts`), and the git/live tooling they back is not selected. Re-assess at the next provider pin.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + cherry-pick** (default for orthogonal tasks; single final test cycle)
@@ -61,6 +62,6 @@ Pin `@sentropic/artifacts@0.2.18` and resolve release content types through the 
   - [x] Lock the served types of every previously mapped extension in `release-files.test.ts`.
   - [x] Fix the #1014 plan objective (ART0218-EX1).
 
-- [ ] **Lot N — Final validation**
+- [x] **Lot N — Final validation**
   - [x] Lot gate: `make typecheck`, `make lint`, api / artifacts-host / immo-mcp unit tests.
-  - [ ] Push branch and open the PR to `main`.
+  - [x] Push branch and open the PR to `main` (#1015, merged).
