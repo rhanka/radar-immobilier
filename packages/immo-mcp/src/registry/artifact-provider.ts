@@ -8,7 +8,7 @@ import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-sta
 import { computeManifestDigest, type RegistryDefinition } from "@sentropic/cluster-mesh/mcp/registry";
 import { projectArtifactHttpOutcome } from "@sentropic/artifacts/http";
 import { assertContentIdsDisjoint, checkAdmission, createArtifactControl, HOST_ARTIFACT_PROFILE, ARTIFACT_PROFILE_DESCRIPTOR, ARTIFACT_STRICT, ARTIFACT_PART1,
-  artifactRefusalResponse, projectContentUrls, projectListVersionsAuthors, validateArtifactInput, withInvocationScopes,
+  artifactRefusalResponse, isGitArtifactTool, liveCapacityState, projectContentUrls, projectListVersionsAuthors, validateArtifactInput, withInvocationScopes,
   type AdmissionAuthority, type ListVersionsDirectory } from "@radar/artifacts-host";
 import { ARTIFACT_INVOCATION_SCOPES, ARTIFACT_TOOL_SCOPES, acceptedArtifactScopes, hasArtifactScope,
   isArtifactToolName, STRICT_ARTIFACT_SCOPE_POLICY, type ArtifactScopePolicy } from "./artifact-profile.js";
@@ -328,12 +328,17 @@ export function bindArtifactProvider(options: {
             } catch { return refusal("capability_unavailable", true); }
           }
           const projected = projectArtifactHttpOutcome(outcome, true).body as { error: { message: string; details?: unknown } };
-          if (ARTIFACT_PART1) return { isError: true, content: [{ type: "text", text: JSON.stringify(projectContentUrls(projectArtifactHttpOutcome(outcome, true).body)) }] };
+          // Git mode only: an explicit live capacity state (queued / builder_unavailable), never a silent wait.
+          const liveState = isGitArtifactTool(tool) ? liveCapacityState(outcome.failure) : undefined;
+          if (ARTIFACT_PART1) return { isError: true, content: [{ type: "text", text: JSON.stringify({
+            ...projectContentUrls(projectArtifactHttpOutcome(outcome, true).body) as Record<string, unknown>,
+            ...(liveState ? { liveState } : {}) }) }] };
           const details = ARTIFACT_STRICT || outcome.failure.details || outcome.failure.conflict || outcome.failure.edit || outcome.failure.release
             ? projected.error.details : undefined;
           return refusal(outcome.failure.publicCode, outcome.failure.retriable, {
             ...(outcome.failure.publicCode === "precondition_required" ? { message: projected.error.message } : {}),
             ...(details ? { details } : {}),
+            ...(liveState ? { liveState } : {}),
           });
         }
         body = projectContentUrls(projectArtifactHttpOutcome(outcome, ARTIFACT_PART1).body);
