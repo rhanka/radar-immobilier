@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import type { LiveIdentity, LiveWorkerPort } from "@sentropic/artifacts";
 import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-contract";
 import { builderBaseUrl } from "./build-api.js";
+import { resolveBuilderBinding, type BuilderBindingSource } from "./builder-binding.js";
 import type { ServiceTokenSource } from "./service-token.js";
 
 /**
@@ -21,7 +22,9 @@ import type { ServiceTokenSource } from "./service-token.js";
  *   host, iat, exp). A granted answer is cached at most 30 s per
  *   (artifactId, principal, invitation); a 409, an edge 404 on a live path or
  *   a revocation invalidates it.
- * - LiveWorkerPort: `POST v1/live/reconcile` (BridgeAck, body with the same
+ * - LiveWorkerPort: `POST v1/live/reconcile` (BridgeAck, body with `binding: {repoId, branch, subPath}`
+ *   read from the package git binding of that artifact and generation, never caller input, no such
+ *   binding: git_not_attached before any call, and with the same
  *   session `invitation` state) and `POST v1/live/stop` (204). The fences
  *   sent are the package store ones.
  *
@@ -254,6 +257,8 @@ function parseBridgeAck(raw: unknown): BridgeAck {
  * durable intent for the controller's fenced reconciliation).
  */
 export function createLiveWorkerClient(options: LiveControllerClientOptions & { readonly fences: LiveWorkerFences;
+  /** Package git binding store: source of the `binding` coordinates of the reconcile body. */
+  readonly bindings?: BuilderBindingSource | undefined;
   /** Session invitation state of the live session (same as the grant body). */
   readonly sessionState: (identity: LiveIdentity, liveSessionId: string) => Promise<LiveSessionInvitationState>;
 }): LiveWorkerPort {
@@ -269,13 +274,14 @@ export function createLiveWorkerClient(options: LiveControllerClientOptions & { 
   return {
     async reconcile(identity) {
       if (!base) throw new ArtifactOperationError("builder_unavailable");
+      const binding = await resolveBuilderBinding(options.bindings, identity);
       const fences = await options.fences.current(identity);
       if (!fences) throw new ArtifactOperationError("provider_unavailable");
       const session = await options.sessionState(identity, fences.liveSessionId);
       const epoch = floor(identity.artifactId, identity.bindingGeneration, session.epoch);
       const answer = await call("v1/live/reconcile", { artifactId: identity.artifactId, bindingGeneration: identity.bindingGeneration,
         liveSessionId: fences.liveSessionId, leaseEpoch: fences.leaseEpoch, routeEpoch: fences.routeEpoch,
-        invitation: sessionBody(session, epoch) });
+        binding, invitation: sessionBody(session, epoch) });
       if (answer.status !== 200) throw new ArtifactOperationError("provider_unavailable");
       return parseBridgeAck(answer.payload);
     },
