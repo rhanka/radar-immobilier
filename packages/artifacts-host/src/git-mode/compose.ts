@@ -1,5 +1,5 @@
 import {
-  createGitHubForge, createGitPort, type GitBindingStore, type GitCodeRightsPort, type GitHumanDirectory,
+  createGitHubForge, createGitPort, createPostgresLiveStore, type GitBindingStore, type GitCodeRightsPort, type GitHumanDirectory,
   type GitIdentity, type GitInstallationLeasePort, type GitPort, type LiveKeyPort, type LiveStore, type LiveWorkerPort,
 } from "@sentropic/artifacts";
 import { createPostgresGitBindingStore } from "@sentropic/artifacts/adapters/postgres";
@@ -16,9 +16,9 @@ import { createLeaseBrokerClient, FAIL_CLOSED_LEASES } from "./lease-broker.js";
 import { createHostBuildApiClient, type HostBuildJobStore } from "./build-api.js";
 import { createSealedLiveKeys, parseLiveDraftKeyring, type LiveDraftKeyring } from "./live-keys.js";
 import { SERVICE_SCOPE_BROKER, SERVICE_SCOPE_BUILDER, serviceTokenSource, type ServiceTokenConfig } from "./service-token.js";
-import { composeLiveService } from "./live.js";
+import { composeLiveService, liveStoreFences } from "./live.js";
+import { createLiveWorkerClient, NO_LIVE_INVITATIONS } from "./live-grant.js";
 import { createPostgresHostJobStore } from "./host-jobs.js";
-import { createPostgresLiveInvitationStore, createPostgresLiveSessions, type LiveInvitationStore, type LiveSessionPort } from "./live-authority.js";
 import { gitToolServiceFactory, GIT_TOOLS_DEP_KEY, type GitBuildPort, type GitToolService, type GitToolsDeps } from "./provider-adapter.js";
 import { createImmoGitRegistry, IMMO_GIT_OUTPUT_DIR, IMMO_GIT_REPO_ID } from "./registry.js";
 
@@ -51,6 +51,25 @@ export interface GitModeConfig {
   readonly builderUrl?: string | undefined;
   /** M4-I: sealed live draft master keys (version -> 32 bytes) and the current version. */
   readonly liveDraftKeys?: LiveDraftKeyring | undefined;
+  /**
+   * W9 live edge (IMMO_ARTIFACTS_LIVE_EDGE_ENABLED=1, default off), on top of
+   * stage `live`: composes the controller LiveWorkerPort (reconcile/stop).
+   * Off: the live service keeps its no-worker composition, byte for byte.
+   */
+  readonly liveEdgeEnabled?: boolean | undefined;
+  /**
+   * Worker qualification (IMMO_ARTIFACTS_LIVE_QUALIFIED=true, default false):
+   * live_write / live_control(start) answer builder_unavailable while false.
+   * Turned on by an ops change ONLY after an owner-recorded « GB4 GO preprod ».
+   */
+  readonly liveQualified?: boolean | undefined;
+  /**
+   * Invited live readers (IMMO_ARTIFACTS_LIVE_INVITATIONS_QUALIFIED=true,
+   * default false), independent of the worker qualification and under the
+   * same rule. Reserved: TODO(0.2.22) `invitations.qualified` of the generic
+   * package host port; until then every invitee is refused (owner-only).
+   */
+  readonly liveInvitationsQualified?: boolean | undefined;
 }
 
 const optional = (value: string | undefined) => value?.trim() ? value.trim() : undefined;
@@ -72,6 +91,9 @@ export function readGitModeConfig(env: NodeJS.ProcessEnv): GitModeConfig {
     committer: name && email ? { name, email } : undefined,
     builderUrl: optional(env.IMMO_ARTIFACTS_BUILDER_URL),
     liveDraftKeys: parseLiveDraftKeyring(env.IMMO_ARTIFACTS_LIVE_DRAFT_KEYS, env.IMMO_ARTIFACTS_LIVE_DRAFT_KEY_CURRENT),
+    liveEdgeEnabled: env.IMMO_ARTIFACTS_LIVE_EDGE_ENABLED?.trim() === "1",
+    liveQualified: env.IMMO_ARTIFACTS_LIVE_QUALIFIED?.trim() === "true",
+    liveInvitationsQualified: env.IMMO_ARTIFACTS_LIVE_INVITATIONS_QUALIFIED?.trim() === "true",
   };
 }
 
@@ -94,8 +116,6 @@ export interface GitModePorts {
   readonly liveStore?: LiveStore;
   readonly liveKeys?: LiveKeyPort;
   readonly liveWorker?: LiveWorkerPort;
-  readonly invitations?: LiveInvitationStore;
-  readonly sessions?: LiveSessionPort;
   readonly liveQualified?: () => boolean;
 }
 
@@ -207,12 +227,22 @@ export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
       repoId: IMMO_GIT_REPO_ID, hasWriteScope }),
     ...(build ? { build } : {}) }));
   const liveSelected = input.resolution.tools.some((tool) => (GIT_LIVE_TOOLS as readonly string[]).includes(tool));
+  // W9 edge flag on top of stage `live`: the store is shared with the worker
+  // client (it reads the package fences sent to the controller). Flag off:
+  // no worker, as before (live_write / live_control(start) answer builder_unavailable).
+  const edgeWorker = liveSelected && input.resolution.stage === "live" && config.liveEdgeEnabled === true;
+  const liveStore = ports.liveStore ?? (edgeWorker && !ports.liveWorker ? createPostgresLiveStore(pool) : undefined);
+  const liveWorker = ports.liveWorker ?? (edgeWorker ? createLiveWorkerClient({ baseUrl: config.builderUrl,
+    identity: serviceTokenSource(config.service ?? {}, SERVICE_SCOPE_BUILDER, ports.fetch), fences: liveStoreFences(liveStore!),
+    // TODO(0.2.22): liveInvitationState(identity); owner-only until then.
+    sessionState: async () => NO_LIVE_INVITATIONS,
+    ...(ports.fetch ? { fetch: ports.fetch } : {}) }) : undefined);
+  // Qualification flags (default false), read from the configuration; an injected port wins (tests).
+  const qualified = ports.liveQualified ?? (() => config.liveQualified === true);
   const live = liveSelected ? composeLiveService({ pool, git, bindings, registry, codeRights, directory, hasWriteScope,
-    invitations: ports.invitations ?? createPostgresLiveInvitationStore(pool),
-    sessions: ports.sessions ?? createPostgresLiveSessions(pool),
-    ...(ports.liveStore ? { store: ports.liveStore } : {}),
+    ...(liveStore ? { store: liveStore } : {}),
     ...(ports.liveKeys ?? config.liveDraftKeys ? { keys: ports.liveKeys ?? createSealedLiveKeys(config.liveDraftKeys!) } : {}),
-    ...(ports.liveWorker ? { worker: ports.liveWorker } : {}), ...(ports.liveQualified ? { qualified: ports.liveQualified } : {}) })
+    ...(liveWorker ? { worker: liveWorker } : {}), qualified })
     : undefined;
   return { git: { bindings, codeRights }, [GIT_TOOLS_DEP_KEY]: gitTools, ...(live ? { live } : {}) };
 }

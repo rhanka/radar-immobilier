@@ -15,7 +15,7 @@ export async function p0bFixture(profile = HOST_ARTIFACT_PROFILE) {
   if (url.hostname !== "postgres" || url.pathname !== "/p0b") throw new Error("p0b_test_database_required");
   const pool = new pg.Pool({ connectionString, max: 8, options: "-c statement_timeout=5000 -c lock_timeout=1000" });
   await pool.query("DROP SCHEMA IF EXISTS artifacts CASCADE; DROP SCHEMA IF EXISTS drizzle CASCADE; DROP TABLE IF EXISTS account_users");
-  for (const name of ["0015_artifacts_core", "0016_artifacts_lifecycle", "0024_artifacts_coordinator", "0025_artifacts_actor_quotas", "0028_artifacts_p0b", "0029_artifacts_parity", "0032_artifacts_sharing_access_mode", "0033_artifacts_upload_sessions", "0034_artifacts_reader_consent", "0035_artifacts_upload_pages", "0036_artifacts_git_bindings", "0037_artifacts_live_drafts", "0038_artifacts_live_invitations", "0039_artifacts_host_build_ledger", "0040_artifacts_git_attach_intents"]) {
+  for (const name of ["0015_artifacts_core", "0016_artifacts_lifecycle", "0024_artifacts_coordinator", "0025_artifacts_actor_quotas", "0028_artifacts_p0b", "0029_artifacts_parity", "0032_artifacts_sharing_access_mode", "0033_artifacts_upload_sessions", "0034_artifacts_reader_consent", "0035_artifacts_upload_pages", "0036_artifacts_git_bindings", "0037_artifacts_live_drafts", "0038_artifacts_live_invitations", "0039_artifacts_host_build_ledger", "0040_artifacts_git_attach_intents", "0041_drop_artifacts_live_invitations"]) {
     await pool.query(readFileSync(new URL(`../../../api/drizzle/${name}.sql`, import.meta.url), "utf8"));
   }
   await pool.query(`CREATE SCHEMA drizzle; CREATE TABLE drizzle.__drizzle_migrations (created_at bigint, hash text);
