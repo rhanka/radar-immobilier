@@ -1,9 +1,10 @@
-import { createLiveService, createPostgresLiveStore, type GitPort, type LiveInvitationPort, type LiveKeyPort, type LiveSessionService,
+import { createLiveDraftVault, createLiveService, createPostgresLiveStore, type GitPort, type LiveInvitationPort, type LiveKeyPort, type LiveSessionService,
   type LiveStore, type LiveWorkerPort } from "@sentropic/artifacts";
 import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-contract";
 import type pg from "pg";
 import { createLiveAuthorize, type LiveAuthorityDeps } from "./live-authority.js";
 import type { LiveWorkerFences } from "./live-grant.js";
+import type { LiveDraftSource } from "./live-draft-stager.js";
 
 /**
  * M4-I live composition (stubs, fail-closed).
@@ -44,7 +45,18 @@ export function liveStoreFences(store: LiveStore): LiveWorkerFences {
   return {
     async current(identity) {
       const runtime = await store.transaction(identity, async (tx) => tx.record?.runtime ?? undefined);
-      return runtime ? { liveSessionId: runtime.liveSessionId, leaseEpoch: runtime.leaseEpoch, routeEpoch: runtime.routeEpoch } : undefined;
+      return runtime ? { ownerId: runtime.ownerId, liveSessionId: runtime.liveSessionId, leaseEpoch: runtime.leaseEpoch, routeEpoch: runtime.routeEpoch } : undefined;
+    },
+  };
+}
+
+/** Current durable draft (revision, base head, live tree, decrypted overlay) of the package store, staged before reconcile. */
+export function liveStoreDrafts(store: LiveStore, keys: LiveKeyPort): LiveDraftSource {
+  const vault = createLiveDraftVault({ store, keys });
+  return {
+    async current(identity) {
+      const draft = await vault.read(identity);
+      return draft ? { revision: draft.revision, baseHeadSha: draft.baseHeadSha, liveTreeSha: draft.liveTreeSha, overlay: draft.overlay } : undefined;
     },
   };
 }
