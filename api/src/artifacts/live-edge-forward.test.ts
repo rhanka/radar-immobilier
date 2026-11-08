@@ -74,7 +74,7 @@ beforeEach(async () => {
   principalDelayMs = 0;
   roles = {
     alice: { role: "binding_owner", principalId: "alice", bindingGeneration: 1 },
-    // Owner-only until 0.2.22: the gate never returns an invitee role.
+    // Owner-only (invitations not qualified): the gate never returns an invitee role.
     carol: null,
   };
   grantFetch = vi.fn(async (_url: URL, init: RequestInit) =>
@@ -132,7 +132,7 @@ describe("live edge forward: HTTP", () => {
     expect(grantFetch).toHaveBeenCalledTimes(1);
   });
 
-  it("forwards HEAD for the owner and refuses an invitee (owner-only until 0.2.22)", async () => {
+  it("forwards HEAD for the owner and refuses an invitee (owner-only, invitations not qualified)", async () => {
     const forward = createLiveEdgeForward({ contentBase: DOMAIN, ports: ports(), principal });
     const response = await forward.fetch(browser("/index.html", { cookie: "reader=alice" }, "HEAD"));
     expect(response?.status).toBe(200);
