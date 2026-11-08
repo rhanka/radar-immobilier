@@ -27,7 +27,9 @@ Flag off stays zero-change.
   - `packages/artifacts-host/src/git-mode/**`
   - `api/src/artifacts/live-edge-forward.ts`, `api/src/artifacts/live-edge-forward.test.ts`
   - `api/src/artifacts/control-route.ts`, `api/src/artifacts/control-route-startup.ts`
-  - `api/src/index.ts`
+  - `api/src/index.ts`, `api/src/artifacts/content-serve.ts` (live reader verification reuse)
+  - `api/drizzle/0041_artifacts_live_authorizations.sql`, `api/drizzle/meta/_journal.json`
+  - `packages/artifacts-host/src/p0b.test-support.ts` (fixture migration list)
   - `docs/operator/git-artifact-mode.md`
   - `plan/LIVEEDGE-BRANCH_feat-artifacts-live-edge.md`
 - **Forbidden Paths (must not change in this branch)**:
@@ -42,22 +44,15 @@ Flag off stays zero-change.
   (13 fields) plus `v`, `kid`, `host`, `iat`, `exp`; the package runtime fields
   are never used and `podUid` can no longer be `''`. The DB-runtime claim
   sourcing of the first draft is removed.
-- `attention`: `invitationEpoch` floor: immo's invitations carry one epoch each
-  (1 at creation, +1 on revocation); the floor sent is the current stored
-  epoch of the active invitation (0 for the binding owner). Sentropic's
-  `liveRole` requires `invitation.epoch === invitationEpoch`; to confirm with
-  s-archi when the grant route lands.
-- `attention`: "live consent" of the §8.2 gate is read as a non-revoked
-  `baskets.read` reader consent row of the principal for the artifact (current
-  scope version), re-read on every admission. Absent consent service: refused.
+- `attention` (s-archi r2, superseded r1): the invitation epoch is SESSION state of the binding generation, shared by every active invitation (several allowed, one principal each); 0 until the first invitation, +1 on each revoke or replace (remaining rows adopt it), never lowered. Grant and reconcile bodies carry `invitation: {epoch, expiresAt}` (latest active expiry or null); the top-level `invitationEpoch` of the CORRECTIF is replaced by it (to confirm with s-archi).
+- `attention` (s-archi r2): baskets.read reader consent is necessary, not sufficient; a dedicated `artifacts.live_authorizations` record (migration 0041) is required: owner on first admitted open, invitee on explicit acceptance; the gate requires consent, code rights, owner or invitation, and a valid record.
+- `attention`: one invitation flag only (`IMMO_ARTIFACTS_LIVE_INVITATIONS_QUALIFIED`), plus `IMMO_ARTIFACTS_LIVE_QUALIFIED` for the worker; both default false, turned on by an ops change only after an owner-recorded « GB4 GO preprod ».
+- `attention` (review 1034): B1 socket error handler at the upgrade entry (regression test), M1 revocation wired through the invitation routes, M2 live principal through `content-serve.ts#authorized`, L1 invitee session check, L2 socket caps and shared recheck, L3 response header allowlist, conditional headers dropped, controller answers bounded to 64 KiB.
 - `attention`: the control push now goes to the INTERNAL Service
   (`IMMO_ARTIFACTS_LIVE_EDGE_URL`) with Host and claim host
   `<artifactId>.<pages domain>` (the edge scopes control to the artifact Host).
   `IMMO_ARTIFACTS_LIVE_CONTROL_URL` (set by PR #1033) is still validated so the
   manifest keeps booting, but never used.
-- `attention`: worker qualification stays `false`: with the flag on, a worker
-  is composed but `live_write` / `live_control(start)` keep answering
-  `builder_unavailable` until the M4-lite qualification is switched.
 - `attention`: network: the Sentropic policy admits pods labelled
   `app.kubernetes.io/name: radar-immobilier` + `app.kubernetes.io/component: api`;
   radar-api carries exactly these labels; immo has no egress policy to adapt.
@@ -75,13 +70,15 @@ Flag off stays zero-change.
 - [x] **Lot 2 — Admission** (`live-forward.ts`): §8.2 gate (owner / active invitee, code rights, live consent), readiness (phase LIVE and appliedRevision = draft revision), grant with `sourceRevision` = that revision, otherwise release; closed 18-claim assertion (HTTP 60 s, websocket 3600 s capped at the invitation expiry).
 - [x] **Lot 3 — Forward** (`api/src/artifacts/live-edge-forward.ts`, `index.ts`): GET/HEAD node:http forward with exact Host, Origin as is, credential headers stripped; HMR upgrade (`token` only, Origin required, `vite-hmr`), sockets tracked per session/invitation and closed on revocation, at exp and on a failed recheck; « live indisponible » on any non-2xx / non-101 / connection failure.
 - [x] **Lot 4 — Control push** (`live-edge.ts`): node:http POST `/_live-control/v1` to the internal Service, per-artifact Host and claim host, 10 control fields.
-- [x] **Lot 5 — Gate**: see Verification.
+- [x] **Lot 5 — s-archi r2 + review 1034**: session epoch, live authorization records (0041), qualification flags, invitation routes (`/api/v1/artifacts/control/live/*`), B1/M1/M2/L1-L3.
+- [x] **Lot 6 — Gate**: see Verification.
 
 ## Verification
-- `make -f tools/mcp-p0b.mk integration SCOPE="src/git-mode/live-grant.test.ts src/git-mode/live-forward.test.ts src/git-mode/live-edge.test.ts src/git-mode/live.test.ts" ENV=test-liveedge`: 4 files, 53 tests (one expectation fixed after the first run, then covered by the full run below).
-- `make -f tools/mcp-p0b.mk test-api SCOPE="src/artifacts/live-edge-forward.test.ts src/artifacts/control-route-startup.test.ts src/artifacts/live-host-route.test.ts" ENV=test-liveedgeapi`: migrations on Postgres, 3 files, 19 tests passed.
-- `make -f tools/mcp-p0b.mk verify ENV=test-liveedge`: typecheck immo-mcp / artifacts-host / api and eslint (packages/immo-mcp/src, packages/artifacts-host/src, api/src/artifacts/control-route*.ts): pass; immo-mcp 74 files, 604 tests passed (5 skipped), identical to the 0.2.20 baseline (tool definitions hash and flag-off profile digests unchanged); artifacts-host with Postgres 60 files, 481 tests passed (baseline 58 / 456); strict cas.v2: the 1 pre-existing `p0c-transport` failure (13 vs 16 tools, documented in ART0220), unrelated.
-- Workspace-wide eslint (`api/src/artifacts/live-edge-forward*.ts`, `api/src/index.ts`) runs in CI (`make lint ENV=ci`).
+- Head r1 (04d40d180): verify pass (immo-mcp 604, artifacts-host 481), test-api 19.
+- Head r2 (s-archi r2 + review 1034):
+  - `make -f tools/mcp-p0b.mk verify ENV=test-liveedge`: typecheck immo-mcp / artifacts-host / api and eslint: pass; immo-mcp 74 files, 604 tests passed (5 skipped), unchanged (tool definitions hash and flag-off profile digests); artifacts-host with Postgres 60 files, 490 tests passed (incl. live invitations / 0041 integration); strict cas.v2: the 1 pre-existing `p0c-transport` failure (13 vs 16 tools, ART0220), unrelated.
+  - `make -f tools/mcp-p0b.mk test-api SCOPE="src/artifacts/live-edge-forward.test.ts src/artifacts/control-route src/artifacts/content-serve src/artifacts/live-host-route.test.ts tests/integration/migrate-idempotence.spec.ts tests/integration/artifacts-migrations.spec.ts tests/integration/artifacts-provenance.spec.ts" ENV=test-liveedgeapi`: migrations 0000 -> 0041 on Postgres, 22 files, 142 tests passed, no unhandled error (B1 regression included).
+- Workspace-wide eslint of the api files runs in CI (`make lint ENV=ci`).
 - Every stack torn down (`down -v` trap).
 
 ## Waiting on Sentropic
