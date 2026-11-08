@@ -236,7 +236,7 @@ export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
   const build = ports.build ?? (input.resolution.tools.includes("artifacts_git_publish")
     ? createHostBuildApiClient({ baseUrl: config.builderUrl,
       identity: serviceTokenSource(config.service ?? {}, SERVICE_SCOPE_BUILDER, ports.fetch),
-      jobs: ports.jobs ?? createPostgresHostJobStore({ pool, scopeId: storageScopeId }),
+      jobs: ports.jobs ?? createPostgresHostJobStore({ pool, scopeId: storageScopeId }), bindings,
       ...(ports.fetch ? { fetch: ports.fetch } : {}) })
     : undefined);
   const factory = ports.gitToolFactory ?? gitToolServiceFactory();
@@ -252,7 +252,7 @@ export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
   let liveService: LiveSessionService | undefined;
   const liveStore = ports.liveStore ?? (edgeWorker && !ports.liveWorker ? createPostgresLiveStore(pool) : undefined);
   const liveWorker = ports.liveWorker ?? (edgeWorker ? createLiveWorkerClient({ baseUrl: config.builderUrl,
-    identity: serviceTokenSource(config.service ?? {}, SERVICE_SCOPE_BUILDER, ports.fetch), fences: liveStoreFences(liveStore!),
+    identity: serviceTokenSource(config.service ?? {}, SERVICE_SCOPE_BUILDER, ports.fetch), fences: liveStoreFences(liveStore!), bindings,
     // Reconcile body `invitation: { epoch, expiresAt }` from the package liveInvitationState(identity).
     sessionState: async (identity) => liveService ? liveService.liveInvitationState(identity) : NO_LIVE_INVITATIONS,
     ...(ports.fetch ? { fetch: ports.fetch } : {}) }) : undefined);
