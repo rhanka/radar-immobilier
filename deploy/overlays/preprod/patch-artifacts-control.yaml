@@ -40,6 +40,14 @@ data:
   IMMO_ARTIFACTS_RECEIPT_KEY_ID: "immo-preprod-receipt-1"
   IMMO_ARTIFACTS_LIVE_HOST_KID: "immo-preprod-live-1"
   IMMO_ARTIFACTS_LIVE_HOST: "pages.preprod.immo.sent-tech.ca"
+  # A-LIVE §8.2 live edge forward, PREPROD ONLY (radar-api reader mount; the
+  # flag is also set on radar-immo-mcp for the live worker client). It
+  # fails closed: with an incomplete configuration live paths show « live
+  # indisponible » and the release keeps being served
+  # (packages/artifacts-host/src/git-mode/live-forward.ts). The QUALIFIED flags
+  # stay unset until the recorded owner « GB4 GO preprod » is acted on.
+  IMMO_ARTIFACTS_LIVE_EDGE_ENABLED: "1"
+  IMMO_ARTIFACTS_LIVE_EDGE_URL: "http://artifact-content.sentropic-preprod.svc.cluster.local:8791"
   IMMO_ARTIFACTS_LIVE_CONTROL_URL: "https://pages.preprod.immo.sent-tech.ca/_live-control/v1"
   IMMO_ARTIFACTS_LIVE_DRAFT_KEY_CURRENT: "v1"
   # SG4b inbound host (radar-api only: radar-immo-mcp reads neither key).
