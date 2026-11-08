@@ -2,6 +2,7 @@ import { createLiveService, createPostgresLiveStore, type GitPort, type LiveKeyP
 import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-contract";
 import type pg from "pg";
 import { createLiveAuthorize, type LiveAuthorityDeps } from "./live-authority.js";
+import type { LiveWorkerFences } from "./live-grant.js";
 
 /**
  * M4-I live composition (stubs, fail-closed).
@@ -9,7 +10,9 @@ import { createLiveAuthorize, type LiveAuthorityDeps } from "./live-authority.js
  * - Draft keys: TODO(M4-I) envelope keys from the KMS or a sealed secret,
  *   minted through the documented rotation cycle. Until then every draft
  *   encryption refuses (`provider_unavailable`), so no draft is stored.
- * - Worker: the host build/live API client of the Sentropic builder (M4-R).
+ * - Worker: the HTTP LiveWorkerPort of the Sentropic controller
+ *   (live-grant.ts, `v1/live/reconcile` and `v1/live/stop`), composed only
+ *   with IMMO_ARTIFACTS_LIVE_EDGE_ENABLED=1 on top of stage `live`.
  *   Absent: live_write and live_control(start) answer `builder_unavailable`.
  * - Qualification: false until the M4-lite acceptance (GB4-P go, W2
  *   baseline, invitations and revocation qualified).
@@ -26,6 +29,16 @@ export interface ComposeLiveInput extends Omit<LiveAuthorityDeps, "qualified"> {
   readonly keys?: LiveKeyPort;
   readonly worker?: LiveWorkerPort;
   readonly qualified?: () => boolean;
+}
+
+/** Fences of the current live session read from the package store (sent to the controller on reconcile). */
+export function liveStoreFences(store: LiveStore): LiveWorkerFences {
+  return {
+    async current(identity) {
+      const runtime = await store.transaction(identity, async (tx) => tx.record?.runtime ?? undefined);
+      return runtime ? { liveSessionId: runtime.liveSessionId, leaseEpoch: runtime.leaseEpoch, routeEpoch: runtime.routeEpoch } : undefined;
+    },
+  };
 }
 
 export function composeLiveService(input: ComposeLiveInput): LiveService {
