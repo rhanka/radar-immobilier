@@ -236,7 +236,9 @@ function presentedGrant(c: Context): string {
   return c.req.query("grant") ?? c.req.header("x-preview-grant") ?? "";
 }
 
-export function createReaderContentApp(deps: ContentServeDeps): Hono {
+export function createReaderContentApp(deps: ContentServeDeps): Hono & {
+  liveReader(request: Request): Promise<{ readerSub: string; artifactId: string } | null>;
+} {
   const app = new Hono();
   const now = deps.now ?? (() => Date.now());
   const geoBudget = deps.geoBudget ?? createGeoReaderBudget();
@@ -1040,5 +1042,18 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono {
     return new Response(null, { status: res.status, headers: res.headers });
   });
 
-  return app;
+  /**
+   * Live edge (W9): the live principal is verified by the SAME `authorized`
+   * path as the release reader (cookie-only resource authority: sealed host,
+   * issuer, audience, tier, session revocation, current release and
+   * authorization version). No audit, budget or consent side effect.
+   */
+  const liveReader = async (request: Request): Promise<{ readerSub: string; artifactId: string } | null> => {
+    const url = new URL(request.url);
+    const context = { req: { header: (name: string) => request.headers.get(name) ?? undefined,
+      query: (name: string) => url.searchParams.get(name) ?? undefined }, set: () => undefined } as unknown as Context;
+    const reader = await authorized(context, true);
+    return reader ? { readerSub: reader.readerSub, artifactId: reader.artifactId } : null;
+  };
+  return Object.assign(app, { liveReader });
 }
