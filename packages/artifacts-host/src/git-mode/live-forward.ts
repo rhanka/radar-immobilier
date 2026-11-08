@@ -2,43 +2,41 @@ import type pg from "pg";
 import { MAX_ASSERTION_SECONDS, type LiveAssertionClaims } from "@sentropic/artifacts/live-host";
 import { composeGitAccess, readGitModeConfig } from "./compose.js";
 import type { GitModeStage } from "./flag.js";
-import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-contract";
-import {
-  createLiveInvitationService, createLiveReaderGate, createPostgresLiveInvitationStore, createPostgresLiveSessions,
-  createLiveSessionStatePort, type LiveReaderRole, type LiveSessionInvitationState, type LiveSessionStatePort,
-} from "./live-authority.js";
-import {
-  createPostgresLiveAuthorizationStore, isLiveAuthorizationValid, type LiveAuthorizationStore,
-} from "./live-authorizations.js";
+import { createLiveReaderGate, type LiveReaderRole } from "./live-authority.js";
 import {
   composeLiveEdgeRevocationWith, createLiveSocketRegistry, liveSignerFrom, readLiveEdgeConfig, type LiveControlTransport,
   type LiveSocketRegistry,
 } from "./live-edge.js";
-import { createLiveGrantClient, type LiveGrant, type LiveGrantClient, type LiveGrantOutcome, type LiveGrantRequest } from "./live-grant.js";
+import {
+  createLiveGrantClient, NO_LIVE_INVITATIONS, type LiveGrant, type LiveGrantClient, type LiveGrantOutcome, type LiveGrantRequest,
+  type LiveSessionInvitationState,
+} from "./live-grant.js";
 import type { LiveHostModule } from "./live-host-adapter.js";
 import { SERVICE_SCOPE_BUILDER, serviceTokenSource } from "./service-token.js";
 
 /**
  * Live edge forward, host side (A-LIVE §8.2, W9 contract of 2026-11-07 and
- * its CORRECTIF verified on Sentropic feat/alive-w7 @ e14fb6b9e).
+ * its CORRECTIF verified on Sentropic feat/alive-w7 @ e14fb6b9e), OWNER-ONLY
+ * until the generic invitations of @sentropic/artifacts 0.2.22.
  *
- * The immo content host (radar-api, which serves `*.<pages domain>`) runs the
- * §8.2 gate (binding owner, or an active invitee, both with current code
- * rights, plus a live reader consent), then serves LIVE only when:
- * 1. the package live record is ready for the current revision (phase LIVE
- *    and appliedRevision = the draft revision), and
- * 2. the controller route grant (`POST v1/live/grant`, live-grant.ts) answers
- *    200 with `grant.sourceRevision` = that revision.
- * Otherwise the release is served (existing path). The assertion signs the
- * controller grant UNCHANGED plus kid, host, iat and exp (the package runtime
- * fields are never used; podUid is the controller's).
+ * The immo content host (radar-api, which serves `*.<pages domain>`) admits
+ * the release reader verified by content-serve `authorized` when (a) its
+ * baskets reader consent is not revoked, (b) it holds current code rights,
+ * and (c)+(d) it is the binding owner, also the runtime owner of the live
+ * record (invitees are refused; TODO(0.2.22): `liveViewer(identity,
+ * principalId)` and the package live authorization record). LIVE is served
+ * only when the package live record is ready for the current revision AND the
+ * controller grant answers 200 with `grant.sourceRevision` = that revision;
+ * otherwise the release. The assertion signs the grant UNCHANGED plus kid,
+ * host, iat and exp; `grant.sessionId` is the CONTROLLER session (new on every
+ * revive and crash restore), carried as is, never compared with the package
+ * session.
  *
  * Two switches, both required: the git mode stage `live` AND
- * IMMO_ARTIFACTS_LIVE_EDGE_ENABLED=1 (off by default: nothing answers on the
- * Sentropic side before the M4-R wagon and GB4-P). With the switches on and
- * the configuration incomplete or invalid, the forward stays composed in an
- * unavailable state: gated principals keep the release, live paths show
- * « live indisponible », nothing is forwarded.
+ * IMMO_ARTIFACTS_LIVE_EDGE_ENABLED=1 (off by default). With the switches on
+ * and the configuration incomplete or invalid, the forward stays composed in
+ * an unavailable state: the release is kept, live paths show « live
+ * indisponible », nothing is forwarded.
  *
  * Configuration: IMMO_ARTIFACTS_LIVE_EDGE_ENABLED (`1`), IMMO_ARTIFACTS_LIVE_EDGE_URL
  * (internal artifact-content origin), IMMO_ARTIFACTS_LIVE_HOST_KEYS / _KID
@@ -58,7 +56,9 @@ export function readLiveEdgeEnabled(env: NodeJS.ProcessEnv, stage: GitModeStage)
 }
 
 /** Package live record readiness of a binding generation. */
-export interface LiveReadiness { readonly revision: string; readonly ready: boolean; readonly liveSessionId?: string | undefined }
+export interface LiveReadiness { readonly revision: string; readonly ready: boolean; readonly liveSessionId?: string | undefined;
+  /** Runtime owner of the live record. */
+  readonly ownerId?: string | undefined }
 export interface LiveReadinessPort {
   current(storageScopeId: string, artifactId: string, bindingGeneration: number): Promise<LiveReadiness | undefined>;
 }
@@ -70,14 +70,15 @@ export function createPostgresLiveReadiness(pool: Queryable): LiveReadinessPort 
   return {
     async current(storageScopeId, artifactId, bindingGeneration) {
       const result = await pool.query<{ revision: string | null; phase: string | null; applied: string | null;
-        tombstone: string | null; session: string | null }>(`SELECT record->>'revision' AS revision,
+        tombstone: string | null; session: string | null; owner: string | null }>(`SELECT record->>'revision' AS revision,
+        record->'runtime'->>'ownerId' AS owner,
         record->'runtime'->>'liveSessionId' AS session, record->'runtime'->>'phase' AS phase,
         record->'runtime'->>'appliedRevision' AS applied, record->>'tombstone' AS tombstone
         FROM artifacts.live_drafts WHERE storage_scope_id = $1 AND artifact_id = $2 AND binding_generation = $3`,
       [storageScopeId, artifactId, bindingGeneration]);
       const row = result.rows[0];
       if (!row?.revision) return undefined;
-      return { revision: row.revision, liveSessionId: row.session ?? undefined,
+      return { revision: row.revision, liveSessionId: row.session ?? undefined, ownerId: row.owner ?? undefined,
         ready: row.tombstone === null && row.phase === "LIVE" && row.applied === row.revision };
     },
   };
@@ -100,14 +101,9 @@ export function liveAssertionFromGrant(input: { readonly grant: LiveGrant; reado
     iat, exp };
 }
 
-/**
- * Grant request built from the §8.2 gate role and the SESSION invitation
- * state (identical for the owner and every invitee of the session).
- */
+/** Grant request of the binding owner with the SESSION invitation state (identical for every viewer of the session). */
 export function grantRequestFor(artifactId: string, role: LiveReaderRole, session: LiveSessionInvitationState): LiveGrantRequest {
-  const base = { artifactId, bindingGeneration: role.bindingGeneration, principalId: role.principalId, session };
-  if (role.role === "binding_owner") return base;
-  return { ...base, invitation: { id: role.invitationId, expiresAt: Date.parse(role.expiresAt) } };
+  return { artifactId, bindingGeneration: role.bindingGeneration, principalId: role.principalId, session };
 }
 
 export interface LiveEdgeForwardConfig {
@@ -134,15 +130,16 @@ export function readLiveEdgeForward(env: NodeJS.ProcessEnv, stage: GitModeStage,
 }
 
 export type LiveReaderGate = (storageScopeId: string, artifactId: string, principalId: string) => Promise<LiveReaderRole | null>;
-/** Baskets reader consent of the principal for this artifact (necessary, not sufficient), re-read on every admission. */
+/** Baskets reader consent of the principal for this artifact, re-read on every admission. */
 export type LiveConsentCheck = (principalId: string, artifactId: string) => Promise<boolean>;
 
 export type LiveAdmission =
-  /** Outside the §8.2 gate (or no valid live authorization record): refused, the release reader decides. */
+  /** Outside the §8.2 gate: refused, the release reader decides. */
   | { readonly kind: "none" }
   /** Gated, but not live now (not ready, grant refused or mismatched): the release is served. */
   | { readonly kind: "release"; readonly reason: string }
-  | { readonly kind: "live"; readonly claims: LiveAssertionClaims; readonly grant: LiveGrant };
+  /** liveSessionId: the PACKAGE live session; claims.sessionId: the controller grant session. */
+  | { readonly kind: "live"; readonly claims: LiveAssertionClaims; readonly grant: LiveGrant; readonly liveSessionId: string };
 
 /** Ports the radar-api content host needs for the forward. */
 export interface LiveEdgePorts {
@@ -151,103 +148,51 @@ export interface LiveEdgePorts {
   readonly gate: LiveReaderGate;
   readonly consent: LiveConsentCheck;
   readonly readiness: LiveReadinessPort;
-  readonly sessionState: LiveSessionStatePort;
-  readonly authorizations: LiveAuthorizationStore;
   readonly grants: Pick<LiveGrantClient, "grant" | "invalidate" | "invalidateInvitation">;
   readonly signAssertion: (claims: LiveAssertionClaims) => string;
   /** Proxied browser sockets, shared with the revocation below. */
   readonly sockets: LiveSocketRegistry;
+  /** Socket closure + control push; TODO(0.2.22): the package `invitations.onRevoked(e)` host port calls `invitation(e)`. */
   readonly revocation: ReturnType<typeof composeLiveEdgeRevocationWith>;
-  /** Host-owned invitation operations (create, list, revoke), wired to the revocation. */
-  readonly invitations: ReturnType<typeof createLiveInvitationService>;
-  readonly now?: () => number;
 }
 
-type AdmissionPorts = Pick<LiveEdgePorts, "storageScopeId" | "gate" | "consent" | "readiness" | "sessionState" | "authorizations" |
-  "grants">;
+type AdmissionPorts = Pick<LiveEdgePorts, "storageScopeId" | "gate" | "consent" | "readiness" | "grants">;
 
-type Granted =
-  | { readonly kind: "refused" }
-  | { readonly kind: "release"; readonly reason: string }
-  | { readonly kind: "granted"; readonly grant: LiveGrant; readonly role: LiveReaderRole };
-
-/** Gate (a, b, c), readiness, session state and controller grant; the live authorization record (d) is the caller's. */
-async function grantedRoute(ports: AdmissionPorts, artifactId: string, principalId: string): Promise<Granted> {
-  // (b) current human with code rights and (c) binding owner or explicit live invitation.
-  const role = await ports.gate(ports.storageScopeId, artifactId, principalId);
-  if (!role || role.principalId !== principalId) return { kind: "refused" };
-  // (a) baskets reader consent not revoked.
-  if (!await ports.consent(principalId, artifactId)) return { kind: "refused" };
-  const readiness = await ports.readiness.current(ports.storageScopeId, artifactId, role.bindingGeneration);
+/**
+ * §8.2 admission (owner-only): gate (b, c), consent (a), readiness, then the
+ * controller grant at the current revision. Throws only on a store failure
+ * (the caller keeps the release, or « live indisponible » on a live path).
+ */
+export async function admitLive(ports: AdmissionPorts, input: { readonly host: string; readonly artifactId: string;
+  readonly principalId: string; readonly kid: string; readonly nowMs: number; readonly lifetimeSeconds: number }): Promise<LiveAdmission> {
+  const role = await ports.gate(ports.storageScopeId, input.artifactId, input.principalId);
+  if (!role || role.role !== "binding_owner" || role.principalId !== input.principalId) return { kind: "none" };
+  if (!await ports.consent(input.principalId, input.artifactId)) return { kind: "none" };
+  const readiness = await ports.readiness.current(ports.storageScopeId, input.artifactId, role.bindingGeneration);
   if (!readiness?.ready || !readiness.liveSessionId) return { kind: "release", reason: "not_ready" };
-  const session = await ports.sessionState.current(ports.storageScopeId, artifactId, role.bindingGeneration, readiness.liveSessionId);
+  // The binding owner must also be the runtime owner of the live record.
+  if (readiness.ownerId !== undefined && readiness.ownerId !== input.principalId) return { kind: "none" };
   let outcome: LiveGrantOutcome;
-  try { outcome = await ports.grants.grant(grantRequestFor(artifactId, role, session)); } catch { outcome = { kind: "unavailable" }; }
+  try {
+    // TODO(0.2.22): session = liveInvitationState(identity).
+    outcome = await ports.grants.grant(grantRequestFor(input.artifactId, role, NO_LIVE_INVITATIONS));
+  } catch { outcome = { kind: "unavailable" }; }
   if (outcome.kind !== "granted") {
     return { kind: "release", reason: outcome.kind === "conflict" ? `grant_${outcome.error}` : `grant_${outcome.kind}` };
   }
   const { grant } = outcome;
-  // The grant names the live session of the package record (and, for an invitee, the session of the invitation).
+  // Freshness: 200, current revision (30 s cache, invalidated on 409 / edge 404). grant.sessionId is carried as is.
   if (grant.sourceRevision !== readiness.revision || grant.storageScopeId !== ports.storageScopeId ||
-    grant.generation !== role.bindingGeneration || grant.role !== role.role || grant.sessionId !== readiness.liveSessionId ||
-    (role.role === "invitee" && grant.sessionId !== role.liveSessionId)) {
-    ports.grants.invalidate(artifactId, principalId);
+    grant.generation !== role.bindingGeneration || grant.role !== "binding_owner") {
+    ports.grants.invalidate(input.artifactId, input.principalId);
     return { kind: "release", reason: "grant_mismatch" };
   }
-  return { kind: "granted", grant, role };
-}
-
-const authorizationKey = (storageScopeId: string, grant: LiveGrant) => ({ storageScopeId, artifactId: grant.artifactId,
-  sessionId: grant.sessionId, bindingGeneration: grant.generation, principalId: grant.principalId, invitationId: grant.invitationId });
-
-/**
- * §8.2 admission. The gate requires all four: (a) baskets reader consent not
- * revoked, (b) a current human with code rights, (c) binding owner or an
- * explicit live invitation, (d) a valid live authorization record for the
- * grant's session and generation (created for the owner on the first
- * admitted open; for an invitee only by explicit acceptance). Then live only
- * when the record is ready for the current revision and the grant answers
- * 200 with that sourceRevision; otherwise the release. Throws only on a
- * store failure (the caller keeps the release, or « live indisponible »).
- */
-export async function admitLive(ports: AdmissionPorts, input: { readonly host: string; readonly artifactId: string;
-  readonly principalId: string; readonly kid: string; readonly nowMs: number; readonly lifetimeSeconds: number }): Promise<LiveAdmission> {
-  const route = await grantedRoute(ports, input.artifactId, input.principalId);
-  if (route.kind === "refused") return { kind: "none" };
-  if (route.kind === "release") return route;
-  const { grant, role } = route;
-  const key = authorizationKey(ports.storageScopeId, grant);
-  let record = await ports.authorizations.find(key);
-  if (!record && role.role === "binding_owner") {
-    record = await ports.authorizations.ensure({ ...key, role: "binding_owner", expiresAt: null,
-      createdAt: new Date(input.nowMs).toISOString() });
-  }
-  if (!isLiveAuthorizationValid(record, input.nowMs) || record.role !== role.role) return { kind: "none" };
   const claims = liveAssertionFromGrant({ grant, kid: input.kid, host: input.host, nowMs: input.nowMs,
     lifetimeSeconds: input.lifetimeSeconds });
-  return claims ? { kind: "live", claims, grant } : { kind: "release", reason: "invitation_expired" };
+  return claims ? { kind: "live", claims, grant, liveSessionId: readiness.liveSessionId } : { kind: "release", reason: "grant_expired" };
 }
 
-/**
- * Explicit acceptance of a live invitation by its invitee (control origin,
- * application session): the invitee passes (a, b, c), the session is live
- * and the controller grants it; the live authorization record of the
- * invitation, principal, session and generation is then created.
- */
-export async function acceptLiveInvitation(ports: AdmissionPorts, input: { readonly artifactId: string;
-  readonly principalId: string; readonly invitationId: string; readonly nowMs: number }) {
-  const route = await grantedRoute(ports, input.artifactId, input.principalId);
-  if (route.kind === "refused" || (route.kind === "granted" && (route.role.role !== "invitee" ||
-    route.role.invitationId !== input.invitationId))) throw new ArtifactOperationError("access_denied");
-  if (route.kind === "release") throw new ArtifactOperationError("git_live_conflict", { publicDetails: { reason: "invalid_phase", live: route.reason } });
-  const role = route.role as Extract<LiveReaderRole, { role: "invitee" }>;
-  const record = await ports.authorizations.ensure({ ...authorizationKey(ports.storageScopeId, route.grant), role: "invitee",
-    expiresAt: role.expiresAt, createdAt: new Date(input.nowMs).toISOString() });
-  if (!isLiveAuthorizationValid(record, input.nowMs)) throw new ArtifactOperationError("access_denied");
-  return record;
-}
-
-/** Composes the gate, readiness, grant client, signer, records, invitations and revocation; undefined while the switches are off. */
+/** Composes the gate, readiness, grant client, signer and revocation; undefined while the switches are off. */
 export function composeLiveEdgePorts(input: {
   readonly pool: pg.Pool; readonly storageScopeId: string; readonly env: NodeJS.ProcessEnv; readonly stage: GitModeStage;
   readonly contentBase: string; readonly module: LiveHostModule | undefined;
@@ -255,34 +200,22 @@ export function composeLiveEdgePorts(input: {
   readonly consent?: LiveConsentCheck | undefined;
   readonly fetch?: typeof fetch;
   readonly send?: LiveControlTransport;
-  /** Revocation push failures (the local effects already happened). */
-  readonly onPushFailure?: (error: unknown) => void;
 }): LiveEdgePorts | undefined {
   const resolution = readLiveEdgeForward(input.env, input.stage, input.contentBase);
   if (!resolution.enabled) return undefined;
   const gitConfig = readGitModeConfig(input.env);
-  const invitationsQualified = () => gitConfig.liveInvitationsQualified === true;
   const { bindings, registry, codeRights } = composeGitAccess({ pool: input.pool, storageScopeId: input.storageScopeId,
     config: gitConfig });
-  const invitationStore = createPostgresLiveInvitationStore(input.pool);
-  const sessions = createPostgresLiveSessions(input.pool);
-  const gate = createLiveReaderGate({ bindings, registry, codeRights, invitations: invitationStore, sessions, invitationsQualified });
+  const gate = createLiveReaderGate({ bindings, registry, codeRights });
   const grants = createLiveGrantClient({ baseUrl: gitConfig.builderUrl,
     identity: serviceTokenSource(gitConfig.service ?? {}, SERVICE_SCOPE_BUILDER, input.fetch),
     ...(input.fetch ? { fetch: input.fetch } : {}) });
   const signer = liveSignerFrom(input.module, resolution.config?.key);
   const sockets = createLiveSocketRegistry();
-  const authorizations = createPostgresLiveAuthorizationStore(input.pool);
   let edge;
   try { edge = readLiveEdgeConfig(input.env); } catch { edge = {}; }
-  const revocation = composeLiveEdgeRevocationWith(resolution.config ? edge : {}, sockets, signer, input.send,
-    { grants, authorizations, storageScopeId: input.storageScopeId });
-  const invitations = createLiveInvitationService({ bindings, registry, codeRights, invitations: invitationStore, sessions,
-    invitationsQualified,
-    // Sockets closed, grants dropped, records revoked, then the push (new session epoch); a push failure is reported, not fatal.
-    onRevoked: (invitation) => revocation.invitation(invitation).catch((error: unknown) => { input.onPushFailure?.(error); }) });
+  const revocation = composeLiveEdgeRevocationWith(resolution.config ? edge : {}, sockets, signer, input.send, { grants });
   return { storageScopeId: input.storageScopeId, resolution, gate, consent: input.consent ?? (async () => false),
-    readiness: createPostgresLiveReadiness(input.pool),
-    sessionState: createLiveSessionStatePort(invitationStore, invitationsQualified), authorizations, grants,
-    signAssertion: (claims) => signer.signAssertion(claims), sockets, revocation, invitations };
+    readiness: createPostgresLiveReadiness(input.pool), grants, signAssertion: (claims) => signer.signAssertion(claims),
+    sockets, revocation };
 }
