@@ -72,7 +72,8 @@ data:
   # Owner identity for the git-backed mode (owner rhanka; preprod OIDC sub of fabien.antoine@gmail.com).
   IMMO_ARTIFACTS_GIT_COMMITTER_NAME: "rhanka"
   IMMO_ARTIFACTS_GIT_COMMITTER_EMAIL: "24390932+rhanka@users.noreply.github.com"
-  IMMO_ARTIFACTS_GIT_CODE_READERS: "1b9b9e15-2956-4df4-9ee1-a42273f0d096"
+  # Code readers (OIDC subs): owner, plus Farid and Steve as live participants (owner, 08/11 ~02 h 20).
+  IMMO_ARTIFACTS_GIT_CODE_READERS: "1b9b9e15-2956-4df4-9ee1-a42273f0d096,efd67056-fb60-42e6-a386-6264c854da55,92c90751-aa0e-49a9-ad61-1dfa21934b8a"
   IMMO_ARTIFACTS_GIT_HUMANS: '[{"principalId":"1b9b9e15-2956-4df4-9ee1-a42273f0d096","name":"rhanka","email":"24390932+rhanka@users.noreply.github.com"}]'
   # Non-secret git mode configuration (preprod values, Sentropic 2026-11-07).
   # Builder hostId on the Sentropic side: immo-preprod.
