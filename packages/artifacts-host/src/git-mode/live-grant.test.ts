@@ -1,9 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   createEpochFloor, createLiveGrantClient, createLiveWorkerClient, LIVE_GRANT_CACHE_MS, livePodName, parseLiveGrant,
-  type LiveGrant, type LiveGrantRequest,
+  type LiveGrant, type LiveGrantRequest, type LiveSessionInvitationState,
 } from "./live-grant.js";
-import type { LiveSessionInvitationState } from "./live-authority.js";
 import { liveStoreFences } from "./live.js";
 
 const BASE = "https://preprod.sentropic.sent-tech.ca/api/v1/artifacts/builder";

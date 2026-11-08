@@ -1,17 +1,13 @@
-import { createMemoryGitBindingStore, type GitBinding } from "@sentropic/artifacts";
 import { verifyLiveControl } from "@sentropic/artifacts/live-host";
 import { createServer, type IncomingMessage } from "node:http";
 import type { AddressInfo } from "node:net";
 import { describe, expect, it, vi } from "vitest";
-import { createLiveInvitationService, createMemoryLiveInvitationStore } from "./live-authority.js";
 import {
   composeLiveEdgeRevocation, createLiveFencePusher, createLiveRevocation, createLiveSocketRegistry, FAIL_CLOSED_LIVE_SIGNER,
   liveSignerFrom, loadLiveSigner, nodeHttpControlTransport, parseLiveHostKeyring, readLiveEdgeConfig,
   LIVE_CONTROL_HEADER, type LiveAssertionSigner, type LiveControlTransport,
 } from "./live-edge.js";
-import { createImmoGitRegistry, IMMO_GIT_REPO_ID } from "./registry.js";
 
-const SCOPE = "s";
 const ARTIFACT = "11111111-1111-4111-8111-111111111111";
 const signer: LiveAssertionSigner = { signAssertion: () => "v1.a.b", signControl: (claims) => `c1.${claims.op}.${claims.invitationId || claims.sessionId}` };
 const socket = () => ({ close: vi.fn() });
@@ -56,9 +52,7 @@ describe("live revocation: sockets closed, fence pushed", () => {
     sockets.register({ artifactId: ARTIFACT, sessionId: "sess", principalId: "alice" }, owner);
     const { send, sent } = transport(204);
     const push = createLiveFencePusher({ signer, kid: "k1", pagesDomain: DOMAIN, target: EDGE, send, sleep: noSleep });
-    const result = await createLiveRevocation({ sockets, push }).invitation({ invitationId: "inv-1", storageScopeId: SCOPE,
-      artifactId: ARTIFACT, bindingGeneration: 1, liveSessionId: "sess", inviteeId: "carol", grantorId: "alice",
-      createdAt: "", expiresAt: "", revokedAt: "x", epoch: 2 });
+    const result = await createLiveRevocation({ sockets, push }).invitation({ artifactId: ARTIFACT, invitationId: "inv-1", epoch: 2 });
     expect(result.closed).toBe(1);
     expect(invitee.close).toHaveBeenCalledWith(4403, "invitation_revoked");
     expect(other.close).not.toHaveBeenCalled();
@@ -68,15 +62,19 @@ describe("live revocation: sockets closed, fence pushed", () => {
       headers: { [LIVE_CONTROL_HEADER]: "c1.revoke_invitation.inv-1" } });
   });
 
-  it("closes every socket of a revoked session", async () => {
+  it("closes every socket of a revoked package session and pushes each controller session it carried", async () => {
     const sockets = createLiveSocketRegistry();
-    const a = socket(); const b = socket();
-    sockets.register({ artifactId: ARTIFACT, sessionId: "sess", principalId: "alice" }, a);
-    sockets.register({ artifactId: ARTIFACT, sessionId: "sess", principalId: "carol", invitationId: "inv-1" }, b);
-    const push = vi.fn(async () => {});
-    expect((await createLiveRevocation({ sockets, push }).session(ARTIFACT, "sess")).closed).toBe(2);
-    expect(push).toHaveBeenCalledWith(expect.objectContaining({ op: "revoke_session", sessionId: "sess" }));
-    expect(sockets.size()).toBe(0);
+    const a = socket(); const b = socket(); const other = socket();
+    // Same package session, two controller sessions (a crash restore minted ctl-2).
+    sockets.register({ artifactId: ARTIFACT, sessionId: "ctl-1", liveSessionId: "pkg-1", principalId: "alice" }, a);
+    sockets.register({ artifactId: ARTIFACT, sessionId: "ctl-2", liveSessionId: "pkg-1", principalId: "carol", invitationId: "inv-1" }, b);
+    sockets.register({ artifactId: ARTIFACT, sessionId: "ctl-9", liveSessionId: "pkg-9", principalId: "alice" }, other);
+    const pushed: string[] = [];
+    const push = vi.fn(async (claims: { sessionId: string }) => { pushed.push(claims.sessionId); });
+    expect(await createLiveRevocation({ sockets, push }).session(ARTIFACT, "pkg-1")).toEqual({ closed: 2, pushed: 2 });
+    expect(pushed.sort()).toEqual(["ctl-1", "ctl-2"]);
+    expect(other.close).not.toHaveBeenCalled();
+    expect(sockets.size()).toBe(1);
   });
 
   it("retries a failed push, then surfaces the failure with the socket already closed", async () => {
@@ -85,9 +83,7 @@ describe("live revocation: sockets closed, fence pushed", () => {
     sockets.register({ artifactId: ARTIFACT, sessionId: "sess", principalId: "carol", invitationId: "inv-1" }, invitee);
     const { send } = transport(new Error("reset"), 404, 503);
     const push = createLiveFencePusher({ signer, kid: "k1", pagesDomain: "pages.test", target: EDGE, send, sleep: noSleep });
-    await expect(createLiveRevocation({ sockets, push }).invitation({ invitationId: "inv-1", storageScopeId: SCOPE,
-      artifactId: ARTIFACT, bindingGeneration: 1, liveSessionId: "sess", inviteeId: "carol", grantorId: "alice",
-      createdAt: "", expiresAt: "", revokedAt: "x", epoch: 2 })).rejects.toMatchObject({ kind: "provider_unavailable",
+    await expect(createLiveRevocation({ sockets, push }).invitation({ artifactId: ARTIFACT, invitationId: "inv-1", epoch: 2 })).rejects.toMatchObject({ kind: "provider_unavailable",
       details: { publicDetails: { fence: "push_failed", status: 503 } } });
     expect(send).toHaveBeenCalledTimes(3);
     expect(invitee.close).toHaveBeenCalled();
@@ -136,29 +132,6 @@ describe("live revocation: sockets closed, fence pushed", () => {
       send: transport(204).send })(claims)).rejects.toMatchObject({ kind: "provider_unavailable" });
   });
 
-  it("runs the edge revocation from the invitation service revoke", async () => {
-    const bindings = createMemoryGitBindingStore();
-    const binding: GitBinding = { artifactId: ARTIFACT, storageScopeId: SCOPE, repoId: IMMO_GIT_REPO_ID,
-      branch: "artifact/p/alice000/triage-11111111", channel: "personal", personalPrincipalId: "alice", subPath: "",
-      baseCommitSha: "a".repeat(40), headCommitSha: "a".repeat(40), releaseCommitSha: null, autoPublish: true, executor: "sandbox",
-      pendingJobId: null, pendingCommitSha: null, state: "attached", generation: 1, version: 1, attachedBy: "alice",
-      attachedAt: "2026-11-08T00:00:00.000Z", updatedAt: "2026-11-08T00:00:00.000Z" };
-    await bindings.write({ binding, expectedVersion: null, actorId: "alice", idempotencyKey: "k", commandHash: "h", event: { action: "attach" } });
-    const sockets = createLiveSocketRegistry();
-    const push = vi.fn(async () => {});
-    const revocation = createLiveRevocation({ sockets, push });
-    const service = createLiveInvitationService({ bindings, invitations: createMemoryLiveInvitationStore(),
-      registry: createImmoGitRegistry({ storageScopeId: SCOPE, installationRef: "inst" }),
-      codeRights: { canReadCode: async () => true }, sessions: { current: async () => ({ liveSessionId: "sess" }) },
-      invitationsQualified: () => true, onRevoked: (invitation) => revocation.invitation(invitation) });
-    const caller = { actorId: "alice", storageScopeId: SCOPE, scopes: ["immo:artifacts:read", "immo:artifacts:write"] };
-    const created = await service.create(caller, { artifactId: ARTIFACT, inviteeId: "carol" });
-    const open = socket();
-    sockets.register({ artifactId: ARTIFACT, sessionId: "sess", principalId: "carol", invitationId: created.invitationId }, open);
-    await service.revoke(caller, { artifactId: ARTIFACT, invitationId: created.invitationId });
-    expect(open.close).toHaveBeenCalled();
-    expect(push).toHaveBeenCalledWith(expect.objectContaining({ op: "revoke_invitation", invitationId: created.invitationId, epoch: 2 }));
-  });
 });
 
 describe("live edge configuration", () => {
@@ -190,16 +163,15 @@ describe("live edge configuration", () => {
   it("pushes revocations the edge verifies with the provider live format (exact claim set, 0.2.20)", async () => {
     const sockets = createLiveSocketRegistry();
     const open = socket();
-    sockets.register({ artifactId: ARTIFACT, sessionId: "sess", principalId: "alice" }, open);
+    sockets.register({ artifactId: ARTIFACT, sessionId: "sess", liveSessionId: "pkg-1", principalId: "alice" }, open);
     const { send, sent } = transport(204);
     const config = readLiveEdgeConfig({ IMMO_ARTIFACTS_LIVE_HOST_KEYS: `immo-preprod-live-1=${key}`,
       IMMO_ARTIFACTS_LIVE_HOST_KID: "immo-preprod-live-1", IMMO_ARTIFACTS_LIVE_HOST: "pages.test",
       IMMO_ARTIFACTS_LIVE_EDGE_URL: "http://artifact-content.test:8791" });
     const revocation = await composeLiveEdgeRevocation(config, sockets, send);
     const tokens = () => sent.map((input) => input.headers[LIVE_CONTROL_HEADER]!);
-    await expect(revocation.session(ARTIFACT, "sess")).resolves.toEqual({ closed: 1 });
-    await revocation.invitation({ invitationId: "inv-1", storageScopeId: SCOPE, artifactId: ARTIFACT, bindingGeneration: 1,
-      liveSessionId: "sess", inviteeId: "carol", grantorId: "alice", createdAt: "", expiresAt: "", revokedAt: "x", epoch: 2 });
+    await expect(revocation.session(ARTIFACT, "pkg-1")).resolves.toEqual({ closed: 1, pushed: 1 });
+    await revocation.invitation({ artifactId: ARTIFACT, invitationId: "inv-1", epoch: 2 });
     expect(open.close).toHaveBeenCalled();
     const verify = (token: string) => verifyLiveControl(token, { key: (kid) => kid === "immo-preprod-live-1" ? config.key : undefined,
       now: () => Date.now() });
@@ -218,12 +190,11 @@ describe("live edge configuration", () => {
     const config = readLiveEdgeConfig({ IMMO_ARTIFACTS_LIVE_HOST_KEYS: `immo-preprod-live-1=${key}`,
       IMMO_ARTIFACTS_LIVE_HOST_KID: "immo-preprod-live-1", IMMO_ARTIFACTS_LIVE_HOST: "pages.test" });
     const revocation = await composeLiveEdgeRevocation(config, createLiveSocketRegistry(), transport(204).send);
-    await expect(revocation.session(ARTIFACT, "sess")).rejects.toMatchObject({ kind: "provider_unavailable" });
+    await expect(revocation.session(ARTIFACT, "pkg-1", ["ctl-1"])).rejects.toMatchObject({ kind: "provider_unavailable" });
     const grants = { invalidate: vi.fn(), invalidateInvitation: vi.fn() };
     const withGrants = createLiveRevocation({ sockets: createLiveSocketRegistry(), push: vi.fn(async () => {}), grants });
     await withGrants.session(ARTIFACT, "sess");
-    await withGrants.invitation({ invitationId: "inv-1", storageScopeId: SCOPE, artifactId: ARTIFACT, bindingGeneration: 1,
-      liveSessionId: "sess", inviteeId: "carol", grantorId: "alice", createdAt: "", expiresAt: "", revokedAt: "x", epoch: 2 });
+    await withGrants.invitation({ artifactId: ARTIFACT, invitationId: "inv-1", epoch: 2 });
     expect(grants.invalidate).toHaveBeenCalledWith(ARTIFACT);
     expect(grants.invalidateInvitation).toHaveBeenCalledWith(ARTIFACT, "inv-1");
   });
