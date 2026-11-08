@@ -65,7 +65,9 @@ Every variable below is immo-owned and read by radar-api and radar-immo-mcp
 | `IMMO_ARTIFACTS_LIVE_HOST_KEYS` | **secret** | HMAC keyring `kid=base64url[,kid=base64url]`, each at least 32 bytes; same value in Sentropic `APP_ARTIFACT_LIVE_HOST_KEYS` | no live signer: pushes refuse |
 | `IMMO_ARTIFACTS_LIVE_HOST_KID` | config | signing kid; preprod `immo-preprod-live-1` | no live signer |
 | `IMMO_ARTIFACTS_LIVE_HOST` | config | pages domain; preprod `pages.preprod.immo.sent-tech.ca` | pushes refuse |
-| `IMMO_ARTIFACTS_LIVE_CONTROL_URL` | config | https URL ending `/_live-control/v1`; preprod `https://pages.preprod.immo.sent-tech.ca/_live-control/v1` | pushes refuse |
+| `IMMO_ARTIFACTS_LIVE_EDGE_ENABLED` | config | `1` enables the W9 live edge on top of stage `live` (anything else: off) | off: no forward, no controller worker, no upgrade listener |
+| `IMMO_ARTIFACTS_LIVE_EDGE_URL` | config | internal artifact-content origin (http, no path); preprod `http://artifact-content.sentropic-preprod.svc.cluster.local:8791` | forward unavailable (release kept), pushes refuse |
+| `IMMO_ARTIFACTS_LIVE_CONTROL_URL` | config, superseded | https URL ending `/_live-control/v1`; validated only, never used (the control push goes to `IMMO_ARTIFACTS_LIVE_EDGE_URL`) | none |
 | `IMMO_ARTIFACTS_LIVE_DRAFT_KEYS` | **secret** | sealed keyring `version=base64url(32 raw bytes)[,...]` | draft keys refuse: `provider_unavailable` |
 | `IMMO_ARTIFACTS_LIVE_DRAFT_KEY_CURRENT` | config | the version used for new drafts (must be listed) | start refuses when the keyring is set |
 
@@ -146,17 +148,54 @@ is an A1 refused write path: a branch can never change it.
   the publish step in one transaction; composed by radar-api from the `build`
   stage on. Without the receipt key or the builder keys, `git_publish` and the
   inbound `/live-host/v1/*` routes answer `provider_unavailable` / 503.
-- Live edge revocation: sockets held by the immo content host are closed first,
-  then `POST /_live-control/v1` (`x-live-host-control`, claims of the provider
-  live format: `op`, `sessionId`, `invitationId`, `epoch`, no generation or
-  route epoch) is pushed with 3 attempts; every response body is drained, a
-  non-2xx answer is retried and the final failure is surfaced
-  (`provider_unavailable`, last status).
+- Live edge revocation: sockets held by the immo content host are closed first
+  (and cached grants dropped), then `POST /_live-control/v1` is pushed with
+  node:http to the INTERNAL artifact-content Service (`IMMO_ARTIFACTS_LIVE_EDGE_URL`)
+  with `Host: <artifactId>.<pages domain>` and the same per-artifact host in the
+  `x-live-host-control` claim (the 10 provider control fields: `op`,
+  `sessionId`, `invitationId`, `epoch`, no generation or route epoch), with 3
+  attempts; every response body is drained, a non-2xx answer is retried and the
+  final failure is surfaced (`provider_unavailable`, last status).
+
+## Live edge (W9, `IMMO_ARTIFACTS_LIVE_EDGE_ENABLED=1` on top of stage `live`)
+
+Contract: `tmp/conductor/concertation-git-artifact/sentropic-live-edge-contract-2026-11-07.md`
+(its CORRECTIF supersedes the claim sources). Off by default; with the flag
+off nothing below is composed and the tool catalogue and profile digests are
+unchanged.
+
+- Controller clients on the builder mount (`IMMO_ARTIFACTS_BUILDER_URL`, S2S
+  token scope `artifacts:builder`): `POST v1/live/grant` (route grant, cached
+  at most 30 s per artifact, principal and invitation; dropped on a 409, an
+  edge 404 on a live path or a revocation), `POST v1/live/reconcile` (BridgeAck)
+  and `POST v1/live/stop` (204) as the package LiveService `worker`.
+- Content host (radar-api, `*.<pages domain>`): on the owner's/invitee's
+  stable Host, the §8.2 gate (binding owner or active invitee, current code
+  rights, live reader consent = a non-revoked `baskets.read` reader consent row
+  for the artifact). LIVE is served only when the package live record is ready
+  for the current revision AND the grant answers 200 with
+  `grant.sourceRevision` = that revision; otherwise the release.
+- Forward: node:http to `IMMO_ARTIFACTS_LIVE_EDGE_URL`, GET/HEAD only, path and
+  query unchanged, Host = the browser host without port, Origin passed as is,
+  cookies, Authorization, service-worker and forwarding headers stripped,
+  `x-live-host-assertion` = the grant unchanged plus v, kid, host, iat, exp
+  (exp = iat + 60 s). HMR websocket `GET /_live/<sessionId>/hmr[?token=]`
+  (only `token`, Origin required, `Sec-WebSocket-Protocol: vite-hmr`): exp =
+  iat + 3600 s capped at the invitation expiry; sockets are tracked per
+  session/invitation, closed on revocation, at exp, and when the 2 s recheck
+  no longer admits the principal.
+- Any non-2xx (non-101) edge answer, timeout or connection failure: « live
+  indisponible » (503, `x-live-state`).
+- Network: Sentropic policy `allow-immo-content-host-to-artifact-content`
+  admits pods labelled `app.kubernetes.io/name: radar-immobilier` and
+  `app.kubernetes.io/component: api`.
 
 ## Not yet composed (fail-closed)
 
-- Live edge control URL: not configured yet (pushes refuse).
-- Live draft keys (KMS or sealed secret): `FAIL_CLOSED_LIVE_KEYS`; live worker
-  (host build/live API client): absent; worker qualification: `false`.
-- HTTP mounting of the handoff acceptance, of the invitation operations and of
-  the content-host live gate forward to the live edge.
+- Live edge: composed only with `IMMO_ARTIFACTS_LIVE_EDGE_ENABLED=1`; nothing
+  answers on the Sentropic side before the M4-R wagon (grant, reconcile,
+  stop, draft staging), GB4-P and `APP_ARTIFACT_LIVE_ENABLED`.
+- Live draft keys (KMS or sealed secret): `FAIL_CLOSED_LIVE_KEYS`; worker
+  qualification: `false` (live_write keeps answering `builder_unavailable`).
+- Draft staging pushed by the host: format pending (Sentropic M4-R).
+- HTTP mounting of the handoff acceptance and of the invitation operations.

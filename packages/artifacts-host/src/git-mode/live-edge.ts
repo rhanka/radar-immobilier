@@ -1,6 +1,8 @@
 import {
   ASSERTION_HEADER, CONTROL_HEADER, LIVE_KEY_ID, type LiveAssertionClaims, type LiveControlClaims,
 } from "@sentropic/artifacts/live-host";
+import { request as httpRequest } from "node:http";
+import { request as httpsRequest } from "node:https";
 import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-contract";
 import type { LiveInvitation } from "./live-authority.js";
 import { loadLiveHost, type LiveHostModule } from "./live-host-adapter.js";
@@ -15,9 +17,12 @@ import { loadLiveHost, type LiveHostModule } from "./live-host-adapter.js";
  *   fence format is reserved to the Sentropic controller).
  * - Revocation (invitation or session): the host first closes every proxied
  *   browser socket it holds for that invitee or session (the host owns the
- *   browser socket), then pushes the revocation to artifact-content's fence
- *   channel: `POST /_live-control/v1` with the signed `x-live-host-control`
- *   header, answered 204 (any refusal is a bare 404). Every response body is
+ *   browser socket), then pushes the revocation to artifact-content's control
+ *   channel: `POST /_live-control/v1` on the INTERNAL artifact-content Service
+ *   (IMMO_ARTIFACTS_LIVE_EDGE_URL) with Host = `<artifactId>.<pages domain>`
+ *   and the same per-artifact host in the signed `x-live-host-control` claim
+ *   (the edge scopes control to the artifact's own pages Host), via node:http;
+ *   answered 204 (any refusal is a bare 404). Every response body is
  *   read to completion (no connection held between attempts); a non-2xx
  *   answer or a transport error is retried, and the final failure is
  *   surfaced with the last status, the sockets being already closed.
@@ -79,41 +84,70 @@ export function createLiveSocketRegistry() {
 }
 export type LiveSocketRegistry = ReturnType<typeof createLiveSocketRegistry>;
 
+/**
+ * Control transport: one POST to the INTERNAL artifact-content Service with
+ * an explicit Host header (node:http keeps it verbatim; fetch/undici would
+ * not let the host choose it). Resolves the status once the body is drained.
+ */
+export type LiveControlTransport = (input: { readonly target: URL; readonly host: string; readonly path: string;
+  readonly headers: Readonly<Record<string, string>>; readonly timeoutMs: number }) => Promise<number>;
+
+export const nodeHttpControlTransport: LiveControlTransport = ({ target, host, path, headers, timeoutMs }) =>
+  new Promise<number>((resolve, reject) => {
+    const send = target.protocol === "https:" ? httpsRequest : httpRequest;
+    const outgoing = send({ protocol: target.protocol, hostname: target.hostname, port: target.port || undefined, method: "POST",
+      path, setHost: false, timeout: timeoutMs, headers: { ...headers, host, "content-length": "0" } });
+    outgoing.once("timeout", () => outgoing.destroy(new Error("timeout")));
+    outgoing.once("error", reject);
+    outgoing.once("response", (response) => {
+      response.once("error", reject);
+      response.once("end", () => resolve(response.statusCode ?? 0));
+      response.resume();
+    });
+    outgoing.end();
+  });
+
+/** The per-artifact pages Host the edge scopes a control message to (`<artifactId>.<pages domain>`). */
+export const liveArtifactHost = (artifactId: string, pagesDomain: string) => `${artifactId}.${pagesDomain}`.toLowerCase();
+
 export interface LiveFencePushOptions {
   readonly signer: LiveAssertionSigner;
   readonly kid: string;
-  /** Host-owned pages domain the edge is configured for. */
-  readonly host: string;
-  /** Internal control URL of the live edge for one artifact; undefined keeps the push closed. */
-  readonly controlUrl?: ((artifactId: string) => URL) | undefined;
-  readonly fetch?: typeof fetch;
+  /** Host-owned pages domain (preprod `pages.preprod.immo.sent-tech.ca`); the claim host is `<artifactId>.<domain>`. */
+  readonly pagesDomain: string;
+  /** Internal artifact-content origin (IMMO_ARTIFACTS_LIVE_EDGE_URL); undefined keeps the push closed. */
+  readonly target?: URL | undefined;
+  readonly send?: LiveControlTransport;
   readonly now?: () => number;
   readonly attempts?: number;
   readonly backoffMs?: (attempt: number) => number;
   readonly sleep?: (ms: number) => Promise<void>;
+  readonly timeoutMs?: number;
 }
 
 export function createLiveFencePusher(options: LiveFencePushOptions) {
-  const fetcher = options.fetch ?? fetch;
+  const send = options.send ?? nodeHttpControlTransport;
   const now = options.now ?? Date.now;
   const attempts = options.attempts ?? 3;
   const backoff = options.backoffMs ?? ((attempt: number) => 100 * 4 ** attempt);
   const sleep = options.sleep ?? ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)));
   return async (claims: Omit<LiveControlClaims, "v" | "kid" | "host" | "iat" | "exp">): Promise<void> => {
-    if (!options.controlUrl) throw new ArtifactOperationError("provider_unavailable", { publicDetails: { fence: "unconfigured" } });
-    const url = options.controlUrl(claims.artifactId);
+    if (!options.target || !options.pagesDomain || !options.kid) {
+      throw new ArtifactOperationError("provider_unavailable", { publicDetails: { fence: "unconfigured" } });
+    }
+    // The edge scopes control to the artifact's own pages Host: same value in the claim and the Host header.
+    const host = liveArtifactHost(claims.artifactId, options.pagesDomain);
     let lastStatus = 0;
     for (let attempt = 0; attempt < attempts; attempt += 1) {
       if (attempt > 0) await sleep(backoff(attempt - 1));
       const iat = Math.floor(now() / 1000);
-      const token = options.signer.signControl({ v: 1, kid: options.kid, host: options.host, iat, exp: iat + 60, ...claims });
+      // Exactly the 10 CONTROL_FIELDS of the provider format, in a closed object.
+      const token = options.signer.signControl({ v: 1, kid: options.kid, host, artifactId: claims.artifactId, op: claims.op,
+        sessionId: claims.sessionId, invitationId: claims.invitationId, epoch: claims.epoch, iat, exp: iat + 60 });
       try {
-        const response = await fetcher(url, { method: "POST", redirect: "error", headers: { [LIVE_CONTROL_HEADER]: token },
-          signal: AbortSignal.timeout(5000) });
-        lastStatus = response.status;
-        // Drain the body (bounded by the edge's empty answers) before deciding.
-        await response.arrayBuffer().catch(() => undefined);
-        if (response.ok) return;
+        lastStatus = await send({ target: options.target, host, path: LIVE_CONTROL_PATH,
+          headers: { [LIVE_CONTROL_HEADER]: token }, timeoutMs: options.timeoutMs ?? 5000 });
+        if (lastStatus >= 200 && lastStatus < 300) return;
       } catch { lastStatus = 0; /* transport error, retried */ }
     }
     throw new ArtifactOperationError("provider_unavailable", { publicDetails: { fence: "push_failed", status: lastStatus } });
@@ -122,15 +156,19 @@ export function createLiveFencePusher(options: LiveFencePushOptions) {
 export type LiveFencePush = ReturnType<typeof createLiveFencePusher>;
 
 /** Revocation handler: sockets closed first, then the fence pushed; a push failure is surfaced. */
-export function createLiveRevocation(deps: { readonly sockets: LiveSocketRegistry; readonly push: LiveFencePush }) {
+export function createLiveRevocation(deps: { readonly sockets: LiveSocketRegistry; readonly push: LiveFencePush;
+  /** Cached controller grants (live-grant.ts) dropped with the sockets. */
+  readonly grants?: { invalidate(artifactId: string): void; invalidateInvitation(artifactId: string, invitationId: string): void } }) {
   return {
     async invitation(invitation: LiveInvitation) {
+      deps.grants?.invalidateInvitation(invitation.artifactId, invitation.invitationId);
       const closed = deps.sockets.closeInvitation(invitation.artifactId, invitation.invitationId);
       await deps.push({ artifactId: invitation.artifactId, op: "revoke_invitation", sessionId: "",
         invitationId: invitation.invitationId, epoch: invitation.epoch });
       return { closed };
     },
     async session(artifactId: string, sessionId: string) {
+      deps.grants?.invalidate(artifactId);
       const closed = deps.sockets.closeSession(artifactId, sessionId);
       await deps.push({ artifactId, op: "revoke_session", sessionId, invitationId: "", epoch: 0 });
       return { closed };
@@ -143,11 +181,15 @@ export function createLiveRevocation(deps: { readonly sockets: LiveSocketRegistr
  * - IMMO_ARTIFACTS_LIVE_HOST_KEYS: HMAC keyring `kid=base64url[,kid=base64url]`,
  *   each key at least 32 bytes; rotation by kid overlap (old and new listed);
  * - IMMO_ARTIFACTS_LIVE_HOST_KID: the kid that signs now (preprod `immo-preprod-live-1`);
- * - IMMO_ARTIFACTS_LIVE_HOST: the pages domain claimed in assertions and
- *   control messages (preprod `pages.preprod.immo.sent-tech.ca`);
- * - IMMO_ARTIFACTS_LIVE_CONTROL_URL: the control endpoint
- *   (preprod `https://pages.preprod.immo.sent-tech.ca/_live-control/v1`).
- * Absent: no signer and no control URL, every push refuses (fail-closed).
+ * - IMMO_ARTIFACTS_LIVE_HOST: the pages domain; assertions and control
+ *   messages claim `<artifactId>.<domain>` (preprod `pages.preprod.immo.sent-tech.ca`);
+ * - IMMO_ARTIFACTS_LIVE_EDGE_URL: the internal artifact-content origin, used
+ *   by the forward and the control push
+ *   (preprod `http://artifact-content.sentropic-preprod.svc.cluster.local:8791`);
+ * - IMMO_ARTIFACTS_LIVE_CONTROL_URL: superseded (W9 CORRECTIF: the control
+ *   push goes to the internal Service, not the public pages origin); still
+ *   validated so an existing manifest keeps booting, never used for transport.
+ * Absent: no signer or no edge URL, every push refuses (fail-closed).
  */
 
 export function parseLiveHostKeyring(raw: string | undefined): ReadonlyMap<string, Uint8Array> {
@@ -168,7 +210,23 @@ export interface LiveEdgeConfig {
   readonly kid?: string | undefined;
   readonly key?: Uint8Array | undefined;
   readonly host?: string | undefined;
+  /** Superseded; validated only. */
   readonly controlUrl?: URL | undefined;
+  /** Internal artifact-content origin (forward and control push). */
+  readonly edgeUrl?: URL | undefined;
+}
+
+export const LIVE_EDGE_URL_ENV = "IMMO_ARTIFACTS_LIVE_EDGE_URL" as const;
+
+/** Internal artifact-content origin: http(s), no credentials, no path, query or fragment. */
+export function parseLiveEdgeUrl(raw: string | undefined): URL | undefined {
+  const value = raw?.trim();
+  if (!value) return undefined;
+  let url: URL;
+  try { url = new URL(value); } catch { throw new Error("artifact_live_edge_url_invalid"); }
+  if (!["http:", "https:"].includes(url.protocol) || url.username || url.password || url.pathname !== "/" || url.search ||
+    url.hash) throw new Error("artifact_live_edge_url_invalid");
+  return url;
 }
 
 export function readLiveEdgeConfig(env: NodeJS.ProcessEnv): LiveEdgeConfig {
@@ -180,15 +238,19 @@ export function readLiveEdgeConfig(env: NodeJS.ProcessEnv): LiveEdgeConfig {
   if (controlUrl && (controlUrl.protocol !== "https:" || controlUrl.pathname !== LIVE_CONTROL_PATH || controlUrl.search)) {
     throw new Error("artifact_live_control_url_invalid");
   }
-  return { kid, key: kid ? keys.get(kid) : undefined, host: env.IMMO_ARTIFACTS_LIVE_HOST?.trim() || undefined, controlUrl };
+  return { kid, key: kid ? keys.get(kid) : undefined, host: env.IMMO_ARTIFACTS_LIVE_HOST?.trim().toLowerCase() || undefined,
+    controlUrl, edgeUrl: parseLiveEdgeUrl(env[LIVE_EDGE_URL_ENV]) };
 }
 
 /** Fence pusher and revocation from the configuration and the provider signer (fail-closed when incomplete). */
 export async function composeLiveEdgeRevocation(config: LiveEdgeConfig, sockets: LiveSocketRegistry,
-  fetcher?: typeof fetch): Promise<ReturnType<typeof createLiveRevocation>> {
-  const signer = await loadLiveSigner(config.key);
-  const controlUrl = config.controlUrl;
-  const push = createLiveFencePusher({ signer, kid: config.kid ?? "", host: config.host ?? "",
-    controlUrl: controlUrl && config.kid && config.host ? () => controlUrl : undefined, ...(fetcher ? { fetch: fetcher } : {}) });
-  return createLiveRevocation({ sockets, push });
+  send?: LiveControlTransport): Promise<ReturnType<typeof createLiveRevocation>> {
+  return composeLiveEdgeRevocationWith(config, sockets, await loadLiveSigner(config.key), send);
+}
+
+export function composeLiveEdgeRevocationWith(config: LiveEdgeConfig, sockets: LiveSocketRegistry, signer: LiveAssertionSigner,
+  send?: LiveControlTransport, grants?: Parameters<typeof createLiveRevocation>[0]["grants"]): ReturnType<typeof createLiveRevocation> {
+  const push = createLiveFencePusher({ signer, kid: config.kid ?? "", pagesDomain: config.host ?? "",
+    target: config.kid && config.host ? config.edgeUrl : undefined, ...(send ? { send } : {}) });
+  return createLiveRevocation({ sockets, push, ...(grants ? { grants } : {}) });
 }

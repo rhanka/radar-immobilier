@@ -1,5 +1,5 @@
 import {
-  createGitHubForge, createGitPort, type GitBindingStore, type GitCodeRightsPort, type GitHumanDirectory,
+  createGitHubForge, createGitPort, createPostgresLiveStore, type GitBindingStore, type GitCodeRightsPort, type GitHumanDirectory,
   type GitIdentity, type GitInstallationLeasePort, type GitPort, type LiveKeyPort, type LiveStore, type LiveWorkerPort,
 } from "@sentropic/artifacts";
 import { createPostgresGitBindingStore } from "@sentropic/artifacts/adapters/postgres";
@@ -16,7 +16,8 @@ import { createLeaseBrokerClient, FAIL_CLOSED_LEASES } from "./lease-broker.js";
 import { createHostBuildApiClient, type HostBuildJobStore } from "./build-api.js";
 import { createSealedLiveKeys, parseLiveDraftKeyring, type LiveDraftKeyring } from "./live-keys.js";
 import { SERVICE_SCOPE_BROKER, SERVICE_SCOPE_BUILDER, serviceTokenSource, type ServiceTokenConfig } from "./service-token.js";
-import { composeLiveService } from "./live.js";
+import { composeLiveService, liveStoreFences } from "./live.js";
+import { createLiveWorkerClient } from "./live-grant.js";
 import { createPostgresHostJobStore } from "./host-jobs.js";
 import { createPostgresLiveInvitationStore, createPostgresLiveSessions, type LiveInvitationStore, type LiveSessionPort } from "./live-authority.js";
 import { gitToolServiceFactory, GIT_TOOLS_DEP_KEY, type GitBuildPort, type GitToolService, type GitToolsDeps } from "./provider-adapter.js";
@@ -51,6 +52,12 @@ export interface GitModeConfig {
   readonly builderUrl?: string | undefined;
   /** M4-I: sealed live draft master keys (version -> 32 bytes) and the current version. */
   readonly liveDraftKeys?: LiveDraftKeyring | undefined;
+  /**
+   * W9 live edge (IMMO_ARTIFACTS_LIVE_EDGE_ENABLED=1, default off), on top of
+   * stage `live`: composes the controller LiveWorkerPort (reconcile/stop).
+   * Off: the live service keeps its no-worker composition, byte for byte.
+   */
+  readonly liveEdgeEnabled?: boolean | undefined;
 }
 
 const optional = (value: string | undefined) => value?.trim() ? value.trim() : undefined;
@@ -72,6 +79,7 @@ export function readGitModeConfig(env: NodeJS.ProcessEnv): GitModeConfig {
     committer: name && email ? { name, email } : undefined,
     builderUrl: optional(env.IMMO_ARTIFACTS_BUILDER_URL),
     liveDraftKeys: parseLiveDraftKeyring(env.IMMO_ARTIFACTS_LIVE_DRAFT_KEYS, env.IMMO_ARTIFACTS_LIVE_DRAFT_KEY_CURRENT),
+    liveEdgeEnabled: env.IMMO_ARTIFACTS_LIVE_EDGE_ENABLED?.trim() === "1",
   };
 }
 
@@ -207,12 +215,20 @@ export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
       repoId: IMMO_GIT_REPO_ID, hasWriteScope }),
     ...(build ? { build } : {}) }));
   const liveSelected = input.resolution.tools.some((tool) => (GIT_LIVE_TOOLS as readonly string[]).includes(tool));
+  // W9 edge flag on top of stage `live`: the store is shared with the worker
+  // client (it reads the package fences sent to the controller). Flag off:
+  // no worker, as before (live_write / live_control(start) answer builder_unavailable).
+  const edgeWorker = liveSelected && input.resolution.stage === "live" && config.liveEdgeEnabled === true;
+  const liveStore = ports.liveStore ?? (edgeWorker && !ports.liveWorker ? createPostgresLiveStore(pool) : undefined);
+  const liveWorker = ports.liveWorker ?? (edgeWorker ? createLiveWorkerClient({ baseUrl: config.builderUrl,
+    identity: serviceTokenSource(config.service ?? {}, SERVICE_SCOPE_BUILDER, ports.fetch), fences: liveStoreFences(liveStore!),
+    ...(ports.fetch ? { fetch: ports.fetch } : {}) }) : undefined);
   const live = liveSelected ? composeLiveService({ pool, git, bindings, registry, codeRights, directory, hasWriteScope,
     invitations: ports.invitations ?? createPostgresLiveInvitationStore(pool),
     sessions: ports.sessions ?? createPostgresLiveSessions(pool),
-    ...(ports.liveStore ? { store: ports.liveStore } : {}),
+    ...(liveStore ? { store: liveStore } : {}),
     ...(ports.liveKeys ?? config.liveDraftKeys ? { keys: ports.liveKeys ?? createSealedLiveKeys(config.liveDraftKeys!) } : {}),
-    ...(ports.liveWorker ? { worker: ports.liveWorker } : {}), ...(ports.liveQualified ? { qualified: ports.liveQualified } : {}) })
+    ...(liveWorker ? { worker: liveWorker } : {}), ...(ports.liveQualified ? { qualified: ports.liveQualified } : {}) })
     : undefined;
   return { git: { bindings, codeRights }, [GIT_TOOLS_DEP_KEY]: gitTools, ...(live ? { live } : {}) };
 }

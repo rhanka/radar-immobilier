@@ -9,6 +9,8 @@ import { createRawDocumentReader } from "./routes/documents.js";
 import { createGeoReadOperation } from "./artifacts/reader-geo.js";
 import { listGeoCities } from "./services/geo/geo-features.js";
 import { createReaderContentApp } from "./artifacts/content-serve.js";
+import { createLiveEdgeForward, withLiveEdge } from "./artifacts/live-edge-forward.js";
+import { readSessionClaims } from "./artifacts/preview-session.js";
 import { resolveReaderCursorKeyring } from "./artifacts/reader-cursor-keyring.js";
 import { createReaderOpening } from "./artifacts/reader-opening.js";
 import { consoleReaderEventSink } from "./artifacts/reader-event-log.js";
@@ -200,6 +202,18 @@ const readerContent = contentHost.enabled && artifactsControl?.readerStorage && 
   })
   : undefined;
 
+// Live edge forward (A-LIVE §8.2): composed only at stage `live` with
+// IMMO_ARTIFACTS_LIVE_EDGE_ENABLED=1, on the reader mount (content hosts only).
+// The principal is the sealed reader session bound to this artifact host.
+const liveEdge = readerContent && contentHost.enabled && artifactsControl?.liveEdge
+  ? createLiveEdgeForward({ contentBase: contentHost.contentBase, ports: artifactsControl.liveEdge,
+    principal: (cookie, artifactId) => {
+      const session = readSessionClaims(cookie, readerSessionSecret, Date.now());
+      return session && session.artifactId === artifactId ? session.readerSub : null;
+    } })
+  : undefined;
+const servedReader = readerContent && liveEdge ? withLiveEdge(readerContent, liveEdge) : readerContent;
+
 const durableRetirement = await readDurableLegacyRetirement(dbHandle.db).catch((error) => {
   logger.warn({ err: String(error) }, "durable retirement unreadable; starting closed");
   return "cutover-closed" as const;
@@ -241,7 +255,7 @@ const app = createApp({
   mcpSignalSearch: { enabled: config.MCP_SIGNAL_SEARCH_ENABLED },
   ...(durableRetirement ? { legacyRetirement: durableRetirement } : {}),
   ...contentHostAppOption(contentHost),
-  ...(readerContent ? { readerContent } : {}),
+  ...(servedReader ? { readerContent: servedReader } : {}),
   ...(readerOpening ? { readerOpening: readerOpening.application } : {}),
   ...(publishedWrite ? { writeH5: publishedWrite.h5, writeApp: publishedWrite.application } : {}),
   ...(readerCursorKeyring ? { classification: { cursorKeyring: readerCursorKeyring } } : {}),
@@ -261,6 +275,12 @@ void scrapeObjectStore
     logger.warn({ err: String(e) }, "ensureBucket (scrape) failed"),
   );
 
-serve({ fetch: app.fetch, port: config.PORT }, (info) => {
+const server = serve({ fetch: app.fetch, port: config.PORT }, (info) => {
   logger.info({ port: info.port, env: config.NODE_ENV }, "radar-api listening");
 });
+// Websocket upgrades exist only for the live HMR route; anything else is closed as before.
+if (liveEdge) {
+  server.on("upgrade", (incoming, socket, head) => {
+    liveEdge.upgrade(incoming, socket, head).then((handled) => { if (!handled) socket.destroy(); }, () => socket.destroy());
+  });
+}

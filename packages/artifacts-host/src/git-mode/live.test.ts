@@ -189,6 +189,19 @@ describe("live stage composition (fail-closed stubs)", () => {
     await expect(compose().live!.execute("live_write", write, inv("bob"))).rejects.toMatchObject({ kind: "access_denied" });
   });
 
+  it("composes the controller worker only with IMMO_ARTIFACTS_LIVE_EDGE_ENABLED on top of stage live", async () => {
+    const withConfig = (liveEdgeEnabled: boolean) => composeGitMode({ resolution, pool: { query: async () => ({ rows: [] }) } as never,
+      storageScopeId: SCOPE, config: { codeReaders: [], humans: [], installationRef: "inst", liveEdgeEnabled,
+        builderUrl: "https://preprod.sentropic.sent-tech.ca/api/v1/artifacts/builder" },
+      ports: { bindings, codeRights, directory, invitations, sessions, hasWriteScope: () => true, liveStore: {} as never,
+        liveQualified: () => true, gitToolFactory: () => ({ execute: async () => ({}) }) } });
+    // Flag off: the no-worker composition, unchanged (builder_unavailable even when qualified).
+    await expect(withConfig(false).live!.execute("live_write", write, inv("alice"))).rejects.toMatchObject({ kind: "builder_unavailable" });
+    // Flag on: a worker is present, so the write goes past the worker check (and fails later on the stub store).
+    const error = await withConfig(true).live!.execute("live_write", write, inv("alice")).catch((caught: unknown) => caught);
+    expect(error).not.toMatchObject({ kind: "builder_unavailable" });
+  });
+
   it("keeps draft keys closed", async () => {
     await expect(FAIL_CLOSED_LIVE_KEYS.current({ storageScopeId: SCOPE, artifactId: A_ALICE, bindingGeneration: 1 }))
       .rejects.toMatchObject({ kind: "provider_unavailable" });
