@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-contract";
+import { resolveBuilderBinding, type BuilderBindingSource } from "./builder-binding.js";
 import type { HostServiceIdentity } from "./lease-broker.js";
 import type { GitBuildExecutor, GitBuildJobRequest, GitBuildJobState, GitBuildPort } from "./provider-adapter.js";
 
@@ -8,8 +9,10 @@ import type { GitBuildExecutor, GitBuildJobRequest, GitBuildJobState, GitBuildPo
  *
  * - immo persists the job first (G0 v3 §2.6: the job identity, never a
  *   caller SHA later) and gets its jobId from the host job store;
- * - then `POST <base>/v1/builds` with exactly `{ artifactId, jobId }`
- *   (≤ 2 KiB), answered 202 (accepted) or 200 (release already published)
+ * - then `POST <base>/v1/builds` with exactly `{ artifactId, jobId, binding }`
+ *   (≤ 2 KiB), where `binding = { repoId, branch, subPath }` is read from the package
+ *   git binding of that artifact AND that job generation (builder-binding.ts, never
+ *   caller input; no such binding: git_not_attached before any call), answered 202 (accepted) or 200 (release already published)
  *   with `{ jobId, state, code?, reason?, releaseId? }`;
  * - progress: `GET <base>/v1/builds/<artifactId>/<jobId>`;
  * - the builder then pulls the job from immo (`POST <host base>/live-host/v1/job`)
@@ -48,6 +51,8 @@ export interface HostBuildApiOptions {
   readonly baseUrl?: string | undefined;
   readonly identity?: HostServiceIdentity | undefined;
   readonly jobs?: HostBuildJobStore;
+  /** Package git binding store: source of the `binding` coordinates sent to the builder. */
+  readonly bindings?: BuilderBindingSource | undefined;
   readonly fetch?: typeof fetch;
   readonly timeoutMs?: number;
 }
@@ -102,9 +107,11 @@ export function createHostBuildApiClient(options: HostBuildApiOptions): GitBuild
     async admits(executor: GitBuildExecutor) { return base !== undefined && executor === "sandbox"; },
     async request(job: GitBuildJobRequest) {
       if (!base || job.executor !== "sandbox") throw new ArtifactOperationError("provider_unavailable");
+      const binding = await resolveBuilderBinding(options.bindings, { storageScopeId: job.storageScopeId, artifactId: job.artifactId,
+        bindingGeneration: job.bindingGeneration });
       const jobId = await jobs.persist(job);
       const status = await call(new URL("v1/builds", base), { method: "POST", headers: { "content-type": "application/json" },
-        body: JSON.stringify({ artifactId: job.artifactId, jobId }) }, [200, 202], jobId);
+        body: JSON.stringify({ artifactId: job.artifactId, jobId, binding }) }, [200, 202], jobId);
       return { jobId: status.jobId, state: status.state };
     },
     async status(artifactId: string, jobId: string) {

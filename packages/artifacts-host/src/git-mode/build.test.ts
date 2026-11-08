@@ -171,6 +171,7 @@ describe("host build API client (W7)", () => {
     requestedBy: "alice", idempotencyKey: "k" };
   const identity = { authorization: async () => "Bearer service-token" };
   const BASE = "https://builder.example/api/v1/artifacts/builder";
+  const bindings = { get: vi.fn(async () => binding) };
 
   it("admits only the sandbox executor, and only when the builder is configured", async () => {
     expect(await createHostBuildApiClient({}).admits("sandbox")).toBe(false);
@@ -180,23 +181,53 @@ describe("host build API client (W7)", () => {
     expect(await client.admits("ci")).toBe(false);
   });
 
-  it("persists the job, then posts exactly { artifactId, jobId } to /v1/builds (202 or 200)", async () => {
+  it("persists the job, then posts exactly { artifactId, jobId, binding } to /v1/builds (202 or 200)", async () => {
     const jobs = createMemoryJobStore();
     const fetcher = vi.fn(async (_url: URL, init: RequestInit) => {
       const body = JSON.parse(String(init.body)) as { jobId: string };
       return new Response(JSON.stringify({ jobId: body.jobId, state: "build_pending" }), { status: 202 });
     });
-    const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs, fetch: fetcher as never });
+    const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs, bindings, fetch: fetcher as never });
     const first = await client.request(job);
     expect(first.state).toBe("build_pending");
     const [url, init] = fetcher.mock.calls[0]! as unknown as [URL, RequestInit];
     expect(String(url)).toBe(`${BASE}/v1/builds`);
     expect(init.method).toBe("POST");
-    expect(JSON.parse(String(init.body))).toEqual({ artifactId: job.artifactId, jobId: first.jobId });
+    expect(JSON.parse(String(init.body))).toEqual({ artifactId: job.artifactId, jobId: first.jobId,
+      binding: { repoId: "radar-immobilier", branch: binding.branch, subPath: "" } });
+    expect(Object.keys(JSON.parse(String(init.body))).sort()).toEqual(["artifactId", "binding", "jobId"]);
+    expect(Object.keys(JSON.parse(String(init.body)).binding).sort()).toEqual(["branch", "repoId", "subPath"]);
+    expect(bindings.get).toHaveBeenCalledWith("s", job.artifactId);
     expect(String(init.body).length).toBeLessThanOrEqual(2048);
     expect((init.headers as Record<string, string>).authorization).toBe("Bearer service-token");
     expect(jobs.jobs.get(first.jobId)).toEqual(job);
     expect((await client.request(job)).jobId).toBe(first.jobId);
+  });
+
+  it("takes the binding coordinates from the store record, never from the job fields", async () => {
+    const fetcher = vi.fn(async (_url: URL, init: RequestInit) => new Response(JSON.stringify({
+      jobId: (JSON.parse(String(init.body)) as { jobId: string }).jobId, state: "build_pending" }), { status: 202 }));
+    const stored = { ...binding, repoId: "stored-repo", branch: "artifact/p/alice000/other-22222222", subPath: "sub/dir" };
+    const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs: createMemoryJobStore(), bindings: { get: async () => stored },
+      fetch: fetcher as never });
+    await client.request({ ...job, repoId: "forged", branch: "artifact/forged", subPath: "forged" });
+    expect(JSON.parse(String((fetcher.mock.calls[0] as unknown as [URL, RequestInit])[1].body)).binding)
+      .toEqual({ repoId: "stored-repo", branch: "artifact/p/alice000/other-22222222", subPath: "sub/dir" });
+  });
+
+  it("fails closed with git_not_attached before any builder call or job persistence without the binding of THAT generation", async () => {
+    for (const record of [undefined, { ...binding, state: "detached" as const }, { ...binding, generation: 3 }, { ...binding, generation: 1 }]) {
+      const fetcher = vi.fn();
+      const jobs = createMemoryJobStore();
+      const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs, bindings: { get: async () => record }, fetch: fetcher as never });
+      await expect(client.request(job)).rejects.toMatchObject({ kind: "git_not_attached" });
+      expect(fetcher).not.toHaveBeenCalled();
+      expect(jobs.jobs.size).toBe(0);
+    }
+    const fetcher = vi.fn();
+    await expect(createHostBuildApiClient({ baseUrl: BASE, identity, jobs: createMemoryJobStore(), fetch: fetcher as never }).request(job))
+      .rejects.toMatchObject({ kind: "provider_unavailable" });
+    expect(fetcher).not.toHaveBeenCalled();
   });
 
   it("reads a build status from /v1/builds/<artifactId>/<jobId>", async () => {
@@ -208,7 +239,7 @@ describe("host build API client (W7)", () => {
 
   it("fails closed on builder errors, malformed answers and a missing job store", async () => {
     for (const answer of [new Response("{}", { status: 503 }), new Response(JSON.stringify({ jobId: "x", state: "weird" }), { status: 202 })]) {
-      const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs: createMemoryJobStore(), fetch: (async () => answer) as never });
+      const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs: createMemoryJobStore(), bindings, fetch: (async () => answer) as never });
       await expect(client.request(job)).rejects.toMatchObject({ kind: "provider_unavailable" });
     }
     await expect(createHostBuildApiClient({ baseUrl: BASE, identity }).request(job)).rejects.toMatchObject({ kind: "provider_unavailable" });
