@@ -1,9 +1,11 @@
-import type { GitBindingStore, GitCodeRightsPort, GitHumanDirectory, GitRepositoryRegistry, LiveAuthority, LiveInvocation } from "@sentropic/artifacts";
+import type { GitBindingStore, GitCodeRightsPort, GitHumanDirectory, GitRepositoryRegistry, LiveAuthority, LiveIdentity, LiveInvocation,
+  LiveViewer } from "@sentropic/artifacts";
 import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-contract";
 import { IMMO_GIT_OUTPUT_DIR } from "./registry.js";
 
 /**
- * Live authority and the content-host reader gate (M4-I, Δ4), OWNER-ONLY.
+ * Live authority and the content-host reader gate (M4-I, Δ4). OWNER-ONLY
+ * unless the generic invitations are qualified (IMMO_ARTIFACTS_LIVE_INVITATIONS_QUALIFIED).
  *
  * - Each user edits THEIR OWN personal binding: the binding owner is the
  *   acting user (`personalPrincipalId`), never a platform owner. Writes need
@@ -12,14 +14,13 @@ import { IMMO_GIT_OUTPUT_DIR } from "./registry.js";
  *   (`access_denied`); a different principal never writes to someone else's
  *   binding (co-editing would be a contract change).
  *
- * Invited live readers are GENERIC in @sentropic/artifacts 0.2.22 (train 1c:
- * artifacts_live_invite / _accept_invitation / _revoke_invitation /
- * _invitations, package migration 0013_live_invitations, `liveViewer` and
- * `liveInvitationState`). The immo invitation store of #1030 (table
- * artifacts.live_invitations, migration 0038) is removed and its table
- * dropped by migration 0041 so the package migration can create its own.
- * TODO(0.2.22): compose the package `invitations` host port and admit the
- * invitee path through `liveViewer(identity, principalId)`.
+ * Invited live readers are GENERIC in @sentropic/artifacts 0.2.22
+ * (artifacts_live_invite / _accept_invitation / _revoke_invitation /
+ * _invitations, package migration 0013_live_invitations). The immo invitation
+ * store of #1030 (migration 0038) was dropped by migration 0041 so the package
+ * migration (0042) creates its own table. The package `liveViewer(identity,
+ * principalId)` decides who is an accepted invitee; the package only lets an
+ * active invitee do `live_read` (viewing only: no write, publish or release).
  *
  * Code rights are evaluated on every call: there is no cached authority.
  */
@@ -31,6 +32,17 @@ export interface LiveAuthorityDeps {
   readonly hasWriteScope: () => boolean;
   /** Worker qualification (GB4 / M4-lite). False until qualified: live_write answers builder_unavailable. */
   readonly qualified: () => boolean;
+  /**
+   * Invitation views of the package live service. Absent, or `qualified()`
+   * false: live stays owner-only (every other principal is refused).
+   */
+  readonly invitations?: LiveInvitationViews | undefined;
+}
+
+/** The package `liveViewer` behind the invitations qualification flag. */
+export interface LiveInvitationViews {
+  readonly qualified: () => boolean;
+  readonly viewer: (identity: LiveIdentity, principalId: string) => Promise<LiveViewer>;
 }
 
 const denied = (): never => { throw new ArtifactOperationError("access_denied"); };
@@ -47,8 +59,17 @@ async function bindingContext(deps: Pick<LiveAuthorityDeps, "bindings" | "regist
 export function createLiveAuthorize(deps: LiveAuthorityDeps) {
   return async (invocation: LiveInvocation, artifactId: string): Promise<LiveAuthority> => {
     const { binding, repository, ownerId } = await bindingContext(deps, invocation.storageScopeId, artifactId);
-    // Owner-only until the generic invitations (0.2.22): every other principal is refused.
-    if (invocation.actorId !== ownerId) return denied();
+    // Owner-only unless the generic invitations are qualified: every other principal is refused.
+    const owner = invocation.actorId === ownerId;
+    let invited = false;
+    if (!owner) {
+      if (!deps.invitations?.qualified()) return denied();
+      // A non-owner is admitted to the package operations only (accept, own invitations, live_read as an
+      // ACTIVE invitee); the package refuses every owner-only operation on `ownerId`.
+      const viewer = await deps.invitations.viewer({ storageScopeId: binding.storageScopeId, artifactId,
+        bindingGeneration: binding.generation }, invocation.actorId);
+      invited = viewer?.role === "invitee";
+    }
     const canReadCode = await deps.codeRights.canReadCode({ storageScopeId: binding.storageScopeId,
       repoId: binding.repoId, actorId: invocation.actorId });
     const target = { storageScopeId: binding.storageScopeId, repoId: binding.repoId, branch: binding.branch,
@@ -56,27 +77,39 @@ export function createLiveAuthorize(deps: LiveAuthorityDeps) {
     const portRepository = { storageScopeId: repository.storageScopeId, repoId: repository.repoId, locator: repository.locator,
       installationRef: repository.installationRef, branchPrefix: repository.branchPrefix, allowedSubPaths: repository.allowedSubPaths,
       canWrite: repository.canWrite, writablePaths: repository.writablePaths, refusedWritePaths: repository.refusedWritePaths };
-    return { binding, ownerId, canReadCode, repository: portRepository, target, invited: false,
-      canWrite: canReadCode && repository.canWrite && deps.hasWriteScope(),
+    return { binding, ownerId, canReadCode, repository: portRepository, target, invited,
+      canWrite: owner && canReadCode && repository.canWrite && deps.hasWriteScope(),
       humanLinked: await deps.directory.resolve({ storageScopeId: binding.storageScopeId, principalId: invocation.actorId }) !== null,
       qualified: deps.qualified() };
   };
 }
 
-export type LiveReaderRole = { readonly role: "binding_owner"; readonly principalId: string; readonly bindingGeneration: number };
+export type LiveReaderRole =
+  | { readonly role: "binding_owner"; readonly principalId: string; readonly bindingGeneration: number }
+  | { readonly role: "invitee"; readonly principalId: string; readonly bindingGeneration: number;
+    /** Accepted invitation (expiresAt in ms) from the package `liveViewer`. */
+    readonly invitation: { readonly id: string; readonly epoch: number; readonly expiresAt: number } };
 
 /**
- * Content-host live reader gate (A-LIVE §8.2), owner-only: the binding owner
- * with current code rights. Null refuses (every invitee until 0.2.22).
+ * Content-host live reader gate (A-LIVE §8.2): the binding owner with current
+ * code rights, or, when the invitations are qualified, an invitee holding an
+ * ACTIVE accepted invitation (package `liveViewer`) and current code rights.
+ * Null refuses. `viewer` absent (not qualified): owner-only, unchanged.
  */
-export function createLiveReaderGate(deps: Pick<LiveAuthorityDeps, "bindings" | "registry" | "codeRights">) {
+export function createLiveReaderGate(deps: Pick<LiveAuthorityDeps, "bindings" | "registry" | "codeRights"> & {
+  readonly viewer?: LiveInvitationViews["viewer"] | undefined }) {
   return async (storageScopeId: string, artifactId: string, principalId: string): Promise<LiveReaderRole | null> => {
     let context;
     try { context = await bindingContext(deps, storageScopeId, artifactId); } catch { return null; }
     const { binding, ownerId } = context;
-    // TODO(0.2.22): invitee path through liveViewer(identity, principalId).
-    if (principalId !== ownerId) return null;
     if (!await deps.codeRights.canReadCode({ storageScopeId, repoId: binding.repoId, actorId: principalId })) return null;
-    return { role: "binding_owner", principalId, bindingGeneration: binding.generation };
+    if (principalId === ownerId) return { role: "binding_owner", principalId, bindingGeneration: binding.generation };
+    if (!deps.viewer) return null;
+    let viewer: LiveViewer;
+    try {
+      viewer = await deps.viewer({ storageScopeId, artifactId, bindingGeneration: binding.generation }, principalId);
+    } catch { return null; }
+    return viewer?.role === "invitee"
+      ? { role: "invitee", principalId, bindingGeneration: binding.generation, invitation: viewer.invitation } : null;
   };
 }

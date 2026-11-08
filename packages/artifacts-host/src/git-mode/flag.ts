@@ -33,14 +33,21 @@ export const GIT_BUILD_TOOLS = ["artifacts_git_publish"] as const;
 /** M4-I: live drafts on the builder pod and the commit of the live draft. */
 export const GIT_LIVE_TOOLS = ["artifacts_git_commit", "artifacts_live_write", "artifacts_live_read",
   "artifacts_live_reset", "artifacts_live_status", "artifacts_live_control"] as const;
-export const GIT_ARTIFACT_TOOLS = [...GIT_BINDING_TOOLS, ...GIT_BUILD_TOOLS, ...GIT_LIVE_TOOLS] as const;
+/**
+ * Generic live invitations (@sentropic/artifacts 0.2.22), appended last. Their
+ * OAuth scope comes from the package `LIVE_INVITATION_TOOL_CLASSES`
+ * (invitation-tools.ts), never from tool mutability.
+ */
+export const GIT_INVITATION_TOOLS = ["artifacts_live_invite", "artifacts_live_accept_invitation",
+  "artifacts_live_revoke_invitation", "artifacts_live_invitations"] as const;
+export const GIT_ARTIFACT_TOOLS = [...GIT_BINDING_TOOLS, ...GIT_BUILD_TOOLS, ...GIT_LIVE_TOOLS, ...GIT_INVITATION_TOOLS] as const;
 export type GitArtifactTool = (typeof GIT_ARTIFACT_TOOLS)[number];
 
 const STAGE_TOOLS: Readonly<Record<GitModeStage, readonly GitArtifactTool[]>> = Object.freeze({
   off: [],
   bindings: [...GIT_BINDING_TOOLS],
   build: [...GIT_BINDING_TOOLS, ...GIT_BUILD_TOOLS],
-  live: [...GIT_BINDING_TOOLS, ...GIT_BUILD_TOOLS, ...GIT_LIVE_TOOLS],
+  live: [...GIT_BINDING_TOOLS, ...GIT_BUILD_TOOLS, ...GIT_LIVE_TOOLS, ...GIT_INVITATION_TOOLS],
 });
 
 /** The tools a stage cannot run without (one per milestone it includes). */
@@ -63,15 +70,19 @@ const STAGE_ANCHORS: Readonly<Record<GitModeStage, readonly GitArtifactTool[]>> 
  *   selection and reported as `unrouted`; a missing anchor refuses the stage.
  */
 export const GIT_TOOL_PROVIDER_ROUTING: Readonly<Record<GitArtifactTool, readonly string[]>> = Object.freeze({
-  artifacts_git_attach: ["0.2.20"],
-  artifacts_fetch_app_source: ["0.2.20"],
-  artifacts_git_publish: ["0.2.20"],
-  artifacts_git_commit: ["0.2.18", "0.2.20"],
-  artifacts_live_write: ["0.2.18", "0.2.20"],
-  artifacts_live_read: ["0.2.18", "0.2.20"],
-  artifacts_live_reset: ["0.2.18", "0.2.20"],
-  artifacts_live_status: ["0.2.18", "0.2.20"],
-  artifacts_live_control: ["0.2.18", "0.2.20"],
+  artifacts_git_attach: ["0.2.20", "0.2.22"],
+  artifacts_fetch_app_source: ["0.2.20", "0.2.22"],
+  artifacts_git_publish: ["0.2.20", "0.2.22"],
+  artifacts_git_commit: ["0.2.18", "0.2.20", "0.2.22"],
+  artifacts_live_write: ["0.2.18", "0.2.20", "0.2.22"],
+  artifacts_live_read: ["0.2.18", "0.2.20", "0.2.22"],
+  artifacts_live_reset: ["0.2.18", "0.2.20", "0.2.22"],
+  artifacts_live_status: ["0.2.18", "0.2.20", "0.2.22"],
+  artifacts_live_control: ["0.2.18", "0.2.20", "0.2.22"],
+  artifacts_live_invite: ["0.2.22"],
+  artifacts_live_accept_invitation: ["0.2.22"],
+  artifacts_live_revoke_invitation: ["0.2.22"],
+  artifacts_live_invitations: ["0.2.22"],
 });
 
 export interface GitModeResolution {
@@ -107,9 +118,13 @@ export function isGitArtifactTool(name: string): name is GitArtifactTool {
   return (GIT_ARTIFACT_TOOLS as readonly string[]).includes(name);
 }
 
-/** Read-only git tools; every other git tool is a write (immo:artifacts:write). */
+/**
+ * Read-only git tools WITHOUT an idempotency key; every other non-invitation
+ * git tool is a write (immo:artifacts:write). Invitation tools take their
+ * class from the package (invitation-tools.ts).
+ */
 export const GIT_READ_TOOLS: readonly GitArtifactTool[] = Object.freeze(["artifacts_fetch_app_source",
-  "artifacts_live_read", "artifacts_live_status"]);
+  "artifacts_live_read", "artifacts_live_status", "artifacts_live_invitations"]);
 
 /**
  * Provider operation entries for the selected git tools. Limits mirror the
