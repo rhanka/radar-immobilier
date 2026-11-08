@@ -31,7 +31,7 @@ describe("git mode flag", () => {
   it("qualifies every stage on the pinned 0.2.23 and refuses them on any other provider (fail-closed)", () => {
     expect(ARTIFACT_PROVIDER_VERSION).toBe("0.2.23");
     expect(GIT_TOOL_PROVIDER_ROUTING).toEqual(Object.fromEntries(GIT_ARTIFACT_TOOLS.map((tool) =>
-      [tool, /invit/.test(tool) ? ["0.2.23"] : /git_commit|live_/.test(tool) ? ["0.2.18", "0.2.20", "0.2.22", "0.2.23"] : ["0.2.20", "0.2.22", "0.2.23"]])));
+      [tool, /invit/.test(tool) ? ["0.2.22", "0.2.23"] : /git_commit|live_/.test(tool) ? ["0.2.18", "0.2.20", "0.2.22", "0.2.23"] : ["0.2.20", "0.2.22", "0.2.23"]])));
     for (const stage of ["bindings", "build", "live"]) {
       expect(resolveGitMode({ [ARTIFACTS_GIT_MODE_ENV]: stage }, ARTIFACT_PROVIDER_VERSION).unrouted).toEqual([]);
       for (const other of ["0.2.18", "0.2.19", "0.3.0"]) {
