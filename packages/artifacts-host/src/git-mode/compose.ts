@@ -1,6 +1,7 @@
 import {
   createGitHubForge, createGitPort, createPostgresLiveStore, type GitBindingStore, type GitCodeRightsPort, type GitHumanDirectory,
-  type GitIdentity, type GitInstallationLeasePort, type GitPort, type LiveKeyPort, type LiveStore, type LiveWorkerPort,
+  type GitIdentity, type GitInstallationLeasePort, type GitPort, type LiveKeyPort, type LiveSessionService, type LiveStore,
+  type LiveWorkerPort, type PrincipalDirectoryPort,
 } from "@sentropic/artifacts";
 import { createPostgresGitBindingStore } from "@sentropic/artifacts/adapters/postgres";
 import type { HttpAppDeps } from "@sentropic/artifacts/http";
@@ -16,8 +17,13 @@ import { createLeaseBrokerClient, FAIL_CLOSED_LEASES } from "./lease-broker.js";
 import { createHostBuildApiClient, type HostBuildJobStore } from "./build-api.js";
 import { createSealedLiveKeys, parseLiveDraftKeyring, type LiveDraftKeyring } from "./live-keys.js";
 import { SERVICE_SCOPE_BROKER, SERVICE_SCOPE_BUILDER, serviceTokenSource, type ServiceTokenConfig } from "./service-token.js";
+import { createAccountDirectory } from "../directory.js";
 import { composeLiveService, liveStoreFences } from "./live.js";
 import { createLiveWorkerClient, NO_LIVE_INVITATIONS } from "./live-grant.js";
+import { composeLiveEdgeRevocationPush, createLiveSocketRegistry, liveSignerFrom, readLiveEdgeConfig, type LiveControlTransport,
+  type LiveSocketRegistry } from "./live-edge.js";
+import { LIVE_HOST_MODULE_IMPORT } from "./live-host-adapter.js";
+import { createInvitationRevoker, createLiveInvitationPort } from "./live-invitations.js";
 import { createPostgresHostJobStore } from "./host-jobs.js";
 import { gitToolServiceFactory, GIT_TOOLS_DEP_KEY, type GitBuildPort, type GitToolService, type GitToolsDeps } from "./provider-adapter.js";
 import { createImmoGitRegistry, IMMO_GIT_OUTPUT_DIR, IMMO_GIT_REPO_ID } from "./registry.js";
@@ -66,8 +72,9 @@ export interface GitModeConfig {
   /**
    * Invited live readers (IMMO_ARTIFACTS_LIVE_INVITATIONS_QUALIFIED=true,
    * default false), independent of the worker qualification and under the
-   * same rule. Reserved: TODO(0.2.22) `invitations.qualified` of the generic
-   * package host port; until then every invitee is refused (owner-only).
+   * same rule: it is `invitations.qualified` of the generic package host port
+   * (@sentropic/artifacts 0.2.22); false keeps live owner-only and every
+   * invitation tool answers builder_unavailable.
    */
   readonly liveInvitationsQualified?: boolean | undefined;
 }
@@ -117,6 +124,15 @@ export interface GitModePorts {
   readonly liveKeys?: LiveKeyPort;
   readonly liveWorker?: LiveWorkerPort;
   readonly liveQualified?: () => boolean;
+  /** 0.2.22 invitations: people directory behind artifacts_lookup_people (default: the account directory). */
+  readonly people?: Pick<PrincipalDirectoryPort, "resolvePrincipal" | "describePrincipal">;
+  /** Proxied browser sockets of this process, shared with the content host; default a private registry. */
+  readonly liveSockets?: LiveSocketRegistry;
+  /** Revocation push, replaced in tests; default: control push to the internal artifact-content Service. */
+  readonly liveInvitationRevoker?: Parameters<typeof createLiveInvitationPort>[0]["revoker"];
+  readonly liveControlTransport?: LiveControlTransport;
+  /** Receives the composed live service (the content host reads the same views). */
+  readonly onLiveService?: (service: LiveSessionService) => void;
 }
 
 export interface GitModeDeps {
@@ -160,6 +176,8 @@ export interface ComposeGitModeInput {
   readonly storageScopeId: string;
   readonly config: GitModeConfig;
   readonly ports?: GitModePorts;
+  /** Process environment for the live control push of the invitations (absent: the push stays closed). */
+  readonly env?: NodeJS.ProcessEnv | undefined;
 }
 
 /**
@@ -172,7 +190,7 @@ export function composeGitModeFromEnv(input: Omit<ComposeGitModeInput, "config">
 }): GitModeDeps {
   if (input.resolution.stage === "off") return {};
   const { env, config, ...rest } = input;
-  return composeGitMode({ ...rest, config: config ?? readGitModeConfig(env) });
+  return composeGitMode({ ...rest, env, config: config ?? readGitModeConfig(env) });
 }
 
 /**
@@ -231,18 +249,33 @@ export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
   // client (it reads the package fences sent to the controller). Flag off:
   // no worker, as before (live_write / live_control(start) answer builder_unavailable).
   const edgeWorker = liveSelected && input.resolution.stage === "live" && config.liveEdgeEnabled === true;
+  let liveService: LiveSessionService | undefined;
   const liveStore = ports.liveStore ?? (edgeWorker && !ports.liveWorker ? createPostgresLiveStore(pool) : undefined);
   const liveWorker = ports.liveWorker ?? (edgeWorker ? createLiveWorkerClient({ baseUrl: config.builderUrl,
     identity: serviceTokenSource(config.service ?? {}, SERVICE_SCOPE_BUILDER, ports.fetch), fences: liveStoreFences(liveStore!),
-    // TODO(0.2.22): liveInvitationState(identity); owner-only until then.
-    sessionState: async () => NO_LIVE_INVITATIONS,
+    // Reconcile body `invitation: { epoch, expiresAt }` from the package liveInvitationState(identity).
+    sessionState: async (identity) => liveService ? liveService.liveInvitationState(identity) : NO_LIVE_INVITATIONS,
     ...(ports.fetch ? { fetch: ports.fetch } : {}) }) : undefined);
   // Qualification flags (default false), read from the configuration; an injected port wins (tests).
   const qualified = ports.liveQualified ?? (() => config.liveQualified === true);
+  // Generic invitations port (0.2.22): off unless IMMO_ARTIFACTS_LIVE_INVITATIONS_QUALIFIED=true.
+  const invitations = liveSelected ? createLiveInvitationPort({ qualified: config.liveInvitationsQualified === true,
+    directory: ports.people ?? createAccountDirectory(pool),
+    revoker: ports.liveInvitationRevoker ?? defaultInvitationRevoker(input, ports.liveSockets ?? createLiveSocketRegistry()) }) : undefined;
   const live = liveSelected ? composeLiveService({ pool, git, bindings, registry, codeRights, directory, hasWriteScope,
+    ...(invitations ? { invitations } : {}),
+    onService: (service) => { liveService = service; ports.onLiveService?.(service); },
     ...(liveStore ? { store: liveStore } : {}),
     ...(ports.liveKeys ?? config.liveDraftKeys ? { keys: ports.liveKeys ?? createSealedLiveKeys(config.liveDraftKeys!) } : {}),
     ...(liveWorker ? { worker: liveWorker } : {}), qualified })
     : undefined;
   return { git: { bindings, codeRights }, [GIT_TOOLS_DEP_KEY]: gitTools, ...(live ? { live } : {}) };
+}
+
+/** Control push of a revoked invitation to the INTERNAL artifact-content Service; closed while the edge is unconfigured. */
+function defaultInvitationRevoker(input: ComposeGitModeInput, sockets: LiveSocketRegistry) {
+  let edge: ReturnType<typeof readLiveEdgeConfig> = {};
+  try { if (input.env) edge = readLiveEdgeConfig(input.env); } catch { edge = {}; }
+  const push = composeLiveEdgeRevocationPush(edge, liveSignerFrom(LIVE_HOST_MODULE_IMPORT, edge.key), input.ports?.liveControlTransport);
+  return createInvitationRevoker({ sockets, push });
 }

@@ -176,8 +176,8 @@ export interface LiveRevocationHooks {
 }
 
 /**
- * A revoked invitation, as the generic package host port will hand it over
- * (TODO(0.2.22): `invitations.onRevoked(e)`): `epoch` is the NEW session epoch.
+ * A revoked invitation, as the generic package host port hands it over
+ * (`invitations.onRevoked(e)`, live-invitations.ts): `epoch` is the NEW session epoch.
  */
 export interface LiveInvitationRevocation { readonly artifactId: string; readonly invitationId: string; readonly epoch: number }
 
@@ -285,9 +285,14 @@ export async function composeLiveEdgeRevocation(config: LiveEdgeConfig, sockets:
   return composeLiveEdgeRevocationWith(config, sockets, await loadLiveSigner(config.key), send);
 }
 
+/** The control pusher of the configuration (fail-closed when kid, host or edge URL are missing). */
+export function composeLiveEdgeRevocationPush(config: LiveEdgeConfig, signer: LiveAssertionSigner,
+  send?: LiveControlTransport): LiveFencePush {
+  return createLiveFencePusher({ signer, kid: config.kid ?? "", pagesDomain: config.host ?? "",
+    target: config.kid && config.host ? config.edgeUrl : undefined, ...(send ? { send } : {}) });
+}
+
 export function composeLiveEdgeRevocationWith(config: LiveEdgeConfig, sockets: LiveSocketRegistry, signer: LiveAssertionSigner,
   send?: LiveControlTransport, hooks: LiveRevocationHooks = {}): ReturnType<typeof createLiveRevocation> {
-  const push = createLiveFencePusher({ signer, kid: config.kid ?? "", pagesDomain: config.host ?? "",
-    target: config.kid && config.host ? config.edgeUrl : undefined, ...(send ? { send } : {}) });
-  return createLiveRevocation({ sockets, push, ...hooks });
+  return createLiveRevocation({ sockets, push: composeLiveEdgeRevocationPush(config, signer, send), ...hooks });
 }
