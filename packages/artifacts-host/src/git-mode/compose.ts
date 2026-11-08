@@ -18,8 +18,9 @@ import { createHostBuildApiClient, type HostBuildJobStore } from "./build-api.js
 import { createSealedLiveKeys, parseLiveDraftKeyring, type LiveDraftKeyring } from "./live-keys.js";
 import { SERVICE_SCOPE_BROKER, SERVICE_SCOPE_BUILDER, serviceTokenSource, type ServiceTokenConfig } from "./service-token.js";
 import { createAccountDirectory } from "../directory.js";
-import { composeLiveService, liveStoreFences } from "./live.js";
-import { createLiveWorkerClient, NO_LIVE_INVITATIONS } from "./live-grant.js";
+import { createLiveWorkerClient, liveStoreDrafts, liveStoreFences } from "@sentropic/artifacts/live-host";
+import { composeLiveService, FAIL_CLOSED_LIVE_KEYS } from "./live.js";
+import { NO_LIVE_INVITATIONS } from "./live-grant.js";
 import { composeLiveEdgeRevocationPush, createLiveSocketRegistry, liveSignerFrom, readLiveEdgeConfig, type LiveControlTransport,
   type LiveSocketRegistry } from "./live-edge.js";
 import { LIVE_HOST_MODULE_IMPORT } from "./live-host-adapter.js";
@@ -251,8 +252,10 @@ export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
   const edgeWorker = liveSelected && input.resolution.stage === "live" && config.liveEdgeEnabled === true;
   let liveService: LiveSessionService | undefined;
   const liveStore = ports.liveStore ?? (edgeWorker && !ports.liveWorker ? createPostgresLiveStore(pool) : undefined);
+  const liveKeys = ports.liveKeys ?? (config.liveDraftKeys ? createSealedLiveKeys(config.liveDraftKeys) : undefined);
   const liveWorker = ports.liveWorker ?? (edgeWorker ? createLiveWorkerClient({ baseUrl: config.builderUrl,
     identity: serviceTokenSource(config.service ?? {}, SERVICE_SCOPE_BUILDER, ports.fetch), fences: liveStoreFences(liveStore!), bindings,
+    drafts: liveStoreDrafts(liveStore!, liveKeys ?? FAIL_CLOSED_LIVE_KEYS), reconcileTimeoutMs: 60_000,
     // Reconcile body `invitation: { epoch, expiresAt }` from the package liveInvitationState(identity).
     sessionState: async (identity) => liveService ? liveService.liveInvitationState(identity) : NO_LIVE_INVITATIONS,
     ...(ports.fetch ? { fetch: ports.fetch } : {}) }) : undefined);
@@ -266,7 +269,7 @@ export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
     ...(invitations ? { invitations } : {}),
     onService: (service) => { liveService = service; ports.onLiveService?.(service); },
     ...(liveStore ? { store: liveStore } : {}),
-    ...(ports.liveKeys ?? config.liveDraftKeys ? { keys: ports.liveKeys ?? createSealedLiveKeys(config.liveDraftKeys!) } : {}),
+    ...(liveKeys ? { keys: liveKeys } : {}),
     ...(liveWorker ? { worker: liveWorker } : {}), qualified })
     : undefined;
   return { git: { bindings, codeRights }, [GIT_TOOLS_DEP_KEY]: gitTools, ...(live ? { live } : {}) };
