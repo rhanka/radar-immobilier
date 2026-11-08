@@ -81,7 +81,36 @@ describe("live authority: each user edits their own binding (Δ4)", () => {
   });
 });
 
-describe("live reader gate (owner-only until the generic invitations, 0.2.22)", () => {
+describe("live authority with the generic invitations (0.2.22)", () => {
+  const viewerOf = (answer: unknown) => ({ qualified: () => true, viewer: async () => answer as never });
+
+  it("stays owner-only while the invitations are not qualified, whatever the viewer says", async () => {
+    const off = { qualified: () => false, viewer: async () => { throw new Error("never consulted"); } };
+    await expect(createLiveAuthorize({ ...deps(), invitations: off })(inv("carol"), A_ALICE)).rejects.toMatchObject({ kind: "access_denied" });
+  });
+
+  it("admits a non-owner as an invitee (read only, no write) when qualified; the owner stays the owner", async () => {
+    const invitee = viewerOf({ role: "invitee", invitation: { id: "inv-1", epoch: 1, expiresAt: NOW + 1000 } });
+    const authority = await createLiveAuthorize({ ...deps(), invitations: invitee })(inv("bob"), A_ALICE);
+    expect(authority).toMatchObject({ ownerId: "alice", invited: true, canReadCode: true, canWrite: false,
+      target: { principalId: "bob" } });
+    const pending = await createLiveAuthorize({ ...deps(), invitations: viewerOf(null) })(inv("bob"), A_ALICE);
+    expect(pending).toMatchObject({ ownerId: "alice", invited: false, canWrite: false });
+    const owner = await createLiveAuthorize({ ...deps(), invitations: viewerOf(null) })(inv("alice"), A_ALICE);
+    expect(owner).toMatchObject({ ownerId: "alice", invited: false, canWrite: true });
+  });
+
+  it("keeps the provider write path closed to an invitee (owner-only operation)", async () => {
+    const invitee = viewerOf({ role: "invitee", invitation: { id: "inv-1", epoch: 1, expiresAt: NOW + 1000 } });
+    const service = createLiveService({ store: {} as never, keys: {} as never, git: {} as never,
+      authorize: createLiveAuthorize({ ...deps(), invitations: invitee }) });
+    await expect(service.execute("live_write", { artifactId: A_ALICE, expectedHeadSha: "a".repeat(40),
+      expectedLiveRevision: "r1", idempotencyKey: "k1", edits: [{ path: "ui/src/a.ts", oldStr: "a", newStr: "b" }] }, inv("bob")))
+      .rejects.toMatchObject({ kind: "access_denied" });
+  });
+});
+
+describe("live reader gate (owner-only unless the invitations are qualified, 0.2.22)", () => {
   it("admits the binding owner with code rights and refuses everybody else", async () => {
     expect(await createLiveReaderGate(deps())(SCOPE, A_ALICE, "alice")).toEqual({ role: "binding_owner", principalId: "alice",
       bindingGeneration: 1 });
@@ -96,12 +125,27 @@ describe("live reader gate (owner-only until the generic invitations, 0.2.22)", 
 describe("live stage composition (fail-closed stubs)", () => {
   const resolution = { stage: "live", tools: ["artifacts_git_attach", "artifacts_fetch_app_source", "artifacts_git_publish",
     "artifacts_git_commit", "artifacts_live_write", "artifacts_live_read", "artifacts_live_reset", "artifacts_live_status",
-    "artifacts_live_control"], unrouted: [] } as const;
+    "artifacts_live_control", "artifacts_live_invite", "artifacts_live_accept_invitation", "artifacts_live_revoke_invitation",
+    "artifacts_live_invitations"], unrouted: [] } as const;
   const compose = () => composeGitMode({ resolution, pool: { query: async () => ({ rows: [] }) } as never, storageScopeId: SCOPE,
     config: { codeReaders: [], humans: [], installationRef: "inst" }, ports: { bindings, codeRights, directory,
       hasWriteScope: () => true, liveStore: {} as never, gitToolFactory: () => ({ execute: async () => ({}) }) } });
   const write = { artifactId: A_ALICE, expectedHeadSha: "a".repeat(40), expectedLiveRevision: "r1", idempotencyKey: "k1",
     edits: [{ path: "ui/src/a.ts", oldStr: "a", newStr: "b" }] };
+
+  it("answers builder_unavailable on every invitation tool while invitations are not qualified (default)", async () => {
+    const live = compose().live!;
+    const ids = { artifactId: A_ALICE, idempotencyKey: "k1" };
+    const uuid = "33333333-3333-4333-8333-333333333333";
+    for (const [operation, args] of [
+      ["live_invite", { ...ids, liveSessionId: uuid, userRef: uuid, expiresInSeconds: 600 }],
+      ["live_accept_invitation", { ...ids, invitationId: uuid }],
+      ["live_revoke_invitation", { ...ids, invitationId: uuid }],
+      ["live_invitations", { artifactId: A_ALICE }],
+    ] as const) {
+      await expect(live.execute(operation, args, inv("alice"))).rejects.toMatchObject({ kind: "builder_unavailable" });
+    }
+  });
 
   it("routes live_* and git_commit to a LiveService only in the live stage", () => {
     expect(compose().live).toBeDefined();

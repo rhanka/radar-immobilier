@@ -21,5 +21,12 @@ CREATE TABLE IF NOT EXISTS artifacts.live_invitations (
   FOREIGN KEY (artifact_id, storage_scope_id) REFERENCES artifacts.artifacts (id, storage_scope_id)
 );
 --> statement-breakpoint
-CREATE INDEX IF NOT EXISTS live_invitations_by_binding
-  ON artifacts.live_invitations (storage_scope_id, artifact_id, binding_generation, invitee_id);
+-- Replay-safe once the package migration 0013 (immo 0042) re-created the table under the same name with other
+-- columns: the index only applies to the immo schema of this migration.
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'artifacts'
+    AND table_name = 'live_invitations' AND column_name = 'invitee_id') THEN
+    CREATE INDEX IF NOT EXISTS live_invitations_by_binding
+      ON artifacts.live_invitations (storage_scope_id, artifact_id, binding_generation, invitee_id);
+  END IF;
+END $$;

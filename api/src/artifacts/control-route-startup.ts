@@ -4,8 +4,9 @@ import {
   createArtifactAdmissionAuthority, readActivationEnv, resolveActivationConfig,
   ARTIFACT_P0B, createDeleteConfirmation, readUploadPageWiring,
   ARTIFACT_GIT_MODE, createLiveHostEndpoints, loadLiveHost, readLiveHostKeys, composeHostBuildLedger, composeLiveEdgePorts,
-  readLiveEdgeEnabled, type LiveEdgePorts,
+  readLiveEdgeEnabled, createLiveSocketRegistry, type LiveEdgePorts,
 } from "@radar/artifacts-host";
+import type { LiveSessionService } from "@sentropic/artifacts";
 import type { AuthConfig } from "../config.js";
 import type { Logger } from "../logger.js";
 import type { ControlRouteDeps } from "./control-route.js";
@@ -54,7 +55,13 @@ export async function startArtifactControl(options: {
     // validated the dependencies, so the control log keeps the real cause.
     const uploadPage = ARTIFACT_P0B ? readUploadPageWiring({ secret: process.env["ARTIFACTS_UPLOAD_PAGE_SECRET"],
       controlOrigin: auth.appBaseUrl, s3Endpoint: parsed.s3Endpoint }) : null;
+    // The proxied live sockets of this process are shared by the content host forward and the package live
+    // service (its invitations onRevoked closes them first); the composed service gives the forward the same
+    // liveViewer / liveInvitationState views.
+    const liveSockets = createLiveSocketRegistry();
+    const liveParts: { liveService?: LiveSessionService } = {};
     const host = await composeArtifactHost(pool, parsed, undefined, { readActivation, contentBase,
+      gitMode: { ports: { liveSockets, onLiveService: (service) => { liveParts.liveService = service; } } },
       ...(confirmation ? { confirmation } : {}),
       ...(uploadPage ? { uploadPage } : {}) });
     if (ARTIFACT_P0B && !uploadPage) {
@@ -79,13 +86,14 @@ export async function startArtifactControl(options: {
     // IMMO_ARTIFACTS_LIVE_EDGE_ENABLED=1. Off by default: nothing is composed.
     // On with an incomplete configuration: the unavailable state (release kept).
     // Baskets reader consent: a non-revoked reader consent row (baskets.read,
-    // current scope version), re-read on every admission. Owner-only until the
-    // generic invitations of @sentropic/artifacts 0.2.22.
+    // current scope version), re-read on every admission. Owner-only unless the
+    // generic invitations of @sentropic/artifacts 0.2.22 are qualified.
     let liveEdge: LiveEdgePorts | undefined;
     if (readLiveEdgeEnabled(process.env, ARTIFACT_GIT_MODE.stage)) {
       try {
         liveEdge = composeLiveEdgePorts({ pool, storageScopeId: parsed.storageScope, env: process.env,
-          stage: ARTIFACT_GIT_MODE.stage, contentBase, module: liveHostModule ?? await loadLiveHost(),
+          stage: ARTIFACT_GIT_MODE.stage, contentBase, module: liveHostModule ?? await loadLiveHost(), sockets: liveSockets,
+          ...(liveParts.liveService ? { views: liveParts.liveService } : {}),
           consent: (principalId, artifactId) => readerConsent.hasLiveConsent(principalId, artifactId, BASKET_READ_SCOPE_ID) });
       } catch (err) {
         logger.error({ err }, "live edge unavailable; release serving unchanged");

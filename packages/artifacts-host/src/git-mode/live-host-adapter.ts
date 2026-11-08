@@ -19,3 +19,6 @@ export type LiveHostModule = { readonly [K in keyof typeof liveHost]?: unknown }
 export async function loadLiveHost(): Promise<LiveHostModule | undefined> {
   return liveHost;
 }
+
+/** The static module, for synchronous composition (the async loader above returns the same object). */
+export const LIVE_HOST_MODULE_IMPORT: LiveHostModule = liveHost;

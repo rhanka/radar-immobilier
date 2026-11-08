@@ -88,7 +88,7 @@ describe("live edge flags (default off)", () => {
   });
 });
 
-describe("§8.2 gate, owner-only until the generic invitations (0.2.22)", () => {
+describe("§8.2 gate, owner-only when the invitations are not qualified (0.2.22)", () => {
   it("admits the binding owner, also runtime owner, with code rights and consent; sends no invitation", async () => {
     expect(await admit("alice")).toMatchObject({ kind: "live", liveSessionId: SESSION,
       claims: { role: "binding_owner", principalId: "alice", invitationId: "", invitationEpoch: 0, invitationExp: 0 } });
@@ -96,7 +96,7 @@ describe("§8.2 gate, owner-only until the generic invitations (0.2.22)", () => 
   });
 
   it("refuses an invitee or any other principal, without consent, without code rights, or when not the runtime owner", async () => {
-    // carol holds code rights but is not the owner: refused (TODO(0.2.22): liveViewer).
+    // carol holds code rights but is not the owner: refused (no viewer wired = not qualified, see live-invitations.test.ts).
     expect(await admit("carol")).toEqual({ kind: "none" });
     expect(await admit("mallory")).toEqual({ kind: "none" });
     expect(await admit("alice", ports(() => false))).toEqual({ kind: "none" });

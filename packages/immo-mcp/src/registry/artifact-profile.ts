@@ -65,6 +65,10 @@ const ALL_TOOL_SCOPES: Record<ArtifactToolName, string> = {
   artifacts_live_reset: gitToolScope("artifacts_live_reset"),
   artifacts_live_status: gitToolScope("artifacts_live_status"),
   artifacts_live_control: gitToolScope("artifacts_live_control"),
+  artifacts_live_invite: gitToolScope("artifacts_live_invite"),
+  artifacts_live_accept_invitation: gitToolScope("artifacts_live_accept_invitation"),
+  artifacts_live_revoke_invitation: gitToolScope("artifacts_live_revoke_invitation"),
+  artifacts_live_invitations: gitToolScope("artifacts_live_invitations"),
 };
 export const ARTIFACT_TOOL_SCOPES = Object.freeze(Object.fromEntries(
   ARTIFACT_TOOL_NAMES.map((name) => [name, ALL_TOOL_SCOPES[name]]))) as Readonly<Record<ArtifactToolName, string>>;

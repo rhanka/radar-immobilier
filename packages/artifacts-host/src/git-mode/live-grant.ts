@@ -33,8 +33,9 @@ export const LIVE_GRANT_CACHE_MS = 30_000;
 /** Session invitation state of the grant and reconcile bodies: `{epoch, expiresAt: ms | null}`. */
 export interface LiveSessionInvitationState { readonly epoch: number; readonly expiresAt: number | null }
 /**
- * Owner-only until the generic invitations: no invitation, epoch 0.
- * TODO(0.2.22): `liveInvitationState(identity)` from @sentropic/artifacts.
+ * Session state while the invitations are not qualified (or no live service is
+ * composed yet): no invitation, epoch 0. Qualified: `liveInvitationState(identity)`
+ * from @sentropic/artifacts.
  */
 export const NO_LIVE_INVITATIONS: LiveSessionInvitationState = Object.freeze({ epoch: 0, expiresAt: null });
 const LIVE_GRANT_CACHE_MAX = 1024;

@@ -37,9 +37,13 @@ describe("artifact journal and startup guard", () => {
     expect(drop.when).toBeGreaterThan(previous.when);
     const sql = readFileSync(new URL(`../../drizzle/${drop.tag}.sql`, import.meta.url), "utf8");
     expect(sql).toContain("SET LOCAL lock_timeout = '5s';\n--> statement-breakpoint\n");
-    // Applied by the harness migration: the table and its index are gone; a replay is a no-op.
-    const gone = await h.pool.query("SELECT to_regclass('artifacts.live_invitations') AS t, to_regclass('artifacts.live_invitations_by_binding') AS i");
-    expect(gone.rows[0]).toEqual({ t: null, i: null });
+    // Applied by the harness migration: the immo table and its index are gone (0041), then the package table of
+    // 0042 (live invitations 0.2.22, column principal_id) is created under the same name.
+    const gone = await h.pool.query("SELECT to_regclass('artifacts.live_invitations_by_binding') AS i");
+    expect(gone.rows[0]).toEqual({ i: null });
+    const columns = (await h.pool.query("SELECT column_name FROM information_schema.columns WHERE table_schema = 'artifacts' AND table_name = 'live_invitations'")).rows.map((row) => row.column_name);
+    expect(columns).toContain("principal_id");
+    expect(columns).not.toContain("invitee_id");
     const statements = sql.split("--> statement-breakpoint");
     const client = await h.pool.connect();
     try {

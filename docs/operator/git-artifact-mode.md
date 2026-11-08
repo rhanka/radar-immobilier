@@ -68,7 +68,7 @@ Every variable below is immo-owned and read by radar-api and radar-immo-mcp
 | `IMMO_ARTIFACTS_LIVE_EDGE_ENABLED` | config | `1` enables the W9 live edge on top of stage `live` (anything else: off) | off: no forward, no controller worker, no upgrade listener |
 | `IMMO_ARTIFACTS_LIVE_EDGE_URL` | config | internal artifact-content origin (http, no path); preprod `http://artifact-content.sentropic-preprod.svc.cluster.local:8791` | forward unavailable (release kept), pushes refuse |
 | `IMMO_ARTIFACTS_LIVE_QUALIFIED` | config | `true` qualifies the live worker (any other value: false) | `live_write` / `live_control(start)` answer `builder_unavailable` |
-| `IMMO_ARTIFACTS_LIVE_INVITATIONS_QUALIFIED` | config | `true` qualifies the generic live invitations (reserved for the 0.2.22 host port; any other value: false) | every invitee is refused (owner-only) |
+| `IMMO_ARTIFACTS_LIVE_INVITATIONS_QUALIFIED` | config | `true` sets `invitations.qualified` of the generic package host port (0.2.22; any other value: false) | every invitation tool answers `builder_unavailable`; live stays owner-only |
 | `IMMO_ARTIFACTS_LIVE_CONTROL_URL` | config, superseded | https URL ending `/_live-control/v1`; validated only, never used (the control push goes to `IMMO_ARTIFACTS_LIVE_EDGE_URL`) | none |
 | `IMMO_ARTIFACTS_LIVE_DRAFT_KEYS` | **secret** | sealed keyring `version=base64url(32 raw bytes)[,...]` | draft keys refuse: `provider_unavailable` |
 | `IMMO_ARTIFACTS_LIVE_DRAFT_KEY_CURRENT` | config | the version used for new drafts (must be listed) | start refuses when the keyring is set |
@@ -111,13 +111,20 @@ the ledger only after authentication); the JSON body itself stays capped at
 
 - Each user edits their own personal binding: current code rights, the host
   write scope (`immo:artifacts:write`) and a GitHub human linkage.
-- Live is OWNER-ONLY until the generic invitations of @sentropic/artifacts
-  0.2.22 (tools `artifacts_live_invite`, `_accept_invitation`,
-  `_revoke_invitation`, `_invitations`, package migration
-  `0013_live_invitations`). The immo invitation store of #1030 is removed and
-  its empty table `artifacts.live_invitations` (0038) is dropped by
-  `0041_drop_artifacts_live_invitations` (refused if any row exists), so that
-  the package migration creates its own table under the same name.
+- Live is OWNER-ONLY unless the generic invitations of @sentropic/artifacts
+  0.2.22 are qualified (`IMMO_ARTIFACTS_LIVE_INVITATIONS_QUALIFIED=true`). Tools
+  `artifacts_live_invite` (scope `immo:artifacts:write`),
+  `artifacts_live_accept_invitation`, `artifacts_live_revoke_invitation` and
+  `artifacts_live_invitations` (scope `immo:artifacts:read`): the scopes come
+  from the package `LIVE_INVITATION_TOOL_CLASSES`, never from tool mutability.
+  People resolve through the existing directory (`resolvePrincipal` /
+  `describePrincipal`, fail closed). The immo invitation store of #1030 was
+  removed and its empty table `artifacts.live_invitations` (0038) is dropped by
+  `0041_drop_artifacts_live_invitations` (refused if any row exists); package
+  migration `0013_live_invitations` is carried as
+  `api/drizzle/0042_artifacts_live_invitations.sql` AFTER 0041 (lock-timeout
+  prefix, pinned by `artifacts-provenance.spec.ts`), and its column guard refuses
+  any foreign table of the same name.
 - Anyone else is refused; a third party never writes to another user's binding.
 - `git_attach` executor: default `sandbox`; `caller` and `ci` are refused.
 
@@ -168,8 +175,8 @@ is an A1 refused write path: a branch can never change it.
 are two independent flags, both `false` by default. Each is turned on by an
 ops change (manifest PR) ONLY after an owner-recorded « GB4 GO preprod », never
 automatically, never by code, never by a test. The invitations flag is
-reserved for the `invitations.qualified` field of the generic package host
-port (0.2.22); until then every invitee is refused (owner-only).
+the `invitations.qualified` field of the generic package host port (0.2.22);
+false: every invitation tool answers `builder_unavailable` (owner-only).
 
 ## Live edge (W9, `IMMO_ARTIFACTS_LIVE_EDGE_ENABLED=1` on top of stage `live`)
 
@@ -185,24 +192,26 @@ unchanged.
   and `POST v1/live/stop` (204) as the package LiveService `worker`.
 - Content host (radar-api, `*.<pages domain>`): the principal is the release
   reader verified by the same code path as the release (sealed host, issuer,
-  audience, tier, session revocation). OWNER-ONLY gate until 0.2.22: (a) the
+  audience, tier, session revocation). Gate: (a) the
   `baskets.read` reader consent not revoked, (b) current code rights, (c)+(d)
-  the binding owner, also the runtime owner of the live record (invitees are
-  refused; TODO(0.2.22): `liveViewer` and the package live authorization
-  record). LIVE is served only when the package live record is ready for the
+  the binding owner, also the runtime owner of the live record, OR, only when
+  the invitations are qualified, an invitee with an ACTIVE accepted invitation
+  reported by the package `liveViewer(identity, principalId)` (owner-only,
+  `liveViewer` never consulted, when not qualified). LIVE is served only when the package live record is ready for the
   current revision AND the grant answers 200 with `grant.sourceRevision` =
   that revision; otherwise the release. `grant.sessionId` is the CONTROLLER
   session (new on every revive and crash restore): carried as is in the
   assertion and the HMR path, never compared with the package session. Grant
   freshness: 200 only, current revision, 30 s cache, invalidated on a 409 or
-  an edge 404. Grant and reconcile bodies carry `invitation: {epoch: 0,
-  expiresAt: null}` (TODO(0.2.22): `liveInvitationState(identity)`).
+  an edge 404. Grant and reconcile bodies carry `invitation: {epoch, expiresAt}`
+  from the package `liveInvitationState(identity)` (`{epoch: 0, expiresAt: null}`
+  when not qualified). An invitee websocket assertion expires at the invitation expiry.
 - Socket closure and control push (`revocation.invitation({artifactId,
   invitationId, epoch})`, `revocation.session(artifactId, liveSessionId)`):
   proxied sockets closed first, cached grants dropped, then `revoke_invitation`
   (with the given NEW epoch) or `revoke_session` (for each controller session
   seen on the sockets of the package session) pushed to the internal Service.
-  Called by the generic host port `invitations.onRevoked(e)` after 0.2.22.
+  Called by the generic host port `invitations.onRevoked(e)` (live-invitations.ts): sockets of the invitation closed first, then `revoke_invitation` carrying `e.epoch`, retried (5 x the pusher 3 attempts) until 204, else the failure is thrown and a replayed revoke re-invokes it. immo-mcp has its own socket registry (empty): the radar-api sockets of a revoked invitee close on the next recheck.
   Sockets are tracked per radar-api replica: on another replica a revoked
   principal is closed by its shared recheck (2 s) and by the edge itself.
 - Forward: node:http to `IMMO_ARTIFACTS_LIVE_EDGE_URL`, GET/HEAD only, path and
@@ -234,4 +243,4 @@ unchanged.
   sealed keyring is set; worker and invitations qualification: `false` until
   the owner-recorded « GB4 GO preprod » (see the rule above).
 - Draft staging pushed by the host: format pending (Sentropic M4-R).
-- Live invitations: generic in @sentropic/artifacts 0.2.22 (not composed yet).
+- Live invitations: generic in @sentropic/artifacts 0.2.22, composed (off until qualified).
