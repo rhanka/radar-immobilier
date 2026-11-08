@@ -3,14 +3,15 @@ import {
   resolveArtifactsStorageConfig, type ArtifactsConfigInput, type ArtifactsPoolParams,
   createArtifactAdmissionAuthority, readActivationEnv, resolveActivationConfig,
   ARTIFACT_P0B, createDeleteConfirmation, readUploadPageWiring,
-  ARTIFACT_GIT_MODE, createLiveHostEndpoints, loadLiveHost, readLiveHostKeys, composeHostBuildLedger,
+  ARTIFACT_GIT_MODE, createLiveHostEndpoints, loadLiveHost, readLiveHostKeys, composeHostBuildLedger, composeLiveEdgePorts,
+  readLiveEdgeEnabled, type LiveEdgePorts,
 } from "@radar/artifacts-host";
 import type { AuthConfig } from "../config.js";
 import type { Logger } from "../logger.js";
 import type { ControlRouteDeps } from "./control-route.js";
 import type { UploadPageService } from "@sentropic/artifacts/server/upload-page";
 import { createPostgresUploadPageStore } from "@sentropic/artifacts/adapters/postgres-uploads";
-import { createReaderConsentService } from "./reader-consent.js";
+import { BASKET_READ_SCOPE_ID, createReaderConsentService } from "./reader-consent.js";
 import { createStoredReader } from "./reader-storage.js";
 
 /**
@@ -73,11 +74,31 @@ export async function startArtifactControl(options: {
         ledger: composeHostBuildLedger({ pool, storageScopeId: parsed.storageScope, blobs: host.blobs,
           module: liveHostModule, env: process.env }) })
       : undefined;
+    const readerConsent = createReaderConsentService(pool, parsed.storageScope);
+    // Live edge forward (A-LIVE §8.2, W9 CORRECTIF): stage `live` AND
+    // IMMO_ARTIFACTS_LIVE_EDGE_ENABLED=1. Off by default: nothing is composed.
+    // On with an incomplete configuration: the unavailable state (release kept).
+    // Live consent: a non-revoked reader consent row of the principal for this
+    // artifact (baskets.read, current scope version), re-read on every admission.
+    let liveEdge: LiveEdgePorts | undefined;
+    if (readLiveEdgeEnabled(process.env, ARTIFACT_GIT_MODE.stage)) {
+      try {
+        liveEdge = composeLiveEdgePorts({ pool, storageScopeId: parsed.storageScope, env: process.env,
+          stage: ARTIFACT_GIT_MODE.stage, contentBase, module: liveHostModule ?? await loadLiveHost(),
+          consent: (principalId, artifactId) => readerConsent.hasLiveConsent(principalId, artifactId, BASKET_READ_SCOPE_ID) });
+      } catch (err) {
+        logger.error({ err }, "live edge unavailable; release serving unchanged");
+      }
+    }
+    if (liveEdge) {
+      logger.info({ liveEdge: "reason" in liveEdge.resolution ? liveEdge.resolution.reason : "configured" }, "live edge forward composed");
+    }
     const composed = host as typeof host & { uploadPageService?: UploadPageService;
       uploadPageConfig?: { controlOrigin: string; s3Origins: readonly string[] } };
     return { auth, accounts: pool, backend, readActivation, storageScope: parsed.storageScope,
       ...(confirmation ? { confirmation } : {}),
       ...(liveHost ? { liveHost } : {}),
+      ...(liveEdge ? { liveEdge } : {}),
       // Browser upload page (LOT 2): same ledger as the provider, mounted on
       // the control origin with the control session rules. The page store
       // backs the session↔owner binding enforced by the route before every
@@ -89,7 +110,7 @@ export async function startArtifactControl(options: {
         pages: createPostgresUploadPageStore(pool) } } : {}),
       readerStorage: createStoredReader(pool, parsed.storageScope, contentBase, host.blobs),
       // Reader consent — durable BASKETS consent (Gate B), never the opening.
-      readerConsent: createReaderConsentService(pool, parsed.storageScope) };
+      readerConsent };
   } catch (err) {
     logger.error({ err }, "artifact control unavailable; API remains available");
     return { auth, accounts: pool };
