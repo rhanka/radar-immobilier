@@ -30,12 +30,15 @@ data:
   # Owner identity for the git-backed mode (owner rhanka; preprod OIDC sub of fabien.antoine@gmail.com).
   IMMO_ARTIFACTS_GIT_COMMITTER_NAME: "rhanka"
   IMMO_ARTIFACTS_GIT_COMMITTER_EMAIL: "24390932+rhanka@users.noreply.github.com"
-  IMMO_ARTIFACTS_GIT_CODE_READERS: "1b9b9e15-2956-4df4-9ee1-a42273f0d096"
+  # Code readers (OIDC subs): owner, plus Farid and Steve as live participants (owner, 08/11 ~02 h 20).
+  IMMO_ARTIFACTS_GIT_CODE_READERS: "1b9b9e15-2956-4df4-9ee1-a42273f0d096,efd67056-fb60-42e6-a386-6264c854da55,92c90751-aa0e-49a9-ad61-1dfa21934b8a"
   IMMO_ARTIFACTS_GIT_HUMANS: '[{"principalId":"1b9b9e15-2956-4df4-9ee1-a42273f0d096","name":"rhanka","email":"24390932+rhanka@users.noreply.github.com"}]'
   # Non-secret git mode configuration (preprod values, Sentropic 2026-11-07).
   # Builder hostId on the Sentropic side: immo-preprod.
   IMMO_ARTIFACTS_SERVICE_OAUTH_TOKEN_ENDPOINT: "https://preprod.auth.sent-tech.ca/api/v1/auth/oauth/token"
   IMMO_ARTIFACTS_GIT_BROKER_ORIGIN: "https://preprod.sentropic.sent-tech.ca"
+  # SG0-app enrollment ref (owner fabien.antoine, 08/11 ~06:30), repo rhanka/radar-immobilier only.
+  IMMO_ARTIFACTS_GIT_INSTALLATION_REF: "enroll_d6fac2e1-8328-4e74-8bc4-08aeafe54f11"
   IMMO_ARTIFACTS_BUILDER_URL: "https://preprod.sentropic.sent-tech.ca/api/v1/artifacts/builder"
   IMMO_ARTIFACTS_RECEIPT_KEY_ID: "immo-preprod-receipt-1"
   IMMO_ARTIFACTS_LIVE_HOST_KID: "immo-preprod-live-1"
@@ -44,9 +47,13 @@ data:
   # flag is also set on radar-immo-mcp for the live worker client). It
   # fails closed: with an incomplete configuration live paths show « live
   # indisponible » and the release keeps being served
-  # (packages/artifacts-host/src/git-mode/live-forward.ts). The QUALIFIED flags
-  # stay unset until the recorded owner « GB4 GO preprod » is acted on.
+  # (packages/artifacts-host/src/git-mode/live-forward.ts).
   IMMO_ARTIFACTS_LIVE_EDGE_ENABLED: "1"
+  # GB4 GO preprod (owner, recorded 07/11 ~22 h 10 Montreal in the sentropic
+  # owner-authorization.md): live worker and generic invitations qualified,
+  # PREPROD ONLY. Same values on radar-immo-mcp. Only the literal `true` counts.
+  IMMO_ARTIFACTS_LIVE_QUALIFIED: "true"
+  IMMO_ARTIFACTS_LIVE_INVITATIONS_QUALIFIED: "true"
   IMMO_ARTIFACTS_LIVE_EDGE_URL: "http://artifact-content.sentropic-preprod.svc.cluster.local:8791"
   IMMO_ARTIFACTS_LIVE_CONTROL_URL: "https://pages.preprod.immo.sent-tech.ca/_live-control/v1"
   IMMO_ARTIFACTS_LIVE_DRAFT_KEY_CURRENT: "v1"
