@@ -15,7 +15,7 @@ import type { LiveWorkerFences } from "./live-grant.js";
  *   with IMMO_ARTIFACTS_LIVE_EDGE_ENABLED=1 on top of stage `live`.
  *   Absent: live_write and live_control(start) answer `builder_unavailable`.
  * - Qualification: false until the M4-lite acceptance (GB4-P go, W2
- *   baseline, invitations and revocation qualified).
+ *   baseline and revocation qualified).
  */
 export const FAIL_CLOSED_LIVE_KEYS: LiveKeyPort = Object.freeze({
   async current(): Promise<never> { throw new ArtifactOperationError("provider_unavailable"); },
