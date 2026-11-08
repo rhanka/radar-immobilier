@@ -288,6 +288,13 @@
       "when": 1793000000011,
       "tag": "0041_drop_artifacts_live_invitations",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1793000000012,
+      "tag": "0042_artifacts_live_invitations",
+      "breakpoints": true
     }
   ]
 }

@@ -10,7 +10,11 @@
     "artifacts_live_read": "immo:artifacts:read",
     "artifacts_live_reset": "immo:artifacts:write",
     "artifacts_live_status": "immo:artifacts:read",
-    "artifacts_live_control": "immo:artifacts:write"
+    "artifacts_live_control": "immo:artifacts:write",
+    "artifacts_live_invite": "immo:artifacts:write",
+    "artifacts_live_accept_invitation": "immo:artifacts:read",
+    "artifacts_live_revoke_invitation": "immo:artifacts:read",
+    "artifacts_live_invitations": "immo:artifacts:read"
   },
   "selection": [
     {
@@ -75,6 +79,34 @@
       "method": "POST",
       "path": "/live_control",
       "command": "live_control"
+    },
+    {
+      "tool": "artifacts_live_invite",
+      "operation": "live_invite",
+      "method": "POST",
+      "path": "/live_invite",
+      "command": "live_invite"
+    },
+    {
+      "tool": "artifacts_live_accept_invitation",
+      "operation": "live_accept_invitation",
+      "method": "POST",
+      "path": "/live_accept_invitation",
+      "command": "live_accept_invitation"
+    },
+    {
+      "tool": "artifacts_live_revoke_invitation",
+      "operation": "live_revoke_invitation",
+      "method": "POST",
+      "path": "/live_revoke_invitation",
+      "command": "live_revoke_invitation"
+    },
+    {
+      "tool": "artifacts_live_invitations",
+      "operation": "live_invitations",
+      "method": "POST",
+      "path": "/live_invitations",
+      "command": "live_invitations"
     }
   ],
   "effectiveProfile": {
@@ -144,6 +176,38 @@
         "idempotencyKey"
       ],
       "live": "the caller's own personal binding only"
+    },
+    "artifacts_live_invite": {
+      "required": [
+        "artifactId",
+        "liveSessionId",
+        "userRef",
+        "expiresInSeconds",
+        "idempotencyKey"
+      ],
+      "live": "binding owner only; builder_unavailable until invitations are qualified"
+    },
+    "artifacts_live_accept_invitation": {
+      "required": [
+        "artifactId",
+        "invitationId",
+        "idempotencyKey"
+      ],
+      "live": "the invited principal only; viewing only, builder_unavailable until invitations are qualified"
+    },
+    "artifacts_live_revoke_invitation": {
+      "required": [
+        "artifactId",
+        "invitationId",
+        "idempotencyKey"
+      ],
+      "live": "the binding owner or the invitee; builder_unavailable until invitations are qualified"
+    },
+    "artifacts_live_invitations": {
+      "required": [
+        "artifactId"
+      ],
+      "live": "binding owner sees every invitation, an invitee only their own"
     }
   }
 }

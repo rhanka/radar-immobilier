@@ -1,5 +1,6 @@
 import { ARTIFACTS_TOOL_DEFINITIONS } from "@sentropic/artifacts/mcp-core";
-import { GIT_ARTIFACT_TOOLS, GIT_MODE_OFF } from "@radar/artifacts-host";
+import { LIVE_INVITATION_TOOL_CLASSES } from "@sentropic/artifacts";
+import { GIT_ARTIFACT_TOOLS, GIT_INVITATION_TOOLS, GIT_MODE_OFF, invitationToolScope } from "@radar/artifacts-host";
 import { describe, expect, it } from "vitest";
 import { gitOverlayFor, readArtifactConfig } from "./artifact-config.js";
 import { gitAuthoringSection, getAuthoringGuide, AUTHORING_GUIDE_REVISION } from "./artifact-authoring-guide.js";
@@ -44,7 +45,24 @@ describe("git mode tables, flag on (fakes)", () => {
       artifacts_fetch_app_source: "immo:artifacts:read", artifacts_git_publish: "immo:artifacts:write",
       artifacts_git_commit: "immo:artifacts:write", artifacts_live_write: "immo:artifacts:write",
       artifacts_live_read: "immo:artifacts:read", artifacts_live_reset: "immo:artifacts:write",
-      artifacts_live_status: "immo:artifacts:read", artifacts_live_control: "immo:artifacts:write" });
+      artifacts_live_status: "immo:artifacts:read", artifacts_live_control: "immo:artifacts:write",
+      artifacts_live_invite: "immo:artifacts:write", artifacts_live_accept_invitation: "immo:artifacts:read",
+      artifacts_live_revoke_invitation: "immo:artifacts:read", artifacts_live_invitations: "immo:artifacts:read" });
+  });
+
+  it("maps the invitation scopes from the package LIVE_INVITATION_TOOL_CLASSES, never from tool mutability", () => {
+    const scopeOf = { read: "immo:artifacts:read", write: "immo:artifacts:write" } as const;
+    expect(Object.keys(LIVE_INVITATION_TOOL_CLASSES).sort()).toEqual([...GIT_INVITATION_TOOLS].sort());
+    for (const tool of GIT_INVITATION_TOOLS) {
+      expect(gitToolScopes(ALL)[tool]).toBe(scopeOf[LIVE_INVITATION_TOOL_CLASSES[tool]]);
+      expect(invitationToolScope(tool)).toBe(scopeOf[LIVE_INVITATION_TOOL_CLASSES[tool]]);
+    }
+    // accept and revoke are state transitions by mutability, yet READ by class.
+    expect(ARTIFACTS_TOOL_DEFINITIONS.artifacts_live_accept_invitation.mutability).toBe("state-transition");
+    expect(ARTIFACTS_TOOL_DEFINITIONS.artifacts_live_revoke_invitation.mutability).toBe("state-transition");
+    expect(gitToolScopes(ALL)).toMatchObject({ artifacts_live_accept_invitation: "immo:artifacts:read",
+      artifacts_live_revoke_invitation: "immo:artifacts:read", artifacts_live_invite: "immo:artifacts:write",
+      artifacts_live_invitations: "immo:artifacts:read" });
   });
 
   it("records the provider's required arguments for every git tool", () => {
