@@ -6,7 +6,7 @@ import {
   type LiveInvitationStore, type LiveSessionPort,
 } from "./live-authority.js";
 import { createImmoGitRegistry, IMMO_GIT_REPO_ID } from "./registry.js";
-import { composeGitMode } from "./compose.js";
+import { composeGitMode, readGitModeConfig } from "./compose.js";
 import { FAIL_CLOSED_LIVE_KEYS } from "./live.js";
 
 const SCOPE = "radar-immobilier-test";
@@ -41,7 +41,13 @@ async function attach(binding: GitBinding) {
 
 function deps() {
   return { bindings, invitations, sessions, codeRights, directory, now: () => now, hasWriteScope: () => writeScope,
-    qualified: () => false, registry: createImmoGitRegistry({ storageScopeId: SCOPE, installationRef: "inst" }) };
+    qualified: () => false, invitationsQualified: () => true,
+    registry: createImmoGitRegistry({ storageScopeId: SCOPE, installationRef: "inst" }) };
+}
+/** deps() without the invitations flag (its default: off). */
+function unqualified() {
+  const { invitationsQualified: _unused, ...rest } = deps();
+  return rest;
 }
 const inv = (actorId: string) => ({ actorId, storageScopeId: SCOPE, invocationId: `i-${actorId}` });
 const caller = (actorId: string, scopes = WRITE) => ({ actorId, storageScopeId: SCOPE, scopes });
@@ -200,6 +206,21 @@ describe("live stage composition (fail-closed stubs)", () => {
     // Flag on: a worker is present, so the write goes past the worker check (and fails later on the stub store).
     const error = await withConfig(true).live!.execute("live_write", write, inv("alice")).catch((caught: unknown) => caught);
     expect(error).not.toMatchObject({ kind: "builder_unavailable" });
+  });
+
+  it("reads both qualification flags from the configuration, default off (owner-recorded GB4 GO only)", async () => {
+    expect(readGitModeConfig({})).toMatchObject({ liveQualified: false, liveInvitationsQualified: false, liveEdgeEnabled: false });
+    expect(readGitModeConfig({ IMMO_ARTIFACTS_LIVE_QUALIFIED: "1", IMMO_ARTIFACTS_LIVE_INVITATIONS_QUALIFIED: "yes" }))
+      .toMatchObject({ liveQualified: false, liveInvitationsQualified: false });
+    expect(readGitModeConfig({ IMMO_ARTIFACTS_LIVE_QUALIFIED: "true", IMMO_ARTIFACTS_LIVE_INVITATIONS_QUALIFIED: "true" }))
+      .toMatchObject({ liveQualified: true, liveInvitationsQualified: true });
+    // Invitations unqualified (default): no invitation is created and an invitee is refused.
+    await expect(createLiveInvitationService(unqualified()).create(caller("alice"),
+      { artifactId: A_ALICE, inviteeId: "carol" })).rejects.toMatchObject({ kind: "provider_unavailable" });
+    await createLiveInvitationService(deps()).create(caller("alice"), { artifactId: A_ALICE, inviteeId: "carol" });
+    await expect(createLiveAuthorize({ ...deps(), invitationsQualified: () => false })(inv("carol"), A_ALICE))
+      .rejects.toMatchObject({ kind: "access_denied" });
+    expect(await createLiveReaderGate(unqualified())(SCOPE, A_ALICE, "carol")).toBeNull();
   });
 
   it("keeps draft keys closed", async () => {
