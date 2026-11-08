@@ -281,6 +281,13 @@
       "when": 1793000000010,
       "tag": "0040_artifacts_git_attach_intents",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1793000000011,
+      "tag": "0041_drop_artifacts_live_invitations",
+      "breakpoints": true
     }
   ]
 }
