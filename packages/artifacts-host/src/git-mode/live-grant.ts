@@ -1,8 +1,5 @@
 import { createHash } from "node:crypto";
-import type { LiveIdentity, LiveWorkerPort } from "@sentropic/artifacts";
-import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-contract";
 import { builderBaseUrl } from "./build-api.js";
-import { resolveBuilderBinding, type BuilderBindingSource } from "./builder-binding.js";
 import type { ServiceTokenSource } from "./service-token.js";
 
 /**
@@ -22,11 +19,7 @@ import type { ServiceTokenSource } from "./service-token.js";
  *   host, iat, exp). A granted answer is cached at most 30 s per
  *   (artifactId, principal, invitation); a 409, an edge 404 on a live path or
  *   a revocation invalidates it.
- * - LiveWorkerPort: `POST v1/live/reconcile` (BridgeAck, body with `binding: {repoId, branch, subPath}`
- *   read from the package git binding of that artifact and generation, never caller input, no such
- *   binding: git_not_attached before any call, and with the same
- *   session `invitation` state) and `POST v1/live/stop` (204). The fences
- *   sent are the package store ones.
+ * - LiveWorkerPort: the package `createLiveWorkerClient` (`@sentropic/artifacts/live-host`), composed in compose.ts.
  *
  * Nothing answers on the Sentropic side before the M4-R wagon: every failure
  * is fail-closed (grant: `unavailable`, release served; worker: typed refusal).
@@ -229,66 +222,3 @@ export function createLiveGrantClient(options: LiveControllerClientOptions) {
   };
 }
 export type LiveGrantClient = ReturnType<typeof createLiveGrantClient>;
-
-/** Package-store fences of the current live session (the package validates the ACK against them). */
-export interface LiveWorkerFences {
-  current(identity: LiveIdentity): Promise<{ liveSessionId: string; leaseEpoch: number; routeEpoch: number } | undefined>;
-}
-
-export interface BridgeAck {
-  readonly liveSessionId: string; readonly leaseEpoch: number; readonly routeEpoch: number;
-  readonly revision: string; readonly ready: boolean;
-}
-
-function parseBridgeAck(raw: unknown): BridgeAck {
-  const record = raw as Record<string, unknown> | null | undefined;
-  if (!record || typeof record !== "object" || typeof record.liveSessionId !== "string" || !ID.test(record.liveSessionId) ||
-    !isCount(record.leaseEpoch) || !isCount(record.routeEpoch) || !isText(record.revision, MAX_REVISION) ||
-    typeof record.ready !== "boolean") throw new ArtifactOperationError("provider_unavailable");
-  return { liveSessionId: record.liveSessionId, leaseEpoch: record.leaseEpoch, routeEpoch: record.routeEpoch,
-    revision: record.revision, ready: record.ready };
-}
-
-/**
- * HTTP LiveWorkerPort of the Sentropic controller (composed as the package
- * LiveService `worker`). Fail-closed: unconfigured answers
- * `builder_unavailable`, any transport error, non-200 reconcile, non-204
- * stop or malformed ACK answers `provider_unavailable` (the package keeps the
- * durable intent for the controller's fenced reconciliation).
- */
-export function createLiveWorkerClient(options: LiveControllerClientOptions & { readonly fences: LiveWorkerFences;
-  /** Package git binding store: source of the `binding` coordinates of the reconcile body. */
-  readonly bindings?: BuilderBindingSource | undefined;
-  /** Session invitation state of the live session (same as the grant body). */
-  readonly sessionState: (identity: LiveIdentity, liveSessionId: string) => Promise<LiveSessionInvitationState>;
-}): LiveWorkerPort {
-  const base = options.baseUrl !== undefined && options.identity !== undefined ? builderBaseUrl(options.baseUrl) : undefined;
-  const floor = createEpochFloor();
-  const call = async (path: string, body: unknown) => {
-    if (!base) throw new ArtifactOperationError("builder_unavailable");
-    try { return await post(options, base, path, body); } catch (error) {
-      if (error instanceof ArtifactOperationError) throw error;
-      throw new ArtifactOperationError("provider_unavailable");
-    }
-  };
-  return {
-    async reconcile(identity) {
-      if (!base) throw new ArtifactOperationError("builder_unavailable");
-      const binding = await resolveBuilderBinding(options.bindings, identity);
-      const fences = await options.fences.current(identity);
-      if (!fences) throw new ArtifactOperationError("provider_unavailable");
-      const session = await options.sessionState(identity, fences.liveSessionId);
-      const epoch = floor(identity.artifactId, identity.bindingGeneration, session.epoch);
-      const answer = await call("v1/live/reconcile", { artifactId: identity.artifactId, bindingGeneration: identity.bindingGeneration,
-        liveSessionId: fences.liveSessionId, leaseEpoch: fences.leaseEpoch, routeEpoch: fences.routeEpoch,
-        binding, invitation: sessionBody(session, epoch) });
-      if (answer.status !== 200) throw new ArtifactOperationError("provider_unavailable");
-      return parseBridgeAck(answer.payload);
-    },
-    async stop(input) {
-      const answer = await call("v1/live/stop", { artifactId: input.artifactId, bindingGeneration: input.bindingGeneration,
-        liveSessionId: input.liveSessionId, leaseEpoch: input.leaseEpoch });
-      if (answer.status !== 204) throw new ArtifactOperationError("provider_unavailable");
-    },
-  };
-}

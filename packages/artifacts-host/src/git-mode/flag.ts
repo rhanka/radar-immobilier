@@ -70,19 +70,19 @@ const STAGE_ANCHORS: Readonly<Record<GitModeStage, readonly GitArtifactTool[]>> 
  *   selection and reported as `unrouted`; a missing anchor refuses the stage.
  */
 export const GIT_TOOL_PROVIDER_ROUTING: Readonly<Record<GitArtifactTool, readonly string[]>> = Object.freeze({
-  artifacts_git_attach: ["0.2.20", "0.2.22", "0.2.23"],
-  artifacts_fetch_app_source: ["0.2.20", "0.2.22", "0.2.23"],
-  artifacts_git_publish: ["0.2.20", "0.2.22", "0.2.23"],
-  artifacts_git_commit: ["0.2.18", "0.2.20", "0.2.22", "0.2.23"],
-  artifacts_live_write: ["0.2.18", "0.2.20", "0.2.22", "0.2.23"],
-  artifacts_live_read: ["0.2.18", "0.2.20", "0.2.22", "0.2.23"],
-  artifacts_live_reset: ["0.2.18", "0.2.20", "0.2.22", "0.2.23"],
-  artifacts_live_status: ["0.2.18", "0.2.20", "0.2.22", "0.2.23"],
-  artifacts_live_control: ["0.2.18", "0.2.20", "0.2.22", "0.2.23"],
-  artifacts_live_invite: ["0.2.22", "0.2.23"],
-  artifacts_live_accept_invitation: ["0.2.22", "0.2.23"],
-  artifacts_live_revoke_invitation: ["0.2.22", "0.2.23"],
-  artifacts_live_invitations: ["0.2.22", "0.2.23"],
+  artifacts_git_attach: ["0.2.20", "0.2.22", "0.2.23", "0.2.24"],
+  artifacts_fetch_app_source: ["0.2.20", "0.2.22", "0.2.23", "0.2.24"],
+  artifacts_git_publish: ["0.2.20", "0.2.22", "0.2.23", "0.2.24"],
+  artifacts_git_commit: ["0.2.18", "0.2.20", "0.2.22", "0.2.23", "0.2.24"],
+  artifacts_live_write: ["0.2.18", "0.2.20", "0.2.22", "0.2.23", "0.2.24"],
+  artifacts_live_read: ["0.2.18", "0.2.20", "0.2.22", "0.2.23", "0.2.24"],
+  artifacts_live_reset: ["0.2.18", "0.2.20", "0.2.22", "0.2.23", "0.2.24"],
+  artifacts_live_status: ["0.2.18", "0.2.20", "0.2.22", "0.2.23", "0.2.24"],
+  artifacts_live_control: ["0.2.18", "0.2.20", "0.2.22", "0.2.23", "0.2.24"],
+  artifacts_live_invite: ["0.2.22", "0.2.23", "0.2.24"],
+  artifacts_live_accept_invitation: ["0.2.22", "0.2.23", "0.2.24"],
+  artifacts_live_revoke_invitation: ["0.2.22", "0.2.23", "0.2.24"],
+  artifacts_live_invitations: ["0.2.22", "0.2.23", "0.2.24"],
 });
 
 export interface GitModeResolution {
