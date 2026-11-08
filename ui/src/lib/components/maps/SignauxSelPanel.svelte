@@ -1405,6 +1405,7 @@
                           {/if}
                         </div>
                       </div>
+                      {#await import("./SignalTriageBlock.svelte") then triageModule}<svelte:component this={triageModule.default} signalId={node.id} />{/await}
                     </div>
                   {/if}
                 </div>
