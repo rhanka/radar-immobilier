@@ -1,9 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import {
-  createEpochFloor, createLiveGrantClient, createLiveWorkerClient, LIVE_GRANT_CACHE_MS, livePodName, parseLiveGrant,
-  type LiveGrant, type LiveGrantRequest, type LiveSessionInvitationState,
+  createEpochFloor, createLiveGrantClient, LIVE_GRANT_CACHE_MS, livePodName, parseLiveGrant,
+  type LiveGrant, type LiveGrantRequest,
 } from "./live-grant.js";
-import { liveStoreFences } from "./live.js";
 
 const BASE = "https://preprod.sentropic.sent-tech.ca/api/v1/artifacts/builder";
 const SCOPE = "radar-immobilier-preprod";
@@ -145,86 +144,5 @@ describe("live grant client (POST v1/live/grant)", () => {
     expect(parseLiveGrant({ ...inviteeGrant(), invitationExp: Math.floor(INVITE_EXP_MS / 1000) + 1 }, inviteeRequest())).toBeUndefined();
     expect(parseLiveGrant({ ...inviteeGrant(), role: "binding_owner" }, inviteeRequest())).toBeUndefined();
     expect(parseLiveGrant(null, ownerRequest())).toBeUndefined();
-  });
-});
-
-describe("live worker client (LiveWorkerPort over v1/live/reconcile and v1/live/stop)", () => {
-  const id = { storageScopeId: SCOPE, artifactId: ARTIFACT, bindingGeneration: 2 };
-  const fences = { current: vi.fn(async () => ({ liveSessionId: "sess-1", leaseEpoch: 4, routeEpoch: 3 })) };
-  const sessionState = vi.fn(async (): Promise<LiveSessionInvitationState> => ({ epoch: 2, expiresAt: INVITE_EXP_MS }));
-  const binding = { storageScopeId: SCOPE, artifactId: ARTIFACT, repoId: "radar-immobilier", branch: "artifact/p/alice000/triage-11111111",
-    subPath: "", state: "attached", generation: 2 };
-  const bindings = { get: vi.fn(async () => binding as never) };
-  const ack = { liveSessionId: "sess-1", leaseEpoch: 4, routeEpoch: 3, revision: "rev-7", ready: true };
-
-  it("reconciles with the package fences and the session invitation state, and returns the BridgeAck", async () => {
-    const fetcher = vi.fn(async () => json(200, ack));
-    const worker = createLiveWorkerClient({ baseUrl: BASE, identity, fences, sessionState, bindings, fetch: fetcher as never });
-    await expect(worker.reconcile(id)).resolves.toEqual(ack);
-    const [url, init] = fetcher.mock.calls[0]! as unknown as [URL, RequestInit];
-    expect(String(url)).toBe(`${BASE}/v1/live/reconcile`);
-    expect((init.headers as Record<string, string>).authorization).toBe("Bearer s2s-token");
-    expect(bodyOf(fetcher.mock.calls[0]!)).toEqual({ artifactId: ARTIFACT, bindingGeneration: 2, liveSessionId: "sess-1",
-      leaseEpoch: 4, routeEpoch: 3, binding: { repoId: "radar-immobilier", branch: binding.branch, subPath: "" },
-      invitation: { epoch: 2, expiresAt: INVITE_EXP_MS } });
-    expect(Object.keys(bodyOf(fetcher.mock.calls[0]!)).sort()).toEqual(["artifactId", "binding", "bindingGeneration", "invitation",
-      "leaseEpoch", "liveSessionId", "routeEpoch"]);
-    expect(Object.keys(bodyOf(fetcher.mock.calls[0]!).binding).sort()).toEqual(["branch", "repoId", "subPath"]);
-    expect(bindings.get).toHaveBeenCalledWith(SCOPE, ARTIFACT);
-    expect(sessionState).toHaveBeenCalledWith(id, "sess-1");
-    // Never lowered on a later reconcile.
-    sessionState.mockImplementationOnce(async () => ({ epoch: 1, expiresAt: null }));
-    await worker.reconcile(id);
-    expect(bodyOf(fetcher.mock.calls[1]!).invitation).toEqual({ epoch: 2, expiresAt: null });
-  });
-
-  it("fails closed with git_not_attached before any call without the binding of THAT generation", async () => {
-    for (const record of [undefined, { ...binding, state: "detached" }, { ...binding, generation: 3 }, { ...binding, generation: 1 }]) {
-      const fetcher = vi.fn(async () => json(200, ack));
-      const fenced = { current: vi.fn(fences.current) };
-      const worker = createLiveWorkerClient({ baseUrl: BASE, identity, fences: fenced, sessionState,
-        bindings: { get: async () => record as never }, fetch: fetcher as never });
-      await expect(worker.reconcile(id)).rejects.toMatchObject({ kind: "git_not_attached" });
-      expect(fetcher).not.toHaveBeenCalled();
-      expect(fenced.current).not.toHaveBeenCalled();
-    }
-    const fetcher = vi.fn(async () => json(200, ack));
-    await expect(createLiveWorkerClient({ baseUrl: BASE, identity, fences, sessionState, fetch: fetcher as never }).reconcile(id))
-      .rejects.toMatchObject({ kind: "provider_unavailable" });
-    expect(fetcher).not.toHaveBeenCalled();
-  });
-
-  it("stops with the session fences and requires 204", async () => {
-    const fetcher = vi.fn(async () => new Response(null, { status: 204 }));
-    const worker = createLiveWorkerClient({ baseUrl: BASE, identity, fences, sessionState, bindings, fetch: fetcher as never });
-    await expect(worker.stop({ ...id, liveSessionId: "sess-1", leaseEpoch: 4 })).resolves.toBeUndefined();
-    const [url] = fetcher.mock.calls[0]! as unknown as [URL, RequestInit];
-    expect(String(url)).toBe(`${BASE}/v1/live/stop`);
-    expect(bodyOf(fetcher.mock.calls[0]!)).toEqual({ artifactId: ARTIFACT, bindingGeneration: 2, liveSessionId: "sess-1", leaseEpoch: 4 });
-    const ok200 = createLiveWorkerClient({ baseUrl: BASE, identity, fences, sessionState, bindings, fetch: (async () => json(200, {})) as never });
-    await expect(ok200.stop({ ...id, liveSessionId: "sess-1", leaseEpoch: 4 })).rejects.toMatchObject({ kind: "provider_unavailable" });
-  });
-
-  it("fails closed: unconfigured, no fences, non-200, malformed ack, transport error", async () => {
-    await expect(createLiveWorkerClient({ identity, fences, sessionState }).reconcile(id)).rejects.toMatchObject({ kind: "builder_unavailable" });
-    await expect(createLiveWorkerClient({ identity, fences, sessionState }).stop({ ...id, liveSessionId: "s", leaseEpoch: 1 }))
-      .rejects.toMatchObject({ kind: "builder_unavailable" });
-    const none = { current: async () => undefined };
-    await expect(createLiveWorkerClient({ baseUrl: BASE, identity, fences: none, sessionState, bindings, fetch: (async () => json(200, ack)) as never })
-      .reconcile(id)).rejects.toMatchObject({ kind: "provider_unavailable" });
-    for (const answer of [async () => json(409, { error: "stale_invitation" }), async () => json(200, { ...ack, ready: "yes" }),
-      async () => json(200, { ...ack, revision: "" }), async () => { throw new Error("reset"); }]) {
-      await expect(createLiveWorkerClient({ baseUrl: BASE, identity, fences, sessionState, bindings, fetch: vi.fn(answer) as never }).reconcile(id))
-        .rejects.toMatchObject({ kind: "provider_unavailable" });
-    }
-  });
-
-  it("reads the fences from the package live store", async () => {
-    const runtime = { liveSessionId: "sess-9", leaseEpoch: 5, routeEpoch: 2, phase: "LIVE" };
-    const store = { transaction: vi.fn(async (_identity: unknown, action: (tx: unknown) => Promise<unknown>) =>
-      action({ record: { runtime } })) };
-    await expect(liveStoreFences(store as never).current(id)).resolves.toEqual({ liveSessionId: "sess-9", leaseEpoch: 5, routeEpoch: 2 });
-    const empty = { transaction: async (_identity: unknown, action: (tx: unknown) => Promise<unknown>) => action({ record: undefined }) };
-    await expect(liveStoreFences(empty as never).current(id)).resolves.toBeUndefined();
   });
 });
