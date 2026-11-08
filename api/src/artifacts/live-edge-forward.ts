@@ -1,8 +1,7 @@
 import { request as httpRequest, type IncomingHttpHeaders, type IncomingMessage, type OutgoingHttpHeaders } from "node:http";
 import { request as httpsRequest } from "node:https";
-import { Readable } from "node:stream";
 import type { Socket } from "node:net";
-import type { Duplex } from "node:stream";
+import { Readable, type Duplex } from "node:stream";
 import {
   admitLive, LIVE_ASSERTION_HEADER, LIVE_HTTP_ASSERTION_SECONDS, LIVE_WS_ASSERTION_SECONDS, type LiveAdmission,
   type LiveEdgePorts,
@@ -13,47 +12,54 @@ import { parseContentHost } from "./content-host.js";
  * Live edge forward on the immo content host (A-LIVE §8.2, W9 contract and
  * its CORRECTIF, tmp/conductor/concertation-git-artifact/sentropic-live-edge-contract-2026-11-07.md).
  *
- * On a stable artifact host `<artifactId>.<pages domain>`, a principal that
- * passes the §8.2 gate (binding owner or active invitee, current code rights,
- * live reader consent) is served LIVE only when the package live record is
- * ready for the current revision AND the controller grant answers 200 with
- * `grant.sourceRevision` = that revision (admitLive, artifacts-host
- * live-forward.ts); otherwise the release is served. A live request is
- * forwarded to artifact-content:
+ * On a stable artifact host `<artifactId>.<pages domain>`, the principal is
+ * the release reader verified by the SAME code path as the release
+ * (content-serve.ts `authorized`: sealed host, issuer, audience, tier,
+ * session revocation). It is served LIVE only after the §8.2 admission
+ * (admitLive: consent, code rights, owner or invitation, live authorization
+ * record, readiness, controller grant at the current revision); otherwise
+ * the release is served. A live request is forwarded to artifact-content:
  * - HTTP: GET/HEAD only, path and query unchanged, Host = the browser host
- *   (no port, node:http keeps it verbatim), Origin passed through, cookies,
- *   Authorization and service-worker stripped (header allowlist), a fresh
- *   assertion per request (exp = iat + 60 s);
+ *   (no port, node:http keeps it verbatim), Origin passed through, request
+ *   and response headers by allowlist (cookies, Authorization, service-worker
+ *   and forwarding headers never leave), a fresh assertion per request
+ *   (exp = iat + 60 s);
  * - websocket (HMR): `GET /_live/<sessionId>/hmr[?token=]`, Origin required
  *   and equal to the pages origin, assertion exp = iat + 3600 s (capped at the
- *   invitation expiry); the socket is closed at exp, on a refused recheck and
- *   on revocation through the socket registry.
+ *   invitation expiry). Sockets are capped per principal and per session,
+ *   closed at exp, on revocation (socket registry) and when the shared
+ *   recheck (one admission per artifact and principal per tick) refuses.
  * Every non-2xx answer (non-101 for a websocket), timeout or connection
- * failure shows « live indisponible »; an edge 404 also drops the cached
- * grant (the next request asks the controller again). Readers outside the
- * gate, and gated principals while live is not admitted, keep the normal
- * release: the forward answers undefined and the reader mount serves as before.
+ * failure shows « live indisponible »; an edge 404 also drops the cached grant.
+ * Socket errors are handled from the first line of the upgrade handler (Node
+ * removes its own handler on upgrade): a browser reset never escapes.
  */
 
 export interface LiveEdgeForwardDeps {
   readonly contentBase: string;
   readonly ports: LiveEdgePorts;
-  /** Verified principal for this artifact host (the sealed reader session), or null. */
-  readonly principal: (cookieHeader: string | undefined, artifactId: string) => string | null;
+  /** Release-reader verification of this request for this artifact host; the principal or null. */
+  readonly principal: (request: Request, artifactId: string) => Promise<string | null>;
   readonly now?: () => number;
-  /** Websocket admission recheck period (default 2 s; the grant itself is cached 30 s). */
+  /** Shared websocket recheck period (default 2 s; the grant itself is cached 30 s). */
   readonly recheckMs?: number;
   readonly timeoutMs?: number;
+  readonly maxSocketsPerPrincipal?: number;
+  readonly maxSocketsPerSession?: number;
 }
 
-/** Request headers sent upstream: everything else (cookies, Authorization, service-worker, forwarding) stays here. */
-const HTTP_FORWARDED = ["accept", "accept-language", "origin", "user-agent", "if-none-match", "if-modified-since"] as const;
-const RESPONSE_DROPPED = new Set(["set-cookie", "connection", "keep-alive", "transfer-encoding", "upgrade",
-  "proxy-authenticate", "proxy-connection", "trailer", "te"]);
+/** Request headers sent upstream; nothing else leaves immo. */
+const HTTP_FORWARDED = ["accept", "accept-language", "origin", "user-agent"] as const;
+/** Response headers returned to the browser; nothing else (set-cookie, location, clear-site-data, HSTS, hop-by-hop). */
+const RESPONSE_ALLOWED = new Set(["content-type", "content-length", "cache-control", "etag", "last-modified",
+  "content-security-policy", "x-content-type-options", "referrer-policy", "cross-origin-opener-policy",
+  "cross-origin-embedder-policy", "cross-origin-resource-policy", "permissions-policy", "x-frame-options", "vary"]);
 const RESERVED_PATH = /^\/(?:__reader|__app|api)(?:\/|$)/;
 const HMR_PATH = /^\/_live\/([A-Za-z0-9_-]{1,128})\/hmr$/;
 const TOKEN = /^[A-Za-z0-9_-]{1,256}$/;
 const WS_KEY = /^[A-Za-z0-9+/]{22}==$/;
+export const LIVE_MAX_SOCKETS_PER_PRINCIPAL = 4;
+export const LIVE_MAX_SOCKETS_PER_SESSION = 32;
 
 const UNAVAILABLE_HTML = "<!doctype html><html lang=\"fr\"><head><meta charset=\"utf-8\"><title>Live indisponible</title></head>" +
   "<body><main><h1>Live indisponible</h1><p>La session live de cet artefact ne répond pas pour le moment.</p></main></body></html>";
@@ -75,6 +81,12 @@ function liveHost(raw: string | undefined, contentBase: string) {
   return parsed.kind === "content" ? { host, artifactId: parsed.id } : undefined;
 }
 
+/** Destroys a socket without ever throwing (a refusal path must be safe on a reset socket). */
+const destroy = (socket: Duplex | undefined) => { try { socket?.destroy(); } catch { /* already gone */ } };
+
+interface Watch { readonly claims: { sessionId: string; routeEpoch: number; generation: number; principalId: string };
+  readonly request: Request; readonly host: string; close(): void }
+
 export function createLiveEdgeForward(deps: LiveEdgeForwardDeps) {
   const now = deps.now ?? Date.now;
   const { ports } = deps;
@@ -82,12 +94,50 @@ export function createLiveEdgeForward(deps: LiveEdgeForwardDeps) {
   const config = ports.resolution.config;
   const timeoutMs = deps.timeoutMs ?? 10_000;
   const unavailableReason = "reason" in ports.resolution ? ports.resolution.reason : "unconfigured";
+  const maxPrincipal = deps.maxSocketsPerPrincipal ?? LIVE_MAX_SOCKETS_PER_PRINCIPAL;
+  const maxSession = deps.maxSocketsPerSession ?? LIVE_MAX_SOCKETS_PER_SESSION;
 
-  async function admit(host: string, artifactId: string, cookie: string | undefined, lifetimeSeconds: number): Promise<LiveAdmission> {
-    const principalId = deps.principal(cookie, artifactId);
-    if (!principalId || !config) return { kind: "none" };
+  async function admit(request: Request, host: string, artifactId: string, lifetimeSeconds: number): Promise<LiveAdmission> {
+    if (!config) return { kind: "none" };
+    const principalId = await deps.principal(request, artifactId);
+    if (!principalId) return { kind: "none" };
     return admitLive(ports, { host, artifactId, principalId, kid: config.kid, nowMs: now(), lifetimeSeconds });
   }
+
+  // Shared websocket recheck: one admission per (artifact, principal) per tick, whatever the number of sockets.
+  const watches = new Map<string, Set<Watch>>();
+  let timer: ReturnType<typeof setInterval> | undefined;
+  let ticking = false;
+  const tick = async () => {
+    if (ticking) return;
+    ticking = true;
+    try {
+      await Promise.all([...watches.entries()].map(async ([group, set]) => {
+        const first = [...set][0];
+        if (!first) { watches.delete(group); return; }
+        const artifactId = JSON.parse(group)[0] as string;
+        let next: LiveAdmission;
+        try { next = await admit(first.request, first.host, artifactId, LIVE_WS_ASSERTION_SECONDS); } catch { next = { kind: "none" }; }
+        for (const watch of [...set]) {
+          if (next.kind !== "live" || next.claims.sessionId !== watch.claims.sessionId ||
+            next.claims.routeEpoch !== watch.claims.routeEpoch || next.claims.generation !== watch.claims.generation ||
+            next.claims.principalId !== watch.claims.principalId) watch.close();
+        }
+      }));
+    } finally { ticking = false; }
+  };
+  const watch = (artifactId: string, entry: Watch) => {
+    const group = JSON.stringify([artifactId, entry.claims.principalId]);
+    const set = watches.get(group) ?? new Set<Watch>();
+    watches.set(group, set);
+    set.add(entry);
+    if (!timer) { timer = setInterval(() => { void tick(); }, deps.recheckMs ?? 2000); timer.unref(); }
+    return () => {
+      set.delete(entry);
+      if (set.size === 0) watches.delete(group);
+      if (watches.size === 0 && timer) { clearInterval(timer); timer = undefined; }
+    };
+  };
 
   function upstream(path: string, method: string, headers: OutgoingHttpHeaders) {
     const target = config!.target;
@@ -108,7 +158,7 @@ export function createLiveEdgeForward(deps: LiveEdgeForwardDeps) {
     if (!config) return live ? liveUnavailable(unavailableReason) : undefined;
     let admission: LiveAdmission;
     try {
-      admission = await admit(target.host, target.artifactId, request.headers.get("cookie") ?? undefined, LIVE_HTTP_ASSERTION_SECONDS);
+      admission = await admit(request, target.host, target.artifactId, LIVE_HTTP_ASSERTION_SECONDS);
     } catch {
       return live ? liveUnavailable("gate_unavailable") : undefined;
     }
@@ -127,8 +177,9 @@ export function createLiveEdgeForward(deps: LiveEdgeForwardDeps) {
       const done = (response: Response) => { if (!settled) { settled = true; resolve(response); } };
       const outgoing = upstream(url.pathname + url.search, request.method, headers);
       outgoing.once("timeout", () => { outgoing.destroy(); done(liveUnavailable("upstream_timeout")); });
-      outgoing.once("error", () => done(liveUnavailable("upstream_unreachable")));
+      outgoing.on("error", () => done(liveUnavailable("upstream_unreachable")));
       outgoing.once("response", (incoming) => {
+        incoming.on("error", () => undefined);
         const status = incoming.statusCode ?? 0;
         if (status < 200 || status > 299) {
           incoming.resume();
@@ -138,7 +189,7 @@ export function createLiveEdgeForward(deps: LiveEdgeForwardDeps) {
         }
         const responseHeaders = new Headers();
         for (const [name, value] of Object.entries(incoming.headers)) {
-          if (value === undefined || RESPONSE_DROPPED.has(name)) continue;
+          if (value === undefined || !RESPONSE_ALLOWED.has(name)) continue;
           responseHeaders.set(name, Array.isArray(value) ? value.join(", ") : value);
         }
         const body = request.method === "HEAD" || status === 204 ? null : Readable.toWeb(incoming) as ReadableStream<Uint8Array>;
@@ -150,15 +201,19 @@ export function createLiveEdgeForward(deps: LiveEdgeForwardDeps) {
   }
 
   const refuse = (socket: Duplex, status: 404 | 503, reason = "") => {
-    if (socket.destroyed) return;
+    if (socket.destroyed || !socket.writable) { destroy(socket); return; }
     const body = status === 503 ? UNAVAILABLE_HTML : "";
-    socket.end(`HTTP/1.1 ${status === 404 ? "404 Not Found" : "503 Service Unavailable"}\r\n` +
-      `Cache-Control: private, no-store\r\nConnection: close\r\n${reason ? `X-Live-State: ${reason}\r\n` : ""}` +
-      `Content-Type: ${status === 503 ? "text/html; charset=utf-8" : "text/plain"}\r\nContent-Length: ${Buffer.byteLength(body)}\r\n\r\n${body}`);
+    try {
+      socket.end(`HTTP/1.1 ${status === 404 ? "404 Not Found" : "503 Service Unavailable"}\r\n` +
+        `Cache-Control: private, no-store\r\nConnection: close\r\n${reason ? `X-Live-State: ${reason}\r\n` : ""}` +
+        `Content-Type: ${status === 503 ? "text/html; charset=utf-8" : "text/plain"}\r\nContent-Length: ${Buffer.byteLength(body)}\r\n\r\n${body}`);
+    } catch { destroy(socket); }
   };
 
-  /** Websocket upgrade on a content host; false when the request is not a live HMR upgrade (caller decides). */
+  /** Websocket upgrade on a content host; false when the request is not on a content host (caller destroys). */
   async function upgrade(incoming: IncomingMessage, socket: Duplex, head: Buffer): Promise<boolean> {
+    // FIRST, before any await: Node removed its own error handler on upgrade; a reset must never escape.
+    socket.on("error", () => destroy(socket));
     const target = liveHost(incoming.headers.host, deps.contentBase);
     if (!target) return false;
     const url = new URL(incoming.url ?? "/", `https://${target.host}`);
@@ -174,64 +229,64 @@ export function createLiveEdgeForward(deps: LiveEdgeForwardDeps) {
     }
     const sessionId = match[1]!;
     if (!config) { refuse(socket, 503, unavailableReason); return true; }
+    // The release-reader verification reads the same headers as an HTTP request on this host.
+    const request = new Request(url, { headers: { host: target.host, ...(incoming.headers.cookie ? { cookie: incoming.headers.cookie } : {}) } });
     let admission: LiveAdmission;
     try {
-      admission = await admit(target.host, target.artifactId, incoming.headers.cookie, LIVE_WS_ASSERTION_SECONDS);
+      admission = await admit(request, target.host, target.artifactId, LIVE_WS_ASSERTION_SECONDS);
     } catch { refuse(socket, 503, "gate_unavailable"); return true; }
+    if (socket.destroyed) return true;
     if (admission.kind === "none") { refuse(socket, 404); return true; }
     if (admission.kind === "release") { refuse(socket, 503, admission.reason); return true; }
     if (admission.claims.sessionId !== sessionId) { refuse(socket, 404); return true; }
     const claims = admission.claims;
+    if (sockets.countPrincipal(target.artifactId, claims.principalId) >= maxPrincipal ||
+      sockets.countSession(target.artifactId, sessionId) >= maxSession) { refuse(socket, 503, "socket_limit"); return true; }
     let assertion: string;
     try { assertion = ports.signAssertion(claims); } catch { refuse(socket, 503, "signer_unavailable"); return true; }
     // Allowlist: no cookie, Authorization or service-worker header reaches the edge.
     const headers: OutgoingHttpHeaders = { host: target.host, origin: incoming.headers.origin, connection: "Upgrade",
       upgrade: "websocket", "sec-websocket-key": key, "sec-websocket-version": "13", "sec-websocket-protocol": "vite-hmr",
       [LIVE_ASSERTION_HEADER]: assertion };
-    if (socket.destroyed) return true;
     const outgoing = upstream(url.pathname + url.search, "GET", headers);
     let tunnel: Duplex | undefined;
     let cleanup = () => {};
-    const close = () => { cleanup(); socket.destroy(); tunnel?.destroy(); outgoing.destroy(); };
+    const close = () => { cleanup(); destroy(socket); destroy(tunnel); outgoing.destroy(); };
+    // Browser reset during the upstream handshake: abort the upstream request.
+    socket.once("close", () => { if (!tunnel) outgoing.destroy(); });
     outgoing.once("timeout", () => { if (tunnel) return; outgoing.destroy(); refuse(socket, 503, "upstream_timeout"); });
-    outgoing.once("error", () => { if (tunnel) close(); else refuse(socket, 503, "upstream_unreachable"); });
+    outgoing.on("error", () => { if (tunnel) close(); else refuse(socket, 503, "upstream_unreachable"); });
     outgoing.once("response", (response) => {
+      response.on("error", () => undefined);
       response.resume();
       if (response.statusCode === 404) ports.grants.invalidate(target.artifactId, claims.principalId);
       refuse(socket, 503, `upstream_${response.statusCode ?? 0}`);
     });
     outgoing.once("upgrade", (response: IncomingMessage, peer: Duplex, upstreamHead: Buffer) => {
       tunnel = peer;
+      peer.on("error", close);
       // The request timeout bounds the handshake only: an idle HMR socket stays open.
-      (peer as Socket).setTimeout(0);
-      if (response.statusCode !== 101 || socket.destroyed) { peer.destroy(); refuse(socket, 503, "upstream_refused"); return; }
+      (peer as Socket).setTimeout?.(0);
+      if (response.statusCode !== 101 || socket.destroyed) { destroy(peer); refuse(socket, 503, "upstream_refused"); return; }
       socket.write(`HTTP/1.1 101 Switching Protocols\r\n${upgradeHeaders(response.headers)}\r\n`);
       if (upstreamHead.length) socket.write(upstreamHead);
       if (head.length) peer.write(head);
       const unregister = sockets.register({ artifactId: target.artifactId, sessionId, principalId: claims.principalId,
         ...(claims.role === "invitee" ? { invitationId: claims.invitationId } : {}) }, { close: () => close() });
       const expiry = setTimeout(close, Math.max(0, claims.exp * 1000 - now()));
-      let checking = false;
-      const recheck = setInterval(() => {
-        if (checking) return;
-        checking = true;
-        admit(target.host, target.artifactId, incoming.headers.cookie, LIVE_WS_ASSERTION_SECONDS)
-          .then((next) => {
-            if (next.kind !== "live" || next.claims.sessionId !== sessionId || next.claims.routeEpoch !== claims.routeEpoch ||
-              next.claims.generation !== claims.generation || next.claims.principalId !== claims.principalId) close();
-          }, close).finally(() => { checking = false; });
-      }, deps.recheckMs ?? 2000);
-      expiry.unref(); recheck.unref();
-      cleanup = () => { cleanup = () => {}; clearTimeout(expiry); clearInterval(recheck); unregister(); };
-      socket.once("close", close); socket.once("error", close);
-      peer.once("close", close); peer.once("error", close);
+      expiry.unref();
+      const unwatch = watch(target.artifactId, { claims, request, host: target.host, close });
+      cleanup = () => { cleanup = () => {}; clearTimeout(expiry); unwatch(); unregister(); };
+      // Either side ending tears the tunnel down (no half-open socket is kept: the HTTP server allows half-open).
+      socket.on("error", close); socket.once("close", close); socket.once("end", close);
+      peer.once("close", close); peer.once("end", close);
       socket.pipe(peer); peer.pipe(socket);
     });
     outgoing.end();
     return true;
   }
 
-  return { fetch, upgrade, sockets };
+  return { fetch, upgrade, sockets, watching: () => [...watches.values()].reduce((sum, set) => sum + set.size, 0) };
 }
 export type LiveEdgeForward = ReturnType<typeof createLiveEdgeForward>;
 
