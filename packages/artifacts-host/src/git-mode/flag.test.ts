@@ -8,9 +8,9 @@ import {
   artifactProfileDescriptor, compileHostArtifactProfile, HOST_ARTIFACT_PROFILE,
 } from "../p0b-profile.js";
 
-/** Every git tool routed by 0.2.22 (fixture, equal to the pinned routing). */
+/** Every git tool routed by 0.2.23 (fixture, equal to the pinned routing). */
 const ROUTED_0222: Record<GitArtifactTool, readonly string[]> = Object.fromEntries(GIT_ARTIFACT_TOOLS.map((tool) =>
-  [tool, ["0.2.22"]])) as unknown as Record<GitArtifactTool, readonly string[]>;
+  [tool, ["0.2.23"]])) as unknown as Record<GitArtifactTool, readonly string[]>;
 
 describe("git mode flag", () => {
   afterEach(() => { vi.unstubAllEnvs(); vi.resetModules(); });
@@ -28,10 +28,10 @@ describe("git mode flag", () => {
     }
   });
 
-  it("qualifies every stage on the pinned 0.2.22 and refuses them on any other provider (fail-closed)", () => {
-    expect(ARTIFACT_PROVIDER_VERSION).toBe("0.2.22");
+  it("qualifies every stage on the pinned 0.2.23 and refuses them on any other provider (fail-closed)", () => {
+    expect(ARTIFACT_PROVIDER_VERSION).toBe("0.2.23");
     expect(GIT_TOOL_PROVIDER_ROUTING).toEqual(Object.fromEntries(GIT_ARTIFACT_TOOLS.map((tool) =>
-      [tool, /invit/.test(tool) ? ["0.2.22"] : /git_commit|live_/.test(tool) ? ["0.2.18", "0.2.20", "0.2.22"] : ["0.2.20", "0.2.22"]])));
+      [tool, /invit/.test(tool) ? ["0.2.23"] : /git_commit|live_/.test(tool) ? ["0.2.18", "0.2.20", "0.2.22", "0.2.23"] : ["0.2.20", "0.2.22", "0.2.23"]])));
     for (const stage of ["bindings", "build", "live"]) {
       expect(resolveGitMode({ [ARTIFACTS_GIT_MODE_ENV]: stage }, ARTIFACT_PROVIDER_VERSION).unrouted).toEqual([]);
       for (const other of ["0.2.18", "0.2.19", "0.3.0"]) {
@@ -42,15 +42,15 @@ describe("git mode flag", () => {
 
   it("selects cumulative stages, never artifacts_list_app_sources (unrouted)", () => {
     expect(GIT_ARTIFACT_TOOLS as readonly string[]).not.toContain("artifacts_list_app_sources");
-    const bindings = resolveGitMode({ [ARTIFACTS_GIT_MODE_ENV]: "bindings" }, "0.2.22", ROUTED_0222);
+    const bindings = resolveGitMode({ [ARTIFACTS_GIT_MODE_ENV]: "bindings" }, "0.2.23", ROUTED_0222);
     expect(bindings.tools).toEqual(["artifacts_git_attach", "artifacts_fetch_app_source"]);
     expect(bindings.unrouted).toEqual([]);
-    const partial = resolveGitMode({ [ARTIFACTS_GIT_MODE_ENV]: "bindings" }, "0.2.22",
+    const partial = resolveGitMode({ [ARTIFACTS_GIT_MODE_ENV]: "bindings" }, "0.2.23",
       { ...ROUTED_0222, artifacts_fetch_app_source: [] });
     expect(partial).toMatchObject({ tools: ["artifacts_git_attach"], unrouted: ["artifacts_fetch_app_source"] });
-    const build = resolveGitMode({ [ARTIFACTS_GIT_MODE_ENV]: "build" }, "0.2.22", ROUTED_0222);
+    const build = resolveGitMode({ [ARTIFACTS_GIT_MODE_ENV]: "build" }, "0.2.23", ROUTED_0222);
     expect(build.tools).toEqual(["artifacts_git_attach", "artifacts_fetch_app_source", "artifacts_git_publish"]);
-    const live = resolveGitMode({ [ARTIFACTS_GIT_MODE_ENV]: "live" }, "0.2.22", ROUTED_0222);
+    const live = resolveGitMode({ [ARTIFACTS_GIT_MODE_ENV]: "live" }, "0.2.23", ROUTED_0222);
     expect(live.tools).toHaveLength(13);
     expect(live.tools.slice(-4)).toEqual(["artifacts_live_invite", "artifacts_live_accept_invitation",
       "artifacts_live_revoke_invitation", "artifacts_live_invitations"]);
@@ -100,7 +100,7 @@ describe("git mode flag", () => {
     }
   });
 
-  it("boots with the flag on under the pinned 0.2.22 and selects exactly the stage tools", async () => {
+  it("boots with the flag on under the pinned 0.2.23 and selects exactly the stage tools", async () => {
     vi.resetModules();
     vi.stubEnv(ARTIFACTS_GIT_MODE_ENV, "bindings");
     const profile = await import("../p0b-profile.js");
@@ -109,7 +109,7 @@ describe("git mode flag", () => {
   });
 
   it("compiles a profile that routes the selected git tools", () => {
-    const tools = resolveGitMode({ [ARTIFACTS_GIT_MODE_ENV]: "live" }, "0.2.22", ROUTED_0222).tools;
+    const tools = resolveGitMode({ [ARTIFACTS_GIT_MODE_ENV]: "live" }, "0.2.23", ROUTED_0222).tools;
     const profile = compileHostArtifactProfile(ARTIFACT_PROFILE_DESCRIPTOR, tools);
     expect(profile.selectedCapabilities).toEqual(expect.arrayContaining([...tools]));
     expect(profile.capabilityForRoute("POST", "/git_attach")).toBe("artifacts_git_attach");
