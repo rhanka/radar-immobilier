@@ -79,6 +79,8 @@ data:
   # Builder hostId on the Sentropic side: immo-preprod.
   IMMO_ARTIFACTS_SERVICE_OAUTH_TOKEN_ENDPOINT: "https://preprod.auth.sent-tech.ca/api/v1/auth/oauth/token"
   IMMO_ARTIFACTS_GIT_BROKER_ORIGIN: "https://preprod.sentropic.sent-tech.ca"
+  # SG0-app enrollment ref (owner fabien.antoine, 08/11 ~06:30), repo rhanka/radar-immobilier only.
+  IMMO_ARTIFACTS_GIT_INSTALLATION_REF: "enroll_d6fac2e1-8328-4e74-8bc4-08aeafe54f11"
   IMMO_ARTIFACTS_BUILDER_URL: "https://preprod.sentropic.sent-tech.ca/api/v1/artifacts/builder"
   IMMO_ARTIFACTS_RECEIPT_KEY_ID: "immo-preprod-receipt-1"
   IMMO_ARTIFACTS_LIVE_HOST_KID: "immo-preprod-live-1"
