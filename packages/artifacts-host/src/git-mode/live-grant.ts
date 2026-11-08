@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import type { LiveIdentity, LiveWorkerPort } from "@sentropic/artifacts";
 import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-contract";
 import { builderBaseUrl } from "./build-api.js";
+import { stageLiveDraft, type LiveDraftSource } from "./live-draft-stager.js";
 import { resolveBuilderBinding, type BuilderBindingSource } from "./builder-binding.js";
 import type { ServiceTokenSource } from "./service-token.js";
 
@@ -232,7 +233,7 @@ export type LiveGrantClient = ReturnType<typeof createLiveGrantClient>;
 
 /** Package-store fences of the current live session (the package validates the ACK against them). */
 export interface LiveWorkerFences {
-  current(identity: LiveIdentity): Promise<{ liveSessionId: string; leaseEpoch: number; routeEpoch: number } | undefined>;
+  current(identity: LiveIdentity): Promise<{ ownerId: string; liveSessionId: string; leaseEpoch: number; routeEpoch: number } | undefined>;
 }
 
 export interface BridgeAck {
@@ -261,6 +262,8 @@ export function createLiveWorkerClient(options: LiveControllerClientOptions & { 
   readonly bindings?: BuilderBindingSource | undefined;
   /** Session invitation state of the live session (same as the grant body). */
   readonly sessionState: (identity: LiveIdentity, liveSessionId: string) => Promise<LiveSessionInvitationState>;
+  /** Current durable draft of the package store, staged to the builder (pages then seal) before every reconcile. */
+  readonly drafts: LiveDraftSource;
 }): LiveWorkerPort {
   const base = options.baseUrl !== undefined && options.identity !== undefined ? builderBaseUrl(options.baseUrl) : undefined;
   const floor = createEpochFloor();
@@ -277,10 +280,11 @@ export function createLiveWorkerClient(options: LiveControllerClientOptions & { 
       const binding = await resolveBuilderBinding(options.bindings, identity);
       const fences = await options.fences.current(identity);
       if (!fences) throw new ArtifactOperationError("provider_unavailable");
+      await stageLiveDraft(options.drafts, identity, call);
       const session = await options.sessionState(identity, fences.liveSessionId);
       const epoch = floor(identity.artifactId, identity.bindingGeneration, session.epoch);
       const answer = await call("v1/live/reconcile", { artifactId: identity.artifactId, bindingGeneration: identity.bindingGeneration,
-        liveSessionId: fences.liveSessionId, leaseEpoch: fences.leaseEpoch, routeEpoch: fences.routeEpoch,
+        ownerId: fences.ownerId, liveSessionId: fences.liveSessionId, leaseEpoch: fences.leaseEpoch, routeEpoch: fences.routeEpoch,
         binding, invitation: sessionBody(session, epoch) });
       if (answer.status !== 200) throw new ArtifactOperationError("provider_unavailable");
       return parseBridgeAck(answer.payload);

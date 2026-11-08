@@ -18,7 +18,7 @@ import { createHostBuildApiClient, type HostBuildJobStore } from "./build-api.js
 import { createSealedLiveKeys, parseLiveDraftKeyring, type LiveDraftKeyring } from "./live-keys.js";
 import { SERVICE_SCOPE_BROKER, SERVICE_SCOPE_BUILDER, serviceTokenSource, type ServiceTokenConfig } from "./service-token.js";
 import { createAccountDirectory } from "../directory.js";
-import { composeLiveService, liveStoreFences } from "./live.js";
+import { composeLiveService, FAIL_CLOSED_LIVE_KEYS, liveStoreDrafts, liveStoreFences } from "./live.js";
 import { createLiveWorkerClient, NO_LIVE_INVITATIONS } from "./live-grant.js";
 import { composeLiveEdgeRevocationPush, createLiveSocketRegistry, liveSignerFrom, readLiveEdgeConfig, type LiveControlTransport,
   type LiveSocketRegistry } from "./live-edge.js";
@@ -252,7 +252,8 @@ export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
   let liveService: LiveSessionService | undefined;
   const liveStore = ports.liveStore ?? (edgeWorker && !ports.liveWorker ? createPostgresLiveStore(pool) : undefined);
   const liveWorker = ports.liveWorker ?? (edgeWorker ? createLiveWorkerClient({ baseUrl: config.builderUrl,
-    identity: serviceTokenSource(config.service ?? {}, SERVICE_SCOPE_BUILDER, ports.fetch), fences: liveStoreFences(liveStore!), bindings,
+    identity: serviceTokenSource(config.service ?? {}, SERVICE_SCOPE_BUILDER, ports.fetch), fences: liveStoreFences(liveStore!), drafts: liveStoreDrafts(liveStore!, ports.liveKeys ?? (config.liveDraftKeys ? createSealedLiveKeys(config.liveDraftKeys) : FAIL_CLOSED_LIVE_KEYS)),
+    bindings,
     // Reconcile body `invitation: { epoch, expiresAt }` from the package liveInvitationState(identity).
     sessionState: async (identity) => liveService ? liveService.liveInvitationState(identity) : NO_LIVE_INVITATIONS,
     ...(ports.fetch ? { fetch: ports.fetch } : {}) }) : undefined);
