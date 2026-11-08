@@ -4,7 +4,8 @@ import { connect, type AddressInfo, type Socket } from "node:net";
 import type { Duplex } from "node:stream";
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import {
-  createLiveGrantClient, createLiveSocketRegistry, livePodName, LIVE_ASSERTION_HEADER, type LiveEdgePorts, type LiveGrant,
+  createLiveGrantClient, createLiveSocketRegistry, createMemoryLiveAuthorizationStore, livePodName, LIVE_ASSERTION_HEADER,
+  type LiveEdgePorts, type LiveGrant,
   type LiveReaderRole,
 } from "@radar/artifacts-host";
 import { signLiveAssertion, verifyLiveAssertion } from "@sentropic/artifacts/live-host";
@@ -21,8 +22,13 @@ const SESSION = "sess-1";
 const WS_KEY = "dGhlIHNhbXBsZSBub25jZQ==";
 const INVITE_EXP = Date.now() + 3_600_000;
 
-/** Principal resolved from the (fake) sealed reader cookie `reader=<principal>`. */
-const principal = (cookie: string | undefined) => /reader=([a-z]+)/.exec(cookie ?? "")?.[1] ?? null;
+/** Release-reader verification stand-in: the (fake) sealed reader cookie `reader=<principal>` on this artifact host. */
+let principalDelayMs = 0;
+const principal = async (request: Request, artifactId: string) => {
+  if (principalDelayMs) await new Promise((resolve) => setTimeout(resolve, principalDelayMs));
+  if (!request.headers.get("host")?.startsWith(artifactId)) return null;
+  return /reader=([a-z]+)/.exec(request.headers.get("cookie") ?? "")?.[1] ?? null;
+};
 
 let edge: Server;
 let edgeUrl: URL;
@@ -31,23 +37,26 @@ let seen: Array<{ method: string | undefined; url: string | undefined; headers: 
 let upgrades: Duplex[];
 let clients: Socket[] = [];
 const closeEdge = () => new Promise<void>((resolve) => { edge.closeAllConnections(); edge.close(() => resolve()); });
-let readiness: { revision: string; ready: boolean };
+let readiness: { revision: string; ready: boolean; liveSessionId: string };
 let grantRevision: string;
 let grantFetch: Mock<(url: URL, init: RequestInit) => Promise<Response>>;
 let roles: Record<string, LiveReaderRole | null>;
 let consent: boolean;
 
-const grantFor = (body: { actor: { principalId: string; invitation?: { id: string; epoch: number; expiresAt: number } };
-  invitationEpoch: number }): LiveGrant => ({ storageScopeId: SCOPE, artifactId: ARTIFACT, sessionId: SESSION, generation: 1,
+const grantFor = (body: { actor: { principalId: string; invitation?: { id: string; epoch: number; expiresAt: number } } }): LiveGrant => ({ storageScopeId: SCOPE, artifactId: ARTIFACT, sessionId: SESSION, generation: 1,
   routeEpoch: 2, podUid: "pod-uid-1", podName: livePodName(SCOPE, ARTIFACT), sourceRevision: grantRevision,
   principalId: body.actor.principalId, role: body.actor.invitation ? "invitee" : "binding_owner",
-  invitationId: body.actor.invitation?.id ?? "", invitationEpoch: body.actor.invitation ? body.invitationEpoch : 0,
+  invitationId: body.actor.invitation?.id ?? "", invitationEpoch: body.actor.invitation?.epoch ?? 0,
   invitationExp: body.actor.invitation ? Math.floor(body.actor.invitation.expiresAt / 1000) : 0 });
 
+let authorizations: ReturnType<typeof createMemoryLiveAuthorizationStore>;
 function ports(config = true): LiveEdgePorts {
   const grants = createLiveGrantClient({ baseUrl: "https://builder.test/api/v1/artifacts/builder",
     identity: { authorization: async () => "Bearer t" }, fetch: grantFetch as never });
   return {
+    sessionState: { current: async () => ({ epoch: 1, expiresAt: INVITE_EXP }) },
+    authorizations,
+    invitations: {} as never,
     storageScopeId: SCOPE,
     resolution: config ? { enabled: true, config: { kid: KID, key: KEY, target: edgeUrl } } : { enabled: true, reason: "live_edge_url_missing" },
     gate: async (_scope, _artifact, principalId) => roles[principalId] ?? null,
@@ -65,8 +74,13 @@ const verify = (token: string | string[] | undefined) =>
 
 beforeEach(async () => {
   seen = []; upgrades = []; edgeStatus = 200; consent = true;
-  readiness = { revision: "rev-7", ready: true };
+  readiness = { revision: "rev-7", ready: true, liveSessionId: SESSION };
   grantRevision = "rev-7";
+  principalDelayMs = 0;
+  authorizations = createMemoryLiveAuthorizationStore();
+  // carol accepted her invitation (the owner's record is created on its first admitted open).
+  await authorizations.ensure({ storageScopeId: SCOPE, artifactId: ARTIFACT, sessionId: SESSION, bindingGeneration: 1,
+    principalId: "carol", role: "invitee", invitationId: "inv-1", expiresAt: new Date(INVITE_EXP).toISOString() });
   roles = {
     alice: { role: "binding_owner", principalId: "alice", bindingGeneration: 1 },
     carol: { role: "invitee", principalId: "carol", bindingGeneration: 1, invitationId: "inv-1", epoch: 1,
@@ -76,7 +90,9 @@ beforeEach(async () => {
     new Response(JSON.stringify({ grant: grantFor(JSON.parse(String(init.body))) }), { status: 200 }));
   edge = createServer((req, res) => {
     seen.push({ method: req.method, url: req.url, headers: req.headers });
-    res.writeHead(edgeStatus, { "content-type": "text/javascript", "set-cookie": "edge=1", "cache-control": "no-store" });
+    res.writeHead(edgeStatus, { "content-type": "text/javascript", "set-cookie": "edge=1", "cache-control": "no-store",
+      "clear-site-data": "\"*\"", location: "https://evil.test/", "strict-transport-security": "max-age=1",
+      "content-security-policy": "default-src 'self'" });
     res.end(req.method === "HEAD" ? undefined : "export const live = true;");
   });
   edge.on("upgrade", (req, socket: Duplex) => {
@@ -106,7 +122,12 @@ describe("live edge forward: HTTP", () => {
       authorization: "Bearer browser", "service-worker": "script", origin: ORIGIN, accept: "*/*", "x-forwarded-for": "1.2.3.4" }));
     expect(response?.status).toBe(200);
     expect(await response!.text()).toBe("export const live = true;");
-    expect(response!.headers.get("set-cookie")).toBeNull();
+    // Response headers by allowlist.
+    for (const name of ["set-cookie", "clear-site-data", "location", "strict-transport-security"]) {
+      expect(response!.headers.get(name)).toBeNull();
+    }
+    expect(response!.headers.get("content-security-policy")).toBe("default-src 'self'");
+    expect(response!.headers.get("cache-control")).toBe("no-store");
     const [request] = seen;
     expect(request).toMatchObject({ method: "GET", url: "/src/main.ts?t=123&import" });
     expect(request!.headers.host).toBe(HOST);
@@ -135,12 +156,12 @@ describe("live edge forward: HTTP", () => {
     consent = false;
     expect(await release().fetch(browser("/", { cookie: "reader=alice" }))).toBeUndefined();
     consent = true;
-    readiness = { revision: "rev-7", ready: false };
+    readiness = { revision: "rev-7", ready: false, liveSessionId: SESSION };
     expect(await release().fetch(browser("/", { cookie: "reader=alice" }))).toBeUndefined();
-    readiness = { revision: "rev-8", ready: true };
+    readiness = { revision: "rev-8", ready: true, liveSessionId: SESSION };
     expect(await release().fetch(browser("/", { cookie: "reader=alice" }))).toBeUndefined();
     grantFetch.mockImplementation(async () => new Response(JSON.stringify({ error: "invalid_phase" }), { status: 409 }));
-    readiness = { revision: "rev-7", ready: true };
+    readiness = { revision: "rev-7", ready: true, liveSessionId: SESSION };
     expect(await release().fetch(browser("/", { cookie: "reader=alice" }))).toBeUndefined();
     expect(seen).toHaveLength(0);
     // The reader mount answers what the forward leaves.
@@ -267,17 +288,67 @@ describe("live edge forward: websocket HMR", () => {
   });
 
   it("answers « live indisponible » when live is not admitted or the edge refuses", async () => {
-    readiness = { revision: "rev-7", ready: false };
+    readiness = { revision: "rev-7", ready: false, liveSessionId: SESSION };
     await withUpgradeServer(ports(), async (port) => {
       const client = handshake(port, `/_live/${SESSION}/hmr`, {});
       expect(await client.first).toMatch(/^HTTP\/1\.1 503 [\s\S]*X-Live-State: not_ready/);
     });
-    readiness = { revision: "rev-7", ready: true };
+    readiness = { revision: "rev-7", ready: true, liveSessionId: SESSION };
     edge.removeAllListeners("upgrade");
     edge.on("upgrade", (_req, socket: Duplex) => { socket.end("HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n"); });
     await withUpgradeServer(ports(), async (port) => {
       const client = handshake(port, `/_live/${SESSION}/hmr`, {});
       expect(await client.first).toMatch(/^HTTP\/1\.1 503 [\s\S]*X-Live-State: upstream_404/);
+    });
+  });
+
+  it("survives a browser reset while the admission is pending (B1 regression: no uncaught ECONNRESET)", async () => {
+    principalDelayMs = 200;
+    await withUpgradeServer(ports(), async (port) => {
+      for (const path of [`/_live/${SESSION}/hmr`, `/_live/${SESSION}/hmr?bad=1`]) {
+        const client = handshake(port, path, {});
+        await new Promise((resolve) => setTimeout(resolve, 20));
+        client.socket.resetAndDestroy();
+        await client.closed;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      // The server is still serving upgrades afterwards.
+      principalDelayMs = 0;
+      const after = handshake(port, `/_live/${SESSION}/hmr`, {});
+      expect(await after.first).toMatch(/^HTTP\/1\.1 101 /);
+    });
+  });
+
+  it("survives a browser reset during the upstream handshake", async () => {
+    edge.removeAllListeners("upgrade");
+    edge.on("upgrade", (_req, socket: Duplex) => { upgrades.push(socket); socket.on("error", () => {}); /* never answers */ });
+    await withUpgradeServer(ports(), async (port) => {
+      const client = handshake(port, `/_live/${SESSION}/hmr`, {});
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      client.socket.resetAndDestroy();
+      await client.closed;
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+  });
+
+  it("caps the proxied sockets per principal and shares one recheck per principal", async () => {
+    const p = ports();
+    await withUpgradeServer(p, async (port) => {
+      const open = [];
+      for (let index = 0; index < 4; index += 1) {
+        const client = handshake(port, `/_live/${SESSION}/hmr`, {});
+        expect(await client.first).toMatch(/^HTTP\/1\.1 101 /);
+        open.push(client);
+      }
+      const fifth = handshake(port, `/_live/${SESSION}/hmr`, {});
+      expect(await fifth.first).toMatch(/^HTTP\/1\.1 503 [\s\S]*X-Live-State: socket_limit/);
+      expect(p.sockets.countPrincipal(ARTIFACT, "alice")).toBe(4);
+      // One shared admission per tick for the 4 sockets (grant cached; the gate is read once per tick, not per socket).
+      const gate = vi.spyOn(p, "gate");
+      await new Promise((resolve) => setTimeout(resolve, 130));
+      const ticks = gate.mock.calls.length;
+      expect(ticks).toBeGreaterThanOrEqual(1);
+      expect(ticks).toBeLessThanOrEqual(3);
     });
   });
 });

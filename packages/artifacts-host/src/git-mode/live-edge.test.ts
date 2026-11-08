@@ -150,7 +150,7 @@ describe("live revocation: sockets closed, fence pushed", () => {
     const service = createLiveInvitationService({ bindings, invitations: createMemoryLiveInvitationStore(),
       registry: createImmoGitRegistry({ storageScopeId: SCOPE, installationRef: "inst" }),
       codeRights: { canReadCode: async () => true }, sessions: { current: async () => ({ liveSessionId: "sess" }) },
-      onRevoked: (invitation) => revocation.invitation(invitation) });
+      invitationsQualified: () => true, onRevoked: (invitation) => revocation.invitation(invitation) });
     const caller = { actorId: "alice", storageScopeId: SCOPE, scopes: ["immo:artifacts:read", "immo:artifacts:write"] };
     const created = await service.create(caller, { artifactId: ARTIFACT, inviteeId: "carol" });
     const open = socket();

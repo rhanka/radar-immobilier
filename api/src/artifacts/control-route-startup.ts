@@ -78,14 +78,16 @@ export async function startArtifactControl(options: {
     // Live edge forward (A-LIVE §8.2, W9 CORRECTIF): stage `live` AND
     // IMMO_ARTIFACTS_LIVE_EDGE_ENABLED=1. Off by default: nothing is composed.
     // On with an incomplete configuration: the unavailable state (release kept).
-    // Live consent: a non-revoked reader consent row of the principal for this
-    // artifact (baskets.read, current scope version), re-read on every admission.
+    // Baskets reader consent (necessary, not sufficient): a non-revoked reader
+    // consent row (baskets.read, current scope version), re-read on every
+    // admission, in addition to the live authorization record.
     let liveEdge: LiveEdgePorts | undefined;
     if (readLiveEdgeEnabled(process.env, ARTIFACT_GIT_MODE.stage)) {
       try {
         liveEdge = composeLiveEdgePorts({ pool, storageScopeId: parsed.storageScope, env: process.env,
           stage: ARTIFACT_GIT_MODE.stage, contentBase, module: liveHostModule ?? await loadLiveHost(),
-          consent: (principalId, artifactId) => readerConsent.hasLiveConsent(principalId, artifactId, BASKET_READ_SCOPE_ID) });
+          consent: (principalId, artifactId) => readerConsent.hasLiveConsent(principalId, artifactId, BASKET_READ_SCOPE_ID),
+          onPushFailure: (err) => logger.error({ err: String(err) }, "live revocation push failed; sockets closed and records revoked") });
       } catch (err) {
         logger.error({ err }, "live edge unavailable; release serving unchanged");
       }

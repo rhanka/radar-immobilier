@@ -67,6 +67,8 @@ Every variable below is immo-owned and read by radar-api and radar-immo-mcp
 | `IMMO_ARTIFACTS_LIVE_HOST` | config | pages domain; preprod `pages.preprod.immo.sent-tech.ca` | pushes refuse |
 | `IMMO_ARTIFACTS_LIVE_EDGE_ENABLED` | config | `1` enables the W9 live edge on top of stage `live` (anything else: off) | off: no forward, no controller worker, no upgrade listener |
 | `IMMO_ARTIFACTS_LIVE_EDGE_URL` | config | internal artifact-content origin (http, no path); preprod `http://artifact-content.sentropic-preprod.svc.cluster.local:8791` | forward unavailable (release kept), pushes refuse |
+| `IMMO_ARTIFACTS_LIVE_QUALIFIED` | config | `true` qualifies the live worker (any other value: false) | `live_write` / `live_control(start)` answer `builder_unavailable` |
+| `IMMO_ARTIFACTS_LIVE_INVITATIONS_QUALIFIED` | config | `true` admits invited live readers (any other value: false) | no invitation is created, every invitee is refused |
 | `IMMO_ARTIFACTS_LIVE_CONTROL_URL` | config, superseded | https URL ending `/_live-control/v1`; validated only, never used (the control push goes to `IMMO_ARTIFACTS_LIVE_EDGE_URL`) | none |
 | `IMMO_ARTIFACTS_LIVE_DRAFT_KEYS` | **secret** | sealed keyring `version=base64url(32 raw bytes)[,...]` | draft keys refuse: `provider_unavailable` |
 | `IMMO_ARTIFACTS_LIVE_DRAFT_KEY_CURRENT` | config | the version used for new drafts (must be listed) | start refuses when the keyring is set |
@@ -157,6 +159,17 @@ is an A1 refused write path: a branch can never change it.
   attempts; every response body is drained, a non-2xx answer is retried and the
   final failure is surfaced (`provider_unavailable`, last status).
 
+## Live qualification flags (rule)
+
+`IMMO_ARTIFACTS_LIVE_QUALIFIED` and `IMMO_ARTIFACTS_LIVE_INVITATIONS_QUALIFIED`
+are two independent flags, both `false` by default. Each is turned on by an
+ops change (manifest PR) ONLY after an owner-recorded « GB4 GO preprod », never
+automatically, never by code, never by a test. The invitations flag is the
+single invitation switch (no separate `_ENABLED` flag): while it is false, the
+invitation operations refuse to create or accept, every invitee is refused by
+the gate, and the session state sent to the controller carries no active
+expiry (its epoch is kept: never lowered).
+
 ## Live edge (W9, `IMMO_ARTIFACTS_LIVE_EDGE_ENABLED=1` on top of stage `live`)
 
 Contract: `tmp/conductor/concertation-git-artifact/sentropic-live-edge-contract-2026-11-07.md`
@@ -169,21 +182,50 @@ unchanged.
   at most 30 s per artifact, principal and invitation; dropped on a 409, an
   edge 404 on a live path or a revocation), `POST v1/live/reconcile` (BridgeAck)
   and `POST v1/live/stop` (204) as the package LiveService `worker`.
-- Content host (radar-api, `*.<pages domain>`): on the owner's/invitee's
-  stable Host, the §8.2 gate (binding owner or active invitee, current code
-  rights, live reader consent = a non-revoked `baskets.read` reader consent row
-  for the artifact). LIVE is served only when the package live record is ready
-  for the current revision AND the grant answers 200 with
-  `grant.sourceRevision` = that revision; otherwise the release.
+- Content host (radar-api, `*.<pages domain>`): the principal is the release
+  reader verified by the same code path as the release (sealed host, issuer,
+  audience, tier, session revocation). The §8.2 gate requires all four:
+  (a) the `baskets.read` reader consent not revoked (necessary, not
+  sufficient), (b) a current human with code rights, (c) the binding owner or
+  an explicit live invitation, (d) a valid live authorization record
+  (`artifacts.live_authorizations`, migration 0041) for the grant's session and
+  generation: created for the owner on the first admitted live open, for an
+  invitee only by explicit acceptance; void on another session or
+  generation, stop, revocation or invitation expiry. It grants no data right.
+  LIVE is served only when the package live record is ready for the current
+  revision AND the grant answers 200 with `grant.sourceRevision` = that
+  revision (and `grant.sessionId` = the live session, also the invitation's
+  for an invitee); otherwise the release.
+- Invitation epoch: SESSION state of the binding generation, shared by every
+  active invitation (several may be active, each naming one principal). 0
+  until the first invitation; +1 on each revoke or replace, every remaining
+  invitation adopting it; never lowered (the controller answers 409
+  `stale_invitation`). Grant and reconcile bodies carry
+  `invitation: {epoch, expiresAt}` (latest expiry among the active
+  invitations, or null), identical for the owner and every invitee; an
+  invitee also sends `actor.invitation: {id, epoch, expiresAt}`. The
+  assertion's invitation fields come from the grant (0 for the owner).
+- Invitation operations (control origin, application session cookie,
+  `POST /api/v1/artifacts/control/live/...`): `invitations/create`
+  `{artifactId, inviteeId, ttlMs?}`, `invitations/list` `{artifactId}`,
+  `invitations/revoke` `{artifactId, invitationId}` (owner); `invitations/accept`
+  `{artifactId, invitationId}` (invitee, while the session is live);
+  `sessions/revoke` `{artifactId}` (owner: stop sharing now). A revocation
+  closes the proxied sockets immediately, drops the cached grants, revokes the
+  live authorization records, then pushes `revoke_invitation` (NEW session
+  epoch) or `revoke_session`; a push failure is logged, the local effects stay.
 - Forward: node:http to `IMMO_ARTIFACTS_LIVE_EDGE_URL`, GET/HEAD only, path and
   query unchanged, Host = the browser host without port, Origin passed as is,
   cookies, Authorization, service-worker and forwarding headers stripped,
   `x-live-host-assertion` = the grant unchanged plus v, kid, host, iat, exp
   (exp = iat + 60 s). HMR websocket `GET /_live/<sessionId>/hmr[?token=]`
   (only `token`, Origin required, `Sec-WebSocket-Protocol: vite-hmr`): exp =
-  iat + 3600 s capped at the invitation expiry; sockets are tracked per
-  session/invitation, closed on revocation, at exp, and when the 2 s recheck
-  no longer admits the principal.
+  iat + 3600 s capped at the invitation expiry; at most 4 sockets per
+  principal and 32 per session; sockets are tracked per session/invitation,
+  closed on revocation, at exp, and when the shared 2 s recheck (one
+  admission per artifact and principal) no longer admits the principal.
+  Response headers by allowlist; socket errors handled from the first line of
+  the upgrade handler.
 - Any non-2xx (non-101) edge answer, timeout or connection failure: « live
   indisponible » (503, `x-live-state`).
 - Network: Sentropic policy `allow-immo-content-host-to-artifact-content`
@@ -195,7 +237,8 @@ unchanged.
 - Live edge: composed only with `IMMO_ARTIFACTS_LIVE_EDGE_ENABLED=1`; nothing
   answers on the Sentropic side before the M4-R wagon (grant, reconcile,
   stop, draft staging), GB4-P and `APP_ARTIFACT_LIVE_ENABLED`.
-- Live draft keys (KMS or sealed secret): `FAIL_CLOSED_LIVE_KEYS`; worker
-  qualification: `false` (live_write keeps answering `builder_unavailable`).
+- Live draft keys (KMS or sealed secret): `FAIL_CLOSED_LIVE_KEYS` unless the
+  sealed keyring is set; worker and invitations qualification: `false` until
+  the owner-recorded « GB4 GO preprod » (see the rule above).
 - Draft staging pushed by the host: format pending (Sentropic M4-R).
-- HTTP mounting of the handoff acceptance and of the invitation operations.
+- No UI yet for the invitation operations (control routes only).

@@ -2,6 +2,8 @@ import { Hono, type Context } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { getCookie } from "hono/cookie";
 import { bodyLimit } from "hono/body-limit";
+import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-contract";
+import { acceptLiveInvitation, LIVE_INVITATION_READ_SCOPE, LIVE_INVITATION_WRITE_SCOPE } from "@radar/artifacts-host";
 import type { UploadPageService, UploadPageStore } from "@sentropic/artifacts/server/upload-page";
 import type { UploadPageRouteCfg } from "./upload-page-route.js";
 import {
@@ -76,6 +78,15 @@ export interface ControlRouteDeps {
 }
 
 export const CONTROL_MAX_BODY_BYTES = 2 * 1024 * 1024;
+
+/** Typed live refusals of the invitation operations (never a stack or driver text). */
+const LIVE_REFUSAL_STATUS: Readonly<Record<string, ContentfulStatusCode>> = { access_denied: 403, invalid_request: 400,
+  not_found: 404, git_not_attached: 409, git_live_conflict: 409, provider_unavailable: 503 };
+function liveRefusal(c: Context, error: unknown): Response {
+  if (!(error instanceof ArtifactOperationError)) return jsonError(c, 503, { error: "capability_unavailable" });
+  const status = LIVE_REFUSAL_STATUS[error.kind] ?? 409;
+  return jsonError(c, status, { error: error.kind });
+}
 
 function jsonError(c: Context, status: ContentfulStatusCode, body: Record<string, string>): Response {
   const { error = "invalid_request", ...details } = body;
@@ -273,6 +284,56 @@ export function controlRoute(deps: ControlRouteDeps): Hono {
     const guarded = await guard(c, deps);
     if (guarded instanceof Response) return guarded;
     return dispatch("list", c, guarded.session, c.req.query());
+  });
+
+  /**
+   * W9 live invitations (control origin, application session cookie; MCP
+   * bearer tokens are refused by guard). Owner: create, list, revoke, and
+   * "stop sharing now" (revoke every open live session). Invitee: explicit
+   * acceptance, which creates the session-bound live authorization record.
+   * Composed only with the live edge (IMMO_ARTIFACTS_LIVE_EDGE_ENABLED=1);
+   * create and accept also require IMMO_ARTIFACTS_LIVE_INVITATIONS_QUALIFIED.
+   */
+  const liveOp = (name: string, handler: (live: NonNullable<ControlRouteDeps["liveEdge"]>, sub: string,
+    body: Record<string, unknown>) => Promise<object>) => {
+    app.post(`/live/${name}`, async (c) => {
+      const guarded = await guardPost(c, deps);
+      if (guarded instanceof Response) return guarded;
+      if (!deps.liveEdge) return jsonError(c, 503, { error: "capability_unavailable" });
+      const body = guarded.body;
+      if (!body || typeof body !== "object" || Array.isArray(body) || typeof (body as { artifactId?: unknown }).artifactId !== "string") {
+        return jsonError(c, 400, { error: "invalid_request" });
+      }
+      try {
+        return c.json(await handler(deps.liveEdge, guarded.session.sub, body as Record<string, unknown>), 200);
+      } catch (error) {
+        return liveRefusal(c, error);
+      }
+    });
+  };
+  const caller = (live: NonNullable<ControlRouteDeps["liveEdge"]>, sub: string) => ({ actorId: sub,
+    storageScopeId: live.storageScopeId, scopes: [LIVE_INVITATION_READ_SCOPE, LIVE_INVITATION_WRITE_SCOPE] });
+  const text = (value: unknown) => { if (typeof value !== "string" || !value) throw new ArtifactOperationError("invalid_request"); return value; };
+  liveOp("invitations/create", async (live, sub, body) => ({ invitation: await live.invitations.create(caller(live, sub), {
+    artifactId: text(body.artifactId), inviteeId: text(body.inviteeId),
+    ...(body.ttlMs === undefined ? {} : { ttlMs: typeof body.ttlMs === "number" ? body.ttlMs : Number.NaN }) }) }));
+  liveOp("invitations/list", async (live, sub, body) => ({ invitations: await live.invitations.list(caller(live, sub),
+    { artifactId: text(body.artifactId) }) }));
+  liveOp("invitations/revoke", async (live, sub, body) => ({ invitation: await live.invitations.revoke(caller(live, sub),
+    { artifactId: text(body.artifactId), invitationId: text(body.invitationId) }) }));
+  liveOp("invitations/accept", async (live, sub, body) => ({ authorization: await acceptLiveInvitation(live, {
+    artifactId: text(body.artifactId), principalId: sub, invitationId: text(body.invitationId), nowMs: Date.now() }) }));
+  liveOp("sessions/revoke", async (live, sub, body) => {
+    const artifactId = text(body.artifactId);
+    const role = await live.gate(live.storageScopeId, artifactId, sub);
+    if (role?.role !== "binding_owner") throw new ArtifactOperationError("access_denied");
+    const sessions = await live.authorizations.openSessions(live.storageScopeId, artifactId);
+    let pushed = true;
+    for (const sessionId of sessions) {
+      // Sockets are closed and records revoked before the push; a push failure is reported, not fatal.
+      await live.revocation.session(artifactId, sessionId).catch(() => { pushed = false; });
+    }
+    return { revokedSessions: sessions.length, edgePush: pushed ? "done" : "failed" };
   });
 
   app.all("*", async (c) => {

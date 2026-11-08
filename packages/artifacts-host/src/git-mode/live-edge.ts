@@ -73,9 +73,16 @@ export function createLiveSocketRegistry() {
     }
     return closed;
   };
+  const count = (match: (key: LiveSocketKey) => boolean) => [...sockets.values()].filter(match).length;
   return {
     register(key: LiveSocketKey, socket: LiveSocket) { sockets.set(socket, key); return () => { sockets.delete(socket); }; },
     size: () => sockets.size,
+    /** Open sockets of one principal on one artifact, and of one session. */
+    countPrincipal: (artifactId: string, principalId: string) =>
+      count((key) => key.artifactId === artifactId && key.principalId === principalId),
+    countSession: (artifactId: string, sessionId: string) =>
+      count((key) => key.artifactId === artifactId && key.sessionId === sessionId),
+    entries: () => [...sockets.entries()],
     closeInvitation: (artifactId: string, invitationId: string) =>
       close((key) => key.artifactId === artifactId && key.invitationId === invitationId, "invitation_revoked"),
     closeSession: (artifactId: string, sessionId: string) =>
@@ -156,20 +163,39 @@ export function createLiveFencePusher(options: LiveFencePushOptions) {
 export type LiveFencePush = ReturnType<typeof createLiveFencePusher>;
 
 /** Revocation handler: sockets closed first, then the fence pushed; a push failure is surfaced. */
-export function createLiveRevocation(deps: { readonly sockets: LiveSocketRegistry; readonly push: LiveFencePush;
+export interface LiveRevocationHooks {
   /** Cached controller grants (live-grant.ts) dropped with the sockets. */
-  readonly grants?: { invalidate(artifactId: string): void; invalidateInvitation(artifactId: string, invitationId: string): void } }) {
+  readonly grants?: { invalidate(artifactId: string): void; invalidateInvitation(artifactId: string, invitationId: string): void };
+  /** Session-bound live authorization records (live-authorizations.ts) revoked with the sockets. */
+  readonly authorizations?: {
+    revokeSession(storageScopeId: string, artifactId: string, sessionId: string, at: string): Promise<number>;
+    revokeInvitation(storageScopeId: string, artifactId: string, invitationId: string, at: string): Promise<number>;
+  };
+  readonly storageScopeId?: string;
+  readonly now?: () => number;
+}
+
+/**
+ * Revocation: the proxied sockets are closed FIRST (synchronously), the
+ * cached grants dropped and the live authorization records revoked, then the
+ * control message is pushed (revoke_invitation carries the NEW session epoch
+ * of the revoked row). A push failure is surfaced after the local effects.
+ */
+export function createLiveRevocation(deps: { readonly sockets: LiveSocketRegistry; readonly push: LiveFencePush } & LiveRevocationHooks) {
+  const at = () => new Date((deps.now ?? Date.now)()).toISOString();
   return {
     async invitation(invitation: LiveInvitation) {
-      deps.grants?.invalidateInvitation(invitation.artifactId, invitation.invitationId);
       const closed = deps.sockets.closeInvitation(invitation.artifactId, invitation.invitationId);
+      deps.grants?.invalidateInvitation(invitation.artifactId, invitation.invitationId);
+      await deps.authorizations?.revokeInvitation(invitation.storageScopeId, invitation.artifactId, invitation.invitationId, at());
       await deps.push({ artifactId: invitation.artifactId, op: "revoke_invitation", sessionId: "",
         invitationId: invitation.invitationId, epoch: invitation.epoch });
       return { closed };
     },
     async session(artifactId: string, sessionId: string) {
-      deps.grants?.invalidate(artifactId);
       const closed = deps.sockets.closeSession(artifactId, sessionId);
+      deps.grants?.invalidate(artifactId);
+      if (deps.storageScopeId) await deps.authorizations?.revokeSession(deps.storageScopeId, artifactId, sessionId, at());
       await deps.push({ artifactId, op: "revoke_session", sessionId, invitationId: "", epoch: 0 });
       return { closed };
     },
@@ -249,8 +275,8 @@ export async function composeLiveEdgeRevocation(config: LiveEdgeConfig, sockets:
 }
 
 export function composeLiveEdgeRevocationWith(config: LiveEdgeConfig, sockets: LiveSocketRegistry, signer: LiveAssertionSigner,
-  send?: LiveControlTransport, grants?: Parameters<typeof createLiveRevocation>[0]["grants"]): ReturnType<typeof createLiveRevocation> {
+  send?: LiveControlTransport, hooks: LiveRevocationHooks = {}): ReturnType<typeof createLiveRevocation> {
   const push = createLiveFencePusher({ signer, kid: config.kid ?? "", pagesDomain: config.host ?? "",
     target: config.kid && config.host ? config.edgeUrl : undefined, ...(send ? { send } : {}) });
-  return createLiveRevocation({ sockets, push, ...(grants ? { grants } : {}) });
+  return createLiveRevocation({ sockets, push, ...hooks });
 }
