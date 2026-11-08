@@ -84,3 +84,8 @@ data:
   IMMO_ARTIFACTS_LIVE_HOST: "pages.preprod.immo.sent-tech.ca"
   IMMO_ARTIFACTS_LIVE_CONTROL_URL: "https://pages.preprod.immo.sent-tech.ca/_live-control/v1"
   IMMO_ARTIFACTS_LIVE_DRAFT_KEY_CURRENT: "v1"
+  # W9 edge flag, PREPROD ONLY: on radar-immo-mcp it composes the live worker
+  # client (packages/artifacts-host/src/git-mode/compose.ts), so the MCP tools
+  # live_write and live_control(start) reach the builder instead of answering
+  # builder_unavailable. The forward URL stays on radar-api (reader mount).
+  IMMO_ARTIFACTS_LIVE_EDGE_ENABLED: "1"
