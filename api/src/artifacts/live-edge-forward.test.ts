@@ -4,12 +4,12 @@ import { connect, type AddressInfo, type Socket } from "node:net";
 import type { Duplex } from "node:stream";
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import {
-  createLiveGrantClient, createLiveSocketRegistry, createMemoryLiveAuthorizationStore, livePodName, LIVE_ASSERTION_HEADER,
+  createLiveGrantClient, createLiveSocketRegistry, livePodName, LIVE_ASSERTION_HEADER,
   type LiveEdgePorts, type LiveGrant,
   type LiveReaderRole,
 } from "@radar/artifacts-host";
 import { signLiveAssertion, verifyLiveAssertion } from "@sentropic/artifacts/live-host";
-import { createLiveEdgeForward, withLiveEdge } from "./live-edge-forward.js";
+import { createLiveEdgeForward, relayedSearch, withLiveEdge } from "./live-edge-forward.js";
 
 const SCOPE = "radar-immobilier-preprod";
 const ARTIFACT = "11111111-1111-4111-8111-111111111111";
@@ -20,7 +20,6 @@ const KID = "immo-preprod-live-1";
 const KEY = new Uint8Array(32).fill(5);
 const SESSION = "sess-1";
 const WS_KEY = "dGhlIHNhbXBsZSBub25jZQ==";
-const INVITE_EXP = Date.now() + 3_600_000;
 
 /** Release-reader verification stand-in: the (fake) sealed reader cookie `reader=<principal>` on this artifact host. */
 let principalDelayMs = 0;
@@ -49,14 +48,10 @@ const grantFor = (body: { actor: { principalId: string; invitation?: { id: strin
   invitationId: body.actor.invitation?.id ?? "", invitationEpoch: body.actor.invitation?.epoch ?? 0,
   invitationExp: body.actor.invitation ? Math.floor(body.actor.invitation.expiresAt / 1000) : 0 });
 
-let authorizations: ReturnType<typeof createMemoryLiveAuthorizationStore>;
 function ports(config = true): LiveEdgePorts {
   const grants = createLiveGrantClient({ baseUrl: "https://builder.test/api/v1/artifacts/builder",
     identity: { authorization: async () => "Bearer t" }, fetch: grantFetch as never });
   return {
-    sessionState: { current: async () => ({ epoch: 1, expiresAt: INVITE_EXP }) },
-    authorizations,
-    invitations: {} as never,
     storageScopeId: SCOPE,
     resolution: config ? { enabled: true, config: { kid: KID, key: KEY, target: edgeUrl } } : { enabled: true, reason: "live_edge_url_missing" },
     gate: async (_scope, _artifact, principalId) => roles[principalId] ?? null,
@@ -65,7 +60,7 @@ function ports(config = true): LiveEdgePorts {
     grants,
     signAssertion: (claims) => signLiveAssertion(claims, KEY),
     sockets: createLiveSocketRegistry(),
-    revocation: { invitation: async () => ({ closed: 0 }), session: async () => ({ closed: 0 }) },
+    revocation: { invitation: async () => ({ closed: 0 }), session: async () => ({ closed: 0, pushed: 0 }) },
   };
 }
 
@@ -77,14 +72,10 @@ beforeEach(async () => {
   readiness = { revision: "rev-7", ready: true, liveSessionId: SESSION };
   grantRevision = "rev-7";
   principalDelayMs = 0;
-  authorizations = createMemoryLiveAuthorizationStore();
-  // carol accepted her invitation (the owner's record is created on its first admitted open).
-  await authorizations.ensure({ storageScopeId: SCOPE, artifactId: ARTIFACT, sessionId: SESSION, bindingGeneration: 1,
-    principalId: "carol", role: "invitee", invitationId: "inv-1", expiresAt: new Date(INVITE_EXP).toISOString() });
   roles = {
     alice: { role: "binding_owner", principalId: "alice", bindingGeneration: 1 },
-    carol: { role: "invitee", principalId: "carol", bindingGeneration: 1, invitationId: "inv-1", epoch: 1,
-      expiresAt: new Date(INVITE_EXP).toISOString(), liveSessionId: SESSION },
+    // Owner-only until 0.2.22: the gate never returns an invitee role.
+    carol: null,
   };
   grantFetch = vi.fn(async (_url: URL, init: RequestInit) =>
     new Response(JSON.stringify({ grant: grantFor(JSON.parse(String(init.body))) }), { status: 200 }));
@@ -141,12 +132,31 @@ describe("live edge forward: HTTP", () => {
     expect(grantFetch).toHaveBeenCalledTimes(1);
   });
 
-  it("forwards HEAD and an invitee, and asserts the invitee role", async () => {
+  it("forwards HEAD for the owner and refuses an invitee (owner-only until 0.2.22)", async () => {
     const forward = createLiveEdgeForward({ contentBase: DOMAIN, ports: ports(), principal });
-    const response = await forward.fetch(browser("/index.html", { cookie: "reader=carol" }, "HEAD"));
+    const response = await forward.fetch(browser("/index.html", { cookie: "reader=alice" }, "HEAD"));
     expect(response?.status).toBe(200);
     expect(seen[0]!.method).toBe("HEAD");
-    expect(verify(seen[0]!.headers[LIVE_ASSERTION_HEADER])).toMatchObject({ role: "invitee", invitationId: "inv-1", invitationEpoch: 1 });
+    expect(await forward.fetch(browser("/index.html", { cookie: "reader=carol" }))).toBeUndefined();
+    expect(seen).toHaveLength(1);
+  });
+
+  it("never forwards the host subtrees (every __ first segment, the API) to the edge (N1)", async () => {
+    const forward = createLiveEdgeForward({ contentBase: DOMAIN, ports: ports(), principal });
+    for (const path of ["/__artifacts/tiles/v1/1/2/3.pbf", "/__artifacts/design/kit/abc/app.css", "/__reader/open", "/__app/x", "/api/v1/x"]) {
+      expect(await forward.fetch(browser(path, { cookie: "reader=alice" }))).toBeUndefined();
+    }
+    expect(seen).toHaveLength(0);
+    expect(grantFetch).not.toHaveBeenCalled();
+  });
+
+  it("strips the immo reader grant query before relaying, keeping the other parameters byte for byte (N2)", async () => {
+    const forward = createLiveEdgeForward({ contentBase: DOMAIN, ports: ports(), principal });
+    await forward.fetch(browser("/src/main.ts?grant=secret-token&import&t=1&gr%61nt=x", { cookie: "reader=alice" }));
+    expect(seen[0]!.url).toBe("/src/main.ts?import&t=1");
+    await forward.fetch(browser("/?grant=only", { cookie: "reader=alice" }));
+    expect(seen[1]!.url).toBe("/");
+    expect(relayedSearch("?a=1&grant=&b")).toBe("?a=1&b");
   });
 
   it("serves the release (undefined) outside the gate, without consent, while not ready, and on a grant mismatch", async () => {
@@ -238,7 +248,7 @@ describe("live edge forward: websocket HMR", () => {
   it("forwards the upgrade with the exact Host, Origin, vite-hmr and a 3600 s assertion, and closes on revocation", async () => {
     const p = ports();
     await withUpgradeServer(p, async (port) => {
-      const client = handshake(port, `/_live/${SESSION}/hmr?token=abc_DEF-1`, { cookie: "reader=carol" });
+      const client = handshake(port, `/_live/${SESSION}/hmr?token=abc_DEF-1`, {});
       expect(await client.first).toMatch(/^HTTP\/1\.1 101 /);
       const [upstream] = seen;
       expect(upstream).toMatchObject({ method: "GET", url: `/_live/${SESSION}/hmr?token=abc_DEF-1` });
@@ -246,11 +256,11 @@ describe("live edge forward: websocket HMR", () => {
         "sec-websocket-key": WS_KEY, upgrade: "websocket" });
       expect(upstream!.headers.cookie).toBeUndefined();
       const claims = verify(upstream!.headers[LIVE_ASSERTION_HEADER]);
-      expect(claims).toMatchObject({ role: "invitee", invitationId: "inv-1" });
-      expect(claims!.exp).toBe(Math.min(claims!.iat + 3600, claims!.invitationExp));
+      expect(claims).toMatchObject({ role: "binding_owner", principalId: "alice" });
+      expect(claims!.exp - claims!.iat).toBe(3600);
       expect(p.sockets.size()).toBe(1);
-      // Revocation through the shared registry closes the proxied socket immediately.
-      expect(p.sockets.closeInvitation(ARTIFACT, "inv-1")).toBe(1);
+      // Revocation through the shared registry (package session) closes the proxied socket immediately.
+      expect(p.sockets.closeLiveSession(ARTIFACT, SESSION)).toEqual({ closed: 1, edgeSessionIds: [SESSION] });
       await client.closed;
       expect(p.sockets.size()).toBe(0);
     });
@@ -259,9 +269,9 @@ describe("live edge forward: websocket HMR", () => {
   it("closes an open socket when the recheck no longer admits the principal (revoked in the store)", async () => {
     const p = ports();
     await withUpgradeServer(p, async (port) => {
-      const client = handshake(port, `/_live/${SESSION}/hmr`, { cookie: "reader=carol" });
+      const client = handshake(port, `/_live/${SESSION}/hmr`, {});
       expect(await client.first).toMatch(/^HTTP\/1\.1 101 /);
-      roles.carol = null;
+      roles.alice = null;
       await client.closed;
       expect(p.sockets.size()).toBe(0);
     });

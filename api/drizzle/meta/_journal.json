@@ -286,7 +286,7 @@
       "idx": 40,
       "version": "7",
       "when": 1793000000011,
-      "tag": "0041_artifacts_live_authorizations",
+      "tag": "0041_drop_artifacts_live_invitations",
       "breakpoints": true
     }
   ]

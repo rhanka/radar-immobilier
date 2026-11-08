@@ -30,6 +30,37 @@ describe("artifact journal and startup guard", () => {
     expect(previous.tag).toBe("0030_admission_sync");
     expect(ttl.when).toBeGreaterThan(previous.when);
   });
+  it("drops the empty immo live invitation table of 0038 with 0041, idempotently, and refuses a non-empty one", async () => {
+    const drop = journal.entries.find((entry) => entry.tag === "0041_drop_artifacts_live_invitations")!;
+    const previous = journal.entries.find((entry) => entry.idx === drop.idx - 1)!;
+    expect(previous.tag).toBe("0040_artifacts_git_attach_intents");
+    expect(drop.when).toBeGreaterThan(previous.when);
+    const sql = readFileSync(new URL(`../../drizzle/${drop.tag}.sql`, import.meta.url), "utf8");
+    expect(sql).toContain("SET LOCAL lock_timeout = '5s';\n--> statement-breakpoint\n");
+    // Applied by the harness migration: the table and its index are gone; a replay is a no-op.
+    const gone = await h.pool.query("SELECT to_regclass('artifacts.live_invitations') AS t, to_regclass('artifacts.live_invitations_by_binding') AS i");
+    expect(gone.rows[0]).toEqual({ t: null, i: null });
+    const statements = sql.split("--> statement-breakpoint");
+    const client = await h.pool.connect();
+    try {
+      await client.query("BEGIN");
+      for (const statement of statements) await client.query(statement);
+      // A non-empty table (0038 re-applied, one row) makes 0041 fail and roll back.
+      await client.query(readFileSync(new URL("../../drizzle/0038_artifacts_live_invitations.sql", import.meta.url), "utf8"));
+      await client.query("SAVEPOINT guard");
+      await client.query("ALTER TABLE artifacts.live_invitations DROP CONSTRAINT IF EXISTS live_invitations_artifact_id_storage_scope_id_fkey");
+      await client.query(`INSERT INTO artifacts.live_invitations (invitation_id, storage_scope_id, artifact_id, binding_generation,
+        live_session_id, invitee_id, grantor_id, created_at, expires_at, revoked_at, epoch)
+        VALUES (gen_random_uuid(), 's', gen_random_uuid(), 1, 'sess', 'b', 'a', now(), now() + interval '1 hour', NULL, 1)`);
+      let refused = "";
+      try { for (const statement of statements) await client.query(statement); } catch (error) { refused = String(error); }
+      expect(refused).toContain("live invitations not empty");
+      await client.query("ROLLBACK TO SAVEPOINT guard");
+    } finally {
+      await client.query("ROLLBACK");
+      client.release();
+    }
+  });
   it("should apply actor quotas 0025 before reader tickets 0026", async () => {
     const quota = journal.entries.find((entry) => entry.tag === "0025_artifacts_actor_quotas")!;
     const reader = journal.entries.find((entry) => entry.tag === "0026_artifacts_reader_tickets")!;

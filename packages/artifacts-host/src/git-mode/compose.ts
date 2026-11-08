@@ -17,11 +17,8 @@ import { createHostBuildApiClient, type HostBuildJobStore } from "./build-api.js
 import { createSealedLiveKeys, parseLiveDraftKeyring, type LiveDraftKeyring } from "./live-keys.js";
 import { SERVICE_SCOPE_BROKER, SERVICE_SCOPE_BUILDER, serviceTokenSource, type ServiceTokenConfig } from "./service-token.js";
 import { composeLiveService, liveStoreFences } from "./live.js";
-import { createLiveWorkerClient } from "./live-grant.js";
+import { createLiveWorkerClient, NO_LIVE_INVITATIONS } from "./live-grant.js";
 import { createPostgresHostJobStore } from "./host-jobs.js";
-import {
-  createLiveSessionStatePort, createPostgresLiveInvitationStore, createPostgresLiveSessions, type LiveInvitationStore, type LiveSessionPort,
-} from "./live-authority.js";
 import { gitToolServiceFactory, GIT_TOOLS_DEP_KEY, type GitBuildPort, type GitToolService, type GitToolsDeps } from "./provider-adapter.js";
 import { createImmoGitRegistry, IMMO_GIT_OUTPUT_DIR, IMMO_GIT_REPO_ID } from "./registry.js";
 
@@ -69,7 +66,8 @@ export interface GitModeConfig {
   /**
    * Invited live readers (IMMO_ARTIFACTS_LIVE_INVITATIONS_QUALIFIED=true,
    * default false), independent of the worker qualification and under the
-   * same rule. False: no invitation is created, every invitee is refused.
+   * same rule. Reserved: TODO(0.2.22) `invitations.qualified` of the generic
+   * package host port; until then every invitee is refused (owner-only).
    */
   readonly liveInvitationsQualified?: boolean | undefined;
 }
@@ -118,8 +116,6 @@ export interface GitModePorts {
   readonly liveStore?: LiveStore;
   readonly liveKeys?: LiveKeyPort;
   readonly liveWorker?: LiveWorkerPort;
-  readonly invitations?: LiveInvitationStore;
-  readonly sessions?: LiveSessionPort;
   readonly liveQualified?: () => boolean;
 }
 
@@ -236,19 +232,14 @@ export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
   // no worker, as before (live_write / live_control(start) answer builder_unavailable).
   const edgeWorker = liveSelected && input.resolution.stage === "live" && config.liveEdgeEnabled === true;
   const liveStore = ports.liveStore ?? (edgeWorker && !ports.liveWorker ? createPostgresLiveStore(pool) : undefined);
-  const invitationsQualified = () => config.liveInvitationsQualified === true;
-  const invitations = liveSelected ? ports.invitations ?? createPostgresLiveInvitationStore(pool) : undefined;
-  const sessionState = invitations ? createLiveSessionStatePort(invitations, invitationsQualified) : undefined;
   const liveWorker = ports.liveWorker ?? (edgeWorker ? createLiveWorkerClient({ baseUrl: config.builderUrl,
     identity: serviceTokenSource(config.service ?? {}, SERVICE_SCOPE_BUILDER, ports.fetch), fences: liveStoreFences(liveStore!),
-    sessionState: (identity, liveSessionId) => sessionState!.current(identity.storageScopeId, identity.artifactId,
-      identity.bindingGeneration, liveSessionId),
+    // TODO(0.2.22): liveInvitationState(identity); owner-only until then.
+    sessionState: async () => NO_LIVE_INVITATIONS,
     ...(ports.fetch ? { fetch: ports.fetch } : {}) }) : undefined);
   // Qualification flags (default false), read from the configuration; an injected port wins (tests).
   const qualified = ports.liveQualified ?? (() => config.liveQualified === true);
   const live = liveSelected ? composeLiveService({ pool, git, bindings, registry, codeRights, directory, hasWriteScope,
-    invitations: invitations!, invitationsQualified,
-    sessions: ports.sessions ?? createPostgresLiveSessions(pool),
     ...(liveStore ? { store: liveStore } : {}),
     ...(ports.liveKeys ?? config.liveDraftKeys ? { keys: ports.liveKeys ?? createSealedLiveKeys(config.liveDraftKeys!) } : {}),
     ...(liveWorker ? { worker: liveWorker } : {}), qualified })

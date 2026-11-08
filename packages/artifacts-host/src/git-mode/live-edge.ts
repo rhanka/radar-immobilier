@@ -4,7 +4,6 @@ import {
 import { request as httpRequest } from "node:http";
 import { request as httpsRequest } from "node:https";
 import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-contract";
-import type { LiveInvitation } from "./live-authority.js";
 import { loadLiveHost, type LiveHostModule } from "./live-host-adapter.js";
 
 /**
@@ -58,8 +57,9 @@ export async function loadLiveSigner(key: Uint8Array | undefined): Promise<LiveA
 
 /** A proxied browser socket held by the immo content host. */
 export interface LiveSocket { close(code: number, reason: string): void }
+/** sessionId: controller grant session (HMR path); liveSessionId: package live session (records, invitations). */
 export interface LiveSocketKey { readonly artifactId: string; readonly sessionId: string; readonly principalId: string;
-  readonly invitationId?: string }
+  readonly invitationId?: string; readonly liveSessionId?: string }
 
 export function createLiveSocketRegistry() {
   const sockets = new Map<LiveSocket, LiveSocketKey>();
@@ -87,6 +87,13 @@ export function createLiveSocketRegistry() {
       close((key) => key.artifactId === artifactId && key.invitationId === invitationId, "invitation_revoked"),
     closeSession: (artifactId: string, sessionId: string) =>
       close((key) => key.artifactId === artifactId && key.sessionId === sessionId, "session_revoked"),
+    /** Closes every socket of a package live session; returns the controller session ids they carried. */
+    closeLiveSession(artifactId: string, liveSessionId: string) {
+      const edge = new Set<string>();
+      for (const [, key] of sockets) if (key.artifactId === artifactId && key.liveSessionId === liveSessionId) edge.add(key.sessionId);
+      const closed = close((key) => key.artifactId === artifactId && key.liveSessionId === liveSessionId, "session_revoked");
+      return { closed, edgeSessionIds: [...edge] };
+    },
   };
 }
 export type LiveSocketRegistry = ReturnType<typeof createLiveSocketRegistry>;
@@ -166,38 +173,42 @@ export type LiveFencePush = ReturnType<typeof createLiveFencePusher>;
 export interface LiveRevocationHooks {
   /** Cached controller grants (live-grant.ts) dropped with the sockets. */
   readonly grants?: { invalidate(artifactId: string): void; invalidateInvitation(artifactId: string, invitationId: string): void };
-  /** Session-bound live authorization records (live-authorizations.ts) revoked with the sockets. */
-  readonly authorizations?: {
-    revokeSession(storageScopeId: string, artifactId: string, sessionId: string, at: string): Promise<number>;
-    revokeInvitation(storageScopeId: string, artifactId: string, invitationId: string, at: string): Promise<number>;
-  };
-  readonly storageScopeId?: string;
-  readonly now?: () => number;
 }
 
 /**
- * Revocation: the proxied sockets are closed FIRST (synchronously), the
- * cached grants dropped and the live authorization records revoked, then the
- * control message is pushed (revoke_invitation carries the NEW session epoch
- * of the revoked row). A push failure is surfaced after the local effects.
+ * A revoked invitation, as the generic package host port will hand it over
+ * (TODO(0.2.22): `invitations.onRevoked(e)`): `epoch` is the NEW session epoch.
+ */
+export interface LiveInvitationRevocation { readonly artifactId: string; readonly invitationId: string; readonly epoch: number }
+
+/**
+ * Revocation: the proxied sockets are closed FIRST (synchronously) and the
+ * cached grants dropped, then the control message is pushed (revoke_invitation
+ * carries the NEW session epoch). A push failure is surfaced after the local
+ * effects (the generic host port retries until 204).
  */
 export function createLiveRevocation(deps: { readonly sockets: LiveSocketRegistry; readonly push: LiveFencePush } & LiveRevocationHooks) {
-  const at = () => new Date((deps.now ?? Date.now)()).toISOString();
   return {
-    async invitation(invitation: LiveInvitation) {
+    async invitation(invitation: LiveInvitationRevocation) {
       const closed = deps.sockets.closeInvitation(invitation.artifactId, invitation.invitationId);
       deps.grants?.invalidateInvitation(invitation.artifactId, invitation.invitationId);
-      await deps.authorizations?.revokeInvitation(invitation.storageScopeId, invitation.artifactId, invitation.invitationId, at());
       await deps.push({ artifactId: invitation.artifactId, op: "revoke_invitation", sessionId: "",
         invitationId: invitation.invitationId, epoch: invitation.epoch });
       return { closed };
     },
-    async session(artifactId: string, sessionId: string) {
-      const closed = deps.sockets.closeSession(artifactId, sessionId);
+    /**
+     * Revokes a PACKAGE live session: closes its sockets, drops grants, then
+     * pushes revoke_session for every CONTROLLER session id known for it (from
+     * its open sockets, plus any given).
+     */
+    async session(artifactId: string, liveSessionId: string, edgeSessionIds: readonly string[] = []) {
+      const local = deps.sockets.closeLiveSession(artifactId, liveSessionId);
+      const edge = [...new Set([...edgeSessionIds, ...local.edgeSessionIds])];
+      let closed = local.closed;
+      for (const sessionId of edge) closed += deps.sockets.closeSession(artifactId, sessionId);
       deps.grants?.invalidate(artifactId);
-      if (deps.storageScopeId) await deps.authorizations?.revokeSession(deps.storageScopeId, artifactId, sessionId, at());
-      await deps.push({ artifactId, op: "revoke_session", sessionId, invitationId: "", epoch: 0 });
-      return { closed };
+      for (const sessionId of edge) await deps.push({ artifactId, op: "revoke_session", sessionId, invitationId: "", epoch: 0 });
+      return { closed, pushed: edge.length };
     },
   };
 }

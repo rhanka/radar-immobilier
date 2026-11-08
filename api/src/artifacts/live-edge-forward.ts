@@ -54,7 +54,8 @@ const HTTP_FORWARDED = ["accept", "accept-language", "origin", "user-agent"] as 
 const RESPONSE_ALLOWED = new Set(["content-type", "content-length", "cache-control", "etag", "last-modified",
   "content-security-policy", "x-content-type-options", "referrer-policy", "cross-origin-opener-policy",
   "cross-origin-embedder-policy", "cross-origin-resource-policy", "permissions-policy", "x-frame-options", "vary"]);
-const RESERVED_PATH = /^\/(?:__reader|__app|api)(?:\/|$)/;
+/** Host-served subtrees (every `__` first segment: reader, app, tile relay, design kit; and the API): never forwarded. */
+const RESERVED_PATH = /^\/(?:__[^/]*|api)(?:\/|$)/;
 const HMR_PATH = /^\/_live\/([A-Za-z0-9_-]{1,128})\/hmr$/;
 const TOKEN = /^[A-Za-z0-9_-]{1,256}$/;
 const WS_KEY = /^[A-Za-z0-9+/]{22}==$/;
@@ -79,6 +80,20 @@ function liveHost(raw: string | undefined, contentBase: string) {
   if (!host || host.includes(":") || host.endsWith(".")) return undefined;
   const parsed = parseContentHost(host, contentBase);
   return parsed.kind === "content" ? { host, artifactId: parsed.id } : undefined;
+}
+
+/**
+ * The query relayed upstream: the raw search minus every `grant` parameter
+ * (the immo reader grant is honored here, never relayed; content-serve
+ * invariant). Other parameters keep their exact bytes (Vite flags like `?import`).
+ */
+export function relayedSearch(search: string): string {
+  const parts = search.replace(/^\?/, "").split("&").filter((part) => {
+    if (!part) return false;
+    const name = part.split("=")[0]!.replace(/\+/g, " ");
+    try { return decodeURIComponent(name) !== "grant"; } catch { return true; }
+  });
+  return parts.length ? `?${parts.join("&")}` : "";
 }
 
 /** Destroys a socket without ever throwing (a refusal path must be safe on a reset socket). */
@@ -175,7 +190,7 @@ export function createLiveEdgeForward(deps: LiveEdgeForwardDeps) {
     return await new Promise<Response>((resolve) => {
       let settled = false;
       const done = (response: Response) => { if (!settled) { settled = true; resolve(response); } };
-      const outgoing = upstream(url.pathname + url.search, request.method, headers);
+      const outgoing = upstream(url.pathname + relayedSearch(url.search), request.method, headers);
       outgoing.once("timeout", () => { outgoing.destroy(); done(liveUnavailable("upstream_timeout")); });
       outgoing.on("error", () => done(liveUnavailable("upstream_unreachable")));
       outgoing.once("response", (incoming) => {
@@ -240,6 +255,7 @@ export function createLiveEdgeForward(deps: LiveEdgeForwardDeps) {
     if (admission.kind === "release") { refuse(socket, 503, admission.reason); return true; }
     if (admission.claims.sessionId !== sessionId) { refuse(socket, 404); return true; }
     const claims = admission.claims;
+    const liveSessionId = admission.liveSessionId;
     if (sockets.countPrincipal(target.artifactId, claims.principalId) >= maxPrincipal ||
       sockets.countSession(target.artifactId, sessionId) >= maxSession) { refuse(socket, 503, "socket_limit"); return true; }
     let assertion: string;
@@ -271,7 +287,8 @@ export function createLiveEdgeForward(deps: LiveEdgeForwardDeps) {
       socket.write(`HTTP/1.1 101 Switching Protocols\r\n${upgradeHeaders(response.headers)}\r\n`);
       if (upstreamHead.length) socket.write(upstreamHead);
       if (head.length) peer.write(head);
-      const unregister = sockets.register({ artifactId: target.artifactId, sessionId, principalId: claims.principalId,
+      // sessionId: the controller grant session (HMR path); liveSessionId: the package session (revocation by session).
+      const unregister = sockets.register({ artifactId: target.artifactId, sessionId, principalId: claims.principalId, liveSessionId,
         ...(claims.role === "invitee" ? { invitationId: claims.invitationId } : {}) }, { close: () => close() });
       const expiry = setTimeout(close, Math.max(0, claims.exp * 1000 - now()));
       expiry.unref();
