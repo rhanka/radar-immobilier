@@ -156,7 +156,7 @@ is an A1 refused write path: a branch can never change it.
   idempotence rewrite, pinned by `artifacts-provenance.spec.ts`).
 
 - Host job and publication ledger (`HostBuildJobStore`, `HostBuildLedger`):
-  job persistence before `POST /v1/builds`, attempt fence, receipt ledger and
+  job persistence before `POST /v1/builds` (body exactly `{artifactId, jobId, binding}`, `binding = {repoId, branch, subPath}` read from the package git binding of that artifact and job generation, `git_not_attached` before any call when absent), attempt fence, receipt ledger and
   the publish step in one transaction; composed by radar-api from the `build`
   stage on. Without the receipt key or the builder keys, `git_publish` and the
   inbound `/live-host/v1/*` routes answer `provider_unavailable` / 503.
@@ -188,7 +188,7 @@ unchanged.
 - Controller clients on the builder mount (`IMMO_ARTIFACTS_BUILDER_URL`, S2S
   token scope `artifacts:builder`): `POST v1/live/grant` (route grant, cached
   at most 30 s per artifact, principal and invitation; dropped on a 409, an
-  edge 404 on a live path or a revocation), `POST v1/live/reconcile` (BridgeAck)
+  edge 404 on a live path or a revocation), `POST v1/live/reconcile` (BridgeAck; body carries `binding: {repoId, branch, subPath}` of the package git binding of that generation, `git_not_attached` before any call when absent)
   and `POST v1/live/stop` (204) as the package LiveService `worker`.
 - Content host (radar-api, `*.<pages domain>`): the principal is the release
   reader verified by the same code path as the release (sealed host, issuer,
