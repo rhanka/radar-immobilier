@@ -1,7 +1,7 @@
 {
   "extends": "immo-artifacts.p0b.v1.json",
   "descriptor": { "profileRevisionId": "immo-artifacts.cas.v2", "requireExpectedCurrentReleaseId": true, "resultEnvelopeVersion": 1 },
-  "providerVersion": "0.2.22",
+  "providerVersion": "0.2.23",
   "policyRevision": "radar-c4-r3-artifacts-cas",
   "effectiveRequired": {
     "artifacts_publish": ["artifactId", "files", "idempotencyKey", "expectedCurrentReleaseId"],
