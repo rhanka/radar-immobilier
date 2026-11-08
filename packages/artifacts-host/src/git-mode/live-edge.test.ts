@@ -1,11 +1,13 @@
 import { createMemoryGitBindingStore, type GitBinding } from "@sentropic/artifacts";
 import { verifyLiveControl } from "@sentropic/artifacts/live-host";
+import { createServer, type IncomingMessage } from "node:http";
+import type { AddressInfo } from "node:net";
 import { describe, expect, it, vi } from "vitest";
 import { createLiveInvitationService, createMemoryLiveInvitationStore } from "./live-authority.js";
 import {
   composeLiveEdgeRevocation, createLiveFencePusher, createLiveRevocation, createLiveSocketRegistry, FAIL_CLOSED_LIVE_SIGNER,
-  liveSignerFrom, loadLiveSigner, parseLiveHostKeyring, readLiveEdgeConfig,
-  LIVE_CONTROL_HEADER, type LiveAssertionSigner,
+  liveSignerFrom, loadLiveSigner, nodeHttpControlTransport, parseLiveHostKeyring, readLiveEdgeConfig,
+  LIVE_CONTROL_HEADER, type LiveAssertionSigner, type LiveControlTransport,
 } from "./live-edge.js";
 import { createImmoGitRegistry, IMMO_GIT_REPO_ID } from "./registry.js";
 
@@ -14,6 +16,19 @@ const ARTIFACT = "11111111-1111-4111-8111-111111111111";
 const signer: LiveAssertionSigner = { signAssertion: () => "v1.a.b", signControl: (claims) => `c1.${claims.op}.${claims.invitationId || claims.sessionId}` };
 const socket = () => ({ close: vi.fn() });
 const noSleep = async () => {};
+const EDGE = new URL("http://artifact-content.sentropic-preprod.svc.cluster.local:8791");
+const DOMAIN = "pages.preprod.immo.sent-tech.ca";
+type Sent = Parameters<LiveControlTransport>[0];
+const transport = (...statuses: Array<number | Error>) => {
+  const sent: Sent[] = [];
+  const send = vi.fn(async (input: Sent) => {
+    sent.push(input);
+    const next = statuses.length > 1 ? statuses.shift()! : statuses[0]!;
+    if (next instanceof Error) throw next;
+    return next;
+  });
+  return { send, sent };
+};
 
 describe("live signer adapter (provider export only)", () => {
   it("binds the provider live-host signer (0.2.20) and fails closed without the export or with a short key", async () => {
@@ -39,9 +54,8 @@ describe("live revocation: sockets closed, fence pushed", () => {
     sockets.register({ artifactId: ARTIFACT, sessionId: "sess", principalId: "carol", invitationId: "inv-1" }, invitee);
     sockets.register({ artifactId: ARTIFACT, sessionId: "sess", principalId: "dave", invitationId: "inv-2" }, other);
     sockets.register({ artifactId: ARTIFACT, sessionId: "sess", principalId: "alice" }, owner);
-    const fetcher = vi.fn(async () => new Response(null, { status: 204 }));
-    const push = createLiveFencePusher({ signer, kid: "k1", host: "pages.preprod.immo.sent-tech.ca", fetch: fetcher as never,
-      controlUrl: (artifactId) => new URL(`https://edge.internal/${artifactId}/_live-control/v1`), sleep: noSleep });
+    const { send, sent } = transport(204);
+    const push = createLiveFencePusher({ signer, kid: "k1", pagesDomain: DOMAIN, target: EDGE, send, sleep: noSleep });
     const result = await createLiveRevocation({ sockets, push }).invitation({ invitationId: "inv-1", storageScopeId: SCOPE,
       artifactId: ARTIFACT, bindingGeneration: 1, liveSessionId: "sess", inviteeId: "carol", grantorId: "alice",
       createdAt: "", expiresAt: "", revokedAt: "x", epoch: 2 });
@@ -49,10 +63,9 @@ describe("live revocation: sockets closed, fence pushed", () => {
     expect(invitee.close).toHaveBeenCalledWith(4403, "invitation_revoked");
     expect(other.close).not.toHaveBeenCalled();
     expect(owner.close).not.toHaveBeenCalled();
-    const [url, init] = fetcher.mock.calls[0]! as unknown as [URL, RequestInit];
-    expect(String(url)).toBe(`https://edge.internal/${ARTIFACT}/_live-control/v1`);
-    expect(init.method).toBe("POST");
-    expect((init.headers as Record<string, string>)[LIVE_CONTROL_HEADER]).toBe("c1.revoke_invitation.inv-1");
+    // Internal Service, per-artifact pages Host, signed control header.
+    expect(sent[0]).toMatchObject({ target: EDGE, host: `${ARTIFACT}.${DOMAIN}`, path: "/_live-control/v1",
+      headers: { [LIVE_CONTROL_HEADER]: "c1.revoke_invitation.inv-1" } });
   });
 
   it("closes every socket of a revoked session", async () => {
@@ -70,48 +83,57 @@ describe("live revocation: sockets closed, fence pushed", () => {
     const sockets = createLiveSocketRegistry();
     const invitee = socket();
     sockets.register({ artifactId: ARTIFACT, sessionId: "sess", principalId: "carol", invitationId: "inv-1" }, invitee);
-    const refused = new Response("refused", { status: 404 });
-    const unavailable = new Response("busy", { status: 503 });
-    const fetcher = vi.fn()
-      .mockRejectedValueOnce(new Error("reset"))
-      .mockResolvedValueOnce(refused)
-      .mockResolvedValueOnce(unavailable);
-    const push = createLiveFencePusher({ signer, kid: "k1", host: "pages.test", fetch: fetcher as never,
-      controlUrl: () => new URL("https://edge.internal/_live-control/v1"), sleep: noSleep });
+    const { send } = transport(new Error("reset"), 404, 503);
+    const push = createLiveFencePusher({ signer, kid: "k1", pagesDomain: "pages.test", target: EDGE, send, sleep: noSleep });
     await expect(createLiveRevocation({ sockets, push }).invitation({ invitationId: "inv-1", storageScopeId: SCOPE,
       artifactId: ARTIFACT, bindingGeneration: 1, liveSessionId: "sess", inviteeId: "carol", grantorId: "alice",
       createdAt: "", expiresAt: "", revokedAt: "x", epoch: 2 })).rejects.toMatchObject({ kind: "provider_unavailable",
       details: { publicDetails: { fence: "push_failed", status: 503 } } });
-    expect(fetcher).toHaveBeenCalledTimes(3);
-    expect(refused.bodyUsed).toBe(true);
-    expect(unavailable.bodyUsed).toBe(true);
+    expect(send).toHaveBeenCalledTimes(3);
     expect(invitee.close).toHaveBeenCalled();
     expect(sockets.size()).toBe(0);
   });
 
-  it("treats any 2xx as pushed and drains its body", async () => {
-    const accepted = new Response("ok", { status: 200 });
-    const push = createLiveFencePusher({ signer, kid: "k1", host: "pages.test", fetch: (async () => accepted) as never,
-      controlUrl: () => new URL("https://edge.internal/_live-control/v1"), sleep: noSleep });
+  it("treats any 2xx as pushed", async () => {
+    const push = createLiveFencePusher({ signer, kid: "k1", pagesDomain: "pages.test", target: EDGE, send: transport(200).send,
+      sleep: noSleep });
     await expect(push({ artifactId: ARTIFACT, op: "revoke_session", sessionId: "sess", invitationId: "", epoch: 0 }))
       .resolves.toBeUndefined();
-    expect(accepted.bodyUsed).toBe(true);
+  });
+
+  it("posts with node:http to the internal Service with the exact Host, and drains the body", async () => {
+    const seen: Array<{ method: string | undefined; url: string | undefined; host: string | undefined; control: string; cookie: string | undefined }> = [];
+    const server = createServer((req: IncomingMessage, res) => {
+      seen.push({ method: req.method, url: req.url, host: req.headers.host, control: req.headers[LIVE_CONTROL_HEADER] as string,
+        cookie: req.headers.cookie });
+      res.writeHead(204).end();
+    });
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    try {
+      const target = new URL(`http://127.0.0.1:${(server.address() as AddressInfo).port}`);
+      const push = createLiveFencePusher({ signer, kid: "k1", pagesDomain: DOMAIN, target, sleep: noSleep });
+      await push({ artifactId: ARTIFACT, op: "revoke_session", sessionId: "sess", invitationId: "", epoch: 0 });
+      expect(seen).toEqual([{ method: "POST", url: "/_live-control/v1", host: `${ARTIFACT}.${DOMAIN}`,
+        control: "c1.revoke_session.sess", cookie: undefined }]);
+      await expect(nodeHttpControlTransport({ target, host: "h", path: "/x", headers: {}, timeoutMs: 1000 })).resolves.toBe(204);
+    } finally { server.close(); }
   });
 
   it("succeeds on a retry after a transient failure", async () => {
-    const fetcher = vi.fn().mockRejectedValueOnce(new Error("reset")).mockResolvedValueOnce(new Response(null, { status: 204 }));
-    const push = createLiveFencePusher({ signer, kid: "k1", host: "pages.test", fetch: fetcher as never,
-      controlUrl: () => new URL("https://edge.internal/_live-control/v1"), sleep: noSleep });
+    const { send } = transport(new Error("reset"), 204);
+    const push = createLiveFencePusher({ signer, kid: "k1", pagesDomain: "pages.test", target: EDGE, send, sleep: noSleep });
     await expect(push({ artifactId: ARTIFACT, op: "revoke_session", sessionId: "sess", invitationId: "", epoch: 0 }))
       .resolves.toBeUndefined();
-    expect(fetcher).toHaveBeenCalledTimes(2);
+    expect(send).toHaveBeenCalledTimes(2);
   });
 
   it("refuses to push while the edge or the signer is not configured", async () => {
     const claims = { artifactId: ARTIFACT, op: "revoke_session" as const, sessionId: "s", invitationId: "", epoch: 0 };
-    await expect(createLiveFencePusher({ signer, kid: "k", host: "h" })(claims)).rejects.toMatchObject({ kind: "provider_unavailable" });
-    await expect(createLiveFencePusher({ signer: FAIL_CLOSED_LIVE_SIGNER, kid: "k", host: "h",
-      controlUrl: () => new URL("https://edge.internal/x") })(claims)).rejects.toMatchObject({ kind: "provider_unavailable" });
+    await expect(createLiveFencePusher({ signer, kid: "k", pagesDomain: "h" })(claims)).rejects.toMatchObject({ kind: "provider_unavailable" });
+    await expect(createLiveFencePusher({ signer, kid: "k", pagesDomain: "", target: EDGE })(claims))
+      .rejects.toMatchObject({ kind: "provider_unavailable" });
+    await expect(createLiveFencePusher({ signer: FAIL_CLOSED_LIVE_SIGNER, kid: "k", pagesDomain: "h", target: EDGE,
+      send: transport(204).send })(claims)).rejects.toMatchObject({ kind: "provider_unavailable" });
   });
 
   it("runs the edge revocation from the invitation service revoke", async () => {
@@ -141,13 +163,16 @@ describe("live revocation: sockets closed, fence pushed", () => {
 
 describe("live edge configuration", () => {
   const key = Buffer.alloc(32, 9).toString("base64url");
-  it("reads the HMAC keyring, the signing kid, the pages host and the control URL", () => {
+  it("reads the HMAC keyring, the signing kid, the pages host and the internal edge URL", () => {
     const config = readLiveEdgeConfig({ IMMO_ARTIFACTS_LIVE_HOST_KEYS: `immo-preprod-live-1=${key},immo-preprod-live-0=${key}`,
       IMMO_ARTIFACTS_LIVE_HOST_KID: "immo-preprod-live-1", IMMO_ARTIFACTS_LIVE_HOST: "pages.preprod.immo.sent-tech.ca",
-      IMMO_ARTIFACTS_LIVE_CONTROL_URL: "https://pages.preprod.immo.sent-tech.ca/_live-control/v1" });
+      IMMO_ARTIFACTS_LIVE_CONTROL_URL: "https://pages.preprod.immo.sent-tech.ca/_live-control/v1",
+      IMMO_ARTIFACTS_LIVE_EDGE_URL: "http://artifact-content.sentropic-preprod.svc.cluster.local:8791" });
     expect(config.kid).toBe("immo-preprod-live-1");
     expect(config.key?.byteLength).toBe(32);
+    // Superseded public control URL: still validated, never used for transport.
     expect(String(config.controlUrl)).toBe("https://pages.preprod.immo.sent-tech.ca/_live-control/v1");
+    expect(String(config.edgeUrl)).toBe("http://artifact-content.sentropic-preprod.svc.cluster.local:8791/");
     expect(parseLiveHostKeyring(undefined).size).toBe(0);
   });
 
@@ -157,28 +182,49 @@ describe("live edge configuration", () => {
       .toThrow("artifact_live_host_kid_invalid");
     expect(() => readLiveEdgeConfig({ IMMO_ARTIFACTS_LIVE_CONTROL_URL: "https://pages.example/other" }))
       .toThrow("artifact_live_control_url_invalid");
+    for (const bad of ["ftp://edge:1", "http://u:p@edge:1", "http://edge:1/path", "http://edge:1/?q=1", "not a url"]) {
+      expect(() => readLiveEdgeConfig({ IMMO_ARTIFACTS_LIVE_EDGE_URL: bad })).toThrow("artifact_live_edge_url_invalid");
+    }
   });
 
   it("pushes revocations the edge verifies with the provider live format (exact claim set, 0.2.20)", async () => {
     const sockets = createLiveSocketRegistry();
     const open = socket();
     sockets.register({ artifactId: ARTIFACT, sessionId: "sess", principalId: "alice" }, open);
-    const tokens: string[] = [];
-    const fetcher = vi.fn(async (_url: URL, init: RequestInit) => {
-      tokens.push((init.headers as Record<string, string>)[LIVE_CONTROL_HEADER]!);
-      return new Response(null, { status: 204 });
-    });
+    const { send, sent } = transport(204);
     const config = readLiveEdgeConfig({ IMMO_ARTIFACTS_LIVE_HOST_KEYS: `immo-preprod-live-1=${key}`,
       IMMO_ARTIFACTS_LIVE_HOST_KID: "immo-preprod-live-1", IMMO_ARTIFACTS_LIVE_HOST: "pages.test",
-      IMMO_ARTIFACTS_LIVE_CONTROL_URL: "https://pages.test/_live-control/v1" });
-    const revocation = await composeLiveEdgeRevocation(config, sockets, fetcher as never);
+      IMMO_ARTIFACTS_LIVE_EDGE_URL: "http://artifact-content.test:8791" });
+    const revocation = await composeLiveEdgeRevocation(config, sockets, send);
+    const tokens = () => sent.map((input) => input.headers[LIVE_CONTROL_HEADER]!);
     await expect(revocation.session(ARTIFACT, "sess")).resolves.toEqual({ closed: 1 });
     await revocation.invitation({ invitationId: "inv-1", storageScopeId: SCOPE, artifactId: ARTIFACT, bindingGeneration: 1,
       liveSessionId: "sess", inviteeId: "carol", grantorId: "alice", createdAt: "", expiresAt: "", revokedAt: "x", epoch: 2 });
     expect(open.close).toHaveBeenCalled();
     const verify = (token: string) => verifyLiveControl(token, { key: (kid) => kid === "immo-preprod-live-1" ? config.key : undefined,
       now: () => Date.now() });
-    expect(verify(tokens[0]!)).toMatchObject({ op: "revoke_session", sessionId: "sess", invitationId: "", epoch: 0, host: "pages.test" });
-    expect(verify(tokens[1]!)).toMatchObject({ op: "revoke_invitation", sessionId: "", invitationId: "inv-1", epoch: 2 });
+    const [session, invitation] = tokens().map(verify);
+    expect(session).toMatchObject({ op: "revoke_session", sessionId: "sess", invitationId: "", epoch: 0, host: `${ARTIFACT}.pages.test` });
+    expect(invitation).toMatchObject({ op: "revoke_invitation", sessionId: "", invitationId: "inv-1", epoch: 2,
+      host: `${ARTIFACT}.pages.test` });
+    // Exactly the 10 CONTROL_FIELDS.
+    expect(Object.keys(invitation!).sort()).toEqual(["artifactId", "epoch", "exp", "host", "iat", "invitationId", "kid", "op",
+      "sessionId", "v"]);
+    expect(sent.every((input) => input.host === `${ARTIFACT}.pages.test` && String(input.target) === "http://artifact-content.test:8791/"))
+      .toBe(true);
+  });
+
+  it("keeps the push closed without the internal edge URL and drops cached grants on revocation", async () => {
+    const config = readLiveEdgeConfig({ IMMO_ARTIFACTS_LIVE_HOST_KEYS: `immo-preprod-live-1=${key}`,
+      IMMO_ARTIFACTS_LIVE_HOST_KID: "immo-preprod-live-1", IMMO_ARTIFACTS_LIVE_HOST: "pages.test" });
+    const revocation = await composeLiveEdgeRevocation(config, createLiveSocketRegistry(), transport(204).send);
+    await expect(revocation.session(ARTIFACT, "sess")).rejects.toMatchObject({ kind: "provider_unavailable" });
+    const grants = { invalidate: vi.fn(), invalidateInvitation: vi.fn() };
+    const withGrants = createLiveRevocation({ sockets: createLiveSocketRegistry(), push: vi.fn(async () => {}), grants });
+    await withGrants.session(ARTIFACT, "sess");
+    await withGrants.invitation({ invitationId: "inv-1", storageScopeId: SCOPE, artifactId: ARTIFACT, bindingGeneration: 1,
+      liveSessionId: "sess", inviteeId: "carol", grantorId: "alice", createdAt: "", expiresAt: "", revokedAt: "x", epoch: 2 });
+    expect(grants.invalidate).toHaveBeenCalledWith(ARTIFACT);
+    expect(grants.invalidateInvitation).toHaveBeenCalledWith(ARTIFACT, "inv-1");
   });
 });
