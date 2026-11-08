@@ -89,3 +89,7 @@ data:
   # live_write and live_control(start) reach the builder instead of answering
   # builder_unavailable. The forward URL stays on radar-api (reader mount).
   IMMO_ARTIFACTS_LIVE_EDGE_ENABLED: "1"
+  # GB4 GO preprod (owner, recorded 07/11 ~22 h 10 Montreal): live worker and
+  # generic invitations qualified, PREPROD ONLY. Only the literal `true` counts.
+  IMMO_ARTIFACTS_LIVE_QUALIFIED: "true"
+  IMMO_ARTIFACTS_LIVE_INVITATIONS_QUALIFIED: "true"
