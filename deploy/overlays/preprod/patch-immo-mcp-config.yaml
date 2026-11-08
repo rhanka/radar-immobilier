@@ -63,3 +63,24 @@ data:
   # dispatch. Kept in the ConfigMap (not the Deployment patch) so the
   # workload render guard keeps its exact ARTIFACTS_ env count.
   ARTIFACTS_PUBLISH_BLOB_DEADLINE_MS: "120000"
+  # Git-backed artifact mode, PREPROD ONLY (docs/operator/git-artifact-mode.md).
+  # Same value on radar-api (patch-artifacts-control.yaml): both compose the
+  # artifacts host and the profile digest depends on it. Requires the
+  # @sentropic/artifacts 0.2.20 qualification commit: on 0.2.18 the stage
+  # refuses to boot (artifact_git_mode_provider_unqualified).
+  IMMO_ARTIFACTS_GIT_MODE: "live"
+  # Owner identity for the git-backed mode (owner rhanka; preprod OIDC sub of fabien.antoine@gmail.com).
+  IMMO_ARTIFACTS_GIT_COMMITTER_NAME: "rhanka"
+  IMMO_ARTIFACTS_GIT_COMMITTER_EMAIL: "24390932+rhanka@users.noreply.github.com"
+  IMMO_ARTIFACTS_GIT_CODE_READERS: "1b9b9e15-2956-4df4-9ee1-a42273f0d096"
+  IMMO_ARTIFACTS_GIT_HUMANS: '[{"principalId":"1b9b9e15-2956-4df4-9ee1-a42273f0d096","name":"rhanka","email":"24390932+rhanka@users.noreply.github.com"}]'
+  # Non-secret git mode configuration (preprod values, Sentropic 2026-11-07).
+  # Builder hostId on the Sentropic side: immo-preprod.
+  IMMO_ARTIFACTS_SERVICE_OAUTH_TOKEN_ENDPOINT: "https://preprod.auth.sent-tech.ca/api/v1/auth/oauth/token"
+  IMMO_ARTIFACTS_GIT_BROKER_ORIGIN: "https://preprod.sentropic.sent-tech.ca"
+  IMMO_ARTIFACTS_BUILDER_URL: "https://preprod.sentropic.sent-tech.ca/api/v1/artifacts/builder"
+  IMMO_ARTIFACTS_RECEIPT_KEY_ID: "immo-preprod-receipt-1"
+  IMMO_ARTIFACTS_LIVE_HOST_KID: "immo-preprod-live-1"
+  IMMO_ARTIFACTS_LIVE_HOST: "pages.preprod.immo.sent-tech.ca"
+  IMMO_ARTIFACTS_LIVE_CONTROL_URL: "https://pages.preprod.immo.sent-tech.ca/_live-control/v1"
+  IMMO_ARTIFACTS_LIVE_DRAFT_KEY_CURRENT: "v1"
