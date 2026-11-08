@@ -29,6 +29,11 @@ const derivedMigrations = [
   ["0040_artifacts_git_attach_intents", "0012_git_attach_intents.sql",
     "8cfb72c5337dcf6305909af52d789940d1944bcf5fca4e4e2d845d745c8d19f8",
     "621fa02397f0002f9e5e06bca1076be0a1c105d87342d14379f4bf4beb92ea02"],
+  // Generic live invitations (0.2.22): session-bound invitations and epochs. Runs AFTER immo 0041, which drops the
+  // table of the immo store (0038) the package migration re-creates under the same name (its guard refuses a foreign one).
+  ["0042_artifacts_live_invitations", "0013_live_invitations.sql",
+    "fb839f4579df640032a16cadc7cf66a987542701ba853a78e5889d0a2a31f65b",
+    "a9deebcde5819871e63ff9c40a6436933d64b775a600ae99843deee6a945f336"],
 ] as const;
 
 const IDEMPOTENCE_REWRITE: readonly (readonly [RegExp, string])[] = [
@@ -65,6 +70,18 @@ describe("artifact migration provenance", () => {
       expect(bytes.toString("utf8")).toBe(rewrite(original.toString("utf8")));
       expect(sha256(bytes)).toBe(expected);
     });
+  it("applies the package live invitations migration 0013 (immo 0042) after the immo drop 0041", () => {
+    const tags = journal.entries.map((entry) => entry.tag);
+    const drop = tags.indexOf("0041_drop_artifacts_live_invitations");
+    const invitations = tags.indexOf("0042_artifacts_live_invitations");
+    expect(drop).toBeGreaterThan(-1);
+    expect(invitations).toBe(drop + 1);
+    expect(journal.entries[invitations]!.when).toBeGreaterThan(journal.entries[drop]!.when);
+    // 0038 (immo store) < 0041 (drop) < 0042 (package): the package guard would refuse the old table.
+    expect(tags.indexOf("0038_artifacts_live_invitations")).toBeLessThan(drop);
+    expect(copy("0041_drop_artifacts_live_invitations").toString("utf8")).toContain("live invitations not empty");
+    expect(copy("0042_artifacts_live_invitations").toString("utf8")).toContain("live invitations schema mismatch");
+  });
   it("appends unique increasing timestamps after every earlier migration", () => {
     let previousIndex = -1;
     for (const [tag] of [...migrations, ...derivedMigrations].sort((a, b) => a[0].localeCompare(b[0]))) {

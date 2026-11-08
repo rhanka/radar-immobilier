@@ -87,6 +87,10 @@ const STABLE_TOOL_SUMMARIES: Readonly<Record<string, string>> = {
   artifacts_live_reset: "Discard your own uncommitted live draft.",
   artifacts_live_status: "Inspect the live state of a page you own or were invited to.",
   artifacts_live_control: "Start or stop the live session of your own page.",
+  artifacts_live_invite: "Invite a colleague to view your live page session.",
+  artifacts_live_accept_invitation: "Accept an invitation to view a live page session.",
+  artifacts_live_revoke_invitation: "Revoke a live page invitation.",
+  artifacts_live_invitations: "List the invitations of a live page session.",
 };
 
 /**

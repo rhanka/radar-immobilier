@@ -12,7 +12,8 @@
  * (fetch_app_source, live_read, live_status); every other
  * git tool writes and needs `immo:artifacts:write`.
  */
-import { GIT_ARTIFACT_TOOLS, GIT_MODE_ARTIFACT_TOOLS, GIT_READ_TOOLS, type GitArtifactTool } from "@radar/artifacts-host";
+import { GIT_ARTIFACT_TOOLS, GIT_MODE_ARTIFACT_TOOLS, GIT_READ_TOOLS, invitationToolScope, isGitInvitationTool,
+  type GitArtifactTool } from "@radar/artifacts-host";
 
 export const GIT_READ_SCOPE = "immo:artifacts:read" as const;
 export const GIT_WRITE_SCOPE = "immo:artifacts:write" as const;
@@ -28,6 +29,10 @@ export const GIT_EFFECTIVE_REQUIRED: Readonly<Record<GitArtifactTool, readonly s
   artifacts_live_reset: ["artifactId", "expectedHeadSha", "expectedLiveRevision", "idempotencyKey"],
   artifacts_live_status: ["artifactId"],
   artifacts_live_control: ["artifactId", "action", "idempotencyKey"],
+  artifacts_live_invite: ["artifactId", "liveSessionId", "userRef", "expiresInSeconds", "idempotencyKey"],
+  artifacts_live_accept_invitation: ["artifactId", "invitationId", "idempotencyKey"],
+  artifacts_live_revoke_invitation: ["artifactId", "invitationId", "idempotencyKey"],
+  artifacts_live_invitations: ["artifactId"],
 });
 
 /** Host semantics recorded in the effective profile (candidate integrity). */
@@ -41,9 +46,15 @@ const GIT_EFFECTIVE_NOTES: Readonly<Record<GitArtifactTool, Readonly<Record<stri
   artifacts_live_reset: { live: "the caller's own personal binding only" },
   artifacts_live_status: { live: "binding owner, or an invitee with an active session-bound invitation and current code rights" },
   artifacts_live_control: { live: "the caller's own personal binding only" },
+  artifacts_live_invite: { live: "binding owner only; builder_unavailable until invitations are qualified" },
+  artifacts_live_accept_invitation: { live: "the invited principal only; viewing only, builder_unavailable until invitations are qualified" },
+  artifacts_live_revoke_invitation: { live: "the binding owner or the invitee; builder_unavailable until invitations are qualified" },
+  artifacts_live_invitations: { live: "binding owner sees every invitation, an invitee only their own" },
 });
 
 export function gitToolScope(tool: GitArtifactTool): string {
+  // Invitation tools: the package class map decides, never the tool mutability.
+  if (isGitInvitationTool(tool)) return invitationToolScope(tool);
   return GIT_READ_TOOLS.includes(tool) ? GIT_READ_SCOPE : GIT_WRITE_SCOPE;
 }
 
