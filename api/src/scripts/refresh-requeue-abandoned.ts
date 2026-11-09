@@ -4,6 +4,15 @@
  * Usage:
  *   node dist/scripts/refresh-requeue-abandoned.js --dry-run [--since <date>] [--city <slug>]...
  *   node dist/scripts/refresh-requeue-abandoned.js --operator <who> [--since <date>] [--city <slug>]...
+ *   node dist/scripts/refresh-requeue-abandoned.js --operator <who> --restore <stamp> [--city <slug>]...
+ *
+ * Restore procedure: a real requeue first copies each original registry to
+ * `refresh/018/_backup/requeue-abandoned-<stamp>/<city>/coverage.json` (the
+ * stamp and per-city `backupKey` are in the audit trace). To roll back, run
+ * `--restore <stamp>` (optionally `--city <slug>`, repeatable): it recopies
+ * each backup byte for byte over `refresh/018/<city>/coverage.json`, under
+ * the same flock as a requeue, and is idempotent. `--dry-run --restore
+ * <stamp>` only reports what would be restored.
  *
  * Requeues `abandoned` -> `pending` (failures 0, `lastReason` removed) through
  * `services/graph/refresh-coverage.ts` only. `--dry-run` writes nothing and
@@ -19,7 +28,10 @@
  */
 
 import { loadConfig } from "../config.js";
-import { runRefreshRequeueAbandoned, type RefreshRequeueTrace } from "../services/graph/refresh-requeue.js";
+import {
+  runRefreshRequeueAbandoned, runRefreshRequeueRestore,
+  type RefreshRequeueTrace,
+} from "../services/graph/refresh-requeue.js";
 import { getScrapeObjectStore } from "../storage/s3-object-store.js";
 
 export interface RefreshRequeueArgs {
@@ -27,12 +39,14 @@ export interface RefreshRequeueArgs {
   readonly since?: Date;
   readonly cities: string[];
   readonly operator?: string;
+  readonly restore?: string;
 }
 
 export function parseRefreshRequeueArgs(argv: readonly string[]): RefreshRequeueArgs {
   let dryRun = false;
   let since: Date | undefined;
   let operator: string | undefined;
+  let restore: string | undefined;
   const cities: string[] = [];
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index]!;
@@ -51,9 +65,12 @@ export function parseRefreshRequeueArgs(argv: readonly string[]): RefreshRequeue
     } else if (arg === "--city") {
       for (const slug of next().split(",")) if (slug.trim()) cities.push(slug.trim());
     } else if (arg === "--operator") operator = next();
+    else if (arg === "--restore") restore = next();
     else throw new Error(`unknown argument: ${arg}`);
   }
-  return { dryRun, ...(since ? { since } : {}), cities, ...(operator ? { operator } : {}) };
+  if (restore !== undefined && since) throw new Error("--restore cannot be combined with --since");
+  return { dryRun, ...(since ? { since } : {}), cities,
+    ...(operator ? { operator } : {}), ...(restore ? { restore } : {}) };
 }
 
 export function formatDryRunCounts(trace: RefreshRequeueTrace): string {
@@ -68,6 +85,14 @@ async function main(): Promise<void> {
   const who = args.operator ?? process.env.REQUEUE_OPERATOR ?? process.env.OPERATOR ?? "";
   if (!args.dryRun && !who) throw new Error("--operator <who> (or REQUEUE_OPERATOR) is required for a real run");
   const store = getScrapeObjectStore(loadConfig());
+  if (args.restore) {
+    const restoreTrace = await runRefreshRequeueRestore(store, {
+      who: who || "dry-run", dryRun: args.dryRun, stamp: args.restore,
+      ...(args.cities.length ? { cities: args.cities } : {}),
+    });
+    console.log(JSON.stringify(restoreTrace));
+    return;
+  }
   const trace = await runRefreshRequeueAbandoned(store, {
     who: who || "dry-run", dryRun: args.dryRun,
     ...(args.since ? { since: args.since } : {}),
