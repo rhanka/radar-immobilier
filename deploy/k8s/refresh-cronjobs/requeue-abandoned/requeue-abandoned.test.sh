@@ -39,6 +39,13 @@ if render prod apply "$T/prod.yaml" REQUEUE_OPERATOR=conductor REQUEUE_SINCE=202
   ok "prod apply render: namespace, since, operator, prod S3 secret, parses"
 else bad "prod apply render ($(cat "$T/out"))"; fi
 
+if render prod restore "$T/restore.yaml" REQUEUE_OPERATOR=conductor REQUEUE_RESTORE_STAMP=2026-11-09T00-00-00-000Z REQUEUE_CITY=beta \
+  && grep -q 'args="--restore 2026-11-09T00-00-00-000Z --city beta --operator conductor"' "$T/restore.yaml" \
+  && grep -q 'flock -n /keyring/runtime/.refresh.lock' "$T/restore.yaml" \
+  && kubectl create --dry-run=client --validate=false -f "$T/restore.yaml" >/dev/null 2>&1; then
+  ok "prod restore render: stamp, city, operator, flock, parses"
+else bad "prod restore render ($(cat "$T/out"))"; fi
+
 if render prod apply "$T/noop.yaml" 2>/dev/null; then bad "apply without operator accepted"
 else grep -q "REQUEUE_OPERATOR is required" "$T/out" && ok "apply without operator refused" || bad "apply without operator: wrong refusal"; fi
 
