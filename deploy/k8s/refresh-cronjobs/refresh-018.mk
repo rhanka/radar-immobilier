@@ -479,15 +479,19 @@ guard-requeue:
 	@timeout $$(( $(REQUEUE_REQUEST_SECONDS) * 3 )) $(REQUEUE_K) --request-timeout=$(REQUEUE_REQUEST_SECONDS)s get serviceaccount radar-app -o name >/dev/null
 
 .PHONY: render-requeue-abandoned
-render-requeue-abandoned: ## Render the one-off requeue Job (REQUEUE_MODE=dry-run|apply)
+render-requeue-abandoned: ## Render the one-off requeue Job (REQUEUE_MODE=dry-run|apply|restore)
 	@test "$(ENV)" = "preprod" -o "$(ENV)" = "prod" || { echo "ENV=preprod or ENV=prod is required" >&2; exit 1; }
 	@[[ "$(REQUEUE_IMAGE_REF)" =~ ^ghcr\.io/rhanka/radar-api@sha256:[0-9a-f]{64}$$ ]] \
 	  || { echo "REQUEUE_IMAGE_REF must be the radar API immutable digest" >&2; exit 1; }
 	@test -n "$(REQUEUE_RENDER_OUT)" || { echo "REQUEUE_RENDER_OUT is required" >&2; exit 1; }
-	@test "$(REQUEUE_MODE)" = "dry-run" -o "$(REQUEUE_MODE)" = "apply" \
-	  || { echo "REQUEUE_MODE must be dry-run or apply" >&2; exit 1; }
-	@if [ "$(REQUEUE_MODE)" = "apply" ]; then test -n "$(REQUEUE_OPERATOR)" \
-	  || { echo "REQUEUE_OPERATOR is required for REQUEUE_MODE=apply" >&2; exit 1; }; fi
+	@test "$(REQUEUE_MODE)" = "dry-run" -o "$(REQUEUE_MODE)" = "apply" -o "$(REQUEUE_MODE)" = "restore" \
+	  || { echo "REQUEUE_MODE must be dry-run, apply or restore" >&2; exit 1; }
+	@if [ "$(REQUEUE_MODE)" = "apply" -o "$(REQUEUE_MODE)" = "restore" ]; then test -n "$(REQUEUE_OPERATOR)" \
+	  || { echo "REQUEUE_OPERATOR is required for REQUEUE_MODE=apply/restore" >&2; exit 1; }; fi
+	@if [ "$(REQUEUE_MODE)" = "restore" ]; then \
+	  [[ "$(REQUEUE_RESTORE_STAMP)" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$$ ]] && [[ "$(REQUEUE_RESTORE_STAMP)" != *".."* ]] \
+	    || { echo "REQUEUE_RESTORE_STAMP is required for REQUEUE_MODE=restore" >&2; exit 1; }; \
+	  test -z "$(REQUEUE_SINCE)" || { echo "REQUEUE_SINCE cannot be combined with restore" >&2; exit 1; }; fi
 	@[[ -z "$(REQUEUE_SINCE)" || "$(REQUEUE_SINCE)" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}([T ].*)?$$ ]] \
 	  || { echo "REQUEUE_SINCE must be a date (YYYY-MM-DD or ISO timestamp)" >&2; exit 1; }
 	@[[ -z "$(REQUEUE_CITY)" || "$(REQUEUE_CITY)" =~ ^[a-z0-9][a-z0-9,-]*$$ ]] \
@@ -496,7 +500,7 @@ render-requeue-abandoned: ## Render the one-off requeue Job (REQUEUE_MODE=dry-ru
 	  || { echo "REQUEUE_OPERATOR must be a single token (letters, digits, @ . _ -)" >&2; exit 1; }
 	@set -o pipefail; umask 077; overlay="$(REQUEUE_DIR)"; \
 	  [ "$(ENV)" = "prod" ] && overlay="$(REQUEUE_PROD_DIR)"; \
-	  args="$(if $(filter dry-run,$(REQUEUE_MODE)),--dry-run,)$(if $(REQUEUE_SINCE), --since $(REQUEUE_SINCE),)$(if $(REQUEUE_CITY), --city $(REQUEUE_CITY),)$(if $(REQUEUE_OPERATOR), --operator $(REQUEUE_OPERATOR),)"; args="$${args# }"; \
+	  args="$(if $(filter dry-run,$(REQUEUE_MODE)),--dry-run,)$(if $(filter restore,$(REQUEUE_MODE)),--restore $(REQUEUE_RESTORE_STAMP),)$(if $(REQUEUE_SINCE), --since $(REQUEUE_SINCE),)$(if $(REQUEUE_CITY), --city $(REQUEUE_CITY),)$(if $(REQUEUE_OPERATOR), --operator $(REQUEUE_OPERATOR),)"; args="$${args# }"; \
 	  kubectl kustomize --load-restrictor LoadRestrictionsNone "$$overlay" \
 	    | sed -e "s#$(PLACEHOLDER)#$(REQUEUE_IMAGE_REF)#g" \
 	          -e "s#REQUEUE-ARGS-SET-BY-RENDER#$$args#g" \
