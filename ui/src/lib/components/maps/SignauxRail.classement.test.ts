@@ -4,8 +4,8 @@ import SignauxRail from "./SignauxRail.svelte";
 
 afterEach(() => cleanup());
 
-describe("SignauxRail Classement section — acceptance criteria", () => {
-  it("criterion 1: Classement filter exists, checked by default except Écarté, with counts", async () => {
+describe("SignauxRail Pertinence dropdown — acceptance criteria", () => {
+  it("criterion 1: Pertinence filter exists, checked by default except Écarté, with counts", async () => {
     const onClassementFilterChange = vi.fn();
     const view = render(SignauxRail, {
       props: {
@@ -15,21 +15,27 @@ describe("SignauxRail Classement section — acceptance criteria", () => {
         onClassementFilterChange,
       },
     });
-    expect(view.container.textContent).toContain("Classement");
+    // « Pertinence » is a field label like « Période des signaux », not an
+    // uppercase collapsible section header.
+    expect(view.container.textContent).toContain("Pertinence");
+    expect(view.container.textContent).not.toContain("CLASSEMENT");
 
-    // Dropdown is closed by default: summary button shows "3 sur 4",
-    // the checkbox list is not rendered until it is opened.
+    // Dropdown closed by default: summary by class name, no counter.
     const trigger = view.getByTestId("classement-filter-trigger");
-    expect(trigger.textContent).toContain("3 sur 4");
+    expect(trigger.textContent).toContain("Pertinent, À surveiller, Non classé");
+    expect(trigger.textContent).not.toContain("3 sur 4");
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
     expect(view.queryByTestId("classement-filter-panel")).toBeNull();
     expect(screen.queryByLabelText(/Pertinent/)).toBeNull();
 
     await fireEvent.click(trigger);
     expect(trigger.getAttribute("aria-expanded")).toBe("true");
-    expect(view.getByTestId("classement-filter-panel")).toBeTruthy();
-    expect(view.container.textContent).toContain("Pertinent (3)");
-    expect(view.container.textContent).toContain("Écarté (1)");
+    const panel = view.getByTestId("classement-filter-panel");
+    expect(panel).toBeTruthy();
+    // Counts in right-aligned pills inside the open list, not "(n)".
+    expect(panel.textContent).not.toContain("(3)");
+    const pills = panel.querySelectorAll(".st-badge");
+    expect([...pills].map((pill) => pill.textContent?.trim())).toEqual(["3", "2", "5", "1"]);
 
     // Non-vacuous: every checkbox must be found by its label text.
     const checkbox = (label: string): HTMLInputElement => {
