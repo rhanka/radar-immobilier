@@ -171,6 +171,16 @@ no further image change is expected.
 
 ## Polling log (@sentropic/llm-mesh@0.33.1)
 
-- 2026-11-09T14:01:03Z — 404 (not published; latest 0.33.0). Polling every
-  5 minutes from this lane; the bump diff above is applied as soon as the
-  version resolves.
+- 2026-11-09T14:01:03Z — 404 (not published; latest 0.33.0).
+- 2026-11-09T14:06:43Z — 404.
+- 2026-11-09T14:12:45Z — 404 (latest still 0.33.0).
+
+**Blocker / pending (not a failure of this lane):** 0.33.1 is not yet on
+npm (ETA ~12:00–12:30 Montréal ≈ 17:00–17:30 UTC), so the bump diff above
+was **not** applied — pinning an unpublished version would break
+`npm ci` and the test run. Everything else in this report is done, pushed,
+and green. Next step for whoever picks this up after publication: apply
+the exact diff above, regenerate the lockfile, run the refresh tests and
+typecheck listed there, commit as
+`chore(deps): bump llm-mesh to 0.33.1 for anthropic seat fallback`, push
+`hotfix/v1.2.19`, and extend this log with the result.
