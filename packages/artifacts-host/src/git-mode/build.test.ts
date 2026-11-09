@@ -235,6 +235,9 @@ describe("host build API client (W7)", () => {
     const client = createHostBuildApiClient({ baseUrl: BASE, identity, fetch: fetcher as never });
     await expect(client.status(job.artifactId, "j1")).resolves.toEqual({ jobId: "j1", state: "published", releaseId: "r1" });
     expect(String((fetcher.mock.calls[0] as unknown as [URL])[0])).toBe(`${BASE}/v1/builds/${job.artifactId}/j1`);
+    const missing = createHostBuildApiClient({ baseUrl: BASE, identity,
+      fetch: (async () => new Response("{}", { status: 404 })) as never });
+    await expect(missing.status(job.artifactId, "unknown")).resolves.toBeUndefined();
   });
 
   it("fails closed on builder errors, malformed answers and a missing job store", async () => {
