@@ -93,6 +93,14 @@
     zoneMatchesMillesime,
     type ZoneMillesimeFilter,
   } from "$lib/maps/zone-millesime-filter.js";
+  import SignalClassementMenu from "$lib/components/maps/SignalClassementMenu.svelte";
+  import {
+    classementKey,
+    EMPTY_CLASSEMENT_ENTRY,
+    type ClassementEntry,
+    type ReasonCodeEntry,
+    type SignalClass,
+  } from "$lib/signals/signal-classement.js";
   import LotFilterHeader from "$lib/components/maps/LotFilterHeader.svelte";
   import ZoneFilterHeader from "$lib/components/maps/ZoneFilterHeader.svelte";
   import {
@@ -187,6 +195,14 @@
    */
   export let hoveredSignalId: string | null = null;
   export let onHoverSignal: (id: string | null) => void = () => {};
+  /** Classement (spec 2026-11-08): per-signal class map + Steve reason codes. */
+  export let classementMap: ReadonlyMap<string, ClassementEntry> = new Map();
+  export let classementReasonCodes: ReasonCodeEntry[] = [];
+  export let onApplyClassement: (
+    node: GraphSignalNode,
+    nextClass: SignalClass,
+    reasonCode: string | null,
+  ) => void = () => {};
 
   /**
    * Focus the head button of a signal card. No-op when the card is absent
@@ -1236,6 +1252,11 @@
                       </span>
                     {/if}
                   </button>
+                  <SignalClassementMenu
+                    classe={classementMap.get(classementKey(node.type, node.id))?.classe ?? EMPTY_CLASSEMENT_ENTRY.classe}
+                    reasonCodes={classementReasonCodes}
+                    onApply={(nextClass, reasonCode) => onApplyClassement(node, nextClass, reasonCode)}
+                  />
 
                   {#if nodeVisual.focused}
                     {@const evidence = signalEvidence(node)}

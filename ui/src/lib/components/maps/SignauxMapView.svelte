@@ -184,6 +184,13 @@
   } from "$lib/signals/signal-date-filter.js";
   import { rankVivierBNodes } from "$lib/signals/vivier-b-ranking.js";
   import {
+    buildClassementMap,
+    classementCounts,
+    classementKey,
+    filterNodesByClassement,
+  } from "$lib/signals/signal-classement.js";
+  import { applyClassement as applyClassementWrite, fetchReasonCodes } from "$lib/signals/signal-classement-client.js";
+  import {
     buildSignauxLotLegend,
     lotLineColorExpression,
     signauxLotFillColorExpression,
@@ -278,6 +285,15 @@
   let detailError: string | null = null;
   let detailNodes: GraphSignalNode[] = [];
   let detailLegacyProjection: LegacyZmpProjection | null = null;
+  // Classement (spec 2026-11-08): heads of the coherent read + Steve codes.
+  let detailSelectionHeads: import("$lib/signals/graph-signal-detail-client.js").CoherentSelectionHead[] = [];
+  let detailArchiveHeads: import("$lib/signals/graph-signal-detail-client.js").CoherentArchiveHead[] = [];
+  let classementFilter: import("$lib/signals/signal-classement.js").ClassementFilter = {
+    pertinent: true, a_surveiller: true, non_classe: true, ecarte: false,
+  };
+  let classementReasonCodes: import("$lib/signals/signal-classement.js").ReasonCodeEntry[] = [];
+  let classementReasonWorkspace: string | null = null;
+  let classementOverrides = new Map<string, import("$lib/signals/signal-classement.js").ClassementEntry>();
   // ── Waiters PAR COUCHE (zones / lots indépendants) ────────────────────────
   // Chaque couche porte SON propre état chargement + erreur : l'échec ou la
   // lenteur de l'une n'affecte JAMAIS l'affichage de l'autre.
@@ -563,6 +579,13 @@
   // without one no scoped request is issued.
   $: workspaceState = $workspaceContext;
   $: scopedWorkspaceId = workspaceState.context.workspaceId;
+  $: if (scopedWorkspaceId !== null && classementReasonWorkspace !== scopedWorkspaceId) {
+    classementReasonWorkspace = scopedWorkspaceId;
+    const ws = scopedWorkspaceId;
+    void fetchReasonCodes({ workspaceId: ws })
+      .then((codes) => { if (classementReasonWorkspace === ws) classementReasonCodes = codes; })
+      .catch(() => { if (classementReasonWorkspace === ws) classementReasonCodes = []; });
+  }
   $: workspaceNote = scopedWorkspaceId === null ? workspaceUnavailableMessage(workspaceState) : null;
 
   // Keep viewers isolated: clear details on sub/workspace changes, then
@@ -879,6 +902,70 @@
   // extraction) ; elle se corrige côté données, pas en surfaçant par-dessus les
   // filtres vivier-v2.
   $: filteredDetailNodes = gatedDetailNodes;
+  // Classement: class map from coherent heads (+ optimistic overrides), then
+  // the Classement filter lens on the displayed list.
+  $: classementBaseMap = buildClassementMap(detailSelectionHeads, detailArchiveHeads);
+  $: classementMap = new Map([...classementBaseMap, ...classementOverrides]);
+  $: classementFilteredNodes = filterNodesByClassement(filteredDetailNodes, classementMap, classementFilter);
+  $: classementCountsValue = classementCountsFor(detailNodes, detailArchiveHeads, classementMap);
+  function classementCountsFor(
+    nodes: GraphSignalNode[],
+    archiveHeads: import("$lib/signals/graph-signal-detail-client.js").CoherentArchiveHead[],
+    map: Map<string, import("$lib/signals/signal-classement.js").ClassementEntry>,
+  ): Record<import("$lib/signals/signal-classement.js").SignalClass, number> {
+    const classes: import("$lib/signals/signal-classement.js").SignalClass[] = nodes.map(
+      (node) => map.get(classementKey(node.type, node.id))?.classe ?? "non_classe",
+    );
+    const visibleKeys = new Set(nodes.map((node) => classementKey(node.type, node.id)));
+    for (const head of archiveHeads) {
+      if (head.effectiveDiscarded && !visibleKeys.has(classementKey(head.target.type, head.target.id))) {
+        classes.push("ecarte");
+      }
+    }
+    return classementCounts(classes);
+  }
+  function handleClassementFilterChange(
+    next: import("$lib/signals/signal-classement.js").ClassementFilter,
+  ): void {
+    classementFilter = next;
+  }
+  async function handleApplyClassement(
+    node: GraphSignalNode,
+    nextClass: import("$lib/signals/signal-classement.js").SignalClass,
+    reasonCode: string | null,
+  ): Promise<void> {
+    const workspaceId = scopedWorkspaceId;
+    const citySlug = selectedCity?.municipality.slug ?? node.citySlug;
+    if (workspaceId === null || !citySlug || !node.facetFingerprint) return;
+    const key = classementKey(node.type, node.id);
+    const current = classementMap.get(key) ?? {
+      classe: "non_classe" as const, reasonCode: null,
+      pertinentHeadId: null, aSurveillerHeadId: null, archiveHeadId: null, discarded: false,
+    };
+    const overrides = new Map(classementOverrides);
+    overrides.set(key, { ...current, classe: nextClass, reasonCode, discarded: nextClass === "ecarte" });
+    classementOverrides = overrides;
+    try {
+      await applyClassementWrite(
+        { workspaceId },
+        {
+          target: { citySlug, type: node.type as "Signal" | "DesignationEvent", id: node.id },
+          displayedFingerprint: node.facetFingerprint,
+          current,
+          nextClass,
+          reasonCode,
+          catalog: classementReasonCodes,
+        },
+      );
+      classementOverrides = new Map();
+      await loadDetailForCity(citySlug, { silent: true });
+      void load();
+    } catch (error) {
+      classementOverrides = new Map();
+      console.warn("Classement write failed:", error);
+      if (selectedCity) void loadDetailForCity(selectedCity.municipality.slug, { silent: true });
+    }
+  }
   $: effectiveDetailError = detailError ?? (
     !detailLoading && detailNodes.length > 0 && !detailProjection.available
       ? "Projection du vivier indisponible (contrat serveur incompatible)."
@@ -900,7 +987,7 @@
    */
   $: selectedCityLiveCount =
     selectedCity && !detailLoading && detailProjection.available
-      ? filteredDetailNodes.length
+      ? classementFilteredNodes.length
       : null;
   $: displayedLots = buildDisplayedLots(lotsResponse, zonesResponse, filteredDetailNodes);
 
@@ -1532,6 +1619,8 @@
       // 200 with no node: city without graphify signals (explicit empty
       // state, not an error).
       detailNodes = res.nodes;
+      detailSelectionHeads = res.selection ?? [];
+      detailArchiveHeads = res.heads ?? [];
       detailLegacyProjection = res.legacyProjection;
       // Alimenter le cache multi-villes (recoloration aplats filtrée)
       detailCache.set(citySlug, res.nodes);
@@ -2583,6 +2672,9 @@
       onFilterChange={handleFilterChange}
       onExclusionsChange={handleExclusionsChange}
       onTimeRangeChange={handleTimeRangeChange}
+      {classementFilter}
+      classementCounts={classementCountsValue}
+      onClassementFilterChange={handleClassementFilterChange}
     />
   </svelte:fragment>
 
@@ -2868,7 +2960,7 @@
     <SignauxSelPanel
       bind:this={selPanel}
       {selectedCity}
-      detailNodes={filteredDetailNodes}
+      detailNodes={classementFilteredNodes}
       unfilteredSignalCount={detailNodes.length}
       {detailLoading}
       detailError={effectiveDetailError}
@@ -2899,6 +2991,9 @@
       onRetryGeo={retryGeo}
       hoveredSignalId={hoveredEvidenceSignalId}
       onHoverSignal={setHoveredEvidenceSignal}
+      {classementMap}
+      classementReasonCodes={classementReasonCodes}
+      onApplyClassement={(node, nextClass, reasonCode) => void handleApplyClassement(node, nextClass, reasonCode)}
     />
   </svelte:fragment>
 </ViewLayout>
