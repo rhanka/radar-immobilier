@@ -7,9 +7,9 @@
 import { readFile, writeFile, mkdir, readdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 
-const DIR = "/home/antoinefa/src/radar-immobilier-bench/tmp/bench-wonder";
-const graphify = await import(
-  `${DIR}/sandbox/node_modules/@sentropic/graphify/dist/index.js`);
+const DIR = process.env.BENCH_DIR ?? new URL("..", import.meta.url).pathname.replace(/\/$/, "");
+const graphify = await import("@sentropic/graphify").catch(() => import(
+  `${DIR}/sandbox/node_modules/@sentropic/graphify/dist/index.js`));
 const { buildProfileChunkPrompt, loadOntologyProfile, registryRecordsToExtraction,
   validateExtraction, validateProfileExtraction } = graphify;
 

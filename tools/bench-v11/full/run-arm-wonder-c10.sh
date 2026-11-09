@@ -1,6 +1,6 @@
 #!/bin/bash
 # Concurrency-10 continuation, strictly same muse command as run-arm-wonder.sh
-DIR=/home/antoinefa/src/radar-immobilier-bench/tmp/bench-wonder/full
+DIR="${BENCH_DIR:-$(cd "$(dirname "$0")/.." && pwd)}/full"
 ARM="muse-wonder-low"
 ARMDIR="$DIR/arms/$ARM"
 mkdir -p "$ARMDIR/raw"

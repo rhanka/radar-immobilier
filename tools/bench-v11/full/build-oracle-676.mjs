@@ -8,7 +8,7 @@
 // effect bounded (see README).
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 
-const DIR = "/home/antoinefa/src/radar-immobilier-bench/tmp/bench-wonder";
+const DIR = process.env.BENCH_DIR ?? new URL("..", import.meta.url).pathname.replace(/\/$/, "");
 const H = `${DIR}/harness`;
 const OUT = `${DIR}/full/oracle-676`;
 
