@@ -356,7 +356,32 @@ verify-renders:
 	    && kubectl kustomize "$$tmp/backup" > "$$tmp/backup.yaml" \
 	    || { echo "bascule window contract failed: cannot render $(BACKUP_DAILY_MANIFEST) (canonical YAML documents are required)" >&2; exit 1; }; \
 	  awk -v restore="$$crons" -f "$(BASCULE_WINDOW_AWK)" "$$tmp/preprod.yaml" "$$tmp/prod.yaml" "$$tmp/backup.yaml" \
-	    || { echo "bascule window contract failed: the daily restore slot of $$wf must stay after the daily backup and clear of every refresh start" >&2; exit 1; }
+	    || { echo "bascule window contract failed: the daily restore slot of $$wf must stay after the daily backup and clear of every refresh start" >&2; exit 1; }; \
+	  $(MAKE) -f "$(lastword $(MAKEFILE_LIST))" render-requeue-recurrent REQUEUE_IMAGE_REF="$$image" REQUEUE_RENDER_OUT="$$tmp/preprod-requeue.yaml" ENV=preprod; \
+	  $(MAKE) -f "$(lastword $(MAKEFILE_LIST))" render-requeue-recurrent REQUEUE_IMAGE_REF="$$image" REQUEUE_RENDER_OUT="$$tmp/prod-requeue.yaml" ENV=prod; \
+	  for render in "$$tmp/preprod-requeue.yaml" "$$tmp/prod-requeue.yaml"; do \
+	    test "$$(grep -c '^kind: CronJob$$' "$$render")" -eq 1 \
+	      || { echo "requeue recurrent render must contain exactly one CronJob: $$render" >&2; exit 1; }; \
+	    awk 'BEGIN{RS="\n---\n"} /kind: CronJob/ && /\n  name: radar-refresh-requeue-abandoned\n/ { rq=1; \
+	      if ($$0 !~ /concurrencyPolicy: Forbid/) exit 1; \
+	      if ($$0 !~ /suspend: false/) exit 1; \
+	      if ($$0 !~ /backoffLimit: 0/) exit 1; \
+	      if ($$0 !~ /\/usr\/bin\/flock/ || $$0 !~ /\/keyring\/runtime\/.refresh.lock/) exit 1; \
+	      if ($$0 !~ /name: REFRESH_FALLBACK_MODEL\n[ ]+value: gemini-3.8-flash/) exit 1; \
+	      if ($$0 !~ /name: REQUEUE_MAX_AGE_DAYS\n/) exit 1; \
+	      if ($$0 !~ /name: REQUEUE_MAX_PER_RUN\n/) exit 1; \
+	      if ($$0 !~ /name: REQUEUE_MAX_PER_CITY\n/) exit 1; \
+	      if ($$0 !~ /name: REQUEUE_MAX_REQUEUES\n/) exit 1; \
+	    } END { if (!rq) exit 1 }' "$$render" \
+	      || { echo "requeue recurrent contract failed (Forbid, flock, seat probe, ceilings): $$render" >&2; exit 1; }; \
+	  done; \
+	  grep -q 'radar-docs-s3-credentials' "$$tmp/preprod-requeue.yaml" \
+	    || { echo "requeue recurrent preprod must use radar-docs-s3-credentials" >&2; exit 1; }; \
+	  grep -q 'radar-scrape-s3-credentials' "$$tmp/prod-requeue.yaml" \
+	    || { echo "requeue recurrent prod must use radar-scrape-s3-credentials" >&2; exit 1; }; \
+	  awk -v min_minutes=$(REFRESH_STAGGER_MIN_MINUTES) -f "$(REQUEUE_STAGGER_AWK)" \
+	    "$$tmp/preprod.yaml" "$$tmp/prod.yaml" "$$tmp/preprod-requeue.yaml" "$$tmp/prod-requeue.yaml" \
+	    || { echo "requeue stagger failed: every requeue start must stay at least $(REFRESH_STAGGER_MIN_MINUTES) min from every refresh and requeue start (incident 2026-10-09)" >&2; exit 1; }
 
 .PHONY: seed-preprod
 seed-preprod: guard-preprod
@@ -556,6 +581,49 @@ cleanup-requeue-abandoned: ## Delete the requeue Job + script ConfigMap (guarded
 .PHONY: test-requeue-abandoned
 test-requeue-abandoned: ## Hermetic render tests of the requeue Job (no cluster)
 	@bash "$(REQUEUE_DIR)/requeue-abandoned.test.sh"
+
+# --- refresh-requeue-recurrent CronJob --------------------------------------
+# Daily catch-up of the abandoned stock (seat probe, then capped requeue;
+# see requeue-recurrent/cronjob.yaml). Applied ONLY by the CD steps gated on
+# REFRESH_REQUEUE_CRONJOB_PREPROD_ENABLED / REFRESH_REQUEUE_CRONJOB_PROD_ENABLED
+# — DISARMED by default, like REFRESH_CRONJOB_PROD_ENABLED for radar-refresh-pv.
+RECURRENT_DIR := $(OVERLAY)/requeue-recurrent
+RECURRENT_PROD_DIR := $(ROOT)/deploy/k8s/refresh-cronjobs/requeue-recurrent-prod
+REQUEUE_STAGGER_AWK := $(OVERLAY)/requeue-stagger.awk
+
+.PHONY: bundle-requeue-recurrent
+bundle-requeue-recurrent: ## Regenerate the self-contained recurrent bundle (esbuild 0.25.12, pinned)
+	@docker run --rm -v "$(ROOT):/workspace" -w /workspace node:24-bookworm-slim \
+	  sh -ceu 'npm install --no-save --ignore-scripts esbuild@0.25.12 >/dev/null 2>&1; node deploy/k8s/refresh-cronjobs/requeue-recurrent/bundle.mjs'
+
+.PHONY: render-requeue-recurrent
+render-requeue-recurrent: ## Render the recurrent requeue CronJob (ENV=preprod|prod)
+	@test "$(ENV)" = "preprod" -o "$(ENV)" = "prod" || { echo "ENV=preprod or ENV=prod is required" >&2; exit 1; }
+	@[[ "$(REQUEUE_IMAGE_REF)" =~ ^ghcr\.io/rhanka/radar-api@sha256:[0-9a-f]{64}$$ ]] \
+	  || { echo "REQUEUE_IMAGE_REF must be the radar API immutable digest" >&2; exit 1; }
+	@test -n "$(REQUEUE_RENDER_OUT)" || { echo "REQUEUE_RENDER_OUT is required" >&2; exit 1; }
+	@set -o pipefail; umask 077; overlay="$(RECURRENT_DIR)"; \
+	  [ "$(ENV)" = "prod" ] && overlay="$(RECURRENT_PROD_DIR)"; \
+	  kubectl kustomize --load-restrictor LoadRestrictionsNone "$$overlay" \
+	    | sed -e "s#$(PLACEHOLDER)#$(REQUEUE_IMAGE_REF)#g" \
+	    > "$(REQUEUE_RENDER_OUT)"
+	@test "$$(grep -c '^kind: CronJob$$' "$(REQUEUE_RENDER_OUT)")" -eq 1
+	@test "$$(grep -c '^kind: ConfigMap$$' "$(REQUEUE_RENDER_OUT)")" -eq 1
+	@grep -q '^  namespace: $(REQUEUE_NS)$$' "$(REQUEUE_RENDER_OUT)"
+	@! grep -q 'PINNED-BY-CI\|radar-api:latest' "$(REQUEUE_RENDER_OUT)"
+
+.PHONY: trigger-requeue-recurrent
+trigger-requeue-recurrent: ## Ad hoc run of the recurrent requeue (create Job from CronJob)
+	@test -n "$(RUN_ID)" || { echo "RUN_ID is required" >&2; exit 1; }
+	@$(MAKE) -s -f "$(lastword $(MAKEFILE_LIST))" guard-requeue KUBECONFIG="$(KUBECONFIG)" \
+	  REQUEUE_REQUEST_SECONDS=$(REQUEUE_REQUEST_SECONDS) REQUEUE_EXPECTED_SERVER="$(REQUEUE_EXPECTED_SERVER)" \
+	  PROD_CONFIRM="$(PROD_CONFIRM)" ENV=$(ENV) || exit 1
+	@if [ "$(ENV)" = "preprod" ]; then test "$(PREPROD_CONFIRM)" = "1" || { echo "PREPROD_CONFIRM=1 is required" >&2; exit 1; }; fi
+	@$(REQUEUE_K) create job "radar-refresh-requeue-abandoned-adhoc-$(RUN_ID)" --from=cronjob/radar-refresh-requeue-abandoned
+
+.PHONY: test-requeue-recurrent
+test-requeue-recurrent: ## Hermetic render tests of the recurrent CronJob (no cluster)
+	@bash "$(RECURRENT_DIR)/requeue-recurrent.test.sh"
 
 .PHONY: diagnose-preprod
 diagnose-preprod: guard-preprod
