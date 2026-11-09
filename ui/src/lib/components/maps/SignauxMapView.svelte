@@ -189,7 +189,7 @@
     classementKey,
     filterNodesByClassement,
   } from "$lib/signals/signal-classement.js";
-  import { applyClassement as applyClassementWrite, fetchReasonCodes } from "$lib/signals/signal-classement-client.js";
+  import { applyClassement as applyClassementWrite, classementWriteErrorMessage, fetchReasonCodes } from "$lib/signals/signal-classement-client.js";
   import {
     buildSignauxLotLegend,
     lotLineColorExpression,
@@ -294,6 +294,8 @@
   let classementReasonCodes: import("$lib/signals/signal-classement.js").ReasonCodeEntry[] = [];
   let classementReasonWorkspace: string | null = null;
   let classementOverrides = new Map<string, import("$lib/signals/signal-classement.js").ClassementEntry>();
+  let classementInFlight = new Set<string>();
+  let classementError: string | null = null;
   // ── Waiters PAR COUCHE (zones / lots indépendants) ────────────────────────
   // Chaque couche porte SON propre état chargement + erreur : l'échec ou la
   // lenteur de l'une n'affecte JAMAIS l'affichage de l'autre.
@@ -584,7 +586,12 @@
     const ws = scopedWorkspaceId;
     void fetchReasonCodes({ workspaceId: ws })
       .then((codes) => { if (classementReasonWorkspace === ws) classementReasonCodes = codes; })
-      .catch(() => { if (classementReasonWorkspace === ws) classementReasonCodes = []; });
+      .catch(() => {
+        if (classementReasonWorkspace === ws) {
+          classementReasonCodes = [];
+          classementError = "Motifs de classement indisponibles — Écarté est impossible sans motif.";
+        }
+      });
   }
   $: workspaceNote = scopedWorkspaceId === null ? workspaceUnavailableMessage(workspaceState) : null;
 
@@ -914,11 +921,11 @@
     map: Map<string, import("$lib/signals/signal-classement.js").ClassementEntry>,
   ): Record<import("$lib/signals/signal-classement.js").SignalClass, number> {
     const classes: import("$lib/signals/signal-classement.js").SignalClass[] = nodes.map(
-      (node) => map.get(classementKey(node.type, node.id))?.classe ?? "non_classe",
+      (node) => map.get(classementKey(node.type, node.id, node.citySlug))?.classe ?? "non_classe",
     );
-    const visibleKeys = new Set(nodes.map((node) => classementKey(node.type, node.id)));
+    const visibleKeys = new Set(nodes.map((node) => classementKey(node.type, node.id, node.citySlug)));
     for (const head of archiveHeads) {
-      if (head.effectiveDiscarded && !visibleKeys.has(classementKey(head.target.type, head.target.id))) {
+      if (head.effectiveDiscarded && !visibleKeys.has(classementKey(head.target.type, head.target.id, head.target.citySlug))) {
         classes.push("ecarte");
       }
     }
@@ -936,15 +943,28 @@
   ): Promise<void> {
     const workspaceId = scopedWorkspaceId;
     const citySlug = selectedCity?.municipality.slug ?? node.citySlug;
-    if (workspaceId === null || !citySlug || !node.facetFingerprint) return;
-    const key = classementKey(node.type, node.id);
+    const key = classementKey(node.type, node.id, citySlug);
+    // F5: per-node in-flight guard — a second apply on the same node is ignored.
+    if (classementInFlight.has(key)) return;
+    if (workspaceId === null || !citySlug || !node.facetFingerprint) {
+      // F7: never fail silently.
+      classementError = "Classement indisponible pour ce signal (empreinte ou contexte manquant).";
+      return;
+    }
     const current = classementMap.get(key) ?? {
       classe: "non_classe" as const, reasonCode: null,
       pertinentHeadId: null, aSurveillerHeadId: null, archiveHeadId: null, discarded: false,
     };
+    classementError = null;
+    classementInFlight = new Set([...classementInFlight, key]);
     const overrides = new Map(classementOverrides);
     overrides.set(key, { ...current, classe: nextClass, reasonCode, discarded: nextClass === "ecarte" });
     classementOverrides = overrides;
+    const clearOverride = () => {
+      const next = new Map(classementOverrides);
+      next.delete(key);
+      classementOverrides = next;
+    };
     try {
       await applyClassementWrite(
         { workspaceId },
@@ -957,13 +977,20 @@
           catalog: classementReasonCodes,
         },
       );
-      classementOverrides = new Map();
+      // Keep this node's override until the reload lands (no flicker);
+      // other nodes' overrides are preserved.
       await loadDetailForCity(citySlug, { silent: true });
+      clearOverride();
       void load();
     } catch (error) {
-      classementOverrides = new Map();
+      clearOverride();
+      classementError = classementWriteErrorMessage(error);
       console.warn("Classement write failed:", error);
       if (selectedCity) void loadDetailForCity(selectedCity.municipality.slug, { silent: true });
+    } finally {
+      const next = new Set(classementInFlight);
+      next.delete(key);
+      classementInFlight = next;
     }
   }
   $: effectiveDetailError = detailError ?? (
@@ -989,7 +1016,7 @@
     selectedCity && !detailLoading && detailProjection.available
       ? classementFilteredNodes.length
       : null;
-  $: displayedLots = buildDisplayedLots(lotsResponse, zonesResponse, filteredDetailNodes);
+  $: displayedLots = buildDisplayedLots(lotsResponse, zonesResponse, classementFilteredNodes);
 
   /**
    * #3 — Règlement PAR ZONE dans la fiche : on injecte dans l'objet zone le
@@ -1018,7 +1045,7 @@
   // Source de vérité de la nav : la liste FILTRÉE (ordre du pane droit). Le
   // viewer la reçoit + l'index courant et NE refiltre pas. navSignals est
   // multi-doc ; le viewer affiche PDF i/N quand ≥ 2 docs distincts.
-  $: navSignals = buildNavSignals(filteredDetailNodes);
+  $: navSignals = buildNavSignals(classementFilteredNodes);
   /** Rang du signal ouvert dans navSignals (-1 si overlay fermé / hors-liste). */
   $: navIndex = activeEvidence
     ? navSignals.findIndex((n) => n.id === activeEvidence!.nodeId)
@@ -2993,6 +3020,8 @@
       onHoverSignal={setHoveredEvidenceSignal}
       {classementMap}
       classementReasonCodes={classementReasonCodes}
+      classementInFlight={classementInFlight}
+      {classementError}
       onApplyClassement={(node, nextClass, reasonCode) => void handleApplyClassement(node, nextClass, reasonCode)}
     />
   </svelte:fragment>

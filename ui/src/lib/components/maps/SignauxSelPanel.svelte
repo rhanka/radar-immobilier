@@ -198,6 +198,8 @@
   /** Classement (spec 2026-11-08): per-signal class map + Steve reason codes. */
   export let classementMap: ReadonlyMap<string, ClassementEntry> = new Map();
   export let classementReasonCodes: ReasonCodeEntry[] = [];
+  export let classementInFlight: ReadonlySet<string> = new Set();
+  export let classementError: string | null = null;
   export let onApplyClassement: (
     node: GraphSignalNode,
     nextClass: SignalClass,
@@ -1137,6 +1139,11 @@
          épinglé. L'actif épinglé = Ville OU Zone uniquement ; le lot s'ouvre
          dans son DRAWER (fiche ci-dessous), jamais un header « Lot actif ». -->
 
+    {#if classementError}
+      <div class="sel-alert" data-testid="classement-error">
+        <Alert tone="error" title="Classement non enregistré" message={classementError} />
+      </div>
+    {/if}
     {#if detailError}
       <div class="sel-alert">
         <Alert tone="error" title="Signaux indisponibles" message={detailError} />
@@ -1253,8 +1260,9 @@
                     {/if}
                   </button>
                   <SignalClassementMenu
-                    classe={classementMap.get(classementKey(node.type, node.id))?.classe ?? EMPTY_CLASSEMENT_ENTRY.classe}
+                    classe={classementMap.get(classementKey(node.type, node.id, node.citySlug))?.classe ?? EMPTY_CLASSEMENT_ENTRY.classe}
                     reasonCodes={classementReasonCodes}
+                    disabled={classementInFlight.has(classementKey(node.type, node.id, node.citySlug))}
                     onApply={(nextClass, reasonCode) => onApplyClassement(node, nextClass, reasonCode)}
                   />
 
