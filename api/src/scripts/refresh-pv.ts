@@ -45,6 +45,12 @@ import { DEFAULT_REFRESH_DOCUMENT_TIMEOUT_MS, DEFAULT_REFRESH_MAX_DOCUMENT_BYTES
   type RefreshAcquire } from "../services/graph/refresh-run.js";
 import { assessRefreshSweepHealth, parseRefreshTarget,
   runRefreshSweep, writeRefreshSweepReport } from "../services/graph/refresh-sweep.js";
+import {
+  StdoutOpsFailureSink,
+  decideOpsEmission,
+  readOpsTarget,
+  type OpsFailureSink,
+} from "../services/graph/ops-failure.js";
 import { canonicalHash } from "../services/graph/replay/canonical-json.js";
 import { configOnlyCitySlugs } from "../services/sources/live-scrape.js";
 import type { RecueilSetAsideDocument } from "../services/sources/recueil.js";
@@ -310,6 +316,26 @@ async function main(): Promise<void> {
         { ...report, startedAt, finishedAt: new Date().toISOString() });
     } catch (error) {
       logger.warn(refreshErrorDiagnostic(error), "refresh-pv: sweep report not persisted");
+    }
+    // Ops emission (L4): systemic city failures alert the platform, a
+    // healthy sweep emits `succeeded` for recovery. Behind OpsFailureSink
+    // until the Sentropic L1 `OpsJobFailureV1` contract is published;
+    // until then one stdout JSON line. Emission never changes the exit
+    // code decided above.
+    const opsSink: OpsFailureSink = new StdoutOpsFailureSink();
+    const opsEvent = decideOpsEmission({
+      health,
+      counts: report.counts,
+      target: readOpsTarget(),
+      cycleId,
+      at: new Date(),
+    });
+    if (opsEvent) {
+      try {
+        await opsSink.emit(opsEvent);
+      } catch (error) {
+        logger.warn(refreshErrorDiagnostic(error), "refresh-pv: ops emission failed");
+      }
     }
     if (health.exitCode === 1) process.exitCode = 1;
   } finally {
