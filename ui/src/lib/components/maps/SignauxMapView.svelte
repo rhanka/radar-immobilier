@@ -1525,6 +1525,7 @@
     try {
       const scope = { workspaceId };
       const res = await fetchGraphSignalDetail(scope, citySlug, {
+        view: "card",
         signal: lease.signal,
         timeoutMs: DEFAULT_REQUEST_TIMEOUT_MS,
       });
