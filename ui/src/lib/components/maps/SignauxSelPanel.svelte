@@ -101,6 +101,7 @@
     type ReasonCodeEntry,
     type SignalClass,
   } from "$lib/signals/signal-classement.js";
+  import { reasonEntryLabel } from "$lib/signals/signal-reason-labels.js";
   import LotFilterHeader from "$lib/components/maps/LotFilterHeader.svelte";
   import ZoneFilterHeader from "$lib/components/maps/ZoneFilterHeader.svelte";
   import {
@@ -1275,7 +1276,7 @@
                   </div>
                   {#if classementEntry.reasonCode}
                     <div class="sel-entity-reason-row">
-                      <span class="classement-reason-chip" data-testid="classement-reason-chip" title={classementEntry.reasonCode}>{classementReasonCodes.find((entry) => entry.code === classementEntry.reasonCode)?.label?.trim() || classementEntry.reasonCode}</span>
+                      <span class="classement-reason-chip" data-testid="classement-reason-chip" title={classementEntry.reasonCode}>{reasonEntryLabel(classementReasonCodes.find((entry) => entry.code === classementEntry.reasonCode) ?? { code: classementEntry.reasonCode })}</span>
                     </div>
                   {/if}
 
