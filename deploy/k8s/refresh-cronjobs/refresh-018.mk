@@ -73,10 +73,13 @@ enroll-codex:
 	  -v "$(OVERLAY)/enroll-codex.mjs:/workspace/enroll-codex.mjs:ro" "$(LOCAL_IMAGE)" \
 	  node /workspace/enroll-codex.mjs
 
+IMPORT_TRANSPORT ?= codex
 .PHONY: import-keyring-account
 import-keyring-account:
 	@[[ "$(IMPORT_IMAGE_REF)" =~ ^ghcr\\.io/rhanka/radar-api@sha256:[0-9a-f]{64}$$ ]] \
 	  || { echo "IMPORT_IMAGE_REF must be the radar API immutable digest" >&2; exit 1; }
+	@[[ "$(IMPORT_TRANSPORT)" = "codex" || "$(IMPORT_TRANSPORT)" = "claude-code" ]] \
+	  || { echo "IMPORT_TRANSPORT must be codex or claude-code" >&2; exit 1; }
 	@test -d "$(IMPORT_SOURCE_DIR)" -a -f "$(IMPORT_SOURCE_DIR)/.key" \
 	  || { echo "IMPORT_SOURCE_DIR with .key is required" >&2; exit 1; }
 	@test -n "$(IMPORT_RENDER_OUT)" || { echo "IMPORT_RENDER_OUT is required" >&2; exit 1; }
@@ -84,7 +87,7 @@ import-keyring-account:
 	  kubectl create secret generic radar-refresh-keyring-account-import \
 	    --from-file="$(IMPORT_SOURCE_DIR)" --dry-run=client -o yaml; echo ---; \
 	  kubectl kustomize --load-restrictor LoadRestrictionsNone "$(OVERLAY)/keyring-import" \
-	    | sed "s#$(PLACEHOLDER)#$(IMPORT_IMAGE_REF)#g"; \
+	    | sed "s#$(PLACEHOLDER)#$(IMPORT_IMAGE_REF)#g; s#__IMPORT_TRANSPORT__#$(IMPORT_TRANSPORT)#g"; \
 	} > "$(IMPORT_RENDER_OUT)"
 	@test "$$(grep -c '^kind: Job$$' "$(IMPORT_RENDER_OUT)")" -eq 1
 	@test "$$(grep -c '^kind: Secret$$' "$(IMPORT_RENDER_OUT)")" -eq 1

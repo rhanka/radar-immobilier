@@ -44,7 +44,10 @@ spec:
               mkdir -p /keyring/runtime/.import
               trap 'rm -rf /keyring/runtime/.import' EXIT
               cp -a /import/. /keyring/runtime/.import/
-              node /workspace/enroll-codex-import.mjs /keyring/runtime /keyring/runtime/.import
+              node /workspace/enroll-codex-import.mjs /keyring/runtime /keyring/runtime/.import "$IMPORT_TRANSPORT"
+          env:
+            - name: IMPORT_TRANSPORT
+              value: "__IMPORT_TRANSPORT__"
           volumeMounts:
             - { name: keyring, mountPath: /keyring }
             - { name: account-import, mountPath: /import, readOnly: true }
