@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render } from "@testing-library/svelte";
+import { cleanup, fireEvent, render, screen } from "@testing-library/svelte";
 import SignauxRail from "./SignauxRail.svelte";
 
 afterEach(() => cleanup());
@@ -18,18 +18,22 @@ describe("SignauxRail Classement section — acceptance criteria", () => {
     expect(view.container.textContent).toContain("Classement");
     expect(view.container.textContent).toContain("Pertinent (3)");
     expect(view.container.textContent).toContain("Écarté (1)");
-    const boxes = Array.from(view.container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'));
-    const byLabel = (label: string) =>
-      boxes.find((box) => box.closest("label")?.textContent?.includes(label) ?? box.getAttribute("aria-label")?.includes(label));
-    expect(byLabel("Pertinent")?.checked ?? true).toBe(true);
-    const ecarteToggle = view.container.querySelectorAll("label");
-    void ecarteToggle;
-    // Toggling Écarté propagates the new filter to the parent.
-    const labels = Array.from(view.container.querySelectorAll("label"));
-    const ecarteLabel = labels.find((el) => el.textContent?.includes("Écarté"));
-    if (ecarteLabel) {
-      await fireEvent.click(ecarteLabel);
-      expect(onClassementFilterChange).toHaveBeenCalled();
-    }
+
+    // Non-vacuous: every checkbox must be found by its label text.
+    const checkbox = (label: string): HTMLInputElement => {
+      const el = screen.getByLabelText(new RegExp(label)) as HTMLInputElement;
+      expect(el, `checkbox for ${label}`).toBeTruthy();
+      expect(el.type).toBe("checkbox");
+      return el;
+    };
+    expect(checkbox("Pertinent").checked).toBe(true);
+    expect(checkbox("À surveiller").checked).toBe(true);
+    expect(checkbox("Non classé").checked).toBe(true);
+    expect(checkbox("Écarté").checked).toBe(false);
+
+    await fireEvent.click(checkbox("Écarté"));
+    expect(onClassementFilterChange).toHaveBeenCalledWith({
+      pertinent: true, a_surveiller: true, non_classe: true, ecarte: true,
+    });
   });
 });

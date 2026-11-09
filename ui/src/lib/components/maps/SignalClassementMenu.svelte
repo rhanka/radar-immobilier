@@ -22,6 +22,20 @@
   let open = false;
   let step: "class" | "reason" = "class";
   let pendingClass: SignalClass | null = null;
+  let rootEl: HTMLElement | null = null;
+  $: if (disabled && open) open = false;
+
+  function close(): void {
+    open = false;
+    step = "class";
+    pendingClass = null;
+  }
+  function onWindowClick(event: MouseEvent): void {
+    if (open && rootEl && event.target instanceof Node && !rootEl.contains(event.target)) close();
+  }
+  function onWindowKey(event: KeyboardEvent): void {
+    if (open && event.key === "Escape") close();
+  }
 
   const ICONS = { pertinent: Target, a_surveiller: Eye, ecarte: EyeOff, non_classe: CircleDashed } as const;
 
@@ -57,7 +71,8 @@
   }
 </script>
 
-<span class="classement-menu">
+<svelte:window on:click={onWindowClick} on:keydown={onWindowKey} />
+<span class="classement-menu" bind:this={rootEl}>
   <button
     type="button"
     class="classement-btn classement-btn--{classe}"
@@ -87,7 +102,18 @@
           </button>
         {/each}
       {:else if pendingClass}
+        <button
+          type="button"
+          class="classement-choice"
+          data-testid="classement-back"
+          on:click|stopPropagation={() => { step = "class"; pendingClass = null; }}
+        >
+          <span>← Retour</span>
+        </button>
         <span class="classement-pop-title">{CLASSEMENT_META[pendingClass].label} — motif</span>
+        {#if pendingReasons.length === 0}
+          <span class="classement-empty" data-testid="classement-reasons-empty">Motifs indisponibles</span>
+        {/if}
         {#each pendingReasons as entry}
           <button
             type="button"
@@ -164,5 +190,10 @@
   }
   .classement-choice:hover {
     background: var(--st-semantic-surface-subtle);
+  }
+  .classement-empty {
+    padding: 4px 8px;
+    color: var(--st-semantic-text-secondary);
+    font-size: 0.75rem;
   }
 </style>
