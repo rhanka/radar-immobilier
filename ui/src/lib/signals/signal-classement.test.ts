@@ -85,6 +85,23 @@ describe("signal classement — acceptance criteria", () => {
     expect(both.get("delson:Signal:sig-10")?.archiveHeadId).toBe("ws-2");
   });
 
+  it("regression 409: inactive heads stay the expected heads of the next write", () => {
+    // A signal classified then returned to Non classé keeps INACTIVE
+    // selection heads server-side; the facet writer compares
+    // expectedHeadId against that head, so dropping it (null) draws a
+    // 409 facet_head_conflict on the next classification.
+    const map = buildClassementMap(
+      [head("pertinent", "inactive", null, "sig-1"), head("a_surveiller", "inactive", null, "sig-1")],
+      [],
+    );
+    const entry = map.get("delson:Signal:sig-1");
+    expect(entry?.classe).toBe("non_classe");
+    expect(entry?.pertinentHeadId).toBeNull();
+    expect(entry?.aSurveillerHeadId).toBeNull();
+    expect(entry?.pertinentExpectedHeadId).toBe("pertinent-sig-1");
+    expect(entry?.aSurveillerExpectedHeadId).toBe("a_surveiller-sig-1");
+  });
+
   it("criterion 6: lucide icon names and DS semantic tokens only, no hex colour", () => {
     expect(CLASSEMENT_META.pertinent.icon).toBe("Target");
     expect(CLASSEMENT_META.a_surveiller.icon).toBe("Eye");
