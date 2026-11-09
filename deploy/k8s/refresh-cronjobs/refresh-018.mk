@@ -491,16 +491,33 @@ bundle-requeue-abandoned: ## Regenerate the self-contained requeue bundle (esbui
 guard-requeue:
 	@test "$(ENV)" = "preprod" -o "$(ENV)" = "prod" || { echo "ENV=preprod or ENV=prod is required" >&2; exit 1; }
 	@test -n "$(KUBECONFIG)" -a -f "$(KUBECONFIG)" || { echo "KUBECONFIG file is required" >&2; exit 1; }
-	@if [ "$(ENV)" = "preprod" ]; then \
-	  server="$$(kubectl --kubeconfig "$(KUBECONFIG)" config view --minify -o jsonpath='{.clusters[0].cluster.server}')"; \
-	  case "$$server" in "$(EXPECTED_SERVER)"|"$(EXPECTED_SERVER)":*) ;; *) echo "refusing unexpected preprod API server" >&2; exit 1;; esac; \
-	else \
-	  test "$(PROD_CONFIRM)" = "1" || { echo "PROD_CONFIRM=1 is required for ENV=prod" >&2; exit 1; }; \
-	  test -n "$(REQUEUE_EXPECTED_SERVER)" || { echo "REQUEUE_EXPECTED_SERVER is required for ENV=prod (expected prod API server, checked against the kubeconfig)" >&2; exit 1; }; \
-	  server="$$(kubectl --kubeconfig "$(KUBECONFIG)" config view --minify -o jsonpath='{.clusters[0].cluster.server}')"; \
-	  case "$$server" in "$(REQUEUE_EXPECTED_SERVER)"|"$(REQUEUE_EXPECTED_SERVER)":*) ;; *) echo "refusing unexpected prod API server" >&2; exit 1;; esac; \
-	  case "$$server" in "$(EXPECTED_SERVER)"*) echo "refusing the preprod API server for ENV=prod" >&2; exit 1;; esac; \
-	fi
+	@# Prod (radar-immobilier) and preprod (radar-immobilier-preprod) share the
+	@# SAME OVH API server ($(EXPECTED_SERVER)), so the server alone cannot
+	@# tell them apart (same pattern as guard-preprod / cleanup-keyring-import:
+	@# expected server + namespace-scoped radar-app probe). The environment is
+	@# discriminated by the target namespace: the kubeconfig context namespace,
+	@# when set, must be $(REQUEUE_NS), and the caller's identity must not be a
+	@# ServiceAccount of the other environment. Every API call below and in the
+	@# callers passes -n $(REQUEUE_NS) explicitly, so an unset context
+	@# namespace carries no target and is accepted.
+	@set -e; \
+	  server="$$(kubectl --kubeconfig "$(KUBECONFIG)" config view --minify -o jsonpath='{.clusters[0].cluster.server}')" \
+	    || { echo "refusing: cannot read API server from kubeconfig" >&2; exit 1; }; \
+	  if [ "$(ENV)" = "prod" ]; then \
+	    test "$(PROD_CONFIRM)" = "1" || { echo "PROD_CONFIRM=1 is required for ENV=prod" >&2; exit 1; }; \
+	    test -n "$(REQUEUE_EXPECTED_SERVER)" || { echo "REQUEUE_EXPECTED_SERVER is required for ENV=prod (expected prod API server, checked against the kubeconfig)" >&2; exit 1; }; \
+	    case "$$server" in "$(REQUEUE_EXPECTED_SERVER)"|"$(REQUEUE_EXPECTED_SERVER)":*) ;; *) echo "refusing unexpected prod API server" >&2; exit 1;; esac; \
+	    other="radar-immobilier-preprod"; \
+	  else \
+	    case "$$server" in "$(EXPECTED_SERVER)"|"$(EXPECTED_SERVER)":*) ;; *) echo "refusing unexpected preprod API server" >&2; exit 1;; esac; \
+	    other="radar-immobilier"; \
+	  fi; \
+	  ctx_ns="$$(kubectl --kubeconfig "$(KUBECONFIG)" config view --minify -o jsonpath='{.contexts[0].context.namespace}')" \
+	    || { echo "refusing: cannot read kubeconfig context namespace" >&2; exit 1; }; \
+	  case "$$ctx_ns" in ""|"$(REQUEUE_NS)") ;; *) echo "refusing kubeconfig context namespace $$ctx_ns for ENV=$(ENV) (expected $(REQUEUE_NS); prod and preprod share the same API server)" >&2; exit 1;; esac; \
+	  whoami="$$(timeout $$(( $(REQUEUE_REQUEST_SECONDS) * 3 )) kubectl --kubeconfig "$(KUBECONFIG)" --request-timeout=$(REQUEUE_REQUEST_SECONDS)s auth whoami -o jsonpath='{.status.userInfo.username}')" \
+	    || { echo "refusing: cannot read caller identity (kubectl auth whoami) for ENV=$(ENV)" >&2; exit 1; }; \
+	  case "$$whoami" in "system:serviceaccount:$$other:"*) echo "refusing the $$other identity for ENV=$(ENV)" >&2; exit 1;; esac
 	@timeout $$(( $(REQUEUE_REQUEST_SECONDS) * 3 )) $(REQUEUE_K) --request-timeout=$(REQUEUE_REQUEST_SECONDS)s get serviceaccount radar-app -o name >/dev/null
 
 .PHONY: render-requeue-abandoned
