@@ -1214,6 +1214,7 @@
               {#if key}
                 {@const nodeVisual = visual(selectionState, key)}
                 {@const stageLabel = signalStageLabel(node)}
+                {@const classementEntry = classementMap.get(classementKey(node.type, node.id, node.citySlug)) ?? EMPTY_CLASSEMENT_ENTRY}
                 <!-- #86 — fiche : ancre de scroll (data-signal-node) + état
                      cross-survolé quand le viewer survole ce signal. Survoler
                      la fiche notifie le parent (→ le surlignage PDF pulse). -->
@@ -1227,6 +1228,7 @@
                   on:focusin={() => onHoverSignal(node.id)}
                   on:focusout={() => onHoverSignal(null)}
                 >
+                  <div class="sel-entity-head-row">
                   <button
                     type="button"
                     class="sel-entity-head"
@@ -1259,12 +1261,20 @@
                       </span>
                     {/if}
                   </button>
-                  <SignalClassementMenu
-                    classe={classementMap.get(classementKey(node.type, node.id, node.citySlug))?.classe ?? EMPTY_CLASSEMENT_ENTRY.classe}
-                    reasonCodes={classementReasonCodes}
-                    disabled={classementInFlight.has(classementKey(node.type, node.id, node.citySlug))}
-                    onApply={(nextClass, reasonCode) => onApplyClassement(node, nextClass, reasonCode)}
-                  />
+                  <span class="sel-entity-classement">
+                    <SignalClassementMenu
+                      classe={classementMap.get(classementKey(node.type, node.id, node.citySlug))?.classe ?? EMPTY_CLASSEMENT_ENTRY.classe}
+                      reasonCodes={classementReasonCodes}
+                      disabled={classementInFlight.has(classementKey(node.type, node.id, node.citySlug))}
+                      onApply={(nextClass, reasonCode) => onApplyClassement(node, nextClass, reasonCode)}
+                    />
+                  </span>
+                  </div>
+                  {#if classementEntry.reasonCode}
+                    <div class="sel-entity-reason-row">
+                      <span class="classement-reason-chip" data-testid="classement-reason-chip">{classementEntry.reasonCode}{classementReasonCodes.find((entry) => entry.code === classementEntry.reasonCode)?.label ? ` · ${classementReasonCodes.find((entry) => entry.code === classementEntry.reasonCode)?.label}` : ""}</span>
+                    </div>
+                  {/if}
 
                   {#if nodeVisual.focused}
                     {@const evidence = signalEvidence(node)}
@@ -2336,6 +2346,41 @@
   .sel-entity-bar--xhover {
     background: var(--st-semantic-surface-selected, #e0f2fe);
     box-shadow: inset 3px 0 0 var(--st-semantic-border-strong, #0ea5e9);
+  }
+
+  .sel-entity-head-row {
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .sel-entity-head-row .sel-entity-head {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
+  }
+
+  .sel-entity-classement {
+    flex-shrink: 0;
+    padding: 0.34rem 0.6rem 0 0;
+  }
+
+  .sel-entity-reason-row {
+    padding: 0 0.85rem 0.34rem;
+  }
+
+  .classement-reason-chip {
+    display: inline-block;
+    max-width: 100%;
+    padding: 0.05rem 0.45rem;
+    border-radius: 999px;
+    border: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
+    background: var(--st-semantic-surface-subtle, #f1f5f9);
+    color: var(--st-semantic-text-secondary, #475569);
+    font-size: var(--signaux-fs-caption);
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   /* #10 — layout colonne : titre complet sur plusieurs lignes + sous-titre dessous */
