@@ -130,6 +130,12 @@ export interface GraphSignalDocRef {
   linkSource?: string;
 }
 
+/** Stored node as read for card building; materialized dates optional. */
+export type StoredSignalNodeInput = Omit<Awaited<ReturnType<typeof getSignalNodesForCity>>[number],
+  "effectiveDocumentDates" | "effectiveScrapDates">
+  & Partial<Pick<Awaited<ReturnType<typeof getSignalNodesForCity>>[number],
+    "effectiveDocumentDates" | "effectiveScrapDates">>;
+
 export interface GraphSignalCard {
   id: string;
   type: string;
@@ -465,7 +471,7 @@ async function enrichDocRefs(
  * pas — elle sert aussi au repli par-nœud.
  */
 function buildSignalCard(
-  node: Awaited<ReturnType<typeof getSignalNodesForCity>>[number],
+  node: StoredSignalNodeInput,
   docRefs: GraphSignalDocRef[],
 ): GraphSignalCard {
   const props = (node.props ?? {}) as Record<string, unknown>;
@@ -542,7 +548,7 @@ function buildSignalCard(
 
 export async function toGraphSignalCard(
   store: ObjectStore,
-  node: Awaited<ReturnType<typeof getSignalNodesForCity>>[number],
+  node: StoredSignalNodeInput,
   context: DocEnrichmentContext,
   citySlug?: string,
   /**
@@ -573,7 +579,7 @@ export async function toGraphSignalCard(
  * S3 plutôt que de faire tomber toute la ville. Aucun accès store.
  */
 export function toDegradedSignalCard(
-  node: Awaited<ReturnType<typeof getSignalNodesForCity>>[number],
+  node: StoredSignalNodeInput,
 ): GraphSignalCard {
   const props = (node.props ?? {}) as Record<string, unknown>;
   const docRefs = extractDocRefs(props, node.sourceRef).map((ref) =>

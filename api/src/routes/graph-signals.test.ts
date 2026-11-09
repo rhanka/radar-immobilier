@@ -140,6 +140,8 @@ function makeNode(
     props,
     sourceRef: null,
     createdAt: new Date("2025-03-15T10:00:00Z"),
+    effectiveDocumentDates: [],
+    effectiveScrapDates: [],
   };
 }
 
@@ -367,6 +369,8 @@ describe("GET /api/graph-signals/:city", () => {
       ...buildNodeRow(node, "sutton"),
       createdAt: new Date("2026-07-14T00:00:00Z"),
       updatedAt: new Date("2026-07-14T00:00:00Z"),
+      effectiveDocumentDates: [],
+      effectiveScrapDates: [],
     }));
     vi.mocked(getSignalNodesForCity).mockResolvedValueOnce(nodes as Awaited<ReturnType<typeof getSignalNodesForCity>>);
 
