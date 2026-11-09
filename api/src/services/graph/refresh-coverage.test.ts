@@ -8,6 +8,7 @@ import {
   planRefreshCoverage,
   readRefreshCoverage,
   refreshCoverageKey,
+  requeueAbandonedRefreshDocuments,
   summarizeRefreshCoverage,
   writeRefreshCoverage,
   type RefreshCoverageCandidate,
@@ -146,6 +147,64 @@ describe("coverRefreshDocument", () => {
   it("refuses to settle a document the ledger has never seen", () => {
     expect(() => coverRefreshDocument(emptyRefreshCoverage("city", clock("2026-09-20T00:00:00.000Z")),
       sha("a"), clock("2026-09-20T00:00:00.000Z"))).toThrow("Unknown refresh coverage document");
+  });
+});
+
+describe("requeueAbandonedRefreshDocuments", () => {
+  const abandonedLedger = () => {
+    let ledger = plan(null, [candidate("a", "2026-09-01"), candidate("b"), candidate("c")], false).ledger;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      ledger = failRefreshDocument(ledger, sha("a"), "transport", 3, clock("2026-10-30T00:00:00.000Z")).ledger;
+      ledger = failRefreshDocument(ledger, sha("b"), "quality", 3, clock("2026-11-05T00:00:00.000Z")).ledger;
+    }
+    return ledger;
+  };
+
+  it("requeues abandoned only: pending, failures 0, lastReason removed, identity unchanged", () => {
+    const before = abandonedLedger();
+    const { ledger, requeued, changed } = requeueAbandonedRefreshDocuments(before,
+      { now: clock("2026-11-09T00:00:00.000Z") });
+
+    expect(changed).toBe(true);
+    expect(requeued).toEqual([sha("a"), sha("b")]);
+    for (const digit of ["a", "b"]) {
+      const entry = ledger.documents[sha(digit)]!;
+      const old = before.documents[sha(digit)]!;
+      expect(entry.state).toBe("pending");
+      expect(entry.failures).toBe(0);
+      expect("lastReason" in entry).toBe(false);
+      expect(entry.sourceId).toBe(old.sourceId);
+      expect(entry.representationKey).toBe(old.representationKey);
+      expect(entry.firstSeenAt).toBe(old.firstSeenAt);
+      expect(entry.publishedAt).toBe(old.publishedAt);
+    }
+    // Nothing else touched: the still-pending document is byte-identical.
+    expect(ledger.documents[sha("c")]).toEqual(before.documents[sha("c")]);
+    expect(summarizeRefreshCoverage(ledger)).toEqual({ pending: 3, covered: 0, abandoned: 0 });
+  });
+
+  it("honours --since: only documents whose last failure is after the date", () => {
+    const before = abandonedLedger();
+    const { ledger, requeued } = requeueAbandonedRefreshDocuments(before,
+      { since: new Date("2026-11-01T00:00:00.000Z"), now: clock("2026-11-09T00:00:00.000Z") });
+
+    expect(requeued).toEqual([sha("b")]);
+    expect(ledger.documents[sha("a")]!.state).toBe("abandoned");
+    // The boundary is strict: a failure exactly at --since stays abandoned.
+    const atBoundary = requeueAbandonedRefreshDocuments(before,
+      { since: new Date("2026-11-05T00:00:00.000Z"), now: clock("2026-11-09T00:00:00.000Z") });
+    expect(atBoundary.requeued).toEqual([]);
+  });
+
+  it("is idempotent: a second run changes nothing", () => {
+    const first = requeueAbandonedRefreshDocuments(abandonedLedger(),
+      { now: clock("2026-11-09T00:00:00.000Z") });
+    const second = requeueAbandonedRefreshDocuments(first.ledger,
+      { now: clock("2026-11-10T00:00:00.000Z") });
+
+    expect(second.changed).toBe(false);
+    expect(second.requeued).toEqual([]);
+    expect(second.ledger).toEqual(first.ledger);
   });
 });
 

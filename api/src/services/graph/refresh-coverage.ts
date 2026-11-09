@@ -269,6 +269,55 @@ function patch(
     documents: { ...ledger.documents, [sha]: { ...mutate(existing), updatedAt: timestamp } } };
 }
 
+export interface RequeueAbandonedRefreshOptions {
+  /**
+   * Only requeue documents whose last failure is strictly after this instant.
+   * The last-failure instant is the entry `updatedAt`: `failRefreshDocument`
+   * stamps it on every counted failure, and no other transition touches an
+   * `abandoned` entry. Absent means every `abandoned` document.
+   */
+  readonly since?: Date;
+  readonly now: () => Date;
+}
+
+/**
+ * Operator requeue: `abandoned` -> `pending`, failures reset, `lastReason`
+ * removed. `sourceId`, `representationKey`, `firstSeenAt` and `publishedAt`
+ * are carried over unchanged; entries in any other state are untouched.
+ * Pure and idempotent: a ledger with nothing (left) to requeue is returned
+ * unchanged (`changed: false`, same `updatedAt`).
+ */
+export function requeueAbandonedRefreshDocuments(
+  ledger: RefreshCoverageLedger,
+  options: RequeueAbandonedRefreshOptions,
+): { ledger: RefreshCoverageLedger; requeued: readonly string[]; changed: boolean } {
+  const sinceMs = options.since?.getTime();
+  const requeued: string[] = [];
+  const documents: Record<string, RefreshCoverageEntry> = { ...ledger.documents };
+  for (const [sha, entry] of Object.entries(ledger.documents)) {
+    if (entry.state !== "abandoned") continue;
+    if (sinceMs !== undefined) {
+      const failedAt = Date.parse(entry.updatedAt);
+      if (!Number.isFinite(failedAt) || failedAt <= sinceMs) continue;
+    }
+    documents[sha] = {
+      state: "pending",
+      sourceId: entry.sourceId,
+      representationKey: entry.representationKey,
+      firstSeenAt: entry.firstSeenAt,
+      updatedAt: entry.updatedAt,
+      failures: 0,
+      ...(entry.publishedAt !== undefined ? { publishedAt: entry.publishedAt } : {}),
+    };
+    requeued.push(sha);
+  }
+  if (requeued.length === 0) return { ledger, requeued, changed: false };
+  const timestamp = options.now().toISOString();
+  for (const sha of requeued) documents[sha] = { ...documents[sha]!, updatedAt: timestamp };
+  requeued.sort();
+  return { ledger: { ...ledger, updatedAt: timestamp, documents }, requeued, changed: true };
+}
+
 /** Counts a sweep can report without re-reading every ledger. */
 export function summarizeRefreshCoverage(ledger: RefreshCoverageLedger): Readonly<Record<RefreshCoverageState, number>> {
   const counts = { pending: 0, covered: 0, abandoned: 0 };
