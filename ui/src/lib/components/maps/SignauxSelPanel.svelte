@@ -19,7 +19,8 @@
    * reste affiché pour signaler un filtre actif.
    */
   import { tick } from "svelte";
-  import { Alert, Badge, Search } from "@sentropic/design-system-svelte";
+  import { Badge, Search } from "@sentropic/design-system-svelte";
+  import BucketReloadAction from "$lib/components/maps/BucketReloadAction.svelte";
   import { normalizeLotKey, zoneSearchKey } from "@radar/domain";
   import { rankBySearch } from "$lib/maps/entity-search.js";
   import { ExternalLink, FileText, FileX, RefreshCw, X } from "@lucide/svelte";
@@ -155,9 +156,9 @@
     () => {};
   export let onClear: () => void = () => {};
   export let onToggleKey: (key: SelectionKey) => void = () => {};
-  /** « Réessayer » — recharge le détail signaux (couche panneau droit). */
+  /** « Recharger » (menu de l'icône !) — recharge le détail signaux. */
   export let onRetryDetail: () => void = () => {};
-  /** « Réessayer » — recharge les couches géo (zones + lots). */
+  /** « Recharger » (menu de l'icône !) — recharge les couches géo (zones + lots). */
   export let onRetryGeo: () => void = () => {};
   // onFocusKey retiré (#9) : SignauxSelPanel n'appelle plus directement le focus ;
   // c'est toggleBucketKey dans le parent qui gère focus + sélection atomiquement.
@@ -1121,34 +1122,6 @@
          épinglé. L'actif épinglé = Ville OU Zone uniquement ; le lot s'ouvre
          dans son DRAWER (fiche ci-dessous), jamais un header « Lot actif ». -->
 
-    {#if detailError}
-      <div class="sel-alert">
-        <Alert tone="error" title="Signaux indisponibles" message={detailError} />
-        <button type="button" class="sel-retry" on:click={onRetryDetail}>
-          <RefreshCw class="h-3 w-3" aria-hidden="true" />
-          Réessayer
-        </button>
-      </div>
-    {/if}
-    {#if zonesError}
-      <div class="sel-alert">
-        <Alert tone="warning" title="Zones indisponibles" message={zonesError} />
-        <button type="button" class="sel-retry" on:click={onRetryGeo}>
-          <RefreshCw class="h-3 w-3" aria-hidden="true" />
-          Réessayer
-        </button>
-      </div>
-    {/if}
-    {#if lotsError}
-      <div class="sel-alert">
-        <Alert tone="warning" title="Lots indisponibles" message={lotsError} />
-        <button type="button" class="sel-retry" on:click={onRetryGeo}>
-          <RefreshCw class="h-3 w-3" aria-hidden="true" />
-          Réessayer
-        </button>
-      </div>
-    {/if}
-
     <div class="sel-buckets" bind:this={bucketsEl}>
       <!-- #8 : replié par défaut ; s'ouvre aussi via un lien croisé zone→signal -->
       <details class="sel-bucket" bind:open={signalsBucketOpen}>
@@ -1158,11 +1131,19 @@
           data-testid="signals-bucket-head"
         >
           <span class="sel-bucket-name">Signaux</span>
-          <!-- #6 : "–" pendant le chargement ; N/M quand la liste est restreinte
-               (zone active — 01KZGM07 item 2 — ou filtre subset). -->
-          <span class="rail-row-count">
-            {#if detailLoading}–{:else if detailError}n/d{:else if focusedZoneCode}{zoneScopedDetailNodes.length}/{totalSignalCount}{:else if signalIsFiltered}{filteredSignalCount}/{totalSignalCount}{:else}{totalSignalCount}{/if}
-          </span>
+          <!-- Échec : icône ! + menu « Recharger » en haut à droite (à la
+               place de « n/d ») ; rechargement : wheel ; succès : compteur
+               N/M quand la liste est restreinte (zone active — 01KZGM07
+               item 2 — ou filtre subset). -->
+          {#if detailLoading}
+            <BucketReloadAction loading testId="signaux" menuId="signaux-reload-menu" menuLabel="Actions Signaux" onRetry={onRetryDetail} />
+          {:else if detailError}
+            <BucketReloadAction error={detailError} testId="signaux" menuId="signaux-reload-menu" menuLabel="Actions Signaux" onRetry={onRetryDetail} />
+          {:else}
+            <span class="rail-row-count">
+              {#if focusedZoneCode}{zoneScopedDetailNodes.length}/{totalSignalCount}{:else if signalIsFiltered}{filteredSignalCount}/{totalSignalCount}{:else}{totalSignalCount}{/if}
+            </span>
+          {/if}
         </summary>
         <div class="sel-entities" bind:this={entityListEl}>
           {#if detailLoading}
@@ -1423,9 +1404,17 @@
       <details class="sel-bucket" bind:open={reglementsBucketOpen}>
         <summary class="sel-bucket-head">
           <span class="sel-bucket-name">Règlement et Normes</span>
-          <!-- 01KZGM07 item 2 : N/M quand la liste est restreinte à la zone active. -->
-          <span class="rail-row-count" data-testid="reglements-bucket-count">
-            {#if detailLoading}–{:else if detailError}n/d{:else if focusedZoneCode}{zoneScopedReglements.length}/{reglements.length}{:else}{reglements.length}{/if}
+          <!-- Même patron que Signaux (même lecture détail) : icône ! +
+               menu « Recharger » sur échec, wheel pendant le rechargement,
+               compteur au succès (01KZGM07 item 2 : N/M en zone active). -->
+          <span data-testid="reglements-bucket-count">
+            {#if detailLoading}
+              <BucketReloadAction loading testId="reglements" menuId="reglements-reload-menu" menuLabel="Actions Règlement et Normes" onRetry={onRetryDetail} />
+            {:else if detailError}
+              <BucketReloadAction error={detailError} testId="reglements" menuId="reglements-reload-menu" menuLabel="Actions Règlement et Normes" onRetry={onRetryDetail} />
+            {:else}
+              <span class="rail-row-count">{#if focusedZoneCode}{zoneScopedReglements.length}/{reglements.length}{:else}{reglements.length}{/if}</span>
+            {/if}
           </span>
         </summary>
         <div class="sel-entities">
@@ -1601,22 +1590,27 @@
 
       <!-- #8 : replié par défaut ; s'ouvre aussi via le badge zone d'un lot -->
       <details class="sel-bucket" bind:open={zonesBucketOpen}>
-        <summary class="sel-bucket-head">
+        <summary class="sel-bucket-head" data-testid="zones-bucket-head">
           <span class="sel-bucket-name">Zones</span>
-          <!-- #6 : "–" pendant le chargement de la couche ZONES -->
-          <span class="rail-row-count">
-            {zonesLoading
-              ? "–"
-              : zonesError
-              ? "n/d"
-              : zonesUnavailableReason
-              ? "n/d"
-              : zonesResponse?.resolutionStatus === "fallback" && configuredZoneCount === 0
-              ? "fallback"
-              : zoneListFiltered
-              ? `${visibleZoneCount}/${configuredZoneCount}`
-              : configuredZoneCount}
-          </span>
+          <!-- Échec couche ZONES : icône ! + menu « Recharger » en haut à
+               droite (à la place de « n/d ») ; rechargement : wheel ;
+               succès : compteur. « n/d » subsiste pour le seul état non
+               configuré (zonesUnavailableReason, non rechargeable). -->
+          {#if zonesLoading}
+            <BucketReloadAction loading testId="zones" menuId="zones-reload-menu" menuLabel="Actions Zones" onRetry={onRetryGeo} />
+          {:else if zonesError}
+            <BucketReloadAction error={zonesError} testId="zones" menuId="zones-reload-menu" menuLabel="Actions Zones" onRetry={onRetryGeo} />
+          {:else}
+            <span class="rail-row-count">
+              {zonesUnavailableReason
+                ? "n/d"
+                : zonesResponse?.resolutionStatus === "fallback" && configuredZoneCount === 0
+                ? "fallback"
+                : zoneListFiltered
+                ? `${visibleZoneCount}/${configuredZoneCount}`
+                : configuredZoneCount}
+            </span>
+          {/if}
         </summary>
         <div class="sel-entities">
           {#if zonesLoading}
@@ -1627,7 +1621,6 @@
           {:else if zonesError}
             <div class="sel-loading">
               <span>Zones indisponibles.</span>
-              <button type="button" class="sel-retry sel-retry--inline" on:click={onRetryGeo}>Réessayer</button>
             </div>
           {:else if zonesUnavailableReason}
             <p class="sel-empty">{zonesUnavailableReason}</p>
@@ -1853,21 +1846,25 @@
       </details>
 
       <details class="sel-bucket" bind:open={lotsBucketOpen}>
-        <summary class="sel-bucket-head">
+        <summary class="sel-bucket-head" data-testid="lots-bucket-head">
           <span class="sel-bucket-name">Lots</span>
-          <!-- #6 : "–" pendant le chargement ; « N/M » quand le filtre lots
-               est actif (reste visible accordéon fermé — état persistant). -->
-          <span class="rail-row-count">
-            {lotsLoading
-              ? "–"
-              : lotsError
-              ? "n/d"
-              : lotsUnavailableReason
-              ? "n/d"
-              : lotFilterActive
-              ? `${formatNumber(lotMatchedCount)}/${formatNumber(lots.length)}`
-              : formatNumber(lotTotalCount)}
-          </span>
+          <!-- Même patron que Zones : icône ! + menu « Recharger » sur
+               échec, wheel pendant le rechargement, compteur au succès
+               (« N/M » quand le filtre lots est actif — reste visible
+               accordéon fermé, état persistant). -->
+          {#if lotsLoading}
+            <BucketReloadAction loading testId="lots" menuId="lots-reload-menu" menuLabel="Actions Lots" onRetry={onRetryGeo} />
+          {:else if lotsError}
+            <BucketReloadAction error={lotsError} testId="lots" menuId="lots-reload-menu" menuLabel="Actions Lots" onRetry={onRetryGeo} />
+          {:else}
+            <span class="rail-row-count">
+              {lotsUnavailableReason
+                ? "n/d"
+                : lotFilterActive
+                ? `${formatNumber(lotMatchedCount)}/${formatNumber(lots.length)}`
+                : formatNumber(lotTotalCount)}
+            </span>
+          {/if}
         </summary>
         <div class="sel-entities">
           {#if lotsLoading}
@@ -1878,7 +1875,6 @@
           {:else if lotsError}
             <div class="sel-loading">
               <span>Lots indisponibles.</span>
-              <button type="button" class="sel-retry sel-retry--inline" on:click={onRetryGeo}>Réessayer</button>
             </div>
           {:else if lotsUnavailableReason}
             <p class="sel-empty">{lotsUnavailableReason}</p>
@@ -2132,34 +2128,6 @@
     margin: 0.35rem 0.85rem;
     color: #92400e;
     font-size: var(--signaux-fs-small);
-  }
-
-  .sel-alert {
-    padding: 0.5rem 0.85rem 0;
-  }
-
-  /* « Réessayer » par couche : action neutre, discrète, sous l'alerte. */
-  .sel-retry {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    margin: 0.35rem 0 0;
-    padding: 0.2rem 0.5rem;
-    border: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
-    border-radius: var(--st-radius-sm, 4px);
-    background: transparent;
-    color: var(--st-semantic-text-secondary, #64748b);
-    font-size: var(--signaux-fs-small);
-    font-weight: 600;
-    cursor: pointer;
-  }
-
-  .sel-retry:hover {
-    background: var(--st-semantic-surface-subtle, #f8fafc);
-  }
-
-  .sel-retry--inline {
-    margin: 0;
   }
 
   .sel-city-head {
