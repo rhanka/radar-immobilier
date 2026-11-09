@@ -11,21 +11,29 @@ const NON_CLASSE: ClassementEntry = {
   pertinentHeadId: null, aSurveillerHeadId: null, archiveHeadId: null, discarded: false,
 };
 
-function stubFetchOk(): { calls: { url: string; method: string; body: unknown; key: string | null }[] } {
-  const calls: { url: string; method: string; body: unknown; key: string | null }[] = [];
+type Call = { url: string; method: string; body: unknown; key: string | null };
+function stubFetchOk(fail?: (call: Call, index: number) => { status: number; error: string } | null): { calls: Call[] } {
+  const calls: Call[] = [];
   vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
-    calls.push({
+    const call: Call = {
       url, method: init?.method ?? "GET",
       body: typeof init?.body === "string" ? JSON.parse(init.body) : null,
       key: new Headers(init?.headers).get("Idempotency-Key"),
-    });
+    };
+    calls.push(call);
+    const failure = fail?.(call, calls.length - 1) ?? null;
+    if (failure) {
+      return new Response(JSON.stringify({ error: failure.error }), { status: failure.status, headers: { "content-type": "application/json" } });
+    }
     const payload = url.includes("reason-codes")
       ? { ok: true, profileId: "immo-steve-2026-09", codes: [{ code: "N-NON-RES", verdict: "non_pertinent" }] }
-      : { ok: true, event: null };
+      : { ok: true, event: { id: `evt-${calls.length}` } };
     return new Response(JSON.stringify(payload), { status: 200, headers: { "content-type": "application/json" } });
   });
   return { calls };
 }
+const posts = (calls: Call[]) => calls.filter((c) => c.method === "POST");
+const entry = (patch: Partial<ClassementEntry>): ClassementEntry => ({ ...NON_CLASSE, ...patch });
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -64,5 +72,88 @@ describe("signal classement client — acceptance criteria", () => {
     const write = calls.find((c) => c.method === "POST");
     expect(write?.url).toBe(`/api/v1/workspaces/${WS}/signal-facets/personal/select`);
     expect(write?.body).toMatchObject({ basket: "pertinent", expectedHeadId: null });
+  });
+
+  it("covers deselect, restore and Non classé transitions with expected heads", async () => {
+    const { calls } = stubFetchOk();
+    await applyClassement(SCOPE, {
+      target: TARGET, displayedFingerprint: FINGERPRINT,
+      current: entry({ classe: "pertinent", pertinentHeadId: "p1", reasonCode: "P-DENSITE" }),
+      nextClass: "a_surveiller",
+    });
+    expect(posts(calls).map((c) => c.url.split("/").pop())).toEqual(["deselect", "select"]);
+    expect(posts(calls)[0]?.body).toMatchObject({ basket: "pertinent", expectedHeadId: "p1" });
+    expect(posts(calls)[1]?.body).toMatchObject({ basket: "a_surveiller", expectedHeadId: null });
+
+    calls.length = 0;
+    await applyClassement(SCOPE, {
+      target: TARGET, displayedFingerprint: FINGERPRINT,
+      current: entry({ classe: "ecarte", discarded: true, archiveHeadId: "arch-1", pertinentHeadId: "p1", reasonCode: "N-NON-RES" }),
+      nextClass: "non_classe",
+    });
+    expect(posts(calls).map((c) => c.url.split("/").pop())).toEqual(["restore", "deselect"]);
+    expect(posts(calls)[0]?.body).toMatchObject({ expectedHeadId: "arch-1" });
+    expect(posts(calls)[1]?.body).toMatchObject({ basket: "pertinent", expectedHeadId: "p1" });
+
+    calls.length = 0;
+    await applyClassement(SCOPE, {
+      target: TARGET, displayedFingerprint: FINGERPRINT,
+      current: entry({ classe: "ecarte", discarded: true, archiveHeadId: "arch-1", reasonCode: "N-NON-RES" }),
+      nextClass: "pertinent",
+    });
+    expect(posts(calls).map((c) => c.url.split("/").pop())).toEqual(["restore", "select"]);
+  });
+
+  it("F4: a failed second POST rolls back the first, keeping the previous classement", async () => {
+    const { calls } = stubFetchOk((call) =>
+      call.url.endsWith("/select") && (call.body as { basket?: string })?.basket === "a_surveiller"
+        ? { status: 409, error: "facet_head_conflict" } : null);
+    await expect(applyClassement(SCOPE, {
+      target: TARGET, displayedFingerprint: FINGERPRINT,
+      current: entry({ classe: "pertinent", pertinentHeadId: "p1", reasonCode: "P-DENSITE" }),
+      nextClass: "a_surveiller",
+    })).rejects.toMatchObject({ status: 409, code: "facet_head_conflict" });
+    // deselect pertinent, failed select, compensating re-select pertinent.
+    expect(posts(calls).map((c) => `${c.url.split("/").pop()}:${(c.body as { basket?: string }).basket}`))
+      .toEqual(["deselect:pertinent", "select:a_surveiller", "select:pertinent"]);
+    expect(posts(calls)[2]?.body).toMatchObject({ reasonCode: "P-DENSITE" });
+    // Compensating key differs from the failed command's key.
+    expect(new Set(posts(calls).map((c) => c.key)).size).toBe(3);
+  });
+
+  it("F4: a failed select after restore re-discards with the previous reason", async () => {
+    const { calls } = stubFetchOk((call) =>
+      call.url.endsWith("/select") ? { status: 422, error: "invalid_reason_code" } : null);
+    await expect(applyClassement(SCOPE, {
+      target: TARGET, displayedFingerprint: FINGERPRINT,
+      current: entry({ classe: "ecarte", discarded: true, archiveHeadId: "arch-1", reasonCode: "N-NON-RES" }),
+      nextClass: "pertinent", reasonCode: "P-DENSITE",
+      catalog: [{ code: "P-DENSITE", verdict: "pertinent" }, { code: "N-NON-RES", verdict: "non_pertinent" }],
+    })).rejects.toMatchObject({ status: 422, code: "invalid_reason_code" });
+    expect(posts(calls).map((c) => c.url.split("/").pop())).toEqual(["restore", "select", "discard"]);
+    expect(posts(calls)[2]?.body).toMatchObject({ reasonCode: "N-NON-RES" });
+  });
+
+  it("surfaces 409, 422 and fingerprint-conflict errors with status and code", async () => {
+    for (const [status, code] of [[409, "facet_head_conflict"], [422, "invalid_reason_code"], [409, "target_version_conflict"]] as const) {
+      vi.unstubAllGlobals();
+      stubFetchOk(() => ({ status, error: code }));
+      await expect(applyClassement(SCOPE, {
+        target: TARGET, displayedFingerprint: FINGERPRINT, current: NON_CLASSE, nextClass: "pertinent",
+      })).rejects.toMatchObject({ status, code });
+    }
+  });
+
+  it("F10: fails closed without crypto.randomUUID instead of a constant key", async () => {
+    stubFetchOk();
+    const original = globalThis.crypto;
+    vi.stubGlobal("crypto", {});
+    try {
+      await expect(applyClassement(SCOPE, {
+        target: TARGET, displayedFingerprint: FINGERPRINT, current: NON_CLASSE, nextClass: "pertinent",
+      })).rejects.toThrow("random_uuid_unavailable");
+    } finally {
+      vi.stubGlobal("crypto", original);
+    }
   });
 });

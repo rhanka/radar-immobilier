@@ -30,14 +30,16 @@ export interface ClassementTarget {
 function newCommandKey(): string {
   const cryptoRef = globalThis.crypto as Crypto | undefined;
   if (cryptoRef && typeof cryptoRef.randomUUID === "function") return cryptoRef.randomUUID();
-  return "00000000-0000-4000-8000-000000000000";
+  // Fail closed: a constant key would collide across distinct commands.
+  throw new Error("random_uuid_unavailable");
 }
 
+/** Returns the new head event id (`event.id`), or null for a no-op. */
 async function postCommand(
   scope: SignalScope,
   action: "select" | "deselect" | "discard" | "restore",
   body: Record<string, unknown>,
-): Promise<void> {
+): Promise<string | null> {
   const res = await fetchJsonWithTimeout<unknown>(
     scopedSignalFacetsPath(scope, `personal/${action}`),
     {
@@ -52,6 +54,8 @@ async function postCommand(
   if (!res.ok) {
     throw new GraphSignalsHttpError(`classement ${action}: ${res.status}`, res.status, readJsonErrorCode(res.json));
   }
+  const event = (res.json as { event?: { id?: unknown } | null } | null)?.event;
+  return typeof event?.id === "string" ? event.id : null;
 }
 
 export async function fetchReasonCodes(scope: SignalScope): Promise<ReasonCodeEntry[]> {
@@ -109,33 +113,76 @@ export async function applyClassement(scope: SignalScope, args: ApplyClassementA
     return;
   }
 
-  if (current.discarded) {
-    await postCommand(scope, "restore", {
-      target, expectedHeadId: current.archiveHeadId, displayedFingerprint,
-    });
-  }
-
-  if (nextClass === "non_classe") {
-    for (const basket of activeBaskets) {
-      await postCommand(scope, "deselect", {
-        target, basket, expectedHeadId: headFor(basket), displayedFingerprint,
+  // F4: multi-POST sequences are not atomic server-side. Track each
+  // completed step's compensating command; on a mid-sequence failure, run
+  // them in reverse (with the head ids the completed steps produced) so
+  // the previous classement is restored, then rethrow the original error.
+  const undo: (() => Promise<void>)[] = [];
+  const reasonFor = (basket: "pertinent" | "a_surveiller"): string | null =>
+    current.classe === basket ? current.reasonCode : null;
+  try {
+    if (current.discarded) {
+      const restoredHead = await postCommand(scope, "restore", {
+        target, expectedHeadId: current.archiveHeadId, displayedFingerprint,
+      });
+      undo.push(async () => {
+        if (!current.reasonCode) throw new Error("rollback_reason_missing");
+        await postCommand(scope, "discard", {
+          target, reasonCode: current.reasonCode,
+          expectedHeadId: restoredHead ?? current.archiveHeadId, displayedFingerprint,
+        });
       });
     }
-    return;
-  }
 
-  const basket = nextClass;
-  const other = basket === "pertinent" ? "a_surveiller" : "pertinent";
-  if (headFor(other)) {
-    await postCommand(scope, "deselect", {
-      target, basket: other, expectedHeadId: headFor(other), displayedFingerprint,
+    if (nextClass === "non_classe") {
+      for (const basket of activeBaskets) {
+        const newHead = await postCommand(scope, "deselect", {
+          target, basket, expectedHeadId: headFor(basket), displayedFingerprint,
+        });
+        undo.push(async () => {
+          const code = reasonFor(basket);
+          await postCommand(scope, "select", {
+            target, basket, ...(code ? { reasonCode: code } : {}),
+            expectedHeadId: newHead ?? headFor(basket), displayedFingerprint,
+          });
+        });
+      }
+      return;
+    }
+
+    const basket = nextClass;
+    const other = basket === "pertinent" ? "a_surveiller" : "pertinent";
+    if (headFor(other)) {
+      const newHead = await postCommand(scope, "deselect", {
+        target, basket: other, expectedHeadId: headFor(other), displayedFingerprint,
+      });
+      undo.push(async () => {
+        const code = reasonFor(other);
+        await postCommand(scope, "select", {
+          target, basket: other, ...(code ? { reasonCode: code } : {}),
+          expectedHeadId: newHead ?? headFor(other), displayedFingerprint,
+        });
+      });
+    }
+    await postCommand(scope, "select", {
+      target,
+      basket,
+      ...(reasonCode ? { reasonCode } : {}),
+      expectedHeadId: headFor(basket),
+      displayedFingerprint,
     });
+  } catch (error) {
+    let rollbackFailed = false;
+    for (const step of [...undo].reverse()) {
+      try {
+        await step();
+      } catch {
+        rollbackFailed = true;
+      }
+    }
+    if (rollbackFailed) {
+      throw new Error(`classement_rollback_failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+    throw error;
   }
-  await postCommand(scope, "select", {
-    target,
-    basket,
-    ...(reasonCode ? { reasonCode } : {}),
-    expectedHeadId: headFor(basket),
-    displayedFingerprint,
-  });
 }
