@@ -1,7 +1,7 @@
 import type { TextJsonGenerationClient } from "@sentropic/graphify";
 import { describe, expect, it, vi } from "vitest";
 
-import { createRefreshModelPolicy, type RefreshModel, type RefreshModelReceipt } from "./refresh-model-policy.js";
+import { createRefreshModelPolicy, parseRefreshModel, shouldVerifyRefreshOutput, type RefreshModel, type RefreshModelReceipt } from "./refresh-model-policy.js";
 
 const primary: RefreshModel = { provider: "gemini", model: "gemini-3.8-flash", effort: "low" };
 const fallback: RefreshModel = { provider: "openai", model: "gpt-6-astra", effort: "low" };
@@ -271,6 +271,69 @@ describe("refresh model policy", () => {
     await run.document("d").generateJson(input);
     expect(run.calls.filter((model) => model === primary.model)).toHaveLength(3);
     expect(run.receipts.at(-1)?.fallbackReason).toBe("circuit-open");
+  });
+
+  it("should parse an anthropic fallback model (claude-opus-5-5, medium)", () => {
+    expect(parseRefreshModel("REFRESH_FALLBACK", {
+      REFRESH_FALLBACK_PROVIDER: "anthropic",
+      REFRESH_FALLBACK_MODEL: "claude-opus-5-5",
+      REFRESH_FALLBACK_REASONING_EFFORT: "medium",
+    })).toEqual({ provider: "anthropic", model: "claude-opus-5-5", effort: "medium" });
+    expect(parseRefreshModel("REFRESH", {
+      REFRESH_PROVIDER: "openai", REFRESH_MODEL: "gpt-6-astra", REFRESH_REASONING_EFFORT: "medium",
+    })).toEqual({ provider: "openai", model: "gpt-6-astra", effort: "medium" });
+    expect(parseRefreshModel("REFRESH_VERIFY", {
+      REFRESH_VERIFY_PROVIDER: "gemini", REFRESH_VERIFY_MODEL: "gemini-3.8-flash", REFRESH_VERIFY_REASONING_EFFORT: "low",
+    })).toEqual({ provider: "gemini", model: "gemini-3.8-flash", effort: "low" });
+  });
+
+  it("should refuse an unknown provider and an invalid effort", () => {
+    expect(() => parseRefreshModel("REFRESH_FALLBACK", {
+      REFRESH_FALLBACK_PROVIDER: "unknown", REFRESH_FALLBACK_MODEL: "x", REFRESH_FALLBACK_REASONING_EFFORT: "medium",
+    })).toThrow("REFRESH_FALLBACK_PROVIDER must be anthropic, gemini or openai");
+    expect(() => parseRefreshModel("REFRESH_FALLBACK", {
+      REFRESH_FALLBACK_PROVIDER: "anthropic", REFRESH_FALLBACK_MODEL: "claude-opus-5-5", REFRESH_FALLBACK_REASONING_EFFORT: "ultra",
+    })).toThrow("REFRESH_FALLBACK_REASONING_EFFORT is invalid");
+    expect(() => parseRefreshModel("REFRESH_FALLBACK", {
+      REFRESH_FALLBACK_PROVIDER: "anthropic", REFRESH_FALLBACK_REASONING_EFFORT: "medium",
+    })).toThrow("REFRESH_FALLBACK_MODEL is required");
+  });
+
+  it("should disable gemini verification for anthropic outputs only", () => {
+    expect(shouldVerifyRefreshOutput({ provider: "anthropic", model: "claude-opus-5-5", effort: "medium" })).toBe(false);
+    expect(shouldVerifyRefreshOutput({ provider: "gemini", model: "gemini-3.8-flash", effort: "low" })).toBe(true);
+    expect(shouldVerifyRefreshOutput({ provider: "openai", model: "gpt-6-astra", effort: "medium" })).toBe(true);
+  });
+
+  it("should fall back to anthropic and skip its verification", async () => {
+    const anthropicFallback: RefreshModel = { provider: "anthropic", model: "claude-opus-5-5", effort: "medium" };
+    const verification: RefreshModel = { provider: "gemini", model: "gemini-3.8-flash", effort: "low" };
+    const calls: string[] = [];
+    const receipts: RefreshModelReceipt[] = [];
+    let verifierCalls = 0;
+    const policy = createRefreshModelPolicy({
+      primary, fallback: anthropicFallback, verification, forceFallback: false,
+      primaryQualityAttempts: 2, timeoutMs: 1000,
+      createClient(model): TextJsonGenerationClient {
+        return { mode: "mesh", provider: model.provider, model: model.model,
+          async generateJson(request) {
+            calls.push(model.model);
+            if (model.provider === "gemini" && model.model === verification.model) verifierCalls++;
+            if (model === primary) throw Object.assign(new Error("quota"), { status: 429 });
+            await request.validateResponse?.("{}");
+            return { status: "completed", mode: "mesh", provider: model.provider, model: model.model, audit: {} };
+          } };
+      },
+    });
+    const chunk = { chunk: { docSha: "one" }, extraction: { nodes: [{ id: "n1" }] } } as never;
+    // Drive an extraction that falls back to anthropic, then ask for verification.
+    await policy.forDocument("one", async (r) => { receipts.push(r); }).generateJson(input);
+    expect(calls).toEqual([primary.model, anthropicFallback.model]);
+    expect(receipts[1]).toMatchObject({ modelUsed: anthropicFallback, status: "completed",
+      fallbackReason: "quota", verification: { status: "skipped-fallback" } });
+    const verified = await policy.verify(chunk, 1024, async (r) => { receipts.push(r); });
+    expect(verified).toBe(chunk);
+    expect(verifierCalls).toBe(0);
   });
 
   it("should not fall back when the validated output cannot be written", async () => {

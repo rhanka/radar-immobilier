@@ -13,6 +13,58 @@ export interface RefreshModel {
   readonly model: string;
   readonly effort: string;
 }
+
+const REFRESH_PROVIDERS: readonly RefreshProvider[] = ["anthropic", "gemini", "openai"];
+const REFRESH_EFFORTS: readonly string[] = ["minimal", "low", "medium", "high", "xhigh"];
+
+/**
+ * Parse one `<PREFIX>_PROVIDER` / `<PREFIX>_MODEL` / `<PREFIX>_REASONING_EFFORT`
+ * triple from the environment. Accepting `anthropic` here is the pre-bump
+ * validation step: the seat transport itself (llm-mesh 0.33.1
+ * `ClaudeCodeRuntimeClient` spawning `claude -p`) is wired in
+ * `refresh-mesh.ts` at bump time — see LANE-REPORT.md. Until then an
+ * anthropic model parses and is carried by the policy, but `createRefreshMesh`
+ * has no anthropic adapter to route it to.
+ */
+export function parseRefreshModel(
+  prefix: string,
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): RefreshModel {
+  const required = (name: string): string => {
+    const value = env[name]?.trim();
+    if (!value) throw new Error(`${name} is required`);
+    return value;
+  };
+  const provider = required(`${prefix}_PROVIDER`);
+  if (!REFRESH_PROVIDERS.includes(provider as RefreshProvider)) {
+    throw new Error(`${prefix}_PROVIDER must be anthropic, gemini or openai`);
+  }
+  const effort = required(`${prefix}_REASONING_EFFORT`);
+  if (!REFRESH_EFFORTS.includes(effort)) {
+    throw new Error(`${prefix}_REASONING_EFFORT is invalid`);
+  }
+  return { provider: provider as RefreshProvider, model: required(`${prefix}_MODEL`), effort };
+}
+
+/**
+ * Verification decision for the anthropic fallback (prod target:
+ * REFRESH_FALLBACK_PROVIDER=anthropic, model claude-opus-5-5, effort medium):
+ * DISABLE gemini verification for anthropic fallback outputs, KEEP it for
+ * primary extractions.
+ *
+ * Why: fallback outputs already report `verification: skipped-fallback` and
+ * `verify()` returns the extraction unchanged when the document fell back
+ * (`selected.reason` set) — no gemini call is made for them. Keeping that
+ * behaviour for anthropic avoids (1) burning the rate-limited gemini seat on
+ * outputs it was not calibrated for, and (2) applying the gemini removal-only
+ * verifier (v101b, tuned on gemini/openai distributions) to Opus 5.5 seat
+ * outputs, whose error profile in benchmark-v11alpha differs (F1 0.319,
+ * recall 0.311). Primary (openai/gpt-6-astra) extractions keep the existing
+ * gemini verification unchanged.
+ */
+export function shouldVerifyRefreshOutput(model: RefreshModel): boolean {
+  return model.provider !== "anthropic";
+}
 export type RefreshFallbackReason = "quota" | "timeout" | "empty-output" | "transport" | "quality" | "forced" | "circuit-open";
 export type RefreshModelTransition = "primary" | "same-model-retry" | "fallback" | "verification";
 export interface RefreshModelReceipt {
@@ -99,6 +151,10 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
     async verify(input, maxOutputTokens, record, citySlug) {
       const identity = citySlug ?? options.citySlug;
       const selected = documents.get(input.chunk.docSha);
+      // Anthropic fallback outputs are not gemini-verified (see
+      // shouldVerifyRefreshOutput): the fallback receipt already carries
+      // `skipped-fallback` and no verifier client is created for them.
+      if (selected?.reason && !shouldVerifyRefreshOutput(options.fallback)) return input;
       if (!options.verification || selected?.reason) return input;
       if (!selected) throw new Error("Refresh verification requires an accepted primary extraction");
       options.signal?.throwIfAborted();
