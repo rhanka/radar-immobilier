@@ -58,6 +58,56 @@ describe("SignauxRail Pertinence dropdown — acceptance criteria", () => {
     expect(view.queryByTestId("classement-filter-panel")).toBeNull();
   });
 
+  it("filter change → counts updated: Pertinence pills follow the new counts prop", async () => {
+    const view = render(SignauxRail, {
+      props: {
+        entries: [],
+        classementFilter: { pertinent: true, a_surveiller: true, non_classe: true, ecarte: false },
+        classementCounts: { pertinent: 3, a_surveiller: 2, non_classe: 5, ecarte: 1 },
+        filtreCounts: { z: 4, r: 3, p: 2, piia: 1, derog: 1 },
+      },
+    });
+    await fireEvent.click(view.getByTestId("classement-filter-trigger"));
+    const pillsOf = (testid: string): string[] => {
+      const panel = view.getByTestId(testid);
+      return [...panel.querySelectorAll(".st-badge")].map((pill) => pill.textContent?.trim() ?? "");
+    };
+    expect(pillsOf("classement-filter-panel")).toEqual(["3", "2", "5", "1"]);
+    // Simulate the parent recomputing after a Filtre/period change.
+    await view.rerender({
+      entries: [],
+      classementFilter: { pertinent: true, a_surveiller: true, non_classe: true, ecarte: false },
+      classementCounts: { pertinent: 1, a_surveiller: 0, non_classe: 2, ecarte: 0 },
+      filtreCounts: { z: 1, r: 1, p: 1, piia: 0, derog: 0 },
+    });
+    expect(pillsOf("classement-filter-panel")).toEqual(["1", "0", "2", "0"]);
+  });
+
+  it("Filtre options show counts in the same right-aligned pill style, reactive", async () => {
+    const view = render(SignauxRail, {
+      props: {
+        entries: [],
+        classementFilter: { pertinent: true, a_surveiller: true, non_classe: true, ecarte: false },
+        classementCounts: { pertinent: 3, a_surveiller: 2, non_classe: 5, ecarte: 1 },
+        filtreCounts: { z: 4, r: 3, p: 2, piia: 1, derog: 6 },
+      },
+    });
+    await fireEvent.click(view.getByTestId("filtre-trigger"));
+    const panel = view.getByTestId("filtre-panel");
+    const rows = [...panel.querySelectorAll(".classement-row")];
+    expect(rows.map((row) => row.querySelector(".st-badge")?.textContent?.trim())).toEqual(["4", "3", "2", "1", "6"]);
+    // Same pill mechanism as Pertinence: a Badge in each row, scope note present.
+    expect(panel.textContent).toContain("ville sélectionnée");
+    await view.rerender({
+      entries: [],
+      classementFilter: { pertinent: true, a_surveiller: true, non_classe: true, ecarte: false },
+      classementCounts: { pertinent: 3, a_surveiller: 2, non_classe: 5, ecarte: 1 },
+      filtreCounts: { z: 9, r: 8, p: 7, piia: 0, derog: 0 },
+    });
+    const updated = [...view.getByTestId("filtre-panel").querySelectorAll(".st-badge")].map((pill) => pill.textContent?.trim());
+    expect(updated).toEqual(["9", "8", "7", "0", "0"]);
+  });
+
   it("Filtre is a dropdown with the same field pattern as Pertinence", async () => {
     const view = render(SignauxRail, {
       props: {

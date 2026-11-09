@@ -96,13 +96,25 @@ function node(id: string, label: string) {
 }
 const SIG1 = node("sig-1", "Signal un");
 const SIG2 = node("sig-2", "Signal deux");
+const SIG3 = {
+  ...node("sig-3", "Signal tardif"),
+  classification: {
+    zonage: { valeur: "oui", source: "test", confiance: 0.95 },
+    residentiel: { valeur: "oui", source: "test", confiance: 0.9 },
+    effet_densifiant: "inconnu", instrument: "rezonage", etape: "adoption",
+    etapes_historique: ["adoption"], exclusion_reason: null,
+    provenance: { extrait: "" }, confiance: 0.9,
+  },
+};
 let discarded = false;
 let surveille = false;
+let includeLate = false;
 
 function detailResult() {
+  const base = discarded ? [SIG2] : [SIG1, SIG2];
   return {
     citySlug: CITY_SLUG, token: "token", legacyProjection: null,
-    nodes: discarded ? [SIG2] : [SIG1, SIG2],
+    nodes: includeLate ? [...base, SIG3] : base,
     selection: surveille
       ? [{ target: { citySlug: CITY_SLUG, type: "Signal", id: "sig-2" }, facet: "selection", basket: "a_surveiller", state: "active", reasonCode: "S-PLANIFIE", id: "a_surveiller-sig-2" }]
       : [], heads: [],
@@ -121,6 +133,7 @@ function card(id: string): HTMLElement {
 beforeEach(() => {
   discarded = false;
   surveille = false;
+  includeLate = false;
   window.history.replaceState({}, "", `/geo/city/${CITY_SLUG}?mode=signal&filter.period=all`);
   vi.mocked(fetchGraphSignalDetail).mockReset();
   vi.mocked(fetchGraphSignalDetail).mockImplementation(async () => detailResult() as never);
@@ -168,6 +181,36 @@ describe("SignauxMapView classement behaviour", () => {
       expect(chip.getAttribute("title")).toBe("S-PLANIFIE");
       expect(chip.textContent).toContain("Changement planifié");
     });
+  });
+
+  it("filter change → counts updated: unchecking Précoce recomputes Pertinence and Filtre pills", async () => {
+    includeLate = true;
+    // Authoritative snapshot with every Filtre axis/exclusion checked, so
+    // Précoce really filters (a bare `filter.period=all` link unchecks all).
+    window.history.replaceState({}, "", `/geo/city/${CITY_SLUG}?mode=signal&filter.period=all&filter.zonage=1&filter.residentiel=1&filter.precoce=1&filter.excludePiia=1&filter.excludeDerogations=1`);
+    render(SignauxMapView, { props: { geoRoute: cityRoute() } });
+    // Précoce checked: the late signal is filtered out (2 cards).
+    await waitFor(() => expect(document.querySelectorAll("[data-signal-node]").length).toBe(2));
+
+    const pills = (testid: string): string[] => {
+      const panel = screen.getByTestId(testid);
+      return [...panel.querySelectorAll(".st-badge")].map((pill) => pill.textContent?.trim() ?? "");
+    };
+    // Pertinence counts AFTER Filtre: Non classé = 2 (late node excluded).
+    await fireEvent.click(screen.getByTestId("classement-filter-trigger"));
+    expect(pills("classement-filter-panel")).toEqual(["0", "0", "2", "0"]);
+    await fireEvent.click(screen.getByTestId("classement-filter-trigger"));
+
+    // Uncheck Précoce in Filtre: Pertinence Non classé must become 3, and
+    // the Filtre Précoce pill counts the 2 early signals in scope.
+    await fireEvent.click(screen.getByTestId("filtre-trigger"));
+    expect(pills("filtre-panel")).toEqual(["3", "3", "2", "0", "0"]);
+    const precoceBox = screen.getByLabelText(/Précoce/) as HTMLInputElement;
+    await fireEvent.click(precoceBox);
+    await waitFor(() => expect(document.querySelectorAll("[data-signal-node]").length).toBe(3));
+    await fireEvent.click(screen.getByTestId("filtre-trigger"));
+    await fireEvent.click(screen.getByTestId("classement-filter-trigger"));
+    expect(pills("classement-filter-panel")).toEqual(["0", "0", "3", "0"]);
   });
 
   it("a failed write marks only the concerned card with an exclamation icon, no big panel", async () => {
