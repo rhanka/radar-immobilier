@@ -16,6 +16,18 @@ describe("SignauxRail Classement section — acceptance criteria", () => {
       },
     });
     expect(view.container.textContent).toContain("Classement");
+
+    // Dropdown is closed by default: summary button shows "3 sur 4",
+    // the checkbox list is not rendered until it is opened.
+    const trigger = view.getByTestId("classement-filter-trigger");
+    expect(trigger.textContent).toContain("3 sur 4");
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    expect(view.queryByTestId("classement-filter-panel")).toBeNull();
+    expect(screen.queryByLabelText(/Pertinent/)).toBeNull();
+
+    await fireEvent.click(trigger);
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    expect(view.getByTestId("classement-filter-panel")).toBeTruthy();
     expect(view.container.textContent).toContain("Pertinent (3)");
     expect(view.container.textContent).toContain("Écarté (1)");
 
@@ -35,5 +47,8 @@ describe("SignauxRail Classement section — acceptance criteria", () => {
     expect(onClassementFilterChange).toHaveBeenCalledWith({
       pertinent: true, a_surveiller: true, non_classe: true, ecarte: true,
     });
+
+    await fireEvent.click(trigger);
+    expect(view.queryByTestId("classement-filter-panel")).toBeNull();
   });
 });
