@@ -54,6 +54,7 @@
     type ClassementFilter,
     type SignalClass,
   } from "$lib/signals/signal-classement.js";
+  import { FILTER_COUNTS_SCOPE_NOTE } from "$lib/signals/signal-filter-counts.js";
   import RailShell from "$lib/components/maps/RailShell.svelte";
   import RailSection from "$lib/components/maps/RailSection.svelte";
   import RailCityList from "$lib/components/maps/RailCityList.svelte";
@@ -149,6 +150,14 @@
     pertinent: 0, a_surveiller: 0, non_classe: 0, ecarte: 0,
   };
   export let onClassementFilterChange: (next: ClassementFilter) => void = () => {};
+
+  /**
+   * Filtre counts (owner 2026-11-09): per-axis / per-exclusion counts within
+   * the current scope (period + Pertinence), computed by the parent from the
+   * selected city's loaded detail. `null` when no exact count is available
+   * (no classification) → pills are hidden rather than partial.
+   */
+  export let filtreCounts: import("$lib/signals/signal-filter-counts.js").FiltreCounts | null = null;
 
   function toggleClassement(classe: SignalClass, checked: boolean): void {
     onClassementFilterChange({ ...classementFilter, [classe]: checked });
@@ -405,11 +414,9 @@
   /**
    * Projection générique consommée par la liste partagée RailCityList.
    *
-   * Badge de la ville SÉLECTIONNÉE quand son compte live est plus étroit que le
-   * bulk : « live/bulk » (ex. « 1/4 ») — le compte affiché reste honnête sans
-   * jamais laisser croire que des signaux ont disparu. Un live ≥ bulk (axes
-   * relâchés au-delà du compte serveur) s'affiche seul : le bulk n'est plus un
-   * dénominateur signifiant.
+   * Badge ville = le seul compte APRÈS filtres (owner 2026-11-09 : « afficher
+   * 1 et pas 1/6 — le 6 ne correspond à rien »). Jamais de format « x/y » :
+   * il n'y a qu'un niveau de filtre, donc un seul nombre.
    */
   function toRailItem(
     entry: CityMapEntry,
@@ -418,10 +425,7 @@
     liveCount: number | null,
     liveSlug: string | null,
   ): RailCityItem {
-    const bulkCount = bulkCountFor(entry, key, unavailable);
     const activeCount = countFor(entry, key, unavailable, liveCount, liveSlug);
-    const isNarrowedLive =
-      activeCount !== null && bulkCount !== null && activeCount < bulkCount;
     return {
       slug: entry.municipality.slug,
       name: entry.municipality.name,
@@ -430,12 +434,6 @@
       badge:
         activeCount === null
           ? { label: "n/d", tone: "neutral" }
-          : isNarrowedLive
-          ? {
-              label: `${activeCount}/${bulkCount}`,
-              tone: activeCount > 0 ? "warning" : "neutral",
-              ariaLabel: `${activeCount} signaux affichés sur ${bulkCount} au total`,
-            }
           : activeCount > 0
           ? {
               label: String(activeCount),
@@ -541,9 +539,12 @@
                   onchange={(event) => toggleClassement(classe, event.currentTarget.checked)}
                 />
               </span>
-              <Badge tone={classementCounts[classe] > 0 ? "warning" : "neutral"} aria-label="{classementCounts[classe]} signaux">{classementCounts[classe]}</Badge>
+              <span title={FILTER_COUNTS_SCOPE_NOTE}>
+                <Badge tone={classementCounts[classe] > 0 ? "warning" : "neutral"} aria-label="{classementCounts[classe]} signaux">{classementCounts[classe]}</Badge>
+              </span>
             </div>
           {/each}
+          <p class="classement-scope-note" title={FILTER_COUNTS_SCOPE_NOTE}>Comptes de la ville sélectionnée.</p>
         </div>
       {/if}
     </div>
@@ -562,33 +563,29 @@
       </button>
       {#if filtreOpen}
         <div class="classement-panel" data-testid="filtre-panel">
-          <Checkbox
-            label="Zonage"
-            checked={bAxes.z}
-            onchange={(event) => toggleBAxis({ z: event.currentTarget.checked })}
-          />
-          <Checkbox
-            label="Résidentiel"
-            checked={bAxes.r}
-            onchange={(event) => toggleBAxis({ r: event.currentTarget.checked })}
-          />
-          <Checkbox
-            label="Précoce"
-            checked={bAxes.p}
-            onchange={(event) => toggleBAxis({ p: event.currentTarget.checked })}
-          />
-          <Checkbox
-            label="Exclure PIIA sans projet résidentiel"
-            checked={exclusions.piiaSansProjetResidentiel}
-            onchange={(event) =>
-              setExclusion({ piiaSansProjetResidentiel: event.currentTarget.checked })}
-          />
-          <Checkbox
-            label="Exclure dérogations mineures"
-            checked={exclusions.derogationsMineures}
-            onchange={(event) =>
-              setExclusion({ derogationsMineures: event.currentTarget.checked })}
-          />
+          {#each [
+            { key: "z", label: FILTRE_LABELS.z, checked: bAxes.z, toggle: (checked: boolean) => toggleBAxis({ z: checked }) },
+            { key: "r", label: FILTRE_LABELS.r, checked: bAxes.r, toggle: (checked: boolean) => toggleBAxis({ r: checked }) },
+            { key: "p", label: FILTRE_LABELS.p, checked: bAxes.p, toggle: (checked: boolean) => toggleBAxis({ p: checked }) },
+            { key: "piia", label: FILTRE_LABELS.piia, checked: exclusions.piiaSansProjetResidentiel, toggle: (checked: boolean) => setExclusion({ piiaSansProjetResidentiel: checked }) },
+            { key: "derog", label: FILTRE_LABELS.derog, checked: exclusions.derogationsMineures, toggle: (checked: boolean) => setExclusion({ derogationsMineures: checked }) },
+          ] as row}
+            <div class="classement-row">
+              <span class="classement-row-check">
+                <Checkbox
+                  label={row.label}
+                  checked={row.checked}
+                  onchange={(event) => row.toggle(event.currentTarget.checked)}
+                />
+              </span>
+              {#if filtreCounts !== null}
+                <span title={FILTER_COUNTS_SCOPE_NOTE}>
+                  <Badge tone={filtreCounts[row.key as keyof typeof filtreCounts] > 0 ? "warning" : "neutral"} aria-label="{filtreCounts[row.key as keyof typeof filtreCounts]} signaux">{filtreCounts[row.key as keyof typeof filtreCounts]}</Badge>
+                </span>
+              {/if}
+            </div>
+          {/each}
+          <p class="classement-scope-note" title={FILTER_COUNTS_SCOPE_NOTE}>Comptes de la ville sélectionnée.</p>
         </div>
       {/if}
     </div>
@@ -708,6 +705,12 @@
 
   .classement-row :global(.st-badge) {
     flex-shrink: 0;
+  }
+
+  .classement-scope-note {
+    margin: 0;
+    color: var(--st-semantic-text-muted);
+    font-size: var(--rail-fs-small, 0.75rem);
   }
 
   .classement-trigger {
