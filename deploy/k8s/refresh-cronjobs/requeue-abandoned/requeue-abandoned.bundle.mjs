@@ -239,9 +239,6 @@ function loadConfig(env = process.env) {
   return envSchema.parse(env);
 }
 
-// api/src/services/graph/refresh-requeue.ts
-import { createHash } from "node:crypto";
-
 // api/src/services/graph/refresh-coverage.ts
 function refreshCoverageKey(citySlug) {
   return `refresh/018/${citySlug}/coverage.json`;
@@ -265,32 +262,51 @@ async function readRefreshCoverage(store, citySlug) {
 async function writeRefreshCoverage(store, ledger) {
   await store.put(refreshCoverageKey(ledger.citySlug), JSON.stringify(ledger), "application/json");
 }
+var REQUEUE_CEILING_REASON = "requeue-ceiling-exceeded";
+var DEFAULT_MAX_REQUEUES = 2;
 function requeueAbandonedRefreshDocuments(ledger, options) {
   const sinceMs = options.since?.getTime();
-  const requeued = [];
+  const maxRequeues = options.maxRequeues ?? DEFAULT_MAX_REQUEUES;
+  const nowMs = options.now().getTime();
+  const oldestMs = options.maxAgeDays !== void 0 ? nowMs - options.maxAgeDays * 864e5 : void 0;
   const documents = { ...ledger.documents };
+  const exhausted = [];
+  const eligible = [];
   for (const [sha, entry] of Object.entries(ledger.documents)) {
     if (entry.state !== "abandoned") continue;
-    if (sinceMs !== void 0) {
-      const failedAt = Date.parse(entry.updatedAt);
-      if (!Number.isFinite(failedAt) || failedAt <= sinceMs) continue;
+    if ((entry.requeues ?? 0) >= maxRequeues) {
+      if (entry.lastReason !== REQUEUE_CEILING_REASON) {
+        documents[sha] = { ...entry, lastReason: REQUEUE_CEILING_REASON };
+        exhausted.push(sha);
+      }
+      continue;
     }
+    const failedAt = Date.parse(entry.updatedAt);
+    if (sinceMs !== void 0 && (!Number.isFinite(failedAt) || failedAt <= sinceMs)) continue;
+    if (oldestMs !== void 0 && (!Number.isFinite(failedAt) || failedAt < oldestMs)) continue;
+    eligible.push([sha, entry]);
+  }
+  eligible.sort((a, b) => b[1].updatedAt.localeCompare(a[1].updatedAt) || a[0].localeCompare(b[0]));
+  const selected = options.maxPerCity !== void 0 ? eligible.slice(0, options.maxPerCity) : eligible;
+  const requeued = [];
+  const timestamp = options.now().toISOString();
+  for (const [sha, entry] of selected) {
     documents[sha] = {
       state: "pending",
       sourceId: entry.sourceId,
       representationKey: entry.representationKey,
       firstSeenAt: entry.firstSeenAt,
-      updatedAt: entry.updatedAt,
+      updatedAt: timestamp,
       failures: 0,
+      requeues: (entry.requeues ?? 0) + 1,
       ...entry.publishedAt !== void 0 ? { publishedAt: entry.publishedAt } : {}
     };
     requeued.push(sha);
   }
-  if (requeued.length === 0) return { ledger, requeued, changed: false };
-  const timestamp = options.now().toISOString();
-  for (const sha of requeued) documents[sha] = { ...documents[sha], updatedAt: timestamp };
   requeued.sort();
-  return { ledger: { ...ledger, updatedAt: timestamp, documents }, requeued, changed: true };
+  exhausted.sort();
+  if (requeued.length === 0 && exhausted.length === 0) return { ledger, requeued, exhausted, changed: false };
+  return { ledger: { ...ledger, updatedAt: timestamp, documents }, requeued, exhausted, changed: true };
 }
 function summarizeRefreshCoverage(ledger) {
   const counts = { pending: 0, covered: 0, abandoned: 0 };
@@ -299,18 +315,29 @@ function summarizeRefreshCoverage(ledger) {
 }
 
 // api/src/services/graph/refresh-requeue.ts
-function refreshRequeueAuditKey(when, traceSha256) {
-  const stamp = when.toISOString().replace(/[:.]/g, "-");
-  return `refresh/018/_audit/requeue-abandoned-${stamp}-${traceSha256.slice(0, 12)}.json`;
+function refreshRequeueStamp(when) {
+  return when.toISOString().replace(/[:.]/g, "-");
+}
+function refreshRequeueAuditKey(when) {
+  return `refresh/018/_audit/requeue-abandoned-${refreshRequeueStamp(when)}.json`;
+}
+function refreshRequeueBackupPrefix(when) {
+  return `refresh/018/_backup/requeue-abandoned-${refreshRequeueStamp(when)}`;
+}
+function refreshRequeueBackupKey(when, citySlug) {
+  return `${refreshRequeueBackupPrefix(when)}/${citySlug}/coverage.json`;
 }
 var COVERAGE_KEY = /^refresh\/018\/([^/]+)\/coverage\.json$/;
+var BACKUP_KEY = /^refresh\/018\/_backup\/requeue-abandoned-[^/]+\/([^/]+)\/coverage\.json$/;
+var STAMP = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
+var CITY_SLUG = /^[a-z0-9][a-z0-9-]*$/;
 async function discoverRefreshCoverageCities(store) {
   if (!store.list) throw new Error("object store does not support listing coverage registries");
   const keys = await store.list("refresh/018/");
   const cities = /* @__PURE__ */ new Set();
   for (const key of keys) {
     const match = COVERAGE_KEY.exec(key);
-    if (match) cities.add(match[1]);
+    if (match && !key.startsWith("refresh/018/_backup/")) cities.add(match[1]);
   }
   return [...cities].sort();
 }
@@ -318,9 +345,33 @@ async function runRefreshRequeueAbandoned(store, options) {
   const now = options.now ?? (() => /* @__PURE__ */ new Date());
   const when = now();
   const cities = options.cities?.length ? [...new Set(options.cities)].sort() : await discoverRefreshCoverageCities(store);
+  const auditKey = options.dryRun ? null : refreshRequeueAuditKey(when);
+  const backupPrefix = options.dryRun ? null : refreshRequeueBackupPrefix(when);
   const cityTraces = [];
   let requeuedTotal = 0;
   let skipped = 0;
+  const snapshot = (complete) => ({
+    schemaVersion: 1,
+    kind: "refresh-requeue-abandoned",
+    who: options.who,
+    when: when.toISOString(),
+    dryRun: options.dryRun,
+    since: options.since?.toISOString() ?? null,
+    cities: [...cityTraces],
+    totals: { cities: cities.length, requeued: requeuedTotal, skipped },
+    auditKey,
+    backupPrefix,
+    complete,
+    filters: {
+      ...options.maxAgeDays !== void 0 ? { maxAgeDays: options.maxAgeDays } : {},
+      ...options.maxPerRun !== void 0 ? { maxPerRun: options.maxPerRun } : {},
+      ...options.maxPerCity !== void 0 ? { maxPerCity: options.maxPerCity } : {},
+      ...options.maxRequeues !== void 0 ? { maxRequeues: options.maxRequeues } : {}
+    }
+  });
+  const persist = async (complete) => {
+    if (auditKey) await store.put(auditKey, JSON.stringify(snapshot(complete)), "application/json");
+  };
   for (const citySlug of cities) {
     const { ledger, unreadable } = await readRefreshCoverage(store, citySlug);
     if (!ledger) {
@@ -329,34 +380,129 @@ async function runRefreshRequeueAbandoned(store, options) {
         citySlug,
         requeued: [],
         countsBefore: {},
+        backupKey: null,
+        phase: "skipped",
         skipped: unreadable ? "unreadable" : "absent"
       });
+      await persist(false);
       continue;
     }
     const countsBefore = summarizeRefreshCoverage(ledger);
+    const remaining = options.maxPerRun !== void 0 ? Math.max(0, options.maxPerRun - requeuedTotal) : void 0;
+    const perCity = remaining !== void 0 ? Math.min(options.maxPerCity ?? remaining, remaining) : options.maxPerCity;
     const result = requeueAbandonedRefreshDocuments(ledger, {
       ...options.since ? { since: options.since } : {},
+      ...options.maxAgeDays !== void 0 ? { maxAgeDays: options.maxAgeDays } : {},
+      ...perCity !== void 0 ? { maxPerCity: perCity } : {},
+      ...options.maxRequeues !== void 0 ? { maxRequeues: options.maxRequeues } : {},
       now
     });
-    if (result.changed && !options.dryRun) await writeRefreshCoverage(store, result.ledger);
+    if (!result.changed || options.dryRun) {
+      if (result.changed) requeuedTotal += result.requeued.length;
+      cityTraces.push({
+        citySlug,
+        requeued: result.requeued,
+        exhausted: result.exhausted,
+        countsBefore,
+        backupKey: null,
+        phase: "done"
+      });
+      await persist(false);
+      continue;
+    }
+    const backupKey = refreshRequeueBackupKey(when, citySlug);
+    const original = await store.get(refreshCoverageKey(citySlug));
+    await store.put(backupKey, original, "application/json");
+    const intent = {
+      citySlug,
+      requeued: result.requeued,
+      exhausted: result.exhausted,
+      countsBefore,
+      backupKey,
+      phase: "intent"
+    };
+    cityTraces.push(intent);
+    await persist(false);
+    await writeRefreshCoverage(store, result.ledger);
     requeuedTotal += result.requeued.length;
-    cityTraces.push({ citySlug, requeued: result.requeued, countsBefore });
+    cityTraces[cityTraces.indexOf(intent)] = { ...intent, phase: "done" };
+    await persist(false);
   }
-  const base = {
+  const trace = snapshot(true);
+  if (auditKey) await store.put(auditKey, JSON.stringify(trace), "application/json");
+  return trace;
+}
+function refreshRequeueRestoreAuditKey(when) {
+  return `refresh/018/_audit/requeue-restore-${refreshRequeueStamp(when)}.json`;
+}
+async function discoverRefreshRequeueBackupCities(store, stamp) {
+  if (!store.list) throw new Error("object store does not support listing coverage backups");
+  const keys = await store.list(`refresh/018/_backup/requeue-abandoned-${stamp}/`);
+  const cities = /* @__PURE__ */ new Set();
+  for (const key of keys) {
+    const match = BACKUP_KEY.exec(key);
+    if (match) cities.add(match[1]);
+  }
+  return [...cities].sort();
+}
+async function runRefreshRequeueRestore(store, options) {
+  if (!STAMP.test(options.stamp) || options.stamp.includes("..")) {
+    throw new Error(`invalid restore stamp: ${options.stamp}`);
+  }
+  const now = options.now ?? (() => /* @__PURE__ */ new Date());
+  const when = now();
+  let cities;
+  if (options.cities?.length) {
+    cities = [...new Set(options.cities)].sort();
+    for (const city of cities) {
+      if (!CITY_SLUG.test(city)) throw new Error(`invalid city slug: ${city}`);
+    }
+  } else {
+    cities = await discoverRefreshRequeueBackupCities(store, options.stamp);
+  }
+  const auditKey = options.dryRun ? null : refreshRequeueRestoreAuditKey(when);
+  const cityTraces = [];
+  let restored = 0;
+  let skipped = 0;
+  const snapshot = (complete) => ({
     schemaVersion: 1,
-    kind: "refresh-requeue-abandoned",
+    kind: "refresh-requeue-restore",
     who: options.who,
     when: when.toISOString(),
     dryRun: options.dryRun,
-    since: options.since?.toISOString() ?? null,
-    cities: cityTraces,
-    totals: { cities: cities.length, requeued: requeuedTotal, skipped }
+    stamp: options.stamp,
+    cities: [...cityTraces],
+    totals: { cities: cities.length, restored, skipped },
+    auditKey,
+    complete
+  });
+  const persist = async (complete) => {
+    if (auditKey) await store.put(auditKey, JSON.stringify(snapshot(complete)), "application/json");
   };
-  if (options.dryRun) return { ...base, auditKey: null };
-  const traceSha = createHash("sha256").update(JSON.stringify(base)).digest("hex");
-  const auditKey = refreshRequeueAuditKey(when, traceSha);
-  const trace = { ...base, auditKey };
-  await store.put(auditKey, JSON.stringify(trace), "application/json");
+  for (const citySlug of cities) {
+    const backupKey = `refresh/018/_backup/requeue-abandoned-${options.stamp}/${citySlug}/coverage.json`;
+    if (!await store.head(backupKey)) {
+      skipped += 1;
+      cityTraces.push({ citySlug, backupKey, phase: "skipped", skipped: "absent" });
+      await persist(false);
+      continue;
+    }
+    if (options.dryRun) {
+      restored += 1;
+      cityTraces.push({ citySlug, backupKey, phase: "done" });
+      continue;
+    }
+    const intent = { citySlug, backupKey, phase: "intent" };
+    cityTraces.push(intent);
+    await persist(false);
+    const bytes = await store.get(backupKey);
+    await store.put(refreshCoverageKey(citySlug), bytes, "application/json");
+    restored += 1;
+    cityTraces[cityTraces.indexOf(intent)] = { ...intent, phase: "done" };
+    await persist(false);
+  }
+  const trace = snapshot(true);
+  if (auditKey) await store.put(auditKey, JSON.stringify(trace), "application/json");
   return trace;
 }
 
@@ -541,6 +687,7 @@ function parseRefreshRequeueArgs(argv) {
   let dryRun = false;
   let since;
   let operator;
+  let restore;
   const cities = [];
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
@@ -559,9 +706,17 @@ function parseRefreshRequeueArgs(argv) {
     } else if (arg === "--city") {
       for (const slug of next().split(",")) if (slug.trim()) cities.push(slug.trim());
     } else if (arg === "--operator") operator = next();
+    else if (arg === "--restore") restore = next();
     else throw new Error(`unknown argument: ${arg}`);
   }
-  return { dryRun, ...since ? { since } : {}, cities, ...operator ? { operator } : {} };
+  if (restore !== void 0 && since) throw new Error("--restore cannot be combined with --since");
+  return {
+    dryRun,
+    ...since ? { since } : {},
+    cities,
+    ...operator ? { operator } : {},
+    ...restore ? { restore } : {}
+  };
 }
 function formatDryRunCounts(trace) {
   const lines = trace.cities.map((city) => `${city.citySlug}	${city.skipped ?? `would-requeue=${city.requeued.length}`}`);
@@ -573,6 +728,16 @@ async function main() {
   const who = args.operator ?? process.env.REQUEUE_OPERATOR ?? process.env.OPERATOR ?? "";
   if (!args.dryRun && !who) throw new Error("--operator <who> (or REQUEUE_OPERATOR) is required for a real run");
   const store = getScrapeObjectStore(loadConfig());
+  if (args.restore) {
+    const restoreTrace = await runRefreshRequeueRestore(store, {
+      who: who || "dry-run",
+      dryRun: args.dryRun,
+      stamp: args.restore,
+      ...args.cities.length ? { cities: args.cities } : {}
+    });
+    console.log(JSON.stringify(restoreTrace));
+    return;
+  }
   const trace = await runRefreshRequeueAbandoned(store, {
     who: who || "dry-run",
     dryRun: args.dryRun,
