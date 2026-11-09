@@ -84,12 +84,14 @@ export function builderBaseUrl(raw: string): URL {
 }
 
 export function createHostBuildApiClient(options: HostBuildApiOptions): GitBuildPort & {
-  status(artifactId: string, jobId: string): Promise<HostBuildStatus>;
+  /** Builder status; undefined when the builder does not know the job (404). Transport failures throw. */
+  status(artifactId: string, jobId: string): Promise<HostBuildStatus | undefined>;
 } {
   const base = options.baseUrl !== undefined && options.identity !== undefined ? builderBaseUrl(options.baseUrl) : undefined;
   const jobs = options.jobs ?? FAIL_CLOSED_JOB_STORE;
   const fetcher = options.fetch ?? fetch;
-  const call = async (url: URL, init: RequestInit, accepted: readonly number[], jobId: string) => {
+  const call = async (url: URL, init: RequestInit, accepted: readonly number[], jobId: string,
+    notFound = false): Promise<HostBuildStatus | undefined> => {
     let response: Response;
     try {
       response = await fetcher(url, { ...init, redirect: "error", signal: AbortSignal.timeout(options.timeoutMs ?? 10_000),
@@ -98,6 +100,7 @@ export function createHostBuildApiClient(options: HostBuildApiOptions): GitBuild
       if (error instanceof ArtifactOperationError) throw error;
       throw new ArtifactOperationError("provider_unavailable");
     }
+    if (notFound && response.status === 404) return undefined;
     let body: unknown;
     try { body = await response.json(); } catch { throw new ArtifactOperationError("provider_unavailable"); }
     if (!accepted.includes(response.status)) throw new ArtifactOperationError("provider_unavailable");
@@ -112,12 +115,13 @@ export function createHostBuildApiClient(options: HostBuildApiOptions): GitBuild
       const jobId = await jobs.persist(job);
       const status = await call(new URL("v1/builds", base), { method: "POST", headers: { "content-type": "application/json" },
         body: JSON.stringify({ artifactId: job.artifactId, jobId, binding }) }, [200, 202], jobId);
+      if (!status) throw new ArtifactOperationError("provider_unavailable");
       return { jobId: status.jobId, state: status.state };
     },
     async status(artifactId: string, jobId: string) {
       if (!base) throw new ArtifactOperationError("provider_unavailable");
       return call(new URL(`v1/builds/${encodeURIComponent(artifactId)}/${encodeURIComponent(jobId)}`, base), { method: "GET" },
-        [200], jobId);
+        [200], jobId, true);
     },
   };
 }
