@@ -37,9 +37,9 @@ import { loadConfig } from "../config.js";
 import { createDb } from "../db/client.js";
 import { createLogger } from "../logger.js";
 import {
-  createRefreshMesh, refreshErrorDiagnostic, type RefreshProvider,
+  createRefreshMesh, refreshErrorDiagnostic,
 } from "../services/graph/refresh-mesh.js";
-import { createRefreshModelPolicy, type RefreshModel } from "../services/graph/refresh-model-policy.js";
+import { createRefreshModelPolicy, parseRefreshModel, type RefreshModel } from "../services/graph/refresh-model-policy.js";
 import { loadRefreshProfileContext } from "../services/graph/refresh-profile.js";
 import { DEFAULT_REFRESH_DOCUMENT_TIMEOUT_MS, DEFAULT_REFRESH_MAX_DOCUMENT_BYTES, runPvRefresh,
   type RefreshAcquire } from "../services/graph/refresh-run.js";
@@ -86,13 +86,7 @@ function rate(name: string, fallback: number): number {
 
 
 function selectedModel(prefix: string): RefreshModel {
-  const provider = required(`${prefix}_PROVIDER`);
-  if (provider !== "openai" && provider !== "gemini") throw new Error(`${prefix}_PROVIDER must be openai or gemini`);
-  const effort = required(`${prefix}_REASONING_EFFORT`);
-  if (!["minimal", "low", "medium", "high", "xhigh"].includes(effort)) {
-    throw new Error(`${prefix}_REASONING_EFFORT is invalid`);
-  }
-  return { provider: provider as RefreshProvider, model: required(`${prefix}_MODEL`), effort };
+  return parseRefreshModel(prefix, process.env);
 }
 
 async function seedSavedInput(store: S3ObjectStore, city: string): Promise<RefreshAcquire | undefined> {
