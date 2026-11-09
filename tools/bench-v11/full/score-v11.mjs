@@ -5,7 +5,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 
-const DIR = "/home/antoinefa/src/radar-immobilier-bench/tmp/bench-wonder";
+const DIR = process.env.BENCH_DIR ?? new URL("..", import.meta.url).pathname.replace(/\/$/, "");
 const { scoreSource } = await import(`${DIR}/full/score-676.mjs`);
 
 const OPUS_ARMS = ["off", "low", "medium", "high", "xhigh"].map((e) => ({

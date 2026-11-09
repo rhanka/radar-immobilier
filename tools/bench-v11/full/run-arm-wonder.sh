@@ -3,7 +3,7 @@
 # Usage: run-arm-muse.sh <effort>   (minimal|low|medium|high|xhigh|max)
 # Resume-safe: docs with a completed raw output are skipped.
 EFFORT="$1"
-DIR=/home/antoinefa/src/radar-immobilier-bench/tmp/bench-wonder/full
+DIR="${BENCH_DIR:-$(cd "$(dirname "$0")/.." && pwd)}/full"
 ARM="muse-wonder-${EFFORT}"
 ARMDIR="$DIR/arms/$ARM"
 mkdir -p "$ARMDIR/raw"

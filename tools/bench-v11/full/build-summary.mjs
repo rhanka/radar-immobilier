@@ -1,7 +1,7 @@
 // bench-v11: build full/SUMMARY.md from scores-v11.json + rescore outputs.
 import { readFile, writeFile } from "node:fs/promises";
 
-const DIR = "/home/antoinefa/src/radar-immobilier-bench/tmp/bench-wonder";
+const DIR = process.env.BENCH_DIR ?? new URL("..", import.meta.url).pathname.replace(/\/$/, "");
 const v11 = JSON.parse(await readFile(`${DIR}/full/scores-v11.json`, "utf8"));
 const r676 = JSON.parse(await readFile(`${DIR}/full/rescore-v10/scores-676.json`, "utf8"));
 const s674 = JSON.parse(await readFile(`${DIR}/harness/scores-100-674.json`, "utf8"));

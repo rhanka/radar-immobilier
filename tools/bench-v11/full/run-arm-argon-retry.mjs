@@ -15,9 +15,10 @@
 // under arms/gemini-argon-low/pass1-print-raw/ and is not scored.
 // Seat quota is never a refusal: on quota text, wait 300 s and resume (max 12 attempts).
 import { spawn } from "node:child_process";
+import { createHash } from "node:crypto";
 import { appendFile, mkdir, readFile, stat, unlink, writeFile } from "node:fs/promises";
 
-const DIR = "/home/antoinefa/src/radar-immobilier-bench/tmp/bench-wonder";
+const DIR = process.env.BENCH_DIR ?? new URL("..", import.meta.url).pathname.replace(/\/$/, "");
 const ARM = "gemini-argon-low";
 const MODEL = "gemini-4-argon-low";
 const ARM_DIR = `${DIR}/full/arms/${ARM}`;
@@ -41,7 +42,7 @@ function runOnce(prompt, stderrPath, streamPath) {
     let child;
     try {
       child = spawn("agy", ["--model", MODEL, "--input-format", "stream-json", "--output-format", "stream-json"], {
-        cwd: "/home/antoinefa/src/radar-immobilier-bench",
+        cwd: process.env.BENCH_REPO ?? `${DIR}/../..`,
         stdio: ["pipe", "pipe", "pipe"],
       });
     } catch (err) {
@@ -90,10 +91,12 @@ async function runDoc(doc) {
     if (st.size > 0) { console.log(`skip ${doc}`); return; }
   } catch { /* run */ }
   const prompt = await readFile(`${DIR}/full/prompts/${doc}.muse.txt`, "utf8");
+  const promptSha256 = createHash("sha256").update(prompt).digest("hex");
   let attempt = 0;
   while (true) {
     attempt += 1;
     const start = Date.now();
+    const startedAt = new Date(start).toISOString();
     const { code, result, err } = await runOnce(prompt, stderrPath, streamPath);
     const ms = Date.now() - start;
     const status = result?.status ?? null;
@@ -114,7 +117,7 @@ async function runDoc(doc) {
       await writeFile(outPath, outBuf);
     }
     await appendMeta({
-      arm: ARM, doc, exit: code, status, ms, attempt, bytes: okRun ? outBuf.length : 0,
+      arm: ARM, doc, exit: code, status, ms, attempt, startedAt, promptSha256, bytes: okRun ? outBuf.length : 0,
       inputTokens: result?.usage?.input_tokens ?? null,
       outputTokens: result?.usage?.output_tokens ?? null,
       thinkingTokens: result?.usage?.thinking_tokens ?? null,

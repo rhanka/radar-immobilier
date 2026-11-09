@@ -1,11 +1,31 @@
-# bench-v11 — harnais reconstruit du benchmark d'extraction PV (v101b / v11alpha / v11)
+# bench-v11 — harnais autonome du benchmark d'extraction PV (v101b / v11alpha / v11)
 
-Ce dossier versionne le harnais reconstruit octet par octet pour les bancs
-v11alpha, complément Muse Wonder low et v11 (Argon low + Muse Wonder low),
-afin que la méthode ne soit plus jamais perdue. Les scripts d'origine
-pointent en dur vers le clone d'exécution (`tmp/bench-wonder/`) ; ils sont
-conservés ici à l'identique (voir `SHA256SUMS`). Les PDF du corpus ne sont
-pas versionnés (volumineux) : le manifeste les identifie par sha256.
+Ce dossier versionne le harnais complet des bancs v11alpha, complément Muse
+Wonder low et v11 (Argon low + Muse Wonder low), de façon **autonome** :
+toutes les commandes ci-dessous réussissent depuis un checkout propre, sans
+le clone d'exécution `tmp/bench-wonder`. Les scripts résolvent leur racine
+depuis leur propre emplacement (ou la variable `BENCH_DIR`, voir plus bas) ;
+aucun chemin absolu d'une machine n'est requis.
+
+## Prérequis
+
+- Node.js (moteur du dépôt : `>=24` ; vérifié aussi sous Node 22).
+- `pdftotext` (paquet `poppler-utils`) pour l'extraction du corpus.
+- CLI `agy` (Antigravity, siège Gemini) connectée au siège, pour le bras Argon.
+- CLI `muse` (siège Meta) connectée au siège, pour le bras Wonder et son burn.
+- Chromium headless pour le PDF du dossier (étape 7, optionnelle).
+- Aucune clé API : les deux bras sont des sièges (abonnements) uniquement.
+- Accès réseau aux URL sources du manifeste (étape 1) et au registre npm
+  (étape 0).
+
+## Variables d'environnement
+
+| Variable | Défaut | Rôle |
+|---|---|---|
+| `BENCH_DIR` | racine de ce harnais (`tools/bench-v11/`, résolue depuis l'emplacement du script) | Racine de lecture/écriture : entrées versionnées (`harness/`, `t1/`, `oracle-676/`) et artefacts générés (`full/corpus/`, `full/prompts/`, `full/arms/`, scores). Pointer vers un ancien clone (`tmp/bench-wonder`) reproduit l'exécution d'origine. |
+| `BENCH_REPO` | `$BENCH_DIR/../..` | Répertoire de travail (`cwd`) des processus `agy` des runners Argon. |
+| `BENCH_CACHE_DIR` | (absent) | Cache PDF optionnel de repli pour `dl-corpus.mjs`, disposition `workers/<ville>/grounding-work/pdfs/<sha256>.pdf`. |
+| `BENCH_KEEP_PDF` | (absent) | `=1` conserve les PDF du corpus ; sinon chaque PDF est supprimé dès son texte vérifié écrit (seuls les textes sont gardés). |
 
 ## Contenu
 
@@ -24,40 +44,114 @@ pas versionnés (volumineux) : le manifeste les identifie par sha256.
   `unresolved.json` (43 non résolus neutres en stricte).
 - `prompts-verify.json` — revérification des prompts gelés reconstruits
   (`count=100, fail=0`).
-- `full/prepare-prompts.mjs` — reconstruction octet par octet des prompts
-  gelés depuis le manifeste (portage de `chunkDocument` / `schemaFor` gelés).
-- `full/validate-outputs.mjs` — validation profil v9 gelé + provenance
-  (gate identique à v11alpha).
-- `full/score-676.mjs` — notation oracle 676 (`scoreSource`) ;
-  `score-wonder.mjs`, `score-argon.mjs`, `score-v11.mjs` — pilotes par bras.
-- `full/run-arm-wonder.sh`, `run-arm-wonder-c10.sh`,
-  `run-burn-wonder-usage10.sh` — runners siège Muse (concurrence 1 puis 10).
-- `full/run-arm-argon.mjs`, `run-burn-argon.mjs` — runners siège AGY
-  (Gemini Argon low, `stream-json`, concurrence 10).
-- `full/extract-usage.mjs` — extraction usage + texte terminal Muse `--json`.
-- `full/build-oracle-676.mjs`, `build-summary.mjs`, `dl-corpus.mjs` —
-  reconstruction oracle 676 et corpus.
+- `sandbox/package.json` + `package-lock.json` — dépendance unique du
+  harnais : `@sentropic/graphify@0.18.0` (prompts et validation).
+  `sandbox/node_modules/` n'est pas versionné (voir étape 0).
+- `full/` — scripts de la chaîne complète (ci-dessous).
 - `build-v11-report.mjs` — générateur du dossier v11 (tableaux, graphiques
   SVG, HTML ; PDF via Chromium headless). Les graphiques v10 venaient de
   Matplotlib ; ils sont régénérés en Node dans le même style (règle zéro
   Python du dépôt).
 
-## Méthode (identique v11alpha, seule différence : concurrence 10)
+## Chaîne complète depuis le manifeste seul
 
-1. `node full/prepare-prompts.mjs` puis vérifier `prompts/verify.json`
-   (`count=100, fail=0`).
-2. Exécuter le bras (siège uniquement, aucune clé API ; reprise sur quota
-   avec attente de 300 s, maximum 12 tentatives ; le quota n'est jamais
-   compté comme un refus).
-3. `node full/validate-outputs.mjs <armDir>` (lit `<armDir>/raw/*.txt`).
-4. `node full/score-wonder.mjs` / `score-argon.mjs` (oracle 676).
-5. Burns : échantillon fixe de 10 documents avec capture d'usage
-   (`muse exec --json` / AGY `--output-format json`), relevés de compteur
-   avant/après, horodatages et sources consignés ; à défaut de compteur
-   lisible, `missing source`, jamais d'estimation inventée.
+Toutes les commandes depuis la racine du dépôt. Les artefacts générés
+vont sous `tools/bench-v11/full/` (ignorés par git, voir `.gitignore`).
+
+### 0. Dépendance graphify
+
+```bash
+cd tools/bench-v11/sandbox && npm ci && cd ../../..
+```
+
+### 1. Corpus : télécharger les PDF du manifeste, ne garder que les textes
+
+```bash
+node tools/bench-v11/full/dl-corpus.mjs
+# -> full/corpus/text/<id>.txt (sha256 du texte vérifié contre le manifeste)
+#    + full/corpus/verify.json ; PDF supprimés sauf BENCH_KEEP_PDF=1.
+```
+
+Reprise : un texte déjà vérifié sur disque est sauté (aucun re-téléchargement).
+État des sources au 2026-11-09 : 89/100 URL du manifeste répondent encore
+avec le sha gelé ; 11 renvoient 404/403 ou un contenu dérivé. Pour celles-ci,
+fournir un cache via `BENCH_CACHE_DIR` (voir tableau) ou déposer les textes
+déjà vérifiés sous `full/corpus/text/` — l'étape 2 revérifie chaque prompt
+octet par octet contre le manifeste, donc un texte faux y échoue.
+
+### 2. Prompts gelés (revérification octet par octet)
+
+```bash
+node tools/bench-v11/full/prepare-prompts.mjs
+# -> full/prompts/*.muse.txt + full/prompts/verify.json
+# Attendu : DONE ok=100 fail=0 (identique au prompts-verify.json versionné).
+```
+
+### 3. Exécuter un bras (siège uniquement ; reprise quota 300 s, max 12, jamais compté refus)
+
+```bash
+node tools/bench-v11/full/run-arm-argon.mjs          # Argon low, passage concurrence 10
+node tools/bench-v11/full/run-arm-argon-retry.mjs    # reprises séquentielles des échecs d'infrastructure
+bash tools/bench-v11/full/run-arm-wonder-c10.sh      # Muse Wonder low, concurrence 10
+```
+
+Chaque ligne `meta.jsonl` enregistre `promptSha256` (sha256 du prompt
+réellement envoyé) et `startedAt`. Surface d'accès AGY : voir le dossier
+v11 §2 (cwd, 60 outils actifs, aucun appel d'outil observé).
+
+### 4. Validation profil v9 gelé + provenance
+
+```bash
+node tools/bench-v11/full/validate-outputs.mjs tools/bench-v11/full/arms/gemini-argon-low
+node tools/bench-v11/full/validate-outputs.mjs tools/bench-v11/full/arms/muse-wonder-low
+# -> <armDir>/validated/*.output.json + *.receipt.json
+```
+
+### 5. Notation oracle 676
+
+```bash
+node tools/bench-v11/full/score-argon.mjs    # -> full/scores-argon.json
+node tools/bench-v11/full/score-wonder.mjs   # -> full/scores-wonder.json
+```
+
+### 6. Burns (échantillon fixe de 10 documents, capture d'usage)
+
+```bash
+bash tools/bench-v11/full/run-burn-wonder-usage10.sh   # muse exec --json, séquentiel
+node tools/bench-v11/full/run-burn-argon.mjs           # agy stream-json (même mode que le bras noté)
+```
+
+### 7. Dossier v11 (Markdown + SVG + HTML, puis PDF)
+
+```bash
+node tools/bench-v11/build-v11-report.mjs tmp/bench-wonder docs/reports/benchmark-v11-2026-11-09
+chromium --headless --disable-gpu --no-sandbox \
+  --print-to-pdf=docs/reports/benchmark-v11-2026-11-09.pdf \
+  docs/reports/benchmark-v11-2026-11-09.html
+```
+
+Le premier argument du générateur est le dossier de preuves contenant
+`full/scores-{argon,wonder}.json`, `full/arms/gemini-argon-low/meta.jsonl`
+et `full/burn-{argon,wonder}-usage10/` (le clone d'exécution pour le
+passage publié ; un `BENCH_DIR` de travail pour une ré-exécution).
+
+Scripts auxiliaires de reconstruction (hors chaîne principale) :
+`full/build-oracle-676.mjs` (reconstruit `full/oracle-676/` depuis
+`harness/`), `full/build-summary.mjs` (tableau v10, exige en plus
+`harness/scores-100-674.json` du clone d'origine), `full/score-v11.mjs`
+et `full/score-676.mjs` (rescore des bras v11alpha/v10),
+`full/extract-usage.mjs` (usage Muse `--json`, appelé par le burn Wonder),
+`full/run-arm-wonder.sh` (passage Wonder concurrence 1 d'origine).
 
 ## Vérification des empreintes
 
 ```bash
 cd tools/bench-v11 && sha256sum -c SHA256SUMS
 ```
+
+Note historique : les scripts ont d'abord été versionnés comme copies
+octet-identiques du clone d'exécution (commits `5e8cd28b`/`9ab7bca9`).
+Depuis le correctif B1 de la revue de PR #1052, ils diffèrent du clone
+par la paramétrisation de la racine (`BENCH_DIR`), la traçabilité
+`promptSha256`/`startedAt` et le mode `stream-json` du burn Argon ;
+`SHA256SUMS` correspond aux copies versionnées courantes.

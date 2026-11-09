@@ -2,7 +2,7 @@
 // (same code path as score-v11.mjs for a muse seat arm).
 import { readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
-const DIR = "/home/antoinefa/src/radar-immobilier-bench/tmp/bench-wonder";
+const DIR = process.env.BENCH_DIR ?? new URL("..", import.meta.url).pathname.replace(/\/$/, "");
 const { scoreSource } = await import(`${DIR}/full/score-676.mjs`);
 const manifest = JSON.parse(await readFile(`${DIR}/harness/manifest-v101b.json`, "utf8"));
 const quantile = (arr, q) => { if (!arr.length) return null; const s=[...arr].sort((a,b)=>a-b); return s[Math.min(s.length-1, Math.floor(q*s.length))]; };
