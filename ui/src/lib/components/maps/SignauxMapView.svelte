@@ -183,6 +183,7 @@
     type SignalTimeRange,
   } from "$lib/signals/signal-date-filter.js";
   import { rankVivierBNodes } from "$lib/signals/vivier-b-ranking.js";
+  import { filtreCountsFor } from "$lib/signals/signal-filter-counts.js";
   import {
     buildClassementMap,
     classementCounts,
@@ -916,7 +917,19 @@
   $: classementBaseMap = buildClassementMap(detailSelectionHeads, detailArchiveHeads);
   $: classementMap = new Map([...classementBaseMap, ...classementOverrides]);
   $: classementFilteredNodes = filterNodesByClassement(filteredDetailNodes, classementMap, classementFilter);
-  $: classementCountsValue = classementCountsFor(detailNodes, detailArchiveHeads, classementMap);
+  // Pertinence counts (owner 2026-11-09): AFTER period + Filtre (axes +
+  // exclusions), i.e. over `filteredDetailNodes`, NOT the raw detail nodes —
+  // recomputed reactively whenever period/Filtre changes.
+  $: classementCountsValue = classementCountsFor(filteredDetailNodes, detailArchiveHeads, classementMap);
+  // Filtre counts (owner 2026-11-09): within period + Pertinence scope —
+  // date lens then Pertinence lens on the raw detail, before any Filtre
+  // axis/exclusion. Each axis/exclusion is counted independently.
+  $: filtreScopedNodes = filterNodesByClassement(
+    filterNodesByDocumentDate(detailNodes, dateRange, dateBasis),
+    classementMap,
+    classementFilter,
+  );
+  $: filtreCountsValue = filtreCountsFor(filtreScopedNodes);
   function classementCountsFor(
     nodes: GraphSignalNode[],
     archiveHeads: import("$lib/signals/graph-signal-detail-client.js").CoherentArchiveHead[],
@@ -2711,6 +2724,7 @@
       onTimeRangeChange={handleTimeRangeChange}
       {classementFilter}
       classementCounts={classementCountsValue}
+      filtreCounts={filtreCountsValue}
       onClassementFilterChange={handleClassementFilterChange}
     />
   </svelte:fragment>
