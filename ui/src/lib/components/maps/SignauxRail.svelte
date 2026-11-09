@@ -46,6 +46,13 @@
     SIGNAL_TIME_RANGE_PRESETS,
     type SignalTimeRange,
   } from "$lib/signals/signal-date-filter.js";
+  import {
+    CLASSEMENT_META,
+    DEFAULT_CLASSEMENT_FILTER,
+    SIGNAL_CLASSES,
+    type ClassementFilter,
+    type SignalClass,
+  } from "$lib/signals/signal-classement.js";
   import RailShell from "$lib/components/maps/RailShell.svelte";
   import RailSection from "$lib/components/maps/RailSection.svelte";
   import RailCityList from "$lib/components/maps/RailCityList.svelte";
@@ -134,6 +141,17 @@
    * reloads once for the range and its basis together.
    */
   export let onTimeRangeChange: (next: SignalTimeRange, basis: DocumentDateBasis) => void = () => {};
+
+  /** Classement filter (spec 2026-11-08): checked by default except Écarté. */
+  export let classementFilter: ClassementFilter = { ...DEFAULT_CLASSEMENT_FILTER };
+  export let classementCounts: Record<SignalClass, number> = {
+    pertinent: 0, a_surveiller: 0, non_classe: 0, ecarte: 0,
+  };
+  export let onClassementFilterChange: (next: ClassementFilter) => void = () => {};
+
+  function toggleClassement(classe: SignalClass, checked: boolean): void {
+    onClassementFilterChange({ ...classementFilter, [classe]: checked });
+  }
 
   // The DS resolves presets when the user opens/selects them. Refresh the
   // upper bound then, rather than pinning a long-lived rail to its mount time.
@@ -499,6 +517,18 @@
     {@render panelB()}
   </RailSection>
 
+  <RailSection label="Classement">
+    <div class="classement-filter">
+      {#each SIGNAL_CLASSES as classe}
+        <Checkbox
+          label="{CLASSEMENT_META[classe].label} ({classementCounts[classe]})"
+          checked={classementFilter[classe]}
+          onchange={(event) => toggleClassement(classe, event.currentTarget.checked)}
+        />
+      {/each}
+    </div>
+  </RailSection>
+
   <!-- ── Section 2 : Villes (recherche + liste plate sélectionnable) ─────── -->
   <!-- (Le bloc « Filtre Zones et Lots » qui vivait ici a été déplacé dans le
        drawer droit : en-têtes des accordéons Zones et Lots.) -->
@@ -574,5 +604,12 @@
 
   .vivier-b-exclusions :global(.st-choice) {
     --st-component-selection-choiceLabelFontSize: var(--rail-fs-small, 0.75rem);
+  }
+
+  .classement-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.25rem 0.75rem;
   }
 </style>
