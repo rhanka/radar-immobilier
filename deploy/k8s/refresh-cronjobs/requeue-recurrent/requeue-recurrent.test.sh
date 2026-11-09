@@ -10,6 +10,11 @@ ok() { PASS=$((PASS + 1)); echo "ok: $1"; }
 bad() { FAIL=$((FAIL + 1)); echo "FAIL: $1" >&2; }
 
 T="$(mktemp -d)"
+parses() { # $1=render $2=tag: hermetic YAML parse via kustomize (kubectl create needs API discovery, absent in CI)
+  local d="$T/parse-$2"; mkdir -p "$d"; cp "$1" "$d/render.yaml"
+  printf 'resources:\n  - render.yaml\n' > "$d/kustomization.yaml"
+  kubectl kustomize "$d" >/dev/null 2>&1
+}
 trap 'rm -rf "$T"' EXIT
 DIGEST="ghcr.io/rhanka/radar-api@sha256:$(printf 'a%.0s' $(seq 64))"
 
@@ -26,14 +31,14 @@ if render preprod "$T/preprod.yaml" && grep -q '^  namespace: radar-immobilier-p
   ok "preprod render: namespace, daily 04:30 slot, Forbid, preprod S3 secret, bundle"
 else bad "preprod render ($(cat "$T/out"))"; fi
 
-if [ -f "$T/preprod.yaml" ] && kubectl create --dry-run=client --validate=false -f "$T/preprod.yaml" >/dev/null 2>&1; then
-  ok "preprod render parses (kubectl dry-run=client)"
+if [ -f "$T/preprod.yaml" ] && parses "$T/preprod.yaml" preprod; then
+  ok "preprod render parses (kustomize, hermetic)"
 else bad "preprod render does not parse"; fi
 
 if render prod "$T/prod.yaml" && grep -q '^  namespace: radar-immobilier$' "$T/prod.yaml" \
   && grep -q 'schedule: 30 3' "$T/prod.yaml" \
   && grep -q 'radar-scrape-s3-credentials' "$T/prod.yaml" \
-  && kubectl create --dry-run=client --validate=false -f "$T/prod.yaml" >/dev/null 2>&1; then
+  && parses "$T/prod.yaml" prod; then
   ok "prod render: namespace, daily 03:30 slot, prod S3 secret, parses"
 else bad "prod render ($(cat "$T/out"))"; fi
 
