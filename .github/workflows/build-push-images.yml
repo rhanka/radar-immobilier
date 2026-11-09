@@ -1175,6 +1175,17 @@ jobs:
             # qs 6.16.1 (GHSA-6pq8-jhm2-2vcw). Any other file in the diff refuses
             # the promotion.
             echo "hotfix OK — v1.2.18 = v1.2.17 + dompurify/body-parser/fast-uri/ip-address/qs security fixes (lock only)"
+          elif [ "${{ steps.vars.outputs.tag }}" = "v1.2.19" ] \
+            && git merge-base --is-ancestor v1.2.18 "$GITHUB_SHA" \
+            && [ -z "$(git diff --name-only v1.2.18 "$GITHUB_SHA" -- . \
+                 ':!ui/e2e-real/map-stalled.spec.ts' \
+                 ':!ui/src/lib/components/maps/GeoCityMapBase.mapready-fallback.test.ts' \
+                 ':!ui/src/lib/components/maps/GeoCityMapBase.svelte' \
+                 ':!.github/workflows/build-push-images.yml')" ]; then
+            # One-off owner-approved UI hotfix (#959, incident map stalled):
+            # v1.2.19 = v1.2.18 + cherry-picked UI fix #958 (3 UI files above).
+            # No LLM change. Any other file in the diff refuses the promotion.
+            echo "hotfix OK — v1.2.19 = v1.2.18 + #958 UI fix (allowlisted files only)"
           else
             echo "::error title=Promote refused — tag not on main::commit $GITHUB_SHA (tag ${{ steps.vars.outputs.tag }}) is NOT an ancestor of origin/main. Only main-merged, CI-validated commits may reach prod."
             exit 1
