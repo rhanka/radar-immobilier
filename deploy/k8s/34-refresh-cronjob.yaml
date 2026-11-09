@@ -180,9 +180,14 @@ spec:
                 - { name: REFRESH_MODEL, value: "gpt-6-astra" }
                 - { name: REFRESH_REASONING_EFFORT, value: "medium" }
                 - { name: REFRESH_PRIMARY_QUALITY_ATTEMPTS, value: "2" }
-                - { name: REFRESH_FALLBACK_PROVIDER, value: "gemini" }
-                - { name: REFRESH_FALLBACK_MODEL, value: "gemini-3.8-flash" }
-                - { name: REFRESH_FALLBACK_REASONING_EFFORT, value: "low" }
+                # Seat fallback (prod incident 2026-10-29): Codex quota out
+                # until 11/11, gemini seat rate-limited. Owner-validated
+                # Claude Opus 5.5 medium on a Claude subscription seat
+                # (benchmark-v11alpha F1 0.319, recall 0.311) via llm-mesh
+                # 0.33.1 ClaudeCodeRuntimeClient (`claude -p`).
+                - { name: REFRESH_FALLBACK_PROVIDER, value: "anthropic" }
+                - { name: REFRESH_FALLBACK_MODEL, value: "claude-opus-5-5" }
+                - { name: REFRESH_FALLBACK_REASONING_EFFORT, value: "medium" }
                 - { name: REFRESH_VERIFY_ENABLED, value: "1" }
                 - { name: REFRESH_VERIFY_PROVIDER, value: "gemini" }
                 - { name: REFRESH_VERIFY_MODEL, value: "gemini-3.8-flash" }
