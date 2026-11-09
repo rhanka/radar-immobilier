@@ -14,6 +14,7 @@
     type ReasonCodeEntry,
     type SignalClass,
   } from "$lib/signals/signal-classement.js";
+  import { reasonEntryLabel } from "$lib/signals/signal-reason-labels.js";
 
   export let classe: SignalClass = "non_classe";
   export let reasonCodes: ReasonCodeEntry[] = [];
@@ -119,7 +120,8 @@
 
   // DS Menu items: neutral DS text (no colour on text); only the trigger
   // icon keeps a DS semantic token colour. Reason rows show the human
-  // Steve label; the technical code stays in the item value (not rendered).
+  // Steve label (UI dictionary, signal-reason-labels); the technical code
+  // stays in the item value (not rendered).
   $: classItems = SIGNAL_CLASSES.map((candidate): MenuItem => ({
     label: CLASSEMENT_META[candidate].label,
     value: candidate,
@@ -131,7 +133,7 @@
       ? [{ kind: "group" as const, label: `${CLASSEMENT_META[pendingClass].label} — motif` }]
       : []),
     ...pendingReasons.map((entry): MenuItem => ({
-      label: entry.label?.trim() ? entry.label : entry.code,
+      label: reasonEntryLabel(entry),
       value: entry.code,
     })),
     ...(reasonOptional ? [{ label: "Sans motif", value: "__none" }] : []),
