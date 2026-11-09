@@ -3,6 +3,7 @@ import { createArtifactTransport, routeArtifactRequest } from "./artifact-transp
 import { fetchWorkspaces, parseWorkspacesResponse } from "$lib/signals/workspace-client";
 import { fetchGraphSignalsByCity } from "$lib/signals/graph-signals-by-city-client";
 import { fetchGraphSignalDetail } from "$lib/signals/graph-signal-detail-client";
+import { applyClassement, fetchReasonCodes } from "$lib/signals/signal-classement-client";
 import { fetchZones } from "$lib/maps/zones-client";
 import { fetchLots } from "$lib/maps/lots-client";
 import { fetchGeoZones } from "$lib/maps/geo-zones-client";
@@ -47,11 +48,12 @@ function readerHost(overrides: Record<string, (url: URL) => Response> = {}) {
   return { network, calls };
 }
 
-function install(host = readerHost(), href = `${ORIGIN}/?grant=initial-grant&view=signaux`, apiBase = "") {
+function install(host = readerHost(), href = `${ORIGIN}/?grant=initial-grant&view=signaux`, apiBase = "",
+  extra: Record<string, unknown> = {}) {
   const location = { href, origin: ORIGIN, assign: vi.fn() };
   const replaceUrl = vi.fn();
   const transport = createArtifactTransport({ fetch: host.network as typeof fetch, location, replaceUrl, apiBase,
-    now: () => 1_000 });
+    now: () => 1_000, ...extra });
   vi.stubGlobal("fetch", transport);
   return { ...host, location, replaceUrl, transport };
 }
@@ -211,6 +213,55 @@ describe("artifact transport through the real API clients", () => {
     }));
     expect((await fetch("/api/v1/auth/me")).status).toBe(401);
     expect(dead.location.assign).toHaveBeenCalledWith("/__reader/start");
+  });
+
+  it("should route classement reads to baskets.context.v1 and writes to the write-intent kind", () => {
+    const route = (path: string, method = "GET") => routeArtifactRequest(path, method, ORIGIN, "");
+    expect(route(`/api/v1/workspaces/${WS}/signal-facets/reason-codes`))
+      .toMatchObject({ kind: "op", op: "baskets.context.v1", transform: "reason-codes" });
+    expect(route(`/api/v1/workspaces/${WS}/signal-facets/personal/select`, "POST"))
+      .toEqual({ kind: "write", workspaceId: WS, action: "select" });
+    expect(route(`/api/v1/workspaces/${WS}/signal-facets/personal/discard`, "POST"))
+      .toEqual({ kind: "write", workspaceId: WS, action: "discard" });
+    expect(route(`/api/v1/workspaces/${WS}/signal-facets/personal/select`))
+      .toMatchObject({ kind: "refused", status: 405 });
+  });
+
+  it("should serve reason codes from the basket context catalogue", async () => {
+    const host = readerHost({ "/__reader/api/baskets.context.v1": () => json(200, { ok: true,
+      context: { workspaceId: WS, reasonCatalog: { availability: { state: "open" }, profileId: "immo-steve-2026-09",
+        digest: SHA, entries: [{ code: "N-1", verdict: "non_pertinent", label: null }] } } }) });
+    const { calls } = install(host);
+    await expect(fetchReasonCodes({ workspaceId: WS })).resolves.toEqual([{ code: "N-1", verdict: "non_pertinent", label: null }]);
+    expect(calls[0]!.url.pathname).toBe("/__reader/api/baskets.context.v1");
+    expect(calls[0]!.url.searchParams.get("workspaceId")).toBe(WS);
+  });
+
+  it("should prepare a classement write, open confirmation and resolve on committed status", async () => {
+    const host = readerHost({
+      "/__reader/api/facets.write-intents.prepare.v1": () => json(200, { data: {
+        intentId: "22222222-2222-4222-8222-222222222222", state: "pending",
+        confirmationUrl: "https://app.example.test/confirm" } }),
+      "/__reader/api/facets.write-intents.status.v1": () => json(200, { data: {
+        state: "committed", receipt: { event: { id: "33333333-3333-4333-8333-333333333333" } } } }),
+    });
+    const openWindow = vi.fn();
+    const { calls } = install(host, undefined, "", { openWindow, pollIntervalMs: 1,
+      readWriteBootstrap: () => ({ pageInstanceId: "inst-1", csrf: "csrf-1" }) });
+    await fetchGraphSignalDetail({ workspaceId: WS }, "valleyfield");
+    await applyClassement({ workspaceId: WS }, {
+      target: { citySlug: "valleyfield", type: "Signal", id: "sig-1" },
+      displayedFingerprint: "b".repeat(64),
+      current: { classe: "non_classe", reasonCode: null, pertinentHeadId: null,
+        aSurveillerHeadId: null, archiveHeadId: null, discarded: false },
+      nextClass: "pertinent", reasonCode: "P-1",
+      catalog: [{ code: "P-1", verdict: "pertinent" }],
+    });
+    const prepare = calls.find((call) => call.url.pathname.endsWith("prepare.v1"))!;
+    expect(JSON.parse(String(prepare.init?.body))).toMatchObject({
+      operation: "facets.signals.personal.select.v1", workspaceId: WS,
+      basket: "pertinent", reasonCode: "P-1", expectedProjectionToken: "t".repeat(64) });
+    expect(openWindow).toHaveBeenCalledWith("https://app.example.test/confirm");
   });
 
   it("should accept the op workspaces superset with the real app parser", () => {
