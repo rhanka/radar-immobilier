@@ -22,7 +22,7 @@ import {
   type KeyringAdapter,
 } from "@sentropic/llm-mesh-refresh/facade";
 
-export type RefreshProvider = "gemini" | "openai";
+export type RefreshProvider = "anthropic" | "gemini" | "openai";
 
 export interface RefreshMeshOptions {
   readonly routingSubject: VerifiedRoutingSubject;
