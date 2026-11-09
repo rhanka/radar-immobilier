@@ -1,15 +1,20 @@
 // bench-v11 burn + usage capture: Gemini Argon low, 10 frozen docs, sequential.
-// Same frozen prompts and same AGY model as run-arm-argon.mjs, plus
-// --output-format json so provider usage (tokens) is recorded per document.
-// The extracted raw response (envelope.response) is written as <doc>.txt.
+// Same frozen prompts, same AGY model AND same invocation mode as the scored
+// arm (run-arm-argon.mjs): AGY headless stream-json on stdin/stdout, so the
+// burn is measured under the scored transport. (The burn published in the
+// v11 dossier was measured earlier under the argv channel
+// `agy --output-format json --print=<prompt>`; see dossier section 6, gap M2.)
+// The extracted raw response (result.response) is written as <doc>.txt.
 // Seat quota is never a refusal: wait 300 s and resume (max 12 attempts).
-// No seat allowance counter is exposed by the AGY json envelope (usage only);
-// the seat burn therefore stays `missing source` unless a counter is read elsewhere.
+// No seat allowance counter is exposed by the AGY stream-json results (usage
+// only); the seat burn therefore stays `missing source` unless a counter is
+// read elsewhere.
 import { spawn } from "node:child_process";
+import { createHash } from "node:crypto";
 import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 
-const DIR = "/home/antoinefa/src/radar-immobilier-bench/tmp/bench-wonder";
+const DIR = process.env.BENCH_DIR ?? new URL("..", import.meta.url).pathname.replace(/\/$/, "");
 const MODEL = "gemini-4-argon-low";
 const OUTDIR = `${DIR}/full/burn-argon-usage10`;
 await mkdir(OUTDIR, { recursive: true });
@@ -20,9 +25,9 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function runOnce(prompt) {
   return new Promise((resolve) => {
-    const child = spawn("agy", ["--model", MODEL, "--output-format", "json", `--print=${prompt}`], {
-      cwd: "/home/antoinefa/src/radar-immobilier-bench",
-      stdio: ["ignore", "pipe", "pipe"],
+    const child = spawn("agy", ["--model", MODEL, "--input-format", "stream-json", "--output-format", "stream-json"], {
+      cwd: process.env.BENCH_REPO ?? `${DIR}/../..`,
+      stdio: ["pipe", "pipe", "pipe"],
     });
     const outChunks = [];
     const errChunks = [];
@@ -31,6 +36,8 @@ function runOnce(prompt) {
     child.stderr.on("data", (c) => errChunks.push(c));
     child.on("error", (err) => { clearTimeout(timer); resolve({ code: -1, out: Buffer.concat(outChunks), err: Buffer.concat([...errChunks, Buffer.from(String(err))]) }); });
     child.on("close", (code) => { clearTimeout(timer); resolve({ code: code ?? -1, out: Buffer.concat(outChunks), err: Buffer.concat(errChunks) }); });
+    child.stdin.on("error", () => {});
+    child.stdin.end(`${JSON.stringify({ event: "user", message: { content: prompt } })}\n`, "utf8");
   });
 }
 
@@ -61,12 +68,15 @@ for (const doc of docs) {
       continue;
     }
     let envelope = null;
-    try { envelope = JSON.parse(out.toString("utf8")); } catch { /* keep null */ }
+    for (const line of out.toString("utf8").split("\n").filter(Boolean)) {
+      try { const o = JSON.parse(line); if (o.event === "result") envelope = o.result ?? null; } catch { /* keep scanning */ }
+    }
     const usage = envelope?.usage ?? null;
     const response = typeof envelope?.response === "string" ? envelope.response : "";
     await writeFile(`${OUTDIR}/${doc}.txt`, response, "utf8");
     await writeFile(usagePath, `${JSON.stringify({
       doc, model: MODEL, startedAt, endedAt, exit: code, ms, attempt,
+      promptSha256: createHash("sha256").update(prompt).digest("hex"),
       status: envelope?.status ?? null,
       conversationId: envelope?.conversation_id ?? null,
       durationSeconds: envelope?.duration_seconds ?? null,

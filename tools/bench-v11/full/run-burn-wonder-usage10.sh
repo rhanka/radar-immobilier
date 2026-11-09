@@ -3,7 +3,7 @@
 # Same frozen prompts and same muse command as run-arm-wonder.sh, plus --json
 # so the provider usage (tokens + seat allowance) is recorded per document.
 # Seat quota is never a refusal: wait 300 s and resume (max 12 attempts).
-DIR=/home/antoinefa/src/radar-immobilier-bench/tmp/bench-wonder/full
+DIR="${BENCH_DIR:-$(cd "$(dirname "$0")/.." && pwd)}/full"
 OUTDIR="$DIR/burn-wonder-usage10"
 mkdir -p "$OUTDIR"
 MANIFEST="$DIR/../harness/manifest-v101b.json"
