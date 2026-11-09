@@ -10,14 +10,17 @@ async function openCard(page: Page, label: string) {
   await expect(page.locator("[data-signal-node]").first()).toBeVisible();
 }
 
-test("signal card: no triage control and no notes control (read-only card)", async ({ page, network }) => {
+test("signal card: classement control present, no legacy triage or notes control", async ({ page, network }) => {
   await openSeededCity(page);
 
   for (const signal of seed.signals) {
     await openCard(page, signal.label);
   }
 
-  // No triage/classification control anywhere in the unfolded card.
+  // Classement (spec 2026-11-08): each card header carries the classement icon.
+  await expect(page.getByTestId("signal-classement-button").first()).toBeVisible();
+
+  // No legacy triage control anywhere in the unfolded card.
   await expect(page.getByTestId("signal-facet-controls")).toHaveCount(0);
   await expect(page.getByTestId("show-discarded-row")).toHaveCount(0);
   await expect(page.getByTestId("facet-badge-pertinent")).toHaveCount(0);
@@ -37,13 +40,13 @@ test("signal card: no triage control and no notes control (read-only card)", asy
   await expect(page.getByText("Preuve").first()).toBeVisible();
   await expect(page.getByRole("button", { name: /Voir la preuve/ }).first()).toBeVisible();
 
-  // No triage write, reveal, codebook or heads traffic on the scoped API.
+  // No classement WRITE on load: writes happen only on an explicit menu
+  // choice. Reason-code and coherent reads are the existing basket API reads.
   const facetWrites = network.filter((entry) =>
-    /\/signal-facets\/(personal|reveal|reason-codes)/.test(
-      new URL(entry.url).pathname,
-    ),
+    entry.method !== "GET" &&
+    /\/signal-facets\/personal\//.test(new URL(entry.url).pathname),
   );
-  expect(facetWrites, "triage API traffic observed").toEqual([]);
+  expect(facetWrites, "classement write traffic observed on load").toEqual([]);
 
   // No prospect notes traffic: the lot notes machinery is removed, marks stay.
   const notesReads = network.filter((entry) =>
