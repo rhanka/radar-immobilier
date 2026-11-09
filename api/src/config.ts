@@ -230,6 +230,22 @@ const envSchema = z.object({
   STRICT_RECEIVER_RECEIPT_API_IMAGE: optStr(z.string().min(1)),
   STRICT_RECEIVER_RECEIPT_MCP_IMAGE: optStr(z.string().min(1)),
 
+  // ── Ops recipients port v1 (L4, Sentropic port contract) ───────────────
+  // `GET /api/v1/ops/recipients?target=...` serves the platform alert
+  // service. All three values come from the deployment environment; none
+  // is hardcoded in the route. The audience is fixed by the Sentropic L1
+  // contract and only configured here. Absent audience or target keeps
+  // the route closed (503, fail-closed).
+  /** This instance's alerting target: `immo-prod` or `immo-preprod`. */
+  OPS_TARGET: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.enum(["immo-prod", "immo-preprod"]).optional(),
+  ),
+  /** Slug of the reference workspace whose managers are recipients. */
+  OPS_REFERENCE_WORKSPACE_SLUG: optStr(z.string().min(1)),
+  /** Exact `aud` required on the service-client bearer (set by L1). */
+  OPS_RECIPIENTS_AUDIENCE: optStr(z.string().min(1)),
+
   // ── Scaleway Transactional Email (TEM) — emails d'invitation ────────────
   // L'egress SMTP est BLOQUÉ au niveau plateforme sur ce cluster (BR-37b), donc
   // le relais smtp.tem.scw.cloud:587 ne délivre jamais. On envoie via l'API HTTP
@@ -547,6 +563,32 @@ export function resolveAuthConfig(config: AppConfig): AuthConfig {
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   return envSchema.parse(env);
+}
+
+/** Alerting target of one deployed instance (port contract v1). */
+export type OpsTarget = "immo-prod" | "immo-preprod";
+
+/**
+ * Ops recipients wiring derived from the environment. Fields stay absent
+ * when unconfigured so the route fails closed instead of guessing an
+ * audience, a target, or a reference workspace.
+ */
+export interface OpsConfig {
+  readonly expectedTarget?: OpsTarget;
+  readonly referenceWorkspaceSlug?: string;
+  readonly recipientsAudience?: string;
+}
+
+export function resolveOpsConfig(config: AppConfig): OpsConfig {
+  return {
+    ...(config.OPS_TARGET ? { expectedTarget: config.OPS_TARGET } : {}),
+    ...(config.OPS_REFERENCE_WORKSPACE_SLUG
+      ? { referenceWorkspaceSlug: config.OPS_REFERENCE_WORKSPACE_SLUG }
+      : {}),
+    ...(config.OPS_RECIPIENTS_AUDIENCE
+      ? { recipientsAudience: config.OPS_RECIPIENTS_AUDIENCE }
+      : {}),
+  };
 }
 
 /**
