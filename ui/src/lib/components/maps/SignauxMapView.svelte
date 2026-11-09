@@ -296,6 +296,8 @@
   let classementOverrides = new Map<string, import("$lib/signals/signal-classement.js").ClassementEntry>();
   let classementInFlight = new Set<string>();
   let classementError: string | null = null;
+  /** Per-card classement write failures (classementKey -> message). */
+  let classementErrors = new Map<string, string>();
   // ── Waiters PAR COUCHE (zones / lots indépendants) ────────────────────────
   // Chaque couche porte SON propre état chargement + erreur : l'échec ou la
   // lenteur de l'une n'affecte JAMAIS l'affichage de l'autre.
@@ -947,15 +949,17 @@
     // F5: per-node in-flight guard — a second apply on the same node is ignored.
     if (classementInFlight.has(key)) return;
     if (workspaceId === null || !citySlug || !node.facetFingerprint) {
-      // F7: never fail silently.
-      classementError = "Classement indisponible pour ce signal (empreinte ou contexte manquant).";
+      // F7: never fail silently — flag the concerned card.
+      classementErrors = new Map(classementErrors).set(
+        key, "Classement indisponible pour ce signal (empreinte ou contexte manquant).");
       return;
     }
     const current = classementMap.get(key) ?? {
       classe: "non_classe" as const, reasonCode: null,
-      pertinentHeadId: null, aSurveillerHeadId: null, archiveHeadId: null, discarded: false,
+      pertinentHeadId: null, aSurveillerHeadId: null,
+      pertinentExpectedHeadId: null, aSurveillerExpectedHeadId: null,
+      archiveHeadId: null, discarded: false,
     };
-    classementError = null;
     classementInFlight = new Set([...classementInFlight, key]);
     const overrides = new Map(classementOverrides);
     overrides.set(key, { ...current, classe: nextClass, reasonCode, discarded: nextClass === "ecarte" });
@@ -977,6 +981,12 @@
           catalog: classementReasonCodes,
         },
       );
+      // A successful write clears this card's error flag.
+      if (classementErrors.has(key)) {
+        const nextErrors = new Map(classementErrors);
+        nextErrors.delete(key);
+        classementErrors = nextErrors;
+      }
       // Keep this node's override until the reload lands (no flicker);
       // other nodes' overrides are preserved.
       await loadDetailForCity(citySlug, { silent: true });
@@ -984,7 +994,7 @@
       void load();
     } catch (error) {
       clearOverride();
-      classementError = classementWriteErrorMessage(error);
+      classementErrors = new Map(classementErrors).set(key, classementWriteErrorMessage(error));
       console.warn("Classement write failed:", error);
       if (selectedCity) void loadDetailForCity(selectedCity.municipality.slug, { silent: true });
     } finally {
@@ -3022,6 +3032,7 @@
       classementReasonCodes={classementReasonCodes}
       classementInFlight={classementInFlight}
       {classementError}
+      {classementErrors}
       onApplyClassement={(node, nextClass, reasonCode) => void handleApplyClassement(node, nextClass, reasonCode)}
     />
   </svelte:fragment>
