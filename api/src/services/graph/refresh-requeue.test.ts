@@ -5,7 +5,7 @@ import {
   emptyRefreshCoverage, failRefreshDocument, writeRefreshCoverage,
   type RefreshCoverageLedger,
 } from "./refresh-coverage.js";
-import { runRefreshRequeueAbandoned } from "./refresh-requeue.js";
+import { runRefreshRequeueAbandoned, runRefreshRequeueRestore } from "./refresh-requeue.js";
 
 class MemoryStore implements ObjectStore {
   readonly objects = new Map<string, Uint8Array>();
@@ -75,6 +75,68 @@ describe("runRefreshRequeueAbandoned", () => {
     const again = await runRefreshRequeueAbandoned(store,
       { who: "op@test", dryRun: false, cities: ["beta"], now: clock("2026-11-09T01:00:00.000Z") });
     expect(again.totals.requeued).toBe(0);
+  });
+
+  it("copies the original registry to a dated backup before rewriting it", async () => {
+    const store = await seededStore();
+    const original = store.objects.get("refresh/018/beta/coverage.json")!;
+    const order: string[] = [];
+    const seenAtRewrite: boolean[] = [];
+    const rawPut = store.put.bind(store);
+    store.put = async (key: string, body: Uint8Array | Buffer | string) => {
+      order.push(key);
+      if (key === "refresh/018/beta/coverage.json") {
+        seenAtRewrite.push([...store.objects.keys()].some((k) => k.includes("/_backup/") && k.endsWith("/beta/coverage.json")));
+      }
+      return rawPut(key, body);
+    };
+    const trace = await runRefreshRequeueAbandoned(store,
+      { who: "op@test", dryRun: false, cities: ["beta"], now: clock("2026-11-09T00:00:00.000Z") });
+    const city = trace.cities[0]!;
+    expect(city.backupKey).toMatch(/^refresh\/018\/_backup\/requeue-abandoned-[^/]+\/beta\/coverage\.json$/);
+    expect(store.objects.get(city.backupKey!)).toEqual(original);
+    expect(seenAtRewrite).toContain(true);
+    expect(order.indexOf(city.backupKey!)).toBeLessThan(order.lastIndexOf("refresh/018/beta/coverage.json"));
+    const audit = JSON.parse(new TextDecoder().decode(store.objects.get(trace.auditKey!)));
+    expect(audit.cities[0].backupKey).toBe(city.backupKey);
+  });
+
+  it("leaves a durable intent trace when the run crashes at city N", async () => {
+    const store = await seededStore();
+    const rawPut = store.put.bind(store);
+    let armed = false;
+    store.put = async (key: string, body: Uint8Array | Buffer | string) => {
+      if (armed && key === "refresh/018/beta/coverage.json") throw new Error("simulated crash");
+      return rawPut(key, body);
+    };
+    armed = true;
+    await expect(runRefreshRequeueAbandoned(store,
+      { who: "op@test", dryRun: false, cities: ["alpha", "beta"], now: clock("2026-11-09T00:00:00.000Z") }),
+    ).rejects.toThrow("simulated crash");
+    const auditKey = [...store.objects.keys()].find((k) => k.startsWith("refresh/018/_audit/requeue-abandoned-"));
+    expect(auditKey).toBeTruthy();
+    const audit = JSON.parse(new TextDecoder().decode(store.objects.get(auditKey!)));
+    expect(audit.cities.find((c: { citySlug: string }) => c.citySlug === "alpha")?.phase).toBe("done");
+    const beta = audit.cities.find((c: { citySlug: string }) => c.citySlug === "beta");
+    expect(beta?.phase).toBe("intent");
+    expect(store.objects.has(beta.backupKey)).toBe(true);
+  });
+
+  it("restore recopies the backup byte for byte and is idempotent", async () => {
+    const store = await seededStore();
+    const original = store.objects.get("refresh/018/beta/coverage.json")!;
+    const trace = await runRefreshRequeueAbandoned(store,
+      { who: "op@test", dryRun: false, cities: ["beta"], now: clock("2026-11-09T00:00:00.000Z") });
+    expect(store.objects.get("refresh/018/beta/coverage.json")).not.toEqual(original);
+    const stamp = trace.cities[0]!.backupKey!.split("/")[3]!.replace("requeue-abandoned-", "");
+    const first = await runRefreshRequeueRestore(store,
+      { who: "op@test", dryRun: false, stamp, cities: ["beta"], now: clock("2026-11-09T02:00:00.000Z") });
+    expect(first.totals.restored).toBe(1);
+    expect(store.objects.get("refresh/018/beta/coverage.json")).toEqual(original);
+    const second = await runRefreshRequeueRestore(store,
+      { who: "op@test", dryRun: false, stamp, cities: ["beta"], now: clock("2026-11-09T03:00:00.000Z") });
+    expect(second.totals.restored).toBe(1);
+    expect(store.objects.get("refresh/018/beta/coverage.json")).toEqual(original);
   });
 
   it("city and since filters combine; an absent city is skipped, never created", async () => {
