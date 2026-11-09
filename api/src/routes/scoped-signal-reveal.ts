@@ -52,7 +52,7 @@ export function scopedSignalRevealRoute(deps: ScopedSignalRevealDeps): Hono {
       // The re-read node also carries its server card fields, derived from
       // that same stored version, so the UI shows it without reclassifying.
       const { signal } = revealed;
-      const [card] = await buildScopedSignalCards(deps, [{ ...signal,
+      const [card] = await buildScopedSignalCards(deps, [{ ...signal, effectiveDocumentDates: [], effectiveScrapDates: [],
         createdAt: signal.createdAt === null ? new Date(0) : new Date(signal.createdAt) }], signal.citySlug);
       return c.json({ ok: true, ...revealed,
         signal: { ...card!, ...signal, facetFingerprint: revealed.displayedFingerprint } });

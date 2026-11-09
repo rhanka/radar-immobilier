@@ -20,7 +20,7 @@ import { eq, or, sql, inArray, notInArray, and, isNotNull } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { graphNodes, graphEdges } from "../../db/schema.js";
 import { QC_MUNICIPALITIES } from "@radar/sources";
-import { classifyBPrime, deriveRegulatoryStatus, isHiddenByVivierBExclusions, matchesDocumentDateWindow, type DocumentDateWindow, type RegulatoryStageKindT } from "@radar/domain";
+import { classifyBPrime, deriveRegulatoryStatus, isHiddenByVivierBExclusions, matchesDocumentDateWindow, resultCivilDates, type DocumentDateWindow, type RegulatoryStageKindT } from "@radar/domain";
 import {
   computeLegacySubsetCounts,
   computeVivierV2,
@@ -163,6 +163,9 @@ export interface NodeRow {
   citySlug: string | null;
   props: Record<string, unknown>;
   sourceRef: string | null;
+  /** #872: effective civil dates per basis, from `resultCivilDates(props)`. */
+  documentDates: string[];
+  scrapDates: string[];
 }
 
 export interface EdgeRow {
@@ -195,22 +198,20 @@ export function buildNodeRow(node: GraphifyNode, citySlug?: string | null): Node
   const enrichedProperties = isLifecycle
     ? { ...(rawProps ?? {}), regulatoryStatus: deriveRegulatoryStatus({ statut, etape }) }
     : properties;
+  const props: Record<string, unknown> = {
+    ...(community !== undefined ? { community } : {}),
+    ...(community_name !== undefined ? { community_name } : {}),
+    ...(source_file !== undefined ? { source_file } : {}),
+    // v2 extras — kept in props for forward compatibility
+    ...(status !== undefined ? { status } : {}),
+    ...(description !== undefined ? { description } : {}),
+    ...(refs !== undefined ? { refs } : {}),
+    ...(enrichedProperties !== undefined ? { properties: enrichedProperties } : {}),
+  };
   return {
-    id,
-    label,
-    type,
-    citySlug: citySlug ?? null,
-    sourceRef: source_file ?? null,
-    props: {
-      ...(community !== undefined ? { community } : {}),
-      ...(community_name !== undefined ? { community_name } : {}),
-      ...(source_file !== undefined ? { source_file } : {}),
-      // v2 extras — kept in props for forward compatibility
-      ...(status !== undefined ? { status } : {}),
-      ...(description !== undefined ? { description } : {}),
-      ...(refs !== undefined ? { refs } : {}),
-      ...(enrichedProperties !== undefined ? { properties: enrichedProperties } : {}),
-    },
+    id, label, type, citySlug: citySlug ?? null, sourceRef: source_file ?? null, props,
+    documentDates: resultCivilDates(props, "document"),
+    scrapDates: resultCivilDates(props, "scrap"),
   };
 }
 
@@ -477,10 +478,11 @@ export function mergeNodeRows(rows: NodeRow[]): NodeRow[] {
       continue;
     }
 
+    const mergedProps = mergeProps(current.props, row.props);
     byId.set(row.id, {
-      ...current,
-      ...row,
-      props: mergeProps(current.props, row.props),
+      ...current, ...row, props: mergedProps,
+      documentDates: resultCivilDates(mergedProps, "document"),
+      scrapDates: resultCivilDates(mergedProps, "scrap"),
     });
   }
 
@@ -1042,12 +1044,8 @@ export async function upsertGraph(
         .insert(graphNodes)
         .values(
           nodeRows.map((r) => ({
-            id: r.id,
-            type: r.type,
-            label: r.label,
-            citySlug,
-            props: r.props,
-            sourceRef: r.sourceRef,
+            id: r.id, type: r.type, label: r.label, citySlug, props: r.props, sourceRef: r.sourceRef,
+            effectiveDocumentDates: r.documentDates, effectiveScrapDates: r.scrapDates,
           })),
         )
         .onConflictDoUpdate({
@@ -1055,6 +1053,8 @@ export async function upsertGraph(
           set: {
             label: sql`excluded.label`,
             type: sql`excluded.type`,
+            effectiveDocumentDates: sql`excluded.effective_document_dates`,
+            effectiveScrapDates: sql`excluded.effective_scrap_dates`,
             // Citation-safety — the worker-live FRESHNESS path (exploitation.ts →
             // this PURE upsert) has NONE of upsertGraphAtomic's gates (gate3 /
             // materializeSeveredSources / completeness). A wholesale
@@ -1294,12 +1294,8 @@ export async function projectCityInTransaction(
       .insert(graphNodes)
       .values(
         nodeRows.map((r) => ({
-          id: r.id,
-          type: r.type,
-          label: r.label,
-          citySlug,
-          props: r.props,
-          sourceRef: r.sourceRef,
+          id: r.id, type: r.type, label: r.label, citySlug, props: r.props, sourceRef: r.sourceRef,
+          effectiveDocumentDates: r.documentDates, effectiveScrapDates: r.scrapDates,
         })),
       )
       .onConflictDoUpdate({
@@ -1309,6 +1305,8 @@ export async function projectCityInTransaction(
           type: sql`excluded.type`,
           props: sql`excluded.props`,
           sourceRef: sql`excluded.source_ref`,
+          effectiveDocumentDates: sql`excluded.effective_document_dates`,
+          effectiveScrapDates: sql`excluded.effective_scrap_dates`,
         },
       });
   }
@@ -1546,7 +1544,7 @@ export interface Subgraph {
   // consommateur (nodeFromDb/edgeFromDb/routes/enrichment) et la colonne peut
   // être absente sur certains déploiements (drift schema OVH). On ne
   // sélectionne donc que les colonnes réellement lues.
-  nodes: Omit<typeof graphNodes.$inferSelect, "createdAt">[];
+  nodes: Omit<typeof graphNodes.$inferSelect, "createdAt" | "effectiveDocumentDates" | "effectiveScrapDates">[];
   edges: Omit<typeof graphEdges.$inferSelect, "createdAt">[];
 }
 
@@ -2340,6 +2338,15 @@ export interface ListCitiesWithSignalNodesOptions {
   discarded?: ReadonlySet<DiscardedSignalKey>;
 }
 
+/** SQL window predicate on the materialized dates (#872); JS re-checks. */
+export function effectiveDateWindowCondition(dateRange?: GraphSignalDateRange) {
+  if (!dateRange?.dateFrom && !dateRange?.dateTo) return undefined;
+  const col = dateRange.dateBasis === "scrap" ? graphNodes.effectiveScrapDates : graphNodes.effectiveDocumentDates;
+  const from = dateRange.dateFrom ?? null;
+  const to = dateRange.dateTo ?? null;
+  return sql`EXISTS (SELECT 1 FROM unnest(${col}) AS d WHERE (${from}::text IS NULL OR d >= ${from}) AND (${to}::text IS NULL OR d <= ${to}))`;
+}
+
 export async function listCitiesWithSignalNodes(
   db: Database,
   dateRange?: GraphSignalDateRange,
@@ -2347,6 +2354,7 @@ export async function listCitiesWithSignalNodes(
 ): Promise<CitySignalCounts[]> {
   // One row per individual signal node (no count grouping in SQL) so both
   // contracts are derived from the same source projection.
+  const windowCondition = effectiveDateWindowCondition(dateRange);
   const rows = await db
     .select({
       id: graphNodes.id,
@@ -2366,6 +2374,7 @@ export async function listCitiesWithSignalNodes(
       and(
         inArray(graphNodes.type, ["Signal", "DesignationEvent"]),
         isNotNull(graphNodes.citySlug),
+        ...(windowCondition ? [windowCondition] : []),
       ),
     );
 
