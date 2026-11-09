@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: radar-immobilier
+
+resources:
+  - ../requeue-recurrent/cronjob.yaml
+
+configMapGenerator:
+  - name: radar-refresh-requeue-recurrent-script
+    files:
+      - ../requeue-recurrent/requeue-recurrent.bundle.mjs
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+patches:
+  # Prod keeps the base schedule `30 3 * * *` (one hour before preprod,
+  # minute 30: >= 30 min from every radar-refresh-pv start). Stated here so
+  # the prod slot is visible in the prod overlay, not only in the base.
+  - target:
+      kind: CronJob
+      name: radar-refresh-requeue-abandoned
+    patch: |
+      - op: replace
+        path: /spec/schedule
+        value: "30 3 * * *"
