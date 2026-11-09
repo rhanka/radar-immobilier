@@ -26,7 +26,7 @@
    * ZÉRO couleur hex en dur · ZÉRO override composant DS · ZÉRO icône lucide
    * ZÉRO checkbox/tabs/search bespoke.
    */
-  import { Checkbox, RadioGroup, TimeRangePicker } from "@sentropic/design-system-svelte";
+  import { Badge, Checkbox, RadioGroup, TimeRangePicker } from "@sentropic/design-system-svelte";
   import {
     B_SUBSET_KEY,
     bAxesFromVivierKey,
@@ -153,13 +153,14 @@
     onClassementFilterChange({ ...classementFilter, [classe]: checked });
   }
 
-  // Classement dropdown (spec 2026-11-08): « Classement » header, closed
-  // trigger summarising the selection as « N sur 4 », opening a checkbox
-  // panel with per-class counts. Default: all except Écarté.
+  // Pertinence dropdown (owner 09/11): closed trigger summarising the checked
+  // classes by name (no counter), opening a multi-checkbox panel whose counts
+  // sit in right-aligned orange pills. Default: all except Écarté.
   let classementOpen = false;
   let classementWrapEl: HTMLElement | null = null;
-  $: classementCheckedCount = SIGNAL_CLASSES.filter((classe) => classementFilter[classe]).length;
-  $: classementSummary = `${classementCheckedCount} sur ${SIGNAL_CLASSES.length}`;
+  $: classementSummary = SIGNAL_CLASSES.filter((classe) => classementFilter[classe])
+    .map((classe) => CLASSEMENT_META[classe].label)
+    .join(", ") || "Aucune sélection";
 
   function onClassementWindowClick(event: MouseEvent): void {
     if (
@@ -483,6 +484,36 @@
         {/snippet}
       </TimeRangePicker>
     </div>
+    <div class="classement-filter" bind:this={classementWrapEl}>
+      <span class="pertinence-label">Pertinence</span>
+      <button
+        type="button"
+        class="classement-trigger"
+        data-testid="classement-filter-trigger"
+        aria-expanded={classementOpen}
+        aria-haspopup="true"
+        on:click|stopPropagation={() => { classementOpen = !classementOpen; }}
+      >
+        <span class="classement-trigger-summary">{classementSummary}</span>
+        <span class="classement-trigger-chevron" class:classement-trigger-chevron--open={classementOpen} aria-hidden="true">▾</span>
+      </button>
+      {#if classementOpen}
+        <div class="classement-panel" data-testid="classement-filter-panel">
+          {#each SIGNAL_CLASSES as classe}
+            <div class="classement-row">
+              <span class="classement-row-check">
+                <Checkbox
+                  label={CLASSEMENT_META[classe].label}
+                  checked={classementFilter[classe]}
+                  onchange={(event) => toggleClassement(classe, event.currentTarget.checked)}
+                />
+              </span>
+              <Badge tone={classementCounts[classe] > 0 ? "warning" : "neutral"} aria-label="{classementCounts[classe]} signaux">{classementCounts[classe]}</Badge>
+            </div>
+          {/each}
+        </div>
+      {/if}
+    </div>
     <div class="vivier-toggles">
       <!-- Trois axes COMBINABLES, librement cochables/décochables (défauts
            Zonage ✓, Résidentiel ✓, Précoce ✗). Décocher un axe RELÂCHE le filtre
@@ -541,33 +572,6 @@
     <!-- Le panneau B est rendu DIRECTEMENT : plus de composant Tabs, plus de
          switcher « Référence A / Nouveau B », plus d'en-tête d'onglet. -->
     {@render panelB()}
-  </RailSection>
-
-  <RailSection label="Classement">
-    <div class="classement-filter" bind:this={classementWrapEl}>
-      <button
-        type="button"
-        class="classement-trigger"
-        data-testid="classement-filter-trigger"
-        aria-expanded={classementOpen}
-        aria-haspopup="true"
-        on:click|stopPropagation={() => { classementOpen = !classementOpen; }}
-      >
-        <span>{classementSummary}</span>
-        <span class="classement-trigger-chevron" class:classement-trigger-chevron--open={classementOpen} aria-hidden="true">▾</span>
-      </button>
-      {#if classementOpen}
-        <div class="classement-panel" data-testid="classement-filter-panel">
-          {#each SIGNAL_CLASSES as classe}
-            <Checkbox
-              label="{CLASSEMENT_META[classe].label} ({classementCounts[classe]})"
-              checked={classementFilter[classe]}
-              onchange={(event) => toggleClassement(classe, event.currentTarget.checked)}
-            />
-          {/each}
-        </div>
-      {/if}
-    </div>
   </RailSection>
 
   <!-- ── Section 2 : Villes (recherche + liste plate sélectionnable) ─────── -->
@@ -647,11 +651,43 @@
     --st-component-selection-choiceLabelFontSize: var(--rail-fs-small, 0.75rem);
   }
 
+  /* Pertinence: label styled like the DS « Période des signaux » field label
+     (sentence case, not an uppercase section header). */
   .classement-filter {
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
-    padding: 0.25rem 0.75rem;
+    gap: 0.25rem;
+  }
+
+  .pertinence-label {
+    color: var(--st-component-field-labelText, var(--st-semantic-text-primary));
+    font-size: var(--rail-fs-small, 0.75rem);
+    font-weight: 600;
+  }
+
+  .classement-trigger-summary {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .classement-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .classement-row-check {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .classement-row :global(.st-badge) {
+    flex-shrink: 0;
   }
 
   .classement-trigger {
@@ -685,6 +721,11 @@
   }
 
   .classement-panel {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    right: 0;
+    z-index: 40;
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
@@ -692,5 +733,10 @@
     background: var(--st-semantic-surface-default);
     border: 1px solid var(--st-semantic-border-subtle);
     border-radius: var(--st-radius-sm, 4px);
+    box-shadow: 0 8px 24px var(--st-semantic-border-subtle);
+  }
+
+  .classement-panel :global(.st-choice) {
+    --st-component-selection-choiceLabelFontSize: var(--rail-fs-small, 0.75rem);
   }
 </style>
