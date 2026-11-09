@@ -42,11 +42,23 @@ test("signal card: classement control present, no legacy triage or notes control
 
   // No classement WRITE on load: writes happen only on an explicit menu
   // choice. Reason-code and coherent reads are the existing basket API reads.
+  // Equivalent of the pre-classement blanket assertion, narrowed only for
+  // the legitimate reason-codes GET: no reveal traffic in any form, and no
+  // non-GET traffic to ANY signal-facets path (personal or not).
+  const revealTraffic = network.filter((entry) =>
+    /\/signal-facets\/reveal/.test(new URL(entry.url).pathname),
+  );
+  expect(revealTraffic, "reveal traffic observed on load").toEqual([]);
   const facetWrites = network.filter((entry) =>
     entry.method !== "GET" &&
-    /\/signal-facets\/personal\//.test(new URL(entry.url).pathname),
+    /\/signal-facets\//.test(new URL(entry.url).pathname),
   );
   expect(facetWrites, "classement write traffic observed on load").toEqual([]);
+  const reasonCodeWrites = network.filter((entry) =>
+    entry.method !== "GET" &&
+    /\/signal-facets\/reason-codes/.test(new URL(entry.url).pathname),
+  );
+  expect(reasonCodeWrites, "reason-codes write traffic observed on load").toEqual([]);
 
   // No prospect notes traffic: the lot notes machinery is removed, marks stay.
   const notesReads = network.filter((entry) =>
