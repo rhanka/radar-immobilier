@@ -196,6 +196,37 @@ describe("requeueAbandonedRefreshDocuments", () => {
     expect(atBoundary.requeued).toEqual([]);
   });
 
+  it("honours maxAgeDays and maxPerCity (recurring catch-up ceilings)", () => {
+    const before = abandonedLedger();
+    // a failed 2026-10-30, b failed 2026-11-05; now 2026-11-09, max age 5 days
+    // keeps only b; per-city cap 0 requeues nothing.
+    const aged = requeueAbandonedRefreshDocuments(before,
+      { maxAgeDays: 5, now: clock("2026-11-09T00:00:00.000Z") });
+    expect(aged.requeued).toEqual([sha("b")]);
+    const capped = requeueAbandonedRefreshDocuments(before,
+      { maxPerCity: 1, now: clock("2026-11-09T00:00:00.000Z") });
+    expect(capped.requeued).toEqual([sha("b")]); // most recently failed first
+    expect(capped.ledger.documents[sha("b")]!.requeues).toBe(1);
+  });
+
+  it("stamps requeue-ceiling-exceeded at maxRequeues and never requeues again", () => {
+    let ledger = abandonedLedger();
+    for (let round = 0; round < 2; round += 1) {
+      ledger = requeueAbandonedRefreshDocuments(ledger, { now: clock("2026-11-09T00:00:00.000Z") }).ledger;
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        ledger = failRefreshDocument(ledger, sha("a"), "quota", 3, clock("2026-11-10T00:00:00.000Z")).ledger;
+      }
+    }
+    const result = requeueAbandonedRefreshDocuments(ledger, { now: clock("2026-11-11T00:00:00.000Z") });
+    expect(result.requeued).not.toContain(sha("a"));
+    expect(result.exhausted).toContain(sha("a"));
+    expect(result.ledger.documents[sha("a")]).toMatchObject(
+      { state: "abandoned", lastReason: "requeue-ceiling-exceeded", requeues: 2 });
+    const again = requeueAbandonedRefreshDocuments(result.ledger, { now: clock("2026-11-12T00:00:00.000Z") });
+    expect(again.changed).toBe(false);
+    expect(again.exhausted).toEqual([]);
+  });
+
   it("is idempotent: a second run changes nothing", () => {
     const first = requeueAbandonedRefreshDocuments(abandonedLedger(),
       { now: clock("2026-11-09T00:00:00.000Z") });
