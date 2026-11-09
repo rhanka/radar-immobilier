@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev --host 0.0.0.0",
-    "build": "vite build",
+    "build": "NODE_OPTIONS=--max-old-space-size=1024 vite build",
     "preview": "vite preview --host 0.0.0.0",
     "typecheck": "svelte-check --tsconfig ./tsconfig.json",
     "test": "vitest run",
@@ -42,6 +42,7 @@
     "postcss": "^8.4.38",
     "svelte-check": "^4.0.0",
     "tailwindcss": "4.3.3",
+    "typescript": "5.9.3",
     "vite": "^6.4.5",
     "vitest": "^5.0.3"
   }
