@@ -11,7 +11,10 @@
  * There is no generic relay (field review J1.2b §14.1: `/__app/` stays a
  * reserved 404). Every app path is either:
  * - mapped to one named op (`app.me.v1`, `workspaces.list.v1`,
- *   `signals.by-city.v1`, `signals.coherent-city.v1`);
+ *   `signals.by-city.v1`, `signals.coherent-city.v1`); the classement
+ *   reason catalogue rides `baskets.context.v1`, and classement writes
+ *   (`personal/{select,deselect,discard,restore}`) go through the page
+ *   write-intent prepare/status paths — no new endpoint;
  * - the zoning layer (`qc-zonage-<slug>/items`) read through the governed
  *   `geo.collection-items.v1` op (#1010), paged and reshaped by
  *   `zonesCollectionResponseViaReader` for the unchanged `fetchZones`;
@@ -35,21 +38,30 @@ export type ArtifactOperation =
   | "app.me.v1"
   | "workspaces.list.v1"
   | "signals.by-city.v1"
-  | "signals.coherent-city.v1";
+  | "signals.coherent-city.v1"
+  | "baskets.context.v1";
 
 /** Named gaps of the field review (§8–§10): refused locally, never relayed. */
 export type ArtifactSourceGap = "zones" | "lots" | "cptaq";
 
 export type ArtifactRoute =
-  | { kind: "op"; op: ArtifactOperation; params: URLSearchParams }
+  | { kind: "op"; op: ArtifactOperation; params: URLSearchParams; transform?: "reason-codes" }
   /** Zoning items: app path (base stripped) for `zonesCollectionResponseViaReader`. */
   | { kind: "zoning"; path: string }
+  /** Classement write: translated to the page write-intent prepare path. */
+  | { kind: "write"; workspaceId: string; action: "select" | "deselect" | "discard" | "restore" }
   | { kind: "gap"; gap: ArtifactSourceGap }
   | { kind: "refused"; status: 400 | 404 | 405; code: string }
   | { kind: "passthrough" };
 
 const UUID = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
 const SCOPED = new RegExp(`^/api/v1/workspaces/(${UUID})/signal-facets/(by-city|coherent-city)$`);
+const REASON_CODES = new RegExp(`^/api/v1/workspaces/(${UUID})/signal-facets/reason-codes$`);
+const PERSONAL_WRITE = new RegExp(`^/api/v1/workspaces/(${UUID})/signal-facets/personal/(select|deselect|discard|restore)$`);
+
+/** Page write-intent paths served by the content host (PW-C, no new endpoint). */
+export const PW_PREPARE_PATH = "/__reader/api/facets.write-intents.prepare.v1";
+export const PW_STATUS_PATH = "/__reader/api/facets.write-intents.status.v1";
 const ZONAGE = /^\/api\/geo\/collections\/qc-zonage-[^/]+\/items$/;
 const LOTS = /^\/api\/geo\/collections\/qc-lots-[^/]+\/items$/;
 const ZONES = /^\/api\/geo\/[^/]+\/zones$/;
@@ -112,6 +124,19 @@ export function routeArtifactRequest(rawUrl: string, method: string, origin: str
     params.append("workspaceId", scoped[1]!.toLowerCase());
     return { kind: "op", op: scoped[2] === "by-city" ? "signals.by-city.v1" : "signals.coherent-city.v1", params };
   }
+  const reasons = REASON_CODES.exec(pathname);
+  if (reasons) {
+    if (!isGet) return { kind: "refused", status: 405, code: "method_not_allowed" };
+    // The Steve reason catalogue rides `baskets.context.v1` (reasonCatalog).
+    params.append("workspaceId", reasons[1]!.toLowerCase());
+    return { kind: "op", op: "baskets.context.v1", params, transform: "reason-codes" };
+  }
+  const write = PERSONAL_WRITE.exec(pathname);
+  if (write) {
+    if (isGet) return { kind: "refused", status: 405, code: "method_not_allowed" };
+    return { kind: "write", workspaceId: write[1]!.toLowerCase(),
+      action: write[2] as "select" | "deselect" | "discard" | "restore" };
+  }
   return { kind: "refused", status: 404, code: "artifact_route_not_served" };
 }
 
@@ -147,6 +172,22 @@ export interface ArtifactTransportDeps {
   /** Build-time API base (`VITE_API_BASE_URL`), stripped before routing. */
   apiBase?: string;
   now?: () => number;
+  /** Write bootstrap (`#pw-page-bootstrap`) injected by the published write page. */
+  readWriteBootstrap?: () => { pageInstanceId: string; csrf: string } | null;
+  /** Opens the application confirmation link of a prepared write intent. */
+  openWindow?: (url: string) => void;
+  /** Write-status poll interval (PW budget default 2 s; tests shorten it). */
+  pollIntervalMs?: number;
+}
+
+function defaultWriteBootstrap(): { pageInstanceId: string; csrf: string } | null {
+  try {
+    const raw = document.querySelector("#pw-page-bootstrap")?.textContent;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { pageInstanceId?: unknown; csrf?: unknown };
+    return typeof parsed.pageInstanceId === "string" && typeof parsed.csrf === "string"
+      ? { pageInstanceId: parsed.pageInstanceId, csrf: parsed.csrf } : null;
+  } catch { return null; }
 }
 
 const REFRESH_BEFORE_MS = 30_000;
@@ -224,6 +265,89 @@ export function createArtifactTransport(deps: ArtifactTransportDeps): typeof fet
     return response;
   }
 
+  /** Reader-scoped coherent tokens, keyed `workspaceId:citySlug` (write gestures). */
+  const projectionTokens = new Map<string, string>();
+
+  async function rememberToken(op: ArtifactOperation, params: URLSearchParams, response: Response): Promise<void> {
+    if (op !== "signals.coherent-city.v1" || !response.ok) return;
+    const body = await response.clone().json().catch(() => null) as { token?: unknown } | null;
+    const workspaceId = params.get("workspaceId");
+    const citySlug = params.get("citySlug");
+    if (typeof body?.token === "string" && workspaceId && citySlug) {
+      projectionTokens.set(`${workspaceId}:${citySlug}`, body.token);
+    }
+  }
+
+  /**
+   * Classement write through the existing page write-intent path only:
+   * prepare (basket write consent-gated), application confirmation, then
+   * status polling until a terminal state. Never confirms from the page.
+   */
+  async function callWrite(route: Extract<ArtifactRoute, { kind: "write" }>, init?: RequestInit): Promise<Response> {
+    const bootstrap = (deps.readWriteBootstrap ?? defaultWriteBootstrap)();
+    if (!bootstrap) return jsonResponse(503, { ok: false, error: "write_transport_closed" });
+    let payload: Record<string, unknown>;
+    try {
+      payload = JSON.parse(typeof init?.body === "string" ? init.body : "") as Record<string, unknown>;
+    } catch { return jsonResponse(400, { ok: false, error: "invalid_facet_command" }); }
+    const target = payload.target as { citySlug?: unknown } | undefined;
+    const token = typeof target?.citySlug === "string"
+      ? projectionTokens.get(`${route.workspaceId}:${target.citySlug}`) : undefined;
+    if (!token) return jsonResponse(409, { ok: false, error: "projection_token_unavailable" });
+    const idempotencyKey = new Headers(init?.headers).get("idempotency-key")
+      ?? globalThis.crypto?.randomUUID?.() ?? "";
+    if (!idempotencyKey) return jsonResponse(400, { ok: false, error: "invalid_idempotency_key" });
+    const prepareBody: Record<string, unknown> = {
+      operation: `facets.signals.personal.${route.action}.v1`,
+      workspaceId: route.workspaceId,
+      target: payload.target,
+      expectedHeadId: payload.expectedHeadId ?? null,
+      displayedFingerprint: payload.displayedFingerprint,
+      expectedProjectionToken: token,
+    };
+    for (const key of ["basket", "reasonCode", "deselect", "expectedSelectionHeads"] as const) {
+      if (payload[key] !== undefined) prepareBody[key] = payload[key];
+    }
+    const readerHeaders = { "x-reader-instance": bootstrap.pageInstanceId, "x-reader-csrf": bootstrap.csrf };
+    const prepared = await deps.fetch(PW_PREPARE_PATH, {
+      method: "POST", credentials: "same-origin", cache: "no-store",
+      headers: { "content-type": "application/json", "idempotency-key": idempotencyKey, ...readerHeaders },
+      body: JSON.stringify(prepareBody),
+      ...(init?.signal ? { signal: init.signal } : {}),
+    });
+    if (!prepared.ok) return prepared;
+    const envelope = await prepared.json().catch(() => null) as
+      { data?: { intentId?: unknown; state?: unknown; confirmationUrl?: unknown } } | null;
+    const data = envelope?.data;
+    if (typeof data?.intentId !== "string") return jsonResponse(502, { ok: false, error: "upstream_bad_payload" });
+    if (data.state === "committed") return jsonResponse(200, { event: { id: data.intentId } });
+    if (typeof data.confirmationUrl === "string") {
+      (deps.openWindow ?? ((url: string) => { globalThis.open?.(url, "_blank", "noopener,noreferrer"); }))(data.confirmationUrl);
+    }
+    const interval = deps.pollIntervalMs ?? 2_000;
+    for (let poll = 0; poll < 60; poll += 1) {
+      if (init?.signal?.aborted) throw new DOMException("The operation was aborted.", "AbortError");
+      await new Promise((resolve) => setTimeout(resolve, interval));
+      const status = await deps.fetch(`${PW_STATUS_PATH}?intentId=${encodeURIComponent(data.intentId)}`, {
+        credentials: "same-origin", cache: "no-store",
+        headers: { accept: "application/json", ...readerHeaders },
+        ...(init?.signal ? { signal: init.signal } : {}),
+      });
+      if (!status.ok) continue;
+      const body = await status.json().catch(() => null) as
+        { data?: { state?: unknown; receipt?: { event?: { id?: unknown } } } } | null;
+      const state = body?.data?.state;
+      if (state === "committed") {
+        const eventId = body?.data?.receipt?.event?.id;
+        return jsonResponse(200, { event: { id: typeof eventId === "string" ? eventId : data.intentId } });
+      }
+      if (state === "rejected" || state === "expired" || state === "revoked") {
+        return jsonResponse(409, { ok: false, error: `write_intent_${state}` });
+      }
+    }
+    return jsonResponse(409, { ok: false, error: "write_confirmation_pending" });
+  }
+
   return async function artifactFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
     const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
     const method = init?.method ?? (typeof input === "object" && "method" in input ? input.method : "GET");
@@ -246,7 +370,16 @@ export function createArtifactTransport(deps: ArtifactTransportDeps): typeof fet
         init?.signal ? { signal: init.signal } : {});
       return mapped ?? jsonResponse(400, { ok: false, error: "zones_request_not_mapped" });
     }
-    return callOperation(route.op, route.params, init);
+    if (route.kind === "write") return callWrite(route, init);
+    const response = await callOperation(route.op, route.params, init);
+    await rememberToken(route.op, route.params, response);
+    if (route.transform === "reason-codes" && response.ok) {
+      const body = await response.json().catch(() => null) as
+        { context?: { reasonCatalog?: { entries?: unknown } } } | null;
+      const entries = body?.context?.reasonCatalog?.entries;
+      return jsonResponse(200, { codes: Array.isArray(entries) ? entries : [] });
+    }
+    return response;
   };
 }
 
