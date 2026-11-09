@@ -440,6 +440,119 @@ logs-preprod: guard-preprod
 	@test -n "$(RUN_ID)" || { echo "RUN_ID is required" >&2; exit 1; }
 	@$(K) logs "job/radar-refresh-pv-$(RUN_ID)" --all-containers=true
 
+# --- refresh-requeue-abandoned one-off Job ---------------------------------
+# Requeues `abandoned` coverage documents (see api/src/scripts/refresh-requeue-abandoned.ts).
+# Runs WITHOUT a release on the frozen image: the coverage module is NOT a
+# separate file in that image dist (verified on the v1.2.18 prod digest:
+# dist/scripts/refresh-pv.js present, no services/graph directory), so the
+# operator script is an esbuild bundle (0.25.12, pinned as in api/Dockerfile)
+# mounted via ConfigMap and resolving the image node_modules at /workspace.
+REQUEUE_DIR := $(OVERLAY)/requeue-abandoned
+REQUEUE_PROD_DIR := $(ROOT)/deploy/k8s/refresh-cronjobs/requeue-abandoned-prod
+REQUEUE_OBJECTS := job/radar-refresh-requeue-abandoned configmap/radar-refresh-requeue-abandoned-script
+REQUEUE_NS = $(if $(filter prod,$(ENV)),radar-immobilier,radar-immobilier-preprod)
+REQUEUE_K = kubectl --kubeconfig "$(KUBECONFIG)" -n $(REQUEUE_NS)
+REQUEUE_WAIT_SECONDS ?= 1800
+REQUEUE_POLL_SECONDS ?= 5
+REQUEUE_REQUEST_SECONDS ?= 30
+REQUEUE_KB = timeout $$(( $(REQUEUE_REQUEST_SECONDS) * 3 )) $(REQUEUE_K) --request-timeout=$(REQUEUE_REQUEST_SECONDS)s
+
+.PHONY: bundle-requeue-abandoned
+bundle-requeue-abandoned: ## Regenerate the self-contained requeue bundle (esbuild 0.25.12, pinned)
+	@docker run --rm -v "$(ROOT):/workspace" -w /workspace node:24-bookworm-slim \
+	  sh -ceu 'npm install --no-save --ignore-scripts esbuild@0.25.12 >/dev/null 2>&1; node deploy/k8s/refresh-cronjobs/requeue-abandoned/bundle.mjs'
+
+.PHONY: guard-requeue
+guard-requeue:
+	@test "$(ENV)" = "preprod" -o "$(ENV)" = "prod" || { echo "ENV=preprod or ENV=prod is required" >&2; exit 1; }
+	@test -n "$(KUBECONFIG)" -a -f "$(KUBECONFIG)" || { echo "KUBECONFIG file is required" >&2; exit 1; }
+	@if [ "$(ENV)" = "preprod" ]; then \
+	  server="$$(kubectl --kubeconfig "$(KUBECONFIG)" config view --minify -o jsonpath='{.clusters[0].cluster.server}')"; \
+	  case "$$server" in "$(EXPECTED_SERVER)"|"$(EXPECTED_SERVER)":*) ;; *) echo "refusing unexpected preprod API server" >&2; exit 1;; esac; \
+	else \
+	  test "$(PROD_CONFIRM)" = "1" || { echo "PROD_CONFIRM=1 is required for ENV=prod" >&2; exit 1; }; \
+	  test -n "$(REQUEUE_EXPECTED_SERVER)" || { echo "REQUEUE_EXPECTED_SERVER is required for ENV=prod (expected prod API server, checked against the kubeconfig)" >&2; exit 1; }; \
+	  server="$$(kubectl --kubeconfig "$(KUBECONFIG)" config view --minify -o jsonpath='{.clusters[0].cluster.server}')"; \
+	  case "$$server" in "$(REQUEUE_EXPECTED_SERVER)"|"$(REQUEUE_EXPECTED_SERVER)":*) ;; *) echo "refusing unexpected prod API server" >&2; exit 1;; esac; \
+	  case "$$server" in "$(EXPECTED_SERVER)"*) echo "refusing the preprod API server for ENV=prod" >&2; exit 1;; esac; \
+	fi
+	@timeout $$(( $(REQUEUE_REQUEST_SECONDS) * 3 )) $(REQUEUE_K) --request-timeout=$(REQUEUE_REQUEST_SECONDS)s get serviceaccount radar-app -o name >/dev/null
+
+.PHONY: render-requeue-abandoned
+render-requeue-abandoned: ## Render the one-off requeue Job (REQUEUE_MODE=dry-run|apply)
+	@test "$(ENV)" = "preprod" -o "$(ENV)" = "prod" || { echo "ENV=preprod or ENV=prod is required" >&2; exit 1; }
+	@[[ "$(REQUEUE_IMAGE_REF)" =~ ^ghcr\.io/rhanka/radar-api@sha256:[0-9a-f]{64}$$ ]] \
+	  || { echo "REQUEUE_IMAGE_REF must be the radar API immutable digest" >&2; exit 1; }
+	@test -n "$(REQUEUE_RENDER_OUT)" || { echo "REQUEUE_RENDER_OUT is required" >&2; exit 1; }
+	@test "$(REQUEUE_MODE)" = "dry-run" -o "$(REQUEUE_MODE)" = "apply" \
+	  || { echo "REQUEUE_MODE must be dry-run or apply" >&2; exit 1; }
+	@if [ "$(REQUEUE_MODE)" = "apply" ]; then test -n "$(REQUEUE_OPERATOR)" \
+	  || { echo "REQUEUE_OPERATOR is required for REQUEUE_MODE=apply" >&2; exit 1; }; fi
+	@[[ -z "$(REQUEUE_SINCE)" || "$(REQUEUE_SINCE)" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}([T ].*)?$$ ]] \
+	  || { echo "REQUEUE_SINCE must be a date (YYYY-MM-DD or ISO timestamp)" >&2; exit 1; }
+	@[[ -z "$(REQUEUE_CITY)" || "$(REQUEUE_CITY)" =~ ^[a-z0-9][a-z0-9,-]*$$ ]] \
+	  || { echo "REQUEUE_CITY must be a city slug (or comma list)" >&2; exit 1; }
+	@[[ -z "$(REQUEUE_OPERATOR)" || "$(REQUEUE_OPERATOR)" =~ ^[A-Za-z0-9@._-]+$$ ]] \
+	  || { echo "REQUEUE_OPERATOR must be a single token (letters, digits, @ . _ -)" >&2; exit 1; }
+	@set -o pipefail; umask 077; overlay="$(REQUEUE_DIR)"; \
+	  [ "$(ENV)" = "prod" ] && overlay="$(REQUEUE_PROD_DIR)"; \
+	  args="$(if $(filter dry-run,$(REQUEUE_MODE)),--dry-run,)$(if $(REQUEUE_SINCE), --since $(REQUEUE_SINCE),)$(if $(REQUEUE_CITY), --city $(REQUEUE_CITY),)$(if $(REQUEUE_OPERATOR), --operator $(REQUEUE_OPERATOR),)"; args="$${args# }"; \
+	  kubectl kustomize --load-restrictor LoadRestrictionsNone "$$overlay" \
+	    | sed -e "s#$(PLACEHOLDER)#$(REQUEUE_IMAGE_REF)#g" \
+	          -e "s#REQUEUE-ARGS-SET-BY-RENDER#$$args#g" \
+	    > "$(REQUEUE_RENDER_OUT)"
+	@test "$$(grep -c '^kind: Job$$' "$(REQUEUE_RENDER_OUT)")" -eq 1
+	@test "$$(grep -c '^kind: ConfigMap$$' "$(REQUEUE_RENDER_OUT)")" -eq 1
+	@grep -q '^  namespace: $(REQUEUE_NS)$$' "$(REQUEUE_RENDER_OUT)"
+	@! grep -q 'PINNED-BY-CI\|SET-BY-RENDER\|radar-api:latest' "$(REQUEUE_RENDER_OUT)"
+
+.PHONY: run-requeue-abandoned
+run-requeue-abandoned: ## Create the rendered requeue Job once, wait, print logs, always clean up
+	@set -uo pipefail; status=1; remote_ok=0; \
+	  cleanup() { if [ "$$remote_ok" -eq 1 ]; then $(MAKE) -s -f "$(lastword $(MAKEFILE_LIST))" cleanup-requeue-abandoned \
+	    KUBECONFIG="$(KUBECONFIG)" REQUEUE_REQUEST_SECONDS=$(REQUEUE_REQUEST_SECONDS) ENV=$(ENV) \
+	    REQUEUE_EXPECTED_SERVER="$(REQUEUE_EXPECTED_SERVER)" PROD_CONFIRM="$(PROD_CONFIRM)" \
+	    || { echo "requeue cleanup FAILED: rerun cleanup-requeue-abandoned" >&2; exit 1; }; fi; }; \
+	  trap cleanup EXIT; trap 'exit 130' INT TERM; \
+	  $(MAKE) -s -f "$(lastword $(MAKEFILE_LIST))" guard-requeue KUBECONFIG="$(KUBECONFIG)" \
+	    REQUEUE_REQUEST_SECONDS=$(REQUEUE_REQUEST_SECONDS) REQUEUE_EXPECTED_SERVER="$(REQUEUE_EXPECTED_SERVER)" \
+	    PROD_CONFIRM="$(PROD_CONFIRM)" ENV=$(ENV) || exit 1; \
+	  if [ "$(ENV)" = "preprod" ]; then test "$(PREPROD_CONFIRM)" = "1" || { echo "PREPROD_CONFIRM=1 is required" >&2; exit 1; }; fi; \
+	  { [ ! -L "$(REQUEUE_RENDER_OUT)" ] && [ -f "$(REQUEUE_RENDER_OUT)" ]; } \
+	    || { echo "REQUEUE_RENDER_OUT must be the regular render file" >&2; exit 1; }; \
+	  remote_ok=1; \
+	  $(REQUEUE_KB) delete $(REQUEUE_OBJECTS) --ignore-not-found --wait=true >/dev/null 2>&1 \
+	    || { echo "could not clear a previous requeue" >&2; exit 1; }; \
+	  $(REQUEUE_KB) create -f "$(REQUEUE_RENDER_OUT)" >/dev/null \
+	    || { echo "kubectl create refused" >&2; exit 1; }; \
+	  deadline=$$(( $$(date +%s) + $(REQUEUE_WAIT_SECONDS) )); \
+	  while :; do \
+	    state="$$($(REQUEUE_KB) get job radar-refresh-requeue-abandoned -o jsonpath='{.status.succeeded}/{.status.failed}')" \
+	      || { echo "could not read the requeue Job" >&2; break; }; \
+	    case "$$state" in 1/*) status=0; break;; */[1-9]*) echo "requeue Job failed" >&2; break;; esac; \
+	    [ "$$(date +%s)" -lt "$$deadline" ] || { echo "requeue Job did not finish in time" >&2; break; }; \
+	    sleep $(REQUEUE_POLL_SECONDS); \
+	  done; \
+	  $(REQUEUE_KB) logs job/radar-refresh-requeue-abandoned || true; \
+	  exit $$status
+
+.PHONY: cleanup-requeue-abandoned
+cleanup-requeue-abandoned: ## Delete the requeue Job + script ConfigMap (guarded, idempotent)
+	@set -u; \
+	  test "$(ENV)" = "preprod" -o "$(ENV)" = "prod" || { echo "cleanup guard refused: ENV=preprod or ENV=prod is required, no remote delete" >&2; exit 1; }; \
+	  test -n "$(KUBECONFIG)" -a -f "$(KUBECONFIG)" || { echo "cleanup guard refused: KUBECONFIG file is required, no remote delete" >&2; exit 1; }; \
+	  if [ "$(ENV)" = "prod" ]; then test "$(PROD_CONFIRM)" = "1" || { echo "cleanup guard refused: PROD_CONFIRM=1 is required for ENV=prod, no remote delete" >&2; exit 1; }; fi; \
+	  $(MAKE) -s -f "$(lastword $(MAKEFILE_LIST))" guard-requeue KUBECONFIG="$(KUBECONFIG)" \
+	    REQUEUE_REQUEST_SECONDS=$(REQUEUE_REQUEST_SECONDS) REQUEUE_EXPECTED_SERVER="$(REQUEUE_EXPECTED_SERVER)" \
+	    PROD_CONFIRM="$(PROD_CONFIRM)" ENV=$(ENV) \
+	    || { echo "cleanup guard refused, no remote delete" >&2; exit 1; }; \
+	  echo "cleanup guard: $(ENV) identity confirmed"; \
+	  $(REQUEUE_KB) delete $(REQUEUE_OBJECTS) --ignore-not-found --wait=true
+
+.PHONY: test-requeue-abandoned
+test-requeue-abandoned: ## Hermetic render tests of the requeue Job (no cluster)
+	@bash "$(REQUEUE_DIR)/requeue-abandoned.test.sh"
+
 .PHONY: diagnose-preprod
 diagnose-preprod: guard-preprod
 	@test -n "$(RUN_ID)" || { echo "RUN_ID is required" >&2; exit 1; }
