@@ -6,7 +6,7 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 
-const DIR = "/home/antoinefa/src/radar-immobilier-bench/tmp/bench-wonder";
+const DIR = process.env.BENCH_DIR ?? new URL("..", import.meta.url).pathname.replace(/\/$/, "");
 const H = `${DIR}/harness`;
 const { scoreValidV2 } = await import(`${H}/score-oracle-v2.mjs`);
 const { unresolvedUnits, softMatcherFor, aggregate, scoreCase } = await import(`${H}/score-oracle-v3.mjs`);
@@ -14,8 +14,9 @@ const { documentPages } = await import(`${H}/o3l.mjs`);
 const { CASCADES } = await import(`${H}/precision-cascade.mjs`);
 
 const manifest = JSON.parse(await readFile(`${H}/manifest-v101b.json`, "utf8"));
-const gold = JSON.parse(await readFile(`${DIR}/full/oracle-676/consensus.json`, "utf8"));
-const unresolved = JSON.parse(await readFile(`${DIR}/full/oracle-676/unresolved.json`, "utf8"));
+const ORACLE_DIR = existsSync(`${DIR}/full/oracle-676/consensus.json`) ? `${DIR}/full/oracle-676` : `${DIR}/oracle-676`;
+const gold = JSON.parse(await readFile(`${ORACLE_DIR}/consensus.json`, "utf8"));
+const unresolved = JSON.parse(await readFile(`${ORACLE_DIR}/unresolved.json`, "utf8"));
 const human = JSON.parse(await readFile(`${H}/manual-oracle-v2.json`, "utf8"));
 const neutral = unresolvedUnits(unresolved.entries);
 const humanDocs = new Set(manifest.documents.filter(({ manualOracle, id }) =>

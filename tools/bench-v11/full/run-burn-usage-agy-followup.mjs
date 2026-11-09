@@ -9,7 +9,7 @@ import { spawn } from "node:child_process";
 import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 
-const DIR = "/home/antoinefa/src/radar-immobilier-bench/tmp/bench-wonder";
+const DIR = process.env.BENCH_DIR ?? new URL("..", import.meta.url).pathname.replace(/\/$/, "");
 const MODEL = "gemini-4-argon-low";
 const OUTDIR = `${DIR}/full/burn-usage-agy-followup10`;
 await mkdir(OUTDIR, { recursive: true });
@@ -21,7 +21,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 function runOnce(prompt) {
   return new Promise((resolve) => {
     const child = spawn("agy", ["--model", MODEL, "--output-format", "json", `--print=${prompt}`], {
-      cwd: "/home/antoinefa/src/radar-immobilier-bench",
+      cwd: process.env.BENCH_REPO ?? `${DIR}/../..`,
       stdio: ["ignore", "pipe", "pipe"],
     });
     const outChunks = [];
