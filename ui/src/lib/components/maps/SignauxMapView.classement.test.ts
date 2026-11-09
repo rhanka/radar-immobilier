@@ -144,8 +144,8 @@ describe("SignauxMapView classement behaviour", () => {
     expect(classementBtn.closest(".sel-entity-head-row")).toBeTruthy();
     expect(classementBtn.closest(".sel-entity-head-row")?.querySelector(".sel-entity-head")).toBeTruthy();
     await fireEvent.click(classementBtn);
-    await fireEvent.click(screen.getByTestId("classement-class-ecarte"));
-    await fireEvent.click(screen.getByTestId("classement-reason-N-NON-RES"));
+    await fireEvent.click(screen.getByRole("menuitem", { name: "Écarté" }));
+    await fireEvent.click(screen.getByRole("menuitem", { name: "non résidentiel" }));
 
     await waitFor(() => expect(document.querySelector('[data-signal-node="sig-1"]')).toBeNull());
     expect(document.querySelector('[data-signal-node="sig-2"]')).toBeTruthy();
@@ -159,11 +159,12 @@ describe("SignauxMapView classement behaviour", () => {
     await waitFor(() => expect(document.querySelectorAll("[data-signal-node]").length).toBe(2));
     const scope = within(card("sig-2"));
     await fireEvent.click(scope.getByTestId("signal-classement-button"));
-    await fireEvent.click(screen.getByTestId("classement-class-a_surveiller"));
-    await fireEvent.click(screen.getByTestId("classement-reason-S-PLANIFIE"));
+    await fireEvent.click(screen.getByRole("menuitem", { name: "À surveiller" }));
+    await fireEvent.click(screen.getByRole("menuitem", { name: "planifié" }));
     await waitFor(() => {
       const chip = within(card("sig-2")).getByTestId("classement-reason-chip");
-      expect(chip.textContent).toContain("S-PLANIFIE");
+      expect(chip.textContent).not.toContain("S-PLANIFIE");
+      expect(chip.getAttribute("title")).toBe("S-PLANIFIE");
       expect(chip.textContent).toContain("planifié");
     });
   });
@@ -176,8 +177,8 @@ describe("SignauxMapView classement behaviour", () => {
 
     const scope = within(card("sig-1"));
     await fireEvent.click(scope.getByTestId("signal-classement-button"));
-    await fireEvent.click(screen.getByTestId("classement-class-ecarte"));
-    await fireEvent.click(screen.getByTestId("classement-reason-N-NON-RES"));
+    await fireEvent.click(screen.getByRole("menuitem", { name: "Écarté" }));
+    await fireEvent.click(screen.getByRole("menuitem", { name: "non résidentiel" }));
 
     const alert = await screen.findByTestId("classement-error");
     expect(alert.textContent).toContain("409");
@@ -193,8 +194,8 @@ describe("SignauxMapView classement behaviour", () => {
 
     const scope = within(card("sig-2"));
     await fireEvent.click(scope.getByTestId("signal-classement-button"));
-    await fireEvent.click(screen.getByTestId("classement-class-pertinent"));
-    await fireEvent.click(screen.getByTestId("classement-reason-none"));
+    await fireEvent.click(screen.getByRole("menuitem", { name: "Pertinent" }));
+    await fireEvent.click(screen.getByRole("menuitem", { name: "Sans motif" }));
 
     await waitFor(() => {
       const btn = within(card("sig-2")).getByTestId("signal-classement-button") as HTMLButtonElement;
