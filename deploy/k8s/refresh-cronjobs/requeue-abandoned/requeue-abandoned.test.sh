@@ -61,6 +61,90 @@ if make -s -f "$MK" render-requeue-abandoned REQUEUE_IMAGE_REF="ghcr.io/rhanka/r
   REQUEUE_RENDER_OUT="$T/tag.yaml" REQUEUE_MODE=dry-run ENV=preprod >"$T/out" 2>&1; then bad "non-digest image accepted"
 else grep -q "immutable digest" "$T/out" && ok "non-digest image refused" || bad "image guard: wrong refusal"; fi
 
+# --- guard-requeue: prod and preprod share the same API server ------------
+# Hermetic kubectl stub: both environments report the SAME cluster server
+# (EXPECTED_SERVER in refresh-018.mk); only the context namespace, the caller
+# identity and the -n-scoped radar-app probe tell them apart.
+mkdir -p "$T/bin"
+cat > "$T/bin/kubectl" <<'EOF'
+#!/usr/bin/env bash
+for a in "$@"; do
+  if [ "$a" = "config" ]; then
+    case "$*" in
+      *cluster.server*) printf '%s' "${STUB_SERVER:-}"; exit 0 ;;
+      *context.namespace*) printf '%s' "${STUB_CTX_NS:-}"; exit 0 ;;
+    esac
+  fi
+  [ "$a" = "whoami" ] && { printf '%s' "${STUB_WHOAMI:-}"; exit 0; }
+done
+ns="" prev=""
+for a in "$@"; do [ "$prev" = "-n" ] && ns="$a"; prev="$a"; done
+if [ "$ns" = "${STUB_SA_NS:-}" ]; then echo "serviceaccount/radar-app"; exit 0; fi
+echo "stub: no radar-app in namespace $ns" >&2; exit 1
+EOF
+chmod +x "$T/bin/kubectl"
+: > "$T/kubeconfig"
+SERVER="https://hlhedx.c1.bhs5.k8s.ovh.net"
+guard() { # $1=ENV, remaining args are VAR=value assignments for env/make
+  local env="$1"; shift
+  env PATH="$T/bin:$PATH" STUB_SERVER="$SERVER" "$@" \
+    make -s -f "$MK" guard-requeue KUBECONFIG="$T/kubeconfig" ENV="$env" >"$T/out" 2>&1
+}
+
+if guard prod PROD_CONFIRM=1 REQUEUE_EXPECTED_SERVER="$SERVER" STUB_CTX_NS=radar-immobilier \
+  STUB_WHOAMI=system:serviceaccount:radar-immobilier:radar-operator STUB_SA_NS=radar-immobilier; then
+  ok "prod guard: same API server as preprod accepted when namespace and identity are prod"
+else bad "prod guard refused the shared cluster ($(cat "$T/out"))"; fi
+
+if guard prod PROD_CONFIRM=1 REQUEUE_EXPECTED_SERVER="$SERVER" STUB_CTX_NS= \
+  STUB_WHOAMI=system:serviceaccount:radar-immobilier:radar-operator STUB_SA_NS=radar-immobilier; then
+  ok "prod guard: unset context namespace accepted (all calls pass -n explicitly)"
+else bad "prod guard refused an unset context namespace ($(cat "$T/out"))"; fi
+
+if guard prod PROD_CONFIRM=1 REQUEUE_EXPECTED_SERVER="$SERVER" STUB_CTX_NS=radar-immobilier-preprod \
+  STUB_WHOAMI=system:serviceaccount:radar-immobilier:radar-operator STUB_SA_NS=radar-immobilier; then
+  bad "prod guard accepted a preprod context namespace"
+else grep -q "refusing kubeconfig context namespace radar-immobilier-preprod for ENV=prod" "$T/out" \
+  && ok "prod guard: preprod context namespace refused" || bad "prod guard context refusal: wrong message ($(cat "$T/out"))"; fi
+
+if guard prod PROD_CONFIRM=1 REQUEUE_EXPECTED_SERVER="$SERVER" STUB_CTX_NS=radar-immobilier \
+  STUB_WHOAMI=system:serviceaccount:radar-immobilier-preprod:radar-ci-bascule-preprod STUB_SA_NS=radar-immobilier; then
+  bad "prod guard accepted a preprod identity"
+else grep -q "refusing the radar-immobilier-preprod identity for ENV=prod" "$T/out" \
+  && ok "prod guard: preprod identity refused" || bad "prod guard identity refusal: wrong message ($(cat "$T/out"))"; fi
+
+if guard prod REQUEUE_EXPECTED_SERVER="$SERVER" STUB_CTX_NS=radar-immobilier \
+  STUB_WHOAMI=system:serviceaccount:radar-immobilier:radar-operator STUB_SA_NS=radar-immobilier; then
+  bad "prod guard accepted a missing PROD_CONFIRM"
+else grep -q "PROD_CONFIRM=1 is required" "$T/out" && ok "prod guard: PROD_CONFIRM still required" || bad "prod guard PROD_CONFIRM refusal: wrong message"; fi
+
+if guard prod PROD_CONFIRM=1 REQUEUE_EXPECTED_SERVER= STUB_CTX_NS=radar-immobilier \
+  STUB_WHOAMI=system:serviceaccount:radar-immobilier:radar-operator STUB_SA_NS=radar-immobilier; then
+  bad "prod guard accepted a missing REQUEUE_EXPECTED_SERVER"
+else grep -q "REQUEUE_EXPECTED_SERVER is required" "$T/out" && ok "prod guard: REQUEUE_EXPECTED_SERVER still required" || bad "prod guard server-var refusal: wrong message"; fi
+
+if guard prod PROD_CONFIRM=1 REQUEUE_EXPECTED_SERVER=https://other.example.net STUB_CTX_NS=radar-immobilier \
+  STUB_WHOAMI=system:serviceaccount:radar-immobilier:radar-operator STUB_SA_NS=radar-immobilier; then
+  bad "prod guard accepted an unexpected API server"
+else grep -q "refusing unexpected prod API server" "$T/out" && ok "prod guard: unexpected API server refused" || bad "prod guard server refusal: wrong message"; fi
+
+if guard preprod STUB_CTX_NS=radar-immobilier-preprod \
+  STUB_WHOAMI=system:serviceaccount:radar-immobilier-preprod:radar-ci-bascule-preprod STUB_SA_NS=radar-immobilier-preprod; then
+  ok "preprod guard: shared API server accepted when namespace and identity are preprod"
+else bad "preprod guard refused the shared cluster ($(cat "$T/out"))"; fi
+
+if guard preprod STUB_CTX_NS=radar-immobilier \
+  STUB_WHOAMI=system:serviceaccount:radar-immobilier-preprod:radar-ci-bascule-preprod STUB_SA_NS=radar-immobilier-preprod; then
+  bad "preprod guard accepted a prod context namespace"
+else grep -q "refusing kubeconfig context namespace radar-immobilier for ENV=preprod" "$T/out" \
+  && ok "preprod guard: prod context namespace refused" || bad "preprod guard context refusal: wrong message ($(cat "$T/out"))"; fi
+
+if guard preprod STUB_CTX_NS=radar-immobilier-preprod \
+  STUB_WHOAMI=system:serviceaccount:radar-immobilier:radar-operator STUB_SA_NS=radar-immobilier-preprod; then
+  bad "preprod guard accepted a prod identity"
+else grep -q "refusing the radar-immobilier identity for ENV=preprod" "$T/out" \
+  && ok "preprod guard: prod identity refused" || bad "preprod guard identity refusal: wrong message ($(cat "$T/out"))"; fi
+
 test -s "$HERE/requeue-abandoned.bundle.mjs" && grep -q "GENERATED by bundle.mjs" "$HERE/requeue-abandoned.bundle.mjs" \
   && ok "committed bundle present and marked generated" || bad "bundle missing"
 
