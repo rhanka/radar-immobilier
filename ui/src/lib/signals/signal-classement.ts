@@ -75,8 +75,8 @@ export const EMPTY_CLASSEMENT_ENTRY: ClassementEntry = {
   discarded: false,
 };
 
-export function classementKey(type: string, id: string): string {
-  return `${type}:${id}`;
+export function classementKey(type: string, id: string, citySlug?: string | null): string {
+  return citySlug ? `${citySlug}:${type}:${id}` : `${type}:${id}`;
 }
 
 export function buildClassementMap(
@@ -84,8 +84,8 @@ export function buildClassementMap(
   archive: readonly ArchiveHeadLike[],
 ): Map<string, ClassementEntry> {
   const map = new Map<string, ClassementEntry>();
-  const ensure = (type: string, id: string): ClassementEntry => {
-    const key = classementKey(type, id);
+  const ensure = (type: string, id: string, citySlug?: string | null): ClassementEntry => {
+    const key = classementKey(type, id, citySlug);
     const existing = map.get(key);
     if (existing) return existing;
     const entry: ClassementEntry = { ...EMPTY_CLASSEMENT_ENTRY };
@@ -93,17 +93,22 @@ export function buildClassementMap(
     return entry;
   };
   for (const row of archive) {
-    const entry = ensure(row.target.type, row.target.id);
-    entry.archiveHeadId = row.personal?.id ?? null;
+    const entry = ensure(row.target.type, row.target.id, row.target.citySlug);
+    // F9: expectedHeadId must be the EFFECTIVE head — the active archive
+    // head (personal first, else workspace), not always the personal one.
+    const activeHead = row.personal?.state === "active"
+      ? row.personal
+      : row.workspace?.state === "active" ? row.workspace : null;
+    entry.archiveHeadId = activeHead?.id ?? row.personal?.id ?? row.workspace?.id ?? null;
     if (row.effectiveDiscarded) {
       entry.classe = "ecarte";
       entry.discarded = true;
-      entry.reasonCode = row.personal?.reasonCode ?? row.workspace?.reasonCode ?? null;
+      entry.reasonCode = activeHead?.reasonCode ?? row.personal?.reasonCode ?? row.workspace?.reasonCode ?? null;
     }
   }
   for (const head of selection) {
     if (head.facet !== "selection" || head.state !== "active") continue;
-    const entry = ensure(head.target.type, head.target.id);
+    const entry = ensure(head.target.type, head.target.id, head.target.citySlug);
     if (head.basket === "pertinent") entry.pertinentHeadId = head.id ?? null;
     if (head.basket === "a_surveiller") entry.aSurveillerHeadId = head.id ?? null;
     if (entry.discarded) continue;
@@ -122,27 +127,16 @@ export function classementCounts(classes: readonly SignalClass[]): Record<Signal
   return counts;
 }
 
-export function filterNodesByClassement<T extends { id: string; type: string }>(
+export function filterNodesByClassement<T extends { id: string; type: string; citySlug?: string | null }>(
   nodes: readonly T[],
   map: ReadonlyMap<string, ClassementEntry>,
   filter: ClassementFilter,
 ): T[] {
   return nodes.filter((node) => {
-    const classe = map.get(classementKey(node.type, node.id))?.classe ?? "non_classe";
+    const classe = map.get(classementKey(node.type, node.id, node.citySlug))?.classe
+      ?? map.get(classementKey(node.type, node.id))?.classe ?? "non_classe";
     return filter[classe];
   });
-}
-
-export function applyClassementToCityCounts(
-  cities: readonly { slug: string; classes: readonly SignalClass[] }[],
-  filter: ClassementFilter,
-): Map<string, number> {
-  const result = new Map<string, number>();
-  for (const city of cities) {
-    const count = city.classes.filter((classe) => filter[classe]).length;
-    if (count > 0) result.set(city.slug, count);
-  }
-  return result;
 }
 
 export function reasonCodesForClass(

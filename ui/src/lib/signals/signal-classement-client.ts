@@ -58,6 +58,21 @@ async function postCommand(
   return typeof event?.id === "string" ? event.id : null;
 }
 
+/** Visible (French) message for a failed classement write. */
+export function classementWriteErrorMessage(error: unknown): string {
+  if (error instanceof GraphSignalsHttpError) {
+    if (error.code === "target_version_conflict") return "Classement non enregistré : le signal a changé depuis l'affichage (conflit d'empreinte). Données rechargées.";
+    if (error.status === 409) return "Classement non enregistré : conflit avec un classement plus récent (409). Données rechargées.";
+    if (error.status === 422) return `Classement non enregistré : motif invalide (422${error.code ? ` — ${error.code}` : ""}).`;
+    return `Classement non enregistré (${error.status}${error.code ? ` — ${error.code}` : ""}). Données rechargées.`;
+  }
+  if (error instanceof Error && error.message.startsWith("classement_rollback_failed")) {
+    return "Classement non enregistré et retour à l'état précédent incomplet — données rechargées.";
+  }
+  if (error instanceof Error && error.message === "reason_code_required") return "Classement non enregistré : un motif N-* est requis pour Écarté.";
+  return "Classement non enregistré. Données rechargées.";
+}
+
 export async function fetchReasonCodes(scope: SignalScope): Promise<ReasonCodeEntry[]> {
   const res = await fetchJsonWithTimeout<unknown>(
     scopedSignalFacetsPath(scope, "reason-codes"),
