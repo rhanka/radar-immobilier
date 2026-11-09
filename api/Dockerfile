@@ -127,8 +127,23 @@ WORKDIR /workspace
 RUN apt-get update \
  && apt-get install -y --no-install-recommends poppler-utils util-linux \
  && rm -rf /var/lib/apt/lists/*
+# Claude Code CLI for the seat-based anthropic fallback (llm-mesh 0.33.1
+# ClaudeCodeRuntimeClient spawns `claude -p` with stream-json). Pinned to an
+# exact version with its registry integrity; never `latest`.
+# The CLI writes its config under CLAUDE_CONFIG_DIR (by default ~/.claude).
+# The runtime root FS is read-only and the process runs as non-root `radar`,
+# so the config dir is pointed at the writable scratch volume (/tmp is an
+# emptyDir in the refresh Job; see deploy/k8s/34-refresh-cronjob.yaml).
+ARG CLAUDE_CODE_VERSION=2.1.319
+ARG CLAUDE_CODE_INTEGRITY=sha512-XoyAxGXBmNsb9ahz0xLAtyz/I6b1j+4lyLpucyTQIq4FcKUxrMDM2AzA2sHipHoN1DdMJINQQrLZxRZRq7FqBA==
+RUN node -e "const https=require('https'),crypto=require('crypto'),fs=require('fs');const v=process.argv[1],exp=process.argv[2].replace(/^sha512-/,'');const url='https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-'+v+'.tgz';const f=fs.createWriteStream('/tmp/claude-code.tgz');https.get(url,r=>{if(r.statusCode!==200){console.error('fetch '+r.statusCode);process.exit(1)}r.pipe(f);f.on('finish',()=>f.close(()=>{const h=crypto.createHash('sha512').update(fs.readFileSync('/tmp/claude-code.tgz')).digest('base64');if(h!==exp){console.error('integrity mismatch');process.exit(1)}console.log('integrity ok')}))}).on('error',e=>{console.error(e);process.exit(1)})" "${CLAUDE_CODE_VERSION}" "${CLAUDE_CODE_INTEGRITY}" \
+ && npm install --global /tmp/claude-code.tgz \
+ && rm -f /tmp/claude-code.tgz \
+ && test "$(claude --version | awk '{print $1}')" = "${CLAUDE_CODE_VERSION}"
+ENV CLAUDE_CONFIG_DIR=/tmp/claude-config
 RUN groupadd --system --gid 1001 radar \
- && useradd --system --uid 1001 --gid radar radar
+ && useradd --system --uid 1001 --gid radar radar \
+ && mkdir -p /tmp/claude-config && chown radar:radar /tmp/claude-config && chmod 0700 /tmp/claude-config
 COPY --from=build /workspace/node_modules ./node_modules
 COPY --from=build /workspace/package.json ./package.json
 COPY --from=build /workspace/api/dist ./api/dist
