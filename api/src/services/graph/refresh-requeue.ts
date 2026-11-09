@@ -27,6 +27,8 @@ export interface RefreshRequeueCityTrace {
   readonly citySlug: string;
   /** sha256 of every document requeued in this city (sorted). */
   readonly requeued: readonly string[];
+  /** sha256 stamped `requeue-ceiling-exceeded` in this city (sorted). */
+  readonly exhausted?: readonly string[];
   readonly countsBefore: Readonly<Record<string, number>>;
   /** Set when the city was skipped without any write. */
   readonly skipped?: "absent" | "unreadable";
@@ -51,6 +53,9 @@ export interface RefreshRequeueTrace {
   readonly backupPrefix?: string | null;
   /** False on the progressive traces written during the loop. */
   readonly complete?: boolean;
+  /** Recurring catch-up ceilings applied by this run, when any. */
+  readonly filters?: { readonly maxAgeDays?: number; readonly maxPerRun?: number;
+    readonly maxPerCity?: number; readonly maxRequeues?: number };
 }
 
 export function refreshRequeueStamp(when: Date): string {
@@ -90,6 +95,11 @@ export interface RunRefreshRequeueOptions {
   readonly who: string;
   readonly dryRun: boolean;
   readonly since?: Date;
+  /** Recurring catch-up filters; absent means unbounded (operator default). */
+  readonly maxAgeDays?: number;
+  readonly maxPerRun?: number;
+  readonly maxPerCity?: number;
+  readonly maxRequeues?: number;
   /** Explicit city filter; absent means every city holding a registry. */
   readonly cities?: readonly string[];
   readonly now?: () => Date;
@@ -115,6 +125,10 @@ export async function runRefreshRequeueAbandoned(
     since: options.since?.toISOString() ?? null, cities: [...cityTraces],
     totals: { cities: cities.length, requeued: requeuedTotal, skipped },
     auditKey, backupPrefix, complete,
+    filters: { ...(options.maxAgeDays !== undefined ? { maxAgeDays: options.maxAgeDays } : {}),
+      ...(options.maxPerRun !== undefined ? { maxPerRun: options.maxPerRun } : {}),
+      ...(options.maxPerCity !== undefined ? { maxPerCity: options.maxPerCity } : {}),
+      ...(options.maxRequeues !== undefined ? { maxRequeues: options.maxRequeues } : {}) },
   });
   const persist = async (complete: boolean): Promise<void> => {
     if (auditKey) await store.put(auditKey, JSON.stringify(snapshot(complete)), "application/json");
@@ -129,11 +143,19 @@ export async function runRefreshRequeueAbandoned(
       continue;
     }
     const countsBefore = summarizeRefreshCoverage(ledger);
+    const remaining = options.maxPerRun !== undefined
+      ? Math.max(0, options.maxPerRun - requeuedTotal) : undefined;
+    const perCity = remaining !== undefined
+      ? Math.min(options.maxPerCity ?? remaining, remaining) : options.maxPerCity;
     const result = requeueAbandonedRefreshDocuments(ledger, {
-      ...(options.since ? { since: options.since } : {}), now });
+      ...(options.since ? { since: options.since } : {}),
+      ...(options.maxAgeDays !== undefined ? { maxAgeDays: options.maxAgeDays } : {}),
+      ...(perCity !== undefined ? { maxPerCity: perCity } : {}),
+      ...(options.maxRequeues !== undefined ? { maxRequeues: options.maxRequeues } : {}),
+      now });
     if (!result.changed || options.dryRun) {
       if (result.changed) requeuedTotal += result.requeued.length;
-      cityTraces.push({ citySlug, requeued: result.requeued, countsBefore,
+      cityTraces.push({ citySlug, requeued: result.requeued, exhausted: result.exhausted, countsBefore,
         backupKey: null, phase: "done" });
       await persist(false);
       continue;
@@ -143,7 +165,7 @@ export async function runRefreshRequeueAbandoned(
     const original = await store.get(refreshCoverageKey(citySlug));
     await store.put(backupKey, original, "application/json");
     const intent: RefreshRequeueCityTrace = { citySlug, requeued: result.requeued,
-      countsBefore, backupKey, phase: "intent" };
+      exhausted: result.exhausted, countsBefore, backupKey, phase: "intent" };
     cityTraces.push(intent);
     await persist(false);
     await writeRefreshCoverage(store, result.ledger);

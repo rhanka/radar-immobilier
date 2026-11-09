@@ -139,6 +139,15 @@ describe("runRefreshRequeueAbandoned", () => {
     expect(store.objects.get("refresh/018/beta/coverage.json")).toEqual(original);
   });
 
+  it("maxPerRun caps the whole run across cities; filters land in the trace", async () => {
+    const store = await seededStore();
+    const trace = await runRefreshRequeueAbandoned(store, {
+      who: "cronjob:test", dryRun: false, maxPerRun: 1, maxPerCity: 5, maxAgeDays: 90,
+      now: clock("2026-11-09T00:00:00.000Z") });
+    expect(trace.totals.requeued).toBe(1);
+    expect(trace.filters).toEqual({ maxAgeDays: 90, maxPerRun: 1, maxPerCity: 5 });
+  });
+
   it("city and since filters combine; an absent city is skipped, never created", async () => {
     const store = await seededStore();
     const trace = await runRefreshRequeueAbandoned(store, {
