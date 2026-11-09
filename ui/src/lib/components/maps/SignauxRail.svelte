@@ -525,7 +525,7 @@
         data-testid="classement-filter-trigger"
         aria-expanded={classementOpen}
         aria-haspopup="true"
-        on:click|stopPropagation={() => { classementOpen = !classementOpen; }}
+        on:click|stopPropagation={() => { classementOpen = !classementOpen; if (classementOpen) filtreOpen = false; }}
       >
         <span class="classement-trigger-summary">{classementSummary}</span>
         <span class="classement-trigger-chevron" class:classement-trigger-chevron--open={classementOpen} aria-hidden="true"><ChevronDown size={16} /></span>
@@ -555,7 +555,7 @@
         data-testid="filtre-trigger"
         aria-expanded={filtreOpen}
         aria-haspopup="true"
-        on:click|stopPropagation={() => { filtreOpen = !filtreOpen; }}
+        on:click|stopPropagation={() => { filtreOpen = !filtreOpen; if (filtreOpen) classementOpen = false; }}
       >
         <span class="classement-trigger-summary">{filtreSummary}</span>
         <span class="classement-trigger-chevron" class:classement-trigger-chevron--open={filtreOpen} aria-hidden="true"><ChevronDown size={16} /></span>
