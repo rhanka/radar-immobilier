@@ -199,9 +199,9 @@ verify-renders:
 	        || $$0 !~ /name: REFRESH_MODEL\n[ ]+value: gpt-6-astra\n/ \
 	        || $$0 !~ /name: REFRESH_REASONING_EFFORT\n[ ]+value: medium\n/ \
 	        || $$0 !~ /name: REFRESH_PRIMARY_QUALITY_ATTEMPTS\n[ ]+value: "2"/ \
-	        || $$0 !~ /name: REFRESH_FALLBACK_PROVIDER\n[ ]+value: gemini\n/ \
-	        || $$0 !~ /name: REFRESH_FALLBACK_MODEL\n[ ]+value: gemini-3.8-flash\n/ \
-	        || $$0 !~ /name: REFRESH_FALLBACK_REASONING_EFFORT\n[ ]+value: low\n/ \
+	        || $$0 !~ /name: REFRESH_FALLBACK_PROVIDER\n[ ]+value: anthropic\n/ \
+	        || $$0 !~ /name: REFRESH_FALLBACK_MODEL\n[ ]+value: claude-opus-5-5\n/ \
+	        || $$0 !~ /name: REFRESH_FALLBACK_REASONING_EFFORT\n[ ]+value: medium\n/ \
 	        || $$0 !~ /name: REFRESH_VERIFY_ENABLED\n[ ]+value: "1"/ \
 	        || $$0 !~ /name: REFRESH_VERIFY_PROVIDER\n[ ]+value: gemini\n/ \
 	        || $$0 !~ /name: REFRESH_VERIFY_MODEL\n[ ]+value: gemini-3.8-flash\n/ \
