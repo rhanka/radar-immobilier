@@ -1,4 +1,4 @@
-23c2a89239e87dbef9059e1b4307d0b6fe1dfc09813f3089f1d8d76d592f20ab  ./build-v11-report.mjs
+95b81bac5c4cf72071ac8b9b5a3a83fb1c543162cedea5caa9612e9e3c09e13c  ./build-v11-report.mjs
 d4e60cebb1f42058034553884d4d5b2c2203945fd38ecb3c617d34be5d145e1f  ./full/build-oracle-676.mjs
 8f4cc034c96505fd2aaea344fd554fbb35345a7a7e742503553e248a7a9684fb  ./full/build-summary.mjs
 58214d92de8b3605820de7b625d2be2068c94357880349057f08bca62a536d0c  ./full/dl-corpus.mjs
@@ -9,6 +9,8 @@ a246efbe7e07ed94ef0bdc04f2aba34a92b1daff48731e8f29c810422cab1df0  ./full/run-arm
 85b0d347fab33866ea18cbdfe50ea3d072f03dd2adc222423f5e0e679325f6e6  ./full/run-arm-wonder-c10.sh
 8b25b2418f1c478e4b6395bcdb8355df43eb4169b0710377f6a164432864813e  ./full/run-arm-wonder.sh
 3798fa9b6147583b1ce1a7107a7caa25d114f2316816c4fd5034e5781f5ec5ac  ./full/run-burn-argon.mjs
+b9cede05717f56145b39b7db0cd257e4d6d2783c349ab63ea5b4f97c44ee4046  ./full/run-burn-usage-agy-followup.mjs
+db83bc97d9a0ae55c251350964383f25cef046c05c1a56fbe5bf7fc1546a9c5d  ./full/run-burn-usage-wonder-followup.sh
 cc20f14dc95681c905b6bfe8d8c3314f48da57ac7cb91387cff5153af61a3dfb  ./full/run-burn-wonder-usage10.sh
 86fca70b92ea494bd13d2ff633302b2e8d78f1774e718e3fd7f5c92eea99aedc  ./full/score-676.mjs
 bbe0e3acb484511af2ea31bff2fd6185c47631875353adf133c603543a243c24  ./full/score-argon.mjs
