@@ -36,7 +36,14 @@
   export let selectedCity: CityMapEntry | null = null;
   export let detailNodes: GraphSignalNode[] = [];
   export let unfilteredSignalCount = 0;
+  export let detailLoading = false;
   export let detailError: string | null = null;
+  export let zonesLoading = false;
+  export let zonesError: string | null = null;
+  export let lotsLoading = false;
+  export let lotsError: string | null = null;
+  export let onRetryDetail: () => void = () => {};
+  export let onRetryGeo: () => void = () => {};
   export let selectionState: SelectionBucketState = createSelectionBucketState();
   export let zonesResponse: GeoZonesResponse | null = null;
   export let lotsResponse: LotsResponse | null = null;
@@ -88,7 +95,14 @@
   {selectedCity}
   {detailNodes}
   {unfilteredSignalCount}
+  {detailLoading}
   {detailError}
+  {zonesLoading}
+  {zonesError}
+  {lotsLoading}
+  {lotsError}
+  {onRetryDetail}
+  {onRetryGeo}
   {selectionState}
   {zonesResponse}
   {lotsResponse}
