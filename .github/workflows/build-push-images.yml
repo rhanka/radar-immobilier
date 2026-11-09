@@ -1175,6 +1175,37 @@ jobs:
             # qs 6.16.1 (GHSA-6pq8-jhm2-2vcw). Any other file in the diff refuses
             # the promotion.
             echo "hotfix OK — v1.2.18 = v1.2.17 + dompurify/body-parser/fast-uri/ip-address/qs security fixes (lock only)"
+          elif [ "${{ steps.vars.outputs.tag }}" = "v1.2.19" ] \
+            && git merge-base --is-ancestor v1.2.18 "$GITHUB_SHA" \
+            && [ -z "$(git diff --name-only v1.2.18 "$GITHUB_SHA" -- . \
+                 ':!ui/e2e-real/map-stalled.spec.ts' \
+                 ':!ui/src/lib/components/maps/GeoCityMapBase.mapready-fallback.test.ts' \
+                 ':!ui/src/lib/components/maps/GeoCityMapBase.svelte' \
+                 ':!api/Dockerfile' \
+                 ':!api/package.json' \
+                 ':!api/src/scripts/refresh-pv.ts' \
+                 ':!api/src/services/graph/refresh-mesh.ts' \
+                 ':!api/src/services/graph/refresh-model-policy.ts' \
+                 ':!api/src/services/graph/refresh-model-policy.test.ts' \
+                 ':!deploy/k8s/34-refresh-cronjob.yaml' \
+                 ':!deploy/k8s/refresh-cronjobs/keyring-import/enroll-codex-import.mjs' \
+                 ':!deploy/k8s/refresh-cronjobs/keyring-import/job.yaml' \
+                 ':!deploy/k8s/refresh-cronjobs/refresh-018.mk' \
+                 ':!.github/workflows/build-push-images.yml' \
+                 ':!package-lock.json' \
+                 ':!LANE-REPORT.md')" ]; then
+            # Owner-approved prod hotfix (incident 2026-10-29, detection down):
+            # v1.2.19 = v1.2.18 + cherry-picked UI fix #958 (3 UI files above) +
+            # anthropic seat fallback for signal detection (Claude Opus 5.5
+            # medium via llm-mesh 0.33.1, `claude -p` seat runner). The diff is
+            # restricted to the explicit allowlist above (the #958 files plus
+            # every file this hotfix touches, including the llm-mesh bump in
+            # api/package.json + package-lock.json); any other file refuses
+            # the promotion. Image path for hotfix tags: build-push is skipped
+            # on tag refs, so promote-prod resolves radar-api/ui:<sha7> (miss
+            # for a hotfix commit never built on main) and falls back to
+            # build-at-tag from this tagged commit — see LANE-REPORT.md.
+            echo "hotfix OK — v1.2.19 = v1.2.18 + #958 UI fix + anthropic seat fallback (allowlisted files only)"
           else
             echo "::error title=Promote refused — tag not on main::commit $GITHUB_SHA (tag ${{ steps.vars.outputs.tag }}) is NOT an ancestor of origin/main. Only main-merged, CI-validated commits may reach prod."
             exit 1
