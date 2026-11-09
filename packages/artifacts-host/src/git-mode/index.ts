@@ -17,6 +17,7 @@ export * from "./live-keys.js";
 export * from "./live-host-endpoints.js";
 export * from "./host-ledger.js";
 export * from "./host-jobs.js";
+export * from "./reconcile.js";
 export * from "./live-forward.js";
 export * from "./live-grant.js";
 export * from "./invitation-tools.js";
