@@ -450,6 +450,11 @@ make -f deploy/k8s/refresh-cronjobs/refresh-018.mk trigger-requeue-recurrent \
   RUN_ID=01 PROD_CONFIRM=1 ENV=prod
 ```
 
+Prod et préprod partagent le même serveur API OVH : `REQUEUE_EXPECTED_SERVER`
+vaut donc le serveur préprod, et `guard-requeue` distingue les deux
+environnements par le namespace cible du contexte kubeconfig et par
+l'identité de l'appelant (`kubectl auth whoami`), jamais par le serveur seul.
+
 **Désarmer** : remettre la variable à autre chose que `'true'` stoppe les
 redéploiements ; suspendre l'existant reste explicite
 (`kubectl -n <ns> patch cronjob radar-refresh-requeue-abandoned --type=merge -p '{"spec":{"suspend":true}}'`).
