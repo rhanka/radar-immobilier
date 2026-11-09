@@ -57,4 +57,23 @@ describe("SignauxRail Pertinence dropdown — acceptance criteria", () => {
     await fireEvent.click(trigger);
     expect(view.queryByTestId("classement-filter-panel")).toBeNull();
   });
+
+  it("Filtre is a dropdown with the same field pattern as Pertinence", async () => {
+    const view = render(SignauxRail, {
+      props: {
+        entries: [],
+        classementFilter: { pertinent: true, a_surveiller: true, non_classe: true, ecarte: false },
+        classementCounts: { pertinent: 3, a_surveiller: 2, non_classe: 5, ecarte: 1 },
+      },
+    });
+    expect(view.container.textContent).toContain("Filtre");
+    const trigger = view.getByTestId("filtre-trigger");
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    expect(view.queryByTestId("filtre-panel")).toBeNull();
+    await fireEvent.click(trigger);
+    const panel = view.getByTestId("filtre-panel");
+    expect(panel.textContent).toContain("Zonage");
+    expect(panel.textContent).toContain("Exclure PIIA sans projet résidentiel");
+    expect(panel.textContent).toContain("Exclure dérogations mineures");
+  });
 });

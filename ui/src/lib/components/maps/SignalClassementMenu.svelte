@@ -5,6 +5,7 @@
    * Icons from @lucide/svelte, colours from DS semantic tokens only.
    */
   import { CircleDashed, Eye, EyeOff, Target } from "@lucide/svelte";
+  import { Menu, type MenuItem } from "@sentropic/design-system-svelte";
   import {
     CLASSEMENT_META,
     reasonCodesForClass,
@@ -115,6 +116,39 @@
     step = "class";
     pendingClass = null;
   }
+
+  // DS Menu items: neutral DS text (no colour on text); only the trigger
+  // icon keeps a DS semantic token colour. Reason rows show the human
+  // Steve label; the technical code stays in the item value (not rendered).
+  $: classItems = SIGNAL_CLASSES.map((candidate): MenuItem => ({
+    label: CLASSEMENT_META[candidate].label,
+    value: candidate,
+    icon: ICONS[candidate],
+  }));
+  $: reasonItems = ([
+    { label: "← Retour", value: "__back" },
+    ...(pendingClass
+      ? [{ kind: "group" as const, label: `${CLASSEMENT_META[pendingClass].label} — motif` }]
+      : []),
+    ...pendingReasons.map((entry): MenuItem => ({
+      label: entry.label?.trim() ? entry.label : entry.code,
+      value: entry.code,
+    })),
+    ...(reasonOptional ? [{ label: "Sans motif", value: "__none" }] : []),
+  ]) as MenuItem[];
+
+  function onMenuSelect(value: string): void {
+    if (step === "class") {
+      chooseClass(value as SignalClass);
+      return;
+    }
+    if (value === "__back") {
+      step = "class";
+      pendingClass = null;
+      return;
+    }
+    chooseReason(value === "__none" ? null : value);
+  }
 </script>
 
 <svelte:window on:click={onWindowClick} on:keydown={onWindowKey} />
@@ -132,56 +166,17 @@
     <svelte:component this={CurrentIcon} size={15} aria-hidden="true" />
   </button>
   {#if open}
-    <span class="classement-pop" role="menu" use:portalPop={step}>
-      {#if step === "class"}
-        {#each SIGNAL_CLASSES as candidate}
-          {@const Icon = ICONS[candidate]}
-          <button
-            type="button"
-            class="classement-choice"
-            style="color: {CLASSEMENT_META[candidate].token}"
-            data-testid="classement-class-{candidate}"
-            on:click|stopPropagation={() => chooseClass(candidate)}
-          >
-            <svelte:component this={Icon} size={14} aria-hidden="true" />
-            <span>{CLASSEMENT_META[candidate].label}</span>
-          </button>
-        {/each}
-      {:else if pendingClass}
-        <button
-          type="button"
-          class="classement-choice"
-          data-testid="classement-back"
-          on:click|stopPropagation={() => { step = "class"; pendingClass = null; }}
-        >
-          <span>← Retour</span>
-        </button>
-        <span class="classement-pop-title">{CLASSEMENT_META[pendingClass].label} — motif</span>
-        {#if pendingReasons.length === 0}
-          <span class="classement-empty" data-testid="classement-reasons-empty">Motifs indisponibles</span>
-        {/if}
-        {#each pendingReasons as entry}
-          <button
-            type="button"
-            class="classement-choice"
-            data-testid="classement-reason-{entry.code}"
-            on:click|stopPropagation={() => chooseReason(entry.code)}
-          >
-            <span class="classement-reason-code">{entry.code}</span>
-            {#if entry.label}<span class="classement-reason-label">{entry.label}</span>{/if}
-          </button>
-        {/each}
-        {#if reasonOptional}
-          <button
-            type="button"
-            class="classement-choice"
-            data-testid="classement-reason-none"
-            on:click|stopPropagation={() => chooseReason(null)}
-          >
-            <span>Sans motif</span>
-          </button>
-        {/if}
+    <span class="classement-pop" use:portalPop={step}>
+      {#if step === "reason" && pendingReasons.length === 0}
+        <span class="classement-empty" data-testid="classement-reasons-empty">Motifs indisponibles</span>
       {/if}
+      <Menu
+        label={step === "class" ? "Classement" : "Motif"}
+        items={step === "class" ? classItems : reasonItems}
+        open={true}
+        dense
+        onselect={onMenuSelect}
+      />
     </span>
   {/if}
 </span>
@@ -211,43 +206,10 @@
     z-index: 30;
     display: flex;
     flex-direction: column;
-    min-width: 180px;
-    padding: 4px;
-    background: var(--st-semantic-surface-default);
-    border: 1px solid var(--st-semantic-border-subtle);
-    border-radius: var(--st-radius-sm, 4px);
-    box-shadow: 0 8px 24px var(--st-semantic-border-subtle);
-  }
-  .classement-pop-title {
-    padding: 4px 8px;
-    color: var(--st-semantic-text-secondary);
-    font-size: 0.75rem;
-    font-weight: 600;
-  }
-  .classement-choice {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 8px;
-    border: none;
-    background: transparent;
-    color: var(--st-semantic-text-primary);
-    text-align: left;
-    cursor: pointer;
-  }
-  .classement-choice:hover {
-    background: var(--st-semantic-surface-subtle);
   }
   .classement-empty {
     padding: 4px 8px;
     color: var(--st-semantic-text-secondary);
     font-size: 0.75rem;
-  }
-  .classement-reason-code {
-    font-weight: 600;
-    white-space: nowrap;
-  }
-  .classement-reason-label {
-    color: var(--st-semantic-text-secondary);
   }
 </style>

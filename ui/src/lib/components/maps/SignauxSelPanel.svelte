@@ -1221,6 +1221,9 @@
                 <div
                   class="sel-entity-bar"
                   class:sel-entity-bar--xhover={hoveredSignalId === node.id}
+                  class:sel-entity-bar--selected={nodeVisual.selected}
+                  class:sel-entity-bar--focused={nodeVisual.focused}
+                  class:sel-entity-bar--dimmed={nodeVisual.dimmed}
                   data-signal-node={node.id}
                   role="presentation"
                   on:mouseenter={() => onHoverSignal(node.id)}
@@ -1272,7 +1275,7 @@
                   </div>
                   {#if classementEntry.reasonCode}
                     <div class="sel-entity-reason-row">
-                      <span class="classement-reason-chip" data-testid="classement-reason-chip">{classementEntry.reasonCode}{classementReasonCodes.find((entry) => entry.code === classementEntry.reasonCode)?.label ? ` · ${classementReasonCodes.find((entry) => entry.code === classementEntry.reasonCode)?.label}` : ""}</span>
+                      <span class="classement-reason-chip" data-testid="classement-reason-chip" title={classementEntry.reasonCode}>{classementReasonCodes.find((entry) => entry.code === classementEntry.reasonCode)?.label?.trim() || classementEntry.reasonCode}</span>
                     </div>
                   {/if}
 
@@ -2334,7 +2337,36 @@
   }
 
   .sel-entity-bar {
-    border-bottom: 1px solid var(--st-semantic-border-subtle, #f1f5f9);
+    border: 1px solid var(--st-semantic-border-subtle, #f1f5f9);
+    border-radius: var(--st-radius-sm, 6px);
+    margin: 0.25rem 0.5rem;
+    overflow: visible;
+  }
+
+  /* Card-wide states: border, selection, hover and focus cover the whole
+     card, classification icon included (icon lives inside the card). */
+  .sel-entity-bar:hover {
+    background: var(--st-semantic-surface-subtle, #f8fafc);
+  }
+
+  .sel-entity-bar--selected {
+    background: var(--st-semantic-surface-selected, #ecfdf5);
+    border-color: var(--st-semantic-feedback-success, #0f766e);
+  }
+
+  .sel-entity-bar--focused {
+    outline: 1px solid var(--st-semantic-feedback-success, #14b8a6);
+    outline-offset: -1px;
+  }
+
+  .sel-entity-bar--dimmed {
+    opacity: 0.5;
+  }
+
+  .sel-entity-bar .sel-entity-head--selected,
+  .sel-entity-bar .sel-entity-head--focused {
+    background: transparent;
+    outline: none;
   }
 
   .sel-entity-bar:last-child {
