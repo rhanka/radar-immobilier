@@ -57,6 +57,9 @@ jobs:
       - name: Validate keyring account import (hermetic selftest, codex and cloud-code)
         run: make -f deploy/k8s/refresh-cronjobs/refresh-018.mk test-keyring-import ENV=ci
 
+      - name: Validate refresh requeue-abandoned renders (hermetic, no cluster)
+        run: make -f deploy/k8s/refresh-cronjobs/refresh-018.mk test-requeue-abandoned ENV=ci
+
       - name: Validate object-storage contracts (offline)
         run: bash deploy/ci/check-object-storage-bindings.test.sh
 
