@@ -30,8 +30,9 @@ vi.mock("$lib/signals/signal-classement-client.js", async (importOriginal) => {
   return {
     ...actual,
     fetchReasonCodes: vi.fn(async () => [
-      { code: "P-DENSITE", verdict: "pertinent" as const },
-      { code: "N-NON-RES", verdict: "non_pertinent" as const },
+      { code: "P-DENSITE", verdict: "pertinent" as const, label: "densité" },
+      { code: "S-PLANIFIE", verdict: "a_surveiller" as const, label: "planifié" },
+      { code: "N-NON-RES", verdict: "non_pertinent" as const, label: "non résidentiel" },
     ]),
     applyClassement: vi.fn(),
   };
@@ -95,12 +96,15 @@ function node(id: string, label: string) {
 const SIG1 = node("sig-1", "Signal un");
 const SIG2 = node("sig-2", "Signal deux");
 let discarded = false;
+let surveille = false;
 
 function detailResult() {
   return {
     citySlug: CITY_SLUG, token: "token", legacyProjection: null,
     nodes: discarded ? [SIG2] : [SIG1, SIG2],
-    selection: [], heads: [],
+    selection: surveille
+      ? [{ target: { citySlug: CITY_SLUG, type: "Signal", id: "sig-2" }, facet: "selection", basket: "a_surveiller", state: "active", reasonCode: "S-PLANIFIE", id: "a_surveiller-sig-2" }]
+      : [], heads: [],
     counts: { total: 2, hidden: discarded ? 1 : 0, visible: discarded ? 1 : 2, selected: 0 },
   };
 }
@@ -115,6 +119,7 @@ function card(id: string): HTMLElement {
 
 beforeEach(() => {
   discarded = false;
+  surveille = false;
   window.history.replaceState({}, "", `/geo/city/${CITY_SLUG}?mode=signal&filter.period=all`);
   vi.mocked(fetchGraphSignalDetail).mockReset();
   vi.mocked(fetchGraphSignalDetail).mockImplementation(async () => detailResult() as never);
@@ -134,14 +139,33 @@ describe("SignauxMapView classement behaviour", () => {
     expect(document.querySelector('[aria-label="2 signaux"]')).toBeTruthy();
 
     const scope = within(card("sig-1"));
-    await fireEvent.click(scope.getByTestId("signal-classement-button"));
-    await fireEvent.click(scope.getByTestId("classement-class-ecarte"));
-    await fireEvent.click(scope.getByTestId("classement-reason-N-NON-RES"));
+    // Icon lives in the card header row, aligned with the title head.
+    const classementBtn = scope.getByTestId("signal-classement-button");
+    expect(classementBtn.closest(".sel-entity-head-row")).toBeTruthy();
+    expect(classementBtn.closest(".sel-entity-head-row")?.querySelector(".sel-entity-head")).toBeTruthy();
+    await fireEvent.click(classementBtn);
+    await fireEvent.click(screen.getByTestId("classement-class-ecarte"));
+    await fireEvent.click(screen.getByTestId("classement-reason-N-NON-RES"));
 
     await waitFor(() => expect(document.querySelector('[data-signal-node="sig-1"]')).toBeNull());
     expect(document.querySelector('[data-signal-node="sig-2"]')).toBeTruthy();
     await waitFor(() => expect(document.querySelector('[aria-label="1 signaux"]')).toBeTruthy());
     expect(vi.mocked(applyClassement)).toHaveBeenCalledTimes(1);
+  });
+
+  it("classifying À surveiller with a reason shows the reason chip on the card", async () => {
+    vi.mocked(applyClassement).mockImplementation(async () => { surveille = true; });
+    render(SignauxMapView, { props: { geoRoute: cityRoute() } });
+    await waitFor(() => expect(document.querySelectorAll("[data-signal-node]").length).toBe(2));
+    const scope = within(card("sig-2"));
+    await fireEvent.click(scope.getByTestId("signal-classement-button"));
+    await fireEvent.click(screen.getByTestId("classement-class-a_surveiller"));
+    await fireEvent.click(screen.getByTestId("classement-reason-S-PLANIFIE"));
+    await waitFor(() => {
+      const chip = within(card("sig-2")).getByTestId("classement-reason-chip");
+      expect(chip.textContent).toContain("S-PLANIFIE");
+      expect(chip.textContent).toContain("planifié");
+    });
   });
 
   it("a failed write shows a visible error and keeps the card", async () => {
@@ -152,8 +176,8 @@ describe("SignauxMapView classement behaviour", () => {
 
     const scope = within(card("sig-1"));
     await fireEvent.click(scope.getByTestId("signal-classement-button"));
-    await fireEvent.click(scope.getByTestId("classement-class-ecarte"));
-    await fireEvent.click(scope.getByTestId("classement-reason-N-NON-RES"));
+    await fireEvent.click(screen.getByTestId("classement-class-ecarte"));
+    await fireEvent.click(screen.getByTestId("classement-reason-N-NON-RES"));
 
     const alert = await screen.findByTestId("classement-error");
     expect(alert.textContent).toContain("409");
@@ -169,8 +193,8 @@ describe("SignauxMapView classement behaviour", () => {
 
     const scope = within(card("sig-2"));
     await fireEvent.click(scope.getByTestId("signal-classement-button"));
-    await fireEvent.click(scope.getByTestId("classement-class-pertinent"));
-    await fireEvent.click(scope.getByTestId("classement-reason-none"));
+    await fireEvent.click(screen.getByTestId("classement-class-pertinent"));
+    await fireEvent.click(screen.getByTestId("classement-reason-none"));
 
     await waitFor(() => {
       const btn = within(card("sig-2")).getByTestId("signal-classement-button") as HTMLButtonElement;

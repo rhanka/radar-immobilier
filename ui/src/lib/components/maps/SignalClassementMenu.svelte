@@ -23,6 +23,7 @@
   let step: "class" | "reason" = "class";
   let pendingClass: SignalClass | null = null;
   let rootEl: HTMLElement | null = null;
+  let popEl: HTMLElement | null = null;
   $: if (disabled && open) open = false;
 
   function close(): void {
@@ -31,7 +32,52 @@
     pendingClass = null;
   }
   function onWindowClick(event: MouseEvent): void {
-    if (open && rootEl && event.target instanceof Node && !rootEl.contains(event.target)) close();
+    if (!open || !(event.target instanceof Node)) return;
+    if (rootEl?.contains(event.target) || popEl?.contains(event.target)) return;
+    close();
+  }
+
+  function portalPop(node: HTMLElement, _step: string): { update: (next: string) => void; destroy: () => void } {
+    popEl = node;
+    const target = node.closest<HTMLElement>("[data-st-theme]") ?? document.body;
+    target.append(node);
+
+    function position(): void {
+      const btn = rootEl?.querySelector("button");
+      if (!btn || !popEl) return;
+      const rect = btn.getBoundingClientRect();
+      const margin = 8;
+      const gap = 4;
+      popEl.style.position = "fixed";
+      popEl.style.zIndex = "1000";
+      popEl.style.maxHeight = `${Math.max(window.innerHeight - margin * 2, 160)}px`;
+      popEl.style.overflowY = "auto";
+      const width = popEl.offsetWidth;
+      const height = popEl.offsetHeight;
+      let top = rect.bottom + gap;
+      if (top + height > window.innerHeight - margin) {
+        top = Math.max(margin, rect.top - gap - height);
+      }
+      const left = Math.min(
+        Math.max(margin, rect.right - width),
+        window.innerWidth - width - margin,
+      );
+      popEl.style.top = `${top}px`;
+      popEl.style.left = `${left}px`;
+    }
+    const raf = requestAnimationFrame(position);
+    window.addEventListener("scroll", position, true);
+    window.addEventListener("resize", position);
+    return {
+      update: () => { requestAnimationFrame(position); },
+      destroy: () => {
+        cancelAnimationFrame(raf);
+        window.removeEventListener("scroll", position, true);
+        window.removeEventListener("resize", position);
+        if (popEl === node) popEl = null;
+        node.remove();
+      },
+    };
   }
   function onWindowKey(event: KeyboardEvent): void {
     if (open && event.key === "Escape") close();
@@ -86,7 +132,7 @@
     <svelte:component this={CurrentIcon} size={15} aria-hidden="true" />
   </button>
   {#if open}
-    <span class="classement-pop" role="menu">
+    <span class="classement-pop" role="menu" use:portalPop={step}>
       {#if step === "class"}
         {#each SIGNAL_CLASSES as candidate}
           {@const Icon = ICONS[candidate]}
@@ -121,7 +167,8 @@
             data-testid="classement-reason-{entry.code}"
             on:click|stopPropagation={() => chooseReason(entry.code)}
           >
-            <span>{entry.label ?? entry.code}</span>
+            <span class="classement-reason-code">{entry.code}</span>
+            {#if entry.label}<span class="classement-reason-label">{entry.label}</span>{/if}
           </button>
         {/each}
         {#if reasonOptional}
@@ -195,5 +242,12 @@
     padding: 4px 8px;
     color: var(--st-semantic-text-secondary);
     font-size: 0.75rem;
+  }
+  .classement-reason-code {
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .classement-reason-label {
+    color: var(--st-semantic-text-secondary);
   }
 </style>
