@@ -22,7 +22,7 @@
   import { Alert, Badge, Search } from "@sentropic/design-system-svelte";
   import { normalizeLotKey, zoneSearchKey } from "@radar/domain";
   import { rankBySearch } from "$lib/maps/entity-search.js";
-  import { ExternalLink, FileText, FileX, RefreshCw, X } from "@lucide/svelte";
+  import { ExternalLink, FileText, FileX, RefreshCw, TriangleAlert, X } from "@lucide/svelte";
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
   import {
     extractDocRefs,
@@ -200,7 +200,11 @@
   export let classementMap: ReadonlyMap<string, ClassementEntry> = new Map();
   export let classementReasonCodes: ReasonCodeEntry[] = [];
   export let classementInFlight: ReadonlySet<string> = new Set();
+  /** Global classement load failure (reason codes), shown as a caption. */
   export let classementError: string | null = null;
+  /** Per-card write failures, keyed by classementKey: icon on the card. */
+  export let classementErrors: ReadonlyMap<string, string> = new Map();
+  let openClassementErrorKey: string | null = null;
   export let onApplyClassement: (
     node: GraphSignalNode,
     nextClass: SignalClass,
@@ -1141,9 +1145,7 @@
          dans son DRAWER (fiche ci-dessous), jamais un header « Lot actif ». -->
 
     {#if classementError}
-      <div class="sel-alert" data-testid="classement-error">
-        <Alert tone="error" title="Classement non enregistré" message={classementError} />
-      </div>
+      <p class="sel-classement-load-error" data-testid="classement-load-error">{classementError}</p>
     {/if}
     {#if detailError}
       <div class="sel-alert">
@@ -1216,6 +1218,8 @@
                 {@const nodeVisual = visual(selectionState, key)}
                 {@const stageLabel = signalStageLabel(node)}
                 {@const classementEntry = classementMap.get(classementKey(node.type, node.id, node.citySlug)) ?? EMPTY_CLASSEMENT_ENTRY}
+                {@const cardClassementKey = classementKey(node.type, node.id, node.citySlug)}
+                {@const cardClassementError = classementErrors.get(cardClassementKey)}
                 <!-- #86 — fiche : ancre de scroll (data-signal-node) + état
                      cross-survolé quand le viewer survole ce signal. Survoler
                      la fiche notifie le parent (→ le surlignage PDF pulse). -->
@@ -1273,7 +1277,24 @@
                       onApply={(nextClass, reasonCode) => onApplyClassement(node, nextClass, reasonCode)}
                     />
                   </span>
+                  {#if cardClassementError}
+                    <span class="sel-entity-classement-error">
+                      <button
+                        type="button"
+                        class="classement-error-icon"
+                        data-testid="classement-error-icon"
+                        title={cardClassementError}
+                        aria-label="Échec du classement — afficher le détail"
+                        on:click={() => { openClassementErrorKey = openClassementErrorKey === cardClassementKey ? null : cardClassementKey; }}
+                      >
+                        <TriangleAlert class="h-4 w-4" aria-hidden="true" />
+                      </button>
+                    </span>
+                  {/if}
                   </div>
+                  {#if cardClassementError && openClassementErrorKey === cardClassementKey}
+                    <p class="classement-error-detail" data-testid="classement-error-detail">{cardClassementError}</p>
+                  {/if}
                   {#if classementEntry.reasonCode}
                     <div class="sel-entity-reason-row">
                       <span class="classement-reason-chip" data-testid="classement-reason-chip" title={classementEntry.reasonCode}>{reasonEntryLabel(classementReasonCodes.find((entry) => entry.code === classementEntry.reasonCode) ?? { code: classementEntry.reasonCode })}</span>
@@ -2395,6 +2416,36 @@
   .sel-entity-classement {
     flex-shrink: 0;
     padding: 0.34rem 0.6rem 0 0;
+  }
+
+  .sel-classement-load-error {
+    margin: 0;
+    padding: 0.34rem 0.85rem;
+    font-size: var(--signaux-fs-caption);
+    color: var(--st-semantic-feedback-warning, #b45309);
+  }
+
+  .sel-entity-classement-error {
+    flex-shrink: 0;
+    padding-top: 0.34rem;
+  }
+
+  .classement-error-icon {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.15rem;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--st-semantic-feedback-warning, #b45309);
+    cursor: pointer;
+  }
+
+  .classement-error-detail {
+    margin: 0;
+    padding: 0 0.85rem 0.34rem;
+    font-size: var(--signaux-fs-caption);
+    color: var(--st-semantic-text-secondary, #475569);
   }
 
   .sel-entity-reason-row {

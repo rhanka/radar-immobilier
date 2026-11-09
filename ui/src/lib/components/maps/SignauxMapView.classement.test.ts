@@ -170,7 +170,7 @@ describe("SignauxMapView classement behaviour", () => {
     });
   });
 
-  it("a failed write shows a visible error and keeps the card", async () => {
+  it("a failed write marks only the concerned card with an exclamation icon, no big panel", async () => {
     vi.mocked(applyClassement).mockRejectedValue(
       new GraphSignalsHttpError("classement discard: 409", 409, "facet_head_conflict"));
     render(SignauxMapView, { props: { geoRoute: cityRoute() } });
@@ -181,9 +181,35 @@ describe("SignauxMapView classement behaviour", () => {
     await fireEvent.click(screen.getByRole("menuitem", { name: "Écarté" }));
     await fireEvent.click(screen.getByRole("menuitem", { name: "Non résidentiel" }));
 
-    const alert = await screen.findByTestId("classement-error");
-    expect(alert.textContent).toContain("409");
+    // No panel-level error any more; the concerned card carries the icon.
+    const icon = await within(card("sig-1")).findByTestId("classement-error-icon");
+    expect(icon.getAttribute("title")).toContain("409");
+    expect(within(card("sig-2")).queryByTestId("classement-error-icon")).toBeNull();
+    expect(screen.queryByTestId("classement-error")).toBeNull();
     expect(document.querySelector('[data-signal-node="sig-1"]')).toBeTruthy();
+    // Click reveals the detail at normal size.
+    await fireEvent.click(icon);
+    const detail = await within(card("sig-1")).findByTestId("classement-error-detail");
+    expect(detail.textContent).toContain("409");
+  });
+
+  it("the exclamation icon disappears on the next successful write", async () => {
+    vi.mocked(applyClassement)
+      .mockRejectedValueOnce(new GraphSignalsHttpError("classement select: 409", 409, "facet_head_conflict"))
+      .mockResolvedValue(undefined);
+    render(SignauxMapView, { props: { geoRoute: cityRoute() } });
+    await waitFor(() => expect(document.querySelectorAll("[data-signal-node]").length).toBe(2));
+
+    const scope = within(card("sig-1"));
+    await fireEvent.click(scope.getByTestId("signal-classement-button"));
+    await fireEvent.click(screen.getByRole("menuitem", { name: "Pertinent" }));
+    await fireEvent.click(screen.getByRole("menuitem", { name: "Sans motif" }));
+    await within(card("sig-1")).findByTestId("classement-error-icon");
+
+    await fireEvent.click(within(card("sig-1")).getByTestId("signal-classement-button"));
+    await fireEvent.click(screen.getByRole("menuitem", { name: "Pertinent" }));
+    await fireEvent.click(screen.getByRole("menuitem", { name: "Sans motif" }));
+    await waitFor(() => expect(within(card("sig-1")).queryByTestId("classement-error-icon")).toBeNull());
   });
 
   it("disables the node's menu while its write is in flight", async () => {
