@@ -306,20 +306,21 @@ describe("refresh model policy", () => {
   });
 
   it("should fall back to anthropic and skip its verification", async () => {
+    const openAiPrimary: RefreshModel = { provider: "openai", model: "gpt-6-astra", effort: "medium" };
     const anthropicFallback: RefreshModel = { provider: "anthropic", model: "claude-opus-5-5", effort: "medium" };
     const verification: RefreshModel = { provider: "gemini", model: "gemini-3.8-flash", effort: "low" };
     const calls: string[] = [];
     const receipts: RefreshModelReceipt[] = [];
     let verifierCalls = 0;
     const policy = createRefreshModelPolicy({
-      primary, fallback: anthropicFallback, verification, forceFallback: false,
+      primary: openAiPrimary, fallback: anthropicFallback, verification, forceFallback: false,
       primaryQualityAttempts: 2, timeoutMs: 1000,
       createClient(model): TextJsonGenerationClient {
         return { mode: "mesh", provider: model.provider, model: model.model,
           async generateJson(request) {
             calls.push(model.model);
-            if (model.provider === "gemini" && model.model === verification.model) verifierCalls++;
-            if (model === primary) throw Object.assign(new Error("quota"), { status: 429 });
+            if (model.provider === "gemini") verifierCalls++;
+            if (model === openAiPrimary) throw Object.assign(new Error("quota"), { status: 429 });
             await request.validateResponse?.("{}");
             return { status: "completed", mode: "mesh", provider: model.provider, model: model.model, audit: {} };
           } };
@@ -328,7 +329,7 @@ describe("refresh model policy", () => {
     const chunk = { chunk: { docSha: "one" }, extraction: { nodes: [{ id: "n1" }] } } as never;
     // Drive an extraction that falls back to anthropic, then ask for verification.
     await policy.forDocument("one", async (r) => { receipts.push(r); }).generateJson(input);
-    expect(calls).toEqual([primary.model, anthropicFallback.model]);
+    expect(calls).toEqual([openAiPrimary.model, anthropicFallback.model]);
     expect(receipts[1]).toMatchObject({ modelUsed: anthropicFallback, status: "completed",
       fallbackReason: "quota", verification: { status: "skipped-fallback" } });
     const verified = await policy.verify(chunk, 1024, async (r) => { receipts.push(r); });
