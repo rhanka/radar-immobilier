@@ -153,6 +153,28 @@
     onClassementFilterChange({ ...classementFilter, [classe]: checked });
   }
 
+  // Classement dropdown (spec 2026-11-08): « Classement » header, closed
+  // trigger summarising the selection as « N sur 4 », opening a checkbox
+  // panel with per-class counts. Default: all except Écarté.
+  let classementOpen = false;
+  let classementWrapEl: HTMLElement | null = null;
+  $: classementCheckedCount = SIGNAL_CLASSES.filter((classe) => classementFilter[classe]).length;
+  $: classementSummary = `${classementCheckedCount} sur ${SIGNAL_CLASSES.length}`;
+
+  function onClassementWindowClick(event: MouseEvent): void {
+    if (
+      classementOpen &&
+      classementWrapEl &&
+      event.target instanceof Node &&
+      !classementWrapEl.contains(event.target)
+    ) {
+      classementOpen = false;
+    }
+  }
+  function onClassementWindowKey(event: KeyboardEvent): void {
+    if (classementOpen && event.key === "Escape") classementOpen = false;
+  }
+
   // The DS resolves presets when the user opens/selects them. Refresh the
   // upper bound then, rather than pinning a long-lived rail to its mount time.
   let timeRangeMax = Date.now();
@@ -424,7 +446,11 @@
       ).length;
 </script>
 
-<svelte:window onpointerdown={refreshTimeRangeMax} onkeydown={refreshTimeRangeMax} />
+<svelte:window
+  onpointerdown={refreshTimeRangeMax}
+  onkeydown={(event) => { refreshTimeRangeMax(event); onClassementWindowKey(event); }}
+  on:click={onClassementWindowClick}
+/>
 
 <!-- Le panneau B (checkboxes d'axes + exclusions) est déclaré au NIVEAU RACINE
      (pas dans <RailSection>, sinon Svelte le passerait comme prop) puis rendu
@@ -518,14 +544,29 @@
   </RailSection>
 
   <RailSection label="Classement">
-    <div class="classement-filter">
-      {#each SIGNAL_CLASSES as classe}
-        <Checkbox
-          label="{CLASSEMENT_META[classe].label} ({classementCounts[classe]})"
-          checked={classementFilter[classe]}
-          onchange={(event) => toggleClassement(classe, event.currentTarget.checked)}
-        />
-      {/each}
+    <div class="classement-filter" bind:this={classementWrapEl}>
+      <button
+        type="button"
+        class="classement-trigger"
+        data-testid="classement-filter-trigger"
+        aria-expanded={classementOpen}
+        aria-haspopup="true"
+        on:click|stopPropagation={() => { classementOpen = !classementOpen; }}
+      >
+        <span>{classementSummary}</span>
+        <span class="classement-trigger-chevron" class:classement-trigger-chevron--open={classementOpen} aria-hidden="true">▾</span>
+      </button>
+      {#if classementOpen}
+        <div class="classement-panel" data-testid="classement-filter-panel">
+          {#each SIGNAL_CLASSES as classe}
+            <Checkbox
+              label="{CLASSEMENT_META[classe].label} ({classementCounts[classe]})"
+              checked={classementFilter[classe]}
+              onchange={(event) => toggleClassement(classe, event.currentTarget.checked)}
+            />
+          {/each}
+        </div>
+      {/if}
     </div>
   </RailSection>
 
@@ -611,5 +652,45 @@
     flex-direction: column;
     gap: 0.35rem;
     padding: 0.25rem 0.75rem;
+  }
+
+  .classement-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid var(--st-semantic-border-subtle);
+    border-radius: var(--st-radius-sm, 4px);
+    background: var(--st-semantic-surface-default);
+    color: var(--st-semantic-text-primary);
+    font-size: var(--rail-fs-small, 0.75rem);
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .classement-trigger:hover {
+    background: var(--st-semantic-surface-subtle);
+  }
+
+  .classement-trigger-chevron {
+    flex-shrink: 0;
+    color: var(--st-semantic-text-muted);
+    transition: transform 0.12s ease;
+  }
+
+  .classement-trigger-chevron--open {
+    transform: rotate(180deg);
+  }
+
+  .classement-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.5rem;
+    background: var(--st-semantic-surface-default);
+    border: 1px solid var(--st-semantic-border-subtle);
+    border-radius: var(--st-radius-sm, 4px);
   }
 </style>
