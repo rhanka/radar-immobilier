@@ -8,7 +8,9 @@ const TARGET = { citySlug: "delson", type: "Signal" as const, id: "sig-1" };
 const FINGERPRINT = "a".repeat(64);
 const NON_CLASSE: ClassementEntry = {
   classe: "non_classe", reasonCode: null,
-  pertinentHeadId: null, aSurveillerHeadId: null, archiveHeadId: null, discarded: false,
+  pertinentHeadId: null, aSurveillerHeadId: null,
+  pertinentExpectedHeadId: null, aSurveillerExpectedHeadId: null,
+  archiveHeadId: null, discarded: false,
 };
 
 type Call = { url: string; method: string; body: unknown; key: string | null };
@@ -102,6 +104,34 @@ describe("signal classement client — acceptance criteria", () => {
       nextClass: "pertinent",
     });
     expect(posts(calls).map((c) => c.url.split("/").pop())).toEqual(["restore", "select"]);
+  });
+
+  it("regression 409: re-classifying a deselected signal sends its inactive head id, not null", async () => {
+    // Exact owner case: the signal shows Non classé but its pertinent
+    // stream head is an INACTIVE event. The server compares
+    // expectedHeadId to that head; null is a facet_head_conflict (409).
+    const { calls } = stubFetchOk();
+    await applyClassement(SCOPE, {
+      target: TARGET, displayedFingerprint: FINGERPRINT,
+      current: entry({ pertinentExpectedHeadId: "old-pertinent-head" }),
+      nextClass: "pertinent",
+    });
+    expect(posts(calls)[0]?.body).toMatchObject({ basket: "pertinent", expectedHeadId: "old-pertinent-head" });
+  });
+
+  it("regression 409: Pertinent then À surveiller sends the inactive a_surveiller head", async () => {
+    const { calls } = stubFetchOk();
+    await applyClassement(SCOPE, {
+      target: TARGET, displayedFingerprint: FINGERPRINT,
+      current: entry({
+        classe: "pertinent", pertinentHeadId: "p1", reasonCode: "P-DENSITE",
+        aSurveillerExpectedHeadId: "old-watch-head",
+      }),
+      nextClass: "a_surveiller",
+    });
+    expect(posts(calls).map((c) => c.url.split("/").pop())).toEqual(["deselect", "select"]);
+    expect(posts(calls)[0]?.body).toMatchObject({ basket: "pertinent", expectedHeadId: "p1" });
+    expect(posts(calls)[1]?.body).toMatchObject({ basket: "a_surveiller", expectedHeadId: "old-watch-head" });
   });
 
   it("F4: a failed second POST rolls back the first, keeping the previous classement", async () => {

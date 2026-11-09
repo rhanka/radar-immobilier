@@ -110,6 +110,12 @@ export async function applyClassement(scope: SignalScope, args: ApplyClassementA
   if (current.aSurveillerHeadId) activeBaskets.push("a_surveiller");
   const headFor = (basket: "pertinent" | "a_surveiller"): string | null =>
     basket === "pertinent" ? current.pertinentHeadId : current.aSurveillerHeadId;
+  // Writes compare against the stream head in ANY state: a basket that
+  // was deselected keeps an inactive head, and null would 409.
+  const expectedHeadFor = (basket: "pertinent" | "a_surveiller"): string | null =>
+    basket === "pertinent"
+      ? current.pertinentExpectedHeadId ?? current.pertinentHeadId
+      : current.aSurveillerExpectedHeadId ?? current.aSurveillerHeadId;
 
   if (nextClass === "ecarte") {
     const deselect = activeBaskets;
@@ -183,7 +189,7 @@ export async function applyClassement(scope: SignalScope, args: ApplyClassementA
       target,
       basket,
       ...(reasonCode ? { reasonCode } : {}),
-      expectedHeadId: headFor(basket),
+      expectedHeadId: expectedHeadFor(basket),
       displayedFingerprint,
     });
   } catch (error) {

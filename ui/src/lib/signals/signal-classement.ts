@@ -60,8 +60,18 @@ export interface ArchiveHeadLike {
 export interface ClassementEntry {
   classe: SignalClass;
   reasonCode: string | null;
+  /** Active selection head id per basket (null when the basket is off). */
   pertinentHeadId: string | null;
   aSurveillerHeadId: string | null;
+  /**
+   * Latest selection head id per basket, ANY state. The facet writer
+   * compares expectedHeadId against the stream head even when that head
+   * is inactive (deselected): sending null there is a 409
+   * facet_head_conflict, so a Non classé signal that was once classified
+   * must keep its inactive head id for the next write.
+   */
+  pertinentExpectedHeadId: string | null;
+  aSurveillerExpectedHeadId: string | null;
   archiveHeadId: string | null;
   discarded: boolean;
 }
@@ -71,6 +81,8 @@ export const EMPTY_CLASSEMENT_ENTRY: ClassementEntry = {
   reasonCode: null,
   pertinentHeadId: null,
   aSurveillerHeadId: null,
+  pertinentExpectedHeadId: null,
+  aSurveillerExpectedHeadId: null,
   archiveHeadId: null,
   discarded: false,
 };
@@ -107,8 +119,14 @@ export function buildClassementMap(
     }
   }
   for (const head of selection) {
-    if (head.facet !== "selection" || head.state !== "active") continue;
+    if (head.facet !== "selection") continue;
     const entry = ensure(head.target.type, head.target.id, head.target.citySlug);
+    // The expected head tracks the latest head in ANY state (see
+    // ClassementEntry): an inactive head is still the stream head the
+    // writer compares against.
+    if (head.basket === "pertinent") entry.pertinentExpectedHeadId = head.id ?? null;
+    if (head.basket === "a_surveiller") entry.aSurveillerExpectedHeadId = head.id ?? null;
+    if (head.state !== "active") continue;
     if (head.basket === "pertinent") entry.pertinentHeadId = head.id ?? null;
     if (head.basket === "a_surveiller") entry.aSurveillerHeadId = head.id ?? null;
     if (entry.discarded) continue;
