@@ -21,13 +21,12 @@ describe("SignalClassementMenu — acceptance criteria", () => {
     const button = view.getByTestId("signal-classement-button");
     expect(button.getAttribute("aria-label")).toContain("Pertinent");
     await fireEvent.click(button);
-    expect(screen.getByTestId("classement-class-ecarte")).toBeTruthy();
-    await fireEvent.click(screen.getByTestId("classement-class-ecarte"));
-    expect(screen.getByTestId("classement-reason-N-NON-RES")).toBeTruthy();
-    // Reason step lists each Steve code with its short label.
-    expect(screen.getByTestId("classement-reason-N-ACCESSOIRE").textContent).toContain("N-ACCESSOIRE");
-    expect(screen.getByTestId("classement-reason-N-ACCESSOIRE").textContent).toContain("accessoire");
-    await fireEvent.click(screen.getByTestId("classement-reason-N-NON-RES"));
+    expect(screen.getByRole("menuitem", { name: "Écarté" })).toBeTruthy();
+    await fireEvent.click(screen.getByRole("menuitem", { name: "Écarté" }));
+    expect(screen.getByRole("menuitem", { name: "non résidentiel" })).toBeTruthy();
+    // Reason step shows the human Steve label, never the technical code.
+    expect(screen.getByRole("menuitem", { name: "accessoire" }).textContent).not.toContain("N-ACCESSOIRE");
+    await fireEvent.click(screen.getByRole("menuitem", { name: "non résidentiel" }));
     expect(onApply).toHaveBeenCalledWith("ecarte", "N-NON-RES");
   });
 
@@ -53,16 +52,16 @@ describe("SignalClassementMenu — acceptance criteria", () => {
       props: { classe: "non_classe" as const, reasonCodes: CODES, onApply },
     });
     await fireEvent.click(view.getByTestId("signal-classement-button"));
-    await fireEvent.click(screen.getByTestId("classement-class-pertinent"));
-    expect(screen.getByTestId("classement-reason-none")).toBeTruthy();
-    await fireEvent.click(screen.getByTestId("classement-back"));
-    expect(screen.getByTestId("classement-class-ecarte")).toBeTruthy();
+    await fireEvent.click(screen.getByRole("menuitem", { name: "Pertinent" }));
+    expect(screen.getByRole("menuitem", { name: "Sans motif" })).toBeTruthy();
+    await fireEvent.click(screen.getByRole("menuitem", { name: "← Retour" }));
+    expect(screen.getByRole("menuitem", { name: "Écarté" })).toBeTruthy();
     await fireEvent.keyDown(window, { key: "Escape" });
-    expect(screen.queryByTestId("classement-class-ecarte")).toBeNull();
+    expect(screen.queryByRole("menuitem", { name: "Écarté" })).toBeNull();
     await fireEvent.click(view.getByTestId("signal-classement-button"));
-    expect(screen.getByTestId("classement-class-ecarte")).toBeTruthy();
+    expect(screen.getByRole("menuitem", { name: "Écarté" })).toBeTruthy();
     await fireEvent.click(document.body);
-    expect(screen.queryByTestId("classement-class-ecarte")).toBeNull();
+    expect(screen.queryByRole("menuitem", { name: "Écarté" })).toBeNull();
     expect(onApply).not.toHaveBeenCalled();
   });
 
@@ -74,15 +73,15 @@ describe("SignalClassementMenu — acceptance criteria", () => {
     const button = view.getByTestId("signal-classement-button") as HTMLButtonElement;
     expect(button.disabled).toBe(true);
     await fireEvent.click(button);
-    expect(screen.queryByTestId("classement-class-ecarte")).toBeNull();
+    expect(screen.queryByRole("menuitem", { name: "Écarté" })).toBeNull();
     cleanup();
     const second = render(SignalClassementMenu, {
       props: { classe: "non_classe" as const, reasonCodes: [], onApply },
     });
     await fireEvent.click(second.getByTestId("signal-classement-button"));
-    await fireEvent.click(screen.getByTestId("classement-class-ecarte"));
+    await fireEvent.click(screen.getByRole("menuitem", { name: "Écarté" }));
     expect(screen.getByTestId("classement-reasons-empty")).toBeTruthy();
-    expect(screen.queryByTestId("classement-reason-none")).toBeNull();
+    expect(screen.queryByRole("menuitem", { name: "Sans motif" })).toBeNull();
   });
 
   it("criterion 3: Écarté offers no reason-free validation; Pertinent can validate without a reason", async () => {
@@ -91,15 +90,15 @@ describe("SignalClassementMenu — acceptance criteria", () => {
       props: { classe: "non_classe" as const, reasonCodes: CODES, onApply },
     });
     await fireEvent.click(view.getByTestId("signal-classement-button"));
-    await fireEvent.click(screen.getByTestId("classement-class-ecarte"));
-    expect(screen.queryByTestId("classement-reason-none")).toBeNull();
+    await fireEvent.click(screen.getByRole("menuitem", { name: "Écarté" }));
+    expect(screen.queryByRole("menuitem", { name: "Sans motif" })).toBeNull();
     cleanup();
     const second = render(SignalClassementMenu, {
       props: { classe: "non_classe" as const, reasonCodes: CODES, onApply },
     });
     await fireEvent.click(second.getByTestId("signal-classement-button"));
-    await fireEvent.click(screen.getByTestId("classement-class-pertinent"));
-    await fireEvent.click(screen.getByTestId("classement-reason-none"));
+    await fireEvent.click(screen.getByRole("menuitem", { name: "Pertinent" }));
+    await fireEvent.click(screen.getByRole("menuitem", { name: "Sans motif" }));
     expect(onApply).toHaveBeenCalledWith("pertinent", null);
     expect(DEFAULT_CLASSEMENT_FILTER.ecarte).toBe(false);
   });

@@ -27,6 +27,7 @@
    * ZÉRO checkbox/tabs/search bespoke.
    */
   import { Badge, Checkbox, RadioGroup, TimeRangePicker } from "@sentropic/design-system-svelte";
+  import { ChevronDown } from "@lucide/svelte";
   import {
     B_SUBSET_KEY,
     bAxesFromVivierKey,
@@ -174,6 +175,38 @@
   }
   function onClassementWindowKey(event: KeyboardEvent): void {
     if (classementOpen && event.key === "Escape") classementOpen = false;
+    if (filtreOpen && event.key === "Escape") filtreOpen = false;
+  }
+
+  // Filtre (axes + exclusions) as a second dropdown with the same DS field
+  // pattern as Pertinence: same label typography, same DS chevron, closed
+  // summary truncated with a single-line ellipsis.
+  let filtreOpen = false;
+  let filtreWrapEl: HTMLElement | null = null;
+  const FILTRE_LABELS = {
+    z: "Zonage",
+    r: "Résidentiel",
+    p: "Précoce",
+    piia: "Exclure PIIA sans projet résidentiel",
+    derog: "Exclure dérogations mineures",
+  } as const;
+  $: filtreSummary = [
+    ...(bAxes.z ? [FILTRE_LABELS.z] : []),
+    ...(bAxes.r ? [FILTRE_LABELS.r] : []),
+    ...(bAxes.p ? [FILTRE_LABELS.p] : []),
+    ...(exclusions.piiaSansProjetResidentiel ? [FILTRE_LABELS.piia] : []),
+    ...(exclusions.derogationsMineures ? [FILTRE_LABELS.derog] : []),
+  ].join(", ") || "Aucune sélection";
+
+  function onFiltreWindowClick(event: MouseEvent): void {
+    if (
+      filtreOpen &&
+      filtreWrapEl &&
+      event.target instanceof Node &&
+      !filtreWrapEl.contains(event.target)
+    ) {
+      filtreOpen = false;
+    }
   }
 
   // The DS resolves presets when the user opens/selects them. Refresh the
@@ -450,7 +483,7 @@
 <svelte:window
   onpointerdown={refreshTimeRangeMax}
   onkeydown={(event) => { refreshTimeRangeMax(event); onClassementWindowKey(event); }}
-  on:click={onClassementWindowClick}
+  on:click={(event) => { onClassementWindowClick(event); onFiltreWindowClick(event); }}
 />
 
 <!-- Le panneau B (checkboxes d'axes + exclusions) est déclaré au NIVEAU RACINE
@@ -495,7 +528,7 @@
         on:click|stopPropagation={() => { classementOpen = !classementOpen; }}
       >
         <span class="classement-trigger-summary">{classementSummary}</span>
-        <span class="classement-trigger-chevron" class:classement-trigger-chevron--open={classementOpen} aria-hidden="true">▾</span>
+        <span class="classement-trigger-chevron" class:classement-trigger-chevron--open={classementOpen} aria-hidden="true"><ChevronDown size={16} /></span>
       </button>
       {#if classementOpen}
         <div class="classement-panel" data-testid="classement-filter-panel">
@@ -514,41 +547,50 @@
         </div>
       {/if}
     </div>
-    <div class="vivier-toggles">
-      <!-- Trois axes COMBINABLES, librement cochables/décochables (défauts
-           Zonage ✓, Résidentiel ✓, Précoce ✗). Décocher un axe RELÂCHE le filtre
-           d'affichage (lecture de la classification serveur, jamais une
-           reclassification). -->
-      <Checkbox
-        label="Zonage"
-        checked={bAxes.z}
-        onchange={(event) => toggleBAxis({ z: event.currentTarget.checked })}
-      />
-      <Checkbox
-        label="Résidentiel"
-        checked={bAxes.r}
-        onchange={(event) => toggleBAxis({ r: event.currentTarget.checked })}
-      />
-      <Checkbox
-        label="Précoce"
-        checked={bAxes.p}
-        onchange={(event) => toggleBAxis({ p: event.currentTarget.checked })}
-      />
-    </div>
-
-    <div class="vivier-b-exclusions">
-      <Checkbox
-        label="Exclure PIIA sans projet résidentiel"
-        checked={exclusions.piiaSansProjetResidentiel}
-        onchange={(event) =>
-          setExclusion({ piiaSansProjetResidentiel: event.currentTarget.checked })}
-      />
-      <Checkbox
-        label="Exclure dérogations mineures"
-        checked={exclusions.derogationsMineures}
-        onchange={(event) =>
-          setExclusion({ derogationsMineures: event.currentTarget.checked })}
-      />
+    <div class="classement-filter" bind:this={filtreWrapEl}>
+      <span class="pertinence-label">Filtre</span>
+      <button
+        type="button"
+        class="classement-trigger"
+        data-testid="filtre-trigger"
+        aria-expanded={filtreOpen}
+        aria-haspopup="true"
+        on:click|stopPropagation={() => { filtreOpen = !filtreOpen; }}
+      >
+        <span class="classement-trigger-summary">{filtreSummary}</span>
+        <span class="classement-trigger-chevron" class:classement-trigger-chevron--open={filtreOpen} aria-hidden="true"><ChevronDown size={16} /></span>
+      </button>
+      {#if filtreOpen}
+        <div class="classement-panel" data-testid="filtre-panel">
+          <Checkbox
+            label="Zonage"
+            checked={bAxes.z}
+            onchange={(event) => toggleBAxis({ z: event.currentTarget.checked })}
+          />
+          <Checkbox
+            label="Résidentiel"
+            checked={bAxes.r}
+            onchange={(event) => toggleBAxis({ r: event.currentTarget.checked })}
+          />
+          <Checkbox
+            label="Précoce"
+            checked={bAxes.p}
+            onchange={(event) => toggleBAxis({ p: event.currentTarget.checked })}
+          />
+          <Checkbox
+            label="Exclure PIIA sans projet résidentiel"
+            checked={exclusions.piiaSansProjetResidentiel}
+            onchange={(event) =>
+              setExclusion({ piiaSansProjetResidentiel: event.currentTarget.checked })}
+          />
+          <Checkbox
+            label="Exclure dérogations mineures"
+            checked={exclusions.derogationsMineures}
+            onchange={(event) =>
+              setExclusion({ derogationsMineures: event.currentTarget.checked })}
+          />
+        </div>
+      {/if}
     </div>
   </div>
 {/snippet}
@@ -623,32 +665,10 @@
     text-align: left;
   }
 
-  .vivier-toggles {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-  }
-
-  /* Interim date-basis switch: same compact choice token as the rail toggles. */
-  .vivier-toggles :global(.st-choice) {
-    --st-component-selection-choiceLabelFontSize: var(--rail-fs-small, 0.75rem);
-  }
-
   /* Typographie compacte des aides/descriptions des checkbox du rail. */
   .vivier-panel :global(.st-choice__help),
   .vivier-panel :global(.st-choice__description) {
     font-size: var(--rail-fs-small, 0.75rem);
-  }
-
-  /* ── Exclusions d'affichage de B ── */
-  .vivier-b-exclusions {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .vivier-b-exclusions :global(.st-choice) {
-    --st-component-selection-choiceLabelFontSize: var(--rail-fs-small, 0.75rem);
   }
 
   /* Pertinence: label styled like the DS « Période des signaux » field label
