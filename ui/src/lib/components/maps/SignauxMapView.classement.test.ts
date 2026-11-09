@@ -29,10 +29,11 @@ vi.mock("$lib/signals/signal-classement-client.js", async (importOriginal) => {
   const actual = await importOriginal<typeof import("$lib/signals/signal-classement-client.js")>();
   return {
     ...actual,
+    // No label from the API: the UI dictionary supplies the readable text.
     fetchReasonCodes: vi.fn(async () => [
-      { code: "P-DENSITE", verdict: "pertinent" as const, label: "densité" },
-      { code: "S-PLANIFIE", verdict: "a_surveiller" as const, label: "planifié" },
-      { code: "N-NON-RES", verdict: "non_pertinent" as const, label: "non résidentiel" },
+      { code: "P-DENSITE", verdict: "pertinent" as const },
+      { code: "S-PLANIFIE", verdict: "a_surveiller" as const },
+      { code: "N-NON-RES", verdict: "non_pertinent" as const },
     ]),
     applyClassement: vi.fn(),
   };
@@ -145,7 +146,7 @@ describe("SignauxMapView classement behaviour", () => {
     expect(classementBtn.closest(".sel-entity-head-row")?.querySelector(".sel-entity-head")).toBeTruthy();
     await fireEvent.click(classementBtn);
     await fireEvent.click(screen.getByRole("menuitem", { name: "Écarté" }));
-    await fireEvent.click(screen.getByRole("menuitem", { name: "non résidentiel" }));
+    await fireEvent.click(screen.getByRole("menuitem", { name: "Non résidentiel" }));
 
     await waitFor(() => expect(document.querySelector('[data-signal-node="sig-1"]')).toBeNull());
     expect(document.querySelector('[data-signal-node="sig-2"]')).toBeTruthy();
@@ -160,12 +161,12 @@ describe("SignauxMapView classement behaviour", () => {
     const scope = within(card("sig-2"));
     await fireEvent.click(scope.getByTestId("signal-classement-button"));
     await fireEvent.click(screen.getByRole("menuitem", { name: "À surveiller" }));
-    await fireEvent.click(screen.getByRole("menuitem", { name: "planifié" }));
+    await fireEvent.click(screen.getByRole("menuitem", { name: "Changement planifié" }));
     await waitFor(() => {
       const chip = within(card("sig-2")).getByTestId("classement-reason-chip");
       expect(chip.textContent).not.toContain("S-PLANIFIE");
       expect(chip.getAttribute("title")).toBe("S-PLANIFIE");
-      expect(chip.textContent).toContain("planifié");
+      expect(chip.textContent).toContain("Changement planifié");
     });
   });
 
@@ -178,7 +179,7 @@ describe("SignauxMapView classement behaviour", () => {
     const scope = within(card("sig-1"));
     await fireEvent.click(scope.getByTestId("signal-classement-button"));
     await fireEvent.click(screen.getByRole("menuitem", { name: "Écarté" }));
-    await fireEvent.click(screen.getByRole("menuitem", { name: "non résidentiel" }));
+    await fireEvent.click(screen.getByRole("menuitem", { name: "Non résidentiel" }));
 
     const alert = await screen.findByTestId("classement-error");
     expect(alert.textContent).toContain("409");

@@ -5,11 +5,13 @@ import { DEFAULT_CLASSEMENT_FILTER } from "$lib/signals/signal-classement.js";
 
 afterEach(() => cleanup());
 
+// No `label` here: the API table (facet_reason_codes) carries none, so the
+// UI dictionary (signal-reason-labels) must supply the human-readable text.
 const CODES = [
-  { code: "P-DENSITE", verdict: "pertinent" as const, label: "densité" },
-  { code: "S-PLANIFIE", verdict: "a_surveiller" as const, label: "planifié" },
-  { code: "N-NON-RES", verdict: "non_pertinent" as const, label: "non résidentiel" },
-  { code: "N-ACCESSOIRE", verdict: "non_pertinent" as const, label: "accessoire" },
+  { code: "P-DENSITE", verdict: "pertinent" as const },
+  { code: "S-PLANIFIE", verdict: "a_surveiller" as const },
+  { code: "N-NON-RES", verdict: "non_pertinent" as const },
+  { code: "N-ACCESSOIRE", verdict: "non_pertinent" as const },
 ];
 
 describe("SignalClassementMenu — acceptance criteria", () => {
@@ -23,10 +25,10 @@ describe("SignalClassementMenu — acceptance criteria", () => {
     await fireEvent.click(button);
     expect(screen.getByRole("menuitem", { name: "Écarté" })).toBeTruthy();
     await fireEvent.click(screen.getByRole("menuitem", { name: "Écarté" }));
-    expect(screen.getByRole("menuitem", { name: "non résidentiel" })).toBeTruthy();
+    expect(screen.getByRole("menuitem", { name: "Non résidentiel" })).toBeTruthy();
     // Reason step shows the human Steve label, never the technical code.
-    expect(screen.getByRole("menuitem", { name: "accessoire" }).textContent).not.toContain("N-ACCESSOIRE");
-    await fireEvent.click(screen.getByRole("menuitem", { name: "non résidentiel" }));
+    expect(screen.getByRole("menuitem", { name: "Accessoire sans unités" }).textContent).not.toContain("N-ACCESSOIRE");
+    await fireEvent.click(screen.getByRole("menuitem", { name: "Non résidentiel" }));
     expect(onApply).toHaveBeenCalledWith("ecarte", "N-NON-RES");
   });
 
