@@ -202,7 +202,9 @@ describe("SignauxMapView — evidence follows refreshed nodes while dialog stays
 
     vi.mocked(rebuildSignalEvidence).mockClear();
 
-    // Another trigger than the retired triage toggle: the B display exclusion.
+    // Another trigger than the retired triage toggle: the B display exclusion
+    // (inside the closed-by-default Filtre dropdown panel).
+    if (!screen.queryByTestId("filtre-panel")) await fireEvent.click(screen.getByTestId("filtre-trigger"));
     await fireEvent.click(screen.getByLabelText("Exclure PIIA sans projet résidentiel"));
 
     await waitFor(() => expect(vi.mocked(rebuildSignalEvidence)).toHaveBeenCalled());
