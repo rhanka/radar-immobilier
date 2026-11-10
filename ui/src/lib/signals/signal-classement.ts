@@ -28,6 +28,12 @@ export const SIGNAL_CLASSES: readonly SignalClass[] = [
   "ecarte",
 ];
 
+/**
+ * Class → DS semantic token mapping (icon colour only; labels stay primary):
+ * pertinent → feedback-success, a_surveiller → feedback-warning,
+ * ecarte → text-muted (neutral), non_classe → text-secondary (neutral).
+ * Same tokens drive the card IconButton (ghost) and the cascade menu icons.
+ */
 export const CLASSEMENT_META: Record<SignalClass, { label: string; icon: string; token: string }> = {
   pertinent: { label: "Pertinent", icon: "Target", token: "var(--st-semantic-feedback-success)" },
   a_surveiller: { label: "À surveiller", icon: "Eye", token: "var(--st-semantic-feedback-warning)" },

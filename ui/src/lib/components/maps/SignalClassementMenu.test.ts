@@ -36,6 +36,35 @@ function reasonItems(): string[] {
 }
 
 describe("SignalClassementMenu — cascade sub-menu", () => {
+  it("fixed chevron slots on every line + DS ghost IconButton trigger (no text shift)", async () => {
+    const onApply = vi.fn();
+    const view = render(SignalClassementMenu, {
+      props: { classe: "pertinent" as const, reasonCodes: CODES, onApply },
+    });
+    const button = view.getByTestId("signal-classement-button");
+    // Standard DS icon button: ghost variant, sm size (same as Zones/Lots warning).
+    expect(button.classList.contains("st-iconButton")).toBe(true);
+    expect(button.classList.contains("st-iconButton--ghost")).toBe(true);
+    expect(button.classList.contains("st-iconButton--sm")).toBe(true);
+    await fireEvent.click(button);
+    const items = within(classMenu()).getAllByRole("menuitem");
+    expect(items.length).toBe(4);
+    for (const item of items) {
+      // Every line reserves both fixed slots, empty until selected.
+      expect(item.querySelector(".classement-chevron--left")).toBeTruthy();
+      expect(item.querySelector(".classement-chevron--right")).toBeTruthy();
+      expect(item.querySelector(".classement-chevron--left")?.textContent).toBe("");
+      expect(item.querySelector(".classement-chevron--right")?.textContent).toBe("");
+    }
+    await fireEvent.click(screen.getByRole("menuitem", { name: "Écarté" }));
+    const chosen = within(classMenu()).getByRole("menuitem", { name: "Écarté" });
+    expect(chosen.querySelector(".classement-chevron--left")?.textContent).toBe("‹");
+    // Non-selected lines keep their empty fixed slots (labels do not move).
+    const other = within(classMenu()).getByRole("menuitem", { name: "Pertinent" });
+    expect(other.querySelector(".classement-chevron--left")?.textContent).toBe("");
+    expect(other.querySelector(".classement-chevron--right")?.textContent).toBe("");
+  });
+
   it("click: class menu stays open, chosen line highlighted with chevron, reason applies (Écarté)", async () => {
     const onApply = vi.fn();
     const view = render(SignalClassementMenu, {
@@ -208,7 +237,8 @@ describe("SignalClassementMenu — cascade sub-menu", () => {
       await fireEvent.click(screen.getByRole("menuitem", { name: "Pertinent" }));
       expect(reasonMenu().getAttribute("data-side")).toBe("right");
       const chosen = within(classMenu()).getByRole("menuitem", { name: "Pertinent" });
-      expect(chosen.querySelector(".classement-chevron")?.textContent).toBe("›");
+      expect(chosen.querySelector(".classement-chevron--right")?.textContent).toBe("›");
+      expect(chosen.querySelector(".classement-chevron--left")?.textContent).toBe("");
     } finally {
       rectSpy.mockRestore();
       widthSpy.mockRestore();
