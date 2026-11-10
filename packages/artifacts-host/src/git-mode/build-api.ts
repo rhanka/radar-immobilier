@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import type { LiveWorkerPort } from "@sentropic/artifacts";
 import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-contract";
 import { resolveBuilderBinding, type BuilderBindingSource } from "./builder-binding.js";
 import type { HostServiceIdentity } from "./lease-broker.js";
@@ -7,6 +8,21 @@ import type { GitBuildExecutor, GitBuildJobRequest, GitBuildJobState, GitBuildPo
 /**
  * Host build API client (M3-I, W7 contract with the Sentropic builder).
  *
+ * - first, reconcile the binding on the builder through the package live
+ *   worker (the live-open path, reused as-is): `createLiveWorkerClient` of
+ *   `@sentropic/artifacts/live-host` 0.2.25 (pinned in the root
+ *   `package.json`; `dist/live-host/worker-client.js`) posts the closed
+ *   `POST v1/live/reconcile` body `{ artifactId, bindingGeneration, ownerId,
+ *   liveSessionId, leaseEpoch, routeEpoch, binding, invitation }`, with the
+ *   fences, the staged draft and the invitation read from the host LiveStore,
+ *   and accepts exactly status 200 with the strict ack
+ *   `{ liveSessionId, leaseEpoch, routeEpoch, revision, ready }` (bounded
+ *   JSON read: the answer body is always drained). This client invents no
+ *   reconcile body of its own: with no live runtime or draft on the host the
+ *   worker fails closed before any build, because a binding the builder has
+ *   never reconciled is refused at build admission
+ *   (`git_live_conflict:stale_session`), and P1 only built because it had
+ *   been opened live first;
  * - immo persists the job first (G0 v3 §2.6: the job identity, never a
  *   caller SHA later) and gets its jobId from the host job store;
  * - then `POST <base>/v1/builds` with exactly `{ artifactId, jobId, binding }`
@@ -53,6 +69,14 @@ export interface HostBuildApiOptions {
   readonly jobs?: HostBuildJobStore;
   /** Package git binding store: source of the `binding` coordinates sent to the builder. */
   readonly bindings?: BuilderBindingSource | undefined;
+  /**
+   * Live-open worker of the pinned package (`createLiveWorkerClient`,
+   * `@sentropic/artifacts/live-host` 0.2.25), composed in compose.ts with the
+   * host LiveStore fences/drafts: its `reconcile` is the pre-build reconcile,
+   * with the same closed body and the same strict ack reading as a live open.
+   * Absent: every build fails closed (`provider_unavailable`) before any call.
+   */
+  readonly liveWorker?: Pick<LiveWorkerPort, "reconcile"> | undefined;
   readonly fetch?: typeof fetch;
   readonly timeoutMs?: number;
 }
@@ -106,12 +130,27 @@ export function createHostBuildApiClient(options: HostBuildApiOptions): GitBuild
     if (!accepted.includes(response.status)) throw new ArtifactOperationError("provider_unavailable");
     return parseStatus(body, jobId);
   };
+  // Pre-build reconcile, delegated to the package live worker (live-open
+  // path): it re-reads the binding of this exact generation, the LiveStore
+  // fences and draft, posts the closed reconcile body and validates the
+  // strict ack (exactly 200). Idempotent on the builder side (same binding +
+  // generation, same ack), so it runs before every build request instead of
+  // tracking a host-side flag that a restart or a builder reset would
+  // silently lose; a retry after a `build_failed` therefore re-reconciles
+  // and is never blocked by the previous failure. Fail-closed: any refusal
+  // throws its typed error and no build is requested.
+  const reconcile = async (identity: { readonly storageScopeId: string; readonly artifactId: string;
+    readonly bindingGeneration: number }) => {
+    if (!options.liveWorker) throw new ArtifactOperationError("provider_unavailable");
+    await options.liveWorker.reconcile(identity);
+  };
   return {
     async admits(executor: GitBuildExecutor) { return base !== undefined && executor === "sandbox"; },
     async request(job: GitBuildJobRequest) {
       if (!base || job.executor !== "sandbox") throw new ArtifactOperationError("provider_unavailable");
       const binding = await resolveBuilderBinding(options.bindings, { storageScopeId: job.storageScopeId, artifactId: job.artifactId,
         bindingGeneration: job.bindingGeneration });
+      await reconcile({ storageScopeId: job.storageScopeId, artifactId: job.artifactId, bindingGeneration: job.bindingGeneration });
       const jobId = await jobs.persist(job);
       const status = await call(new URL("v1/builds", base), { method: "POST", headers: { "content-type": "application/json" },
         body: JSON.stringify({ artifactId: job.artifactId, jobId, binding }) }, [200, 202], jobId);
