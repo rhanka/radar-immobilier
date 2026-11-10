@@ -242,6 +242,83 @@ if (params.get("fixture") === "p01-preuve") {
       onToggleKey: toggleBucketKey,
     },
   });
+} else if (params.get("fixture") === "reload-error") {
+  // QA patron rechargement par icône : toutes les couches en échec →
+  // icône ! + menu « Recharger » sur chaque en-tête, aucune grande carte.
+  mount(SignauxSelPanel, {
+    target,
+    props: {
+      selectedCity,
+      detailNodes: [],
+      detailError: "Projection du vivier indisponible.",
+      zonesError: "Zones indisponibles.",
+      lotsError: "Lots indisponibles.",
+      selectionState: createSelectionBucketState(),
+      onToggleKey: toggleBucketKey,
+      onRetryDetail: () => {},
+      onRetryGeo: () => {},
+    },
+  });
+} else if (params.get("fixture") === "reload-loading") {
+  // QA patron rechargement : couches en cours de (re)chargement → wheel.
+  mount(SignauxSelPanel, {
+    target,
+    props: {
+      selectedCity,
+      detailNodes: [],
+      detailLoading: true,
+      zonesLoading: true,
+      lotsLoading: true,
+      selectionState: createSelectionBucketState(),
+      onToggleKey: toggleBucketKey,
+    },
+  });
+} else if (params.get("fixture") === "reload-success") {
+  // QA patron rechargement : couches chargées → compteurs de retour.
+  const okZones = {
+    ok: true,
+    citySlug: "saint-frederic",
+    source: "official" as const,
+    resolutionStatus: "official" as const,
+    geometryStatus: "official" as const,
+    zoneCount: 2,
+    warnings: [] as string[],
+    featureCollection: {
+      type: "FeatureCollection" as const,
+      features: ["H-431", "C-186"].map((code) => ({
+        type: "Feature" as const,
+        geometry: null,
+        properties: {
+          code,
+          citySlug: "saint-frederic",
+          geometryStatus: "official" as const,
+          confidence: 1,
+          source: "official-zone" as const,
+          lotCount: 0,
+          lots: [],
+        },
+      })),
+    },
+  };
+  mount(SignauxSelPanel, {
+    target,
+    props: {
+      selectedCity,
+      detailNodes,
+      zonesResponse: okZones,
+      lotsResponse: {
+        ok: true,
+        citySlug: "saint-frederic",
+        source: "donnees-quebec",
+        collectionId: "qc-lots-saint-frederic",
+        numberMatched: 0,
+        numberReturned: 0,
+        featureCollection: { type: "FeatureCollection" as const, features: [] },
+      },
+      selectionState: createSelectionBucketState(),
+      onToggleKey: toggleBucketKey,
+    },
+  });
 } else {
   mount(SignauxSelPanel, {
     target,
