@@ -109,6 +109,20 @@ spec:
       # 34-refresh-pending-watchdog.yaml (15 min de Pending au plus).
       activeDeadlineSeconds: 19800
       ttlSecondsAfterFinished: 86400
+      # Rétention du pod en échec (incident 2026-11-10, job manuel
+      # radar-refresh-pv-stock-03 en BackoffLimitExceeded, logs illisibles
+      # après disparition du pod) : FailJob dès un code de sortie non nul
+      # (backoffLimit: 0, aucun pod de remplacement), le pod terminé reste
+      # lisible jusqu'à ttlSecondsAfterFinished. Les jobs manuels créés par
+      # `kubectl create job --from=cronjob/radar-refresh-pv` héritent de ce
+      # template. Plancher commun des CronJobs du dépôt : 21600 s (6 h) ;
+      # ce balayage long garde 86400 s (24 h).
+      podFailurePolicy:
+        rules:
+          - action: FailJob
+            onExitCodes:
+              operator: NotIn
+              values: [0]
       template:
         metadata:
           labels:
