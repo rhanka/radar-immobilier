@@ -89,6 +89,40 @@ describe("SignalClassementMenu — acceptance criteria", () => {
     expect((pop as HTMLElement).style.position).toBe("fixed");
   });
 
+  it("popover carries the DS popover elevation and stays in the viewport near the bottom edge", async () => {
+    const onApply = vi.fn();
+    // jsdom has no layout: pin the trigger near the bottom of a 300px
+    // viewport so the reason step must flip up and cap its height.
+    const rectSpy = vi
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockImplementation(function (this: HTMLElement) {
+        if (this.getAttribute("data-testid") === "signal-classement-button") {
+          return { top: 260, bottom: 280, left: 90, right: 110, width: 20, height: 20, x: 90, y: 260, toJSON: () => ({}) } as DOMRect;
+        }
+        return { top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0, x: 0, y: 0, toJSON: () => ({}) } as DOMRect;
+      });
+    const heightSpy = vi.spyOn(window, "innerHeight", "get").mockReturnValue(300);
+    try {
+      const view = render(SignalClassementMenu, {
+        props: { classe: "non_classe" as const, reasonCodes: CODES, onApply },
+      });
+      await fireEvent.click(view.getByTestId("signal-classement-button"));
+      await fireEvent.click(screen.getByRole("menuitem", { name: "Écarté" }));
+      expect(screen.getByRole("menuitem", { name: "Non résidentiel" })).toBeTruthy();
+      const pop = document.querySelector(".classement-pop") as HTMLElement;
+      expect(pop).toBeTruthy();
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      const top = Number.parseFloat(pop.style.top);
+      const maxHeight = Number.parseFloat(pop.style.maxHeight);
+      expect(top).toBeGreaterThanOrEqual(8);
+      expect(maxHeight).toBeLessThanOrEqual(300 - 16);
+      expect(pop.style.getPropertyValue("--st-menu-maxHeight")).toBe(pop.style.maxHeight);
+    } finally {
+      rectSpy.mockRestore();
+      heightSpy.mockRestore();
+    }
+  });
+
   it("F10: Escape and outside click close the menu; back returns to class step", async () => {
     const onApply = vi.fn();
     const view = render(SignalClassementMenu, {

@@ -39,6 +39,9 @@ export const REASON_LABELS: Readonly<Record<string, { fr: string; en: string }>>
   "N-DOUBLON": { fr: "Doublon", en: "Duplicate" },
   "N-HORS-TERR": { fr: "Hors territoire visé", en: "Outside target territory" },
   "N-FAUX-POSITIF": { fr: "Pas un règlement d'urbanisme", en: "Not a planning bylaw" },
+  // Hors N-* : codes non_pertinent présents en base hors des 11 N-*.
+  "V2-PRECEDENT": { fr: "Autorisation individuelle", en: "Individual authorization" },
+  "legacy-unknown": { fr: "Motif hérité inconnu", en: "Legacy unknown reason" },
 };
 
 /** Dictionary label for a code; falls back to the technical code itself. */

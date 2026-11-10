@@ -63,6 +63,12 @@ glose (libellé dérivé du nom du code, à valider).
 | N-HORS-TERR | Hors territoire visé | Outside target territory | proposé (dossier l.272, jamais employé) |
 | N-FAUX-POSITIF | Pas un règlement d'urbanisme | Not a planning bylaw | dossier l.91 « pas un règlement d'urbanisme » |
 
-Le 28e code du profil, `V2-PRECEDENT` (autorisation individuelle,
-dossier l.126), est hors du périmètre 8 P-* / 8 S-* / 11 N-* demandé ;
-il retombe sur le libellé serveur s'il existe, sinon sur le code.
+La base tient 13 codes `non_pertinent` : les 11 N-* ci-dessus plus
+`V2-PRECEDENT` (profil `immo-steve-2026-09`) et `legacy-unknown`
+(profil `lot-import-v1`, provenance d'import seulement). Tous deux ont
+un libellé du dictionnaire :
+
+| Code | Libellé FR | Libellé EN | Source |
+|---|---|---|---|
+| V2-PRECEDENT | Autorisation individuelle | Individual authorization | dossier l.126 « autorisation individuelle » |
+| legacy-unknown | Motif hérité inconnu | Legacy unknown reason | proposé (migration `0021_facet_lot_history.sql`, provenance d'import) |

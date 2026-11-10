@@ -8,11 +8,11 @@ const EXPECTED_CODES = [
   "S-RESTRICTIF", "S-INFO-MANQUANTE", "S-PPCMOI-SERIE", "S-PREEMPTION",
   "N-ACCESSOIRE", "N-RETIRE", "N-FORME", "N-ODJ-SEUL", "N-NON-RES",
   "N-ADMIN", "N-RESTRICTIF", "N-UNIFAM", "N-DOUBLON", "N-HORS-TERR",
-  "N-FAUX-POSITIF",
+  "N-FAUX-POSITIF", "V2-PRECEDENT", "legacy-unknown",
 ];
 
 describe("signal-reason-labels — human-readable reason labels (immo-steve-2026-09)", () => {
-  it("covers exactly the 27 P-/S-/N- codes with short fr + en labels", () => {
+  it("covers exactly the 29 codes (27 P-/S-/N- + V2-PRECEDENT + legacy-unknown) with short fr + en labels", () => {
     expect(Object.keys(REASON_LABELS).sort()).toEqual([...EXPECTED_CODES].sort());
     for (const code of EXPECTED_CODES) {
       for (const locale of ["fr", "en"] as const) {
@@ -31,14 +31,18 @@ describe("signal-reason-labels — human-readable reason labels (immo-steve-2026
   });
 
   it("falls back to the technical code when a code is missing from the dictionary", () => {
-    expect(reasonLabel("V2-PRECEDENT")).toBe("V2-PRECEDENT");
     expect(reasonLabel("X-UNKNOWN")).toBe("X-UNKNOWN");
+  });
+
+  it("labels the non_pertinent codes held in base beyond the 11 N-*", () => {
+    expect(reasonLabel("V2-PRECEDENT")).toBe("Autorisation individuelle");
+    expect(reasonLabel("legacy-unknown")).toBe("Motif hérité inconnu");
   });
 
   it("prefers the dictionary, then a server-provided label, then the code", () => {
     expect(reasonEntryLabel({ code: "P-DENSITE", label: "server label" })).toBe("Hausse de densité");
-    expect(reasonEntryLabel({ code: "V2-PRECEDENT", label: "Précédent individuel" })).toBe("Précédent individuel");
-    expect(reasonEntryLabel({ code: "V2-PRECEDENT", label: "  " })).toBe("V2-PRECEDENT");
-    expect(reasonEntryLabel({ code: "V2-PRECEDENT" })).toBe("V2-PRECEDENT");
+    expect(reasonEntryLabel({ code: "X-UNKNOWN", label: "Précédent individuel" })).toBe("Précédent individuel");
+    expect(reasonEntryLabel({ code: "X-UNKNOWN", label: "  " })).toBe("X-UNKNOWN");
+    expect(reasonEntryLabel({ code: "X-UNKNOWN" })).toBe("X-UNKNOWN");
   });
 });
