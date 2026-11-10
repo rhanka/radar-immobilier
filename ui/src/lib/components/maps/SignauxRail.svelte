@@ -54,7 +54,6 @@
     type ClassementFilter,
     type SignalClass,
   } from "$lib/signals/signal-classement.js";
-  import { FILTER_COUNTS_SCOPE_NOTE } from "$lib/signals/signal-filter-counts.js";
   import RailShell from "$lib/components/maps/RailShell.svelte";
   import RailSection from "$lib/components/maps/RailSection.svelte";
   import RailCityList from "$lib/components/maps/RailCityList.svelte";
@@ -539,12 +538,11 @@
                   onchange={(event) => toggleClassement(classe, event.currentTarget.checked)}
                 />
               </span>
-              <span title={FILTER_COUNTS_SCOPE_NOTE}>
+              <span>
                 <Badge tone={classementCounts[classe] > 0 ? "warning" : "neutral"} aria-label="{classementCounts[classe]} signaux">{classementCounts[classe]}</Badge>
               </span>
             </div>
           {/each}
-          <p class="classement-scope-note" title={FILTER_COUNTS_SCOPE_NOTE}>Comptes de la ville sélectionnée.</p>
         </div>
       {/if}
     </div>
@@ -579,13 +577,12 @@
                 />
               </span>
               {#if filtreCounts !== null}
-                <span title={FILTER_COUNTS_SCOPE_NOTE}>
+                <span>
                   <Badge tone={filtreCounts[row.key as keyof typeof filtreCounts] > 0 ? "warning" : "neutral"} aria-label="{filtreCounts[row.key as keyof typeof filtreCounts]} signaux">{filtreCounts[row.key as keyof typeof filtreCounts]}</Badge>
                 </span>
               {/if}
             </div>
           {/each}
-          <p class="classement-scope-note" title={FILTER_COUNTS_SCOPE_NOTE}>Comptes de la ville sélectionnée.</p>
         </div>
       {/if}
     </div>
@@ -705,12 +702,6 @@
 
   .classement-row :global(.st-badge) {
     flex-shrink: 0;
-  }
-
-  .classement-scope-note {
-    margin: 0;
-    color: var(--st-semantic-text-muted);
-    font-size: var(--rail-fs-small, 0.75rem);
   }
 
   .classement-trigger {

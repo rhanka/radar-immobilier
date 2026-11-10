@@ -18,6 +18,7 @@
     type SignalClass,
   } from "$lib/signals/signal-classement.js";
   import { reasonEntryLabel } from "$lib/signals/signal-reason-labels.js";
+  import { nextPanelMenuId, openPanelMenuId } from "$lib/components/maps/panel-menu.js";
 
   export let classe: SignalClass = "non_classe";
   export let reasonCodes: ReasonCodeEntry[] = [];
@@ -32,7 +33,9 @@
   let classWrapEl: HTMLElement | null = null;
   let reasonWrapEl: HTMLElement | null = null;
   let hoverTimer: ReturnType<typeof setTimeout> | null = null;
+  const panelMenuId = nextPanelMenuId("classement");
   $: if (disabled && open) closeAll(false);
+  $: if (open && $openPanelMenuId !== null && $openPanelMenuId !== panelMenuId) closeAll(false);
 
   const SUBMENU_CLASSES: readonly SignalClass[] = ["pertinent", "a_surveiller", "ecarte"];
 
@@ -46,6 +49,7 @@
     cancelHover();
     open = false;
     pendingClass = null;
+    openPanelMenuId.update((v) => (v === panelMenuId ? null : v));
     if (returnFocus) triggerButton()?.focus();
   }
   function closeSub(): void {
@@ -183,26 +187,14 @@
       btn.classList.toggle("classement-item--selected", selected);
       if (selected) btn.setAttribute("aria-haspopup", "menu");
       else btn.removeAttribute("aria-haspopup");
-      // Fixed chevron slots on EVERY line (left + right, empty when the
-      // line is not the selected parent) so icon and label never shift
-      // on hover/selection, whichever side the sub-menu opens on.
-      let leftSlot = btn.querySelector<HTMLElement>(".classement-chevron--left");
-      if (!leftSlot) {
-        leftSlot = document.createElement("span");
-        leftSlot.className = "classement-chevron classement-chevron--left";
-        leftSlot.setAttribute("aria-hidden", "true");
-        btn.prepend(leftSlot);
+      let chevron = btn.querySelector<HTMLElement>(".classement-chevron");
+      if (!chevron) {
+        chevron = document.createElement("span");
+        chevron.className = "classement-chevron";
+        chevron.setAttribute("aria-hidden", "true");
+        btn.prepend(chevron);
       }
-      let rightSlot = btn.querySelector<HTMLElement>(".classement-chevron--right");
-      if (!rightSlot) {
-        rightSlot = document.createElement("span");
-        rightSlot.className = "classement-chevron classement-chevron--right";
-        rightSlot.setAttribute("aria-hidden", "true");
-        btn.append(rightSlot);
-      }
-      const showChevron = selected && SUBMENU_CLASSES.includes(candidate);
-      leftSlot.textContent = showChevron && subSide === "left" ? "‹" : "";
-      rightSlot.textContent = showChevron && subSide === "right" ? "›" : "";
+      chevron.textContent = selected && SUBMENU_CLASSES.includes(candidate) ? (subSide === "left" ? "‹" : "›") : "";
     });
   }
 
@@ -223,6 +215,7 @@
       cancelHover();
       open = false;
       pendingClass = null;
+      openPanelMenuId.update((v) => (v === panelMenuId ? null : v));
       onApply("non_classe", null);
       triggerButton()?.focus();
       return;
@@ -238,12 +231,14 @@
     cancelHover();
     open = false;
     pendingClass = null;
+    openPanelMenuId.update((v) => (v === panelMenuId ? null : v));
     onApply(chosen, code);
     triggerButton()?.focus();
   }
 
   async function toggle(): Promise<void> {
     if (open) { closeAll(false); return; }
+    openPanelMenuId.set(panelMenuId);
     open = true;
     pendingClass = null;
     await tick();
@@ -320,25 +315,20 @@
 
 <svelte:window on:click={onWindowClick} on:keydown={onWindowKey} />
 <span class="classement-menu" bind:this={rootEl}>
-  <!-- Standard DS icon button (ghost: transparent, light hover darkening,
-       no border) — same component/size as the Zones/Lots warning trigger. -->
-  <span role="presentation" on:click|stopPropagation>
-    <IconButton
-      size="sm"
-      variant="ghost"
-      style="color: {CLASSEMENT_META[classe].token}"
-      aria-label="Classement : {CLASSEMENT_META[classe].label}"
-      aria-haspopup="menu"
-      aria-expanded={open}
-      title="Classement : {CLASSEMENT_META[classe].label}"
-      data-testid="signal-classement-button"
-      data-classe={classe}
-      {disabled}
-      onclick={toggle}
-    >
-      <svelte:component this={CurrentIcon} size={15} aria-hidden="true" />
-    </IconButton>
-  </span>
+  <IconButton
+    size="sm"
+    variant="ghost"
+    style="color: {CLASSEMENT_META[classe].token}"
+    aria-label="Classement : {CLASSEMENT_META[classe].label}"
+    aria-haspopup="menu"
+    aria-expanded={open}
+    title="Classement : {CLASSEMENT_META[classe].label}"
+    data-testid="signal-classement-button"
+    {disabled}
+    onclick={(event: MouseEvent) => { event.stopPropagation(); void toggle(); }}
+  >
+    <svelte:component this={CurrentIcon} size={15} aria-hidden="true" />
+  </IconButton>
   {#if open}
     <span class="classement-pop" data-testid="classement-pop" data-side={subSide} use:portalPop={pendingClass ?? "class"}>
       <span class="cascade" role="presentation" on:keydown={onCascadeKeydown}>
@@ -360,13 +350,6 @@
 
 <style>
   .classement-menu { position: relative; display: inline-flex; }
-  /* Class colours: DS semantic tokens, icon only (labels keep primary text).
-     pertinent=feedback-success, a_surveiller=feedback-warning,
-     ecarte=text-muted, non_classe=text-secondary (see CLASSEMENT_META). */
-  .cascade-class :global([data-class="pertinent"] svg) { color: var(--st-semantic-feedback-success); }
-  .cascade-class :global([data-class="a_surveiller"] svg) { color: var(--st-semantic-feedback-warning); }
-  .cascade-class :global([data-class="ecarte"] svg) { color: var(--st-semantic-text-muted); }
-  .cascade-class :global([data-class="non_classe"] svg) { color: var(--st-semantic-text-secondary); }
   .classement-pop { position: absolute; top: calc(100% + 4px); right: 0; z-index: 30; display: block; border-radius: var(--st-component-popover-radius, var(--st-radius-lg, 0.5rem)); box-shadow: var(--st-component-popover-shadow, var(--st-shadow-floating)); }
   .cascade { position: relative; display: block; }
   .cascade-class { display: block; }
@@ -375,5 +358,6 @@
   .cascade-reason :global(.st-menu) { box-shadow: var(--st-component-popover-shadow, var(--st-shadow-floating)); }
   :global(.classement-item--selected) { background: var(--st-component-selectableRow-selectedBackground, var(--st-semantic-surface-subtle)); color: var(--st-component-selectableRow-selectedText, var(--st-semantic-text-primary)); font-weight: 600; }
   :global(.classement-chevron) { display: inline-flex; align-items: center; justify-content: center; width: 1rem; min-width: 1rem; font-size: 1rem; line-height: 1; color: var(--st-semantic-text-secondary); flex: 0 0 1rem; }
+  :global(.st-menu [data-class] svg) { color: var(--st-component-iconButton-text, var(--st-semantic-text-primary)); }
   .classement-empty { display: block; padding: 4px 8px; color: var(--st-semantic-text-secondary); font-size: 0.75rem; background: var(--st-semantic-surface-raised); }
 </style>
