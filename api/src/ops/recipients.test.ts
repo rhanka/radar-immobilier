@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { SignJWT, createLocalJWKSet, exportJWK, generateKeyPair } from "jose";
+import { PgDialect } from "drizzle-orm/pg-core";
 import { loadConfig, resolveOpsConfig } from "../config.js";
 import {
+  createDrizzleRecipientsStore,
   isMissingWorkspaceTablesError,
   mergeRecipients,
   opsRecipientsRoute,
@@ -300,5 +302,65 @@ describe("ops config", () => {
     expect(() =>
       loadConfig({ ...base, OPS_TARGET: "staging" }),
     ).toThrow();
+  });
+
+  it("drops an audience overlapping a user Bearer [REDACTED]", () => {
+    const base = {
+      NODE_ENV: "test",
+      POSTGRES_HOST: "localhost",
+      POSTGRES_USER: "radar",
+      POSTGRES_PASSWORD: "pw",
+      POSTGRES_DB: "radar",
+      S3_ENDPOINT: "http://localhost:9000",
+      S3_ACCESS_KEY: "minio",
+      S3_SECRET_KEY: "minio",
+      OPS_TARGET: "immo-prod",
+      OPS_RECIPIENTS_AUDIENCE: "https://app.example.test",
+    } as NodeJS.ProcessEnv;
+    expect(
+      resolveOpsConfig(loadConfig(base), ["https://app.example.test"]),
+    ).toEqual({ expectedTarget: "immo-prod" });
+    expect(
+      resolveOpsConfig(loadConfig(base), ["https://other.example.test"]),
+    ).toEqual({
+      expectedTarget: "immo-prod",
+      recipientsAudience: "https://app.example.test",
+    });
+  });
+});
+
+describe("createDrizzleRecipientsStore filters", () => {
+  function fakeDb(capture: { cond?: unknown }) {
+    const builder: Record<string, unknown> = {};
+    builder.from = () => builder;
+    builder.innerJoin = () => builder;
+    builder.where = (cond: unknown) => {
+      capture.cond = cond;
+      return Promise.resolve([]);
+    };
+    return { select: () => builder };
+  }
+
+  it("filters app admins on is_admin and approved status", async () => {
+    const capture: { cond?: unknown } = {};
+    const store = createDrizzleRecipientsStore(fakeDb(capture) as never);
+    await store.listAppAdmins();
+    const query = new PgDialect().sqlToQuery(capture.cond as never);
+    expect(query.sql).toContain("is_admin");
+    expect(query.params).toContain(true);
+    expect(query.params).toContain("approved");
+  });
+
+  it("filters workspace managers on slug, active, unrevoked, manage_members", async () => {
+    const capture: { cond?: unknown } = {};
+    const store = createDrizzleRecipientsStore(fakeDb(capture) as never);
+    await store.listWorkspaceManagers("ref-workspace");
+    const query = new PgDialect().sqlToQuery(capture.cond as never);
+    expect(query.sql).toContain("manage_members");
+    expect(query.sql).toContain("revoked_at");
+    expect(query.params).toContain("ref-workspace");
+    expect(query.params).toContain("active");
+    expect(query.params).toContain(true);
+    expect(query.params).toContain("approved");
   });
 });
