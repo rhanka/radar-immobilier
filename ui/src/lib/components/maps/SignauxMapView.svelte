@@ -183,6 +183,14 @@
     type SignalTimeRange,
   } from "$lib/signals/signal-date-filter.js";
   import { rankVivierBNodes } from "$lib/signals/vivier-b-ranking.js";
+  import { filtreCountsFor } from "$lib/signals/signal-filter-counts.js";
+  import {
+    buildClassementMap,
+    classementCounts,
+    classementKey,
+    filterNodesByClassement,
+  } from "$lib/signals/signal-classement.js";
+  import { applyClassement as applyClassementWrite, classementWriteErrorMessage, fetchReasonCodes } from "$lib/signals/signal-classement-client.js";
   import {
     buildSignauxLotLegend,
     lotLineColorExpression,
@@ -278,6 +286,19 @@
   let detailError: string | null = null;
   let detailNodes: GraphSignalNode[] = [];
   let detailLegacyProjection: LegacyZmpProjection | null = null;
+  // Classement (spec 2026-11-08): heads of the coherent read + Steve codes.
+  let detailSelectionHeads: import("$lib/signals/graph-signal-detail-client.js").CoherentSelectionHead[] = [];
+  let detailArchiveHeads: import("$lib/signals/graph-signal-detail-client.js").CoherentArchiveHead[] = [];
+  let classementFilter: import("$lib/signals/signal-classement.js").ClassementFilter = {
+    pertinent: true, a_surveiller: true, non_classe: true, ecarte: false,
+  };
+  let classementReasonCodes: import("$lib/signals/signal-classement.js").ReasonCodeEntry[] = [];
+  let classementReasonWorkspace: string | null = null;
+  let classementOverrides = new Map<string, import("$lib/signals/signal-classement.js").ClassementEntry>();
+  let classementInFlight = new Set<string>();
+  let classementError: string | null = null;
+  /** Per-card classement write failures (classementKey -> message). */
+  let classementErrors = new Map<string, string>();
   // ── Waiters PAR COUCHE (zones / lots indépendants) ────────────────────────
   // Chaque couche porte SON propre état chargement + erreur : l'échec ou la
   // lenteur de l'une n'affecte JAMAIS l'affichage de l'autre.
@@ -563,6 +584,18 @@
   // without one no scoped request is issued.
   $: workspaceState = $workspaceContext;
   $: scopedWorkspaceId = workspaceState.context.workspaceId;
+  $: if (scopedWorkspaceId !== null && classementReasonWorkspace !== scopedWorkspaceId) {
+    classementReasonWorkspace = scopedWorkspaceId;
+    const ws = scopedWorkspaceId;
+    void fetchReasonCodes({ workspaceId: ws })
+      .then((codes) => { if (classementReasonWorkspace === ws) classementReasonCodes = codes; })
+      .catch(() => {
+        if (classementReasonWorkspace === ws) {
+          classementReasonCodes = [];
+          classementError = "Motifs de classement indisponibles — Écarté est impossible sans motif.";
+        }
+      });
+  }
   $: workspaceNote = scopedWorkspaceId === null ? workspaceUnavailableMessage(workspaceState) : null;
 
   // Keep viewers isolated: clear details on sub/workspace changes, then
@@ -879,6 +912,110 @@
   // extraction) ; elle se corrige côté données, pas en surfaçant par-dessus les
   // filtres vivier-v2.
   $: filteredDetailNodes = gatedDetailNodes;
+  // Classement: class map from coherent heads (+ optimistic overrides), then
+  // the Classement filter lens on the displayed list.
+  $: classementBaseMap = buildClassementMap(detailSelectionHeads, detailArchiveHeads);
+  $: classementMap = new Map([...classementBaseMap, ...classementOverrides]);
+  $: classementFilteredNodes = filterNodesByClassement(filteredDetailNodes, classementMap, classementFilter);
+  // Pertinence counts (owner 2026-11-09): AFTER period + Filtre (axes +
+  // exclusions), i.e. over `filteredDetailNodes`, NOT the raw detail nodes —
+  // recomputed reactively whenever period/Filtre changes.
+  $: classementCountsValue = classementCountsFor(filteredDetailNodes, detailArchiveHeads, classementMap);
+  // Filtre counts (owner 2026-11-09): within period + Pertinence scope —
+  // date lens then Pertinence lens on the raw detail, before any Filtre
+  // axis/exclusion. Each axis/exclusion is counted independently.
+  $: filtreScopedNodes = filterNodesByClassement(
+    filterNodesByDocumentDate(detailNodes, dateRange, dateBasis),
+    classementMap,
+    classementFilter,
+  );
+  $: filtreCountsValue = filtreCountsFor(filtreScopedNodes);
+  function classementCountsFor(
+    nodes: GraphSignalNode[],
+    archiveHeads: import("$lib/signals/graph-signal-detail-client.js").CoherentArchiveHead[],
+    map: Map<string, import("$lib/signals/signal-classement.js").ClassementEntry>,
+  ): Record<import("$lib/signals/signal-classement.js").SignalClass, number> {
+    const classes: import("$lib/signals/signal-classement.js").SignalClass[] = nodes.map(
+      (node) => map.get(classementKey(node.type, node.id, node.citySlug))?.classe ?? "non_classe",
+    );
+    const visibleKeys = new Set(nodes.map((node) => classementKey(node.type, node.id, node.citySlug)));
+    for (const head of archiveHeads) {
+      if (head.effectiveDiscarded && !visibleKeys.has(classementKey(head.target.type, head.target.id, head.target.citySlug))) {
+        classes.push("ecarte");
+      }
+    }
+    return classementCounts(classes);
+  }
+  function handleClassementFilterChange(
+    next: import("$lib/signals/signal-classement.js").ClassementFilter,
+  ): void {
+    classementFilter = next;
+  }
+  async function handleApplyClassement(
+    node: GraphSignalNode,
+    nextClass: import("$lib/signals/signal-classement.js").SignalClass,
+    reasonCode: string | null,
+  ): Promise<void> {
+    const workspaceId = scopedWorkspaceId;
+    const citySlug = selectedCity?.municipality.slug ?? node.citySlug;
+    const key = classementKey(node.type, node.id, citySlug);
+    // F5: per-node in-flight guard — a second apply on the same node is ignored.
+    if (classementInFlight.has(key)) return;
+    if (workspaceId === null || !citySlug || !node.facetFingerprint) {
+      // F7: never fail silently — flag the concerned card.
+      classementErrors = new Map(classementErrors).set(
+        key, "Classement indisponible pour ce signal (empreinte ou contexte manquant).");
+      return;
+    }
+    const current = classementMap.get(key) ?? {
+      classe: "non_classe" as const, reasonCode: null,
+      pertinentHeadId: null, aSurveillerHeadId: null,
+      pertinentExpectedHeadId: null, aSurveillerExpectedHeadId: null,
+      archiveHeadId: null, discarded: false,
+    };
+    classementInFlight = new Set([...classementInFlight, key]);
+    const overrides = new Map(classementOverrides);
+    overrides.set(key, { ...current, classe: nextClass, reasonCode, discarded: nextClass === "ecarte" });
+    classementOverrides = overrides;
+    const clearOverride = () => {
+      const next = new Map(classementOverrides);
+      next.delete(key);
+      classementOverrides = next;
+    };
+    try {
+      await applyClassementWrite(
+        { workspaceId },
+        {
+          target: { citySlug, type: node.type as "Signal" | "DesignationEvent", id: node.id },
+          displayedFingerprint: node.facetFingerprint,
+          current,
+          nextClass,
+          reasonCode,
+          catalog: classementReasonCodes,
+        },
+      );
+      // A successful write clears this card's error flag.
+      if (classementErrors.has(key)) {
+        const nextErrors = new Map(classementErrors);
+        nextErrors.delete(key);
+        classementErrors = nextErrors;
+      }
+      // Keep this node's override until the reload lands (no flicker);
+      // other nodes' overrides are preserved.
+      await loadDetailForCity(citySlug, { silent: true });
+      clearOverride();
+      void load();
+    } catch (error) {
+      clearOverride();
+      classementErrors = new Map(classementErrors).set(key, classementWriteErrorMessage(error));
+      console.warn("Classement write failed:", error);
+      if (selectedCity) void loadDetailForCity(selectedCity.municipality.slug, { silent: true });
+    } finally {
+      const next = new Set(classementInFlight);
+      next.delete(key);
+      classementInFlight = next;
+    }
+  }
   $: effectiveDetailError = detailError ?? (
     !detailLoading && detailNodes.length > 0 && !detailProjection.available
       ? "Projection du vivier indisponible (contrat serveur incompatible)."
@@ -900,9 +1037,9 @@
    */
   $: selectedCityLiveCount =
     selectedCity && !detailLoading && detailProjection.available
-      ? filteredDetailNodes.length
+      ? classementFilteredNodes.length
       : null;
-  $: displayedLots = buildDisplayedLots(lotsResponse, zonesResponse, filteredDetailNodes);
+  $: displayedLots = buildDisplayedLots(lotsResponse, zonesResponse, classementFilteredNodes);
 
   /**
    * #3 — Règlement PAR ZONE dans la fiche : on injecte dans l'objet zone le
@@ -931,7 +1068,7 @@
   // Source de vérité de la nav : la liste FILTRÉE (ordre du pane droit). Le
   // viewer la reçoit + l'index courant et NE refiltre pas. navSignals est
   // multi-doc ; le viewer affiche PDF i/N quand ≥ 2 docs distincts.
-  $: navSignals = buildNavSignals(filteredDetailNodes);
+  $: navSignals = buildNavSignals(classementFilteredNodes);
   /** Rang du signal ouvert dans navSignals (-1 si overlay fermé / hors-liste). */
   $: navIndex = activeEvidence
     ? navSignals.findIndex((n) => n.id === activeEvidence!.nodeId)
@@ -1532,6 +1669,8 @@
       // 200 with no node: city without graphify signals (explicit empty
       // state, not an error).
       detailNodes = res.nodes;
+      detailSelectionHeads = res.selection ?? [];
+      detailArchiveHeads = res.heads ?? [];
       detailLegacyProjection = res.legacyProjection;
       // Alimenter le cache multi-villes (recoloration aplats filtrée)
       detailCache.set(citySlug, res.nodes);
@@ -1744,8 +1883,10 @@
       // clic carte (handleLotClick) ; les autres kinds gardent l'exclusif géo
       // par défaut (zone+lot).
       if (!selectionState.selectedKeys.has(key)) {
+        const clickedKind = parseKey(key)?.kind;
+        // Une seule carte de signal sélectionnée à la fois (exclusif ENTRE signaux).
         const exclusiveKinds: readonly BucketKind[] | undefined =
-          parseKey(key)?.kind === "lot" ? ["lot"] : undefined;
+          clickedKind === "lot" ? ["lot"] : clickedKind === "signal" ? ["signal"] : undefined;
         selectionState = toggleExclusiveSelection(selectionState, key, exclusiveKinds);
       }
       selectionState = setFocus(selectionState, key);
@@ -2583,6 +2724,10 @@
       onFilterChange={handleFilterChange}
       onExclusionsChange={handleExclusionsChange}
       onTimeRangeChange={handleTimeRangeChange}
+      {classementFilter}
+      classementCounts={classementCountsValue}
+      filtreCounts={filtreCountsValue}
+      onClassementFilterChange={handleClassementFilterChange}
     />
   </svelte:fragment>
 
@@ -2868,7 +3013,7 @@
     <SignauxSelPanel
       bind:this={selPanel}
       {selectedCity}
-      detailNodes={filteredDetailNodes}
+      detailNodes={classementFilteredNodes}
       unfilteredSignalCount={detailNodes.length}
       {detailLoading}
       detailError={effectiveDetailError}
@@ -2899,6 +3044,12 @@
       onRetryGeo={retryGeo}
       hoveredSignalId={hoveredEvidenceSignalId}
       onHoverSignal={setHoveredEvidenceSignal}
+      {classementMap}
+      classementReasonCodes={classementReasonCodes}
+      classementInFlight={classementInFlight}
+      {classementError}
+      {classementErrors}
+      onApplyClassement={(node, nextClass, reasonCode) => void handleApplyClassement(node, nextClass, reasonCode)}
     />
   </svelte:fragment>
 </ViewLayout>

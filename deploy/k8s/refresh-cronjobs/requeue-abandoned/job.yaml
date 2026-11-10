@@ -1,0 +1,89 @@
+# One-off operator Job: requeue `abandoned` refresh-coverage documents.
+# Rendered by `refresh-018.mk render-requeue-abandoned` (ENV=preprod|prod),
+# applied once by `run-requeue-abandoned`, which ALWAYS cleans up
+# (cleanup-requeue-abandoned): Job + script ConfigMap. No Secret is created.
+# Placeholders REQUEUE-*-SET-BY-RENDER are substituted at render time and are
+# fail-loud: an unrendered manifest carries values the script rejects.
+# The image is the frozen prod/preprod api image; it has NO coverage module
+# in its dist (bundles inline it per entrypoint), so the script arrives as a
+# self-contained esbuild bundle mounted from a ConfigMap and resolves the
+# image's own node_modules (@aws-sdk/client-s3, zod) from /workspace.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: radar-refresh-requeue-abandoned
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/component: refresh-requeue-abandoned
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 3600
+  activeDeadlineSeconds: 1800
+  template:
+    spec:
+      restartPolicy: Never
+      serviceAccountName: radar-app
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: requeue-abandoned
+          image: ghcr.io/rhanka/radar-api:PINNED-BY-CI-AT-RELEASE-DO-NOT-APPLY-UNEDITED
+          imagePullPolicy: IfNotPresent
+          workingDir: /workspace
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          env:
+            - name: SCRAPE_S3_ENDPOINT
+              valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_ENDPOINT } }
+            - name: SCRAPE_S3_BUCKET
+              valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_BUCKET } }
+            - name: SCRAPE_S3_REGION
+              valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_REGION } }
+            - name: SCRAPE_S3_FORCE_PATH_STYLE
+              valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_FORCE_PATH_STYLE } }
+            - name: SCRAPE_S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ACCESS_KEY } }
+            - name: SCRAPE_S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_SECRET_KEY } }
+          command:
+            - /bin/sh
+            - -ceu
+            - |
+              # Rendered argument string (validated by render-requeue-abandoned).
+              # It lives in this shell block, not in env values: a `--since`
+              # date or a `-` sentinel in a YAML env value is not a string.
+              args="REQUEUE-ARGS-SET-BY-RENDER"
+              marker="REQUEUE-ARGS-SET-""BY-RENDER"
+              case " $args " in *" $marker "*) echo "unrendered requeue arguments" >&2; exit 1;; esac
+              # Same lock as a refresh pass, non-blocking: refuse, never race.
+              # A real run HOLDS the lock for its whole duration. A dry run
+              # only CHECKS it (then releases): it writes nothing, and holding
+              # the lock could make a scheduled pass skip its slot.
+              if [ "$args" != "${args#--dry-run}" ]; then
+                exec 9>/keyring/runtime/.refresh.lock
+                flock -n 9 || { echo "a refresh pass is in flight (dry-run refused)" >&2; exit 1; }
+                flock -u 9
+                exec 9>&-
+                exec node /workspace/requeue-abandoned.bundle.mjs $args
+              fi
+              exec /usr/bin/flock -n /keyring/runtime/.refresh.lock \
+                node /workspace/requeue-abandoned.bundle.mjs $args
+          volumeMounts:
+            - { name: keyring, mountPath: /keyring }
+            - { name: requeue-script, mountPath: /workspace/requeue-abandoned.bundle.mjs, subPath: requeue-abandoned.bundle.mjs, readOnly: true }
+            - { name: scratch, mountPath: /tmp }
+      volumes:
+        - name: keyring
+          persistentVolumeClaim: { claimName: radar-refresh-keyring }
+        - name: requeue-script
+          configMap:
+            name: radar-refresh-requeue-abandoned-script
+            defaultMode: 0444
+        - name: scratch
+          emptyDir: { sizeLimit: 64Mi }
