@@ -75,7 +75,9 @@ cutover deletes them immediately by UID. Sweep cursors under
 `refresh/018/sweep/` are excluded from copy and reconciliation.
 
 The `prepare-preprod-db` CI job blocks deployment on restore, DDL, 6H or smoke
-failure. Its runner polls cluster Jobs for up to 50 minutes. This is incompatible
+failure. Its runner polls cluster Jobs for up to 240 minutes, aligned with the
+sum of the preparation stage budgets (about 12 390 s after the preparing
+stamp). This is incompatible
 with the design's simultaneous five-minute runner wall-time budget; no long work
 runs on the runner. The prepared smoke checks API health, SHA and anonymous
 refusal; the existing full UI/MCP smoke runs during cutover.
