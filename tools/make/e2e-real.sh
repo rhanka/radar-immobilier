@@ -24,6 +24,9 @@ if [ "${1:-run}" = "down" ]; then
   exit 0
 fi
 mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}" tmp/e2e-real
+# UIDFIX-EX1: pre-create the named-volume mount points host-side so
+# Docker does not create them as root-owned stubs in the workspace.
+mkdir -p node_modules api/node_modules ui/node_modules packages/immo-mcp/node_modules
 exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
 until flock -w 30 8; do echo "[test-e2e] waiting for the Docker campaign lock"; done
 cleanup() {
