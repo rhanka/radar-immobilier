@@ -69,6 +69,18 @@ describe("inbound SG4b host build API", () => {
     }
   });
 
+  it("logs a structured refusal line without candidate content on a handoff refusal", async () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    try {
+      const endpoints = createLiveHostEndpoints({ module: { ...module,
+        acceptHandoff: async () => { throw new FakeLiveHostError("handoff_mismatch"); } }, scopeId: "s", keys, ledger: ledger(true) });
+      expect((await endpoints.handoff({ v: 1 })).status).toBe(409);
+      expect(spy).toHaveBeenCalledTimes(1);
+      const line = JSON.parse(String(spy.mock.calls[0]?.[0])) as Record<string, unknown>;
+      expect(line).toEqual({ kind: "artifacts.handoff_refused", reason: "handoff_mismatch", jobId: "j", artifactId: "a" });
+    } finally { spy.mockRestore(); }
+  });
+
   it("accepts a handoff with immo's receipt key, and answers 503 without a ledger or a receipt key", async () => {
     const endpoints = createLiveHostEndpoints({ module, scopeId: "s", keys, ledger: ledger(true) });
     expect(await endpoints.handoff({ v: 1 })).toEqual({ status: 200, body: { v: 1,

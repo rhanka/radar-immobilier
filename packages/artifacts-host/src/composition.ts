@@ -127,6 +127,7 @@ export async function composeArtifactHost(
   const { blobDeadlineMs, preparationWindowMs } =
     resolvePublishDeadlines(config.publishBlobDeadlineMs ?? PUBLISH_BLOB_DEADLINE_MS);
   let uploadSweepTimer: NodeJS.Timeout | undefined;
+  let reconcileTimer: NodeJS.Timeout | undefined;
   try {
     // Files parity — upload staging + presigned PUT signer on the same
     // bucket/client as publication blobs (disjoint `staging/` key prefix),
@@ -193,6 +194,28 @@ export async function composeArtifactHost(
         .finally(() => { sweepInFlight = false; });
     }, 60_000);
     uploadSweepTimer.unref();
+    // Pending-build threshold sweep (0.2.25): every 5 minutes, jobs pending
+    // past the package threshold (10 min) are closed from the builder status,
+    // so a builder failure never leaves a job at `building`/`build_pending`.
+    if (gitMode.pendingBuilds) {
+      const pendingBuilds = gitMode.pendingBuilds;
+      let reconcileInFlight = false;
+      reconcileTimer = setInterval(() => {
+        if (reconcileInFlight) return;
+        reconcileInFlight = true;
+        void pendingBuilds.sweep()
+          .then((report) => {
+            if (report.updated > 0) console.error(JSON.stringify({
+              kind: "artifacts.reconcile_pending_builds", checked: report.checked, updated: report.updated }));
+          })
+          .catch((error: unknown) => {
+            console.error(JSON.stringify({ kind: "artifacts.reconcile_unavailable" }));
+            options.onProviderFailure?.(error);
+          })
+          .finally(() => { reconcileInFlight = false; });
+      }, 5 * 60_000);
+      reconcileTimer.unref();
+    }
     const cleanup = startPreparationCleanup(pool, domain.store, blobs, options.onProviderFailure);
     const execute: typeof domain.execute = async (request, invocation) => {
       const dispatch = () => domain.execute(request, invocation);
@@ -227,6 +250,6 @@ export async function composeArtifactHost(
       authorizeCommit: authorizeArtifactCommit,
       ...(uploadPageService ? { uploadPageService, uploadPageConfig: {
         controlOrigin: options.uploadPage!.controlOrigin, s3Origins: options.uploadPage!.s3Origins } } : {}),
-      close: () => { clearInterval(uploadSweepTimer); cleanup.stop(); destroyTransport(); } };
-  } catch (error) { clearInterval(uploadSweepTimer); destroyTransport(); throw error; }
+      close: () => { clearInterval(uploadSweepTimer); clearInterval(reconcileTimer); cleanup.stop(); destroyTransport(); } };
+  } catch (error) { clearInterval(uploadSweepTimer); clearInterval(reconcileTimer); destroyTransport(); throw error; }
 }

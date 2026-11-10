@@ -573,8 +573,19 @@ export interface CoherentArchiveHead {
   effectiveDiscarded: boolean;
 }
 
+export interface CoherentSelectionHead {
+  target: { citySlug: string; type: string; id: string };
+  facet: string;
+  basket: string | null;
+  state: string;
+  reasonCode: string | null;
+  id?: string;
+}
+
 export interface GraphSignalDetailResponse {
   citySlug: string;
+  /** Personal selection heads (pertinent/a_surveiller) of the coherent read. */
+  selection?: CoherentSelectionHead[];
   /** 6L1 revision token acknowledged with this snapshot. */
   token: string;
   /** Legacy A authority derived server-side from the same served nodes. */
@@ -682,6 +693,7 @@ export async function fetchGraphSignalDetail(
   }
   return {
     citySlug,
+    selection: Array.isArray(body.selection) ? (body.selection as CoherentSelectionHead[]) : [],
     token: body.token,
     legacyProjection: isRecord(body.legacyProjection)
       ? body.legacyProjection as unknown as LegacyZmpProjection : null,

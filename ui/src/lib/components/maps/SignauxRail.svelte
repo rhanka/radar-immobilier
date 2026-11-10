@@ -26,7 +26,8 @@
    * ZÉRO couleur hex en dur · ZÉRO override composant DS · ZÉRO icône lucide
    * ZÉRO checkbox/tabs/search bespoke.
    */
-  import { Checkbox, RadioGroup, TimeRangePicker } from "@sentropic/design-system-svelte";
+  import { Badge, Checkbox, RadioGroup, TimeRangePicker } from "@sentropic/design-system-svelte";
+  import { ChevronDown } from "@lucide/svelte";
   import {
     B_SUBSET_KEY,
     bAxesFromVivierKey,
@@ -46,6 +47,13 @@
     SIGNAL_TIME_RANGE_PRESETS,
     type SignalTimeRange,
   } from "$lib/signals/signal-date-filter.js";
+  import {
+    CLASSEMENT_META,
+    DEFAULT_CLASSEMENT_FILTER,
+    SIGNAL_CLASSES,
+    type ClassementFilter,
+    type SignalClass,
+  } from "$lib/signals/signal-classement.js";
   import RailShell from "$lib/components/maps/RailShell.svelte";
   import RailSection from "$lib/components/maps/RailSection.svelte";
   import RailCityList from "$lib/components/maps/RailCityList.svelte";
@@ -134,6 +142,80 @@
    * reloads once for the range and its basis together.
    */
   export let onTimeRangeChange: (next: SignalTimeRange, basis: DocumentDateBasis) => void = () => {};
+
+  /** Classement filter (spec 2026-11-08): checked by default except Écarté. */
+  export let classementFilter: ClassementFilter = { ...DEFAULT_CLASSEMENT_FILTER };
+  export let classementCounts: Record<SignalClass, number> = {
+    pertinent: 0, a_surveiller: 0, non_classe: 0, ecarte: 0,
+  };
+  export let onClassementFilterChange: (next: ClassementFilter) => void = () => {};
+
+  /**
+   * Filtre counts (owner 2026-11-09): per-axis / per-exclusion counts within
+   * the current scope (period + Pertinence), computed by the parent from the
+   * selected city's loaded detail. `null` when no exact count is available
+   * (no classification) → pills are hidden rather than partial.
+   */
+  export let filtreCounts: import("$lib/signals/signal-filter-counts.js").FiltreCounts | null = null;
+
+  function toggleClassement(classe: SignalClass, checked: boolean): void {
+    onClassementFilterChange({ ...classementFilter, [classe]: checked });
+  }
+
+  // Pertinence dropdown (owner 09/11): closed trigger summarising the checked
+  // classes by name (no counter), opening a multi-checkbox panel whose counts
+  // sit in right-aligned orange pills. Default: all except Écarté.
+  let classementOpen = false;
+  let classementWrapEl: HTMLElement | null = null;
+  $: classementSummary = SIGNAL_CLASSES.filter((classe) => classementFilter[classe])
+    .map((classe) => CLASSEMENT_META[classe].label)
+    .join(", ") || "Aucune sélection";
+
+  function onClassementWindowClick(event: MouseEvent): void {
+    if (
+      classementOpen &&
+      classementWrapEl &&
+      event.target instanceof Node &&
+      !classementWrapEl.contains(event.target)
+    ) {
+      classementOpen = false;
+    }
+  }
+  function onClassementWindowKey(event: KeyboardEvent): void {
+    if (classementOpen && event.key === "Escape") classementOpen = false;
+    if (filtreOpen && event.key === "Escape") filtreOpen = false;
+  }
+
+  // Filtre (axes + exclusions) as a second dropdown with the same DS field
+  // pattern as Pertinence: same label typography, same DS chevron, closed
+  // summary truncated with a single-line ellipsis.
+  let filtreOpen = false;
+  let filtreWrapEl: HTMLElement | null = null;
+  const FILTRE_LABELS = {
+    z: "Zonage",
+    r: "Résidentiel",
+    p: "Précoce",
+    piia: "Exclure PIIA sans projet résidentiel",
+    derog: "Exclure dérogations mineures",
+  } as const;
+  $: filtreSummary = [
+    ...(bAxes.z ? [FILTRE_LABELS.z] : []),
+    ...(bAxes.r ? [FILTRE_LABELS.r] : []),
+    ...(bAxes.p ? [FILTRE_LABELS.p] : []),
+    ...(exclusions.piiaSansProjetResidentiel ? [FILTRE_LABELS.piia] : []),
+    ...(exclusions.derogationsMineures ? [FILTRE_LABELS.derog] : []),
+  ].join(", ") || "Aucune sélection";
+
+  function onFiltreWindowClick(event: MouseEvent): void {
+    if (
+      filtreOpen &&
+      filtreWrapEl &&
+      event.target instanceof Node &&
+      !filtreWrapEl.contains(event.target)
+    ) {
+      filtreOpen = false;
+    }
+  }
 
   // The DS resolves presets when the user opens/selects them. Refresh the
   // upper bound then, rather than pinning a long-lived rail to its mount time.
@@ -331,11 +413,9 @@
   /**
    * Projection générique consommée par la liste partagée RailCityList.
    *
-   * Badge de la ville SÉLECTIONNÉE quand son compte live est plus étroit que le
-   * bulk : « live/bulk » (ex. « 1/4 ») — le compte affiché reste honnête sans
-   * jamais laisser croire que des signaux ont disparu. Un live ≥ bulk (axes
-   * relâchés au-delà du compte serveur) s'affiche seul : le bulk n'est plus un
-   * dénominateur signifiant.
+   * Badge ville = le seul compte APRÈS filtres (owner 2026-11-09 : « afficher
+   * 1 et pas 1/6 — le 6 ne correspond à rien »). Jamais de format « x/y » :
+   * il n'y a qu'un niveau de filtre, donc un seul nombre.
    */
   function toRailItem(
     entry: CityMapEntry,
@@ -344,10 +424,7 @@
     liveCount: number | null,
     liveSlug: string | null,
   ): RailCityItem {
-    const bulkCount = bulkCountFor(entry, key, unavailable);
     const activeCount = countFor(entry, key, unavailable, liveCount, liveSlug);
-    const isNarrowedLive =
-      activeCount !== null && bulkCount !== null && activeCount < bulkCount;
     return {
       slug: entry.municipality.slug,
       name: entry.municipality.name,
@@ -356,12 +433,6 @@
       badge:
         activeCount === null
           ? { label: "n/d", tone: "neutral" }
-          : isNarrowedLive
-          ? {
-              label: `${activeCount}/${bulkCount}`,
-              tone: activeCount > 0 ? "warning" : "neutral",
-              ariaLabel: `${activeCount} signaux affichés sur ${bulkCount} au total`,
-            }
           : activeCount > 0
           ? {
               label: String(activeCount),
@@ -406,7 +477,11 @@
       ).length;
 </script>
 
-<svelte:window onpointerdown={refreshTimeRangeMax} onkeydown={refreshTimeRangeMax} />
+<svelte:window
+  onpointerdown={refreshTimeRangeMax}
+  onkeydown={(event) => { refreshTimeRangeMax(event); onClassementWindowKey(event); }}
+  on:click={(event) => { onClassementWindowClick(event); onFiltreWindowClick(event); }}
+/>
 
 <!-- Le panneau B (checkboxes d'axes + exclusions) est déclaré au NIVEAU RACINE
      (pas dans <RailSection>, sinon Svelte le passerait comme prop) puis rendu
@@ -439,41 +514,77 @@
         {/snippet}
       </TimeRangePicker>
     </div>
-    <div class="vivier-toggles">
-      <!-- Trois axes COMBINABLES, librement cochables/décochables (défauts
-           Zonage ✓, Résidentiel ✓, Précoce ✗). Décocher un axe RELÂCHE le filtre
-           d'affichage (lecture de la classification serveur, jamais une
-           reclassification). -->
-      <Checkbox
-        label="Zonage"
-        checked={bAxes.z}
-        onchange={(event) => toggleBAxis({ z: event.currentTarget.checked })}
-      />
-      <Checkbox
-        label="Résidentiel"
-        checked={bAxes.r}
-        onchange={(event) => toggleBAxis({ r: event.currentTarget.checked })}
-      />
-      <Checkbox
-        label="Précoce"
-        checked={bAxes.p}
-        onchange={(event) => toggleBAxis({ p: event.currentTarget.checked })}
-      />
+    <div class="classement-filter" bind:this={classementWrapEl}>
+      <span class="pertinence-label">Pertinence</span>
+      <button
+        type="button"
+        class="classement-trigger"
+        data-testid="classement-filter-trigger"
+        aria-expanded={classementOpen}
+        aria-haspopup="true"
+        on:click|stopPropagation={() => { classementOpen = !classementOpen; if (classementOpen) filtreOpen = false; }}
+      >
+        <span class="classement-trigger-summary">{classementSummary}</span>
+        <span class="classement-trigger-chevron" class:classement-trigger-chevron--open={classementOpen} aria-hidden="true"><ChevronDown size={16} /></span>
+      </button>
+      {#if classementOpen}
+        <div class="classement-panel" data-testid="classement-filter-panel">
+          {#each SIGNAL_CLASSES as classe}
+            <div class="classement-row">
+              <span class="classement-row-check">
+                <Checkbox
+                  label={CLASSEMENT_META[classe].label}
+                  checked={classementFilter[classe]}
+                  onchange={(event) => toggleClassement(classe, event.currentTarget.checked)}
+                />
+              </span>
+              <span>
+                <Badge tone={classementCounts[classe] > 0 ? "warning" : "neutral"} aria-label="{classementCounts[classe]} signaux">{classementCounts[classe]}</Badge>
+              </span>
+            </div>
+          {/each}
+        </div>
+      {/if}
     </div>
-
-    <div class="vivier-b-exclusions">
-      <Checkbox
-        label="Exclure PIIA sans projet résidentiel"
-        checked={exclusions.piiaSansProjetResidentiel}
-        onchange={(event) =>
-          setExclusion({ piiaSansProjetResidentiel: event.currentTarget.checked })}
-      />
-      <Checkbox
-        label="Exclure dérogations mineures"
-        checked={exclusions.derogationsMineures}
-        onchange={(event) =>
-          setExclusion({ derogationsMineures: event.currentTarget.checked })}
-      />
+    <div class="classement-filter" bind:this={filtreWrapEl}>
+      <span class="pertinence-label">Filtre</span>
+      <button
+        type="button"
+        class="classement-trigger"
+        data-testid="filtre-trigger"
+        aria-expanded={filtreOpen}
+        aria-haspopup="true"
+        on:click|stopPropagation={() => { filtreOpen = !filtreOpen; if (filtreOpen) classementOpen = false; }}
+      >
+        <span class="classement-trigger-summary">{filtreSummary}</span>
+        <span class="classement-trigger-chevron" class:classement-trigger-chevron--open={filtreOpen} aria-hidden="true"><ChevronDown size={16} /></span>
+      </button>
+      {#if filtreOpen}
+        <div class="classement-panel" data-testid="filtre-panel">
+          {#each [
+            { key: "z", label: FILTRE_LABELS.z, checked: bAxes.z, toggle: (checked: boolean) => toggleBAxis({ z: checked }) },
+            { key: "r", label: FILTRE_LABELS.r, checked: bAxes.r, toggle: (checked: boolean) => toggleBAxis({ r: checked }) },
+            { key: "p", label: FILTRE_LABELS.p, checked: bAxes.p, toggle: (checked: boolean) => toggleBAxis({ p: checked }) },
+            { key: "piia", label: FILTRE_LABELS.piia, checked: exclusions.piiaSansProjetResidentiel, toggle: (checked: boolean) => setExclusion({ piiaSansProjetResidentiel: checked }) },
+            { key: "derog", label: FILTRE_LABELS.derog, checked: exclusions.derogationsMineures, toggle: (checked: boolean) => setExclusion({ derogationsMineures: checked }) },
+          ] as row}
+            <div class="classement-row">
+              <span class="classement-row-check">
+                <Checkbox
+                  label={row.label}
+                  checked={row.checked}
+                  onchange={(event) => row.toggle(event.currentTarget.checked)}
+                />
+              </span>
+              {#if filtreCounts !== null}
+                <span>
+                  <Badge tone={filtreCounts[row.key as keyof typeof filtreCounts] > 0 ? "warning" : "neutral"} aria-label="{filtreCounts[row.key as keyof typeof filtreCounts]} signaux">{filtreCounts[row.key as keyof typeof filtreCounts]}</Badge>
+                </span>
+              {/if}
+            </div>
+          {/each}
+        </div>
+      {/if}
     </div>
   </div>
 {/snippet}
@@ -548,31 +659,98 @@
     text-align: left;
   }
 
-  .vivier-toggles {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-  }
-
-  /* Interim date-basis switch: same compact choice token as the rail toggles. */
-  .vivier-toggles :global(.st-choice) {
-    --st-component-selection-choiceLabelFontSize: var(--rail-fs-small, 0.75rem);
-  }
-
   /* Typographie compacte des aides/descriptions des checkbox du rail. */
   .vivier-panel :global(.st-choice__help),
   .vivier-panel :global(.st-choice__description) {
     font-size: var(--rail-fs-small, 0.75rem);
   }
 
-  /* ── Exclusions d'affichage de B ── */
-  .vivier-b-exclusions {
+  /* Pertinence: label styled like the DS « Période des signaux » field label
+     (sentence case, not an uppercase section header). */
+  .classement-filter {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
   }
 
-  .vivier-b-exclusions :global(.st-choice) {
+  .pertinence-label {
+    color: var(--st-component-field-labelText, var(--st-semantic-text-primary));
+    font-size: var(--rail-fs-small, 0.75rem);
+    font-weight: 600;
+  }
+
+  .classement-trigger-summary {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .classement-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .classement-row-check {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .classement-row :global(.st-badge) {
+    flex-shrink: 0;
+  }
+
+  .classement-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid var(--st-semantic-border-subtle);
+    border-radius: var(--st-radius-sm, 4px);
+    background: var(--st-semantic-surface-default);
+    color: var(--st-semantic-text-primary);
+    font-size: var(--rail-fs-small, 0.75rem);
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .classement-trigger:hover {
+    background: var(--st-semantic-surface-subtle);
+  }
+
+  .classement-trigger-chevron {
+    flex-shrink: 0;
+    color: var(--st-semantic-text-muted);
+    transition: transform 0.12s ease;
+  }
+
+  .classement-trigger-chevron--open {
+    transform: rotate(180deg);
+  }
+
+  .classement-panel {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    right: 0;
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.5rem;
+    background: var(--st-semantic-surface-default);
+    border: 1px solid var(--st-semantic-border-subtle);
+    border-radius: var(--st-component-dropdown-radius, var(--st-radius-md, 0.375rem));
+    box-shadow: var(--st-component-dropdown-shadow, var(--st-shadow-medium));
+  }
+
+  .classement-panel :global(.st-choice) {
     --st-component-selection-choiceLabelFontSize: var(--rail-fs-small, 0.75rem);
   }
 </style>

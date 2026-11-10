@@ -219,6 +219,8 @@ describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
     expect((await screen.findByTestId("sel-lot-drawer")).textContent).toContain("1000001");
     await view.rerender({ geoRoute: { level: "city", citySlug: CITY_SLUG, state: parseGeoQuery("?filter.zonage=1") } });
     await waitFor(() => expect(screen.queryByTestId("sel-lot-drawer")).toBeNull());
+    // Filtre checkboxes live in the (closed by default) Filtre dropdown panel.
+    if (!screen.queryByTestId("filtre-panel")) await fireEvent.click(screen.getByTestId("filtre-trigger"));
     expect((screen.getByLabelText("Zonage") as HTMLInputElement).checked).toBe(true);
   });
 
@@ -229,6 +231,7 @@ describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
     const view = render(SignauxMapView, { props: { geoRoute: cityRoute() } });
     const cptaq = await screen.findByTestId("legend-cptaq-toggle");
     await waitFor(() => expect(cptaq.getAttribute("aria-pressed")).toBe("true"));
+    if (!screen.queryByTestId("filtre-panel")) await fireEvent.click(screen.getByTestId("filtre-trigger"));
     expect((screen.getByLabelText("Zonage") as HTMLInputElement).checked).toBe(true);
     expect((screen.getByLabelText("Rechercher une ville") as HTMLInputElement).value).toBe("Valleyfield");
     expect(fetchAllLots).not.toHaveBeenCalled();
@@ -240,6 +243,7 @@ describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
     setSearch("?filter.dateFrom=2026-05-01&filter.dateTo=2026-05-31");
     await view.rerender({ geoRoute: cityRoute() });
     await waitFor(() => expect(fetchAllLots).toHaveBeenCalled());
+    if (!screen.queryByTestId("filtre-panel")) await fireEvent.click(screen.getByTestId("filtre-trigger"));
     for (const label of ["Zonage", "Résidentiel", "Précoce", "Exclure PIIA sans projet résidentiel", "Exclure dérogations mineures"]) {
       expect((screen.getByLabelText(label) as HTMLInputElement).checked).toBe(false);
     }
@@ -252,6 +256,7 @@ describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
     const labels = ["Zonage", "Résidentiel", "Précoce", "Exclure PIIA sans projet résidentiel", "Exclure dérogations mineures"];
     setSearch("?mode=signal");
     const view = render(SignauxMapView, { props: { geoRoute: cityRoute() } });
+    if (!screen.queryByTestId("filtre-panel")) await fireEvent.click(await screen.findByTestId("filtre-trigger"));
     await waitFor(() => expect((screen.getByLabelText("Zonage") as HTMLInputElement).checked).toBe(true));
     for (const label of labels) expect((screen.getByLabelText(label) as HTMLInputElement).checked).toBe(true);
     expect(screen.getByText("Dernière semaine")).toBeTruthy();
