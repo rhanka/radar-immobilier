@@ -11,8 +11,10 @@ import { getSignalNodesForCity } from "../services/graph/graph-store.js";
 import {
   buildScopedSignalCards,
   scopedLegacyProjection,
+  toSignalCardView,
   type ScopedSignalCardDeps,
 } from "../services/facets/scoped-signal-cards.js";
+import { toDegradedSignalCard } from "./graph-signals.js";
 import { FacetError, targetFingerprint } from "../services/facets/target.js";
 import { ScopeError } from "../services/facets/scope.js";
 import { WorkspaceError } from "../services/workspaces/types.js";
@@ -102,8 +104,8 @@ export function scopedProjectionRevisionsRoute(deps: ScopedProjectionRevisionsDe
     }
   });
   app.get("/api/v1/workspaces/:workspaceId/signal-facets/coherent-city", async (c) => {
-    const params = z.object({ citySlug: city, mode }).safeParse({
-      citySlug: c.req.query("citySlug"), mode: c.req.query("mode"),
+    const params = z.object({ citySlug: city, mode, view: z.enum(["full", "card"]).optional() }).safeParse({
+      citySlug: c.req.query("citySlug"), mode: c.req.query("mode"), view: c.req.query("view") || undefined,
     });
     if (!params.success) return c.json({ error: "invalid_scoped_identity" }, 400);
     const session = c.get("session" as never) as { sub: string };
@@ -132,11 +134,14 @@ export function scopedProjectionRevisionsRoute(deps: ScopedProjectionRevisionsDe
       // plus the server card fields derived from that same stored node
       // (classification, evidence) so the UI never reclassifies.
       const visibleNodes = coherent.payload.signals.filter((node) => !hiddenKeys.has(key(node)));
-      const cards = await buildScopedSignalCards(deps, visibleNodes, params.data.citySlug);
+      const cardView = params.data.view === "card";
+      const cards = cardView
+        ? visibleNodes.map((node) => toSignalCardView(toDegradedSignalCard(node)))
+        : await buildScopedSignalCards(deps, visibleNodes, params.data.citySlug);
       const signals = visibleNodes.map((node, index) => ({
         ...cards[index]!,
         id: node.id, type: node.type, citySlug: node.citySlug, label: node.label,
-        props: node.props, sourceRef: node.sourceRef,
+        props: cardView ? cards[index]!.props : node.props, sourceRef: node.sourceRef,
         facetFingerprint: targetFingerprint(node),
       }));
       const legacyProjection = scopedLegacyProjection(cards);
