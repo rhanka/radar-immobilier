@@ -10,6 +10,11 @@
 # down -v --remove-orphans in a trap, even on failure.
 SHELL := /bin/bash
 ENV ?= test-mcp-auth-022
+# UIDFIX-EX2: standalone makefile (never includes the root Makefile);
+# export the real host ids so docker-compose.test.yml renders the
+# host user instead of silently pinning the 1000:1000 fallback.
+export UID := $(shell id -u)
+export GID := $(shell id -g)
 # Effective compose project derives only from ENV: fixed command and -p flag
 # ignore inherited DOCKER_COMPOSE/COMPOSE/COMPOSE_PROJECT_NAME values.
 override DOCKER_COMPOSE := docker compose

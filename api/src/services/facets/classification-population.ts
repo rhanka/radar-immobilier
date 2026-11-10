@@ -3,9 +3,10 @@ import { getSignalNodesForCity } from "../graph/graph-store.js";
 import { NativeTarget } from "./classification-query.js";
 import { ClassificationError } from "./classification-errors.js";
 import type { SignalTarget } from "./target.js";
+import type { StoredSignalNodeInput } from "../../routes/graph-signals.js";
 
 export const POPULATION = "signal_nodes_v1" as const;
-export type ClassificationNode = Awaited<ReturnType<typeof getSignalNodesForCity>>[number];
+export type ClassificationNode = StoredSignalNodeInput;
 export function nativeKey(target: SignalTarget): string {
   return JSON.stringify([target.citySlug, target.type, target.id]);
 }

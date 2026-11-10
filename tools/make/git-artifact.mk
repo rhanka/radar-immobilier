@@ -5,6 +5,11 @@
 #   make -f tools/make/git-artifact.mk gb1-rows ENV=test-git-artifact
 #   make -f tools/make/git-artifact.mk down ENV=test-git-artifact
 GIT_ARTIFACT_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/../..)
+# UIDFIX-EX2: standalone makefile (never includes the root Makefile);
+# export the real host ids so git-artifact.compose.yml renders the
+# host user instead of silently pinning the 1000:1000 fallback.
+export UID := $(shell id -u)
+export GID := $(shell id -g)
 REF ?= HEAD
 GB1_ROWS := artifact-build/gb1-qualification.json
 .PHONY: proof test down gb1-rows
