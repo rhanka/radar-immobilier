@@ -200,9 +200,14 @@
     color: var(--st-semantic-warning-text);
   }
 
+  /* Same slot as the sm IconButton it replaces: identical box, centred. */
   .reload-spinner {
     display: inline-flex;
     flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: var(--st-component-iconButton-smSize, 2rem);
+    height: var(--st-component-iconButton-smSize, 2rem);
     color: var(--st-semantic-text-muted);
     animation: reload-spin 1s linear infinite;
   }
