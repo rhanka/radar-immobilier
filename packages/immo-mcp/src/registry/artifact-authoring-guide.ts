@@ -66,7 +66,7 @@ export function gitAuthoringSection(mode: GitModeResolution): AuthoringGuideGitM
     tools: [...mode.tools],
     unavailableTools: [...mode.unrouted],
     path: [
-      "Each user works on their OWN page and branch: artifacts_ensure, then artifacts_git_attach({artifactId, idempotencyKey}) creates the personal branch artifact/p/<id8-principal>/<slug>-<id8> from main. You never edit another user's binding.",
+      "Each user works on their OWN page and branch: artifacts_ensure, then artifacts_git_attach({artifactId, idempotencyKey}) creates the personal branch artifact/p/<id8-principal>/app-<id8-artifact> from main (the host defaults repoId to the registered repository and baseRef to main; pass branch explicitly to bind an existing personal branch instead). You never edit another user's binding.",
       "Read the real application source with artifacts_fetch_app_source (artifactId resolves the bound branch); it needs current code rights. Oversized files are reported as omitted, not truncated.",
       ...(has("artifacts_live_write") ? [
         "Edit only through live: artifacts_live_write applies edits to your own live tree (expectedHeadSha + expectedLiveRevision), artifacts_live_read / artifacts_live_status inspect it, artifacts_live_reset discards the draft, artifacts_live_control starts or stops the session. Without a qualified worker live_write answers builder_unavailable.",
