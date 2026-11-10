@@ -22,6 +22,9 @@
  * `packages/artifacts-host/src/git-mode/service-token.ts`. The exact
  * audience is fixed by the Sentropic L1 contract and injected via
  * `OPS_RECIPIENTS_AUDIENCE`; without it the route stays closed (503).
+ * Deployment gate: that audience MUST be a dedicated L1 service
+ * audience, distinct from every user Bearer [REDACTED]; an overlapping
+ * value is refused in `resolveOpsConfig` (route stays closed).
  */
 import { Hono } from "hono";
 import { createRemoteJWKSet, type JWTVerifyGetKey } from "jose";
@@ -100,20 +103,33 @@ export function mergeRecipients(
     .sort((a, b) => a.accountRef.localeCompare(b.accountRef));
 }
 
-/** True when Postgres reports a missing workspace table (SQLSTATE 42P01). */
+/**
+ * True when Postgres reports a missing workspace table (SQLSTATE 42P01).
+ * Drizzle wraps driver failures in a `DrizzleQueryError` whose pg
+ * `DatabaseError` sits in the `cause` chain (same wrapping as
+ * `isUniqueViolation` in `admission/jit.ts`), so every level is checked:
+ * the top-level message is the failed SQL text and carries no `code`.
+ */
 export function isMissingWorkspaceTablesError(error: unknown): boolean {
-  if (typeof error === "object" && error !== null) {
-    const code = (error as { code?: unknown }).code;
-    if (code === "42P01") return true;
+  let current: unknown = error;
+  for (
+    let depth = 0;
+    depth < 4 && typeof current === "object" && current !== null;
+    depth++
+  ) {
+    if ((current as { code?: unknown }).code === "42P01") return true;
     const message =
-      error instanceof Error ? error.message : String(
-        (error as { message?: unknown }).message ?? "",
-      );
-    return (
+      current instanceof Error
+        ? current.message
+        : String((current as { message?: unknown }).message ?? "");
+    if (
       message.includes("does not exist") &&
       (message.includes("workspace_memberships") ||
         message.includes("workspaces"))
-    );
+    ) {
+      return true;
+    }
+    current = (current as { cause?: unknown }).cause;
   }
   return false;
 }
@@ -199,6 +215,20 @@ export interface OpsRouteDeps {
   /** Test seam for JWKS verification (local key set). */
   readonly getKey?: JWTVerifyGetKey;
   readonly now?: () => number;
+  /** Fallback-tier signal; defaults to a structured `console.warn`. */
+  readonly warn?: (event: Record<string, unknown>) => void;
+}
+
+/** Remote JWKS sets cached per URI so jose key caching survives requests. */
+const remoteJwkSets = new Map<string, JWTVerifyGetKey>();
+
+function remoteJwkSet(jwksUri: string): JWTVerifyGetKey {
+  let set = remoteJwkSets.get(jwksUri);
+  if (!set) {
+    set = createRemoteJWKSet(new URL(jwksUri));
+    remoteJwkSets.set(jwksUri, set);
+  }
+  return set;
 }
 
 function extractBearerToken(header: string | undefined): string | undefined {
@@ -232,7 +262,7 @@ export function opsRecipientsRoute(deps: OpsRouteDeps | null): Hono {
       if (!deps.jwksUri) {
         return c.json({ error: "ops_recipients_unconfigured" }, 503);
       }
-      getKey = createRemoteJWKSet(new URL(deps.jwksUri));
+      getKey = remoteJwkSet(deps.jwksUri);
     }
     const now = deps.now ?? (() => Date.now());
     try {
@@ -254,6 +284,12 @@ export function opsRecipientsRoute(deps: OpsRouteDeps | null): Hono {
       resolved = await resolveRecipients(store, deps.referenceWorkspaceSlug);
     } catch {
       return c.json({ error: "recipients_unavailable" }, 503);
+    }
+    if (!resolved.workspaceTierAvailable) {
+      (deps.warn ?? ((event) => console.warn(JSON.stringify(event))))({
+        event: "ops_recipients_workspace_tier_unavailable",
+        target: deps.expectedTarget,
+      });
     }
     const body: OpsRecipientsResponse = {
       v: 1,
