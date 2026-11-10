@@ -55,8 +55,11 @@ describe("global UI styles", () => {
   });
 
   it("should space zero-margin map notices independently of their margins", async () => {
+    // SignauxMapView no longer renders a Zones/Lots loading banner (dropped
+    // duplicate overlay); only SourceCoverageMap keeps the notice pattern.
+    const signauxSource = await readFile(new URL("./lib/components/maps/SignauxMapView.svelte", import.meta.url), "utf8");
+    expect(signauxSource).not.toContain("Chargement des zones");
     for (const path of [
-      "./lib/components/maps/SignauxMapView.svelte",
       "./lib/components/sources-map/SourceCoverageMap.svelte",
     ]) {
       const source = await readFile(new URL(path, import.meta.url), "utf8");
