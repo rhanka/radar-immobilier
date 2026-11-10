@@ -14,6 +14,7 @@ import {
   type GraphSignalCard,
 } from "../../routes/graph-signals.js";
 import { buildLegacyZmpProjection, type LegacyZmpProjection } from "../graph/vivier-v2.js";
+import { projectProps } from "./props-projection.js";
 
 export type StoredSignalNode = Parameters<typeof toDegradedSignalCard>[0];
 
@@ -48,6 +49,11 @@ export async function buildScopedSignalCards(
       console.error(`[scoped-signal-cards] card degraded (city=${citySlug} node=${node.id}):`, error);
       return toDegradedSignalCard(node);
     })));
+}
+
+/** Thin card view (SPEC_FILTRAGE_API §3): closed props projection, no S3. */
+export function toSignalCardView(card: GraphSignalCard): GraphSignalCard {
+  return { ...card, props: projectProps(card.props) };
 }
 
 /** Legacy A authority derived from the same served cards (exact signal ids). */
