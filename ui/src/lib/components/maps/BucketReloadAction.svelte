@@ -185,9 +185,9 @@
     flex-shrink: 0;
   }
 
-  .reload-anchor :global(.st-iconButton:hover:not(:disabled)),
-  .reload-anchor :global(.st-iconButton:focus-visible) {
-    background: var(--st-component-iconButton-hoverBackground, var(--st-semantic-action-secondaryHover, var(--st-semantic-surface-subtle)));
+  /* Parent .sel-bucket-head is already surface-subtle (= DS ghost hover), so the DS next-level hover token is used here. */
+  .reload-anchor :global(.st-iconButton:hover:not(:disabled)) {
+    background: var(--st-semantic-action-secondaryHover);
   }
 
   .reload-icon {
