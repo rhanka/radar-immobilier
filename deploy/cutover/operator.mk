@@ -12,6 +12,10 @@ override OUTPUT := $(value OUTPUT)
 override BUILD_RUN := $(value BUILD_RUN)
 override SHA := $(value SHA)
 export ENV RELEASE RUN MODE BACKUP_ID CYCLE_ID OUTPUT BUILD_RUN SHA TEST_PATTERN
+# UIDFIX-EX2: standalone makefile (never includes the root Makefile);
+# export the real host ids so test.compose.yml renders the host user.
+export UID := $(shell id -u)
+export GID := $(shell id -g)
 export COMPOSE_DISABLE_ENV_FILE := 1
 override COMPOSE := docker compose --env-file /dev/null -p radar-test-cutover -f $(CUTOVER_ROOT)/deploy/cutover/test.compose.yml
 .PHONY: help run prepare rollback recover status resume lock release-lock report-refs force-refresh test lint typecheck test-api down ps commit syntax
