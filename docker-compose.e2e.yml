@@ -46,7 +46,16 @@ services:
   # dependencies in named volumes (never on the host). It migrates and seeds
   # the synthetic database, then drives the UI served by the production image.
   e2e:
-    image: node:24-bookworm-slim
+    # UIDFIX-EX1: dedicated image (e2e/Dockerfile) baking the Chromium
+    # system deps, because the runner now runs as the host user and can
+    # no longer `apt-get` them via `playwright install --with-deps`.
+    build:
+      context: ./e2e
+      dockerfile: Dockerfile
+    image: radar-immobilier-e2e:${E2E_VERSION:-local}
+    # UIDFIX-EX1: run as the host user so bind-mounted outputs stay
+    # host-owned (Sentropic PRs #973/#987 pattern).
+    user: "${UID:-1000}:${GID:-1000}"
     working_dir: /workspace
     profiles: [e2e]
     entrypoint: ["bash", "tools/make/e2e-real-runner.sh"]
@@ -58,6 +67,11 @@ services:
       - e2e-mcp-node-modules:/workspace/packages/immo-mcp/node_modules
       - e2e-state:/e2e-state
     environment:
+      # UIDFIX-EX1: npm cache and Playwright browsers under the
+      # container /tmp (HOME is not writable for the host user).
+      HOME: /tmp
+      npm_config_cache: /tmp/npm-cache
+      PLAYWRIGHT_BROWSERS_PATH: /tmp/ms-playwright
       NODE_ENV: test
       # Runners without IPv6 egress (browser download): prefer IPv4.
       NODE_OPTIONS: --dns-result-order=ipv4first
