@@ -8,6 +8,7 @@ import {
   verifyReceipt, type AcceptOptions, type CandidateFile, type HandoffClaims, type HandoffReceipt, type HostRecheckView,
 } from "@sentropic/artifacts/live-host";
 import { createHostBuildApiClient, createMemoryJobStore } from "./build-api.js";
+import { createLiveWorkerClient } from "@sentropic/artifacts/live-host";
 import { composeGitMode, readGitModeConfig } from "./compose.js";
 import type { GitBuildPort } from "./provider-adapter.js";
 import { loadLiveHost } from "./live-host-adapter.js";
@@ -172,6 +173,8 @@ describe("host build API client (W7)", () => {
   const identity = { authorization: async () => "Bearer service-token" };
   const BASE = "https://builder.example/api/v1/artifacts/builder";
   const bindings = { get: vi.fn(async () => binding) };
+  const ack = { liveSessionId: "sess-1", leaseEpoch: 1, routeEpoch: 1, revision: "rev-1", ready: true };
+  const liveWorker = { reconcile: vi.fn(async () => ack) };
 
   it("admits only the sandbox executor, and only when the builder is configured", async () => {
     expect(await createHostBuildApiClient({}).admits("sandbox")).toBe(false);
@@ -181,44 +184,88 @@ describe("host build API client (W7)", () => {
     expect(await client.admits("ci")).toBe(false);
   });
 
-  it("reconciles the binding live (POST /v1/live/reconcile) BEFORE requesting the build", async () => {
+  it("reconciles the binding live through the package worker BEFORE requesting the build", async () => {
     const jobs = createMemoryJobStore();
+    const events: string[] = [];
+    const worker = { reconcile: vi.fn(async () => { events.push("reconcile"); return ack; }) };
     const fetcher = vi.fn(async (_url: URL, init: RequestInit) => {
+      events.push("builds");
       const body = JSON.parse(String(init.body)) as { jobId?: string };
       return new Response(JSON.stringify({ jobId: body.jobId ?? "reconciled", state: "build_pending" }), { status: 202 });
     });
-    const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs, bindings, fetch: fetcher as never });
+    const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs, bindings, liveWorker: worker, fetch: fetcher as never });
     await client.request(job);
-    expect(fetcher.mock.calls.map((call) => String((call as unknown as [URL])[0]))).toEqual([
-      `${BASE}/v1/live/reconcile`, `${BASE}/v1/builds`]);
-    const reconcileInit = (fetcher.mock.calls[0] as unknown as [URL, RequestInit])[1];
-    expect(reconcileInit.method).toBe("POST");
-    expect(JSON.parse(String(reconcileInit.body))).toEqual({ artifactId: job.artifactId,
-      binding: { repoId: "radar-immobilier", branch: binding.branch, subPath: "" }, generation: 2 });
-    expect((reconcileInit.headers as Record<string, string>).authorization).toBe("Bearer [REDACTED]");
+    expect(events).toEqual(["reconcile", "builds"]);
+    expect(worker.reconcile).toHaveBeenCalledWith({ storageScopeId: "s", artifactId: job.artifactId, bindingGeneration: 2 });
+    expect(String((fetcher.mock.calls[0] as unknown as [URL])[0])).toBe(`${BASE}/v1/builds`);
+  });
+
+  it("sends the closed reconcile body and validates the strict ack through the real package worker client", async () => {
+    const calls: Array<{ url: string; init: RequestInit }> = [];
+    const fetcher = vi.fn(async (url: URL, init: RequestInit) => {
+      calls.push({ url: String(url), init });
+      if (String(url).endsWith("/v1/live/draft/seal")) return new Response(null, { status: 204 });
+      if (String(url).endsWith("/v1/live/reconcile")) return new Response(JSON.stringify(ack), { status: 200 });
+      const body = JSON.parse(String(init.body)) as { jobId?: string };
+      return new Response(JSON.stringify({ jobId: body.jobId ?? "reconciled", state: "build_pending" }), { status: 202 });
+    });
+    const worker = createLiveWorkerClient({ baseUrl: BASE, identity, bindings,
+      fences: { current: async () => ({ ownerId: "alice", liveSessionId: "sess-1", leaseEpoch: 1, routeEpoch: 1 }) },
+      drafts: { current: async () => ({ revision: "rev-1", baseHeadSha: "a".repeat(40), liveTreeSha: "c".repeat(40), overlay: [] }) },
+      sessionState: async () => ({ epoch: 0, expiresAt: null }), fetch: fetcher as never });
+    const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs: createMemoryJobStore(), bindings,
+      liveWorker: worker, fetch: fetcher as never });
+    await client.request(job);
+    const reconcileCall = calls.find((call) => call.url === `${BASE}/v1/live/reconcile`)!;
+    expect(reconcileCall.init.method).toBe("POST");
+    expect(JSON.parse(String(reconcileCall.init.body))).toEqual({ artifactId: job.artifactId, bindingGeneration: 2,
+      ownerId: "alice", liveSessionId: "sess-1", leaseEpoch: 1, routeEpoch: 1,
+      binding: { repoId: "radar-immobilier", branch: binding.branch, subPath: "" }, invitation: { epoch: 0, expiresAt: null } });
+    expect((reconcileCall.init.headers as Record<string, string>).authorization).toBe("Bearer service-token");
+    // A malformed ack or a non-200 reconcile is refused before any build.
+    for (const answer of [new Response(JSON.stringify({ ready: true }), { status: 200 }),
+      new Response(JSON.stringify(ack), { status: 202 })]) {
+      const callsBefore = calls.length;
+      const badWorker = createLiveWorkerClient({ baseUrl: BASE, identity, bindings,
+        fences: { current: async () => ({ ownerId: "alice", liveSessionId: "sess-1", leaseEpoch: 1, routeEpoch: 1 }) },
+        drafts: { current: async () => ({ revision: "rev-1", baseHeadSha: "a".repeat(40), liveTreeSha: "c".repeat(40), overlay: [] }) },
+        sessionState: async () => ({ epoch: 0, expiresAt: null }),
+        fetch: (async (url: URL) => String(url).endsWith("/v1/live/draft/seal") ? new Response(null, { status: 204 }) : answer) as never });
+      const badClient = createHostBuildApiClient({ baseUrl: BASE, identity, jobs: createMemoryJobStore(), bindings,
+        liveWorker: badWorker, fetch: fetcher as never });
+      await expect(badClient.request(job)).rejects.toMatchObject({ kind: "provider_unavailable" });
+      expect(calls.length).toBe(callsBefore);
+    }
   });
 
   it("fails closed before persisting or building when the live reconcile is refused", async () => {
     const jobs = createMemoryJobStore();
     const fetcher = vi.fn(async () => new Response("{}", { status: 503 }));
-    const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs, bindings, fetch: fetcher as never });
+    const refused = { reconcile: vi.fn(async () => { throw Object.assign(new Error("refused"), { kind: "provider_unavailable" }); }) };
+    const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs, bindings, liveWorker: refused, fetch: fetcher as never });
     await expect(client.request(job)).rejects.toMatchObject({ kind: "provider_unavailable" });
-    expect(fetcher.mock.calls).toHaveLength(1);
-    expect(String((fetcher.mock.calls[0] as unknown as [URL])[0])).toBe(`${BASE}/v1/live/reconcile`);
+    expect(fetcher).not.toHaveBeenCalled();
+    expect(jobs.jobs.size).toBe(0);
+    // No live worker composed: fail closed before any builder call as well.
+    const noWorker = createHostBuildApiClient({ baseUrl: BASE, identity, jobs, bindings, fetch: fetcher as never });
+    await expect(noWorker.request(job)).rejects.toMatchObject({ kind: "provider_unavailable" });
+    expect(fetcher).not.toHaveBeenCalled();
     expect(jobs.jobs.size).toBe(0);
   });
 
   it("re-reconciles on a retry after a build_failed, so a failed build never blocks the next publish", async () => {
     const jobs = createMemoryJobStore();
+    const events: string[] = [];
+    const worker = { reconcile: vi.fn(async () => { events.push("reconcile"); return ack; }) };
     const fetcher = vi.fn(async (_url: URL, init: RequestInit) => {
+      events.push("builds");
       const body = JSON.parse(String(init.body)) as { jobId?: string };
       return new Response(JSON.stringify({ jobId: body.jobId ?? "reconciled", state: "build_pending" }), { status: 202 });
     });
-    const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs, bindings, fetch: fetcher as never });
+    const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs, bindings, liveWorker: worker, fetch: fetcher as never });
     await client.request(job);
     await client.request({ ...job, idempotencyKey: "k-retry" });
-    expect(fetcher.mock.calls.map((call) => String((call as unknown as [URL])[0]))).toEqual([
-      `${BASE}/v1/live/reconcile`, `${BASE}/v1/builds`, `${BASE}/v1/live/reconcile`, `${BASE}/v1/builds`]);
+    expect(events).toEqual(["reconcile", "builds", "reconcile", "builds"]);
   });
 
   it("persists the job, then posts exactly { artifactId, jobId, binding } to /v1/builds (202 or 200)", async () => {
@@ -227,10 +274,10 @@ describe("host build API client (W7)", () => {
       const body = JSON.parse(String(init.body)) as { jobId: string };
       return new Response(JSON.stringify({ jobId: body.jobId, state: "build_pending" }), { status: 202 });
     });
-    const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs, bindings, fetch: fetcher as never });
+    const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs, bindings, liveWorker, fetch: fetcher as never });
     const first = await client.request(job);
     expect(first.state).toBe("build_pending");
-    const [url, init] = fetcher.mock.calls[1]! as unknown as [URL, RequestInit];
+    const [url, init] = fetcher.mock.calls[0]! as unknown as [URL, RequestInit];
     expect(String(url)).toBe(`${BASE}/v1/builds`);
     expect(init.method).toBe("POST");
     expect(JSON.parse(String(init.body))).toEqual({ artifactId: job.artifactId, jobId: first.jobId,
@@ -249,9 +296,10 @@ describe("host build API client (W7)", () => {
       jobId: (JSON.parse(String(init.body)) as { jobId: string }).jobId, state: "build_pending" }), { status: 202 }));
     const stored = { ...binding, repoId: "stored-repo", branch: "artifact/p/alice000/other-22222222", subPath: "sub/dir" };
     const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs: createMemoryJobStore(), bindings: { get: async () => stored },
-      fetch: fetcher as never });
+      liveWorker, fetch: fetcher as never });
     await client.request({ ...job, repoId: "forged", branch: "artifact/forged", subPath: "forged" });
-    expect(JSON.parse(String((fetcher.mock.calls[1] as unknown as [URL, RequestInit])[1].body)).binding)
+    expect(liveWorker.reconcile).toHaveBeenCalledWith({ storageScopeId: "s", artifactId: job.artifactId, bindingGeneration: 2 });
+    expect(JSON.parse(String((fetcher.mock.calls[0] as unknown as [URL, RequestInit])[1].body)).binding)
       .toEqual({ repoId: "stored-repo", branch: "artifact/p/alice000/other-22222222", subPath: "sub/dir" });
   });
 
@@ -259,8 +307,11 @@ describe("host build API client (W7)", () => {
     for (const record of [undefined, { ...binding, state: "detached" as const }, { ...binding, generation: 3 }, { ...binding, generation: 1 }]) {
       const fetcher = vi.fn();
       const jobs = createMemoryJobStore();
-      const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs, bindings: { get: async () => record }, fetch: fetcher as never });
+      const worker = { reconcile: vi.fn(async () => ack) };
+      const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs, bindings: { get: async () => record },
+        liveWorker: worker, fetch: fetcher as never });
       await expect(client.request(job)).rejects.toMatchObject({ kind: "git_not_attached" });
+      expect(worker.reconcile).not.toHaveBeenCalled();
       expect(fetcher).not.toHaveBeenCalled();
       expect(jobs.jobs.size).toBe(0);
     }
@@ -282,7 +333,8 @@ describe("host build API client (W7)", () => {
 
   it("fails closed on builder errors, malformed answers and a missing job store", async () => {
     for (const answer of [new Response("{}", { status: 503 }), new Response(JSON.stringify({ jobId: "x", state: "weird" }), { status: 202 })]) {
-      const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs: createMemoryJobStore(), bindings, fetch: (async () => answer) as never });
+      const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs: createMemoryJobStore(), bindings, liveWorker,
+        fetch: (async () => answer) as never });
       await expect(client.request(job)).rejects.toMatchObject({ kind: "provider_unavailable" });
     }
     await expect(createHostBuildApiClient({ baseUrl: BASE, identity }).request(job)).rejects.toMatchObject({ kind: "provider_unavailable" });
