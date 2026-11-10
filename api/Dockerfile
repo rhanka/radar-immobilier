@@ -85,6 +85,8 @@ RUN npm install --no-save esbuild@0.25.12 \
   "    'api/src/scripts/emit-graphify34-candidates.ts'," \
   "    'api/src/scripts/refresh-pv.ts'," \
   "    'api/src/scripts/refresh-pending-watchdog.ts'," \
+  "    'api/src/scripts/refresh-requeue-abandoned.ts'," \
+  "    'api/src/scripts/refresh-requeue-recurrent.ts'," \
   "    'api/src/scripts/repair-graph-city-key.ts'," \
   "    'api/src/scripts/init-workspace-authority.ts'," \
   "    'api/src/scripts/attach-personal-history.ts'," \
