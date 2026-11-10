@@ -40,11 +40,25 @@ Sentropic PRs #973 and #987 (`fix/compose-host-user`,
   - `tools/make/artefacts-a4-run.sh`, `tools/make/artefacts-a5-run.sh`
     (UIDFIX-EX1)
   - `deploy/k8s/refresh-cronjobs/refresh-018.mk` (UIDFIX-EX1)
+  - `deploy/cutover/test.compose.yml`, `deploy/cutover/Dockerfile.test`,
+    `deploy/cutover/operator.mk`, `tools/make/cutover-verify.sh`,
+    `tools/immo-mcp-test.mk`, `tools/make/git-artifact.mk`,
+    `tools/make/git-artifact.compose.yml` (UIDFIX-EX2)
 - **Exception process**:
   - Declare exception ID `UIDFIX-EXn` in `## Feedback Loop` before
     touching any conditional/forbidden path.
 
 ## Feedback Loop
+- `acknowledge` UIDFIX-EX2 (declared 2026-11-10, review of PR #1061):
+  touch `deploy/cutover/test.compose.yml`,
+  `deploy/cutover/Dockerfile.test` (new), `deploy/cutover/operator.mk`,
+  `tools/make/cutover-verify.sh`, `tools/immo-mcp-test.mk`,
+  `tools/make/git-artifact.mk`, `tools/make/git-artifact.compose.yml`.
+  - Reason: REVIEW.md F1/F2 — the cutover `api` bind-mount writer was
+    missed and the standalone entrypoints pin the `1000:1000` fallback.
+  - Impact: same UIDFIX-EX1 pattern (host user, baked tools, one-off
+    root chown of fresh named volumes); no application code touched.
+  - Rollback: revert the EX2 commits.
 - `acknowledge` UIDFIX-EX1 (declared before any edit): touch
   `Makefile`, `docker-compose.yml`, `docker-compose.dev.yml`,
   `docker-compose.test.yml`, `docker-compose.e2e.yml`,

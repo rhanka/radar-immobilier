@@ -12,13 +12,22 @@ services:
       interval: 2s
       retries: 30
   api:
-    image: node:24-bookworm-slim
+    # UIDFIX-EX2: run as the host user so bind-mounted outputs stay
+    # host-owned (Sentropic PRs #973/#987 pattern); tools baked in
+    # deploy/cutover/Dockerfile.test (apt-get needs root).
+    user: "${UID:-1000}:${GID:-1000}"
+    build:
+      context: ../..
+      dockerfile: deploy/cutover/Dockerfile.test
+    image: radar-cutover-test:local
     working_dir: /workspace
     volumes:
       - ../..:/workspace
       - modules:/workspace/node_modules
       - api-modules:/workspace/api/node_modules
     environment:
+      HOME: /tmp
+      npm_config_cache: /tmp/npm-cache
       NODE_ENV: test
       LOT_MIGRATION_DB_TEST: "1"
       LOG_LEVEL: silent
