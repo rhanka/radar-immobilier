@@ -13,6 +13,9 @@ set -euo pipefail
 root=$(cd "$(dirname "$0")/../.." && pwd)
 cd "$root"
 export COMPOSE_DISABLE_ENV_FILE=1
+# UIDFIX-EX2: export the real host ids for the compose user:
+# interpolation (run() also passes --user literally as before).
+export UID="$(id -u)" GID="$(id -g)"
 unset COMPOSE_FILE COMPOSE_ENV_FILES COMPOSE_PROFILES
 mkdir -p tmp/git-artifact-proof
 compose=(docker compose --env-file /dev/null -p "radar-${ENV}" -f tools/make/git-artifact.compose.yml)
