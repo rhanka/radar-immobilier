@@ -23,7 +23,7 @@ await mkdir(`${DIR}/full/corpus/text`, { recursive: true });
 if (existsSync(`${DIR}/corpus/picked.json`)) {
   const pilotIds = JSON.parse(await readFile(`${DIR}/corpus/picked.json`, "utf8"));
   for (const id of pilotIds) {
-    try { await copyFile(`${DIR}/corpus/pdf/${id}.pdf`, `${DIR}/full/corpus/pdf/${id}.pdf`); } catch {}
+    try { await copyFile(`${DIR}/corpus/pdf/${id}.pdf`, `${DIR}/full/corpus/pdf/${id}.pdf`); } catch { /* pilot pdf absent: skip */ }
   }
 }
 
