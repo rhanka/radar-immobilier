@@ -57,30 +57,41 @@
       const rect = btn.getBoundingClientRect();
       const margin = 8;
       const gap = 4;
+      const minHeight = 160;
       popEl.style.position = "fixed";
       popEl.style.zIndex = "1000";
-      popEl.style.maxHeight = `${Math.max(window.innerHeight - margin * 2, 160)}px`;
+      // Side with the most room wins; the popover height is capped to
+      // that side so the header (first row) can never leave the viewport.
+      const spaceBelow = window.innerHeight - rect.bottom - gap - margin;
+      const spaceAbove = rect.top - gap - margin;
+      const openAbove = spaceBelow < popEl.offsetHeight && spaceAbove > spaceBelow;
+      const maxHeight = Math.max(openAbove ? spaceAbove : spaceBelow, minHeight);
+      popEl.style.maxHeight = `${maxHeight}px`;
       popEl.style.overflowY = "auto";
+      popEl.style.setProperty("--st-menu-maxHeight", `${maxHeight}px`);
       const width = popEl.offsetWidth;
-      const height = popEl.offsetHeight;
-      let top = rect.bottom + gap;
-      if (top + height > window.innerHeight - margin) {
-        top = Math.max(margin, rect.top - gap - height);
-      }
+      const height = Math.min(popEl.offsetHeight, maxHeight);
+      let top = openAbove ? rect.top - gap - height : rect.bottom + gap;
+      top = Math.min(Math.max(top, margin), Math.max(margin, window.innerHeight - margin - height));
       const left = Math.min(
         Math.max(margin, rect.right - width),
-        window.innerWidth - width - margin,
+        Math.max(margin, window.innerWidth - width - margin),
       );
       popEl.style.top = `${top}px`;
       popEl.style.left = `${left}px`;
     }
     const raf = requestAnimationFrame(position);
+    // The class -> reason step changes the popover height mid-open:
+    // reposition on every content resize, not only on step change.
+    const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(() => position()) : null;
+    observer?.observe(node);
     window.addEventListener("scroll", position, true);
     window.addEventListener("resize", position);
     return {
       update: () => { requestAnimationFrame(position); },
       destroy: () => {
         cancelAnimationFrame(raf);
+        observer?.disconnect();
         window.removeEventListener("scroll", position, true);
         window.removeEventListener("resize", position);
         if (popEl === node) popEl = null;
@@ -215,6 +226,8 @@
     z-index: 30;
     display: flex;
     flex-direction: column;
+    border-radius: var(--st-component-popover-radius, var(--st-radius-lg, 0.5rem));
+    box-shadow: var(--st-component-popover-shadow, var(--st-shadow-floating));
   }
   .classement-empty {
     padding: 4px 8px;

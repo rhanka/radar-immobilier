@@ -755,8 +755,8 @@
     padding: 0.5rem;
     background: var(--st-semantic-surface-default);
     border: 1px solid var(--st-semantic-border-subtle);
-    border-radius: var(--st-radius-sm, 4px);
-    box-shadow: 0 8px 24px var(--st-semantic-border-subtle);
+    border-radius: var(--st-component-dropdown-radius, var(--st-radius-md, 0.375rem));
+    box-shadow: var(--st-component-dropdown-shadow, var(--st-shadow-medium));
   }
 
   .classement-panel :global(.st-choice) {
