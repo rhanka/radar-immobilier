@@ -10,6 +10,7 @@ import {
   DEFAULT_VIVIER_B_EXCLUSIONS,
   isHiddenByVivierBExclusions,
   matchesDocumentDateWindow,
+  resultCivilDates,
   type DocumentDateWindow,
 } from "@radar/domain";
 import { loadConfig } from "../../src/config.js";
@@ -41,16 +42,21 @@ const july = {
 
 function node(id: string, ref: Record<string, unknown>, properties: Record<string, unknown> = {},
   citySlug = city) {
+  const props = {
+    refs: [{ ...ref, excerpt: "Projet de huit logements" }],
+    properties: { category: "rezonage", etape: "avis_motion", nb_unites_max: "8", ...properties },
+  };
   return {
     id: `${citySlug}-${id}`,
     type: "Signal",
     label: `Avis de motion — projet de ${id} logements`,
     citySlug,
-    props: {
-      refs: [{ ...ref, excerpt: "Projet de huit logements" }],
-      properties: { category: "rezonage", etape: "avis_motion", nb_unites_max: "8", ...properties },
-    },
+    props,
     sourceRef: null,
+    // Materialized exactly like the graph writers (buildNodeRow): the SQL
+    // window reads these columns, never props.
+    effectiveDocumentDates: resultCivilDates(props, "document"),
+    effectiveScrapDates: resultCivilDates(props, "scrap"),
     // Node creation is never a period clock.
     createdAt: new Date("2026-09-29T15:00:00.000Z"),
   };
