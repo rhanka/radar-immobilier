@@ -34,8 +34,15 @@
     pendingClass = null;
   }
   function onWindowClick(event: MouseEvent): void {
-    if (!open || !(event.target instanceof Node)) return;
-    if (rootEl?.contains(event.target) || popEl?.contains(event.target)) return;
+    if (!open) return;
+    // composedPath() reflects the tree at dispatch time. A click on a
+    // class item re-renders the Menu mid-dispatch (reason step), which
+    // can detach the clicked node; a live-tree contains() check would
+    // then misread that same click as an outside click and close the
+    // popover before the reason step is ever seen.
+    const path = event.composedPath();
+    if (rootEl && path.includes(rootEl)) return;
+    if (popEl && path.includes(popEl)) return;
     close();
   }
 
