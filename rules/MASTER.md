@@ -183,7 +183,7 @@ human baseline (e.g. a manual ChatGPT run) — for the demo or anywhere else.
 - `rules/security.md` — secrets, SAST, container scanning, vulnerability register.
 - `rules/sources.md` — radar-specific scraping etiquette and source adapter contract.
 - `rules/scoring.md` — radar-specific scoring transparency.
-- `rules/llm-costs.md` — LLM accounts held by the cluster mesh, Gemini paid fallback, overflow cost ceilings and owner alerts.
+- `rules/llm-costs.md` — LLM accounts held by the cluster mesh, detection on subscription seats only (no pay-per-token fallback), Muse Wonder as preferred alternative, and the benchmark v11 cost/recall reference.
 
 ## WARNING — Most-Violated Rules (review before any change)
 - VERIFY BRANCH before any work: `git branch --show-current` should NOT be `main`.
