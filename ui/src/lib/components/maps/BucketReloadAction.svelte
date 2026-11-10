@@ -5,14 +5,15 @@
    *
    * Owner contract: when a section fails to load, its header shows an
    * exclamation trigger at the top right, in place of the counter (« n/d »
-   * removed). The trigger opens a standard DS menu (`MenuPopover` +
-   * `MenuTriggerButton`) with a single « Recharger » action. While the
+   * removed). The trigger is the standard DS `IconButton` (`variant="ghost"`,
+   * `size="sm"` — same as the signal classement trigger) and opens a DS menu
+   * (`MenuPopover`) with a single « Recharger » action. While the
    * reload runs, a spinning wheel replaces the exclamation. On success the
    * parent renders the counter again; on a new failure this trigger comes
    * back. DS components and DS tokens only.
    */
   import { tick } from "svelte";
-  import { MenuPopover, MenuTriggerButton } from "@sentropic/design-system-svelte";
+  import { IconButton, MenuPopover } from "@sentropic/design-system-svelte";
   import { LoaderCircle, TriangleAlert } from "@lucide/svelte";
 
   export let error: string | null = null;
@@ -124,12 +125,15 @@
     role="presentation"
     on:click|stopPropagation|preventDefault
   >
-    <MenuTriggerButton
+    <!-- Standard DS icon button (ghost: transparent, light hover darkening,
+         no border) — same component/size as the signal classement trigger. -->
+    <IconButton
       aria-label="Rechargement impossible, ouvrir les actions"
       aria-controls={menuId}
-      expanded={menuOpen}
+      aria-expanded={menuOpen}
+      aria-haspopup="menu"
       size="sm"
-      variant="secondary"
+      variant="ghost"
       data-testid="{testId}-reload-trigger"
       onclick={toggleMenu}
       onkeydown={handleTriggerKeydown}
@@ -137,7 +141,7 @@
       <span class="reload-icon">
         <TriangleAlert size={16} aria-hidden="true" />
       </span>
-    </MenuTriggerButton>
+    </IconButton>
   </span>
   <MenuPopover
     id={menuId}

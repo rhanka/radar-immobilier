@@ -77,6 +77,10 @@ describe("SignauxSelPanel — rechargement par icône (en-têtes Zones/Lots)", (
     expect(trigger.getAttribute("aria-label")).toBe(
       "Rechargement impossible, ouvrir les actions",
     );
+    // Standard DS icon button (ghost, sm) — same as the classement trigger.
+    expect(trigger.classList.contains("st-iconButton")).toBe(true);
+    expect(trigger.classList.contains("st-iconButton--ghost")).toBe(true);
+    expect(trigger.classList.contains("st-iconButton--sm")).toBe(true);
     expect(head.textContent).not.toContain("n/d");
     expect(queryByText("Réessayer")).toBeNull();
     expect(container.querySelector(".sel-alert")).toBeNull();
