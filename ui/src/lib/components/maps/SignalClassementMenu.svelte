@@ -18,6 +18,7 @@
     type SignalClass,
   } from "$lib/signals/signal-classement.js";
   import { reasonEntryLabel } from "$lib/signals/signal-reason-labels.js";
+  import { nextPanelMenuId, openPanelMenuId } from "$lib/components/maps/panel-menu.js";
 
   export let classe: SignalClass = "non_classe";
   export let reasonCodes: ReasonCodeEntry[] = [];
@@ -32,7 +33,9 @@
   let classWrapEl: HTMLElement | null = null;
   let reasonWrapEl: HTMLElement | null = null;
   let hoverTimer: ReturnType<typeof setTimeout> | null = null;
+  const panelMenuId = nextPanelMenuId("classement");
   $: if (disabled && open) closeAll(false);
+  $: if (open && $openPanelMenuId !== null && $openPanelMenuId !== panelMenuId) closeAll(false);
 
   const SUBMENU_CLASSES: readonly SignalClass[] = ["pertinent", "a_surveiller", "ecarte"];
 
@@ -46,6 +49,7 @@
     cancelHover();
     open = false;
     pendingClass = null;
+    openPanelMenuId.update((v) => (v === panelMenuId ? null : v));
     if (returnFocus) triggerButton()?.focus();
   }
   function closeSub(): void {
@@ -211,6 +215,7 @@
       cancelHover();
       open = false;
       pendingClass = null;
+      openPanelMenuId.update((v) => (v === panelMenuId ? null : v));
       onApply("non_classe", null);
       triggerButton()?.focus();
       return;
@@ -226,12 +231,14 @@
     cancelHover();
     open = false;
     pendingClass = null;
+    openPanelMenuId.update((v) => (v === panelMenuId ? null : v));
     onApply(chosen, code);
     triggerButton()?.focus();
   }
 
   async function toggle(): Promise<void> {
     if (open) { closeAll(false); return; }
+    openPanelMenuId.set(panelMenuId);
     open = true;
     pendingClass = null;
     await tick();
