@@ -343,10 +343,6 @@
 
 <style>
   .classement-menu { position: relative; display: inline-flex; }
-  .classement-menu :global(.st-iconButton:hover:not(:disabled)),
-  .classement-menu :global(.st-iconButton:focus-visible) {
-    background: var(--st-component-iconButton-hoverBackground, var(--st-semantic-action-secondaryHover, var(--st-semantic-surface-subtle)));
-  }
   .classement-pop { position: absolute; top: calc(100% + 4px); right: 0; z-index: 30; display: block; border-radius: var(--st-component-popover-radius, var(--st-radius-lg, 0.5rem)); box-shadow: var(--st-component-popover-shadow, var(--st-shadow-floating)); }
   .cascade { position: relative; display: block; }
   .cascade-class { display: block; }
@@ -355,9 +351,6 @@
   .cascade-reason :global(.st-menu) { box-shadow: var(--st-component-popover-shadow, var(--st-shadow-floating)); }
   :global(.classement-item--selected) { background: var(--st-component-selectableRow-selectedBackground, var(--st-semantic-surface-subtle)); color: var(--st-component-selectableRow-selectedText, var(--st-semantic-text-primary)); font-weight: 600; }
   :global(.classement-chevron) { display: inline-flex; align-items: center; justify-content: center; width: 1rem; min-width: 1rem; font-size: 1rem; line-height: 1; color: var(--st-semantic-text-secondary); flex: 0 0 1rem; }
-  :global(.st-menu [data-class="pertinent"] svg) { color: var(--st-semantic-feedback-success); }
-  :global(.st-menu [data-class="a_surveiller"] svg) { color: var(--st-semantic-feedback-warning); }
-  :global(.st-menu [data-class="ecarte"] svg) { color: var(--st-semantic-text-muted); }
-  :global(.st-menu [data-class="non_classe"] svg) { color: var(--st-semantic-text-secondary); }
+  :global(.st-menu [data-class] svg) { color: var(--st-component-iconButton-text, var(--st-semantic-text-primary)); }
   .classement-empty { display: block; padding: 4px 8px; color: var(--st-semantic-text-secondary); font-size: 0.75rem; background: var(--st-semantic-surface-raised); }
 </style>
