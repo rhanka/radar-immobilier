@@ -42,6 +42,8 @@
     type GeoSegment,
   } from "$lib/components/maps/GeoCityMapBase.svelte";
   import SignauxGeoEngineCanvas from "$lib/components/maps/SignauxGeoEngineCanvas.svelte";
+  import SignalFocusPanel from "$lib/components/maps/SignalFocusPanel.svelte";
+  import { FOCUS_CASES, type FocusCase } from "$lib/maps/focus-signal-cases.js";
   import { GEO3D_ENGINE_ENABLED } from "$lib/maps/geo-engine-flag.js";
   import {
     buildCityMapEntries,
@@ -1139,6 +1141,21 @@
     return new Set(extractSignalLotRefs(node));
   })();
 
+    // Focus-signal artifact: real case matching the focused signal (zone+bylaw), if any.
+  $: focusedFocusCase = (() => {
+    const key = selectionState.focusedKey;
+    if (!key) return null;
+    const parsed = parseKey(key);
+    if (!parsed || parsed.kind !== 'signal') return null;
+    const node = detailNodes.find((n) => n.id === parsed.id);
+    if (!node) return null;
+    const zoneRefs = extractSignalZoneRefs(node).map((z) => z.toUpperCase());
+    const bylawHit = FOCUS_CASES.find((c) => JSON.stringify(node.props ?? {}).toUpperCase().includes(c.bylaw.toUpperCase()));
+    if (bylawHit) return bylawHit;
+    return FOCUS_CASES.find((c) => zoneRefs.includes(c.zoneCode.toUpperCase()) && (selectedCity?.municipality.slug ?? node.citySlug) === c.citySlug) ?? null;
+  })();
+  let focusPanelHoveredLot: string | null = null;
+  function closeSignalFocus(): void { selectionState = setFocus(selectionState, null); updateGeoLayers(); }
   $: if (mapReady && (focusedSignalZoneRefs || focusedSignalLotRefs)) {
     updateGeoLayers();
   }
@@ -2737,6 +2754,13 @@
     l'init MapLibre, le drill segmenté, la caméra et l'échafaudage zone/lot ;
     cette vue ne pilote que les données + expressions métier. Iso-comportement.
   -->
+  <div class="flex h-full min-h-0 flex-col" data-testid="signaux-center-column">
+  {#if focusedFocusCase}
+    <div class="h-1/2 min-h-0 shrink-0" data-testid="signal-focus-half">
+      <SignalFocusPanel focusCase={focusedFocusCase} hoveredLot={focusPanelHoveredLot} onHoverLot={(noLot) => { focusPanelHoveredLot = noLot; }} onClose={closeSignalFocus} />
+    </div>
+  {/if}
+  <div class="relative min-h-0 flex-1" data-testid="signal-map-half">
   {#if GEO3D_ENGINE_ENABLED}
   <SignauxGeoEngineCanvas
     mount={geoEngineMount}
@@ -2988,6 +3012,8 @@
     {/if}
   </GeoCityMapBase>
   {/if}
+  </div>
+  </div>
 
   <!-- ── SEL droit : contexte de sélection (Ville active + Signaux / Zones /
        Lots). Les filtres DONNÉES vivent en EN-TÊTE des accordéons Zones et
