@@ -1,0 +1,10 @@
+# UIDFIX-EX1: dev/test api image. Stock node:24-bookworm-slim plus
+# poppler-utils (pdftotext), baked at build time because the api
+# service now runs as the host user and its entrypoint can no longer
+# apt-get poppler-utils at container start (that needed root; the
+# entrypoint keeps a graceful fallback for the stock image).
+# Mirrors the production install in api/Dockerfile.
+FROM node:24-bookworm-slim
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends poppler-utils util-linux \
+ && rm -rf /var/lib/apt/lists/*
