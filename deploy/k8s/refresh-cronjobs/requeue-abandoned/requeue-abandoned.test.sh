@@ -51,6 +51,27 @@ if render prod restore "$T/restore.yaml" REQUEUE_OPERATOR=conductor REQUEUE_REST
   ok "prod restore render: stamp, city, operator, flock, parses"
 else bad "prod restore render ($(cat "$T/out"))"; fi
 
+# --- rendered guard: no false "unrendered" after sed substitution --------
+# Extract the Job shell from args= through the guard esac and run it with sh
+# up to the guard only: rendered args must pass, raw manifest must refuse.
+extract_guard() { # $1=yaml $2=out
+  awk '/^[[:space:]]*args=/ {f=1} f {sub(/^[[:space:]]+/, ""); print} f && /esac/ {exit}' "$1" > "$2"
+  test -s "$2" && grep -q 'marker=' "$2" && grep -q 'unrendered requeue arguments' "$2"
+}
+if [ -f "$T/preprod.yaml" ] && extract_guard "$T/preprod.yaml" "$T/guard-rendered.sh" \
+  && sh "$T/guard-rendered.sh" >"$T/out" 2>&1; then
+  ok "rendered dry-run guard: sh passes (no false unrendered)"
+else bad "rendered dry-run guard failed ($(cat "$T/out" 2>/dev/null))"; fi
+
+if [ -f "$T/prod.yaml" ] && extract_guard "$T/prod.yaml" "$T/guard-prod.sh" \
+  && sh "$T/guard-prod.sh" >"$T/out" 2>&1; then
+  ok "rendered apply guard: sh passes (no false unrendered)"
+else bad "rendered apply guard failed ($(cat "$T/out" 2>/dev/null))"; fi
+
+if extract_guard "$HERE/job.yaml" "$T/guard-raw.sh" && sh "$T/guard-raw.sh" >"$T/out" 2>&1; then
+  bad "unrendered guard accepted the raw manifest"
+else grep -q "unrendered requeue arguments" "$T/out" && ok "unrendered guard: raw manifest refused" || bad "unrendered guard: wrong refusal ($(cat "$T/out"))"; fi
+
 if render prod apply "$T/noop.yaml" 2>/dev/null; then bad "apply without operator accepted"
 else grep -q "REQUEUE_OPERATOR is required" "$T/out" && ok "apply without operator refused" || bad "apply without operator: wrong refusal"; fi
 
