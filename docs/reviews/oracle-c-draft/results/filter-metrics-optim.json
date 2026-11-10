@@ -1,0 +1,347 @@
+{
+ "set": "optim",
+ "n": 60,
+ "municipalities": 26,
+ "systems": [
+  {
+   "key": "b-pass1",
+   "label": "B pass 1 (5 filters)",
+   "family": "B observed",
+   "available": true,
+   "note": "",
+   "shown": 36,
+   "P": {
+    "tp": 17,
+    "fp": 19,
+    "fn": 2,
+    "tn": 22,
+    "precision": 0.4722222222222222,
+    "recall": 0.8947368421052632,
+    "f1": 0.6181818181818182,
+    "ci95": {
+     "precision": [
+      0.3023255813953488,
+      0.6551724137931034
+     ],
+     "recall": [
+      0.782608695652174,
+      1
+     ],
+     "f1": [
+      0.4482758620689656,
+      0.7666666666666667
+     ]
+    }
+   },
+   "PS": {
+    "tp": 25,
+    "fp": 11,
+    "fn": 8,
+    "tn": 16,
+    "precision": 0.6944444444444444,
+    "recall": 0.7575757575757576,
+    "f1": 0.7246376811594203,
+    "ci95": {
+     "precision": [
+      0.5,
+      0.8928571428571429
+     ],
+     "recall": [
+      0.6333333333333333,
+      0.8888888888888888
+     ],
+     "f1": [
+      0.5901639344262296,
+      0.8461538461538461
+     ]
+    }
+   },
+   "noise": 0.3055555555555556,
+   "pertinentLost": 2
+  },
+  {
+   "key": "b-pass2",
+   "label": "B pass 2 (no Précoce)",
+   "family": "B observed",
+   "available": true,
+   "note": "",
+   "shown": 52,
+   "P": {
+    "tp": 18,
+    "fp": 34,
+    "fn": 1,
+    "tn": 7,
+    "precision": 0.34615384615384615,
+    "recall": 0.9473684210526315,
+    "f1": 0.5070422535211268,
+    "ci95": {
+     "precision": [
+      0.21212121212121213,
+      0.5
+     ],
+     "recall": [
+      0.8333333333333334,
+      1
+     ],
+     "f1": [
+      0.3448275862068966,
+      0.6562500000000001
+     ]
+    }
+   },
+   "PS": {
+    "tp": 31,
+    "fp": 21,
+    "fn": 2,
+    "tn": 6,
+    "precision": 0.5961538461538461,
+    "recall": 0.9393939393939394,
+    "f1": 0.7294117647058823,
+    "ci95": {
+     "precision": [
+      0.44680851063829785,
+      0.7441860465116279
+     ],
+     "recall": [
+      0.8529411764705882,
+      1
+     ],
+     "f1": [
+      0.6060606060606061,
+      0.8316831683168316
+     ]
+    }
+   },
+   "noise": 0.40384615384615385,
+   "pertinentLost": 1
+  },
+  {
+   "key": "b-pass3",
+   "label": "B pass 3 (no filter)",
+   "family": "B observed",
+   "available": true,
+   "note": "",
+   "shown": 60,
+   "P": {
+    "tp": 19,
+    "fp": 41,
+    "fn": 0,
+    "tn": 0,
+    "precision": 0.31666666666666665,
+    "recall": 1,
+    "f1": 0.4810126582278481,
+    "ci95": {
+     "precision": [
+      0.19672131147540983,
+      0.45901639344262296
+     ],
+     "recall": [
+      1,
+      1
+     ],
+     "f1": [
+      0.3287671232876712,
+      0.6292134831460674
+     ]
+    }
+   },
+   "PS": {
+    "tp": 33,
+    "fp": 27,
+    "fn": 0,
+    "tn": 0,
+    "precision": 0.55,
+    "recall": 1,
+    "f1": 0.7096774193548387,
+    "ci95": {
+     "precision": [
+      0.4098360655737705,
+      0.6981132075471698
+     ],
+     "recall": [
+      1,
+      1
+     ],
+     "f1": [
+      0.5813953488372093,
+      0.8222222222222222
+     ]
+    }
+   },
+   "noise": 0.45,
+   "pertinentLost": 0
+  },
+  {
+   "key": "f-precoce",
+   "label": "Précoce alone (reconstructed)",
+   "family": "B reconstructed",
+   "available": true,
+   "note": "etape ∈ {avis_motion, projet_reglement} on any record of the line",
+   "shown": 38,
+   "P": {
+    "tp": 18,
+    "fp": 20,
+    "fn": 1,
+    "tn": 21,
+    "precision": 0.47368421052631576,
+    "recall": 0.9473684210526315,
+    "f1": 0.631578947368421,
+    "ci95": {
+     "precision": [
+      0.29545454545454547,
+      0.6666666666666666
+     ],
+     "recall": [
+      0.8571428571428571,
+      1
+     ],
+     "f1": [
+      0.4516129032258065,
+      0.7931034482758621
+     ]
+    }
+   },
+   "PS": {
+    "tp": 26,
+    "fp": 12,
+    "fn": 7,
+    "tn": 15,
+    "precision": 0.6842105263157895,
+    "recall": 0.7878787878787878,
+    "f1": 0.732394366197183,
+    "ci95": {
+     "precision": [
+      0.4772727272727273,
+      0.9024390243902439
+     ],
+     "recall": [
+      0.6578947368421053,
+      0.92
+     ],
+     "f1": [
+      0.588235294117647,
+      0.8607594936708861
+     ]
+    }
+   },
+   "noise": 0.3157894736842105,
+   "pertinentLost": 1
+  },
+  {
+   "key": "f-zonage",
+   "label": "Zonage alone (reconstructed)",
+   "family": "B reconstructed",
+   "available": true,
+   "note": "category ∈ {rezonage, modification_zonage, densification, refonte, plan d'urbanisme}; densification_residentielle excluded as in the code",
+   "shown": 48,
+   "P": {
+    "tp": 19,
+    "fp": 29,
+    "fn": 0,
+    "tn": 12,
+    "precision": 0.3958333333333333,
+    "recall": 1,
+    "f1": 0.5671641791044776,
+    "ci95": {
+     "precision": [
+      0.2549019607843137,
+      0.5581395348837209
+     ],
+     "recall": [
+      1,
+      1
+     ],
+     "f1": [
+      0.40625,
+      0.7164179104477612
+     ]
+    }
+   },
+   "PS": {
+    "tp": 33,
+    "fp": 15,
+    "fn": 0,
+    "tn": 12,
+    "precision": 0.6875,
+    "recall": 1,
+    "f1": 0.8148148148148148,
+    "ci95": {
+     "precision": [
+      0.5272727272727272,
+      0.85
+     ],
+     "recall": [
+      1,
+      1
+     ],
+     "f1": [
+      0.6904761904761904,
+      0.9189189189189189
+     ]
+    }
+   },
+   "noise": 0.3125,
+   "pertinentLost": 0
+  },
+  {
+   "key": "f-excl",
+   "label": "Exclude PIIA + dérogation alone (reconstructed)",
+   "family": "B reconstructed",
+   "available": true,
+   "note": "hides any record typed piia or dérogation (the code keeps a PIIA with residential proof: not reproducible here)",
+   "shown": 53,
+   "P": {
+    "tp": 18,
+    "fp": 35,
+    "fn": 1,
+    "tn": 6,
+    "precision": 0.33962264150943394,
+    "recall": 0.9473684210526315,
+    "f1": 0.4999999999999999,
+    "ci95": {
+     "precision": [
+      0.2127659574468085,
+      0.48148148148148145
+     ],
+     "recall": [
+      0.8571428571428571,
+      1
+     ],
+     "f1": [
+      0.345679012345679,
+      0.6461538461538462
+     ]
+    }
+   },
+   "PS": {
+    "tp": 32,
+    "fp": 21,
+    "fn": 1,
+    "tn": 6,
+    "precision": 0.6037735849056604,
+    "recall": 0.9696969696969697,
+    "f1": 0.7441860465116279,
+    "ci95": {
+     "precision": [
+      0.45454545454545453,
+      0.7551020408163265
+     ],
+     "recall": [
+      0.9166666666666666,
+      1
+     ],
+     "f1": [
+      0.6233766233766235,
+      0.851063829787234
+     ]
+    }
+   },
+   "noise": 0.39622641509433965,
+   "pertinentLost": 1
+  }
+ ],
+ "precoceSanity": {
+  "linesPass1or2": 52,
+  "reconstructedPrecoceMatchesPass1": 51
+ }
+}
