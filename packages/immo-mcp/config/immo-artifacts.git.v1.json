@@ -115,7 +115,7 @@
         "artifactId",
         "idempotencyKey"
       ],
-      "binding": "own personal branch artifact/p/<id8-principal>/<slug>-<id8> of the A1 registry; code rights, write scope and GitHub linkage required"
+      "binding": "own personal branch artifact/p/<id8-principal>/app-<id8-artifact> of the A1 registry; code rights, write scope and GitHub linkage required"
     },
     "artifacts_fetch_app_source": {
       "required": [],
