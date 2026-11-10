@@ -391,6 +391,74 @@ un Job du gardien encore actif ferait refuser la restauration par la garde G2. L
    La consigne « validate peak RSS » de l'overlay prod n'est pas encore levée.
    Une mesure sur un balayage réel en préproduction est la pièce manquante.
 
+## Rattrapage récurrent du stock `abandoned`
+
+Le CronJob `radar-refresh-requeue-abandoned`
+(`deploy/k8s/refresh-cronjobs/requeue-recurrent/`, jumeau prod
+`requeue-recurrent-prod/`) fait partie de l'écosystème régulier : chaque
+jour, il sonde un siège puis, si un siège répond, remet en `pending` une
+partie du stock `abandoned`. Les passages réguliers `radar-refresh-pv`
+traitent ensuite ces `pending` (un document par ville et par passage) ;
+le rattrapage ne fait rien d'autre.
+
+- **Horaire (UTC)** : prod `30 3 * * *`, préprod `30 4 * * *`, quotidien.
+  La minute 30 garde chaque lancement à au moins 30 minutes de tout
+  passage `radar-refresh-pv` (prod 05/11/17/23 h, préprod 00/06/12/18 h)
+  et à 60 minutes du rattrapage de l'autre environnement — au-dessus du
+  minimum de 15 minutes de l'incident RWO du 2026-10-09. `verify-renders`
+  vérifie ces écarts sur les rendus (`requeue-stagger.awk`).
+- **Contrôle de siège** : llm-mesh 0.19.2 n'expose aucune API de quota ni
+  de disponibilité de compte. La sonde est donc une génération minimale
+  (prompt `ping`, 16 tokens de sortie, un seul essai de route) sur la
+  cascade régulière — primaire `openai/gpt-6-astra`, puis repli
+  `gemini/gemini-3.8-flash` — via le même `createRefreshMesh` que
+  `refresh-pv`. Aucun document n'est consommé. Si aucune route ne répond,
+  le run écrit une ligne JSON structurée (`decision: "skip"`, raison
+  classée `quota` / `no-route` / `timeout` / `transport`) et sort en 0.
+- **Plafonds par run** (env du CronJob) : `REQUEUE_MAX_AGE_DAYS=90`,
+  `REQUEUE_MAX_PER_RUN=50`, `REQUEUE_MAX_PER_CITY=5`,
+  `REQUEUE_MAX_REQUEUES=2`. Un document remis en file deux fois sans
+  succès reste `abandoned`, tamponné `requeue-ceiling-exceeded`. Le
+  requeue n'a lieu que si la sonde est verte : aucun run ne brûle ses
+  trois tentatives sur un fournisseur sec.
+- **Sécurité** : `concurrencyPolicy: Forbid` (jamais deux rattrapages) et
+  le même flock qu'un passage (`/keyring/runtime/.refresh.lock`) ;
+  `backoffLimit: 0` ; trace d'audit et sauvegardes datées dans S3 comme
+  le Job ponctuel (`refresh/018/_audit/`, `refresh/018/_backup/`).
+
+**Armement — désarmé par défaut.** Le CronJob n'est appliqué que par les
+étapes CD gardées : `REFRESH_REQUEUE_CRONJOB_PREPROD_ENABLED == 'true'`
+(préprod, à chaque push `main`) et
+`REFRESH_REQUEUE_CRONJOB_PROD_ENABLED == 'true'` (prod, à chaque tag
+`v*`, avec `REFRESH_REQUEUE_PROD_IMAGE_REF` = l'empreinte promue
+`ghcr.io/rhanka/radar-api@sha256:…`). Définir ces variables est un acte
+owner ; la fusion seule n'arme rien. Prérequis prod : les mêmes que le
+refresh (Secret `radar-refresh-runtime`, PVC `radar-refresh-keyring`
+semé, marge de quota relue sur le cluster).
+
+**Déclenchement ad hoc** (CronJob déjà appliqué) :
+
+```bash
+kubectl -n radar-immobilier create job radar-refresh-requeue-abandoned-adhoc-01 \
+  --from=cronjob/radar-refresh-requeue-abandoned
+
+# ou, depuis un checkout de la branche :
+make -f deploy/k8s/refresh-cronjobs/refresh-018.mk trigger-requeue-recurrent \
+  KUBECONFIG=<kubeconfig> RUN_ID=01 PREPROD_CONFIRM=1 ENV=preprod
+make -f deploy/k8s/refresh-cronjobs/refresh-018.mk trigger-requeue-recurrent \
+  KUBECONFIG=<kubeconfig-prod> REQUEUE_EXPECTED_SERVER=<serveur-prod> \
+  RUN_ID=01 PROD_CONFIRM=1 ENV=prod
+```
+
+Prod et préprod partagent le même serveur API OVH : `REQUEUE_EXPECTED_SERVER`
+vaut donc le serveur préprod, et `guard-requeue` distingue les deux
+environnements par le namespace cible du contexte kubeconfig et par
+l'identité de l'appelant (`kubectl auth whoami`), jamais par le serveur seul.
+
+**Désarmer** : remettre la variable à autre chose que `'true'` stoppe les
+redéploiements ; suspendre l'existant reste explicite
+(`kubectl -n <ns> patch cronjob radar-refresh-requeue-abandoned --type=merge -p '{"spec":{"suspend":true}}'`).
+
 ## Désarmer
 
 Remettre `REFRESH_CRONJOB_PROD_ENABLED` à autre chose que `'true'` empêche les
