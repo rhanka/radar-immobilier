@@ -66,7 +66,7 @@
         {focusCase.evidenceExcerpt}
       </blockquote>
       <p class="m-0 mt-2 text-xs text-slate-400">
-        Source : MCP immo (preprod, lecture seule), {focusCase.documentId}, lu le 2026-11-09.
+        Source : base preprod radar_next (lecture seule), document {focusCase.documentId}, lu le 2026-11-10.
       </p>
 
       <h3 class="m-0 mt-4 text-xs font-semibold text-slate-500">Règlement associé</h3>
@@ -93,7 +93,7 @@
         Zone <strong>{focusCase.zoneCode}</strong> — {focusCase.zoneUseBefore}
       </p>
       <p class="m-0 mt-1 text-xs text-slate-500">
-        Lien signal ↔ zone : porté par le signal réel (zone_ref, MCP search_signals).
+        Lien signal ↔ zone : porté par le signal réel (zone_ref, base preprod radar_next).
         Sur la carte ci-dessous, la zone et les lots du focus sont surlignés.
       </p>
 
@@ -117,11 +117,11 @@
               <span class="mt-1 block text-slate-500">
                 {lot.addressStreet ?? "adresse : source-gap"}
                 {lot.frontageM !== null ? ` · façade ${lot.frontageM} m` : ""}
-                · {lot.serviced ? "desservi" : "non desservi"}
+                · {lot.serviced === null ? "desserte : source-gap" : lot.serviced ? "desservi" : "non desservi"}
               </span>
               <span class="mt-1 block">
                 {#if lot.linkedByProduct}
-                  <Badge tone="success">lien produit réel</Badge>
+                  <Badge tone="success">lien réel (texte du PV)</Badge>
                 {:else}
                   <Badge tone="warning">incorporation simulée</Badge>
                 {/if}

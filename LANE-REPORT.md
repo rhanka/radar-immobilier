@@ -1,44 +1,94 @@
-# Lane report — artifact mockup « focus signal »
+# Lane report — artifact mockup « focus signal » — v2 real data
 
-- Branche : `artifact/p/bbfae795/focus-signal-h203`
-- Commit : `5bfb9624bf0c4c59f1ac78df27ec6bde1822277c` (« feat(artifact): focus-signal panel with real-data valuation cases », aucun trailer d'attribution IA)
-- Base : `preview-combo` @ `a89a3cc9` (inclut `c9960f7a`, version UI validée)
-- Push : effectué vers GitHub (`rhanka/radar-immobilier`) via le dépôt local classement. Aucun push vers `main`, aucune PR, aucun appel MCP de publication.
+- Branch: `artifact/p/bbfae795/focus-signal-h203`
+- Previous lane commit: `5bfb9624` (data found fictitious by the conductor, replaced below)
+- Base: `preview-combo` @ `a89a3cc9`
+- No push to `main`, no PR, no MCP publish call (conductor publishes).
 
-## Ce qui est livré
+## Blocking defect — root cause (evidence)
 
-- `SignalFocusPanel` : au clic d'un signal focalisé, panneau dans la moitié haute de la zone centrale (au-dessus de la carte, moitié basse). Rail gauche et cartes de droite inchangés. La carte conserve la mécanique de surlignage zones/lots du signal focalisé déjà présente dans la base (`focusedSignalZoneRefs` / `focusedSignalLotRefs`).
-- Sections : signal + preuve (extrait de PV), règlement associé (avant réel → après lu dans le PV), zone associée, lots associés (survol synchronisé panneau ↔ état carte), valorisation avec section « Comment c'est calculé ».
-- Harnais QA `focus-signal` pour les captures locales.
+The v1 cases (`sig-longueuil-001`, `CO-2026-1187`, zone `H-203`, lots
+`6 359 591` / `6 359 612`, `sig-valleyfield-001`, `PPU-2026-007`, `H-410`,
+lot `5 870 223`) came from the immo MCP seam. Verified 2026-11-10:
 
-## Cas choisis (données réelles uniquement, amendement du 09/11)
+- `mcp__immo.search_signals(city=longueuil)` returns `sig-longueuil-001`,
+  but the preprod DB (`radar_next.graph_nodes`) holds exactly one
+  Longueuil `Signal` (`signal-longueuil-derogation-zone-contraintes-2026`)
+  plus three `event-longueuil-derogation-*` nodes. The MCP ids do not
+  exist in the DB.
+- `mcp__immo.search_signals(city=coaticook)` returns 0 signals while the
+  DB holds 56 Coaticook `Signal` nodes. The MCP connector used by the
+  previous lane is therefore not a real-data source for these cities and
+  is not used in v2.
 
-1. Longueuil — signal `sig-longueuil-001`, règlement CO-2026-1187, zone H-203, lots 6 359 591 (lien produit réel) et 6 359 612 (même zone). Pertinent : avis de motion avec gabarit explicite dans le PV (« multifamiliale jusqu'à 4 étages », point 7.3), deux lots réels desservis dans la zone.
-2. Salaberry-de-Valleyfield — signal `sig-valleyfield-001`, PPU-2026-007, zone H-410, lot 5 870 223 non desservi. Pertinent comme contre-cas : adoption conditionnelle aux services, valorisation en source-gap plutôt qu'un montant inventé.
+v2 source of truth: preprod DB read-only (`radar_next` on
+`radar-postgres-0`, namespace `radar-immobilier-preprod`, kubeconfig
+`~/.kube/radar-preprod-tenant.kubeconfig`, every query prefixed with
+`SET default_transaction_read_only=on`). `signals`/`documents` tables are
+empty; real data lives in `graph_nodes`, `zone_versions`, `lot_versions`.
 
-## Réel vs incorporation simulée
+## Cases chosen (all real, 2026-11-10)
 
-- Réel (MCP immo preprod, lecture seule, 2026-11-09) : signaux, étapes, dates, règlements, zones, lots, superficies, façades, usages, desserte, extraits de PV.
-- Réel (source publique citée) : prix médian condominium Le Vieux-Longueuil 398 500 $ (Centris, consulté le 2026-11-09).
-- Incorporation simulée (badgée dans l'UI) : rattachement du lot 6 359 612 au signal (règle : même zone), application du gabarit du PV aux lots, valorisation.
-- Source-gaps affichés, jamais comblés : grille CES/COS H-203 et H-410 (source publique identifiée : grilles de spécifications, Ville de Longueuil, Données Québec), prix Valleyfield, géométrie des lots dans le harnais.
+1. Lévis — `signal-levis-densification-L0054`, avis de motion 2026-03-31,
+   zone `L0054`: PV excerpt (p. 21) raises max height to 4 storeys / 18 m
+   for classes C700 and L300 and removes the C700 floor-area cap. Three
+   real lots intersecting the zone (PostGIS) carry the valuation.
+2. Coaticook — `signal-coaticook-rezonage-c416`, projet de règlement
+   2026-02-09: PV excerpt (p. 23 of PV20260209) names the four real lots
+   moved from RB-414 / P-412 into C-416 (real signal↔lot link in the PV
+   text). No residential template in the PV: valuation stays source-gap.
+3. Rosemère — `signal-rosemere-rezonage-lot-3005325-2026`, second projet
+   2026-03-09, règlement `801-70`: PV excerpt (p. 5) includes lot
+   `3 005 325` in zone C-18 « sans changement ». Zone geometry absent
+   from `zone_versions`: explicit source-gap.
 
-## Formules (inspiration LotAI)
+## Provenance table (exact query or URL per value)
 
-- Surface brute (borne haute, empreinte pleine faute de grille) = superficie du lot × étages autorisés après.
-- Logements théoriques = surface brute × 80 % (rendement net, hypothèse affichée) ÷ 85 m² (logement moyen, hypothèse affichée).
-- Valeur indicative = logements × prix médian public cité.
-- Résultats H-203 : lot 6 359 591 → 46 logements, 18 331 000 $ ; lot 6 359 612 → 74 logements, 29 489 000 $ (bornes hautes théoriques, libellées comme telles).
+Access pattern for every DB row below:
+`kubectl --kubeconfig ~/.kube/radar-preprod-tenant.kubeconfig -n radar-immobilier-preprod exec radar-postgres-0 -- psql -U radar -d radar_next -c "<SQL>"`,
+each SQL prefixed by `SET default_transaction_read_only=on;`.
 
-## Sources LotAI
+| Value shown | Exact source |
+| --- | --- |
+| Signal ids, stages, dates, descriptions, excerpts, pages | `SELECT props FROM graph_nodes WHERE id='<signalId>'` for the three ids above |
+| Lévis excerpt p. 21, 4 storeys / 18 m, C700 cap removal | Same query, `signal-levis-densification-L0054` (docSha `1839a794…`) |
+| Coaticook excerpt p. 23, lots and ex-zones RB-414/P-412 | Same query, `signal-coaticook-rezonage-c416` (docSha `8c4662d3…`, sourceUrl `coaticook.ca/upload/DOCUMENTS/PV/PV20260209.pdf`) |
+| Rosemère excerpt p. 5, règlement 801-70, lot 3 005 325 | Same query, `signal-rosemere-rezonage-lot-3005325-2026` (docSha `d302f381…`) |
+| Zone areas (L0054 947 711 m²; C-416 16 851; RB-414 49 104; P-412 79 058) | `SELECT code_affiche, round(ST_Area(geom::geography)) FROM zone_versions WHERE city_slug='<city>' AND code_norm IN (...)` |
+| Lot areas (Lévis 4 174 / 9 139 / 10 467 m²; Coaticook 1 115 / 508 / 2 111 / 1 136 m²; Rosemère 4 238 m²) | `SELECT no_lot, round(ST_Area(geom::geography)) FROM lot_versions WHERE city_slug='<city>' AND no_lot_norm IN (...)` |
+| Lévis lots inside L0054 | `SELECT l.no_lot, ST_Area(...) FROM lot_versions l JOIN zone_versions z ON z.city_slug='levis' AND z.code_norm='L0054' AND ST_Intersects(l.geom, z.geom) WHERE l.city_slug='levis'` |
+| Rosemère zone C-18 label | `SELECT id, label FROM graph_nodes WHERE type='Zone' AND id='zone-rosemere-C-18'` (geometry absent from `zone_versions`: source-gap) |
+| Median condo price Lévis 299 000 $ | Centris community profile, Lévis (Desjardins), fetched 2026-11-10: https://www.centris.ca/en/tools/community-profile/province-of-quebec/levis-desjardins |
 
-- GetApp — LotAi (plateforme québécoise, 4,4 M de lots, 31 sources publiques, constructibilité et zonage croisés) : https://www.getapp.com/all-software/a/lotai/
-- Capterra — LotAi (analyse de lots, zonage, constructibilité) : https://www.capterra.ca/directory/31244/commercial-real-estate/software
-- Rapport interne `docs/reports/benchmark-lotai-dossier-decision-2026-11-03.html` : présent dans la base ; son contenu est un bundle applicatif illisible en texte brut dans cette lane (constat, non exploité ligne à ligne).
+## Real vs simulated incorporation
 
-## Build et captures
+- Real: every signal, stage, date, excerpt, zone code, lot number, area
+  and the Lévis price above.
+- Incorporation simulée (badged in UI): Lévis lot↔signal link by spatial
+  intersection with the signal zone; application of the real 4-storey
+  parameter to real lot areas.
+- Source-gaps shown, never filled: zoning grids (CES/COS), lot role
+  values and servicing (empty `evidence` in `lot_versions`), Coaticook
+  and Rosemère prices, Rosemère C-18 geometry, Coaticook/Lévis bylaw
+  numbers (absent from the PV excerpts read).
 
-- Build artefact : `npm ci --workspace=ui --workspace=packages/radar-domain --workspace=packages/radar-scoring --workspace=packages/radar-sources` puis `npm run build:artifact` dans `node:24 --memory=1536m` : vert (avec `NODE_OPTIONS=--max-old-space-size=1024` ; sans ce cap, OOM du conteneur constaté). Pic RSS du processus client mesuré : ~26 Mo (mesure externe, le pic interne au conteneur reste sous le cap de 1536 Mo puisque le build passe).
-- Typecheck : aucune erreur sur les fichiers livrés (les erreurs restantes proviennent de l'install subset, dépendances `api` absentes : `hono`, `drizzle-orm`).
-- Captures (Chrome CDP 9333, harnais local, regardées) : `shots/01-liste-signaux.png`, `shots/02-focus-signal-h203.png`, `shots/03-valorisation.png`, `shots/04-survol-lot-carte.png`, `shots/05-focus-valleyfield-sourcegap.png`.
-- Limite des captures : les tuiles OSM externes ne chargent pas depuis le Chrome sandboxé (pas d'accès réseau sortant du navigateur) ; la carte du harnais reste blanche avec son libellé source-gap. En artefact réel, le fond de carte est servi par l'hôte (`/__artifacts/tiles/v1`) et le surlignage zones/lots utilise les couches géo réelles.
+## Formulas (LotAI-inspired, unchanged from v1)
+
+- Gross floor (upper bound, no CES grid) = lot area × authorised storeys after.
+- Theoretical units = gross × 80 % (net efficiency, shown) ÷ 85 m² (shown).
+- Indicative value = units × cited public median price.
+- Lévis results: lot 1 960 556 → 16 696 m², 157 units, 46 943 000 $;
+  lot 2 244 656 → 36 556 m², 344 units, 102 856 000 $;
+  lot 1 962 094 → 41 868 m², 394 units, 117 806 000 $ (upper bounds).
+
+## Build and screenshots
+
+- Build: `npm ci --workspace=ui --workspace=packages/radar-domain --workspace=packages/radar-scoring --workspace=packages/radar-sources` then `npm run build:artifact` in `node:24 --memory=1536m` (with `NODE_OPTIONS=--max-old-space-size=1024`): green.
+- Screenshots (Chrome CDP 9333, harness `focus-signal`, looked at):
+  `shots/01-liste-signaux.png`, `shots/02-focus-signal-levis-l0054.png`,
+  `shots/03-valorisation.png`, `shots/04-survol-lot-carte.png`,
+  `shots/05-focus-coaticook-sourcegap.png`,
+  `shots/06-focus-rosemere-801-70.png`. Fictitious v1 shots deleted.
+- Harness limit (unchanged): OSM tiles do not load from the sandboxed
+  browser; the real artifact serves its basemap through the host tile
+  relay and highlights the real geo layers.
