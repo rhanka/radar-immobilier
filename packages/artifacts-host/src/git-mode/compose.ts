@@ -26,6 +26,10 @@ import { composeLiveEdgeRevocationPush, createLiveSocketRegistry, liveSignerFrom
 import { LIVE_HOST_MODULE_IMPORT } from "./live-host-adapter.js";
 import { createInvitationRevoker, createLiveInvitationPort } from "./live-invitations.js";
 import { createPostgresHostJobStore } from "./host-jobs.js";
+import {
+  createHostBuildReceipts, createPendingBuildReconciler, createPostgresReconcileJobStore, createReconcileStatusClient,
+  type PendingBuildReconciler,
+} from "./reconcile.js";
 import { gitToolServiceFactory, GIT_TOOLS_DEP_KEY, type GitBuildPort, type GitToolService, type GitToolsDeps } from "./provider-adapter.js";
 import { createImmoGitRegistry, IMMO_GIT_OUTPUT_DIR, IMMO_GIT_REPO_ID } from "./registry.js";
 
@@ -118,6 +122,8 @@ export interface GitModePorts {
   readonly gitToolFactory?: (deps: GitToolsDeps) => GitToolService;
   /** M3-I: sandbox build executor (host build API client). Absent: git_publish refuses. */
   readonly build?: GitBuildPort;
+  /** Builder API client with `status()`; injected instead of the composed client it also enables the pending-build reconciler. */
+  readonly buildApi?: ReturnType<typeof createHostBuildApiClient>;
   /** M3-I: host job store; absent: the fail-closed store (git_publish refuses). */
   readonly jobs?: HostBuildJobStore;
   /** M4-I: live ports; absent ones default to Postgres stores and fail-closed keys, no worker. */
@@ -140,6 +146,8 @@ export interface GitModeDeps {
   readonly git?: NonNullable<HttpAppDeps["git"]>;
   readonly [GIT_TOOLS_DEP_KEY]?: GitToolService;
   readonly live?: NonNullable<HttpAppDeps["live"]>;
+  /** Pending-build reconciler (0.2.25); consumed by the host triggers, never passed to the provider app. */
+  readonly pendingBuilds?: PendingBuildReconciler;
 }
 
 const unavailable = (): never => { throw new ArtifactOperationError("provider_unavailable"); };
@@ -249,12 +257,24 @@ export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
   // M3-I: git_publish is selected only from the `build` stage; the sandbox
   // executor is admitted only once the builder base URL is set; the service
   // token source itself fails closed while the OAuth client is unconfigured.
-  const build = ports.build ?? (input.resolution.tools.includes("artifacts_git_publish")
+  const buildApi = ports.buildApi ?? (input.resolution.tools.includes("artifacts_git_publish")
     ? createHostBuildApiClient({ baseUrl: config.builderUrl,
       identity: serviceTokenSource(config.service ?? {}, SERVICE_SCOPE_BUILDER, ports.fetch),
       jobs: ports.jobs ?? createPostgresHostJobStore({ pool, scopeId: storageScopeId }), bindings,
       ...(ports.fetch ? { fetch: ports.fetch } : {}) })
     : undefined);
+  const build = ports.build ?? buildApi;
+  // Pending-build reconciliation (0.2.25): host ports only — the sweep and
+  // the on-demand triggers live in the package. Wired only when a builder
+  // status client exists; without one no job can be pending either.
+  const pendingBuilds = buildApi ? createPendingBuildReconciler({
+    jobs: createPostgresReconcileJobStore({ pool, scopeId: storageScopeId }),
+    status: createReconcileStatusClient(buildApi), bindings, receipts: createHostBuildReceipts(pool),
+    onItem: (item) => {
+      if (item.outcome === "still-pending") return;
+      console.error(JSON.stringify({ kind: "artifacts.reconcile_pending_build", outcome: item.outcome,
+        job: item.job, binding: item.binding, ...(item.error ? { error: item.error } : {}) }));
+    } }) : undefined;
   const factory = ports.gitToolFactory ?? gitToolServiceFactory();
   const gitTools = withHostGitPolicy(factory({ bindings, registry, codeRights, git, outputDir: IMMO_GIT_OUTPUT_DIR,
     authorize: createGitToolAuthorize({ owners: ports.owners ?? createPostgresArtifactOwners(pool), codeRights,
@@ -287,7 +307,8 @@ export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
     ...(liveKeys ? { keys: liveKeys } : {}),
     ...(liveWorker ? { worker: liveWorker } : {}), qualified })
     : undefined;
-  return { git: { bindings, codeRights }, [GIT_TOOLS_DEP_KEY]: gitTools, ...(live ? { live } : {}) };
+  return { git: { bindings, codeRights }, [GIT_TOOLS_DEP_KEY]: gitTools, ...(live ? { live } : {}),
+    ...(pendingBuilds ? { pendingBuilds } : {}) };
 }
 
 /** Control push of a revoked invitation to the INTERNAL artifact-content Service; closed while the edge is unconfigured. */

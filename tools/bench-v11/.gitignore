@@ -1,0 +1,14 @@
+sandbox/node_modules/
+full/corpus/
+full/prompts/
+full/chunks/
+full/arms/
+full/burn-argon-usage10/
+full/burn-wonder-usage10/
+full/burn-usage-agy-followup10/
+full/burn-usage-wonder-followup10/
+full/rescore-v10/
+full/scores-argon.json
+full/scores-wonder.json
+full/scores-v11.json
+full/SUMMARY.md

@@ -15,7 +15,7 @@ import { createReaderOpening } from "./artifacts/reader-opening.js";
 import { consoleReaderEventSink } from "./artifacts/reader-event-log.js";
 import { createPublishedWriteRuntime } from "./artifacts/published-write-runtime.js";
 import { pageWriteListenerRoute } from "./artifacts/write-intent-page-listener.js";
-import { loadConfig, resolveAuthConfig, resolveTemConfig } from "./config.js";
+import { loadConfig, resolveAuthConfig, resolveOpsConfig, resolveTemConfig } from "./config.js";
 import { resolveAdmissionConfig } from "./admission/admission-config.js";
 import { reconcilePreprodSub } from "./admission/jit.js";
 import { pushAdmissionMutation } from "./admission/route.js";
@@ -253,6 +253,25 @@ const app = createApp({
   discarded: createDiscardedSignalsReader(dbHandle.db),
   auth,
   tem,
+  ops: (() => {
+    const ops = resolveOpsConfig(config, auth.bearerAudiences);
+    if (config.OPS_RECIPIENTS_AUDIENCE && !ops.recipientsAudience) {
+      logger.error(
+        { event: "ops_recipients_audience_overlap" },
+        "OPS_RECIPIENTS_AUDIENCE overlaps a user bearer audience; recipients route stays closed (503)",
+      );
+    }
+    return {
+      db: dbHandle.db,
+      issuer: auth.issuer,
+      jwksUri: auth.jwksUri,
+      ...(ops.recipientsAudience ? { audience: ops.recipientsAudience } : {}),
+      ...(ops.expectedTarget ? { expectedTarget: ops.expectedTarget } : {}),
+      ...(ops.referenceWorkspaceSlug
+        ? { referenceWorkspaceSlug: ops.referenceWorkspaceSlug }
+        : {}),
+    };
+  })(),
   mcpSignalSearch: { enabled: config.MCP_SIGNAL_SEARCH_ENABLED },
   ...(durableRetirement ? { legacyRetirement: durableRetirement } : {}),
   ...contentHostAppOption(contentHost),
