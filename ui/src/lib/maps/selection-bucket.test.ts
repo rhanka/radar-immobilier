@@ -229,7 +229,7 @@ describe("selection bucket visual state", () => {
 
   it("dims unselected entities to 50 percent once the bucket is non-empty", () => {
     const selectedKey = makeKey("signal", "sig-1");
-    const otherKey = makeKey("zone", "salaberry-de-valleyfield/H-609");
+    const otherKey = makeKey("signal", "sig-2");
     const state = createSelectionBucketState({
       selectedKeys: [selectedKey],
       focusedKey: selectedKey,
@@ -249,5 +249,46 @@ describe("selection bucket visual state", () => {
       dimmed: true,
       opacity: DIMMED_SELECTION_OPACITY,
     });
+  });
+
+  it("city selected only → cards at opacity 1 (no cross-kind dimming)", () => {
+    const cityKey = makeKey("municipality", "salaberry-de-valleyfield");
+    const signalKey = makeKey("signal", "sig-1");
+    const zoneKey = makeKey("zone", "salaberry-de-valleyfield/H-609");
+    const lotKey = makeKey("lot", "salaberry-de-valleyfield/4 516 943");
+    const state = createSelectionBucketState({
+      selectedKeys: [cityKey],
+      focusedKey: cityKey,
+      expandedKeys: [cityKey],
+    });
+
+    for (const key of [signalKey, zoneKey, lotKey]) {
+      expect(deriveOpacity(state, key)).toBe(FULL_SELECTION_OPACITY);
+      expect(selectionVisualState(state, key)).toMatchObject({
+        selected: false,
+        dimmed: false,
+        opacity: FULL_SELECTION_OPACITY,
+      });
+    }
+    expect(deriveOpacity(state, cityKey)).toBe(FULL_SELECTION_OPACITY);
+  });
+
+  it("dims only same-kind peers (signal selected → zone/lot/city stay full)", () => {
+    const selectedKey = makeKey("signal", "sig-1");
+    const state = createSelectionBucketState({ selectedKeys: [selectedKey] });
+
+    expect(deriveOpacity(state, makeKey("signal", "sig-2"))).toBe(DIMMED_SELECTION_OPACITY);
+    expect(deriveOpacity(state, makeKey("zone", "salaberry-de-valleyfield/H-609"))).toBe(FULL_SELECTION_OPACITY);
+    expect(deriveOpacity(state, makeKey("lot", "salaberry-de-valleyfield/4 516 943"))).toBe(FULL_SELECTION_OPACITY);
+    expect(deriveOpacity(state, makeKey("municipality", "salaberry-de-valleyfield"))).toBe(FULL_SELECTION_OPACITY);
+  });
+
+  it("zone selected → other zones dim, lots and signals stay full", () => {
+    const selectedKey = makeKey("zone", "salaberry-de-valleyfield/H-609");
+    const state = createSelectionBucketState({ selectedKeys: [selectedKey] });
+
+    expect(deriveOpacity(state, makeKey("zone", "salaberry-de-valleyfield/C-186"))).toBe(DIMMED_SELECTION_OPACITY);
+    expect(deriveOpacity(state, makeKey("lot", "salaberry-de-valleyfield/4 516 943"))).toBe(FULL_SELECTION_OPACITY);
+    expect(deriveOpacity(state, makeKey("signal", "sig-1"))).toBe(FULL_SELECTION_OPACITY);
   });
 });
