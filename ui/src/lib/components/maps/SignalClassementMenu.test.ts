@@ -14,6 +14,18 @@ const CODES = [
   { code: "N-ACCESSOIRE", verdict: "non_pertinent" as const },
 ];
 
+// Full À surveiller catalogue (profile immo-steve-2026-09, 8 codes).
+const SURVEILLER_CODES = [
+  { code: "S-MANDAT-AMONT", verdict: "a_surveiller" as const },
+  { code: "S-PLANIFIE", verdict: "a_surveiller" as const },
+  { code: "S-PORTEE-FLOUE", verdict: "a_surveiller" as const },
+  { code: "S-CONTRAINTE", verdict: "a_surveiller" as const },
+  { code: "S-RESTRICTIF", verdict: "a_surveiller" as const },
+  { code: "S-INFO-MANQUANTE", verdict: "a_surveiller" as const },
+  { code: "S-PPCMOI-SERIE", verdict: "a_surveiller" as const },
+  { code: "S-PREEMPTION", verdict: "a_surveiller" as const },
+];
+
 describe("SignalClassementMenu — acceptance criteria", () => {
   it("criterion 2: card shows its class icon; click opens class first, then the Steve reason", async () => {
     const onApply = vi.fn();
@@ -30,6 +42,35 @@ describe("SignalClassementMenu — acceptance criteria", () => {
     expect(screen.getByRole("menuitem", { name: "Accessoire sans unités" }).textContent).not.toContain("N-ACCESSOIRE");
     await fireEvent.click(screen.getByRole("menuitem", { name: "Non résidentiel" }));
     expect(onApply).toHaveBeenCalledWith("ecarte", "N-NON-RES");
+  });
+
+  it("À surveiller: reason step shows its 8 labels plus Sans motif, then applies", async () => {
+    const onApply = vi.fn();
+    const view = render(SignalClassementMenu, {
+      props: { classe: "non_classe" as const, reasonCodes: SURVEILLER_CODES, onApply },
+    });
+    await fireEvent.click(view.getByTestId("signal-classement-button"));
+    // Real-mouse sequence (mousedown + click): the class click must not
+    // be misread as an outside click when the Menu re-renders.
+    const item = screen.getByRole("menuitem", { name: "À surveiller" });
+    await fireEvent.mouseDown(item);
+    await fireEvent.click(item);
+    for (const label of [
+      "Mandat d'urbaniste amont",
+      "Changement planifié",
+      "Portée floue",
+      "Contrainte à vérifier",
+      "Resserrement à surveiller",
+      "Information manquante",
+      "PPCMOI répétés",
+      "Droit de préemption",
+      "Sans motif",
+    ]) {
+      expect(screen.getByRole("menuitem", { name: label })).toBeTruthy();
+    }
+    expect(screen.queryByTestId("classement-reasons-empty")).toBeNull();
+    await fireEvent.click(screen.getByRole("menuitem", { name: "Changement planifié" }));
+    expect(onApply).toHaveBeenCalledWith("a_surveiller", "S-PLANIFIE");
   });
 
   it("menu popover is portaled out of the card (fixed, not clipped by panel overflow)", async () => {
