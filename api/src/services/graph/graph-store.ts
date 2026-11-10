@@ -2420,9 +2420,19 @@ export async function listCitiesWithSignalNodes(
 export async function getSignalNodesForCity(
   db: Database,
   citySlug: string,
-): Promise<Array<typeof graphNodes.$inferSelect>> {
+): Promise<Array<Omit<typeof graphNodes.$inferSelect, "effectiveDocumentDates" | "effectiveScrapDates">>> {
+  // Card reads never consume the materialized SQL-window columns (#872);
+  // selecting them would inflate every detail payload for no reader.
   return db
-    .select()
+    .select({
+      id: graphNodes.id,
+      type: graphNodes.type,
+      label: graphNodes.label,
+      citySlug: graphNodes.citySlug,
+      props: graphNodes.props,
+      sourceRef: graphNodes.sourceRef,
+      createdAt: graphNodes.createdAt,
+    })
     .from(graphNodes)
     .where(
       and(
