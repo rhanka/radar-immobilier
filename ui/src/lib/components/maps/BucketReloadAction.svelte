@@ -14,6 +14,7 @@
   import { tick } from "svelte";
   import { IconButton, MenuPopover } from "@sentropic/design-system-svelte";
   import { LoaderCircle, TriangleAlert } from "@lucide/svelte";
+  import { openPanelMenuId } from "$lib/components/maps/panel-menu.js";
 
   export let error: string | null = null;
   export let loading = false;
@@ -26,6 +27,8 @@
   export let menuLabel: string;
 
   let menuOpen = false;
+  $: panelMenuId = `reload-${menuId}`;
+  $: if (menuOpen && $openPanelMenuId !== null && $openPanelMenuId !== panelMenuId) menuOpen = false;
   let placement: "bottom-end" | "top-end" = "bottom-end";
   let anchor: HTMLElement | null = null;
   let menuList: HTMLElement | null = null;
@@ -51,12 +54,14 @@
       const spaceAbove = rect.top;
       placement = spaceBelow < menuHeight + 16 && spaceAbove > spaceBelow ? "top-end" : "bottom-end";
     }
+    openPanelMenuId.set(panelMenuId);
     menuOpen = true;
     void tick().then(() => focusFirstItem());
   }
 
   function closeMenu(restoreFocus = false): void {
     menuOpen = false;
+    openPanelMenuId.update((v) => (v === panelMenuId ? null : v));
     if (restoreFocus) focusTrigger();
   }
 

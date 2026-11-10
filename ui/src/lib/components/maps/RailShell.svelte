@@ -12,7 +12,7 @@
    *
    * Anti-invention : aucun appel API, aucune logique métier — tout par props.
    */
-  import { Button } from "@sentropic/design-system-svelte";
+  import { IconButton } from "@sentropic/design-system-svelte";
 
   /** Titre overline de l'en-tête (ex. « Signaux · Villes »). */
   export let title: string;
@@ -28,9 +28,9 @@
   <div class="rail-head">
     <div class="rail-head-row">
       <span class="rail-overline">{title}</span>
-      <Button
-        type="button"
+      <IconButton
         aria-label="Actualiser"
+        title="Actualiser"
         size="sm"
         variant="ghost"
         disabled={loading}
@@ -52,7 +52,7 @@
           <polyline points="23 4 23 10 17 10"></polyline>
           <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
         </svg>
-      </Button>
+      </IconButton>
     </div>
 
     <!-- Ligne de synthèse (compteur global de la vue) -->
