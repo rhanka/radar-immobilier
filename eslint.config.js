@@ -50,6 +50,22 @@ export default tseslint.config(
     },
   },
   {
+    // bench-v11 harness scripts: same Node runtime, wider global set
+    // (fetch, URL, Buffer, timers) declared here instead of no-undef.
+    files: ["tools/bench-v11/**/*.mjs"],
+    languageOptions: {
+      globals: {
+        Buffer: "readonly",
+        URL: "readonly",
+        clearTimeout: "readonly",
+        console: "readonly",
+        fetch: "readonly",
+        process: "readonly",
+        setTimeout: "readonly",
+      },
+    },
+  },
+  {
     rules: {
       "@typescript-eslint/no-unused-vars": [
         "error",

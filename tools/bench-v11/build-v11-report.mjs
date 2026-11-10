@@ -130,13 +130,6 @@ const agyWeeklySharePerDoc = (AGY_USAGE_FOLLOWUP.weeklyBefore - AGY_USAGE_FOLLOW
 const MONTH_DAYS = 365.25 / 12;
 const ultra20xWeeklyUsd = 199.99 * 7 / MONTH_DAYS;
 const argonSeatUsd20x = agyWeeklySharePerDoc * ultra20xWeeklyUsd;
-const MUSE_USAGE_FOLLOWUP = {
-  tier: "Muse Code Max Usage", beforeAt: "2026-11-09T20:28:54.912Z", afterAt: "2026-11-09T20:53:04.883Z",
-  weeklyBefore: 19, weeklyAfter: 20, windowBefore: 16, windowAfter: 19,
-  weeklyReset: "2026-11-16T00:00:00.000Z", windowReset: "2026-11-09T21:26:11.000Z", docs: 10,
-};
-const wonderSeatUpperBoundUsd = ((MUSE_USAGE_FOLLOWUP.weeklyAfter - MUSE_USAGE_FOLLOWUP.weeklyBefore) / 100 / MUSE_USAGE_FOLLOWUP.docs) * (200 * 7 / MONTH_DAYS);
-
 const wonderRow = {
   label: "Muse Wonder low (siège)", accepted: wonderScores.accepted,
   p: wonderScores.strict.precision, r: wonderScores.strict.recall, f1: wonderScores.strict.f1,
@@ -275,14 +268,6 @@ const seatDetailMd = [
   `| **Muse Wonder low** | 100 | ${wonderScores.accepted} | ${wonderScores.failClasses.J} · ${wonderScores.failClasses.V} · ${wonderScores.failClasses.Pr} · ${wonderScores.failClasses.T} | ${fmt(wonderScores.f1n4)} | ${fmt(wonderScores.p50s, 1)} ¹ | ${fmt(wonderScores.p90s, 1)} ¹ | ${Math.round(mean(wonderBurn, "outputTokens") ?? 0)} réelle (burn) | ${fmtUsd(wonderApiBurn)} ² | missing source |`,
   `| **Gemini Argon low** | 100 | ${argonScores.accepted} | ${argonScores.failClasses.J} · ${argonScores.failClasses.V} · ${argonScores.failClasses.Pr} · ${argonScores.failClasses.T} | ${fmt(argonScores.f1n4)} | ${fmt(argonScores.p50s, 1)} ¹ | ${fmt(argonScores.p90s, 1)} ¹ | ${Math.round(argonTok.out ?? 0)} réelle (bras) | ${fmtUsd(argonApiArm)} ³ | ${fmtUsd(argonSeatUsd20x)} ⁴ |`,
 ].join("\n");
-
-const wonderBurnRowsMd = [...wonderBurn].sort((a, b) => (a.allowance?.as_of_ms ?? 0) - (b.allowance?.as_of_ms ?? 0))
-  .map((u) => `| ${u.model ? "" : ""}${Object.keys(u).length ? "" : ""}${u.terminalChars !== undefined ? "" : ""}${u.inputTokens} | ${u.outputTokens} | ${u.reasoningTokens} | ${u.cachedTokens} | ${u.allowance ? `${u.allowance.weekly?.used_percent} % (reset ${iso(u.allowance.weekly?.resets_at_ms)})` : "N-A"} | ${u.allowance ? iso(u.allowance.as_of_ms) : "N-A"} |`).join("\n");
-// Document ids for burn rows, aligned after sort by as_of (keep filename order mapping separately below).
-const wonderBurnDocRows = (() => {
-  const sorted = [...wonderBurn].sort((a, b) => (a.allowance?.as_of_ms ?? 0) - (b.allowance?.as_of_ms ?? 0));
-  return sorted;
-})();
 
 const md = `# Quel modèle pour lire les documents municipaux ?
 

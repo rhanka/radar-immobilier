@@ -154,7 +154,7 @@ const OBJECT_STOPWORDS = /\b(?:reglements?|projets?|premier|second|resolutions?|
 export function objectKey(objet) {
   if (typeof objet !== "string") return "";
   return objet.normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase()
-    .replace(/[°º]/gu, " ").replace(/(\d)[\s  .]+(?=\d{3}\b)/gu, "$1")
+    .replace(/[°º]/gu, " ").replace(/(\d)[\s\u00A0\u202F.]+(?=\d{3}\b)/gu, "$1")
     .replace(/[^\p{L}\p{N}]+/gu, " ").replace(OBJECT_STOPWORDS, " ")
     .replace(/\s+/gu, "");
 }
