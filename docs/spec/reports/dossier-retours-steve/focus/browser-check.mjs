@@ -1,9 +1,12 @@
 // Contrôles Chromium réels, sur la page autonome ouverte en file://.
-// Même protocole que docs/architecture/focus/browser-check.mjs, réduit aux cinq
-// scènes de ce dossier et étendu aux décisions D1 à D16 et à leur copie en YAML. Onglet neuf, fermé à la fin.
+// Même protocole que docs/architecture/focus/browser-check.mjs pour les deux scènes de
+// composants (SvelteFlow) ; contrôles propres à la matrice, au diagramme entité-relation
+// et à l'architecture en couloirs ; décisions G1 à G8 et D1 à D17 et leur copie en YAML ; thèmes
+// clair et sombre. Les scènes sont rendues dans les chapitres qui les portent : toutes les
+// sections sont ouvertes avant les contrôles. Onglet neuf, fermé à la fin.
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 
-const { graphs } = JSON.parse(await readFile('.generated/data.json', 'utf8'));
+const { graphs, manifest } = JSON.parse(await readFile('.generated/data.json', 'utf8'));
 const port = process.env.CDP_PORT ?? '9243';
 const base = `http://127.0.0.1:${port}`;
 const focusFileRoot = process.env.FOCUS_FILE_ROOT;
@@ -42,6 +45,12 @@ const waitUntil = async (expression, failure) => {
   throw Error(failure);
 };
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
+const sceneBox = selector => evaluate(`(() => { const element = document.querySelector('${selector}'); element.scrollIntoView({ block: 'start' });
+  const rect = element.getBoundingClientRect(); return { x: rect.x + scrollX, y: rect.y + scrollY, width: rect.width, height: rect.height }; })()`);
+const capture = async (box, file) => {
+  const shot = await call('Page.captureScreenshot', { format: 'png', fromSurface: true, captureBeyondViewport: true, clip: { ...box, scale: 1 } });
+  await writeFile(file, Buffer.from(shot.data, 'base64'));
+};
 const timeout = setTimeout(() => { console.error('Browser verification timed out'); process.exit(1); }, 150000);
 
 await mkdir('.generated', { recursive: true });
@@ -51,18 +60,106 @@ await call('Network.enable');
 await call('Network.setBlockedURLs', { urls: ['http://*', 'https://*'] });
 await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
 await call('Page.navigate', { url: focusFile });
-await waitUntil(`document.querySelectorAll('.flow').length === 5 && document.querySelectorAll('[data-node-kind]').length > 0`, 'les cinq scènes natives sont absentes');
-await evaluate(`window.expectedGraphs=${JSON.stringify(graphs.map(graph => ({ id: graph.id, projection: graph.projection, sceneHash: graph.sceneHash, groups: graph.groups.length })))};true`);
+// Scenes are mounted when their chapter opens: open every section of the dossier first.
+const OPEN_ALL = `(() => { const all = document.querySelectorAll('details.dossier-section'); for (const details of all) details.open = true; return all.length; })()`;
+await waitUntil(`document.querySelectorAll('details.dossier-section').length === 17`, 'les 17 sections du dossier sont absentes');
+await evaluate(OPEN_ALL);
+const READY = `document.querySelectorAll('.scene').length === 5 && document.querySelectorAll('.flow').length === 1 && document.querySelectorAll('.scene [data-diagram]').length === 4 && document.querySelectorAll('[data-node-kind]').length > 0`;
+await waitUntil(READY, 'les cinq scènes sont absentes');
+const expectedGraphs = `window.expectedGraphs=${JSON.stringify(graphs.map(graph => ({ id: graph.id, kind: graph.kind, projection: graph.projection, sceneHash: graph.sceneHash, groups: (graph.groups ?? []).length })))};true`;
+await evaluate(expectedGraphs);
 
 const checkExpression = `(() => {
   const graphs = window.expectedGraphs;
   const order = graphs.map(graph => graph.id);
   const actualOrder = [...document.querySelectorAll('.scene')].map(scene => scene.dataset.scene);
   if (JSON.stringify(actualOrder) !== JSON.stringify(order)) throw Error('ordre des scènes : ' + actualOrder);
-  if (document.querySelectorAll('.flow').length !== 5) throw Error('cinq scènes attendues');
-  if (!document.querySelector('.masthead').textContent.includes('5 SCÈNES · 12 SECTIONS · 16 DÉCISIONS')) throw Error('bandeau absent');
+  if (document.querySelectorAll('.flow').length !== 1 || document.querySelectorAll('.scene [data-diagram]').length !== 4) throw Error('une scène SvelteFlow et quatre diagrammes attendus');
+  const inside = (inner, outer, pad = 1) => inner.left >= outer.left - pad && inner.top >= outer.top - pad && inner.right <= outer.right + pad && inner.bottom <= outer.bottom + pad;
+  const hit = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+  const orthogonal = points => points.slice(1).every((point, index) => point.x === points[index].x || point.y === points[index].y);
+  // Texts of a box must stay inside it; labels must not cover any box.
+  const textsInside = (box, texts, name) => { for (const text of texts) if (text.textContent.trim() && !inside(text.getBoundingClientRect(), box, 0.5)) throw Error(name + ' : texte hors de sa boîte : ' + text.textContent); };
+  const checkDiagram = graph => {
+    const root = document.querySelector('[data-scene="' + graph.id + '"] [data-diagram]');
+    if (!root || root.dataset.diagramKind !== graph.kind) throw Error(graph.id + ' : diagramme ' + graph.kind + ' absent');
+    const frame = root.getBoundingClientRect();
+    if (graph.kind === 'matrix') {
+      const rows = [...root.querySelectorAll('tbody tr[data-row]')].map(row => ({ criterion: row.dataset.row, coverage: row.dataset.coverage, noise: Number(row.dataset.noise) }));
+      const expected = graph.projection.rows.map(row => ({ criterion: row.criterion, coverage: row.coverage, noise: row.noise }));
+      if (JSON.stringify(rows) !== JSON.stringify(expected)) throw Error(graph.id + ' : lignes de la matrice différentes');
+      if (Number(root.querySelector('tfoot tr').dataset.noise) !== graph.projection.total.noise) throw Error(graph.id + ' : total de bruit');
+      if (root.scrollWidth > root.clientWidth + 1) throw Error(graph.id + ' : matrice plus large que son panneau');
+      return { sceneId: graph.id, kind: 'matrix', sceneHash: graph.sceneHash, rows: rows.length, coverage: rows.map(row => row.coverage) };
+    }
+    const svg = root.querySelector('svg');
+    const scale = svg.getBoundingClientRect().width / Number(root.dataset.canvasWidth);
+    if (root.querySelector('[data-action="fit"]').getAttribute('aria-pressed') !== 'true' || scale <= 0 || scale > 1.0001 || svg.getBoundingClientRect().width > frame.width + 1) throw Error(graph.id + ' : vue d’ensemble hors panneau ' + scale);
+    if (!root.querySelector('[data-action="actual-size"]') || !root.querySelector('[data-action="fit"]')) throw Error(graph.id + ' : boutons de zoom absents');
+    const routes = [...root.querySelectorAll('[data-route-points]')];
+    for (const route of routes) {
+      const path = route.querySelector('path'), style = getComputedStyle(path);
+      if (path.getTotalLength() <= 0 || style.stroke === 'none') throw Error(graph.id + ' : lien invisible ' + (route.dataset.relation || route.dataset.laneEdge));
+      if (!orthogonal(JSON.parse(route.dataset.routePoints))) throw Error(graph.id + ' : route non orthogonale');
+    }
+    if (graph.kind === 'er') {
+      const entities = [...root.querySelectorAll('[data-entity]')];
+      const ids = entities.map(entity => entity.dataset.entity).sort();
+      if (JSON.stringify(ids) !== JSON.stringify(graph.projection.entities.map(entity => entity.id).sort())) throw Error(graph.id + ' : tables différentes');
+      const relations = [...root.querySelectorAll('[data-relation]')].map(relation => [relation.dataset.relation, relation.dataset.sourceCardinality, relation.dataset.targetCardinality, relation.dataset.identifying].join('|')).sort();
+      const expected = graph.projection.relations.map(relation => [relation.id, relation.sourceCardinality, relation.targetCardinality, String(relation.identifying)].join('|')).sort();
+      if (JSON.stringify(relations) !== JSON.stringify(expected)) throw Error(graph.id + ' : relations différentes');
+      const boxes = entities.map(entity => ({ id: entity.dataset.entity, rect: entity.querySelector('.er-body').getBoundingClientRect() }));
+      for (const [index, a] of boxes.entries()) {
+        textsInside(a.rect, entities[index].querySelectorAll('text'), graph.id + '/' + a.id);
+        for (const b of boxes.slice(index + 1)) if (hit(a.rect, b.rect)) throw Error(graph.id + ' : tables superposées ' + a.id + '/' + b.id);
+      }
+      const labels = [...root.querySelectorAll('[data-relation-label] rect')];
+      for (const label of labels) for (const box of boxes) if (hit(label.getBoundingClientRect(), box.rect)) throw Error(graph.id + ' : libellé sur la table ' + box.id);
+      for (const [index, a] of labels.entries()) for (const b of labels.slice(index + 1)) if (hit(a.getBoundingClientRect(), b.getBoundingClientRect())) throw Error(graph.id + ' : libellés superposés');
+      return { sceneId: graph.id, kind: 'er', sceneHash: graph.sceneHash, initialScale: scale, tables: entities.length, relations: relations.length, labels: labels.length,
+        existing: entities.filter(entity => entity.dataset.existing === 'true').map(entity => entity.dataset.entity) };
+    }
+    // Swimlanes: lanes left to right in the agreed order, jeu de référence band below all of them.
+    const lanes = [...root.querySelectorAll('[data-lane-kind]')].map(lane => ({ id: lane.dataset.lane, kind: lane.dataset.laneKind, rect: lane.querySelector('.lane-bg').getBoundingClientRect() }));
+    if (JSON.stringify(lanes.map(lane => lane.kind)) !== JSON.stringify(graph.projection.laneKinds)) throw Error(graph.id + ' : ordre des couloirs');
+    if (lanes.some((lane, index) => index && lane.rect.left < lanes[index - 1].rect.right - 1)) throw Error(graph.id + ' : couloirs non alignés de gauche à droite');
+    const band = root.querySelector('[data-band] .band-bg').getBoundingClientRect();
+    const lanesBox = { left: lanes[0].rect.left, right: lanes.at(-1).rect.right, bottom: Math.max(...lanes.map(lane => lane.rect.bottom)) };
+    if (band.top < lanesBox.bottom || band.width < (lanesBox.right - lanesBox.left) * .95) throw Error(graph.id + ' : bande jeu de référence pas en bas ni transversale');
+    // Scène à deux zones : la zone « application » contient tous les couloirs, la bande est dessous.
+    const zoneElement = root.querySelector('[data-zone] rect');
+    if (Boolean(zoneElement) !== Boolean(graph.projection.zone)) throw Error(graph.id + ' : zone application');
+    if (zoneElement) { const zone = zoneElement.getBoundingClientRect();
+      if (lanes.some(lane => !inside(lane.rect, zone)) || band.top < zone.bottom) throw Error(graph.id + ' : couloirs hors de la zone application ou bande non séparée'); }
+    const nodes = [...root.querySelectorAll('[data-lane-node]')];
+    const projected = graph.projection.nodes.map(node => node.id + '|' + node.lane + '|' + node.evidence).sort();
+    if (JSON.stringify(nodes.map(node => node.dataset.laneNode + '|' + node.dataset.lane + '|' + node.dataset.evidence).sort()) !== JSON.stringify(projected)) throw Error(graph.id + ' : blocs différents');
+    const laneRect = Object.fromEntries(lanes.map(lane => [lane.id, lane.rect]));
+    const boxes = nodes.map(node => ({ id: node.dataset.laneNode, rect: node.querySelector('.node-body').getBoundingClientRect(), lane: node.dataset.lane }));
+    for (const [index, box] of boxes.entries()) {
+      if (!inside(box.rect, laneRect[box.lane] ?? band)) throw Error(graph.id + '/' + box.id + ' : bloc hors de son couloir');
+      textsInside(box.rect, nodes[index].querySelectorAll('text'), graph.id + '/' + box.id);
+      for (const other of boxes.slice(index + 1)) if (hit(box.rect, other.rect)) throw Error(graph.id + ' : blocs superposés ' + box.id + '/' + other.id);
+    }
+    const data = laneRect[lanes.find(lane => lane.kind === 'data').id];
+    const stores = [...root.querySelectorAll('[data-container]')].map(store => ({ id: store.dataset.container, rect: store.querySelector('rect').getBoundingClientRect(), label: store.querySelector('text').textContent }));
+    if (stores.length !== graph.projection.stores || stores.some(store => !inside(store.rect, data))) throw Error(graph.id + ' : magasins de données hors du couloir données');
+    const edges = [...root.querySelectorAll('[data-lane-edge]')].map(edge => edge.dataset.laneEdge).sort();
+    if (JSON.stringify(edges) !== JSON.stringify(graph.projection.edges.map(edge => edge.id).sort())) throw Error(graph.id + ' : liens différents');
+    const labels = [...root.querySelectorAll('[data-edge-label] rect')];
+    for (const label of labels) {
+      const rect = label.getBoundingClientRect();
+      if (!inside(rect, svg.getBoundingClientRect())) throw Error(graph.id + ' : libellé hors du canevas');
+      for (const box of boxes) if (hit(rect, box.rect)) throw Error(graph.id + ' : libellé sur le bloc ' + box.id + ' : ' + label.nextElementSibling.textContent);
+    }
+    return { sceneId: graph.id, kind: 'lanes', sceneHash: graph.sceneHash, initialScale: scale, lanes: lanes.map(lane => lane.kind), stores: stores.map(store => store.label),
+      zone: graph.projection.zone, band: { below: true, widthShare: Number((band.width / (lanesBox.right - lanesBox.left)).toFixed(3)) }, nodes: nodes.length, edges: edges.length, labels: labels.length };
+  };
+  if (!document.querySelector('.masthead [data-banner]').textContent.includes('version figée L5')) throw Error('bandeau de version absent');
   const metrics = [];
   for (const graph of graphs) {
+    if (graph.kind !== 'flow') { metrics.push(checkDiagram(graph)); continue; }
     const scene = document.querySelector('[data-scene="' + graph.id + '"]');
     const flow = scene.querySelector('.flow');
     const transform = getComputedStyle(flow.querySelector('.svelte-flow__viewport')).transform;
@@ -155,7 +252,7 @@ const checkExpression = `(() => {
     const contentInside = content.left >= flowRect.left - 1 && content.top >= flowRect.top - 1
       && content.right <= flowRect.right + 1 && content.bottom <= flowRect.bottom + 1;
     if (!contentInside) throw Error(graph.id + ' : le contenu complet sort du panneau ' + JSON.stringify({ content, flowRect }));
-    metrics.push({ sceneId: graph.id, sceneHash: graph.sceneHash, initialScale: scale, contentInside, overlaps,
+    metrics.push({ sceneId: graph.id, kind: 'flow', sceneHash: graph.sceneHash, initialScale: scale, contentInside, overlaps,
       cards: cards.length, edges: nativeEdges.length, groups: graph.groups, edgeLabels: labels.length,
       panel: { left: flowRect.left, top: flowRect.top, width: flowRect.width, height: flowRect.height },
       iconPx: Math.min(...cards.map(card => card.iconPx)), controls });
@@ -163,6 +260,124 @@ const checkExpression = `(() => {
   if (document.documentElement.scrollWidth > innerWidth + 1) throw Error('débordement horizontal de la page');
   return metrics;
 })()`;
+
+// Graphiques du texte et options détaillées : présents, lisibles, rien ne déborde.
+const contentExpression = `(() => {
+  for (const details of document.querySelectorAll('details.dossier-section')) details.open = true;
+  const hit = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+  const charts = [...document.querySelectorAll('[data-chart]')].map(chart => {
+    const svg = chart.querySelector('svg').getBoundingClientRect();
+    const bars = [...chart.querySelectorAll('rect[data-value], [data-chart-point] circle')];
+    if (!bars.length || bars.some(bar => bar.getBoundingClientRect().right > svg.right + 1)) throw Error('graphique ' + chart.dataset.chart + ' : barres hors cadre');
+    const fills = new Set(bars.map(bar => getComputedStyle(bar).fill));
+    if (fills.has('none') || fills.has('rgb(0, 0, 0)')) throw Error('graphique ' + chart.dataset.chart + ' : couleur absente');
+    for (const text of chart.querySelectorAll('svg text')) if (!hit(text.getBoundingClientRect(), svg)) throw Error('graphique ' + chart.dataset.chart + ' : texte hors cadre');
+    return { id: chart.dataset.chart, kind: chart.dataset.chartKind, bars: bars.length };
+  });
+  const descriptions = document.querySelectorAll('.question-block [data-description]').length;
+  const minis = [...document.querySelectorAll('[data-mini-diagram]')].map(mini => {
+    const svg = mini.querySelector('svg').getBoundingClientRect();
+    const boxes = [...mini.querySelectorAll('.er-body')].map(box => box.getBoundingClientRect());
+    for (const label of mini.querySelectorAll('[data-relation-label] rect')) for (const box of boxes) if (hit(label.getBoundingClientRect(), box)) throw Error(mini.dataset.miniDiagram + ' : libellé sur une table');
+    for (const entity of mini.querySelectorAll('[data-entity]')) { const body = entity.querySelector('.er-body').getBoundingClientRect();
+      for (const text of entity.querySelectorAll('text')) if (text.textContent.trim()) { const r = text.getBoundingClientRect(); if (r.right > body.right + 1 || r.left < body.left - 1) throw Error(mini.dataset.miniDiagram + ' : texte hors table'); } }
+    return { id: mini.dataset.miniDiagram, option: Boolean(mini.closest('.question-block')), tables: boxes.length, scale: Number((svg.width / Number(mini.dataset.canvasWidth)).toFixed(3)) };
+  });
+  if (charts.length !== 7 || descriptions !== 81 || minis.length !== 12) throw Error('contenu : ' + JSON.stringify({ charts: charts.length, descriptions, minis: minis.length }));
+  if (minis.some(mini => mini.option && mini.scale < .6)) throw Error('schéma d’option trop réduit : ' + JSON.stringify(minis));
+  return { charts, descriptions, minis };
+})()`;
+const content = await evaluate(contentExpression);
+// Renvois vers le dossier : le badge de chaque scène nomme la section qui la porte (titre le
+// plus proche au-dessus), l'en-tête de la copie interactive nomme des sections présentes.
+const references = await evaluate(`(() => {
+  const headings = [...document.querySelectorAll('.dossier-section summary strong, .dossier-section .prose h2, .dossier-section .prose h3, .dossier-section .prose h4')];
+  const target = number => headings.find(heading => new RegExp('^' + number.replace('.', '\\\\.') + '\\\\.? ').test(heading.textContent.trim()));
+  const before = (a, b) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+  const badges = [...document.querySelectorAll('.scene')].map(scene => {
+    const badge = scene.querySelector('[data-scene-section]'), number = badge.dataset.sceneSection, heading = target(number);
+    const above = headings.filter(item => before(item, scene)).at(-1);
+    if (!badge.textContent.trim().startsWith('§' + number + ' · ') || !heading || above !== heading)
+      throw Error('badge de la scène ' + scene.dataset.scene + ' : ' + badge.textContent.trim() + ' ; titre au-dessus : ' + above?.textContent.trim());
+    return { scene: scene.dataset.scene, badge: badge.textContent.trim(), target: heading.textContent.trim() };
+  });
+  const eyebrow = document.querySelector('.choices [data-section-refs]');
+  const cited = [...eyebrow.textContent.matchAll(/§(\\d+\\.\\d+)/g)].map(match => match[1]);
+  if (JSON.stringify(cited) !== JSON.stringify(eyebrow.dataset.sectionRefs.split(' ')) || /annexe II\\b|ch\\. 10/.test(eyebrow.textContent)) throw Error('en-tête de la copie : ' + eyebrow.textContent);
+  const header = { text: eyebrow.textContent.trim(), targets: cited.map(number => { const heading = target(number);
+    if (!heading) throw Error('en-tête de la copie : §' + number + ' sans cible'); return heading.textContent.trim(); }) };
+  return { badges, header };
+})()`);
+const contentCaptures = [];
+for (const [name, selector] of [['graphique-sens', '[data-chart="sens-classement"]'], ['graphique-bruit', '[data-chart="bruit-familles"]'], ['graphique-pr-test-steve', '[data-chart="pr-test-steve"]'], ['decision-D2', '[data-question="D2"]'], ['decision-D3', '[data-question="D3"]']]) {
+  await capture(await sceneBox(selector), `.generated/${name}.png`);
+  contentCaptures.push(`.generated/${name}.png`);
+}
+
+// Zoom : chaque diagramme s'ouvre en plein écran, se zoome, se ferme par Échap, sans
+// débordement ni erreur ; zoom direct dans la page ; déplacement à la souris ; mobile 390 px.
+const zoomOne = async (id, { drag = false, shot = null } = {}) => {
+  const sel = `[data-zoom="${id}"]`;
+  await evaluate(`(() => { const frame = document.querySelector('${sel}'); frame.scrollIntoView({ block: 'center' });
+    frame.querySelector('[data-action="expand"]').click(); return true; })()`);
+  await pause(250);
+  const opened = await evaluate(`(() => { const frame = document.querySelector('${sel}'), rect = frame.getBoundingClientRect();
+    return { open: frame.dataset.zoomOpen, mode: frame.dataset.zoomMode, scale: Number(frame.dataset.scale), rect: { left: rect.left, top: rect.top, width: rect.width, height: rect.height },
+      locked: document.documentElement.classList.contains('zoom-frame-open'), flowH: frame.querySelector('.flow')?.getBoundingClientRect().height ?? null,
+      focus: document.activeElement?.dataset.action ?? null, title: frame.querySelector('.zoom-title')?.textContent.trim() ?? '' }; })()`);
+  const W = await evaluate('innerWidth'), H = await evaluate('innerHeight');
+  if (opened.open !== 'true' || !opened.locked || Math.abs(opened.rect.left) > 1 || Math.abs(opened.rect.top) > 1 || Math.abs(opened.rect.width - W) > 1 || Math.abs(opened.rect.height - H) > 1 || opened.focus !== 'close')
+    throw Error(`plein écran ${id} : ${JSON.stringify(opened)}`);
+  // The full-screen title is a human title (dossier text), never the technical id.
+  if (!opened.title || opened.title === id || opened.title === id.replace(/^chart-/, '')) throw Error(`plein écran ${id} : titre ${JSON.stringify(opened.title)}`);
+  if (opened.mode === 'native' && opened.flowH < H * 0.7) throw Error(`plein écran ${id} : scène trop petite ${opened.flowH}`);
+  // Capture at the fitted full-screen view, before zooming.
+  if (shot) await capture({ x: 0, y: await evaluate('scrollY'), width: W, height: H }, shot);
+  let zoomed = null, moved = null;
+  if (opened.mode === 'transform') {
+    await evaluate(`(() => { const frame = document.querySelector('${sel}'); frame.querySelector('[data-action="zoom-in"]').click(); frame.querySelector('[data-action="zoom-in"]').click(); return true; })()`);
+    await pause(120);
+    zoomed = await evaluate(`Number(document.querySelector('${sel}').dataset.scale)`);
+    if (!(zoomed > opened.scale * 1.4)) throw Error(`zoom ${id} : ${opened.scale} → ${zoomed}`);
+    if (drag) {
+      const before = await evaluate(`document.querySelector('${sel} .zoom-stage').style.transform`);
+      const at = await evaluate(`(() => { const r = document.querySelector('${sel} .zoom-viewport').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; })()`);
+      await call('Input.dispatchMouseEvent', { type: 'mousePressed', x: at.x, y: at.y, button: 'left', clickCount: 1 });
+      await call('Input.dispatchMouseEvent', { type: 'mouseMoved', x: at.x - 120, y: at.y - 80, button: 'left' });
+      await call('Input.dispatchMouseEvent', { type: 'mouseReleased', x: at.x - 120, y: at.y - 80, button: 'left', clickCount: 1 });
+      await pause(100);
+      moved = await evaluate(`document.querySelector('${sel} .zoom-stage').style.transform`);
+      if (moved === before) throw Error(`déplacement ${id} sans effet`);
+    }
+  }
+  const overflow = await evaluate('document.documentElement.scrollWidth > innerWidth + 1');
+  await evaluate(`(() => { document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); return true; })()`);
+  await pause(200);
+  const closed = await evaluate(`({ open: document.querySelector('${sel}').dataset.zoomOpen, locked: document.documentElement.classList.contains('zoom-frame-open') })`);
+  if (overflow || closed.open !== 'false' || closed.locked) throw Error(`fermeture ${id} : ${JSON.stringify({ overflow, ...closed })}`);
+  return { id, title: opened.title, mode: opened.mode, fit: opened.scale || null, zoomed, dragged: Boolean(moved), escapeClosed: true };
+};
+const zoomIds = await evaluate(`[...document.querySelectorAll('[data-zoom]')].map(frame => frame.dataset.zoom)`);
+// 5 scènes, 5 schémas du texte, 1 schéma en couloirs du texte, 7 schémas d'options (D2, D3), 8 graphiques.
+if (zoomIds.length !== 27) throw Error(`27 diagrammes zoomables attendus, ${zoomIds.length} : ${zoomIds.join(', ')}`);
+const zoom = [];
+for (const id of zoomIds) zoom.push(await zoomOne(id, { drag: id === 'flux-import-reference', shot: id === 'affichage-abc' ? '.generated/zoom-plein-ecran-affichage-abc.png' : null }));
+// Zoom direct dans la page, sur un grand diagramme : le panneau ne déborde pas.
+const inPage = await evaluate(`(() => { const frame = document.querySelector('[data-zoom="modele-donnees"]'), before = Number(frame.dataset.scale);
+  frame.querySelector('[data-action="zoom-in"]').click(); return before; })()`);
+await pause(150);
+const inPageAfter = await evaluate(`(() => { const frame = document.querySelector('[data-zoom="modele-donnees"]'), panel = frame.querySelector('.zoom-viewport').getBoundingClientRect(), outer = frame.getBoundingClientRect();
+  const result = { scale: Number(frame.dataset.scale), inside: panel.right <= outer.right + 1, overflow: document.documentElement.scrollWidth > innerWidth + 1 };
+  frame.querySelector('[data-action="fit"]').click(); return result; })()`);
+if (!(inPageAfter.scale > inPage) || !inPageAfter.inside || inPageAfter.overflow) throw Error(`zoom dans la page : ${JSON.stringify({ inPage, ...inPageAfter })}`);
+// Mobile 390 px : pas de défilement horizontal, plein écran utilisable.
+await call('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: false });
+await pause(500);
+const mobileOverflow = await evaluate('document.documentElement.scrollWidth - innerWidth');
+if (mobileOverflow > 1) throw Error(`mobile 390 px : débordement horizontal de ${mobileOverflow}px`);
+const mobile = [await zoomOne('modele-donnees', { shot: '.generated/zoom-mobile-modele-donnees.png' }), await zoomOne('criteres-steve')];
+await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
+await pause(400);
 
 const viewports = [];
 for (const viewport of [{ width: 1440, height: 1000 }, { width: 1920, height: 1080 }]) {
@@ -176,19 +391,31 @@ for (const viewport of [{ width: 1440, height: 1000 }, { width: 1920, height: 10
 // Les décisions : une réponse par décision, réellement sélectionnable, copiée en YAML.
 // EXPECT : ce que le dossier porte (décisions, options, filtres « Je suis », PR cible).
 const EXPECT = {
-  picks: [['D12', 'b'], ['D12', 'a'], ['D9', '1']], selectedQuestion: 'D12', selectedOption: 'a', persisted: [['D12', 'a'], ['D9', '1']],
-  storagePrefix: 'immo-steve-decision-responses:', blocks: 16, options: 48, recommended: 15, decides: { Farid: 10, Fabien: 6 },
-  url: 'https://github.com/rhanka/radar-immobilier/pull/794', mine: { Farid: 10, Fabien: 6 },
-  faridAnswered: ['D12'], notFarid: ['D9'], faridRoles: { D12: 'decide' }, fabienRoles: { D9: 'decide' }, allOptions: { D9: '"1"', D12: 'a' },
+  picks: [['D12', 'b'], ['D12', 'a'], ['D9', 'a']], selectedQuestion: 'D12', selectedOption: 'a', persisted: [['D12', 'a'], ['D9', 'a']],
+  storagePrefix: 'immo-steve-decision-responses:', blocks: 25, options: 81, recommended: 24, decides: { Farid: 9, Fabien: 16 },
+  url: 'https://github.com/rhanka/radar-immobilier/pull/794', mine: { Farid: 9, Fabien: 16 },
+  faridAnswered: ['D12'], notFarid: ['D9'], faridRoles: { D12: 'decide' }, fabienRoles: { D9: 'decide' }, allOptions: { D1: 'b', D9: 'a', D17: 'a', D12: 'a' },
+  headerKeys: ['dossier', 'fichier', 'version', 'decideur', 'date', 'coller_dans'],
+  // sha256 of the served Markdown (dossierHash of the manifest and of portable.json).
+  version: `2026-10-10 · sha256:${manifest.dossierHash}`,
+  title: 'Analyse des retours d\'usage du 21 septembre 2026 : capitalisation des données annotées, vers de nouveaux critères de ciblage',
 };
 const pickScript = picks => `(() => { ${picks.map(([question, option]) =>
   `document.querySelector('[data-question="${question}"] [data-option="${option}"] input').click();`).join(' ')} return true; })()`;
 const readExport = `(() => {
   const text = document.querySelector('#decisions-yaml').value;
-  const field = (chunk, key) => (chunk.match(new RegExp('^    ' + key + ': (.*)$', 'm')) || [])[1];
+  // A value is plain on its line, or a block scalar (>- or |-) on the next, indented line.
+  const field = (chunk, key, indent = '    ') => {
+    const match = chunk.match(new RegExp('^' + indent + key + ': (.*)(?:\\n' + indent + '  +(.*))?$', 'm'));
+    return match ? (/^[>|]2?-$/.test(match[1]) ? match[2] : match[1]) : undefined;
+  };
   const entries = text.split(/^  - id: /m).slice(1).map(chunk => ({ id: chunk.split('\\n')[0],
     role: field(chunk, 'role'), option: field(chunk, 'option'), statut: field(chunk, 'statut') }));
-  return { text, entries, header: text.split('\\n').slice(0, 8) };
+  const head = text.split('\\ndecisions:')[0];
+  const header = { fenced: text.startsWith('\`\`\`yaml\\n'), keys: [...head.matchAll(/^([a-z_]+):/gm)].map(match => match[1]),
+    dossierStyle: (head.match(/^dossier: (.*)$/m) || [])[1], dossier: field(head, 'dossier', ''), decideur: field(head, 'decideur', ''), version: field(head, 'version', ''),
+    coller_dans: field(head, 'coller_dans', ''), decisions: text.includes('\\ndecisions:\\n'), doubleQuotes: text.includes('"') };
+  return { text, entries, header };
 })()`;
 const setSelect = (selector, value) => `(() => { const select = document.querySelector('${selector}');
   select.value = '${value}'; select.dispatchEvent(new Event('change', { bubbles: true })); return true; })()`;
@@ -224,8 +451,9 @@ if (choices.blocks !== EXPECT.blocks || choices.single !== EXPECT.blocks || choi
   || choices.steps !== '1. Copier, 2. ouvrir la PR, 3. coller dans un commentaire.'
   || choices.person !== 'Farid' || choices.scope !== 'mine'
   || !choices.link || choices.link.href !== EXPECT.url || choices.link.target !== '_blank' || !choices.link.rel.split(' ').includes('noopener')
-  || choices.header[0] !== '```yaml' || !choices.header[1].startsWith('dossier: ') || choices.header[4] !== 'decideur: Farid'
-  || choices.header[6] !== `coller_dans: "${EXPECT.url}"` || choices.header[7] !== 'decisions:'
+  || !choices.header.fenced || JSON.stringify(choices.header.keys) !== JSON.stringify(EXPECT.headerKeys) || choices.header.doubleQuotes
+  || choices.header.dossierStyle !== '>-' || choices.header.dossier !== EXPECT.title || choices.header.decideur !== 'Farid'
+  || choices.header.coller_dans !== EXPECT.url || !choices.header.decisions || choices.header.version !== EXPECT.version
   || choices.entries.length !== EXPECT.mine.Farid || JSON.stringify(choices.answered) !== JSON.stringify(EXPECT.faridAnswered)
   || own[EXPECT.selectedQuestion]?.option !== EXPECT.selectedOption || own[EXPECT.selectedQuestion]?.role !== 'decide'
   || EXPECT.notFarid.some(id => own[id]) || Object.entries(EXPECT.faridRoles).some(([id, role]) => own[id]?.role !== role))
@@ -266,9 +494,9 @@ await evaluate(setSelect('[data-export-scope]', 'mine'));
 await pause(200);
 const fabien = await evaluate(readExport);
 const exportFilter = { faridMine: choices.entries.length, all: all.entries.length, fabienMine: fabien.entries.length,
-  fabienDecideur: fabien.header[4], fabienRoles: Object.fromEntries(fabien.entries.map(entry => [entry.id, entry.role])),
+  fabienDecideur: fabien.header.decideur, fabienRoles: Object.fromEntries(fabien.entries.map(entry => [entry.id, entry.role])),
   allOptions: Object.fromEntries(all.entries.filter(entry => entry.option !== 'null').map(entry => [entry.id, entry.option])) };
-if (exportFilter.all !== EXPECT.blocks || exportFilter.fabienMine !== EXPECT.mine.Fabien || exportFilter.fabienDecideur !== 'decideur: Fabien'
+if (exportFilter.all !== EXPECT.blocks || exportFilter.fabienMine !== EXPECT.mine.Fabien || exportFilter.fabienDecideur !== 'Fabien' || all.header.doubleQuotes
   || JSON.stringify(exportFilter.allOptions) !== JSON.stringify(EXPECT.allOptions)
   || Object.entries(EXPECT.fabienRoles).some(([id, role]) => exportFilter.fabienRoles[id] !== role))
   throw Error(`filtre « Je suis » : ${JSON.stringify(exportFilter)}`);
@@ -279,7 +507,22 @@ await evaluate(`(() => { localStorage.clear(); return true; })()`);
 const oneToOne = [];
 await call('Emulation.setDeviceMetricsOverride', { width: 1920, height: 1080, deviceScaleFactor: 1, mobile: false });
 await pause(300);
-for (const graph of graphs) {
+// Matrice, tables et couloirs : clic réel sur 1:1, l'échelle du SVG doit valoir 1.
+for (const graph of graphs.filter(item => item.kind !== 'flow')) {
+  if (graph.kind === 'matrix') {
+    await capture(await sceneBox(`[data-scene="${graph.id}"] [data-diagram]`), `.generated/scene-1a1-${graph.id}.png`);
+    oneToOne.push({ sceneId: graph.id, scale: 1 });
+    continue;
+  }
+  await evaluate(`(() => { document.querySelector('[data-scene="${graph.id}"] [data-action="actual-size"]').click(); return true; })()`);
+  await pause(250);
+  const scale = await evaluate(`(() => { const root = document.querySelector('[data-scene="${graph.id}"] [data-diagram]');
+    return root.querySelector('svg').getBoundingClientRect().width / Number(root.dataset.canvasWidth); })()`);
+  if (Math.abs(scale - 1) > 0.001) throw Error(`${graph.id} : le bouton 1:1 ne remet pas l’échelle à 1 (${scale})`);
+  await capture(await sceneBox(`[data-scene="${graph.id}"] [data-diagram] svg`), `.generated/scene-1a1-${graph.id}.png`);
+  oneToOne.push({ sceneId: graph.id, scale });
+}
+for (const graph of graphs.filter(item => item.kind === 'flow')) {
   const box = await evaluate(`(() => {
     const scene = document.querySelector('[data-scene="${graph.id}"]');
     scene.scrollIntoView({ block: 'center' });
@@ -299,14 +542,16 @@ for (const graph of graphs) {
 
 // Vue d'ensemble par scène, après retour au fitView (rechargement de la page).
 await call('Page.navigate', { url: focusFile });
-await waitUntil(`document.querySelectorAll('.flow').length === 5`, 'rechargement hors ligne sans les cinq scènes');
+await waitUntil(`document.querySelectorAll('details.dossier-section').length === 17`, 'rechargement : sections absentes');
+await evaluate(OPEN_ALL);
+await waitUntil(READY, 'rechargement hors ligne sans les cinq scènes');
 await pause(500);
 const overview = [];
 for (const graph of graphs) {
   const box = await evaluate(`(() => {
     const scene = document.querySelector('[data-scene="${graph.id}"]');
     scene.scrollIntoView({ block: 'center' });
-    const rect = scene.querySelector('.flow').getBoundingClientRect();
+    const rect = (scene.querySelector('.flow') ?? scene.querySelector('[data-diagram]')).getBoundingClientRect();
     return { x: rect.x + scrollX, y: rect.y + scrollY, width: rect.width, height: rect.height };
   })()`);
   await pause(300);
@@ -314,6 +559,37 @@ for (const graph of graphs) {
   await writeFile(`.generated/scene-vue-ensemble-${graph.id}.png`, Buffer.from(shot.data, 'base64'));
   overview.push({ sceneId: graph.id, clip: box });
 }
+
+// Thème sombre : préférence système émulée, mêmes contrôles de géométrie, contraste vérifié,
+// une capture de page et une capture par scène.
+await call('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: 'dark' }] });
+await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
+await call('Page.navigate', { url: focusFile });
+await waitUntil(`document.querySelectorAll('details.dossier-section').length === 17`, 'thème sombre : sections absentes');
+await evaluate(OPEN_ALL);
+await waitUntil(READY, 'thème sombre : scènes absentes');
+await pause(500);
+await evaluate(expectedGraphs);
+const darkMetrics = await evaluate(checkExpression);
+const luminance = `(color => { const [r, g, b] = color.match(/[\\d.]+/g).map(Number).map(value => value / 255).map(value => value <= .03928 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4); return .2126 * r + .7152 * g + .0722 * b; })`;
+const dark = await evaluate(`(() => { const theme = document.querySelector('[data-st-theme]'), style = getComputedStyle(theme);
+  const lum = ${luminance};
+  return { background: style.backgroundColor, text: style.color, backgroundLum: lum(style.backgroundColor), textLum: lum(style.color),
+    diagram: getComputedStyle(document.querySelector('[data-diagram]')).backgroundColor }; })()`);
+if (dark.backgroundLum > .05 || dark.textLum < .6) throw Error(`thème sombre non appliqué : ${JSON.stringify(dark)}`);
+await capture({ x: 0, y: 0, width: 1440, height: 1000 }, '.generated/dossier-preview-dark-1440x1000.png');
+const darkContent = await evaluate(contentExpression);
+const darkZoom = await zoomOne('modele-donnees', { shot: '.generated/sombre-zoom-plein-ecran-modele-donnees.png' });
+const darkCaptures = [];
+for (const [name, selector] of [['graphique-sens', '[data-chart="sens-classement"]'], ['decision-D2', '[data-question="D2"]']]) {
+  await capture(await sceneBox(selector), `.generated/sombre-${name}.png`);
+  darkCaptures.push(`.generated/sombre-${name}.png`);
+}
+for (const graph of graphs) {
+  await capture(await sceneBox(`[data-scene="${graph.id}"]`), `.generated/scene-sombre-${graph.id}.png`);
+  darkCaptures.push(`.generated/scene-sombre-${graph.id}.png`);
+}
+await call('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: 'light' }] });
 
 const offline = await evaluate(`({ url: location.href, title: document.title, external: performance.getEntriesByType('resource').filter(entry => /^https?:/.test(entry.name)).length })`);
 clearTimeout(timeout);
@@ -323,14 +599,16 @@ const report = {
   offline: { ...offline, blockedExternal: true },
   viewports: viewports.map(viewport => ({ width: viewport.width, height: viewport.height })),
   scenes: viewports[0].metrics, scenesAt1920: viewports[1].metrics,
-  choices, copy, exportFilter, oneToOne, overview,
+  dark: { ...dark, scenes: darkMetrics, content: darkContent, zoom: darkZoom }, content, references, zoom: { frames: zoom, inPage: { before: inPage, ...inPageAfter }, mobile }, choices, copy, exportFilter, oneToOne, overview,
   captures: ['.generated/dossier-preview-1440x1000.png', '.generated/dossier-preview-1920x1080.png',
     ...graphs.map(graph => `.generated/scene-1a1-${graph.id}.png`),
-    ...graphs.map(graph => `.generated/scene-vue-ensemble-${graph.id}.png`)],
+    ...graphs.map(graph => `.generated/scene-vue-ensemble-${graph.id}.png`),
+    '.generated/dossier-preview-dark-1440x1000.png', ...darkCaptures, ...contentCaptures,
+    '.generated/zoom-plein-ecran-affichage-abc.png', '.generated/zoom-mobile-modele-donnees.png', '.generated/sombre-zoom-plein-ecran-modele-donnees.png'],
   consoleErrors, runtimeErrors, externalRequests,
 };
 await writeFile('.generated/browser-check.json', `${JSON.stringify(report, null, 2)}\n`);
-console.log(JSON.stringify({ status: report.status, scenes: report.scenes.map(scene => ({ id: scene.sceneId, cards: scene.cards, edges: scene.edges, groups: scene.groups, labels: scene.edgeLabels, fitView: Number(scene.initialScale.toFixed(4)) })), choices: { blocks: choices.blocks, radio: choices.radio, recommended: choices.recommended, selected: choices.selected, answered: choices.answered }, yaml: { copy: copy.realClick, clipboardMatchesZone: copy.clipboardMatchesZone, forcedRefusalHandled: true, hasDecisions: copy.hasDecisions, link: choices.link.href, faridMine: exportFilter.faridMine, fabienMine: exportFilter.fabienMine, all: exportFilter.all }, captures: report.captures.length, consoleErrors: consoleErrors.length, runtimeErrors: runtimeErrors.length, externalRequests: externalRequests.length }));
+console.log(JSON.stringify({ status: report.status, scenes: report.scenes.map(scene => ({ id: scene.sceneId, kind: scene.kind, cards: scene.cards ?? scene.tables ?? scene.nodes ?? scene.rows, edges: scene.edges ?? scene.relations, labels: scene.edgeLabels ?? scene.labels, fitView: scene.initialScale && Number(scene.initialScale.toFixed(4)) })), dark: { background: dark.background, scenes: darkMetrics.length }, zoom: { frames: zoom.length, mobile: mobile.length }, choices: { blocks: choices.blocks, radio: choices.radio, recommended: choices.recommended, selected: choices.selected, answered: choices.answered }, yaml: { copy: copy.realClick, clipboardMatchesZone: copy.clipboardMatchesZone, forcedRefusalHandled: true, hasDecisions: copy.hasDecisions, link: choices.link.href, faridMine: exportFilter.faridMine, fabienMine: exportFilter.fabienMine, all: exportFilter.all }, captures: report.captures.length, consoleErrors: consoleErrors.length, runtimeErrors: runtimeErrors.length, externalRequests: externalRequests.length }));
 ws.close();
 // L'onglet de contrôle est refermé : le Chromium partagé ou isolé ne garde rien.
 await fetch(`${base}/json/close/${page.id}`).catch(() => {});

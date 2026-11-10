@@ -1,7 +1,39 @@
 {
+ "G1": [
+  "Fabien",
+  "Farid"
+ ],
+ "G2": [
+  "Fabien",
+  "Farid"
+ ],
+ "G3": [
+  "Fabien",
+  "Farid"
+ ],
+ "G4": [
+  "Fabien",
+  "Farid"
+ ],
+ "G5": [
+  "Fabien",
+  "Farid"
+ ],
+ "G6": [
+  "Fabien",
+  "Farid"
+ ],
+ "G7": [
+  "Fabien",
+  "Farid"
+ ],
+ "G8": [
+  "Fabien",
+  "Farid"
+ ],
  "D1": [
-  "Farid",
-  "Steve, Mathieu"
+  "Fabien",
+  "Farid, Steve, Mathieu"
  ],
  "D2": [
   "Fabien",
@@ -29,7 +61,7 @@
  ],
  "D8": [
   "Farid",
-  "Steve, Mathieu"
+  "Steve, Mathieu, Fabien"
  ],
  "D9": [
   "Fabien",
@@ -61,6 +93,10 @@
  ],
  "D16": [
   "Farid",
-  "Mathieu"
+  "Mathieu, Fabien"
+ ],
+ "D17": [
+  "Fabien",
+  "Steve, Farid"
  ]
 }

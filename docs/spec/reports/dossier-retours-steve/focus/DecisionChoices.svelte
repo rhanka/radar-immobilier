@@ -1,11 +1,14 @@
 <script>
   // Same interaction contract as Choices.svelte in the architecture chain (local draft),
-  // one answer per decision D1 to D16; the recommended option is flagged, never preselected.
+  // one answer per decision G1 to G8 and D1 to D17; the recommended option is flagged, never preselected.
+  // Order of decision: Fabien's block first, then Farid's. Each decision opens with an
+  // introduction and its dependencies; each option lists its advantages and drawbacks.
   // Export: a paste-ready Markdown block (```yaml … ```) for the GitHub PR, copied to the
   // clipboard and always shown in a read-only textarea (artifacts may refuse the clipboard
   // and block downloads). The JSON pack (responsePack) stays internal, for the backend.
   import { onMount, tick } from 'svelte';
-  import { questions, minimalValidAnswer, exportBlock, PEOPLE, DECISIONS_TARGET_URL, DECISIONS_TARGET_LABEL } from './choices.js';
+  import MiniEr from './MiniEr.svelte';
+  import { questions, minimalValidAnswer, exportBlock, PEOPLE, DECISIONS_TARGET_URL, DECISIONS_TARGET_LABEL, SEQUENCE, STEPS, usedBy } from './choices.js';
   let { manifest } = $props();
   let selections = $state({}), comments = $state({}), deferred = $state({});
   let person = $state(PEOPLE[0]), scope = $state('mine'), stamp = $state(new Date());
@@ -13,6 +16,8 @@
   let storageKey = $derived(`immo-steve-decision-responses:${manifest.artifactInputHash}`);
   let exported = $derived(exportBlock(manifest, { selections, comments, deferred }, person, scope, stamp));
   const groups = [...new Set(questions.map(question => question.group))];
+  const short = Object.fromEntries(questions.map(question => [question.key, question.question.replace(/^D\d+ — /, '').replace(/ \(.*\)$/, '')]));
+  const optionTitle = question => question.options.find(option => option.key === question.recommended)?.title;
   onMount(() => {
     try {
       const saved = JSON.parse(localStorage.getItem(storageKey) ?? 'null');
@@ -37,7 +42,7 @@
   }
   const checked = (question, option) => question.mode === 'multi'
     ? (selections[question.key] ?? []).includes(option.key)
-    : selections[question.key] === option.key;
+    : (selections[question.key] ?? question.decided?.option) === option.key;
   function comment(question, value) { comments = { ...comments, [question]: value }; persist(); }
   function defer(question, value) { deferred = { ...deferred, [question]: value }; persist(); }
   async function copy() {
@@ -59,11 +64,16 @@
 
 <section class="choices" id="ce-qu-on-demande" aria-labelledby="choice-title">
   <div class="flex-row">
-    <div><span class="eyebrow">§3 et §10 · décisions demandées à Farid, validation technique par Fabien</span><h2 id="choice-title">Décisions D1 à D16</h2></div>
+    <div><span class="eyebrow" data-section-refs="9.2 9.3 9.4">§9.2, §9.3 et §9.4 · Fabien décide d’abord, Farid ensuite</span><h2 id="choice-title">Décisions G1 à G8 et D1 à D17</h2></div>
     <span class="badge warning">Brouillon local · rien n’est ratifié</span>
   </div>
-  <p>Chaque décision précède ses options, dans l’ordre du dossier ; l’option recommandée est signalée. Les réponses restent locales : elles ne créent
-    aucune migration, aucun import, aucun acte de production, ne fusionnent aucune PR et n’écrivent aucun événement track.</p>
+  <div class="sequence" data-sequence>
+    <strong>Ordre de décision.</strong> {SEQUENCE}
+    <ol>{#each STEPS as step}<li><strong>{step.label}</strong> : {questions.filter(question => question.step === step.step).map(question => question.key).join(', ')}.</li>{/each}</ol>
+  </div>
+  <p>Chaque décision s’ouvre sur une courte introduction (le problème, pourquoi maintenant, ce qui change selon le choix, les renvois au dossier),
+    dit de quelles décisions elle dépend, puis détaille chaque option avec ses avantages et ses inconvénients ; l’option recommandée est signalée.
+    Les réponses restent locales : elles ne créent aucune migration, aucun import, aucun acte de production, ne fusionnent aucune PR et n’écrivent aucun événement track.</p>
   <p><strong>Réponse minimale valide :</strong> <code>{minimalValidAnswer}</code></p>
   {#each groups as group}
     <section class="question-group" aria-label={group}>
@@ -74,9 +84,14 @@
             <h4 id={`question-${question.key}`}>{question.question}</h4>
             <span class="badge" class:warning={question.mode === 'multi'}>{question.mode === 'multi' ? 'plusieurs réponses' : 'une seule réponse'}</span>
           </div>
-          <p class="roles" data-decides={question.decides}><span class="badge" class:warning={question.decides === 'Farid'}>Décide : {question.decides}</span> <span class="badge">Consulté : {question.consulted}</span>{#if question.decides === 'Fabien'} <span class="role-note">validation technique</span>{/if}</p>
-          <p>{question.context}</p>
-          <div class="option-grid" aria-label={`Options pour ${question.question}`}>
+          {#if question.decided}<p class="decided" data-decided={question.decided.option}><span class="badge selected">Tranchée · {question.decided.date}</span> {question.decided.note}</p>{/if}
+          <p class="roles" data-decides={question.decides}><span class="badge step" data-step={question.step}>Étape {question.step} · {question.decides} décide</span> <span class="badge">Consulté : {question.consulted}</span>{#if question.family === 'générique'} <span class="badge generic">Décision générique · sentropic, engram, track</span>{/if}{#if question.decides === 'Fabien'} <span class="role-note">validation technique, prise telle quelle sauf incohérence</span>{:else} <span class="role-note">après les décisions de Fabien</span>{/if}</p>
+          <p class="intro" data-intro>{question.intro}</p>
+          <p class="deps" data-depends-on={question.dependsOn.join(' ')}>
+            <strong>Dépend de :</strong> {#if question.dependsOn.length}{#each question.dependsOn as key, index}{index ? ' · ' : ''}<a href={`#question-${key}`}>{key} {short[key]}</a>{/each}{:else}aucune décision antérieure{/if}
+            {#if usedBy[question.key].length}<br><strong>Conditionne :</strong> {usedBy[question.key].map(key => `${key} ${short[key]}`).join(' · ')}{/if}
+          </p>
+          <div class="option-grid" class:wide={question.options.some(option => option.diagram)} aria-label={`Options pour ${question.question}`}>
             {#each question.options as option}
               <article class="option" data-option={option.key} data-selected={checked(question, option)}>
                 <div class="flex-row"><span class="badge">{option.key}</span>{#if option.key === question.recommended}<span class="badge warning">Recommandée</span>{/if}{#if checked(question, option)}<span class="badge selected">Sélectionnée</span>{/if}</div>
@@ -86,10 +101,16 @@
                     onchange={() => question.mode === 'multi' ? toggle(question.key, option.key) : pick(question.key, option.key)} />
                   {option.title}
                 </label>
-                <p>{option.detail}</p>
+                <p class="description" data-description><span class="pc-title">Description</span><br>{option.description}</p>
+                {#if option.diagram}<div class="option-diagram"><MiniEr id={`option-${question.key}-${option.key}`} spec={option.diagram} /></div>{/if}
+                <div class="pros-cons">
+                  <div><span class="pc-title">Avantages</span><ul data-pros>{#each option.pros as item}<li>{item}</li>{/each}</ul></div>
+                  <div><span class="pc-title">Inconvénients</span><ul data-cons>{#each option.cons as item}<li>{item}</li>{/each}</ul></div>
+                </div>
               </article>
             {/each}
           </div>
+          <p class="recommendation" data-recommendation>{#if question.recommended}<strong>Recommandation : {optionTitle(question)}.</strong>{:else}<strong>Point ouvert.</strong>{/if} {question.recommendation}</p>
           <label class="defer"><input type="checkbox" data-defer checked={Boolean(deferred[question.key])}
             onchange={event => defer(question.key, event.currentTarget.checked)} /> Différer cette décision (statut « différée » dans l’export)</label>
           <label class="comment">Commentaire — {question.question}
@@ -137,6 +158,21 @@
   .option[data-selected='true'] { border-color: var(--st-semantic-action-primary); border-left-width: 6px; }
   .roles { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 8px 0 0; }
   .role-note { font-size: .8rem; color: var(--st-semantic-text-secondary); }
+  .decided { margin: 8px 0 0; font-size: .9rem; font-weight: 600; }
+  .sequence { margin: 16px 0; padding: 14px 16px; border-left: 5px solid var(--st-semantic-data-category2); background: var(--st-semantic-surface-default); font-size: .92rem; line-height: 1.55; }
+  .sequence ol { margin: 8px 0 0; padding-left: 20px; }
+  .badge.step[data-step='1'] { border-color: var(--st-semantic-data-category1); }
+  .badge.step[data-step='2'] { border-color: var(--st-semantic-data-category2); }
+  .intro { max-width: 1050px; font-size: .95rem; line-height: 1.6; }
+  .deps { font-size: .85rem; color: var(--st-semantic-text-secondary); }
+  .deps a { color: var(--st-semantic-action-primary); }
+  .option-grid.wide { grid-template-columns: 1fr; }
+  .description { margin: 6px 0 10px; font-size: .88rem; line-height: 1.55; }
+  .option-diagram { margin: 4px 0 12px; padding: 8px; border: 1px dashed var(--st-semantic-border-subtle); overflow-x: auto; }
+  .pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .pros-cons ul { margin: 4px 0 0; padding-left: 18px; font-size: .84rem; line-height: 1.5; }
+  .pc-title { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--st-semantic-text-secondary); }
+  .recommendation { padding: 10px 14px; border-left: 4px solid var(--st-semantic-action-primary); background: var(--st-semantic-surface-default); }
   h2, h4 { margin: 0; } h4 { font-size: 1rem; }
   p { font-size: .9rem; line-height: 1.55; }
   .option label { display: block; margin: 8px 0; font-weight: 650; font-size: .92rem; }
@@ -150,5 +186,5 @@
   .copy-error { border-left: 4px solid var(--st-semantic-action-primary); padding-left: 10px; font-weight: 650; }
   .yaml-label { display: block; margin-top: 12px; font-size: .8rem; color: var(--st-semantic-text-secondary); }
   .decisions-yaml { width: 100%; font-family: monospace; font-size: .78rem; white-space: pre; overflow: auto; }
-  @media (max-width: 900px) { .option-grid { grid-template-columns: 1fr; } .choices { padding: 18px 14px; } }
+  @media (max-width: 900px) { .option-grid, .pros-cons { grid-template-columns: 1fr; } .choices { padding: 18px 14px; } }
 </style>

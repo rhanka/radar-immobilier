@@ -3,53 +3,64 @@
 //   header    dossier, fichier, version, decideur, date (ISO-8601 with offset), coller_dans
 //   decisions id, titre, role (decide | valide), decide, consulte, option, option_libelle,
 //             statut (tranchee | differee | non_traitee), commentaire (literal block `|`)
-// Keys are ASCII. Strings stay plain only when unambiguous; otherwise they are
-// double-quoted with JSON-compatible escapes (so JSON.parse reads them back).
+// Keys are ASCII. No value is ever quoted: a string is a plain scalar whenever a YAML
+// reader loads it back unchanged; otherwise it is a block scalar under its key (`>-`
+// folded for a single line, `|-` literal for several lines). Empty option fields are null.
+// The `date` header is a plain ISO-8601 date-time: readers with a timestamp type load it
+// as a timestamp, by design.
 
 export const STATUSES = ['tranchee', 'differee', 'non_traitee'];
 export const ROLES = ['decide', 'valide'];
 
 // A plain scalar may not start with a YAML indicator character.
 const RESERVED_START = /^[-?:,[\]{}#&*!|>'"%@`]/;
-// Agreed rule: quote as soon as the string contains `: # ' "`.
-const QUOTE_CHARS = /[:#'"]/;
+// `: ` (or a final `:`) would open a mapping and ` #` a comment. `#` not preceded by a
+// space and `:` not followed by one (URLs, sha256:…) stay plain.
+const PLAIN_BREAKERS = /: |:$| #/;
 // Plain words that a YAML 1.1 / 1.2 reader would not load as a string.
 const NON_STRING = /^(?:~|null|true|false|yes|no|on|off|y|n|[-+]?\.(?:inf|nan))$/i;
-// Numbers, dates and times all start with a digit (optionally signed or dotted).
-const NUMBER_LIKE = /^[-+.]?\d/;
+// Numbers in YAML 1.1 or 1.2 (decimal, float, hex, octal, binary, sexagesimal).
+const NUMBER = /^[-+]?(?:\d[\d_]*(?:\.[\d_]*)?(?:e[-+]?\d+)?|\.\d[\d_]*(?:e[-+]?\d+)?|0x[\da-f_]+|0o[0-7_]+|0b[01_]+|\d[\d_]*(?::[0-5]?\d)+(?:\.[\d_]*)?)$/i;
+// A date alone would load as a timestamp: only date-times (the `date` header) stay plain.
+const DATE_ONLY = /^\d{4}-\d\d?-\d\d?$/;
 // Characters a YAML stream may not carry raw (C0 except tab and line feed, DEL, C1,
-// line/paragraph separators, BOM). Tab and line feed are handled per scalar style.
-const NON_PRINTABLE = /[\u0000-\u0008\u000b-\u001f\u007f-\u009f\u{2028}\u{2029}\u{feff}]/u;
-const ESCAPED = /[\\"\u0000-\u001f\u007f-\u009f\u{2028}\u{2029}\u{feff}]/gu;
-const ESCAPES = { '\\': '\\\\', '"': '\\"', '\n': '\\n', '\t': '\\t', '\r': '\\r' };
+// line/paragraph separators, BOM). Without quoted scalars there is no escape for them,
+// so they are dropped; carriage returns become line feeds.
+const NON_PRINTABLE = /[\u0000-\u0008\u000b-\u001f\u007f-\u009f\u{2028}\u{2029}\u{feff}]/gu;
+const clean = value => String(value).replace(/\r\n?/g, '\n').replace(NON_PRINTABLE, '');
 
 const isPlainSafe = text => text.length > 0
-  && text === text.trim()
-  && !/[\t\n\r]/.test(text) && !NON_PRINTABLE.test(text)
-  && !QUOTE_CHARS.test(text) && !RESERVED_START.test(text)
-  && !NON_STRING.test(text) && !NUMBER_LIKE.test(text);
+  && text === text.trim() && !/[\t\n]/.test(text)
+  && !RESERVED_START.test(text) && !PLAIN_BREAKERS.test(text)
+  && !NON_STRING.test(text) && !NUMBER.test(text) && !DATE_ONLY.test(text);
 
-export const yamlQuoted = text => `"${String(text).replace(ESCAPED,
-  char => ESCAPES[char] ?? `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`)}"`;
+// Block scalar for a value that cannot be plain. Content lines are indented by `indent`
+// spaces; a first content line starting with a space needs the explicit indentation
+// indicator (always 2: content sits two spaces under its key). Readers disagree on a line
+// made only of blanks, so such a line is emptied; trailing line breaks are dropped.
+const blockScalar = (value, style, chomping, indent) => {
+  const text = value.replace(/^[ \t]+$/gm, '').replace(/\n+$/, '');
+  const header = `${style}${/^\n* /.test(text) ? '2' : ''}${chomping}`;
+  if (!text) return header;
+  const pad = ' '.repeat(indent);
+  return `${header}\n${text.split('\n').map(line => (line ? pad + line : '')).join('\n')}`;
+};
 
-export function yamlScalar(value) {
+// `indent` is the indentation of a block scalar's content: key indentation + 2.
+export function yamlScalar(value, indent = 2) {
   if (value === null || value === undefined) return 'null';
-  const text = String(value);
-  return isPlainSafe(text) ? text : yamlQuoted(text);
+  const text = clean(value);
+  if (isPlainSafe(text)) return text;
+  return blockScalar(text, /\n[^\n]/.test(text) ? '|' : '>', '-', indent);
 }
 
 // Literal block (`|`) for free text. Line endings are normalised, leading blank lines
-// and trailing whitespace are dropped. Every content line is indented by `indent`
-// spaces (>= 4 here), so a line such as ``` never closes the surrounding Markdown fence.
+// and trailing whitespace are dropped (clip chomping: readers get one final line break).
+// Every content line is indented by `indent` spaces (>= 4 here), so a line such as ```
+// never closes the surrounding Markdown fence.
 export function yamlBlock(value, indent) {
-  const text = String(value ?? '').replace(/\r\n?/g, '\n').replace(/^(?:[ \t]*\n)+/, '').replace(/\s+$/, '');
-  if (!text) return '|';
-  // A literal block cannot carry non-printable characters: fall back to a quoted string.
-  if (NON_PRINTABLE.test(text)) return yamlQuoted(text);
-  // A first line starting with a space needs an explicit indentation indicator.
-  const header = text.startsWith(' ') ? '|2' : '|';
-  const pad = ' '.repeat(indent);
-  return `${header}\n${text.split('\n').map(line => (line ? pad + line : '')).join('\n')}`;
+  const text = clean(value ?? '').replace(/^(?:[ \t]*\n)+/, '').replace(/\s+$/, '');
+  return blockScalar(text, '|', '', indent);
 }
 
 // Local time with its UTC offset, e.g. 2026-10-03T14:05:09-04:00.
@@ -72,7 +83,8 @@ export function decisionRecords(questions, { selections = {}, comments = {}, def
   return questions.flatMap(question => {
     const role = roleOf(question, person);
     if (scope === 'mine' && !role) return [];
-    const raw = selections[question.key];
+    // A decision already taken (question.decided) stands unless a draft answer overrides it.
+    const raw = selections[question.key] ?? question.decided?.option;
     const picked = (Array.isArray(raw) ? raw : [raw]).filter(value => value !== null && value !== undefined);
     const options = picked.map(key => {
       const option = question.options.find(item => item.key === key);
@@ -88,7 +100,7 @@ export function decisionRecords(questions, { selections = {}, comments = {}, def
       option: options.length ? options.map(option => option.key).join(', ') : null,
       option_libelle: options.length ? options.map(option => option.title).join(' ; ') : null,
       statut: deferred[question.key] ? 'differee' : options.length ? 'tranchee' : 'non_traitee',
-      commentaire: comments[question.key] ?? '',
+      commentaire: comments[question.key] ?? question.decided?.note ?? '',
     }];
   });
 }
@@ -101,8 +113,8 @@ export function decisionsYaml(header, records) {
   if (!records.length) return [...lines, 'decisions: []'].join('\n');
   lines.push('decisions:');
   for (const record of records) {
-    lines.push(`  - id: ${yamlScalar(record.id)}`);
-    for (const key of RECORD_KEYS) lines.push(`    ${key}: ${yamlScalar(record[key])}`);
+    lines.push(`  - id: ${yamlScalar(record.id, 6)}`);
+    for (const key of RECORD_KEYS) lines.push(`    ${key}: ${yamlScalar(record[key], 6)}`);
     lines.push(`    commentaire: ${yamlBlock(record.commentaire, 6)}`);
   }
   return lines.join('\n');

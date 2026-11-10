@@ -1,0 +1,118 @@
+// Charts placed in the dossier text by `<!-- chart:<id> -->` markers. Every figure is a
+// copy of a table of the same section (mapping.test.mjs compares them to the Markdown).
+//   stacked  one bar per row, split by classement (Pertinent / À surveiller / Non pertinent)
+//   grouped  two bars per row (passe 1, 124 lignes)
+//   percent  one bar per row, a percentage
+export const SERIES = {
+  P: { label: 'Pertinent', token: 'p' },
+  S: { label: 'À surveiller', token: 's' },
+  N: { label: 'Non pertinent', token: 'n' },
+};
+
+export const CHARTS = {
+  'pr-test-steve': {
+    kind: 'scatter',
+    title: 'Montrer à Steve : précision et rappel sur le test aveugle exploratoire, référence Steve (61 lignes)',
+    note: 'Un point par configuration (A = Astra, O = Opus, G = Gemini, chiffre = version du prompt ; B = B′, chiffre = passe observée). Les points d’Opus v1, v2 et v3 se superposent. Intervalles par villes de ±15 à ±20 points sur le rappel : les écarts entre configurations C ne sont pas établis. Exploratoire, non admissible pour D13.',
+    source: '§6.4, tableau des résultats (CALCUL)',
+    points: [
+      { label: 'Astra v1', short: 'A1', group: 'astra', recall: 68.6, precision: 96 },
+      { label: 'Opus v1', short: 'O1', group: 'opus', recall: 74.3, precision: 96.3 },
+      { label: 'Gemini v1', short: 'G1', group: 'gemini', recall: 77.1, precision: 93.1 },
+      { label: 'Astra v2', short: 'A2', group: 'astra', recall: 65.7, precision: 95.8 },
+      { label: 'Opus v2', short: 'O2', group: 'opus', recall: 74.3, precision: 96.3 },
+      { label: 'Gemini v2', short: 'G2', group: 'gemini', recall: 77.1, precision: 93.1 },
+      { label: 'Astra v3', short: 'A3', group: 'astra', recall: 62.9, precision: 95.7 },
+      { label: 'Opus v3', short: 'O3', group: 'opus', recall: 74.3, precision: 96.3 },
+      { label: 'Gemini v3', short: 'G3', group: 'gemini', recall: 80, precision: 93.3 },
+      { label: 'B′ passe 1 (5 filtres)', short: 'B1', group: 'bprime', recall: 74.3, precision: 70.3 },
+      { label: 'B′ passe 2 (sans Précoce)', short: 'B2', group: 'bprime', recall: 94.3, precision: 62.3 },
+      { label: 'B′ passe 3 (aucun filtre)', short: 'B3', group: 'bprime', recall: 100, precision: 57.4 },
+    ],
+  },
+  'pr-test-consensus': {
+    kind: 'scatter',
+    title: 'Montrer à Steve : précision et rappel sur le test aveugle exploratoire, référence consensus IA (R′ v1 sur les tags majoritaires)',
+    note: 'Même lecture. Le consensus IA est une référence machine corrélée aux configurations évaluées (mêmes familles de modèles, mêmes définitions) : une précision de 100 % en découle en partie.',
+    source: '§6.4, tableau des résultats (CALCUL)',
+    points: [
+      { label: 'Astra v1', short: 'A1', group: 'astra', recall: 78.1, precision: 100 },
+      { label: 'Opus v1', short: 'O1', group: 'opus', recall: 84.4, precision: 100 },
+      { label: 'Gemini v1', short: 'G1', group: 'gemini', recall: 87.5, precision: 96.6 },
+      { label: 'Astra v2', short: 'A2', group: 'astra', recall: 75, precision: 100 },
+      { label: 'Opus v2', short: 'O2', group: 'opus', recall: 84.4, precision: 100 },
+      { label: 'Gemini v2', short: 'G2', group: 'gemini', recall: 87.5, precision: 96.6 },
+      { label: 'Astra v3', short: 'A3', group: 'astra', recall: 71.9, precision: 100 },
+      { label: 'Opus v3', short: 'O3', group: 'opus', recall: 84.4, precision: 100 },
+      { label: 'Gemini v3', short: 'G3', group: 'gemini', recall: 87.5, precision: 93.3 },
+      { label: 'B′ passe 1 (5 filtres)', short: 'B1', group: 'bprime', recall: 75, precision: 64.9 },
+      { label: 'B′ passe 2 (sans Précoce)', short: 'B2', group: 'bprime', recall: 96.9, precision: 58.5 },
+      { label: 'B′ passe 3 (aucun filtre)', short: 'B3', group: 'bprime', recall: 100, precision: 52.5 },
+    ],
+  },
+  'sens-classement': {
+    kind: 'stacked',
+    title: 'Sens de la modification × classement de Steve (124 lignes)',
+    note: 'Entre parenthèses : lignes de la passe 1 (vue de travail, 73 lignes). 23 assouplissements sont Non pertinent, surtout des autorisations au cas par cas : le sens seul ne suffit pas (§5.3).',
+    source: '§2.3 et §4.2, feuille Triage (CALCUL)',
+    rows: [
+      { label: 'Assouplissement', values: { P: 27, S: 5, N: 23 }, extra: 35 },
+      { label: 'Indéterminé', values: { P: 7, S: 21, N: 10 }, extra: 21 },
+      { label: 'Neutre', values: { P: 1, S: 0, N: 13 }, extra: 6 },
+      { label: 'Restriction', values: { P: 0, S: 3, N: 7 }, extra: 6 },
+      { label: 'Mixte', values: { P: 5, S: 0, N: 2 }, extra: 5 },
+    ],
+  },
+  'bruit-familles': {
+    kind: 'grouped',
+    title: 'Les Non pertinent par motif : passe 1 (24 sur 73) et ensemble du relevé (55 sur 124)',
+    note: 'Chaque famille correspond à un critère ou une exclusion de Steve. La première barre est le bruit de sa vue de travail ; la seconde, le même motif sur les 124 lignes.',
+    source: '§2.3, motifs de la feuille Triage (CALCUL, recompté par motif)',
+    series: ['Passe 1', '124 lignes'],
+    rows: [
+      { label: 'Hors résidentiel ou hors urbanisme', detail: 'N-NON-RES, N-FAUX-POSITIF', values: [3, 10] },
+      { label: 'Resserrement', detail: 'N-RESTRICTIF', values: [4, 7] },
+      { label: 'Sans effet sur la capacité', detail: 'N-ADMIN, N-FORME, N-UNIFAM, N-ACCESSOIRE', values: [6, 13] },
+      { label: 'Autorisation individuelle', detail: 'V2-PRECEDENT', values: [8, 21] },
+      { label: 'Point d’ordre du jour', detail: 'N-ODJ-SEUL', values: [3, 4] },
+    ],
+  },
+  'steve-signaux': {
+    kind: 'stacked',
+    title: 'Lignes de Steve et enregistrements distincts du radar, par verdict (121 lignes retenues)',
+    note: 'Une ligne peut viser plusieurs signaux : 121 lignes → 162 enregistrements distincts. Les documents (80 distincts) ne s’additionnent pas par verdict : un même PV peut porter des signaux de verdicts différents.',
+    source: 'items.json, nodes.json du premier jet (recompté)',
+    rows: [
+      { label: 'Lignes de Steve', values: { P: 39, S: 29, N: 53 } },
+      { label: 'Enregistrements distincts', values: { P: 55, S: 38, N: 69 } },
+    ],
+  },
+  'classement-passes': {
+    kind: 'stacked',
+    title: 'Classement de Steve par passe (124 lignes)',
+    note: 'Passe 1 : ses cinq filtres cochés ; passe 2 : sans le filtre Précoce ; passe 3 : aucun filtre. 34 des 40 Pertinent sont en passe 1, 38 en passe 1 ou 2.',
+    source: '§4.2, feuille Triage (CALCUL)',
+    rows: [
+      { label: '1 — 5 filtres', values: { P: 34, S: 15, N: 24 } },
+      { label: '2 — sans Précoce', values: { P: 4, S: 11, N: 18 } },
+      { label: '3 — reste', values: { P: 2, S: 3, N: 12 } },
+      { label: 'Hors radar', values: { P: 0, S: 0, N: 1 } },
+    ],
+  },
+  'base-b': {
+    kind: 'percent',
+    title: 'Repère historique : passe 1 observée par Steve (vue de travail, 73 lignes)',
+    note: 'Repère seulement, jamais comparateur de D13 (B′ passe 1 est recalculé sur l’instantané, annexe B.5.2). Le bruit est la part des signaux affichés que Steve juge Non pertinent.',
+    source: 'annexe A.4 (CALCUL)',
+    rows: [
+      { label: 'Bruit (Non pertinent)', value: 32.9, ratio: '24/73', tone: 'n' },
+      { label: 'Part P ∪ S', value: 67.1, ratio: '49/73' },
+      { label: 'Part P', value: 46.6, ratio: '34/73' },
+      { label: 'Part « trois critères »', value: 30.1, ratio: '22/73' },
+      { label: 'Part des P en passe 1', value: 85, ratio: '34/40' },
+      { label: 'Part des P en passe 1 ou 2', value: 95, ratio: '38/40' },
+    ],
+  },
+};
+
+export const CHART_MARKER = /<!-- chart:([\w-]+) -->/;
