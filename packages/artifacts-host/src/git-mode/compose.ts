@@ -151,6 +151,8 @@ const unavailable = (): never => { throw new ArtifactOperationError("provider_un
  * it to `sandbox` and refuses `caller` and `ci` before any binding write.
  */
 export const IMMO_GIT_DEFAULT_EXECUTOR = "sandbox" as const;
+/** Single A1 repository and its base ref: host configuration, never a caller discovery problem. */
+export const IMMO_GIT_DEFAULT_BASE_REF = "main" as const;
 
 export function withHostGitPolicy(service: GitToolService): GitToolService {
   return {
@@ -160,7 +162,17 @@ export function withHostGitPolicy(service: GitToolService): GitToolService {
       if (executor !== IMMO_GIT_DEFAULT_EXECUTOR) {
         throw new ArtifactOperationError("builder_unavailable", { publicDetails: { executor, reason: "executor_unavailable" } });
       }
-      return service.execute(operation, { ...args, executor }, invocation);
+      // A fresh attach needs a repo and, for a branch that does not exist yet, a base ref.
+      // The provider refuses both omissions with invalid_request, while immo registers exactly
+      // one repository (A1) and creates personal branches from main: default both here, like
+      // the executor. Pause/resume/detach act on an existing binding and keep their strict
+      // argument shapes, so they receive no repo/base default.
+      const isLifecycleOnly = args.detach !== undefined || args.pause !== undefined;
+      const defaults = isLifecycleOnly ? {} : {
+        repoId: args.repoId ?? IMMO_GIT_REPO_ID,
+        baseRef: args.baseRef ?? IMMO_GIT_DEFAULT_BASE_REF,
+      };
+      return service.execute(operation, { ...args, ...defaults, executor }, invocation);
     },
   };
 }
