@@ -52,13 +52,21 @@ spec:
   timeZone: "Etc/UTC"
   concurrencyPolicy: Forbid
   startingDeadlineSeconds: 120
-  successfulJobsHistoryLimit: 1
+  successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
   jobTemplate:
     spec:
       backoffLimit: 0
       activeDeadlineSeconds: 180
-      ttlSecondsAfterFinished: 3600
+      ttlSecondsAfterFinished: 21600
+      # Même rétention que radar-refresh-pv : FailJob sur code non nul
+      # (backoffLimit: 0), pod terminé lisible 21600 s (6 h).
+      podFailurePolicy:
+        rules:
+          - action: FailJob
+            onExitCodes:
+              operator: NotIn
+              values: [0]
       template:
         metadata:
           labels:
