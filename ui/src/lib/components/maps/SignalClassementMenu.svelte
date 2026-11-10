@@ -60,6 +60,9 @@
       const minHeight = 160;
       popEl.style.position = "fixed";
       popEl.style.zIndex = "1000";
+      // The stylesheet anchors with right:0; with an inline left too the
+      // fixed box would stretch across the viewport.
+      popEl.style.right = "auto";
       // Side with the most room wins; the popover height is capped to
       // that side so the header (first row) can never leave the viewport.
       const spaceBelow = window.innerHeight - rect.bottom - gap - margin;
