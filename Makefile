@@ -133,6 +133,8 @@ COMPOSE_RUN_API_NODEPS := $(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm --no-d
 # (ui/, packages/*/) as root: `npm ci` recreates them as the host
 # user, and a tree left by another stack or user must never block
 # the clean with EACCES (observed on CI, Quality gates step Test).
+# Blast radius (F5): that rm -rf runs on every `make test*` and
+# deletes host-bind trees outside the test stack's own volumes.
 .PHONY: chown-test-node-modules
 chown-test-node-modules: ## Hand test named node_modules volumes to the host user
 	@mkdir -p node_modules api/node_modules

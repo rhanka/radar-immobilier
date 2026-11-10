@@ -10,7 +10,7 @@ services:
     working_dir: /workspace
     entrypoint: []
     environment:
-      HOME: /tmp/home
+      HOME: /tmp
       npm_config_cache: /tmp/npm-cache
     volumes:
       - ../..:/workspace:ro
