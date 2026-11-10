@@ -58,7 +58,8 @@ data:
   IMMO_ARTIFACTS_LIVE_CONTROL_URL: "https://pages.preprod.immo.sent-tech.ca/_live-control/v1"
   IMMO_ARTIFACTS_LIVE_DRAFT_KEY_CURRENT: "v1"
   # SG4b inbound host (radar-api only: radar-immo-mcp reads neither key).
-  # Exact builder image digests admitted at handoff, comma-separated
+  # Builder images admitted at handoff, comma-separated: bare digests or
+  # full <repo>@sha256:<hex> references, normalised to digests at read
   # (empty: every handoff refused with image_not_allowed).
   IMMO_ARTIFACTS_BUILDER_IMAGE_ALLOWLIST: "docker.io/library/node@sha256:add5c17c14752c54d2f3d519ec46a3815684d41c33f198bcb09fb998f7dcbf68"
   # Sentropic preprod builder handoff PUBLIC key, `kid=base64(SPKI DER)`

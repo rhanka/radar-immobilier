@@ -14,6 +14,7 @@ import {
 import {
   DIMMED_SELECTION_OPACITY,
   FULL_SELECTION_OPACITY,
+  hasSameKindSelection,
   type SelectionBucketState,
   type SelectionKey,
 } from "./selection-bucket.js";
@@ -124,9 +125,10 @@ export function opacityForSelectionKey(
   emptyBucketOpacity: number,
 ): number {
   if (state.selectedKeys.size === 0) return emptyBucketOpacity;
-  return state.selectedKeys.has(key)
-    ? FULL_SELECTION_OPACITY
-    : DIMMED_SELECTION_OPACITY;
+  if (state.selectedKeys.has(key)) return FULL_SELECTION_OPACITY;
+  return hasSameKindSelection(state, key)
+    ? DIMMED_SELECTION_OPACITY
+    : emptyBucketOpacity;
 }
 
 /** Opacité atténuée appliquée aux lots/zones hors-filtre (#4). */
