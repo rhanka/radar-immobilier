@@ -179,6 +179,23 @@ describe("git mode composition", () => {
     expect(seen).toHaveLength(3);
   });
 
+  it("defaults git_attach to the A1 repo and main base ref, preserving explicit values and pause/detach", async () => {
+    const seen: Record<string, unknown>[] = [];
+    const service = withHostGitPolicy({ execute: async (_op, args) => { seen.push(args); return { ok: true }; } });
+    const invocation = { actorId: "alice", storageScopeId: SCOPE, invocationId: "i" };
+    await service.execute("git_attach", { artifactId: "a", idempotencyKey: "k" }, invocation);
+    expect(seen.at(-1)).toMatchObject({ repoId: "radar-immobilier", baseRef: "main", executor: "sandbox" });
+    await service.execute("git_attach", { artifactId: "a", idempotencyKey: "k", repoId: "radar-immobilier",
+      branch: "artifact/p/x/app-y", baseRef: "preview" }, invocation);
+    expect(seen.at(-1)).toMatchObject({ branch: "artifact/p/x/app-y", baseRef: "preview" });
+    await service.execute("git_attach", { artifactId: "a", idempotencyKey: "k", pause: true }, invocation);
+    expect(seen.at(-1)).not.toHaveProperty("repoId");
+    expect(seen.at(-1)).not.toHaveProperty("baseRef");
+    await service.execute("git_attach", { artifactId: "a", idempotencyKey: "k", detach: true }, invocation);
+    expect(seen.at(-1)).not.toHaveProperty("repoId");
+    expect(seen.at(-1)).not.toHaveProperty("baseRef");
+  });
+
   it("applies the executor policy to the composed git tools", async () => {
     const seen: Record<string, unknown>[] = [];
     const deps = composeGitMode({ resolution: LIVE, pool, storageScopeId: SCOPE, config, ports: {
