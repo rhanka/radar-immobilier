@@ -51,6 +51,7 @@ const harnessInput = qaHarness
       "sel-panel": fileURLToPath(
         new URL("./e2e-qa/harness/sel-panel.html", import.meta.url),
       ),
+      "focus-signal": fileURLToPath(new URL("./e2e-qa/harness/focus-signal.html", import.meta.url)),
       "focus-scope": fileURLToPath(
         new URL("./e2e-qa/harness/focus-scope.html", import.meta.url),
       ),
