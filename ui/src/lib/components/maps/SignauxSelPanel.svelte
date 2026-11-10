@@ -19,7 +19,7 @@
    * reste affiché pour signaler un filtre actif.
    */
   import { tick } from "svelte";
-  import { Alert, Badge, Search } from "@sentropic/design-system-svelte";
+  import { Alert, Badge, IconButton, Search } from "@sentropic/design-system-svelte";
   import { normalizeLotKey, zoneSearchKey } from "@radar/domain";
   import { rankBySearch } from "$lib/maps/entity-search.js";
   import { ExternalLink, FileText, FileX, RefreshCw, TriangleAlert, X } from "@lucide/svelte";
@@ -1052,15 +1052,15 @@
   <div class="sel-head">
     <span class="sel-kicker">Sélection</span>
     {#if selectedCity}
-      <button
-        type="button"
-        class="sel-clear"
-        on:click={onClear}
+      <IconButton
+        size="sm"
+        variant="ghost"
+        onclick={onClear}
         aria-label="Fermer la sélection"
+        title="Fermer la sélection"
       >
-        <X class="h-3.5 w-3.5" aria-hidden="true" />
-        Fermer
-      </button>
+        <X size={15} aria-hidden="true" />
+      </IconButton>
     {/if}
   </div>
 
@@ -2167,23 +2167,6 @@
     color: var(--st-semantic-text-muted, #94a3b8);
   }
 
-  .sel-clear {
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-    font-size: var(--signaux-fs-small);
-    padding: 0.2rem 0.5rem;
-    border: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
-    border-radius: var(--st-radius-sm, 4px);
-    background: transparent;
-    color: var(--st-semantic-text-secondary, #64748b);
-    cursor: pointer;
-  }
-
-  .sel-clear:hover {
-    background: var(--st-semantic-surface-subtle, #f8fafc);
-  }
-
   .sel-muted,
   .sel-empty {
     padding: 0.6rem 0.85rem;
@@ -2359,46 +2342,29 @@
   }
 
   .sel-entity-bar {
-    border: 1px solid var(--st-semantic-border-subtle, #f1f5f9);
-    border-radius: var(--st-radius-sm, 6px);
-    margin: 0.25rem 0.5rem;
-    overflow: visible;
-  }
-
-  /* Card-wide states: border, selection, hover and focus cover the whole
-     card, classification icon included (icon lives inside the card). */
-  .sel-entity-bar:hover {
-    background: var(--st-semantic-surface-subtle, #f8fafc);
-  }
-
-  .sel-entity-bar--selected {
-    background: var(--st-semantic-surface-selected, #ecfdf5);
-    border-color: var(--st-semantic-feedback-success, #0f766e);
-  }
-
-  .sel-entity-bar--focused {
-    outline: 1px solid var(--st-semantic-feedback-success, #14b8a6);
-    outline-offset: -1px;
-  }
-
-  .sel-entity-bar--dimmed {
-    opacity: 0.5;
-  }
-
-  .sel-entity-bar .sel-entity-head--selected,
-  .sel-entity-bar .sel-entity-head--focused {
-    background: transparent;
-    outline: none;
+    border-bottom: 1px solid var(--st-semantic-border-subtle, #f1f5f9);
   }
 
   .sel-entity-bar:last-child {
     border-bottom: none;
   }
 
+  /* Fond + liseré portés par la ligne entière : le bouton de classement,
+     posé dans la ligne, partage le même fond (aucune colonne séparée). */
+  .sel-entity-bar:hover:not(.sel-entity-bar--selected) {
+    background: var(--st-semantic-surface-subtle, #f8fafc);
+    box-shadow: inset 3px 0 0 var(--st-semantic-border-strong, #0ea5e9);
+  }
+
   /* #86 — cross-highlight : la fiche correspondant au surlignage PDF survolé
      prend un état SÉLECTIONNÉ visible (liseré + fond) sans ouvrir le détail. */
-  .sel-entity-bar--xhover {
+  .sel-entity-bar--xhover:not(.sel-entity-bar--selected) {
     background: var(--st-semantic-surface-selected, #e0f2fe);
+    box-shadow: inset 3px 0 0 var(--st-semantic-border-strong, #0ea5e9);
+  }
+
+  .sel-entity-bar--selected {
+    background: #ecfdf5;
     box-shadow: inset 3px 0 0 var(--st-semantic-border-strong, #0ea5e9);
   }
 
@@ -2435,10 +2401,15 @@
     align-items: center;
     padding: 0.15rem;
     border: none;
-    border-radius: 4px;
+    border-radius: var(--st-radius-sm, 4px);
     background: transparent;
     color: var(--st-semantic-feedback-warning, #b45309);
     cursor: pointer;
+  }
+
+  .classement-error-icon:hover,
+  .classement-error-icon:focus-visible {
+    background: var(--st-semantic-action-secondaryHover, var(--st-semantic-surface-subtle));
   }
 
   .classement-error-detail {
@@ -2483,23 +2454,24 @@
   }
 
   .sel-entity-head:hover {
-    background: var(--st-semantic-surface-subtle, #f8fafc);
+    background: transparent;
   }
 
   .sel-entity-head--selected {
-    background: #ecfdf5;
+    background: transparent;
     color: #0f766e;
     font-weight: 600;
   }
 
-  .sel-entity-head--focused {
-    outline: 1px solid #14b8a6;
-    outline-offset: -1px;
+  /* Le cadre de focus est porté par la ligne entière (icône incluse),
+     jamais par le seul bouton du titre. */
+  .sel-entity-head--focused,
+  .sel-entity-head:focus,
+  .sel-entity-head:focus-visible {
+    outline: none;
   }
 
-  .sel-entity-head--dimmed {
-    opacity: 0.5;
-  }
+  /* Pas de cadre sur la ligne sélectionnée : fond + liseré suffisent. */
 
   /* #10 — titre complet, sans troncature */
   .sel-entity-label {
