@@ -11,6 +11,7 @@ API_IMAGE := ghcr.io/rhanka/radar-api
 CONTRACT_AWK := $(OVERLAY)/refresh-contract.awk
 WINDOW_AWK := $(OVERLAY)/refresh-window.awk
 WATCHDOG_AWK := $(OVERLAY)/refresh-watchdog.awk
+RETENTION_AWK := $(OVERLAY)/refresh-retention.awk
 STAGGER_AWK := $(OVERLAY)/refresh-stagger.awk
 BASCULE_CRONS_AWK := $(OVERLAY)/bascule-crons.awk
 BASCULE_WINDOW_AWK := $(OVERLAY)/bascule-window.awk
@@ -295,6 +296,8 @@ verify-renders:
 	    awk 'BEGIN{RS="\n---\n"} /[^[:space:]]/ { if ($$0 !~ /apiVersion:/ || $$0 !~ /kind:/) { print "missing apiVersion/kind in refresh render" > "/dev/stderr"; bad=1 } } END{ exit bad }' "$$render"; \
 	    awk -f "$(WATCHDOG_AWK)" "$$render" \
 	      || { echo "refresh pending watchdog contract failed: $$render" >&2; exit 1; }; \
+	    awk -f "$(RETENTION_AWK)" "$$render" \
+	      || { echo "refresh retention contract failed: $$render" >&2; exit 1; }; \
 	    test "$$(grep -c '^kind: CronJob$$' "$$render")" -eq 2 \
 	      || { echo "refresh render must contain exactly two CronJobs (radar-refresh-pv, radar-refresh-pending-watchdog): $$render" >&2; exit 1; }; \
 	    test "$$(grep -c '^kind: PersistentVolumeClaim$$' "$$render")" -eq 1; \
@@ -357,6 +360,8 @@ verify-renders:
 	    || { echo "bascule window contract failed: cannot render $(BACKUP_DAILY_MANIFEST) (canonical YAML documents are required)" >&2; exit 1; }; \
 	  awk -v restore="$$crons" -f "$(BASCULE_WINDOW_AWK)" "$$tmp/preprod.yaml" "$$tmp/prod.yaml" "$$tmp/backup.yaml" \
 	    || { echo "bascule window contract failed: the daily restore slot of $$wf must stay after the daily backup and clear of every refresh start" >&2; exit 1; }; \
+	  awk -f "$(RETENTION_AWK)" "$$tmp/backup.yaml" "$(ROOT)/deploy/k8s/35-consistency-snapshot-cronjob.yaml" "$(ROOT)/deploy/k8s/35b-populate-geo-cronjob.yaml" \
+	    || { echo "refresh retention contract failed: backup/snapshot/geo CronJobs" >&2; exit 1; }; \
 	  $(MAKE) -f "$(lastword $(MAKEFILE_LIST))" render-requeue-recurrent REQUEUE_IMAGE_REF="$$image" REQUEUE_RENDER_OUT="$$tmp/preprod-requeue.yaml" ENV=preprod; \
 	  $(MAKE) -f "$(lastword $(MAKEFILE_LIST))" render-requeue-recurrent REQUEUE_IMAGE_REF="$$image" REQUEUE_RENDER_OUT="$$tmp/prod-requeue.yaml" ENV=prod; \
 	  for render in "$$tmp/preprod-requeue.yaml" "$$tmp/prod-requeue.yaml"; do \
@@ -374,6 +379,8 @@ verify-renders:
 	      if ($$0 !~ /name: REQUEUE_MAX_REQUEUES\n/) exit 1; \
 	    } END { if (!rq) exit 1 }' "$$render" \
 	      || { echo "requeue recurrent contract failed (Forbid, flock, seat probe, ceilings): $$render" >&2; exit 1; }; \
+	    awk -f "$(RETENTION_AWK)" "$$render" \
+	      || { echo "refresh retention contract failed: $$render" >&2; exit 1; }; \
 	  done; \
 	  grep -q 'radar-docs-s3-credentials' "$$tmp/preprod-requeue.yaml" \
 	    || { echo "requeue recurrent preprod must use radar-docs-s3-credentials" >&2; exit 1; }; \
