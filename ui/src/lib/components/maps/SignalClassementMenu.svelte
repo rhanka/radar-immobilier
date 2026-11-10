@@ -8,7 +8,7 @@
    */
   import { tick } from "svelte";
   import { CircleDashed, Eye, EyeOff, Target } from "@lucide/svelte";
-  import { Menu, type MenuItem } from "@sentropic/design-system-svelte";
+  import { IconButton, Menu, type MenuItem } from "@sentropic/design-system-svelte";
   import {
     CLASSEMENT_META,
     reasonCodesForClass,
@@ -183,19 +183,26 @@
       btn.classList.toggle("classement-item--selected", selected);
       if (selected) btn.setAttribute("aria-haspopup", "menu");
       else btn.removeAttribute("aria-haspopup");
-      let chevron = btn.querySelector<HTMLElement>(".classement-chevron");
-      if (selected && SUBMENU_CLASSES.includes(candidate)) {
-        if (!chevron) {
-          chevron = document.createElement("span");
-          chevron.className = "classement-chevron";
-          chevron.setAttribute("aria-hidden", "true");
-        }
-        chevron.textContent = subSide === "left" ? "‹" : "›";
-        if (subSide === "left") btn.prepend(chevron);
-        else btn.append(chevron);
-      } else if (chevron) {
-        chevron.remove();
+      // Fixed chevron slots on EVERY line (left + right, empty when the
+      // line is not the selected parent) so icon and label never shift
+      // on hover/selection, whichever side the sub-menu opens on.
+      let leftSlot = btn.querySelector<HTMLElement>(".classement-chevron--left");
+      if (!leftSlot) {
+        leftSlot = document.createElement("span");
+        leftSlot.className = "classement-chevron classement-chevron--left";
+        leftSlot.setAttribute("aria-hidden", "true");
+        btn.prepend(leftSlot);
       }
+      let rightSlot = btn.querySelector<HTMLElement>(".classement-chevron--right");
+      if (!rightSlot) {
+        rightSlot = document.createElement("span");
+        rightSlot.className = "classement-chevron classement-chevron--right";
+        rightSlot.setAttribute("aria-hidden", "true");
+        btn.append(rightSlot);
+      }
+      const showChevron = selected && SUBMENU_CLASSES.includes(candidate);
+      leftSlot.textContent = showChevron && subSide === "left" ? "‹" : "";
+      rightSlot.textContent = showChevron && subSide === "right" ? "›" : "";
     });
   }
 
@@ -313,20 +320,25 @@
 
 <svelte:window on:click={onWindowClick} on:keydown={onWindowKey} />
 <span class="classement-menu" bind:this={rootEl}>
-  <button
-    type="button"
-    class="classement-btn classement-btn--{classe}"
-    style="color: {CLASSEMENT_META[classe].token}"
-    aria-label="Classement : {CLASSEMENT_META[classe].label}"
-    aria-haspopup="menu"
-    aria-expanded={open}
-    title="Classement : {CLASSEMENT_META[classe].label}"
-    data-testid="signal-classement-button"
-    {disabled}
-    on:click|stopPropagation={toggle}
-  >
-    <svelte:component this={CurrentIcon} size={15} aria-hidden="true" />
-  </button>
+  <!-- Standard DS icon button (ghost: transparent, light hover darkening,
+       no border) — same component/size as the Zones/Lots warning trigger. -->
+  <span role="presentation" on:click|stopPropagation>
+    <IconButton
+      size="sm"
+      variant="ghost"
+      style="color: {CLASSEMENT_META[classe].token}"
+      aria-label="Classement : {CLASSEMENT_META[classe].label}"
+      aria-haspopup="menu"
+      aria-expanded={open}
+      title="Classement : {CLASSEMENT_META[classe].label}"
+      data-testid="signal-classement-button"
+      data-classe={classe}
+      {disabled}
+      onclick={toggle}
+    >
+      <svelte:component this={CurrentIcon} size={15} aria-hidden="true" />
+    </IconButton>
+  </span>
   {#if open}
     <span class="classement-pop" data-testid="classement-pop" data-side={subSide} use:portalPop={pendingClass ?? "class"}>
       <span class="cascade" role="presentation" on:keydown={onCascadeKeydown}>
@@ -348,8 +360,13 @@
 
 <style>
   .classement-menu { position: relative; display: inline-flex; }
-  .classement-btn { display: inline-flex; align-items: center; justify-content: center; padding: 2px; border: none; background: transparent; cursor: pointer; }
-  .classement-btn:disabled { cursor: default; opacity: 0.5; }
+  /* Class colours: DS semantic tokens, icon only (labels keep primary text).
+     pertinent=feedback-success, a_surveiller=feedback-warning,
+     ecarte=text-muted, non_classe=text-secondary (see CLASSEMENT_META). */
+  .cascade-class :global([data-class="pertinent"] svg) { color: var(--st-semantic-feedback-success); }
+  .cascade-class :global([data-class="a_surveiller"] svg) { color: var(--st-semantic-feedback-warning); }
+  .cascade-class :global([data-class="ecarte"] svg) { color: var(--st-semantic-text-muted); }
+  .cascade-class :global([data-class="non_classe"] svg) { color: var(--st-semantic-text-secondary); }
   .classement-pop { position: absolute; top: calc(100% + 4px); right: 0; z-index: 30; display: block; border-radius: var(--st-component-popover-radius, var(--st-radius-lg, 0.5rem)); box-shadow: var(--st-component-popover-shadow, var(--st-shadow-floating)); }
   .cascade { position: relative; display: block; }
   .cascade-class { display: block; }
@@ -357,6 +374,6 @@
   .cascade-reason { position: absolute; display: block; }
   .cascade-reason :global(.st-menu) { box-shadow: var(--st-component-popover-shadow, var(--st-shadow-floating)); }
   :global(.classement-item--selected) { background: var(--st-component-selectableRow-selectedBackground, var(--st-semantic-surface-subtle)); color: var(--st-component-selectableRow-selectedText, var(--st-semantic-text-primary)); font-weight: 600; }
-  :global(.classement-chevron) { display: inline-flex; align-items: center; font-size: 1rem; line-height: 1; color: var(--st-semantic-text-secondary); flex: 0 0 auto; }
+  :global(.classement-chevron) { display: inline-flex; align-items: center; justify-content: center; width: 1rem; min-width: 1rem; font-size: 1rem; line-height: 1; color: var(--st-semantic-text-secondary); flex: 0 0 1rem; }
   .classement-empty { display: block; padding: 4px 8px; color: var(--st-semantic-text-secondary); font-size: 0.75rem; background: var(--st-semantic-surface-raised); }
 </style>
