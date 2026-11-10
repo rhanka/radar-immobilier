@@ -579,15 +579,23 @@ export interface OpsConfig {
   readonly recipientsAudience?: string;
 }
 
-export function resolveOpsConfig(config: AppConfig): OpsConfig {
+export function resolveOpsConfig(
+  config: AppConfig,
+  bearerAudiences: readonly string[] = [],
+): OpsConfig {
+  // Deployment gate (Minor-1): the recipients audience must be a dedicated
+  // L1 service audience. If it overlaps a user Bearer [REDACTED], any user
+  // token could enumerate admin emails, so the audience is dropped and
+  // the route stays closed (503) instead of serving unsafely.
+  const audience = config.OPS_RECIPIENTS_AUDIENCE;
+  const dedicated =
+    audience !== undefined && !bearerAudiences.includes(audience);
   return {
     ...(config.OPS_TARGET ? { expectedTarget: config.OPS_TARGET } : {}),
     ...(config.OPS_REFERENCE_WORKSPACE_SLUG
       ? { referenceWorkspaceSlug: config.OPS_REFERENCE_WORKSPACE_SLUG }
       : {}),
-    ...(config.OPS_RECIPIENTS_AUDIENCE
-      ? { recipientsAudience: config.OPS_RECIPIENTS_AUDIENCE }
-      : {}),
+    ...(dedicated ? { recipientsAudience: audience } : {}),
   };
 }
 
