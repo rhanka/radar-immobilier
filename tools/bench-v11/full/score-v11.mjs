@@ -17,7 +17,6 @@ const MUSE_ARMS = ["minimal", "low", "medium", "high", "xhigh", "max"].map((e) =
   model: "muse-spark-1.3", promptFile: (id) => `${DIR}/full/prompts/${id}.muse.txt`,
 }));
 const F_SEAT_CLAUDE = 0.030248; // v10 burn, Claude Max 20x
-const OPUS_RATE = { input: 4, output: 20 }; // platform.claude.com (official)
 const MUSE_RATE = { input: 1.25, output: 4.25 }; // Meta standard tier (secondary sources)
 
 const manifest = JSON.parse(await readFile(`${DIR}/harness/manifest-v101b.json`, "utf8"));
@@ -34,7 +33,7 @@ for (const spec of [...OPUS_ARMS, ...MUSE_ARMS]) {
   try {
     meta = (await readFile(`${armDir}/meta.jsonl`, "utf8")).split("\n")
       .filter(Boolean).map((l) => JSON.parse(l));
-  } catch {}
+  } catch { /* meta.jsonl absent: no runs */ }
   const done = meta.filter((r) => r.exit !== undefined);
   const resolveDoc = async (documentId) => {
     const prefix = spec.kind === "opus55-seat" ? spec.effort : spec.effort;
@@ -76,7 +75,7 @@ for (const spec of [...OPUS_ARMS, ...MUSE_ARMS]) {
     const ok = done.filter((r) => r.exit === 0);
     let inBytes = 0;
     for (const d of manifest.documents) {
-      try { inBytes += (await readFile(spec.promptFile(d.id))).length; } catch {}
+      try { inBytes += (await readFile(spec.promptFile(d.id))).length; } catch { /* prompt absent: skip */ }
     }
     row.tokens = { note: "estimated bytes/4, no provider usage on muse exec",
       inBytesMean: inBytes / manifest.documents.length,

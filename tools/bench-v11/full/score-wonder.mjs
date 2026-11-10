@@ -24,7 +24,7 @@ for (const d of manifest.documents) {
   } else failClasses.T+=1;
 }
 const ok = done.filter((r)=>r.exit===0);
-let inBytes=0; for (const d of manifest.documents) { try{ inBytes+=(await readFile(`${DIR}/full/prompts/${d.id}.muse.txt`)).length; }catch{} }
+let inBytes=0; for (const d of manifest.documents) { try{ inBytes+=(await readFile(`${DIR}/full/prompts/${d.id}.muse.txt`)).length; }catch{ /* prompt absent: skip */ } }
 const outBytesMean = ok.length ? ok.reduce((s,r)=>s+r.bytes,0)/ok.length : null;
 const row = { arm:"muse-wonder-low", model:"muse-wonder-1.0", effort:"low", docs:manifest.documents.length,
   completed:done.length, quotaEvents:quotas.length, accepted:scored.accepted, strict:scored.net, broad:scored.broad,

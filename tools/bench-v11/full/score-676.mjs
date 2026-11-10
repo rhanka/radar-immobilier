@@ -8,7 +8,7 @@ import { existsSync } from "node:fs";
 
 const DIR = process.env.BENCH_DIR ?? new URL("..", import.meta.url).pathname.replace(/\/$/, "");
 const H = `${DIR}/harness`;
-const { scoreValidV2 } = await import(`${H}/score-oracle-v2.mjs`);
+await import(`${H}/score-oracle-v2.mjs`);
 const { unresolvedUnits, softMatcherFor, aggregate, scoreCase } = await import(`${H}/score-oracle-v3.mjs`);
 const { documentPages } = await import(`${H}/o3l.mjs`);
 const { CASCADES } = await import(`${H}/precision-cascade.mjs`);
@@ -91,7 +91,7 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   await mkdir(`${DIR}/full/rescore-v10`, { recursive: true });
   await writeFile(`${DIR}/full/rescore-v10/scores-676.json`,
     JSON.stringify({ gold: { units: gold.units.length, unresolved: unresolved.count },
-      arms: results.map(({ cases, ...rest }) => rest),
+      arms: results.map(({ cases: _cases, ...rest }) => rest),
       cases: Object.fromEntries(results.map((r) => [r.arm, r.cases])) }, null, 1));
   for (const r of results) {
     console.log(`${r.arm}: accepted=${r.accepted} P=${r.net.precision?.toFixed(3)} R=${r.net.recall?.toFixed(3)} F1=${r.net.f1?.toFixed(3)}`);

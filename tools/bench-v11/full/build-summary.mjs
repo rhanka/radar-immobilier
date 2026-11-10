@@ -5,13 +5,10 @@ const DIR = process.env.BENCH_DIR ?? new URL("..", import.meta.url).pathname.rep
 const v11 = JSON.parse(await readFile(`${DIR}/full/scores-v11.json`, "utf8"));
 const r676 = JSON.parse(await readFile(`${DIR}/full/rescore-v10/scores-676.json`, "utf8"));
 const s674 = JSON.parse(await readFile(`${DIR}/harness/scores-100-674.json`, "utf8"));
-const report = JSON.parse(await readFile(`${DIR}/harness/report-data-v101b.json`, "utf8"));
-const published = new Map(report.arms.map((a) => [a.arm, a]));
 const strict674 = new Map(s674.arms.map((a) => [a.arm, a]));
 
 const f3 = (v) => v === null || v === undefined ? "N-A" : Number(v).toFixed(3);
 const f2 = (v) => v === null || v === undefined ? "N-A" : Number(v).toFixed(2);
-const f5 = (v) => v === null || v === undefined ? "N-A" : Number(v).toFixed(5);
 const usd = (v) => v === null || v === undefined ? "N-A" : Number(v).toFixed(5);
 
 const v11lines = ["| Bras | Modèle | Effort | Acc./100 | P stricte | R stricte | F1 stricte | F1 net 4 doc | E/doc | S/doc | USD équiv. API/doc | USD siège/doc | Sièges/1000 | p50 s | p90 s | Échecs J/V/Pr/T |",
@@ -31,7 +28,6 @@ const v10lines = ["| Bras | Acc./100 (v10) | P stricte | R stricte | F1 stricte 
 const order = [...s674.arms.map((a) => a.arm)];
 for (const name of order) {
   const s = strict674.get(name);
-  const pub = published.get(name);
   const ex = exact676.get(name);
   if (ex) {
     v10lines.push(`| ${name} | ${ex.accepted}/100 | ${f3(ex.strict.precision)} | ${f3(ex.strict.recall)} | ${f3(ex.strict.f1)} | exact (sorties gelées rescorées) |`);

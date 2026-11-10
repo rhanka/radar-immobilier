@@ -29,7 +29,7 @@ for (const d of manifest.documents) {
 const okByDoc = new Map();
 for (const r of done) if (r.status==="SUCCESS") okByDoc.set(r.doc, r);
 const ok = [...okByDoc.values()];
-let inBytes=0; for (const d of manifest.documents) { try{ inBytes+=(await readFile(`${DIR}/full/prompts/${d.id}.muse.txt`)).length; }catch{} }
+let inBytes=0; for (const d of manifest.documents) { try{ inBytes+=(await readFile(`${DIR}/full/prompts/${d.id}.muse.txt`)).length; }catch{ /* prompt absent: skip */ } }
 const outBytesMean = ok.length ? ok.reduce((s,r)=>s+r.bytes,0)/ok.length : null;
 const tMean = (key) => ok.length ? ok.reduce((s,r)=>s+(r[key]??0),0)/ok.length : null;
 const row = { arm:"gemini-argon-low", model:"gemini-4-argon-low", effort:"low", docs:manifest.documents.length,

@@ -5,12 +5,11 @@
 // validateExtraction, validateProfileExtraction, validateProvenance).
 // Usage: node validate-outputs.mjs <armDir>  (reads <armDir>/raw/*.txt)
 import { readFile, writeFile, mkdir, readdir } from "node:fs/promises";
-import { existsSync } from "node:fs";
 
 const DIR = process.env.BENCH_DIR ?? new URL("..", import.meta.url).pathname.replace(/\/$/, "");
 const graphify = await import("@sentropic/graphify").catch(() => import(
   `${DIR}/sandbox/node_modules/@sentropic/graphify/dist/index.js`));
-const { buildProfileChunkPrompt, loadOntologyProfile, registryRecordsToExtraction,
+const { loadOntologyProfile, registryRecordsToExtraction,
   validateExtraction, validateProfileExtraction } = graphify;
 
 const MIN_ANCHOR = 12;
@@ -22,16 +21,12 @@ const containsNormalizedPdfExcerpt = (pageText, excerpt) => {
   const n = normalizePdfExcerpt(excerpt);
   return [...n].length >= MIN_ANCHOR && normalizePdfExcerpt(pageText).includes(n);
 };
-const stripItemNumber = (v) => v.replace(/^\d+(?:\.\d+)*[.)]?\s+/, "");
-const normalized = (v) => v.normalize("NFC").toLocaleLowerCase("fr-CA").replace(/\s+/g, " ").trim();
-const key = (v) => stripItemNumber(normalized(v));
-
 function strictJsonCandidate(text) {
   const trimmed = text.trim();
   const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/iu);
   return { text: fenced ? fenced[1].trim() : trimmed, wrapperNormalized: Boolean(fenced) };
 }
-const parseErrorDetails = (error, source) => {
+const parseErrorDetails = (error, _source) => {
   if (!(error instanceof SyntaxError)) return null;
   const match = error.message.match(/(?:at )?position\s+(\d+)/iu);
   return { name: error.name, message: error.message,
@@ -203,7 +198,6 @@ function validatedExtraction(text, chunk, context, pageTextsMap) {
 
 const armDir = process.argv[2];
 if (!armDir) throw new Error("usage: validate-outputs.mjs <armDir>");
-const manifest = JSON.parse(await readFile(`${DIR}/harness/manifest-v101b.json`, "utf8"));
 const profile = loadOntologyProfile(`${DIR}/t1/frozen-ontology-profile.yaml`);
 const context = { profile, registries: {}, registryExtraction: registryRecordsToExtraction({}, profile) };
 const onlyDoc = process.argv[3] ?? null;
