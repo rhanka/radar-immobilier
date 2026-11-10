@@ -7,6 +7,10 @@ import type { GitBuildExecutor, GitBuildJobRequest, GitBuildJobState, GitBuildPo
 /**
  * Host build API client (M3-I, W7 contract with the Sentropic builder).
  *
+ * - first `POST <base>/v1/live/reconcile` with `{ artifactId, binding, generation }`
+ *   (the live-open endpoint, reused): a binding the builder has never
+ *   reconciled is refused at build admission (`git_live_conflict:stale_session`),
+ *   and P1 only built because it had been opened live first;
  * - immo persists the job first (G0 v3 §2.6: the job identity, never a
  *   caller SHA later) and gets its jobId from the host job store;
  * - then `POST <base>/v1/builds` with exactly `{ artifactId, jobId, binding }`
@@ -86,6 +90,20 @@ export function builderBaseUrl(raw: string): URL {
 export function createHostBuildApiClient(options: HostBuildApiOptions): GitBuildPort & {
   /** Builder status; undefined when the builder does not know the job (404). Transport failures throw. */
   status(artifactId: string, jobId: string): Promise<HostBuildStatus | undefined>;
+  /**
+   * Live reconcile of one binding generation (`POST v1/live/reconcile`, the
+   * same endpoint the live-open worker calls): records the binding on the
+   * builder, which otherwise refuses every build of a never-reconciled
+   * binding with `git_live_conflict:stale_session`. Idempotent on the
+   * builder side (same binding + generation, same ack), so it is sent
+   * before every build request instead of tracking a host-side flag that
+   * a restart or a builder reset would silently lose; a retry after a
+   * `build_failed` therefore re-reconciles and is never blocked by the
+   * previous failure. Fail-closed: a refused reconcile throws
+   * `provider_unavailable` and no build is requested.
+   */
+  reconcileLiveBinding(input: { readonly storageScopeId: string; readonly artifactId: string;
+    readonly bindingGeneration: number }): Promise<void>;
 } {
   const base = options.baseUrl !== undefined && options.identity !== undefined ? builderBaseUrl(options.baseUrl) : undefined;
   const jobs = options.jobs ?? FAIL_CLOSED_JOB_STORE;
@@ -106,12 +124,33 @@ export function createHostBuildApiClient(options: HostBuildApiOptions): GitBuild
     if (!accepted.includes(response.status)) throw new ArtifactOperationError("provider_unavailable");
     return parseStatus(body, jobId);
   };
+  const reconcile = async (artifactId: string, binding: Awaited<ReturnType<typeof resolveBuilderBinding>>, generation: number) => {
+    let response: Response;
+    try {
+      response = await fetcher(new URL("v1/live/reconcile", base!), { method: "POST", redirect: "error",
+        signal: AbortSignal.timeout(options.timeoutMs ?? 10_000),
+        headers: { "content-type": "application/json", authorization: await options.identity!.authorization() },
+        body: JSON.stringify({ artifactId, binding, generation }) });
+    } catch (error) {
+      if (error instanceof ArtifactOperationError) throw error;
+      throw new ArtifactOperationError("provider_unavailable");
+    }
+    // BridgeAck: any 2xx records the binding; the ack body carries no host state.
+    if (response.status < 200 || response.status >= 300) throw new ArtifactOperationError("provider_unavailable");
+    await response.text().catch(() => undefined);
+  };
   return {
     async admits(executor: GitBuildExecutor) { return base !== undefined && executor === "sandbox"; },
+    async reconcileLiveBinding(input) {
+      if (!base) throw new ArtifactOperationError("provider_unavailable");
+      const binding = await resolveBuilderBinding(options.bindings, input);
+      await reconcile(input.artifactId, binding, input.bindingGeneration);
+    },
     async request(job: GitBuildJobRequest) {
       if (!base || job.executor !== "sandbox") throw new ArtifactOperationError("provider_unavailable");
       const binding = await resolveBuilderBinding(options.bindings, { storageScopeId: job.storageScopeId, artifactId: job.artifactId,
         bindingGeneration: job.bindingGeneration });
+      await reconcile(job.artifactId, binding, job.bindingGeneration);
       const jobId = await jobs.persist(job);
       const status = await call(new URL("v1/builds", base), { method: "POST", headers: { "content-type": "application/json" },
         body: JSON.stringify({ artifactId: job.artifactId, jobId, binding }) }, [200, 202], jobId);

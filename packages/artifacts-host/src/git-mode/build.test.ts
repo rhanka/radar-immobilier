@@ -181,6 +181,46 @@ describe("host build API client (W7)", () => {
     expect(await client.admits("ci")).toBe(false);
   });
 
+  it("reconciles the binding live (POST /v1/live/reconcile) BEFORE requesting the build", async () => {
+    const jobs = createMemoryJobStore();
+    const fetcher = vi.fn(async (_url: URL, init: RequestInit) => {
+      const body = JSON.parse(String(init.body)) as { jobId?: string };
+      return new Response(JSON.stringify({ jobId: body.jobId ?? "reconciled", state: "build_pending" }), { status: 202 });
+    });
+    const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs, bindings, fetch: fetcher as never });
+    await client.request(job);
+    expect(fetcher.mock.calls.map((call) => String((call as unknown as [URL])[0]))).toEqual([
+      `${BASE}/v1/live/reconcile`, `${BASE}/v1/builds`]);
+    const reconcileInit = (fetcher.mock.calls[0] as unknown as [URL, RequestInit])[1];
+    expect(reconcileInit.method).toBe("POST");
+    expect(JSON.parse(String(reconcileInit.body))).toEqual({ artifactId: job.artifactId,
+      binding: { repoId: "radar-immobilier", branch: binding.branch, subPath: "" }, generation: 2 });
+    expect((reconcileInit.headers as Record<string, string>).authorization).toBe("Bearer [REDACTED]");
+  });
+
+  it("fails closed before persisting or building when the live reconcile is refused", async () => {
+    const jobs = createMemoryJobStore();
+    const fetcher = vi.fn(async () => new Response("{}", { status: 503 }));
+    const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs, bindings, fetch: fetcher as never });
+    await expect(client.request(job)).rejects.toMatchObject({ kind: "provider_unavailable" });
+    expect(fetcher.mock.calls).toHaveLength(1);
+    expect(String((fetcher.mock.calls[0] as unknown as [URL])[0])).toBe(`${BASE}/v1/live/reconcile`);
+    expect(jobs.jobs.size).toBe(0);
+  });
+
+  it("re-reconciles on a retry after a build_failed, so a failed build never blocks the next publish", async () => {
+    const jobs = createMemoryJobStore();
+    const fetcher = vi.fn(async (_url: URL, init: RequestInit) => {
+      const body = JSON.parse(String(init.body)) as { jobId?: string };
+      return new Response(JSON.stringify({ jobId: body.jobId ?? "reconciled", state: "build_pending" }), { status: 202 });
+    });
+    const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs, bindings, fetch: fetcher as never });
+    await client.request(job);
+    await client.request({ ...job, idempotencyKey: "k-retry" });
+    expect(fetcher.mock.calls.map((call) => String((call as unknown as [URL])[0]))).toEqual([
+      `${BASE}/v1/live/reconcile`, `${BASE}/v1/builds`, `${BASE}/v1/live/reconcile`, `${BASE}/v1/builds`]);
+  });
+
   it("persists the job, then posts exactly { artifactId, jobId, binding } to /v1/builds (202 or 200)", async () => {
     const jobs = createMemoryJobStore();
     const fetcher = vi.fn(async (_url: URL, init: RequestInit) => {
@@ -190,7 +230,7 @@ describe("host build API client (W7)", () => {
     const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs, bindings, fetch: fetcher as never });
     const first = await client.request(job);
     expect(first.state).toBe("build_pending");
-    const [url, init] = fetcher.mock.calls[0]! as unknown as [URL, RequestInit];
+    const [url, init] = fetcher.mock.calls[1]! as unknown as [URL, RequestInit];
     expect(String(url)).toBe(`${BASE}/v1/builds`);
     expect(init.method).toBe("POST");
     expect(JSON.parse(String(init.body))).toEqual({ artifactId: job.artifactId, jobId: first.jobId,
@@ -211,7 +251,7 @@ describe("host build API client (W7)", () => {
     const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs: createMemoryJobStore(), bindings: { get: async () => stored },
       fetch: fetcher as never });
     await client.request({ ...job, repoId: "forged", branch: "artifact/forged", subPath: "forged" });
-    expect(JSON.parse(String((fetcher.mock.calls[0] as unknown as [URL, RequestInit])[1].body)).binding)
+    expect(JSON.parse(String((fetcher.mock.calls[1] as unknown as [URL, RequestInit])[1].body)).binding)
       .toEqual({ repoId: "stored-repo", branch: "artifact/p/alice000/other-22222222", subPath: "sub/dir" });
   });
 
