@@ -16,7 +16,7 @@ import { createHmac } from "node:crypto";
 import { z } from "zod";
 import { ClassificationError } from "../services/facets/classification-errors.js";
 import { CitySlug, WorkspaceId } from "../services/facets/classification-query.js";
-import { cut, finiteNumber, validBbox, projectProps, PROOF_BOOL_KEYS, REGLEMENT_KEYS, SHORT_STRING_KEYS, TEXT_KEYS, ZONE_LOT_KEYS } from "../services/facets/props-projection.js";
+import { cut, validBbox, projectProps, PROOF_BOOL_KEYS, REGLEMENT_KEYS, SHORT_STRING_KEYS, TEXT_KEYS, ZONE_LOT_KEYS } from "../services/facets/props-projection.js";
 import type { GraphSignalCard, GraphSignalDocRef, SignalEvidence } from "../routes/graph-signals.js";
 
 export { projectProps };
