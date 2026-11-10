@@ -8,7 +8,7 @@
    */
   import { tick } from "svelte";
   import { CircleDashed, Eye, EyeOff, Target } from "@lucide/svelte";
-  import { Menu, type MenuItem } from "@sentropic/design-system-svelte";
+  import { IconButton, Menu, type MenuItem } from "@sentropic/design-system-svelte";
   import {
     CLASSEMENT_META,
     reasonCodesForClass,
@@ -184,18 +184,13 @@
       if (selected) btn.setAttribute("aria-haspopup", "menu");
       else btn.removeAttribute("aria-haspopup");
       let chevron = btn.querySelector<HTMLElement>(".classement-chevron");
-      if (selected && SUBMENU_CLASSES.includes(candidate)) {
-        if (!chevron) {
-          chevron = document.createElement("span");
-          chevron.className = "classement-chevron";
-          chevron.setAttribute("aria-hidden", "true");
-        }
-        chevron.textContent = subSide === "left" ? "‹" : "›";
-        if (subSide === "left") btn.prepend(chevron);
-        else btn.append(chevron);
-      } else if (chevron) {
-        chevron.remove();
+      if (!chevron) {
+        chevron = document.createElement("span");
+        chevron.className = "classement-chevron";
+        chevron.setAttribute("aria-hidden", "true");
+        btn.prepend(chevron);
       }
+      chevron.textContent = selected && SUBMENU_CLASSES.includes(candidate) ? (subSide === "left" ? "‹" : "›") : "";
     });
   }
 
@@ -313,9 +308,9 @@
 
 <svelte:window on:click={onWindowClick} on:keydown={onWindowKey} />
 <span class="classement-menu" bind:this={rootEl}>
-  <button
-    type="button"
-    class="classement-btn classement-btn--{classe}"
+  <IconButton
+    size="sm"
+    variant="ghost"
     style="color: {CLASSEMENT_META[classe].token}"
     aria-label="Classement : {CLASSEMENT_META[classe].label}"
     aria-haspopup="menu"
@@ -323,10 +318,10 @@
     title="Classement : {CLASSEMENT_META[classe].label}"
     data-testid="signal-classement-button"
     {disabled}
-    on:click|stopPropagation={toggle}
+    onclick={(event: MouseEvent) => { event.stopPropagation(); void toggle(); }}
   >
     <svelte:component this={CurrentIcon} size={15} aria-hidden="true" />
-  </button>
+  </IconButton>
   {#if open}
     <span class="classement-pop" data-testid="classement-pop" data-side={subSide} use:portalPop={pendingClass ?? "class"}>
       <span class="cascade" role="presentation" on:keydown={onCascadeKeydown}>
@@ -348,8 +343,6 @@
 
 <style>
   .classement-menu { position: relative; display: inline-flex; }
-  .classement-btn { display: inline-flex; align-items: center; justify-content: center; padding: 2px; border: none; background: transparent; cursor: pointer; }
-  .classement-btn:disabled { cursor: default; opacity: 0.5; }
   .classement-pop { position: absolute; top: calc(100% + 4px); right: 0; z-index: 30; display: block; border-radius: var(--st-component-popover-radius, var(--st-radius-lg, 0.5rem)); box-shadow: var(--st-component-popover-shadow, var(--st-shadow-floating)); }
   .cascade { position: relative; display: block; }
   .cascade-class { display: block; }
@@ -357,6 +350,10 @@
   .cascade-reason { position: absolute; display: block; }
   .cascade-reason :global(.st-menu) { box-shadow: var(--st-component-popover-shadow, var(--st-shadow-floating)); }
   :global(.classement-item--selected) { background: var(--st-component-selectableRow-selectedBackground, var(--st-semantic-surface-subtle)); color: var(--st-component-selectableRow-selectedText, var(--st-semantic-text-primary)); font-weight: 600; }
-  :global(.classement-chevron) { display: inline-flex; align-items: center; font-size: 1rem; line-height: 1; color: var(--st-semantic-text-secondary); flex: 0 0 auto; }
+  :global(.classement-chevron) { display: inline-flex; align-items: center; justify-content: center; width: 1rem; min-width: 1rem; font-size: 1rem; line-height: 1; color: var(--st-semantic-text-secondary); flex: 0 0 1rem; }
+  :global(.st-menu [data-class="pertinent"] svg) { color: var(--st-semantic-feedback-success); }
+  :global(.st-menu [data-class="a_surveiller"] svg) { color: var(--st-semantic-feedback-warning); }
+  :global(.st-menu [data-class="ecarte"] svg) { color: var(--st-semantic-text-muted); }
+  :global(.st-menu [data-class="non_classe"] svg) { color: var(--st-semantic-text-secondary); }
   .classement-empty { display: block; padding: 4px 8px; color: var(--st-semantic-text-secondary); font-size: 0.75rem; background: var(--st-semantic-surface-raised); }
 </style>
