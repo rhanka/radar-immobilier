@@ -1,0 +1,606 @@
+{
+ "count": 100,
+ "fail": 0,
+ "rows": [
+  {
+   "id": "saint-polycarpe-2026-01-19",
+   "schemaBytes": 16773,
+   "promptBytes": 11516,
+   "ok": true
+  },
+  {
+   "id": "saint-lin-laurentides-2026-06-09",
+   "schemaBytes": 16927,
+   "promptBytes": 13787,
+   "ok": true
+  },
+  {
+   "id": "amherst-2026-06-08",
+   "schemaBytes": 16773,
+   "promptBytes": 10276,
+   "ok": true
+  },
+  {
+   "id": "ayers-cliff-2026-03-02",
+   "schemaBytes": 16707,
+   "promptBytes": 14324,
+   "ok": true
+  },
+  {
+   "id": "saint-roch-de-lachigan-2026-05-11",
+   "schemaBytes": 16776,
+   "promptBytes": 11174,
+   "ok": true
+  },
+  {
+   "id": "saint-charles-de-bourget-2026-05-04",
+   "schemaBytes": 16854,
+   "promptBytes": 10138,
+   "ok": true
+  },
+  {
+   "id": "saint-henri-2026-03-02",
+   "schemaBytes": 16739,
+   "promptBytes": 9884,
+   "ok": true
+  },
+  {
+   "id": "stratford-2026-04-20",
+   "schemaBytes": 16709,
+   "promptBytes": 10793,
+   "ok": true
+  },
+  {
+   "id": "coteau-du-lac-2026-02-10",
+   "schemaBytes": 16929,
+   "promptBytes": 11799,
+   "ok": true
+  },
+  {
+   "id": "abercorn-2026-03-30",
+   "schemaBytes": 16738,
+   "promptBytes": 15616,
+   "ok": true
+  },
+  {
+   "id": "grenville-sur-la-rouge-2026-04-14",
+   "schemaBytes": 16814,
+   "promptBytes": 14265,
+   "ok": true
+  },
+  {
+   "id": "saint-damien-2026-06-16",
+   "schemaBytes": 16746,
+   "promptBytes": 10500,
+   "ok": true
+  },
+  {
+   "id": "chibougamau-2026-05-16",
+   "schemaBytes": 16926,
+   "promptBytes": 13148,
+   "ok": true
+  },
+  {
+   "id": "val-racine-2026-06-09",
+   "schemaBytes": 16758,
+   "promptBytes": 10106,
+   "ok": true
+  },
+  {
+   "id": "aumond-2026-01-14",
+   "schemaBytes": 16696,
+   "promptBytes": 19423,
+   "ok": true
+  },
+  {
+   "id": "val-dor-2026-06-01",
+   "schemaBytes": 16759,
+   "promptBytes": 10630,
+   "ok": true
+  },
+  {
+   "id": "lac-tremblant-nord-2026-05-09",
+   "schemaBytes": 16914,
+   "promptBytes": 12488,
+   "ok": true
+  },
+  {
+   "id": "candiac-2026-06-15",
+   "schemaBytes": 16755,
+   "promptBytes": 14637,
+   "ok": true
+  },
+  {
+   "id": "ogden-2026-03-09",
+   "schemaBytes": 16697,
+   "promptBytes": 12410,
+   "ok": true
+  },
+  {
+   "id": "lislet-2026-04-07",
+   "schemaBytes": 16784,
+   "promptBytes": 11780,
+   "ok": true
+  },
+  {
+   "id": "dollard-des-ormeaux-2026-02-10",
+   "schemaBytes": 16799,
+   "promptBytes": 12190,
+   "ok": true
+  },
+  {
+   "id": "pincourt-2026-01-20",
+   "schemaBytes": 16738,
+   "promptBytes": 11717,
+   "ok": true
+  },
+  {
+   "id": "arundel-2026-07-31",
+   "schemaBytes": 16737,
+   "promptBytes": 22415,
+   "ok": true
+  },
+  {
+   "id": "bolton-est-2026-01-12",
+   "schemaBytes": 16846,
+   "promptBytes": 10123,
+   "ok": true
+  },
+  {
+   "id": "danville-2026-01-15",
+   "schemaBytes": 16730,
+   "promptBytes": 15468,
+   "ok": true
+  },
+  {
+   "id": "mcmasterville-2026-02-02",
+   "schemaBytes": 16779,
+   "promptBytes": 12440,
+   "ok": true
+  },
+  {
+   "id": "chesterville-2026-03-02",
+   "schemaBytes": 16752,
+   "promptBytes": 10045,
+   "ok": true
+  },
+  {
+   "id": "lac-du-cerf-2026-04-11",
+   "schemaBytes": 16735,
+   "promptBytes": 10592,
+   "ok": true
+  },
+  {
+   "id": "acton-vale-2026-03-16",
+   "schemaBytes": 16718,
+   "promptBytes": 10847,
+   "ok": true
+  },
+  {
+   "id": "saint-constant-2026-01-20",
+   "schemaBytes": 16840,
+   "promptBytes": 19227,
+   "ok": true
+  },
+  {
+   "id": "sainte-brigide-diberville-2026-06-01",
+   "schemaBytes": 16851,
+   "promptBytes": 10241,
+   "ok": true
+  },
+  {
+   "id": "waterville-2026-04-07",
+   "schemaBytes": 16734,
+   "promptBytes": 10432,
+   "ok": true
+  },
+  {
+   "id": "lyster-2026-02-02",
+   "schemaBytes": 16809,
+   "promptBytes": 32401,
+   "ok": true
+  },
+  {
+   "id": "roxton-2026-04-07",
+   "schemaBytes": 16794,
+   "promptBytes": 39453,
+   "ok": true
+  },
+  {
+   "id": "les-coteaux-2026-03-16",
+   "schemaBytes": 16783,
+   "promptBytes": 43362,
+   "ok": true
+  },
+  {
+   "id": "saint-felix-de-kingsey-2026-04-07",
+   "schemaBytes": 16899,
+   "promptBytes": 31092,
+   "ok": true
+  },
+  {
+   "id": "daveluyville-2026-05-04",
+   "schemaBytes": 16796,
+   "promptBytes": 38072,
+   "ok": true
+  },
+  {
+   "id": "lorraine-2026-01-13",
+   "schemaBytes": 16860,
+   "promptBytes": 32055,
+   "ok": true
+  },
+  {
+   "id": "beaupre-2026-03-02",
+   "schemaBytes": 16885,
+   "promptBytes": 30145,
+   "ok": true
+  },
+  {
+   "id": "saint-stanislas--des-chenaux-2026-04-07",
+   "schemaBytes": 16915,
+   "promptBytes": 38354,
+   "ok": true
+  },
+  {
+   "id": "saint-bernard-de-michaudville-2026-04-01",
+   "schemaBytes": 16937,
+   "promptBytes": 34064,
+   "ok": true
+  },
+  {
+   "id": "sainte-francoise--becancour-2026-05-04",
+   "schemaBytes": 16875,
+   "promptBytes": 34474,
+   "ok": true
+  },
+  {
+   "id": "tadoussac-2026-01-13",
+   "schemaBytes": 16890,
+   "promptBytes": 44800,
+   "ok": true
+  },
+  {
+   "id": "blue-sea-2026-02-03",
+   "schemaBytes": 16766,
+   "promptBytes": 26098,
+   "ok": true
+  },
+  {
+   "id": "saint-sylvere-2026-04-07",
+   "schemaBytes": 16842,
+   "promptBytes": 31783,
+   "ok": true
+  },
+  {
+   "id": "parisville-2026-05-05",
+   "schemaBytes": 16748,
+   "promptBytes": 26939,
+   "ok": true
+  },
+  {
+   "id": "lac-saint-paul-2026-05-11",
+   "schemaBytes": 16891,
+   "promptBytes": 35621,
+   "ok": true
+  },
+  {
+   "id": "dosquet-2026-01-13",
+   "schemaBytes": 16781,
+   "promptBytes": 32708,
+   "ok": true
+  },
+  {
+   "id": "barnston-ouest-2026-05-04",
+   "schemaBytes": 16812,
+   "promptBytes": 36675,
+   "ok": true
+  },
+  {
+   "id": "bedford--brome-missisquoi-2026-06-02",
+   "schemaBytes": 16908,
+   "promptBytes": 44692,
+   "ok": true
+  },
+  {
+   "id": "notre-dame-de-lourdes--joliette-2026-04-13",
+   "schemaBytes": 16951,
+   "promptBytes": 39810,
+   "ok": true
+  },
+  {
+   "id": "wentworth-nord-2026-01-21",
+   "schemaBytes": 16844,
+   "promptBytes": 38876,
+   "ok": true
+  },
+  {
+   "id": "saint-just-de-bretenieres-2026-02-02",
+   "schemaBytes": 16945,
+   "promptBytes": 36922,
+   "ok": true
+  },
+  {
+   "id": "sainte-clotilde-2026-04-20",
+   "schemaBytes": 16865,
+   "promptBytes": 44541,
+   "ok": true
+  },
+  {
+   "id": "saint-zephirin-de-courval-2026-03-02",
+   "schemaBytes": 16845,
+   "promptBytes": 36042,
+   "ok": true
+  },
+  {
+   "id": "eastman-2026-06-01",
+   "schemaBytes": 16911,
+   "promptBytes": 47415,
+   "ok": true
+  },
+  {
+   "id": "warden-2026-04-08",
+   "schemaBytes": 16816,
+   "promptBytes": 37636,
+   "ok": true
+  },
+  {
+   "id": "bowman-2026-05-12",
+   "schemaBytes": 16842,
+   "promptBytes": 27933,
+   "ok": true
+  },
+  {
+   "id": "lavenir-2026-05-04",
+   "schemaBytes": 16835,
+   "promptBytes": 36721,
+   "ok": true
+  },
+  {
+   "id": "richelieu-2026-02-03",
+   "schemaBytes": 16842,
+   "promptBytes": 41987,
+   "ok": true
+  },
+  {
+   "id": "stoneham-et-tewkesbury-2026-06-08",
+   "schemaBytes": 17271,
+   "promptBytes": 36891,
+   "ok": true
+  },
+  {
+   "id": "saint-tite-des-caps-2026-02-02",
+   "schemaBytes": 16821,
+   "promptBytes": 31842,
+   "ok": true
+  },
+  {
+   "id": "cookshire-eaton-2026-04-07",
+   "schemaBytes": 16832,
+   "promptBytes": 33818,
+   "ok": true
+  },
+  {
+   "id": "sainte-angele-de-monnoir-2026-01-13",
+   "schemaBytes": 16899,
+   "promptBytes": 37529,
+   "ok": true
+  },
+  {
+   "id": "mont-saint-hilaire-2026-04-13",
+   "schemaBytes": 16942,
+   "promptBytes": 69032,
+   "ok": true
+  },
+  {
+   "id": "cowansville-2026-05-05",
+   "schemaBytes": 17168,
+   "promptBytes": 126466,
+   "ok": true
+  },
+  {
+   "id": "brossard-2026-04-28",
+   "schemaBytes": 16897,
+   "promptBytes": 70821,
+   "ok": true
+  },
+  {
+   "id": "contrecoeur-2026-04-14",
+   "schemaBytes": 16998,
+   "promptBytes": 71718,
+   "ok": true
+  },
+  {
+   "id": "frontenac-2026-03-10",
+   "schemaBytes": 17057,
+   "promptBytes": 84595,
+   "ok": true
+  },
+  {
+   "id": "hatley-2026-04-07",
+   "schemaBytes": 16829,
+   "promptBytes": 55110,
+   "ok": true
+  },
+  {
+   "id": "beloeil-2026-03-23",
+   "schemaBytes": 16885,
+   "promptBytes": 75520,
+   "ok": true
+  },
+  {
+   "id": "la-peche-2026-06-01",
+   "schemaBytes": 16998,
+   "promptBytes": 88563,
+   "ok": true
+  },
+  {
+   "id": "sainte-sophie-2026-06-02",
+   "schemaBytes": 17248,
+   "promptBytes": 71101,
+   "ok": true
+  },
+  {
+   "id": "sainte-barbe-2026-05-05",
+   "schemaBytes": 16843,
+   "promptBytes": 53222,
+   "ok": true
+  },
+  {
+   "id": "sainte-martine-2026-03-17",
+   "schemaBytes": 16936,
+   "promptBytes": 71182,
+   "ok": true
+  },
+  {
+   "id": "rosemere-2026-04-13",
+   "schemaBytes": 16848,
+   "promptBytes": 52438,
+   "ok": true
+  },
+  {
+   "id": "orford-2026-03-02",
+   "schemaBytes": 17084,
+   "promptBytes": 118512,
+   "ok": true
+  },
+  {
+   "id": "berthier-sur-mer-2026-03-24",
+   "schemaBytes": 17167,
+   "promptBytes": 79491,
+   "ok": true
+  },
+  {
+   "id": "gracefield-2026-04-14",
+   "schemaBytes": 17025,
+   "promptBytes": 75251,
+   "ok": true
+  },
+  {
+   "id": "sainte-catherine-de-la-jacques-cartier-2026-03-02",
+   "schemaBytes": 17143,
+   "promptBytes": 100369,
+   "ok": true
+  },
+  {
+   "id": "sacre-coeur-2026-05-11",
+   "schemaBytes": 17073,
+   "promptBytes": 75290,
+   "ok": true
+  },
+  {
+   "id": "potton-2026-01-05",
+   "schemaBytes": 17121,
+   "promptBytes": 144297,
+   "ok": true
+  },
+  {
+   "id": "notre-dame-du-rosaire-2026-03-02",
+   "schemaBytes": 16959,
+   "promptBytes": 58950,
+   "ok": true
+  },
+  {
+   "id": "pierreville-2026-03-10",
+   "schemaBytes": 16898,
+   "promptBytes": 73869,
+   "ok": true
+  },
+  {
+   "id": "sainte-croix-2026-05-05",
+   "schemaBytes": 17041,
+   "promptBytes": 75421,
+   "ok": true
+  },
+  {
+   "id": "lac-etchemin-2026-02-03",
+   "schemaBytes": 16833,
+   "promptBytes": 50105,
+   "ok": true
+  },
+  {
+   "id": "sainte-genevieve-de-batiscan-2026-04-07",
+   "schemaBytes": 16928,
+   "promptBytes": 67863,
+   "ok": true
+  },
+  {
+   "id": "stanstead-est-2026-04-13",
+   "schemaBytes": 16870,
+   "promptBytes": 57960,
+   "ok": true
+  },
+  {
+   "id": "brownsburg-chatham-2026-03-10",
+   "schemaBytes": 17438,
+   "promptBytes": 200259,
+   "ok": true
+  },
+  {
+   "id": "sainte-thecle-2026-03-09",
+   "schemaBytes": 16964,
+   "promptBytes": 78432,
+   "ok": true
+  },
+  {
+   "id": "carignan-2026-03-04",
+   "schemaBytes": 17011,
+   "promptBytes": 76050,
+   "ok": true
+  },
+  {
+   "id": "saint-odilon-de-cranbourne-2026-01-12",
+   "schemaBytes": 17002,
+   "promptBytes": 60115,
+   "ok": true
+  },
+  {
+   "id": "lac-brome-2026-04-07",
+   "schemaBytes": 17146,
+   "promptBytes": 67979,
+   "ok": true
+  },
+  {
+   "id": "sainte-christine-2026-04-07",
+   "schemaBytes": 16881,
+   "promptBytes": 51155,
+   "ok": true
+  },
+  {
+   "id": "boisbriand-2026-05-05",
+   "schemaBytes": 16994,
+   "promptBytes": 49182,
+   "ok": true
+  },
+  {
+   "id": "lac-des-seize-iles-2026-09-agenda",
+   "schemaBytes": 16822,
+   "promptBytes": 10464,
+   "ok": true
+  },
+  {
+   "id": "saint-etienne-de-bolton-2026-08-04",
+   "schemaBytes": 16914,
+   "promptBytes": 52005,
+   "ok": true
+  },
+  {
+   "id": "valcourt-2026-06-01-agenda",
+   "schemaBytes": 16809,
+   "promptBytes": 10733,
+   "ok": true
+  },
+  {
+   "id": "saint-barthelemy-2026-09-08",
+   "schemaBytes": 17109,
+   "promptBytes": 35970,
+   "ok": true
+  },
+  {
+   "id": "waterloo-2026-08-18",
+   "schemaBytes": 16929,
+   "promptBytes": 53490,
+   "ok": true
+  }
+ ]
+}
