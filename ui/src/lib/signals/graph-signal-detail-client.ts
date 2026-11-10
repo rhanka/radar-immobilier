@@ -598,6 +598,8 @@ export interface GraphSignalDetailResponse {
 }
 
 export interface FetchGraphSignalDetailOptions {
+  /** `card` = thin projection without S3 enrichment; absent = full (default). */
+  view?: "card" | "full";
   /**
    * Signal d'annulation externe (anti-course). Distinct du timeout interne :
    * un abort externe (changement de ville) relève une `AbortError` — la réponse
@@ -683,7 +685,7 @@ export async function fetchGraphSignalDetail(
   citySlug: string,
   opts: FetchGraphSignalDetailOptions = {},
 ): Promise<GraphSignalDetailResponse> {
-  const query = new URLSearchParams({ citySlug, mode: "signal" });
+  const query = new URLSearchParams({ citySlug, mode: "signal", ...(opts.view ? { view: opts.view } : {}) });
   const label = `coherent-city/${citySlug}`;
   const body = await readScoped<Record<string, unknown>>(
     scopedSignalFacetsPath(scope, `coherent-city?${query.toString()}`), label, opts);
