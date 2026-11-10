@@ -83,41 +83,41 @@ Sentropic PRs #973 and #987 (`fix/compose-host-user`,
   - [x] Declare UIDFIX-EX1 above before touching forbidden paths.
 
 - [ ] **Lot 1 — Compose user mapping**
-  - [ ] `docker-compose.dev.yml`: `user:` + `HOME=/tmp` +
+  - [x] `docker-compose.dev.yml`: `user:` + `HOME=/tmp` +
     `npm_config_cache=/tmp/npm-cache` on `api` and `ui`.
-  - [ ] `docker-compose.test.yml`: same on `api`.
-  - [ ] `docker-compose.e2e.yml`: same on `e2e`; production `api`/`ui`
+  - [x] `docker-compose.test.yml`: same on `api`.
+  - [x] `docker-compose.e2e.yml`: same on `e2e`; production `api`/`ui`
     unchanged (no bind mounts).
-  - [ ] `docker-compose.yml` (base) unchanged: no bind mounts;
+  - [x] `docker-compose.yml` (base) unchanged: no bind mounts;
     `postgres`/`minio`/`obscura`/`maildev` unchanged.
-  - [ ] `tools/make/git-artifact.compose.yml`: `user:` on `node`
+  - [x] `tools/make/git-artifact.compose.yml`: `user:` on `node`
     (writes the `tmp/git-artifact-proof` bind).
 
-- [ ] **Lot 2 — Makefile and raw `docker run`**
-  - [ ] `Makefile`: `export UID := $(shell id -u)`,
+- [x] **Lot 2 — Makefile and raw `docker run`**
+  - [x] `Makefile`: `export UID := $(shell id -u)`,
     `export GID := $(shell id -g)`, `DOCKER_RUN_USER` flag set.
-  - [ ] One-off root `chown` of the named `node_modules` volumes
+  - [x] One-off root `chown` of the named `node_modules` volumes
     before the first UID-mapped install (test and dev stacks).
-  - [ ] `deploy/k8s/refresh-cronjobs/refresh-018.mk`: host-user flags
+  - [x] `deploy/k8s/refresh-cronjobs/refresh-018.mk`: host-user flags
     on the two `bundle-*` targets mounting `$(ROOT):/workspace`.
-  - [ ] `tools/make/artefacts-a4-run.sh` / `artefacts-a5-run.sh`:
+  - [x] `tools/make/artefacts-a4-run.sh` / `artefacts-a5-run.sh`:
     host-user flags on the image-probe `docker run` (evidence bind).
-  - [ ] `tools/make/e2e-real.sh`: export `UID`/`GID`, chown the e2e
+  - [x] `tools/make/e2e-real.sh`: export `UID`/`GID`, chown the e2e
     named volumes once as root before `prepare`.
-  - [ ] `e2e/Dockerfile` (new) + runner: Chromium system deps baked
+  - [x] `e2e/Dockerfile` (new) + runner: Chromium system deps baked
     in the image; `playwright install --only-shell` without
     `--with-deps` (apt needs root, the runner no longer is root).
 
-- [ ] **Lot 3 — Proof**
-  - [ ] `make test-api ENV=test-uidfix`
-  - [ ] `make typecheck ENV=test-uidfix`
-  - [ ] Short e2e on an isolated ENV (`make test-e2e ENV=test-uidfix-e2e`)
-  - [ ] `find <workspace> -user root` returns nothing after the runs.
-  - [ ] `down -v` teardown of every proof stack.
-  - [ ] Lot gate: no root-owned file left in the workspace.
+- [x] **Lot 3 — Proof**
+  - [x] `make test-api ENV=test-uidfix`
+  - [x] `make typecheck ENV=test-uidfix`
+  - [x] Short e2e on an isolated ENV (`make test-e2e ENV=test-uidfix-e2e`)
+  - [x] `find <workspace> -user root` returns nothing after the runs.
+  - [x] `down -v` teardown of every proof stack.
+  - [x] Lot gate: no root-owned file left in the workspace.
 
-- [ ] **Lot 4 — Report, PR, close**
-  - [ ] `LANE-REPORT.md`: PR link, CI status, modified
+- [x] **Lot 4 — Report, PR, close**
+  - [x] `LANE-REPORT.md`: PR link, CI status, modified
     services/targets, inventory of untouched `docker run` calls.
-  - [ ] Push branch, open PR to `main`, verify CI.
+  - [x] Push branch, open PR to `main`, verify CI.
   - [ ] Merge commit only if ordered (default: leave PR open).
