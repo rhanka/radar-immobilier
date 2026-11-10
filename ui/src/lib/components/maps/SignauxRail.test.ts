@@ -179,8 +179,18 @@ function renderRail(initialSubsetKey = "vivier-v2", onFilterChange?: (key: strin
 /** Les checkboxes du panneau de vivier B (axes zonage/résidentiel/précoce). */
 function toggleBoxes(container: HTMLElement): HTMLInputElement[] {
   return Array.from(
-    container.querySelectorAll<HTMLInputElement>(".vivier-toggles input[type=checkbox]"),
-  );
+    container.querySelectorAll<HTMLInputElement>('[data-testid="filtre-panel"] input[type=checkbox]'),
+  ).slice(0, 3);
+}
+
+function exclusionBoxes(container: HTMLElement): HTMLInputElement[] {
+  return Array.from(
+    container.querySelectorAll<HTMLInputElement>('[data-testid="filtre-panel"] input[type=checkbox]'),
+  ).slice(3);
+}
+
+async function openFiltrePanel(container: HTMLElement): Promise<void> {
+  await fireEvent.click(container.querySelector('[data-testid="filtre-trigger"]')!);
 }
 
 /**
@@ -199,21 +209,23 @@ const SUTTON: CityMapEntry = {
 };
 
 describe("SignauxRail — vivier B (vue unique, sans onglets)", () => {
-  it("ne rend AUCUN bandeau à onglets A-B : panelB visible d'emblée", () => {
+  it("ne rend AUCUN bandeau à onglets A-B : panelB visible d'emblée", async () => {
     const { container } = renderRail();
     // Plus aucun onglet/switcher : ni role=tab, ni les libellés A/B retirés.
     expect(container.querySelectorAll('[role="tab"]')).toHaveLength(0);
     expect(container.querySelector(".vivier-tabs-wrap")).toBeNull();
     expect(container.textContent).not.toContain("Référence A");
     expect(container.textContent).not.toContain("Nouveau B");
-    // Le panneau B est rendu directement (axes + exclusions B présents).
-    expect(container.querySelector(".vivier-b-exclusions")).not.toBeNull();
+    // Les axes + exclusions B vivent dans le dropdown « Filtre ».
+    await openFiltrePanel(container);
+    expect(container.querySelector('[data-testid="filtre-panel"]')).not.toBeNull();
     expect(container.textContent).toContain("Résidentiel");
     expect(container.textContent).toContain("Exclure PIIA sans projet résidentiel");
   });
 
-  it("défaut vierge = B (trois axes B cochés, aucun axe A « Multifamilial 4+ »)", () => {
+  it("défaut vierge = B (trois axes B cochés, aucun axe A « Multifamilial 4+ »)", async () => {
     const { container } = renderRail();
+    await openFiltrePanel(container);
     const boxes = toggleBoxes(container);
     expect(boxes).toHaveLength(3);
     expect(boxes.every((box) => box.checked)).toBe(true);
@@ -224,11 +236,12 @@ describe("SignauxRail — vivier B (vue unique, sans onglets)", () => {
     expect(container.textContent).not.toContain("Multifamilial 4+");
   });
 
-  it("une clé A résiduelle (z|m|p) dégrade vers le défaut B — jamais un panneau blanc", () => {
+  it("une clé A résiduelle (z|m|p) dégrade vers le défaut B — jamais un panneau blanc", async () => {
     const { container } = renderRail("z|m|p");
     // Le rail reçoit une clé A résiduelle mais rend la vue B par défaut.
     expect(container.querySelectorAll('[role="tab"]')).toHaveLength(0);
-    expect(container.querySelector(".vivier-b-exclusions")).not.toBeNull();
+    await openFiltrePanel(container);
+    expect(container.querySelector('[data-testid="filtre-panel"]')).not.toBeNull();
     const boxes = toggleBoxes(container);
     expect(boxes).toHaveLength(3);
     expect(boxes.every((box) => box.checked)).toBe(true);
@@ -353,6 +366,7 @@ describe("SignauxRail — vivier B (vue unique, sans onglets)", () => {
     const { container } = render(SignauxRail, {
       props: { entries: [SUTTON], initialSubsetKey: "vivier-v2" },
     });
+    await openFiltrePanel(container);
     const boxes = toggleBoxes(container);
     expect(boxes).toHaveLength(3);
     // `vivier-v2` is a mode key: it infers the current B default, including Précoce.
@@ -377,6 +391,7 @@ describe("SignauxRail — vivier B (vue unique, sans onglets)", () => {
         onFilterChange: (key: string) => calls.push(key),
       },
     });
+    await openFiltrePanel(container);
     const boxes = toggleBoxes(container);
     // Décocher « Résidentiel » (2e case) → vivier-v2|-r|p (Précoce remains explicitly checked).
     await fireEvent.click(boxes[1]!);
@@ -397,6 +412,7 @@ describe("SignauxRail — vivier B (vue unique, sans onglets)", () => {
     });
     // B direct/reload default is already Précoce: stageCounts précoce = 1.
     expect(container.textContent).toMatch(/1\s+signal/);
+    await openFiltrePanel(container);
 
     // Explicitly uncheck Précoce → the live key preserves that session intent.
     await fireEvent.click(toggleBoxes(container)[2]!);
@@ -431,9 +447,8 @@ describe("SignauxRail — vivier B (vue unique, sans onglets)", () => {
         onExclusionsChange: (next: unknown) => changes.push(next),
       },
     });
-    const boxes = Array.from(
-      container.querySelectorAll<HTMLInputElement>(".vivier-b-exclusions input[type=checkbox]"),
-    );
+    await openFiltrePanel(container);
+    const boxes = exclusionBoxes(container);
     expect(boxes).toHaveLength(2);
     expect(boxes.every((box) => box.checked)).toBe(true);
     expect(container.textContent).toContain("Exclure PIIA sans projet résidentiel");
@@ -542,8 +557,8 @@ describe("SignauxRail — liste plate de villes (sans accordéon signaux)", () =
 // ── #378 (régression m1.7) — stabilité de la ville sélectionnée ──────────────
 // Le compte LIVE (`selectedCityLiveCount`) ne participe JAMAIS au tri ni à
 // l'appartenance : la ligne sélectionnée garde sa position (tri bulk) et reste
-// listée même à 0. Le badge devient honnête : « live/bulk » quand la lentille
-// client (plage de dates, exclusions) masque une partie du bulk.
+// listée même à 0. Le badge affiche le seul compte APRÈS filtres (owner
+// 2026-11-09 : « afficher 1 et pas 1/6 ») — jamais un format « x/y ».
 
 function renderRailB(selectedSlug: string | null, selectedCityLiveCount: number | null) {
   return render(SignauxRail, {
@@ -584,17 +599,20 @@ describe("SignauxRail — la ville sélectionnée ne saute ni ne disparaît (#37
     ]);
   });
 
-  it("badge honnête « live/bulk » (1/4) quand la lentille client masque une partie du bulk", () => {
+  it("city counter = single number after filters, never « x/y »", () => {
     const { container } = renderRailB("notre-dame-du-bon-conseil--drummond", 1);
-    expect(badgeOf(container, "Notre-Dame-du-Bon-Conseil")).toBe("1/4");
+    expect(badgeOf(container, "Notre-Dame-du-Bon-Conseil")).toBe("1");
     // Les autres villes restent au bulk sec.
     expect(badgeOf(container, "Acton Vale")).toBe("3");
+    for (const row of Array.from(container.querySelectorAll("button.rail-city-row"))) {
+      expect(row.querySelector(".st-badge")?.textContent ?? "").not.toMatch(/\d+\s*\/\s*\d+/);
+    }
   });
 
-  it("live 0 : la ligne reste listée, à sa place bulk, badge 0/4", () => {
+  it("live 0 : la ligne reste listée, à sa place bulk, badge 0 seul", () => {
     const { container } = renderRailB("notre-dame-du-bon-conseil--drummond", 0);
     expect(rowNames(container)[0]).toBe("Notre-Dame-du-Bon-Conseil");
-    expect(badgeOf(container, "Notre-Dame-du-Bon-Conseil")).toBe("0/4");
+    expect(badgeOf(container, "Notre-Dame-du-Bon-Conseil")).toBe("0");
   });
 
   it("live null (fetch en cours) : repli bulk sans dénominateur — aucun flash", () => {
