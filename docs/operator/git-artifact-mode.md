@@ -156,6 +156,7 @@ is an A1 refused write path: a branch can never change it.
   idempotence rewrite, pinned by `artifacts-provenance.spec.ts`).
 
 - Host job and publication ledger (`HostBuildJobStore`, `HostBuildLedger`):
+  `POST v1/live/reconcile` (`{artifactId, binding, generation}`, same binding read) BEFORE job persistence and `POST /v1/builds` on every publish — a never-reconciled binding is refused by the builder with `git_live_conflict:stale_session`, the reconcile is idempotent, and a retry after `build_failed` re-reconciles instead of staying blocked; a refused reconcile fails closed (`provider_unavailable`, no job persisted, no build requested). Then
   job persistence before `POST /v1/builds` (body exactly `{artifactId, jobId, binding}`, `binding = {repoId, branch, subPath}` read from the package git binding of that artifact and job generation, `git_not_attached` before any call when absent), attempt fence, receipt ledger and
   the publish step in one transaction; composed by radar-api from the `build`
   stage on. Without the receipt key or the builder keys, `git_publish` and the
