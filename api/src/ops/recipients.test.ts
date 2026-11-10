@@ -96,6 +96,42 @@ describe("resolveRecipients fallback", () => {
     ]);
   });
 
+  it("falls back when Drizzle wraps the pg error in the cause chain", async () => {
+    const pgError = Object.assign(
+      new Error('relation "workspace_memberships" does not exist'),
+      { code: "42P01" },
+    );
+    const wrapped = new Error(
+      "Failed query: select from workspace_memberships",
+      { cause: pgError },
+    );
+    expect(isMissingWorkspaceTablesError(wrapped)).toBe(true);
+    const messageOnly = new Error("Failed query: select", {
+      cause: new Error('relation "workspaces" does not exist'),
+    });
+    expect(isMissingWorkspaceTablesError(messageOnly)).toBe(true);
+    const store = fakeStore({
+      listWorkspaceManagers: async () => {
+        throw wrapped;
+      },
+    });
+    const resolved = await resolveRecipients(store, "ref-workspace");
+    expect(resolved.workspaceTierAvailable).toBe(false);
+    expect(resolved.admins).toEqual([
+      { accountRef: "acc-a", email: "a@example.test", basis: ["app:is_admin"] },
+      { accountRef: "acc-b", email: "b@example.test", basis: ["app:is_admin"] },
+    ]);
+  });
+
+  it("uses the fallback tier when no reference slug is configured", async () => {
+    const resolved = await resolveRecipients(fakeStore(), undefined);
+    expect(resolved.workspaceTierAvailable).toBe(false);
+    expect(resolved.admins).toEqual([
+      { accountRef: "acc-a", email: "a@example.test", basis: ["app:is_admin"] },
+      { accountRef: "acc-b", email: "b@example.test", basis: ["app:is_admin"] },
+    ]);
+  });
+
   it("propagates non-missing-table errors", async () => {
     const store = fakeStore({
       listWorkspaceManagers: async () => {
@@ -158,6 +194,64 @@ describe("opsRecipientsRoute", () => {
       },
     );
     expect(res.status).toBe(401);
+  });
+
+  it("answers 503 recipients_unavailable when the store fails", async () => {
+    const store = fakeStore({
+      listAppAdmins: async () => {
+        throw new Error("connection reset");
+      },
+    });
+    const res = await route(store).request(
+      "/api/v1/ops/recipients?target=immo-preprod",
+      { headers: { authorization: `Bearer ${await serviceToken()}` } },
+    );
+    expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({ error: "recipients_unavailable" });
+  });
+
+  it("answers 404 when the target parameter is missing", async () => {
+    const res = await route(fakeStore()).request("/api/v1/ops/recipients", {
+      headers: { authorization: `Bearer ${await serviceToken()}` },
+    });
+    expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({ error: "target_not_found" });
+  });
+
+  it("signals the fallback tier through the warn seam", async () => {
+    const events: Record<string, unknown>[] = [];
+    const store = fakeStore({
+      listWorkspaceManagers: async () => {
+        throw new Error("Failed query: select", {
+          cause: Object.assign(
+            new Error('relation "workspace_memberships" does not exist'),
+            { code: "42P01" },
+          ),
+        });
+      },
+    });
+    const app = opsRecipientsRoute({
+      store,
+      issuer: ISSUER,
+      jwksUri: `${ISSUER}/.well-known/jwks.json`,
+      audience: AUDIENCE,
+      expectedTarget: "immo-preprod",
+      referenceWorkspaceSlug: "ref-workspace",
+      getKey,
+      now: () => NOW.getTime(),
+      warn: (event) => events.push(event),
+    });
+    const res = await app.request(
+      "/api/v1/ops/recipients?target=immo-preprod",
+      { headers: { authorization: `Bearer ${await serviceToken()}` } },
+    );
+    expect(res.status).toBe(200);
+    expect(events).toEqual([
+      {
+        event: "ops_recipients_workspace_tier_unavailable",
+        target: "immo-preprod",
+      },
+    ]);
   });
 
   it("stays closed (503) while the L1 audience is not configured", async () => {
