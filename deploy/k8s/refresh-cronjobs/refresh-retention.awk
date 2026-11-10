@@ -17,12 +17,12 @@ BEGIN { RS = "\n---\n" }
   seen++
   name = "?"
   if (match($0, /\n  name: [^\n]+/)) { name = substr($0, RSTART, RLENGTH); sub(/^\n  name: /, "", name); gsub(/["']/, "", name) }
-  ttl = field($0, /ttlSecondsAfterFinished: [0-9]+/)
+  ttl = field($0, "ttlSecondsAfterFinished: [0-9]+")
   if (ttl == "" || ttl + 0 < 21600)
     fail(name ": ttlSecondsAfterFinished " (ttl == "" ? "missing" : ttl) " is below the 21600 s (6 h) floor")
-  backoff = field($0, /backoffLimit: [0-9]+/)
+  backoff = field($0, "backoffLimit: [0-9]+")
   if (backoff != "" && backoff + 0 == 0) {
-    if ($0 !~ /podFailurePolicy:/ || $0 !~ /action: FailJob/ || $0 !~ /onExitCodes:/ || $0 !~ /operator: NotIn/ || $0 !~ /values: \[0\]/)
+    if ($0 !~ /podFailurePolicy:/ || $0 !~ /action: FailJob/ || $0 !~ /onExitCodes:/ || $0 !~ /operator: NotIn/ || ($0 !~ /values: \[0\]/ && $0 !~ /values:\n[ ]*- 0\n/))
       fail(name ": backoffLimit: 0 without podFailurePolicy FailJob on onExitCodes NotIn [0]")
   }
   if (name == "radar-refresh-pending-watchdog") {
@@ -32,7 +32,7 @@ BEGIN { RS = "\n---\n" }
       n = split(s, f, / +/)
       if (n == 5 && f[1] ~ /^\*\/[0-9]+$/) period = substr(f[1], 3) * 60
     }
-    failed = field($0, /failedJobsHistoryLimit: [0-9]+/)
+    failed = field($0, "failedJobsHistoryLimit: [0-9]+")
     if (period <= 0) fail(name ": schedule must be `*/<minutes> * * * *`")
     else if (failed == "" || failed * period < 21600)
       fail(name ": failedJobsHistoryLimit " (failed == "" ? "missing" : failed) " x period " period " s is below the 21600 s (6 h) floor")
