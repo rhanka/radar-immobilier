@@ -29,10 +29,10 @@ export const SIGNAL_CLASSES: readonly SignalClass[] = [
 ];
 
 export const CLASSEMENT_META: Record<SignalClass, { label: string; icon: string; token: string }> = {
-  pertinent: { label: "Pertinent", icon: "Target", token: "var(--st-semantic-feedback-success)" },
-  a_surveiller: { label: "À surveiller", icon: "Eye", token: "var(--st-semantic-feedback-warning)" },
-  ecarte: { label: "Écarté", icon: "EyeOff", token: "var(--st-semantic-text-muted)" },
-  non_classe: { label: "Non classé", icon: "CircleDashed", token: "var(--st-semantic-text-secondary)" },
+  pertinent: { label: "Pertinent", icon: "Target", token: "var(--st-component-iconButton-text, var(--st-semantic-text-primary))" },
+  a_surveiller: { label: "À surveiller", icon: "Eye", token: "var(--st-component-iconButton-text, var(--st-semantic-text-primary))" },
+  ecarte: { label: "Écarté", icon: "EyeOff", token: "var(--st-component-iconButton-text, var(--st-semantic-text-primary))" },
+  non_classe: { label: "Non classé", icon: "CircleDashed", token: "var(--st-component-iconButton-text, var(--st-semantic-text-primary))" },
 };
 
 const VERDICT_FOR_CLASS: Record<Exclude<SignalClass, "non_classe">, ClassementVerdict> = {
