@@ -2317,10 +2317,22 @@
     border-bottom: none;
   }
 
+  /* Fond + liseré portés par la ligne entière : le bouton de classement,
+     posé dans la ligne, partage le même fond (aucune colonne séparée). */
+  .sel-entity-bar:hover:not(.sel-entity-bar--selected) {
+    background: var(--st-semantic-surface-subtle, #f8fafc);
+    box-shadow: inset 3px 0 0 var(--st-semantic-border-strong, #0ea5e9);
+  }
+
   /* #86 — cross-highlight : la fiche correspondant au surlignage PDF survolé
      prend un état SÉLECTIONNÉ visible (liseré + fond) sans ouvrir le détail. */
-  .sel-entity-bar--xhover {
+  .sel-entity-bar--xhover:not(.sel-entity-bar--selected) {
     background: var(--st-semantic-surface-selected, #e0f2fe);
+    box-shadow: inset 3px 0 0 var(--st-semantic-border-strong, #0ea5e9);
+  }
+
+  .sel-entity-bar--selected {
+    background: #ecfdf5;
     box-shadow: inset 3px 0 0 var(--st-semantic-border-strong, #0ea5e9);
   }
 
@@ -2410,23 +2422,24 @@
   }
 
   .sel-entity-head:hover {
-    background: var(--st-semantic-surface-subtle, #f8fafc);
+    background: transparent;
   }
 
   .sel-entity-head--selected {
-    background: #ecfdf5;
+    background: transparent;
     color: #0f766e;
     font-weight: 600;
   }
 
-  .sel-entity-head--focused {
-    outline: 1px solid #14b8a6;
-    outline-offset: -1px;
+  /* Le cadre de focus est porté par la ligne entière (icône incluse),
+     jamais par le seul bouton du titre. */
+  .sel-entity-head--focused,
+  .sel-entity-head:focus,
+  .sel-entity-head:focus-visible {
+    outline: none;
   }
 
-  .sel-entity-head--dimmed {
-    opacity: 0.5;
-  }
+  /* Pas de cadre sur la ligne sélectionnée : fond + liseré suffisent. */
 
   /* #10 — titre complet, sans troncature */
   .sel-entity-label {
