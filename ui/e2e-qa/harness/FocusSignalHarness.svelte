@@ -24,7 +24,7 @@
         },
         layers: [{ id: "osm", type: "raster", source: "osm" }],
       },
-      center: [-73.516, 45.531],
+      center: [-71.3215, 46.7245],
       zoom: 13,
     });
     return () => map.remove();
@@ -33,7 +33,7 @@
 
 <div class="flex h-screen bg-white text-slate-900">
   <aside class="w-80 shrink-0 overflow-y-auto border-r border-slate-200 p-3">
-    <p class="m-0 text-xs font-semibold text-slate-500">Signaux (données réelles MCP, 2026-11-09)</p>
+    <p class="m-0 text-xs font-semibold text-slate-500">Signaux (données réelles base preprod radar_next, 2026-11-10)</p>
     {#each FOCUS_CASES as c (c.signalId)}
       <button
         type="button"
