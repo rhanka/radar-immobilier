@@ -185,6 +185,11 @@
     flex-shrink: 0;
   }
 
+  .reload-anchor :global(.st-iconButton:hover:not(:disabled)),
+  .reload-anchor :global(.st-iconButton:focus-visible) {
+    background: var(--st-component-iconButton-hoverBackground, var(--st-semantic-action-secondaryHover, var(--st-semantic-surface-subtle)));
+  }
+
   .reload-icon {
     display: inline-flex;
     color: var(--st-semantic-warning-text);
