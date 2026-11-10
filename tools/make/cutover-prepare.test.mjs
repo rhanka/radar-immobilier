@@ -71,6 +71,31 @@ test('prepared smoke failure fails preparation and leaves live database selected
     assert.equal(object(f, 'radar-db-credentials').data.POSTGRES_DB, Buffer.from('radar').toString('base64'));
   } finally { f.cleanup(); }
 });
+const staleSlot = preparedAt => ({ apiVersion: 'v1', kind: 'ConfigMap',
+  metadata: { name: 'radar-prepared-db', uid: 'uid-radar-prepared-db', resourceVersion: '1', generation: 1 },
+  data: { status: 'preparing', smoke: 'preparing', run: 'dead-operator-run', preparedAt,
+    gitSha: 'd'.repeat(40), record: '{}' } });
+test('prepare abandons a preparing slot older than every stage budget and proceeds', () => {
+  const f = fixture();
+  try {
+    const state = f.state(); state.objects.push(staleSlot('2026-10-30T21:00:42Z')); save(f, state);
+    success(f.run('prepare'));
+    const stamp = object(f, 'radar-prepared-db').data;
+    assert.equal(stamp.status, 'ready'); assert.equal(stamp.gitSha, f.release.gitSha);
+  } finally { f.cleanup(); }
+});
+test('prepare refuses a preparing slot still within its stage budgets', () => {
+  const f = fixture();
+  try {
+    const state = f.state();
+    state.objects.push(staleSlot(new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'))); save(f, state);
+    const result = f.run('prepare');
+    assert.notEqual(result.status, 0);
+    assert.ok(result.stderr.includes('Prepared slot is still preparing'), result.stderr);
+    const stamp = object(f, 'radar-prepared-db').data;
+    assert.equal(stamp.status, 'preparing'); assert.equal(stamp.run, 'dead-operator-run');
+  } finally { f.cleanup(); }
+});
 test('cutover refuses stale and mismatched prepared stamps before closure', () => {
   const f = fixture();
   try {

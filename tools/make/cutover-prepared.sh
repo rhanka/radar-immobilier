@@ -2,10 +2,28 @@
 prepared_read() {
   "${k[@]}" get configmap radar-prepared-db --ignore-not-found -o json > "$WORK/prepared.json"
 }
+# After the preparing stamp, the longest legitimate preparation is bounded by
+# the sum of its stage budgets (drain 600 + resolve 90 + docs 7500 + recon 900
+# + reset 90 + restore 1920 + ddl 600 + data 600 + destination 90 = 12390s).
+# A slot still preparing past 14400s belongs to an operator that can no longer
+# finish (each stage Job also carries a bounded activeDeadlineSeconds), so the
+# next prepare converges it to failed instead of refusing every later prepare.
+PREPARED_STALE_AFTER_SECONDS=14400
 prepared_available() {
   prepared_read
-  [[ ! -s $WORK/prepared.json ]] ||
-    jq -e '.data.status!="preparing"' "$WORK/prepared.json" >/dev/null || fail 'Prepared slot is still preparing'
+  [[ ! -s $WORK/prepared.json ]] && return 0
+  [[ $(jq -r '.data.status // ""' "$WORK/prepared.json") != preparing ]] && return 0
+  local stamped
+  stamped=$(jq -r 'try (.data.preparedAt | fromdateiso8601) catch empty' "$WORK/prepared.json")
+  if [[ -n $stamped ]] && (( $(date +%s) - stamped > PREPARED_STALE_AFTER_SECONDS )); then
+    jq --arg at "$(date -u +%FT%TZ)" '.data.status="failed" | .data.smoke="failed" | .data.abandonedAt=$at' \
+      "$WORK/prepared.json" > "$WORK/prepared-next.json"
+    "${k[@]}" replace -f "$WORK/prepared-next.json" >/dev/null || fail 'Stale prepared slot could not be abandoned'
+    printf 'Abandoned prepared slot of run %s: still preparing since %s\n' \
+      "$(jq -r '.data.run // "unknown"' "$WORK/prepared.json")" "$(jq -r '.data.preparedAt // "unknown"' "$WORK/prepared.json")"
+    return 0
+  fi
+  fail 'Prepared slot is still preparing'
 }
 prepared_write() {
   local status=$1 verb=replace

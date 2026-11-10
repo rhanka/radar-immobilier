@@ -69,7 +69,9 @@ Preparation releases `radar-change-lock` during long-running cluster Jobs; a
 preparing stamp prevents a release cutover from consuming incomplete work.
 Preparation failures stop owned Jobs, delete the smoke Deployment, discard the
 disposable database, restore schedules and mark the slot failed. Uncertain
-cleanup leaves it blocked. Both prepare and cutover suspend schedules before
+cleanup leaves it blocked until the stamp is older than every stage budget
+combined (14400 s); the next prepare then abandons it to `failed` (recording
+`abandonedAt` and keeping the dead run's record for forensics) and proceeds. Both prepare and cutover suspend schedules before
 document work; prepare drains active refresh Jobs for up to ten minutes,
 cutover deletes them immediately by UID. Sweep cursors under
 `refresh/018/sweep/` are excluded from copy and reconciliation.
