@@ -52,13 +52,25 @@ spec:
   timeZone: "Etc/UTC"
   concurrencyPolicy: Forbid
   startingDeadlineSeconds: 120
-  successfulJobsHistoryLimit: 1
-  failedJobsHistoryLimit: 3
+  successfulJobsHistoryLimit: 3
+  # 73 x 5 min = 365 min >= 21600 s (6 h): the CronJob controller prunes
+  # finished Jobs past this limit regardless of ttlSecondsAfterFinished,
+  # so the limit itself must span the 6 h floor or a systematically
+  # failing watchdog would lose its failed Jobs (and pods/logs) in ~15 min.
+  failedJobsHistoryLimit: 73
   jobTemplate:
     spec:
       backoffLimit: 0
       activeDeadlineSeconds: 180
-      ttlSecondsAfterFinished: 3600
+      ttlSecondsAfterFinished: 21600
+      # Même rétention que radar-refresh-pv : FailJob sur code non nul
+      # (backoffLimit: 0), pod terminé lisible 21600 s (6 h).
+      podFailurePolicy:
+        rules:
+          - action: FailJob
+            onExitCodes:
+              operator: NotIn
+              values: [0]
       template:
         metadata:
           labels:

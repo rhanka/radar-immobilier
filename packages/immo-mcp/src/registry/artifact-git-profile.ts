@@ -37,7 +37,7 @@ export const GIT_EFFECTIVE_REQUIRED: Readonly<Record<GitArtifactTool, readonly s
 
 /** Host semantics recorded in the effective profile (candidate integrity). */
 const GIT_EFFECTIVE_NOTES: Readonly<Record<GitArtifactTool, Readonly<Record<string, string>>>> = Object.freeze({
-  artifacts_git_attach: { binding: "own personal branch artifact/p/<id8-principal>/<slug>-<id8> of the A1 registry; code rights, write scope and GitHub linkage required" },
+  artifacts_git_attach: { binding: "own personal branch artifact/p/<id8-principal>/app-<id8-artifact> of the A1 registry; code rights, write scope and GitHub linkage required" },
   artifacts_fetch_app_source: { source: "files at a server-resolved commit; current code rights required" },
   artifacts_git_publish: { build: "sandbox executor on the Sentropic builder; SG4b handoff verified and committed by immo in one transaction" },
   artifacts_git_commit: { commit: "commits the caller's own live draft under expectedHeadSha; never another user's binding" },
