@@ -130,11 +130,13 @@ export interface GraphSignalDocRef {
   linkSource?: string;
 }
 
-/** Stored node as read for card building; materialized dates optional. */
+/**
+ * Stored node as read for card building. The materialized effective-date
+ * columns are not card input: card readers never read them, so they are
+ * excluded from this type instead of being optional everywhere.
+ */
 export type StoredSignalNodeInput = Omit<Awaited<ReturnType<typeof getSignalNodesForCity>>[number],
-  "effectiveDocumentDates" | "effectiveScrapDates">
-  & Partial<Pick<Awaited<ReturnType<typeof getSignalNodesForCity>>[number],
-    "effectiveDocumentDates" | "effectiveScrapDates">>;
+  "effectiveDocumentDates" | "effectiveScrapDates">;
 
 export interface GraphSignalCard {
   id: string;

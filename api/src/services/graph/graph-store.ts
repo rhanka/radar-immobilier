@@ -1040,10 +1040,37 @@ export async function upsertGraph(
   await db.transaction(async (tx) => {
     await lockCityGraph(tx, citySlug);
     if (nodeRows.length > 0) {
+      // #872 parity: the conflict path unions existing and incoming root
+      // refs into the final props, so the materialized dates must be
+      // computed from those final props — not from the incoming graph
+      // alone, which would drop dates carried only by pre-existing refs
+      // and let the SQL window discard nodes the JS filter would keep.
+      // The city lock is already held, so this read is race-free.
+      const existing = await tx
+        .select({ id: graphNodes.id, props: graphNodes.props })
+        .from(graphNodes)
+        .where(and(eq(graphNodes.citySlug, citySlug), inArray(graphNodes.id, nodeRows.map((r) => r.id))));
+      const existingProps = new Map(existing.map((row) => [row.id, row.props as Record<string, unknown>]));
+      const effectiveRows = nodeRows.map((r) => {
+        const prev = existingProps.get(r.id);
+        const prevRefs = Array.isArray(prev?.refs) ? prev.refs : [];
+        if (prevRefs.length === 0) return r;
+        const incomingRefs = Array.isArray(r.props.refs) ? r.props.refs : [];
+        const seen = new Set<string>();
+        const union: unknown[] = [];
+        for (const ref of [...prevRefs, ...incomingRefs]) {
+          const key = JSON.stringify(ref);
+          if (!seen.has(key)) { seen.add(key); union.push(ref); }
+        }
+        const props = { ...r.props, refs: union };
+        return { ...r, props,
+          documentDates: resultCivilDates(props, "document"),
+          scrapDates: resultCivilDates(props, "scrap") };
+      });
       await tx
         .insert(graphNodes)
         .values(
-          nodeRows.map((r) => ({
+          effectiveRows.map((r) => ({
             id: r.id, type: r.type, label: r.label, citySlug, props: r.props, sourceRef: r.sourceRef,
             effectiveDocumentDates: r.documentDates, effectiveScrapDates: r.scrapDates,
           })),
