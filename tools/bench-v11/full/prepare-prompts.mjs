@@ -4,10 +4,7 @@
 // refresh-profile.ts @93994e4); prompt body via @sentropic/graphify@0.18.0.
 import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { createRequire } from "node:module";
-
 const DIR = process.env.BENCH_DIR ?? new URL("..", import.meta.url).pathname.replace(/\/$/, "");
-const require = createRequire(`${DIR}/sandbox/package.json`);
 const graphify = await import("@sentropic/graphify").catch(() => import(`${DIR}/sandbox/node_modules/@sentropic/graphify/dist/index.js`));
 const { buildProfileChunkPrompt, loadOntologyProfile, registryRecordsToExtraction } = graphify;
 
