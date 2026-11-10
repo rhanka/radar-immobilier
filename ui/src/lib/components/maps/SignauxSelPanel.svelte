@@ -2327,36 +2327,7 @@
   }
 
   .sel-entity-bar {
-    border: 1px solid var(--st-semantic-border-subtle, #f1f5f9);
-    border-radius: var(--st-radius-sm, 6px);
-    margin: 0.25rem 0.5rem;
-    overflow: visible;
-  }
-
-  /* Card-wide states: border, selection, hover and focus cover the whole
-     card, classification icon included (icon lives inside the card). */
-  .sel-entity-bar:hover {
-    background: var(--st-semantic-surface-subtle, #f8fafc);
-  }
-
-  .sel-entity-bar--selected {
-    background: var(--st-semantic-surface-selected, #ecfdf5);
-    border-color: var(--st-semantic-feedback-success, #0f766e);
-  }
-
-  .sel-entity-bar--focused {
-    outline: 1px solid var(--st-semantic-feedback-success, #14b8a6);
-    outline-offset: -1px;
-  }
-
-  .sel-entity-bar--dimmed {
-    opacity: 0.5;
-  }
-
-  .sel-entity-bar .sel-entity-head--selected,
-  .sel-entity-bar .sel-entity-head--focused {
-    background: transparent;
-    outline: none;
+    border-bottom: 1px solid var(--st-semantic-border-subtle, #f1f5f9);
   }
 
   .sel-entity-bar:last-child {
@@ -2403,10 +2374,15 @@
     align-items: center;
     padding: 0.15rem;
     border: none;
-    border-radius: 4px;
+    border-radius: var(--st-radius-sm, 4px);
     background: transparent;
     color: var(--st-semantic-feedback-warning, #b45309);
     cursor: pointer;
+  }
+
+  .classement-error-icon:hover,
+  .classement-error-icon:focus-visible {
+    background: var(--st-semantic-action-secondaryHover, var(--st-semantic-surface-subtle));
   }
 
   .classement-error-detail {

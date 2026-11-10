@@ -343,6 +343,10 @@
 
 <style>
   .classement-menu { position: relative; display: inline-flex; }
+  .classement-menu :global(.st-iconButton:hover:not(:disabled)),
+  .classement-menu :global(.st-iconButton:focus-visible) {
+    background: var(--st-component-iconButton-hoverBackground, var(--st-semantic-action-secondaryHover, var(--st-semantic-surface-subtle)));
+  }
   .classement-pop { position: absolute; top: calc(100% + 4px); right: 0; z-index: 30; display: block; border-radius: var(--st-component-popover-radius, var(--st-radius-lg, 0.5rem)); box-shadow: var(--st-component-popover-shadow, var(--st-shadow-floating)); }
   .cascade { position: relative; display: block; }
   .cascade-class { display: block; }
