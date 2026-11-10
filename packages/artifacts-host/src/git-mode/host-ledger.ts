@@ -42,6 +42,36 @@ export type {
 /** Actor recorded on the binding audit for a builder publication. */
 export const SANDBOX_PUBLISHER = "sentropic:sandbox-builder" as const;
 
+const BARE_BUILDER_DIGEST = /^sha256:([0-9a-fA-F]{64})$/;
+const FULL_BUILDER_REFERENCE = /^[^@\s]+@sha256:([0-9a-fA-F]{64})$/;
+
+/**
+ * Normalise one builder-image allowlist entry to the bare digest
+ * `sha256:<hex>` carried by `claims.tuple.builderImageDigest`. A bare
+ * digest is kept as-is; a full reference `<repo>@sha256:<hex>` keeps only
+ * its digest, so the operator-facing configuration stays readable while
+ * the handoff comparison runs on the digest. Anything else returns
+ * `undefined` and is refused (never admitted to the allowlist).
+ */
+export function normalizeBuilderImageDigest(entry: string): string | undefined {
+  const trimmed = entry.trim();
+  const bare = BARE_BUILDER_DIGEST.exec(trimmed);
+  if (bare) return `sha256:${bare[1]!.toLowerCase()}`;
+  const full = FULL_BUILDER_REFERENCE.exec(trimmed);
+  if (full) return `sha256:${full[1]!.toLowerCase()}`;
+  return undefined;
+}
+
+/** Normalise allowlist entries to bare digests, dropping refused entries and duplicates. */
+export function normalizeBuilderImageAllowlist(entries: readonly string[]): string[] {
+  const digests: string[] = [];
+  for (const entry of entries) {
+    const digest = normalizeBuilderImageDigest(entry);
+    if (digest && !digests.includes(digest)) digests.push(digest);
+  }
+  return digests;
+}
+
 export interface HostBuildLedgerOptions {
   readonly pool: pg.Pool;
   readonly scopeId: string;
@@ -53,7 +83,7 @@ export interface HostBuildLedgerOptions {
     commitSha: string) => Promise<boolean>;
   /** Current owner authority for an explicit publication: code rights and an approved account. */
   readonly ownerAuthorized: (principalId: string) => Promise<boolean>;
-  /** Exact builder image digests admitted (A-LIVE §8.1). Empty: every handoff is refused. */
+  /** Builder images admitted (A-LIVE §8.1): bare digests or full `<repo>@sha256:<hex>` references, normalised to digests. Empty: every handoff is refused. */
   readonly imageAllowlist: readonly string[];
   /** Operator pause of sandbox publication. */
   readonly killSwitch: () => boolean;
@@ -97,6 +127,7 @@ async function inTransaction<T>(pool: pg.Pool, work: (client: Client) => Promise
 export function createPostgresHostBuildLedger(options: HostBuildLedgerOptions) {
   const { pool, scopeId } = options;
   const now = options.now ?? Date.now;
+  const imageAllowlist = normalizeBuilderImageAllowlist(options.imageAllowlist);
   const current = new AsyncLocalStorage<Client>();
   const txClient = (): Client => {
     const client = current.getStore();
@@ -118,7 +149,7 @@ export function createPostgresHostBuildLedger(options: HostBuildLedgerOptions) {
   function toView(rows: Awaited<ReturnType<typeof lockedRows>>, extra: { headReachable: boolean; ownerAuthorized: boolean }): HostRecheckView {
     const { binding, job } = rows;
     return {
-      scopeId, killSwitch: options.killSwitch(), imageAllowlist: [...options.imageAllowlist],
+      scopeId, killSwitch: options.killSwitch(), imageAllowlist: [...imageAllowlist],
       currentReleaseId: rows.currentReleaseId, headReachable: extra.headReachable,
       binding: binding ? { artifactId: binding.artifact_id, state: binding.state, generation: Number(binding.generation),
         executor: binding.executor, autoPublish: binding.auto_publish, pendingJobId: binding.pending_job_id,
@@ -245,8 +276,10 @@ export type PostgresHostBuildLedger = ReturnType<typeof createPostgresHostBuildL
  *   subpath (0.2.20); a module without them: no ledger, the endpoints answer 503;
  * - head reachability through the immo GitPort (lease from SG0-app);
  * - owner authority: current code rights of the binding owner;
- * - IMMO_ARTIFACTS_BUILDER_IMAGE_ALLOWLIST: exact builder image digests,
- *   comma-separated (empty: every handoff refused with image_not_allowed);
+ * - IMMO_ARTIFACTS_BUILDER_IMAGE_ALLOWLIST: builder images admitted,
+ *   comma-separated bare digests or full `<repo>@sha256:<hex>` references
+ *   (normalised to digests at read; empty: every handoff refused with
+ *   image_not_allowed);
  * - IMMO_ARTIFACTS_SANDBOX_PUBLICATION_PAUSED=true: operator kill switch.
  */
 export function composeHostBuildLedger(input: {
@@ -264,7 +297,7 @@ export function composeHostBuildLedger(input: {
     config: input.config ?? readGitModeConfig(input.env) });
   return createPostgresHostBuildLedger({ pool: input.pool, scopeId: input.storageScopeId, blobs: input.blobs,
     candidateDigest: candidateDigest as (files: readonly CandidateFile[]) => string,
-    imageAllowlist: (input.env.IMMO_ARTIFACTS_BUILDER_IMAGE_ALLOWLIST ?? "").split(",").map((entry) => entry.trim()).filter(Boolean),
+    imageAllowlist: normalizeBuilderImageAllowlist((input.env.IMMO_ARTIFACTS_BUILDER_IMAGE_ALLOWLIST ?? "").split(",")),
     killSwitch: () => input.env.IMMO_ARTIFACTS_SANDBOX_PUBLICATION_PAUSED === "true",
     refuse: (code, reason) => new (RefusalError as new (code: string, reason?: string) => Error)(code, reason),
     ownerAuthorized: (principalId) => access.codeRights.canReadCode({ storageScopeId: input.storageScopeId,
