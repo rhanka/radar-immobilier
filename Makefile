@@ -7,6 +7,15 @@ SHELL := /bin/bash
 ENV ?= dev
 export COMPOSE_PROJECT_NAME ?= radar-$(ENV)
 
+# UIDFIX-EX1: run bind-mount writer services as the host user so
+# container outputs stay host-owned (no sudo cleanup). Compose
+# interpolates UID/GID (docker-compose.dev/.test/.e2e.yml); raw
+# `docker run` calls with a workspace mount use DOCKER_RUN_USER
+# (Sentropic PRs #973/#987 pattern).
+export UID := $(shell id -u)
+export GID := $(shell id -g)
+DOCKER_RUN_USER := -u $(UID):$(GID) -e HOME=/tmp
+
 DOCKER_COMPOSE        ?= docker compose
 COMPOSE_FILES_BASE    := -f docker-compose.yml
 COMPOSE_FILES_DEV     := $(COMPOSE_FILES_BASE) -f docker-compose.dev.yml
@@ -69,7 +78,7 @@ help: ## Show this help
 # ─────────────────────────────────────────────────────────────────────
 
 .PHONY: dev
-dev: ## Start the dev stack (api + postgres + minio + obscura + maildev + ui-dev)
+dev: chown-dev-node-modules ## Start the dev stack (api + postgres + minio + obscura + maildev + ui-dev)
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) up -d --build
 	@$(MAKE) s3-init ENV=$(ENV)
 
@@ -114,8 +123,20 @@ exec-%: ## Exec arbitrary CMD="..." inside a service container
 # started (used for build-time gates: install / typecheck / lint / build).
 COMPOSE_RUN_API_NODEPS := $(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm --no-deps -T api
 
+# UIDFIX-EX1: fresh named node_modules volumes are root-owned; hand them
+# to the host user once (one-off root run) before the UID-mapped api
+# service installs into them. Fast path: skip when already host-owned.
+.PHONY: chown-test-node-modules
+chown-test-node-modules: ## Hand test named node_modules volumes to the host user
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm --no-deps -T -u 0:0 --entrypoint sh api -c '[ "$$(stat -c %u /workspace/node_modules)" = "$(UID)" ] || chown -R $(UID):$(GID) /workspace/node_modules /workspace/api/node_modules'
+
+.PHONY: chown-dev-node-modules
+chown-dev-node-modules: ## Hand dev named node_modules volumes to the host user
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm --no-deps -T -u 0:0 --entrypoint sh api -c '[ "$$(stat -c %u /workspace/node_modules)" = "$(UID)" ] || chown -R $(UID):$(GID) /workspace/node_modules /workspace/api/node_modules'
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm --no-deps -T -u 0:0 --entrypoint sh ui -c '[ "$$(stat -c %u /workspace/ui/node_modules)" = "$(UID)" ] || chown -R $(UID):$(GID) /workspace/ui/node_modules'
+
 .PHONY: typecheck
-typecheck: ## TypeScript typecheck across the workspace
+typecheck: chown-dev-node-modules ## TypeScript typecheck across the workspace
 	$(COMPOSE_RUN_API_NODEPS) npm run typecheck --workspaces --if-present
 
 .PHONY: lint
@@ -193,7 +214,7 @@ smoke-ui-mjs-mime: ## Fail if nginx serves the pdf.js worker (.mjs) with a non-J
 # The test stack uses its own node_modules volumes (isolated from dev), so
 # it installs deps itself via `npm ci` before migrating and running tests.
 .PHONY: test
-test: ## Run unit + integration tests (boots postgres + minio)
+test: chown-test-node-modules ## Run unit + integration tests (boots postgres + minio)
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) up -d postgres minio
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm -T api sh -c "\
 	  npm ci && \
@@ -201,7 +222,7 @@ test: ## Run unit + integration tests (boots postgres + minio)
 	  npm run test --workspaces --if-present"
 
 .PHONY: test-api
-test-api: ## Run API tests (SCOPE=<file> for scoped runs)
+test-api: chown-test-node-modules ## Run API tests (SCOPE=<file> for scoped runs)
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) up -d postgres minio
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm -T api sh -c "\
 	  npm ci && \
@@ -213,7 +234,7 @@ test-ui: ## Run UI unit tests (SCOPE=<file> for scoped runs)
 	$(COMPOSE_RUN_API_NODEPS) npm run test --workspace=ui $(if $(SCOPE),-- $(SCOPE),)
 
 .PHONY: test-immo-mcp
-test-immo-mcp: ## Run isolated MCP tests (SCOPE=<file>, excludes service E2E)
+test-immo-mcp: chown-test-node-modules ## Run isolated MCP tests (SCOPE=<file>, excludes service E2E)
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm --no-deps -T api sh -c "\
 	  npm ci && \
 	  npm run test --workspace=packages/immo-mcp -- --exclude '**/*.e2e.test.ts' $(SCOPE)"
@@ -280,22 +301,22 @@ db-status: ## Check DB readiness
 # ─────────────────────────────────────────────────────────────────────
 
 .PHONY: admission-keygen
-admission-keygen: ## Print a fresh Ed25519 admission keypair JSON (owner stores it; nothing is created)
+admission-keygen: chown-test-node-modules ## Print a fresh Ed25519 admission keypair JSON (owner stores it; nothing is created)
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm --no-deps -T api sh -c "npm ci --silent && npm run --silent admission:keygen --workspace=api"
 
 .PHONY: admission-snapshot
-admission-snapshot: ## Emit a signed FULL admission snapshot from the DB (prod emitter, prints envelope JSON)
+admission-snapshot: chown-test-node-modules ## Emit a signed FULL admission snapshot from the DB (prod emitter, prints envelope JSON)
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) up -d postgres
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm -T -e ADMISSION_SIGNING_KEY api sh -c "npm ci --silent && npm run --silent admission:snapshot --workspace=api"
 
 .PHONY: admission-ingest
-admission-ingest: ## Apply a signed admission envelope file (preprod ingest, FILE=<envelope.json>)
+admission-ingest: chown-test-node-modules ## Apply a signed admission envelope file (preprod ingest, FILE=<envelope.json>)
 	@test -n "$(FILE)" || (echo "Pass FILE=<envelope.json> (repo-relative, visible in the container)"; exit 1)
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) up -d postgres
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm -T -e ADMISSION_SYNC_ENABLED -e ADMISSION_PROD_PUBLIC_KEYS api sh -c "npm ci --silent && npm run --silent db:migrate --workspace=api && npm run --silent admission:ingest --workspace=api -- --file /workspace/$(FILE)"
 
 .PHONY: admission-verify
-admission-verify: ## Offline signature check of an envelope file (FILE=<envelope.json>, no DB writes)
+admission-verify: chown-test-node-modules ## Offline signature check of an envelope file (FILE=<envelope.json>, no DB writes)
 	@test -n "$(FILE)" || (echo "Pass FILE=<envelope.json>"; exit 1)
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm --no-deps -T -e ADMISSION_PROD_PUBLIC_KEYS api sh -c "npm ci --silent && npm run --silent admission:verify --workspace=api -- --file /workspace/$(FILE)"
 
@@ -352,21 +373,21 @@ fixture-promote: ## Promote an S3/local PV capture to a golden fixture (CITY, IN
 # ─────────────────────────────────────────────────────────────────────
 
 .PHONY: install
-install: ## Install root workspace deps (no service deps started)
+install: chown-dev-node-modules ## Install root workspace deps (no service deps started)
 	$(COMPOSE_RUN_API_NODEPS) npm install
 
 .PHONY: install-api
-install-api: ## Add a dep to api: make install-api LIB=foo (VAR=-D for devDeps)
+install-api: chown-dev-node-modules ## Add a dep to api: make install-api LIB=foo (VAR=-D for devDeps)
 	@test -n "$$LIB" || (echo "Pass LIB=<name>"; exit 1)
 	$(COMPOSE_RUN_API_NODEPS) npm --workspace=api install $$VAR $$LIB
 
 .PHONY: install-ui
-install-ui: ## Add a dep to ui: make install-ui LIB=foo
+install-ui: chown-dev-node-modules ## Add a dep to ui: make install-ui LIB=foo
 	@test -n "$$LIB" || (echo "Pass LIB=<name>"; exit 1)
 	$(COMPOSE_RUN_API_NODEPS) npm --workspace=ui install $$VAR $$LIB
 
 .PHONY: install-dev
-install-dev: ## Add a devDep at workspace root: make install-dev LIB=foo
+install-dev: chown-dev-node-modules ## Add a devDep at workspace root: make install-dev LIB=foo
 	@test -n "$$LIB" || (echo "Pass LIB=<name>"; exit 1)
 	$(COMPOSE_RUN_API_NODEPS) npm install -D $$LIB
 
