@@ -24,27 +24,27 @@ export function validBbox(value: unknown): [number, number, number, number] | nu
     : null;
 }
 
-const SHORT_STRING_KEYS = new Set([
+export const SHORT_STRING_KEYS = new Set([
   "category", "etape", "instrument",
   "date", "documentDate", "publishedAt", "meetingDate", "etapeDate", "etape_date", "meeting_date",
   "linkSource", "link_source",
 ]);
 
-const TEXT_KEYS = new Set([
+export const TEXT_KEYS = new Set([
   "description", "summary", "details", "resume", "justification", "citation", "excerpt",
 ]);
 
-const REGLEMENT_KEYS = new Set([
+export const REGLEMENT_KEYS = new Set([
   "reglement_number", "reglementNumber", "reglement_numero",
   "reglementNumbers", "bylaw", "reglement_millesime", "reglementMillesime", "millesime",
 ]);
 
-const ZONE_LOT_KEYS = new Set([
+export const ZONE_LOT_KEYS = new Set([
   "zone_ref", "zoneRef", "zone_refs", "zones", "zone", "target_zone", "targets_zone",
   "lot_ref", "lotRef", "noLot", "no_lot", "lot", "lots", "target_lot", "targets_lot",
 ]);
 
-const PROOF_BOOL_KEYS = new Set([
+export const PROOF_BOOL_KEYS = new Set([
   "provisional", "is_provisional", "isProvisional", "auto", "autoLinked",
 ]);
 
