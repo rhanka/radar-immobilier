@@ -106,6 +106,26 @@ describe("SignauxSelPanel — rechargement par icône (en-têtes Zones/Lots)", (
     expect(queryByTestId("zones-reload-action")).toBeNull();
   });
 
+  it("un seul menu ouvert à la fois et « Recharger » en graisse normale", async () => {
+    const { getByTestId, queryByTestId } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        zonesError: "Zones indisponibles.",
+        lotsError: "Lots indisponibles.",
+        onRetryGeo: vi.fn(),
+      },
+    });
+    await fireEvent.click(getByTestId("zones-reload-trigger"));
+    const action = getByTestId("zones-reload-action");
+    // « Recharger » uses the normal-weight menu item style (font-weight: 400 in CSS).
+    expect(action.classList.contains("reload-menu__item")).toBe(true);
+    // Opening the Lots menu closes the Zones menu (shared panel-menu state).
+    await fireEvent.click(getByTestId("lots-reload-trigger"));
+    expect(queryByTestId("zones-reload-action")).toBeNull();
+    expect(getByTestId("lots-reload-action")).toBeTruthy();
+  });
+
   it("clavier : flèche bas ouvre le menu, Échap le ferme et rend le focus", async () => {
     const { getByTestId, queryByTestId } = render(Harness, {
       props: {
