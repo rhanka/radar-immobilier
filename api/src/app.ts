@@ -53,6 +53,7 @@ import { scopedSignalRevealRoute } from "./routes/scoped-signal-reveal.js";
 import { mcpSignalSearchRoute } from "./routes/mcp-signal-search.js";
 import { classificationBoundary, scopedClassificationRoute } from "./routes/scoped-classification.js";
 import type { ClassificationOptions } from "./services/facets/classification-search.js";
+import { opsRecipientsRoute, type OpsRouteDeps } from "./ops/recipients.js";
 
 export type AppDeps = HealthDeps &
   SourcesDeps &
@@ -115,6 +116,8 @@ export type AppDeps = HealthDeps &
     /** PW-A write authority; absent keeps prepare/status/confirm closed. */
     writeH5?: Parameters<typeof writeIntentH5Route>[0] | undefined;
     writeApp?: Parameters<typeof writeIntentAppRoute>[0] | undefined;
+    /** Ops recipients port v1; absent mounts the closed (503) capability. */
+    ops?: OpsRouteDeps | null;
   };
 
 /** Compose the Hono application from injected dependencies. */
@@ -135,6 +138,11 @@ export function createApp(deps: AppDeps): Hono {
   // on session state.
   app.all("/__app", (c) => c.json({ error: "not_found" }, 404));
   app.all("/__app/*", (c) => c.json({ error: "not_found" }, 404));
+
+  // Ops recipients (S2S service-client bearer): mounted before protect,
+  // like the artifacts live-host routes, and authenticated by the route
+  // itself against the IdP JWKS. Absent deps keep it closed (503).
+  app.route("/", opsRecipientsRoute(deps.ops ?? null));
 
   // Control requests use the official cookie guard before general bearer auth.
   if (deps.auth?.enabled) {
