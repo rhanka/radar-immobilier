@@ -1,0 +1,9 @@
+# UIDFIX-EX2: cutover test image. Stock node:24-bookworm-slim plus the
+# CLI tools the hermetic cutover tests shell out to (make, jq, curl,
+# envsubst from gettext-base), baked at build time because the api
+# service now runs as the host user and can no longer apt-get at
+# container start (that needed root).
+FROM node:24-bookworm-slim
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends bash make jq curl gettext-base \
+ && rm -rf /var/lib/apt/lists/*
