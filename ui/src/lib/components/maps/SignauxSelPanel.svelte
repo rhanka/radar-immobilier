@@ -19,7 +19,7 @@
    * reste affiché pour signaler un filtre actif.
    */
   import { tick } from "svelte";
-  import { Badge, Search } from "@sentropic/design-system-svelte";
+  import { Badge, IconButton, Search } from "@sentropic/design-system-svelte";
   import BucketReloadAction from "$lib/components/maps/BucketReloadAction.svelte";
   import { normalizeLotKey, zoneSearchKey } from "@radar/domain";
   import { rankBySearch } from "$lib/maps/entity-search.js";
@@ -1053,15 +1053,15 @@
   <div class="sel-head">
     <span class="sel-kicker">Sélection</span>
     {#if selectedCity}
-      <button
-        type="button"
-        class="sel-clear"
-        on:click={onClear}
+      <IconButton
+        size="sm"
+        variant="ghost"
+        onclick={onClear}
         aria-label="Fermer la sélection"
+        title="Fermer la sélection"
       >
-        <X class="h-3.5 w-3.5" aria-hidden="true" />
-        Fermer
-      </button>
+        <X size={15} aria-hidden="true" />
+      </IconButton>
     {/if}
   </div>
 
@@ -2161,23 +2161,6 @@
     font-size: var(--signaux-fs-overline);
     font-weight: 700;
     color: var(--st-semantic-text-muted, #94a3b8);
-  }
-
-  .sel-clear {
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-    font-size: var(--signaux-fs-small);
-    padding: 0.2rem 0.5rem;
-    border: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
-    border-radius: var(--st-radius-sm, 4px);
-    background: transparent;
-    color: var(--st-semantic-text-secondary, #64748b);
-    cursor: pointer;
-  }
-
-  .sel-clear:hover {
-    background: var(--st-semantic-surface-subtle, #f8fafc);
   }
 
   .sel-muted,
