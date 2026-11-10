@@ -3,6 +3,9 @@
 # tools; the proof builds from a clean tree streamed on stdin.
 services:
   node:
+    # UIDFIX-EX1: run as the host user so outputs written to the
+    # tmp/git-artifact-proof bind stay host-owned.
+    user: "${UID:-1000}:${GID:-1000}"
     image: node:24-bookworm-slim
     working_dir: /workspace
     entrypoint: []

@@ -8,6 +8,9 @@
 
 services:
   api:
+    # UIDFIX-EX1: run as the host user so bind-mounted outputs stay
+    # host-owned (Sentropic PRs #973/#987 pattern).
+    user: "${UID:-1000}:${GID:-1000}"
     image: node:24-bookworm-slim
     working_dir: /workspace
     command: sh -c "npm run test --workspace=api"
@@ -16,6 +19,10 @@ services:
       - radar-test-root-node-modules:/workspace/node_modules
       - radar-test-api-node-modules:/workspace/api/node_modules
     environment:
+      # UIDFIX-EX1: npm cache under the container /tmp (HOME is not
+      # writable for the host user inside the stock node image).
+      HOME: /tmp
+      npm_config_cache: /tmp/npm-cache
       NODE_ENV: test
 
 volumes:
