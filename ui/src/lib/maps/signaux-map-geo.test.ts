@@ -144,11 +144,21 @@ describe("opacityForSelectionKey", () => {
 
   it("keeps selected entities full color and unselected entities at 50 percent", () => {
     const selectedKey = makeKey("zone", `${CITY_SLUG}/H-609`);
-    const otherKey = makeKey("lot", `${CITY_SLUG}/4 516 943`);
+    const otherKey = makeKey("zone", `${CITY_SLUG}/C-186`);
     const state = createSelectionBucketState({ selectedKeys: [selectedKey] });
 
     expect(opacityForSelectionKey(state, selectedKey, 0.42)).toBe(FULL_SELECTION_OPACITY);
     expect(opacityForSelectionKey(state, otherKey, 0.42)).toBe(DIMMED_SELECTION_OPACITY);
+  });
+
+  it("city selected only → other kinds keep the layer default (no cross-kind dimming)", () => {
+    const cityKey = makeKey("municipality", CITY_SLUG);
+    const state = createSelectionBucketState({ selectedKeys: [cityKey] });
+
+    expect(opacityForSelectionKey(state, makeKey("municipality", "delson"), 0.75)).toBe(DIMMED_SELECTION_OPACITY);
+    expect(opacityForSelectionKey(state, cityKey, 0.75)).toBe(FULL_SELECTION_OPACITY);
+    expect(opacityForSelectionKey(state, makeKey("zone", `${CITY_SLUG}/H-609`), 0.42)).toBe(0.42);
+    expect(opacityForSelectionKey(state, makeKey("lot", `${CITY_SLUG}/4 516 943`), 0.42)).toBe(0.42);
   });
 });
 
