@@ -14,7 +14,7 @@ import {
   type GraphSignalCard,
 } from "../../routes/graph-signals.js";
 import { buildLegacyZmpProjection, type LegacyZmpProjection } from "../graph/vivier-v2.js";
-import { projectProps } from "../../artifacts/reader-coherent-city.js";
+import { projectProps } from "./props-projection.js";
 
 export type StoredSignalNode = Parameters<typeof toDegradedSignalCard>[0];
 
