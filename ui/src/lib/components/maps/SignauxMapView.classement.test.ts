@@ -131,6 +131,8 @@ function card(id: string): HTMLElement {
 }
 
 beforeEach(() => {
+  // jsdom has no scrollIntoView; SelPanel scrolls the hovered fiche into view.
+  HTMLElement.prototype.scrollIntoView = vi.fn();
   discarded = false;
   surveille = false;
   includeLate = false;

@@ -96,8 +96,8 @@ describe("SignauxRail Pertinence dropdown — acceptance criteria", () => {
     const panel = view.getByTestId("filtre-panel");
     const rows = [...panel.querySelectorAll(".classement-row")];
     expect(rows.map((row) => row.querySelector(".st-badge")?.textContent?.trim())).toEqual(["4", "3", "2", "1", "6"]);
-    // Same pill mechanism as Pertinence: a Badge in each row, scope note present.
-    expect(panel.textContent).toContain("ville sélectionnée");
+    // Same pill mechanism as Pertinence: a Badge in each row, no scope caption.
+    expect(panel.textContent).not.toContain("ville sélectionnée");
     await view.rerender({
       entries: [],
       classementFilter: { pertinent: true, a_surveiller: true, non_classe: true, ecarte: false },

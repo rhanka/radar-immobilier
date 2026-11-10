@@ -111,11 +111,10 @@ describe("signal classement — acceptance criteria", () => {
       expect(meta.token).toContain("--st-semantic-");
       expect(meta.token).not.toMatch(/#[0-9a-fA-F]{3,8}/);
     }
-    // Documented DS mapping: pertinent=success, a_surveiller=warning,
-    // ecarte / non_classe = neutral text tokens.
-    expect(CLASSEMENT_META.pertinent.token).toBe("var(--st-semantic-feedback-success)");
-    expect(CLASSEMENT_META.a_surveiller.token).toBe("var(--st-semantic-feedback-warning)");
-    expect(CLASSEMENT_META.ecarte.token).toBe("var(--st-semantic-text-muted)");
-    expect(CLASSEMENT_META.non_classe.token).toBe("var(--st-semantic-text-secondary)");
+    // Validated neutral mapping: every class icon uses the DS IconButton
+    // text token (no per-class semantic tint).
+    for (const meta of Object.values(CLASSEMENT_META)) {
+      expect(meta.token).toBe("var(--st-component-iconButton-text, var(--st-semantic-text-primary))");
+    }
   });
 });
