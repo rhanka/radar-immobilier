@@ -206,7 +206,7 @@ describe("SignauxSelPanel — carte signal : bulle d'étape, sans effet densifia
 
 describe("SignauxSelPanel — clic signal → fiche détail", () => {
   it("shows unavailable without a false zero or empty-state message", () => {
-    const { container } = render(Harness, {
+    const { container, getByTestId, queryByText } = render(Harness, {
       props: {
         selectedCity: makeCity("sutton", "Sutton"),
         detailNodes: [],
@@ -214,8 +214,13 @@ describe("SignauxSelPanel — clic signal → fiche détail", () => {
       },
     });
 
-    expect(container.textContent).toContain("Signaux indisponibles");
-    expect(container.textContent).toContain("n/d");
+    // Patron icône : plus de grande carte ni de « Réessayer », l'en-tête
+    // Signaux porte le déclencheur ! (le détail complet est couvert par
+    // SignauxSelPanel.reload.test.ts).
+    expect(getByTestId("signaux-reload-trigger")).toBeTruthy();
+    expect(container.querySelector(".sel-alert")).toBeNull();
+    expect(queryByText("Réessayer")).toBeNull();
+    expect(getByTestId("signals-bucket-head").textContent).not.toContain("n/d");
     expect(container.textContent).not.toContain("0 signal");
     expect(container.textContent).not.toContain("Aucun signal indexé");
   });
@@ -915,7 +920,8 @@ describe("SignauxSelPanel — reglement bucket on failed signal read", () => {
     expect(getByTestId("reglements-unavailable").textContent).toContain(
       "Règlements indisponibles",
     );
-    expect(getByTestId("reglements-bucket-count").textContent).toContain("n/d");
+    expect(getByTestId("reglements-reload-trigger")).toBeTruthy();
+    expect(getByTestId("reglements-bucket-count").textContent).not.toContain("n/d");
     expect(
       queryByText("Aucun règlement cité par les signaux de cette ville."),
     ).toBeNull();
@@ -926,7 +932,7 @@ describe("SignauxSelPanel — reglement bucket on failed signal read", () => {
     await fireEvent.click(getByText("H-431", { selector: ".sel-entity-label" }));
     expect(getByTestId("reglement-normes-grid").textContent).toContain("12 m");
     expect(getByText("100", { selector: ".sel-entity-label" })).not.toBeNull();
-    expect(getByTestId("reglements-bucket-count").textContent).toContain("n/d");
+    expect(getByTestId("reglements-bucket-count").textContent).not.toContain("n/d");
   });
 
   it("should keep demo documents when signal counts are unavailable", () => {
@@ -938,7 +944,8 @@ describe("SignauxSelPanel — reglement bucket on failed signal read", () => {
       },
     });
     expect(getByTestId("reglements-unavailable")).toBeTruthy();
-    expect(getByTestId("reglements-bucket-count").textContent).toContain("n/d");
+    expect(getByTestId("reglements-reload-trigger")).toBeTruthy();
+    expect(getByTestId("reglements-bucket-count").textContent).not.toContain("n/d");
     expect(queryByText("2019-342")).not.toBeNull();
     expect(queryByText("Voir le PDF du règlement")).not.toBeNull();
     expect(

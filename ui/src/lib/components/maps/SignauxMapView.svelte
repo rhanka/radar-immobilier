@@ -1662,6 +1662,7 @@
     try {
       const scope = { workspaceId };
       const res = await fetchGraphSignalDetail(scope, citySlug, {
+        view: "card",
         signal: lease.signal,
         timeoutMs: DEFAULT_REQUEST_TIMEOUT_MS,
       });
@@ -2922,28 +2923,11 @@
     </svelte:fragment>
 
     <svelte:fragment slot="overlay-top-left">
-      {#if selectedCity && (zonesLoading || lotsLoading || zonesError || lotsError || geoNotices.length > 0 || cptaqLoading || cptaqError)}
+      {#if selectedCity && (geoNotices.length > 0 || cptaqLoading || cptaqError)}
         <div class="max-w-sm flex flex-col gap-1 rounded-sm border border-slate-200 bg-white/95 px-3 py-2 text-xs text-slate-700 shadow-xs">
-          <!-- Waiter PAR COUCHE : chacune affiche son propre état. -->
-          {#if zonesLoading}
-            <p class="m-0 font-semibold text-slate-500">Chargement des zones…</p>
-          {/if}
-          {#if lotsLoading}
-            <p class="m-0 font-semibold text-slate-500">Chargement des lots…</p>
-          {/if}
-          <!-- Erreur PAR COUCHE : neutre + « Réessayer » ; n'affecte pas l'autre. -->
-          {#if zonesError}
-            <p class="m-0 flex items-center gap-2 text-amber-700">
-              <span>Zones indisponibles.</span>
-              <button type="button" class="font-semibold underline hover:text-amber-900" on:click={retryGeo}>Réessayer</button>
-            </p>
-          {/if}
-          {#if lotsError}
-            <p class="m-0 flex items-center gap-2 text-amber-700">
-              <span>Lots indisponibles.</span>
-              <button type="button" class="font-semibold underline hover:text-amber-900" on:click={retryGeo}>Réessayer</button>
-            </p>
-          {/if}
+          <!-- Zones/Lots : signal UNIQUE sur l'en-tête de la carte gigogne
+               du panneau droit (icône ! + menu « Recharger », wheel pendant
+               le rechargement) — aucun doublon « indisponibles » ici. -->
           {#each geoNotices as notice (notice)}
             <p class="m-0 text-slate-600">{notice}</p>
           {/each}
