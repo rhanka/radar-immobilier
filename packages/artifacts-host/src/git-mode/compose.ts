@@ -168,6 +168,9 @@ export function withHostGitPolicy(service: GitToolService): GitToolService {
       // the executor. Pause/resume/detach act on an existing binding and keep their strict
       // argument shapes, so they receive no repo/base default.
       const isLifecycleOnly = args.detach !== undefined || args.pause !== undefined;
+      if (!isLifecycleOnly && args.repoId !== undefined && args.repoId !== IMMO_GIT_REPO_ID) {
+        throw new ArtifactOperationError("git_repo_not_registered", { publicDetails: { repoId: args.repoId, reason: "repo_not_registered" } });
+      }
       const defaults = isLifecycleOnly ? {} : {
         repoId: args.repoId ?? IMMO_GIT_REPO_ID,
         baseRef: args.baseRef ?? IMMO_GIT_DEFAULT_BASE_REF,
