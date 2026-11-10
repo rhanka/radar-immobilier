@@ -1,0 +1,42 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: radar-immobilier-preprod
+
+resources:
+  - cronjob.yaml
+
+configMapGenerator:
+  - name: radar-refresh-requeue-recurrent-script
+    files:
+      - requeue-recurrent.bundle.mjs
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+patches:
+  # Preprod divergences (mirroring the refresh overlays): namespace above,
+  # schedule one hour after prod (30 4 vs 30 3 — still >= 15 min from every
+  # radar-refresh-pv start, incident 2026-10-09), and the preprod S3 secret
+  # (radar-scrape-s3-credentials does not exist in preprod).
+  - target:
+      kind: CronJob
+      name: radar-refresh-requeue-abandoned
+    patch: |
+      apiVersion: batch/v1
+      kind: CronJob
+      metadata:
+        name: radar-refresh-requeue-abandoned
+      spec:
+        schedule: "30 4 * * *"
+        jobTemplate:
+          spec:
+            template:
+              spec:
+                containers:
+                  - name: requeue-recurrent
+                    env:
+                      - name: SCRAPE_S3_ACCESS_KEY
+                        valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_ACCESS_KEY } }
+                      - name: SCRAPE_S3_SECRET_KEY
+                        valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_SECRET_KEY } }
