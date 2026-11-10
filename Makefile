@@ -128,10 +128,14 @@ COMPOSE_RUN_API_NODEPS := $(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm --no-d
 # service installs into them. Fast path: skip when already host-owned.
 # The host-side mkdir -p runs first so Docker does not create the
 # bind-mount points as root-owned empty stubs in the workspace.
+# The test one-off also removes the bind-mount node_modules trees
+# (ui/, packages/*/) as root: `npm ci` recreates them as the host
+# user, and a tree left by another stack or user must never block
+# the clean with EACCES (observed on CI, Quality gates step Test).
 .PHONY: chown-test-node-modules
 chown-test-node-modules: ## Hand test named node_modules volumes to the host user
 	@mkdir -p node_modules api/node_modules
-	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm --no-deps -T -u 0:0 --entrypoint sh api -c '[ "$$(stat -c %u /workspace/node_modules)" = "$(UID)" ] || chown -R $(UID):$(GID) /workspace/node_modules /workspace/api/node_modules'
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm --no-deps -T -u 0:0 --entrypoint sh api -c '[ "$$(stat -c %u /workspace/node_modules)" = "$(UID)" ] || chown -R $(UID):$(GID) /workspace/node_modules /workspace/api/node_modules; rm -rf /workspace/ui/node_modules /workspace/packages/*/node_modules'
 
 .PHONY: chown-dev-node-modules
 chown-dev-node-modules: ## Hand dev named node_modules volumes to the host user
