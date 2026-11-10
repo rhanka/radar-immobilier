@@ -126,9 +126,12 @@ Unchanged, with reason:
 - `782bb5fe` fix: run bind-mount writer containers as host user
 - `f6b952b4` fix: pre-create node_modules mount points host-owned
 - `6db1b8e4` docs: close lots 1-3 in branch plan
-- plus this report commit. No commit carries a `Co-Authored-By`,
-  `Claude-Session` or "Generated with" line (verified with
-  `git log --format=%B | grep`).
+- `3426d3d2` docs: add lane report for fix/containers-run-as-host-user
+- `4b450bfd` fix: pre-clean bind node_modules trees before test npm ci
+- `3ae01239` fix: bake poppler-utils into dev/test api image
+- plus this report update commit. No commit carries a
+  `Co-Authored-By`, `Claude-Session` or "Generated with" line
+  (verified with `git log --format=%B | grep`).
 
 ## CI
 
@@ -145,4 +148,8 @@ Unchanged, with reason:
   missing because the entrypoint apt-get needs root. API (420),
   UI (137) and other workspace suites all passed. Fixed by
   `api/Dockerfile.dev` (this head).
-- Final status: recorded after this head's CI completes.
+- Run 3 (head `3ae01239`, poppler fix): **all green** — Quality
+  gates PASS (20m09s, incl. Install / Typecheck / Lint / Audit /
+  Build / Smoke / Test on all workspaces), Real-stack e2e PASS
+  (3m23s), Enforce repo policy PASS. PR state: OPEN, MERGEABLE.
+  This report commit is docs-only on top of that head.
