@@ -12,7 +12,7 @@
    * back. DS components and DS tokens only.
    */
   import { tick } from "svelte";
-  import { MenuPopover, MenuTriggerButton } from "@sentropic/design-system-svelte";
+  import { IconButton, MenuPopover } from "@sentropic/design-system-svelte";
   import { LoaderCircle, TriangleAlert } from "@lucide/svelte";
 
   export let error: string | null = null;
@@ -26,6 +26,7 @@
   export let menuLabel: string;
 
   let menuOpen = false;
+  let placement: "bottom-end" | "top-end" = "bottom-end";
   let anchor: HTMLElement | null = null;
   let menuList: HTMLElement | null = null;
 
@@ -43,6 +44,13 @@
   }
 
   function openMenu(): void {
+    const rect = anchor?.getBoundingClientRect();
+    if (rect) {
+      const menuHeight = 48;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      placement = spaceBelow < menuHeight + 16 && spaceAbove > spaceBelow ? "top-end" : "bottom-end";
+    }
     menuOpen = true;
     void tick().then(() => focusFirstItem());
   }
@@ -124,12 +132,13 @@
     role="presentation"
     on:click|stopPropagation|preventDefault
   >
-    <MenuTriggerButton
+    <IconButton
       aria-label="Rechargement impossible, ouvrir les actions"
       aria-controls={menuId}
-      expanded={menuOpen}
+      aria-expanded={menuOpen}
+      aria-haspopup="menu"
       size="sm"
-      variant="secondary"
+      variant="ghost"
       data-testid="{testId}-reload-trigger"
       onclick={toggleMenu}
       onkeydown={handleTriggerKeydown}
@@ -137,13 +146,13 @@
       <span class="reload-icon">
         <TriangleAlert size={16} aria-hidden="true" />
       </span>
-    </MenuTriggerButton>
+    </IconButton>
   </span>
   <MenuPopover
     id={menuId}
     bind:open={menuOpen}
     trigger={anchor}
-    placement="bottom-end"
+    placement={placement}
     label={menuLabel}
     closeOnEscape={false}
   >
@@ -216,7 +225,7 @@
     background: transparent;
     color: var(--st-semantic-text-primary);
     font-size: var(--st-font-size-sm, 0.875rem);
-    font-weight: 600;
+    font-weight: 400;
     text-align: left;
     cursor: pointer;
   }
@@ -224,5 +233,6 @@
   .reload-menu__item:hover,
   .reload-menu__item:focus-visible {
     background: var(--st-semantic-surface-subtle);
+    outline: none;
   }
 </style>
