@@ -153,3 +153,56 @@ Unchanged, with reason:
   Build / Smoke / Test on all workspaces), Real-stack e2e PASS
   (3m23s), Enforce repo policy PASS. PR state: OPEN, MERGEABLE.
   This report commit is docs-only on top of that head.
+
+## Fixes REVIEW.md (independent review, REQUEST_CHANGES)
+
+Source: `/home/antoinefa/src/radar-immobilier-review-1061/REVIEW.md`
+(reviewed head `878f9867`). Fresh clone
+`/home/antoinefa/src/radar-immobilier-fix-1061`, branch
+`fix/containers-run-as-host-user`, `git pull --rebase` before edits,
+regular push only (no force-push). New scope declared as
+`UIDFIX-EX2` in the branch plan before touching the cutover and
+standalone-makefile paths. Not merged.
+
+| Finding | Fix | Commit |
+| --- | --- | --- |
+| F1 (BLOCKING) `deploy/cutover/test.compose.yml` `api` missed: root bind-mount writer exercised in CI | `api` gets `user: "${UID:-1000}:${GID:-1000}"` + `HOME=/tmp` + `npm_config_cache=/tmp/npm-cache`; new `deploy/cutover/Dockerfile.test` bakes `bash make jq curl gettext-base` (the `apt-get` step is removed from `cutover-verify.sh`); `tools/make/cutover-verify.sh` exports the real `UID`/`GID`, pre-creates the mount points and hands the fresh `modules`/`api-modules` volumes to the host user (one-off root `chown`, mirroring `chown-test-node-modules`) before the first `npm ci`; `deploy/cutover/operator.mk` also exports `UID`/`GID` | `26ed8e10` |
+| F2 (major) standalone entrypoints silently pin `1000:1000` | `tools/immo-mcp-test.mk` and `tools/make/git-artifact.mk` export `UID := $(shell id -u)` / `GID := $(shell id -g)`; `tools/make/git-artifact-verify.sh` exports the real ids for compose interpolation (its `--user` literal is unchanged) | `6cc1ae69` |
+| F3 (minor) `DOCKER_RUN_USER` defined, never used; `:=` overrides caller `UID`/`GID` | Variable and its false comment dropped from the root `Makefile` (raw writers are standalone and pass `--user` literally); `export UID :=` / `export GID :=` aligned to `export UID ?=` / `export GID ?=` | `1a16c10e` |
+| F4 (minor) cold-volume prerequisites incomplete | `chown-dev-node-modules` prerequisite added to `lint`, `test-ui`, `audit-security`, `test-audit-security`, `db-generate`, `fixture-promote`, `build-ui-artifact` | `38d2405a` |
+| F5 (minor / observations) | One-line blast-radius comment on `chown-test-node-modules` (its `rm -rf` of host-bind `node_modules` trees runs on every `make test*`); `tools/make/git-artifact.compose.yml` `HOME: /tmp/home` aligned to `/tmp`. The `e2e/Dockerfile` browser re-download cost is unchanged (accepted, recorded in REVIEW.md) | `2aa69c31` |
+
+### Proof
+
+- Compose rendering: cutover `api` renders `user: 1000:1000` with
+  `HOME=/tmp` and the npm cache on this host (uid 1000).
+- F2 mechanism proven with a stub `id` returning 1001/1002 first in
+  `PATH`: `make -f tools/immo-mcp-test.mk config ENV=test-fix1061`
+  renders `"user": "1001:1002"` instead of the fallback. The
+  `gb1-rows` path was also exercised with the stub; its stack was
+  torn down (`down -v`) and the tracked generated file restored
+  unchanged.
+- F3 semantics: `UID=1001 GID=1002 make -pn` shows the caller values
+  kept; without them, `$(shell id -u)` / `$(shell id -g)` apply.
+- F4: `make -n lint ENV=test-review` and `make -n test-ui
+  ENV=test-review` now print the `chown-dev-node-modules` steps
+  before the service run.
+- Local cutover run: `make -f deploy/cutover/operator.mk test
+  TEST_PATTERN='one command restores' ENV=test-cutover` was started
+  locally but `cutover-verify.sh` waits for the Docker campaign lock
+  while other pre-existing stacks run on this host (not touched);
+  it was stopped before creating any cutover container or volume.
+  The same command is exercised in CI (Quality gates, head
+  `2aa69c31`: PASS, see below), which is the F1 proof.
+- Teardown: no `radar-test-cutover` or `radar-test-fix1061`
+  container/volume remains (`down -v` verified); no root-owned file
+  in the clone outside `node_modules`.
+- CI (head `2aa69c31`, run 42766339024): Quality gates PASS
+  (30m02s, includes the cutover hermetic tests, install, typecheck,
+  lint, audit, build, test), Real-stack e2e PASS (3m46s), Enforce
+  repo policy PASS. PR state: OPEN, not merged.
+- Commit hygiene: `git log --format=%B 878f9867..HEAD | grep -ci
+  'co-authored-by\|claude-session\|generated with'` = 0.
+
+This report commit is docs-only on top of the green head
+`2aa69c31`.
