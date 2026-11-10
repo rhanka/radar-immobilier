@@ -318,7 +318,10 @@ async function main(): Promise<void> {
       logger.warn(refreshErrorDiagnostic(error), "refresh-pv: sweep report not persisted");
     }
     // Ops emission (L4): systemic city failures alert the platform, a
-    // healthy sweep emits `succeeded` for recovery. Behind OpsFailureSink
+    // healthy sweep emits `succeeded` for recovery. Sweep-scoped by
+    // contract: only this `--all` path emits (it is the
+    // `radar-refresh-pv` CronJob shape); single-city runs never emit.
+    // Behind OpsFailureSink
     // until the Sentropic L1 `OpsJobFailureV1` contract is published;
     // until then one stdout JSON line. Emission never changes the exit
     // code decided above.
