@@ -299,7 +299,7 @@ export const graphNodes = pgTable(
     citySlug: text("city_slug").notNull(), // the city whose latest.json holds the node
     props: jsonb("props").notNull().default({}), // community, source_file, …
     sourceRef: text("source_ref"), // S3 key / raw ref
-    // #872: effective civil dates materialized at write time (migration 0043)
+    // #872: effective civil dates materialized at write time (migration 0044)
     effectiveDocumentDates: text("effective_document_dates").array().notNull().default([]),
     effectiveScrapDates: text("effective_scrap_dates").array().notNull().default([]),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -311,8 +311,8 @@ export const graphNodes = pgTable(
     byCityType: index("graph_nodes_city_type_idx").on(t.citySlug, t.type),
     // GIN JSONB sur props (migration 0003)
     propsGin: index("graph_nodes_props_gin_idx").using("gin", t.props),
-    docDatesGin: index("graph_nodes_doc_dates_gin_idx").using("gin", t.effectiveDocumentDates),
-    scrapDatesGin: index("graph_nodes_scrap_dates_gin_idx").using("gin", t.effectiveScrapDates),
+    // No GIN on the effective-date arrays: the unnest/BETWEEN window
+    // predicate cannot use one (SPEC_FILTRAGE_API section 4).
   }),
 );
 
