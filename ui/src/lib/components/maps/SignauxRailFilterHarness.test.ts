@@ -44,15 +44,19 @@ function node(
   };
 }
 
-function exclusionBoxes(container: HTMLElement): HTMLInputElement[] {
+function filtreBoxes(container: HTMLElement): HTMLInputElement[] {
   return Array.from(
-    container.querySelectorAll<HTMLInputElement>(".vivier-b-exclusions input[type=checkbox]"),
+    container.querySelectorAll<HTMLInputElement>('[data-testid="filtre-panel"] input[type=checkbox]'),
   );
 }
+function exclusionBoxes(container: HTMLElement): HTMLInputElement[] {
+  return filtreBoxes(container).slice(3);
+}
 function axisBoxes(container: HTMLElement): HTMLInputElement[] {
-  return Array.from(
-    container.querySelectorAll<HTMLInputElement>(".vivier-toggles input[type=checkbox]"),
-  );
+  return filtreBoxes(container).slice(0, 3);
+}
+async function openFiltrePanel(container: HTMLElement): Promise<void> {
+  await fireEvent.click(container.querySelector('[data-testid="filtre-trigger"]')!);
 }
 
 describe("Vivier B filter pipeline — rail toggles change the visible count", () => {
@@ -80,6 +84,7 @@ describe("Vivier B filter pipeline — rail toggles change the visible count", (
     });
     // Défaut B : les deux exclusions actives → seul le rezonage reste visible.
     expect(getByTestId("visible-count").textContent).toBe("1");
+    await openFiltrePanel(container);
 
     const boxes = exclusionBoxes(container);
     expect(boxes).toHaveLength(2);
@@ -110,6 +115,7 @@ describe("Vivier B filter pipeline — rail toggles change the visible count", (
     });
     // Default (z, r, p): the late node is outside Précoce.
     expect(getByTestId("visible-count").textContent).toBe("3");
+    await openFiltrePanel(container);
     // Uncheck p: the late unknown is still filtered by r.
     await fireEvent.click(axisBoxes(container)[2]!);
     expect(getByTestId("visible-count").textContent).toBe("3");
@@ -213,21 +219,19 @@ describe("m1.7 — the rail BADGE of the SELECTED city must track the visible li
       return badge!.textContent?.trim() ?? "";
     }
 
-    // Défaut : 2 exclusions actives → seul le rezonage est visible (1), PAS le
-    // bulk serveur (3) affiché seul. Le badge HONNÊTE montre « affiché/bulk »
-    // (1/3) : ni « 3 » figé, ni « 1 » inexpliqué.
+    // Défaut : 2 exclusions actives → seul le rezonage est visible (1).
+    // Le badge ville = le seul compte après filtres (« 1 »), jamais « 1/3 ».
     expect(getByTestId("visible-count").textContent).toBe("1");
-    expect(badgeText()).toBe("1/3");
+    expect(badgeText()).toBe("1");
+    await openFiltrePanel(container);
 
     const boxes = exclusionBoxes(container);
-    // Décocher « Exclure PIIA sans projet résidentiel » → 2/3, le badge SUIT.
+    // Décocher « Exclure PIIA sans projet résidentiel » → 2, le badge SUIT.
     await fireEvent.click(boxes[0]!);
     expect(getByTestId("visible-count").textContent).toBe("2");
-    expect(badgeText()).toBe("2/3");
+    expect(badgeText()).toBe("2");
 
-    // Décocher « Exclure dérogations mineures » → 3, badge = bulk (convergence
-    // attendue : sans exclusion, le vivier v2 qualifié EST les 3 nœuds — plus
-    // de dénominateur quand rien n'est masqué).
+    // Décocher « Exclure dérogations mineures » → 3.
     await fireEvent.click(boxes[1]!);
     expect(getByTestId("visible-count").textContent).toBe("3");
     expect(badgeText()).toBe("3");

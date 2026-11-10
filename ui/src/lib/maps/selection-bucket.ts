@@ -226,14 +226,27 @@ export function toggleExpansion(
   return { ...state, expandedKeys };
 }
 
+export function hasSameKindSelection(
+  state: Pick<SelectionBucketState, "selectedKeys">,
+  key: SelectionKey,
+): boolean {
+  const kind = parseKey(key)?.kind;
+  if (!kind) return state.selectedKeys.size > 0;
+  for (const selectedKey of state.selectedKeys) {
+    if (parseKey(selectedKey)?.kind === kind) return true;
+  }
+  return false;
+}
+
 export function deriveOpacity(
   state: Pick<SelectionBucketState, "selectedKeys">,
   key: SelectionKey,
 ): number {
   if (state.selectedKeys.size === 0) return FULL_SELECTION_OPACITY;
-  return state.selectedKeys.has(key)
-    ? FULL_SELECTION_OPACITY
-    : DIMMED_SELECTION_OPACITY;
+  if (state.selectedKeys.has(key)) return FULL_SELECTION_OPACITY;
+  return hasSameKindSelection(state, key)
+    ? DIMMED_SELECTION_OPACITY
+    : FULL_SELECTION_OPACITY;
 }
 
 export function selectionVisualState(
