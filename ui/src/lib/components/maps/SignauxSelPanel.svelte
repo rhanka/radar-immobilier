@@ -19,10 +19,11 @@
    * reste affiché pour signaler un filtre actif.
    */
   import { tick } from "svelte";
-  import { Alert, Badge, Search } from "@sentropic/design-system-svelte";
+  import { Badge, IconButton, Search } from "@sentropic/design-system-svelte";
+  import BucketReloadAction from "$lib/components/maps/BucketReloadAction.svelte";
   import { normalizeLotKey, zoneSearchKey } from "@radar/domain";
   import { rankBySearch } from "$lib/maps/entity-search.js";
-  import { ExternalLink, FileText, FileX, RefreshCw, X } from "@lucide/svelte";
+  import { ExternalLink, FileText, FileX, RefreshCw, TriangleAlert, X } from "@lucide/svelte";
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
   import {
     extractDocRefs,
@@ -93,6 +94,15 @@
     zoneMatchesMillesime,
     type ZoneMillesimeFilter,
   } from "$lib/maps/zone-millesime-filter.js";
+  import SignalClassementMenu from "$lib/components/maps/SignalClassementMenu.svelte";
+  import {
+    classementKey,
+    EMPTY_CLASSEMENT_ENTRY,
+    type ClassementEntry,
+    type ReasonCodeEntry,
+    type SignalClass,
+  } from "$lib/signals/signal-classement.js";
+  import { reasonEntryLabel } from "$lib/signals/signal-reason-labels.js";
   import LotFilterHeader from "$lib/components/maps/LotFilterHeader.svelte";
   import ZoneFilterHeader from "$lib/components/maps/ZoneFilterHeader.svelte";
   import {
@@ -155,9 +165,9 @@
     () => {};
   export let onClear: () => void = () => {};
   export let onToggleKey: (key: SelectionKey) => void = () => {};
-  /** « Réessayer » — recharge le détail signaux (couche panneau droit). */
+  /** « Recharger » (menu de l'icône !) — recharge le détail signaux. */
   export let onRetryDetail: () => void = () => {};
-  /** « Réessayer » — recharge les couches géo (zones + lots). */
+  /** « Recharger » (menu de l'icône !) — recharge les couches géo (zones + lots). */
   export let onRetryGeo: () => void = () => {};
   // onFocusKey retiré (#9) : SignauxSelPanel n'appelle plus directement le focus ;
   // c'est toggleBucketKey dans le parent qui gère focus + sélection atomiquement.
@@ -187,6 +197,20 @@
    */
   export let hoveredSignalId: string | null = null;
   export let onHoverSignal: (id: string | null) => void = () => {};
+  /** Classement (spec 2026-11-08): per-signal class map + Steve reason codes. */
+  export let classementMap: ReadonlyMap<string, ClassementEntry> = new Map();
+  export let classementReasonCodes: ReasonCodeEntry[] = [];
+  export let classementInFlight: ReadonlySet<string> = new Set();
+  /** Global classement load failure (reason codes), shown as a caption. */
+  export let classementError: string | null = null;
+  /** Per-card write failures, keyed by classementKey: icon on the card. */
+  export let classementErrors: ReadonlyMap<string, string> = new Map();
+  let openClassementErrorKey: string | null = null;
+  export let onApplyClassement: (
+    node: GraphSignalNode,
+    nextClass: SignalClass,
+    reasonCode: string | null,
+  ) => void = () => {};
 
   /**
    * Focus the head button of a signal card. No-op when the card is absent
@@ -1029,15 +1053,15 @@
   <div class="sel-head">
     <span class="sel-kicker">Sélection</span>
     {#if selectedCity}
-      <button
-        type="button"
-        class="sel-clear"
-        on:click={onClear}
+      <IconButton
+        size="sm"
+        variant="ghost"
+        onclick={onClear}
         aria-label="Fermer la sélection"
+        title="Fermer la sélection"
       >
-        <X class="h-3.5 w-3.5" aria-hidden="true" />
-        Fermer
-      </button>
+        <X size={15} aria-hidden="true" />
+      </IconButton>
     {/if}
   </div>
 
@@ -1121,34 +1145,9 @@
          épinglé. L'actif épinglé = Ville OU Zone uniquement ; le lot s'ouvre
          dans son DRAWER (fiche ci-dessous), jamais un header « Lot actif ». -->
 
-    {#if detailError}
-      <div class="sel-alert">
-        <Alert tone="error" title="Signaux indisponibles" message={detailError} />
-        <button type="button" class="sel-retry" on:click={onRetryDetail}>
-          <RefreshCw class="h-3 w-3" aria-hidden="true" />
-          Réessayer
-        </button>
-      </div>
+    {#if classementError}
+      <p class="sel-classement-load-error" data-testid="classement-load-error">{classementError}</p>
     {/if}
-    {#if zonesError}
-      <div class="sel-alert">
-        <Alert tone="warning" title="Zones indisponibles" message={zonesError} />
-        <button type="button" class="sel-retry" on:click={onRetryGeo}>
-          <RefreshCw class="h-3 w-3" aria-hidden="true" />
-          Réessayer
-        </button>
-      </div>
-    {/if}
-    {#if lotsError}
-      <div class="sel-alert">
-        <Alert tone="warning" title="Lots indisponibles" message={lotsError} />
-        <button type="button" class="sel-retry" on:click={onRetryGeo}>
-          <RefreshCw class="h-3 w-3" aria-hidden="true" />
-          Réessayer
-        </button>
-      </div>
-    {/if}
-
     <div class="sel-buckets" bind:this={bucketsEl}>
       <!-- #8 : replié par défaut ; s'ouvre aussi via un lien croisé zone→signal -->
       <details class="sel-bucket" bind:open={signalsBucketOpen}>
@@ -1158,11 +1157,19 @@
           data-testid="signals-bucket-head"
         >
           <span class="sel-bucket-name">Signaux</span>
-          <!-- #6 : "–" pendant le chargement ; N/M quand la liste est restreinte
-               (zone active — 01KZGM07 item 2 — ou filtre subset). -->
-          <span class="rail-row-count">
-            {#if detailLoading}–{:else if detailError}n/d{:else if focusedZoneCode}{zoneScopedDetailNodes.length}/{totalSignalCount}{:else if signalIsFiltered}{filteredSignalCount}/{totalSignalCount}{:else}{totalSignalCount}{/if}
-          </span>
+          <!-- Échec : icône ! + menu « Recharger » en haut à droite (à la
+               place de « n/d ») ; rechargement : wheel ; succès : compteur
+               N/M quand la liste est restreinte (zone active — 01KZGM07
+               item 2 — ou filtre subset). -->
+          {#if detailLoading}
+            <BucketReloadAction loading testId="signaux" menuId="signaux-reload-menu" menuLabel="Actions Signaux" onRetry={onRetryDetail} />
+          {:else if detailError}
+            <BucketReloadAction error={detailError} testId="signaux" menuId="signaux-reload-menu" menuLabel="Actions Signaux" onRetry={onRetryDetail} />
+          {:else}
+            <span class="rail-row-count">
+              {#if focusedZoneCode}{zoneScopedDetailNodes.length}/{totalSignalCount}{:else if signalIsFiltered}{filteredSignalCount}/{totalSignalCount}{:else}{totalSignalCount}{/if}
+            </span>
+          {/if}
         </summary>
         <div class="sel-entities" bind:this={entityListEl}>
           {#if detailLoading}
@@ -1191,12 +1198,18 @@
               {#if key}
                 {@const nodeVisual = visual(selectionState, key)}
                 {@const stageLabel = signalStageLabel(node)}
+                {@const classementEntry = classementMap.get(classementKey(node.type, node.id, node.citySlug)) ?? EMPTY_CLASSEMENT_ENTRY}
+                {@const cardClassementKey = classementKey(node.type, node.id, node.citySlug)}
+                {@const cardClassementError = classementErrors.get(cardClassementKey)}
                 <!-- #86 — fiche : ancre de scroll (data-signal-node) + état
                      cross-survolé quand le viewer survole ce signal. Survoler
                      la fiche notifie le parent (→ le surlignage PDF pulse). -->
                 <div
                   class="sel-entity-bar"
                   class:sel-entity-bar--xhover={hoveredSignalId === node.id}
+                  class:sel-entity-bar--selected={nodeVisual.selected}
+                  class:sel-entity-bar--focused={nodeVisual.focused}
+                  class:sel-entity-bar--dimmed={nodeVisual.dimmed}
                   data-signal-node={node.id}
                   role="presentation"
                   on:mouseenter={() => onHoverSignal(node.id)}
@@ -1204,6 +1217,7 @@
                   on:focusin={() => onHoverSignal(node.id)}
                   on:focusout={() => onHoverSignal(null)}
                 >
+                  <div class="sel-entity-head-row">
                   <button
                     type="button"
                     class="sel-entity-head"
@@ -1236,6 +1250,37 @@
                       </span>
                     {/if}
                   </button>
+                  <span class="sel-entity-classement">
+                    <SignalClassementMenu
+                      classe={classementMap.get(classementKey(node.type, node.id, node.citySlug))?.classe ?? EMPTY_CLASSEMENT_ENTRY.classe}
+                      reasonCodes={classementReasonCodes}
+                      disabled={classementInFlight.has(classementKey(node.type, node.id, node.citySlug))}
+                      onApply={(nextClass, reasonCode) => onApplyClassement(node, nextClass, reasonCode)}
+                    />
+                  </span>
+                  {#if cardClassementError}
+                    <span class="sel-entity-classement-error">
+                      <button
+                        type="button"
+                        class="classement-error-icon"
+                        data-testid="classement-error-icon"
+                        title={cardClassementError}
+                        aria-label="Échec du classement — afficher le détail"
+                        on:click={() => { openClassementErrorKey = openClassementErrorKey === cardClassementKey ? null : cardClassementKey; }}
+                      >
+                        <TriangleAlert class="h-4 w-4" aria-hidden="true" />
+                      </button>
+                    </span>
+                  {/if}
+                  </div>
+                  {#if cardClassementError && openClassementErrorKey === cardClassementKey}
+                    <p class="classement-error-detail" data-testid="classement-error-detail">{cardClassementError}</p>
+                  {/if}
+                  {#if classementEntry.reasonCode}
+                    <div class="sel-entity-reason-row">
+                      <span class="classement-reason-chip" data-testid="classement-reason-chip" title={classementEntry.reasonCode}>{reasonEntryLabel(classementReasonCodes.find((entry) => entry.code === classementEntry.reasonCode) ?? { code: classementEntry.reasonCode })}</span>
+                    </div>
+                  {/if}
 
                   {#if nodeVisual.focused}
                     {@const evidence = signalEvidence(node)}
@@ -1423,9 +1468,17 @@
       <details class="sel-bucket" bind:open={reglementsBucketOpen}>
         <summary class="sel-bucket-head">
           <span class="sel-bucket-name">Règlement et Normes</span>
-          <!-- 01KZGM07 item 2 : N/M quand la liste est restreinte à la zone active. -->
-          <span class="rail-row-count" data-testid="reglements-bucket-count">
-            {#if detailLoading}–{:else if detailError}n/d{:else if focusedZoneCode}{zoneScopedReglements.length}/{reglements.length}{:else}{reglements.length}{/if}
+          <!-- Même patron que Signaux (même lecture détail) : icône ! +
+               menu « Recharger » sur échec, wheel pendant le rechargement,
+               compteur au succès (01KZGM07 item 2 : N/M en zone active). -->
+          <span data-testid="reglements-bucket-count">
+            {#if detailLoading}
+              <BucketReloadAction loading testId="reglements" menuId="reglements-reload-menu" menuLabel="Actions Règlement et Normes" onRetry={onRetryDetail} />
+            {:else if detailError}
+              <BucketReloadAction error={detailError} testId="reglements" menuId="reglements-reload-menu" menuLabel="Actions Règlement et Normes" onRetry={onRetryDetail} />
+            {:else}
+              <span class="rail-row-count">{#if focusedZoneCode}{zoneScopedReglements.length}/{reglements.length}{:else}{reglements.length}{/if}</span>
+            {/if}
           </span>
         </summary>
         <div class="sel-entities">
@@ -1601,22 +1654,27 @@
 
       <!-- #8 : replié par défaut ; s'ouvre aussi via le badge zone d'un lot -->
       <details class="sel-bucket" bind:open={zonesBucketOpen}>
-        <summary class="sel-bucket-head">
+        <summary class="sel-bucket-head" data-testid="zones-bucket-head">
           <span class="sel-bucket-name">Zones</span>
-          <!-- #6 : "–" pendant le chargement de la couche ZONES -->
-          <span class="rail-row-count">
-            {zonesLoading
-              ? "–"
-              : zonesError
-              ? "n/d"
-              : zonesUnavailableReason
-              ? "n/d"
-              : zonesResponse?.resolutionStatus === "fallback" && configuredZoneCount === 0
-              ? "fallback"
-              : zoneListFiltered
-              ? `${visibleZoneCount}/${configuredZoneCount}`
-              : configuredZoneCount}
-          </span>
+          <!-- Échec couche ZONES : icône ! + menu « Recharger » en haut à
+               droite (à la place de « n/d ») ; rechargement : wheel ;
+               succès : compteur. « n/d » subsiste pour le seul état non
+               configuré (zonesUnavailableReason, non rechargeable). -->
+          {#if zonesLoading}
+            <BucketReloadAction loading testId="zones" menuId="zones-reload-menu" menuLabel="Actions Zones" onRetry={onRetryGeo} />
+          {:else if zonesError}
+            <BucketReloadAction error={zonesError} testId="zones" menuId="zones-reload-menu" menuLabel="Actions Zones" onRetry={onRetryGeo} />
+          {:else}
+            <span class="rail-row-count">
+              {zonesUnavailableReason
+                ? "n/d"
+                : zonesResponse?.resolutionStatus === "fallback" && configuredZoneCount === 0
+                ? "fallback"
+                : zoneListFiltered
+                ? `${visibleZoneCount}/${configuredZoneCount}`
+                : configuredZoneCount}
+            </span>
+          {/if}
         </summary>
         <div class="sel-entities">
           {#if zonesLoading}
@@ -1627,7 +1685,6 @@
           {:else if zonesError}
             <div class="sel-loading">
               <span>Zones indisponibles.</span>
-              <button type="button" class="sel-retry sel-retry--inline" on:click={onRetryGeo}>Réessayer</button>
             </div>
           {:else if zonesUnavailableReason}
             <p class="sel-empty">{zonesUnavailableReason}</p>
@@ -1853,21 +1910,25 @@
       </details>
 
       <details class="sel-bucket" bind:open={lotsBucketOpen}>
-        <summary class="sel-bucket-head">
+        <summary class="sel-bucket-head" data-testid="lots-bucket-head">
           <span class="sel-bucket-name">Lots</span>
-          <!-- #6 : "–" pendant le chargement ; « N/M » quand le filtre lots
-               est actif (reste visible accordéon fermé — état persistant). -->
-          <span class="rail-row-count">
-            {lotsLoading
-              ? "–"
-              : lotsError
-              ? "n/d"
-              : lotsUnavailableReason
-              ? "n/d"
-              : lotFilterActive
-              ? `${formatNumber(lotMatchedCount)}/${formatNumber(lots.length)}`
-              : formatNumber(lotTotalCount)}
-          </span>
+          <!-- Même patron que Zones : icône ! + menu « Recharger » sur
+               échec, wheel pendant le rechargement, compteur au succès
+               (« N/M » quand le filtre lots est actif — reste visible
+               accordéon fermé, état persistant). -->
+          {#if lotsLoading}
+            <BucketReloadAction loading testId="lots" menuId="lots-reload-menu" menuLabel="Actions Lots" onRetry={onRetryGeo} />
+          {:else if lotsError}
+            <BucketReloadAction error={lotsError} testId="lots" menuId="lots-reload-menu" menuLabel="Actions Lots" onRetry={onRetryGeo} />
+          {:else}
+            <span class="rail-row-count">
+              {lotsUnavailableReason
+                ? "n/d"
+                : lotFilterActive
+                ? `${formatNumber(lotMatchedCount)}/${formatNumber(lots.length)}`
+                : formatNumber(lotTotalCount)}
+            </span>
+          {/if}
         </summary>
         <div class="sel-entities">
           {#if lotsLoading}
@@ -1878,7 +1939,6 @@
           {:else if lotsError}
             <div class="sel-loading">
               <span>Lots indisponibles.</span>
-              <button type="button" class="sel-retry sel-retry--inline" on:click={onRetryGeo}>Réessayer</button>
             </div>
           {:else if lotsUnavailableReason}
             <p class="sel-empty">{lotsUnavailableReason}</p>
@@ -2103,23 +2163,6 @@
     color: var(--st-semantic-text-muted, #94a3b8);
   }
 
-  .sel-clear {
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-    font-size: var(--signaux-fs-small);
-    padding: 0.2rem 0.5rem;
-    border: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
-    border-radius: var(--st-radius-sm, 4px);
-    background: transparent;
-    color: var(--st-semantic-text-secondary, #64748b);
-    cursor: pointer;
-  }
-
-  .sel-clear:hover {
-    background: var(--st-semantic-surface-subtle, #f8fafc);
-  }
-
   .sel-muted,
   .sel-empty {
     padding: 0.6rem 0.85rem;
@@ -2132,34 +2175,6 @@
     margin: 0.35rem 0.85rem;
     color: #92400e;
     font-size: var(--signaux-fs-small);
-  }
-
-  .sel-alert {
-    padding: 0.5rem 0.85rem 0;
-  }
-
-  /* « Réessayer » par couche : action neutre, discrète, sous l'alerte. */
-  .sel-retry {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    margin: 0.35rem 0 0;
-    padding: 0.2rem 0.5rem;
-    border: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
-    border-radius: var(--st-radius-sm, 4px);
-    background: transparent;
-    color: var(--st-semantic-text-secondary, #64748b);
-    font-size: var(--signaux-fs-small);
-    font-weight: 600;
-    cursor: pointer;
-  }
-
-  .sel-retry:hover {
-    background: var(--st-semantic-surface-subtle, #f8fafc);
-  }
-
-  .sel-retry--inline {
-    margin: 0;
   }
 
   .sel-city-head {
@@ -2302,11 +2317,93 @@
     border-bottom: none;
   }
 
+  /* Fond + liseré portés par la ligne entière : le bouton de classement,
+     posé dans la ligne, partage le même fond (aucune colonne séparée). */
+  .sel-entity-bar:hover:not(.sel-entity-bar--selected) {
+    background: var(--st-semantic-surface-subtle, #f8fafc);
+    box-shadow: inset 3px 0 0 var(--st-semantic-border-strong, #0ea5e9);
+  }
+
   /* #86 — cross-highlight : la fiche correspondant au surlignage PDF survolé
      prend un état SÉLECTIONNÉ visible (liseré + fond) sans ouvrir le détail. */
-  .sel-entity-bar--xhover {
+  .sel-entity-bar--xhover:not(.sel-entity-bar--selected) {
     background: var(--st-semantic-surface-selected, #e0f2fe);
     box-shadow: inset 3px 0 0 var(--st-semantic-border-strong, #0ea5e9);
+  }
+
+  .sel-entity-bar--selected {
+    background: #ecfdf5;
+    box-shadow: inset 3px 0 0 var(--st-semantic-border-strong, #0ea5e9);
+  }
+
+  .sel-entity-head-row {
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .sel-entity-head-row .sel-entity-head {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
+  }
+
+  .sel-entity-classement {
+    flex-shrink: 0;
+    padding: 0.34rem 0.6rem 0 0;
+  }
+
+  .sel-classement-load-error {
+    margin: 0;
+    padding: 0.34rem 0.85rem;
+    font-size: var(--signaux-fs-caption);
+    color: var(--st-semantic-feedback-warning, #b45309);
+  }
+
+  .sel-entity-classement-error {
+    flex-shrink: 0;
+    padding-top: 0.34rem;
+  }
+
+  .classement-error-icon {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.15rem;
+    border: none;
+    border-radius: var(--st-radius-sm, 4px);
+    background: transparent;
+    color: var(--st-semantic-feedback-warning, #b45309);
+    cursor: pointer;
+  }
+
+  .classement-error-icon:hover,
+  .classement-error-icon:focus-visible {
+    background: var(--st-semantic-action-secondaryHover, var(--st-semantic-surface-subtle));
+  }
+
+  .classement-error-detail {
+    margin: 0;
+    padding: 0 0.85rem 0.34rem;
+    font-size: var(--signaux-fs-caption);
+    color: var(--st-semantic-text-secondary, #475569);
+  }
+
+  .sel-entity-reason-row {
+    padding: 0 0.85rem 0.34rem;
+  }
+
+  .classement-reason-chip {
+    display: inline-block;
+    max-width: 100%;
+    padding: 0.05rem 0.45rem;
+    border-radius: 999px;
+    border: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
+    background: var(--st-semantic-surface-subtle, #f1f5f9);
+    color: var(--st-semantic-text-secondary, #475569);
+    font-size: var(--signaux-fs-caption);
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   /* #10 — layout colonne : titre complet sur plusieurs lignes + sous-titre dessous */
@@ -2325,23 +2422,24 @@
   }
 
   .sel-entity-head:hover {
-    background: var(--st-semantic-surface-subtle, #f8fafc);
+    background: transparent;
   }
 
   .sel-entity-head--selected {
-    background: #ecfdf5;
+    background: transparent;
     color: #0f766e;
     font-weight: 600;
   }
 
-  .sel-entity-head--focused {
-    outline: 1px solid #14b8a6;
-    outline-offset: -1px;
+  /* Le cadre de focus est porté par la ligne entière (icône incluse),
+     jamais par le seul bouton du titre. */
+  .sel-entity-head--focused,
+  .sel-entity-head:focus,
+  .sel-entity-head:focus-visible {
+    outline: none;
   }
 
-  .sel-entity-head--dimmed {
-    opacity: 0.5;
-  }
+  /* Pas de cadre sur la ligne sélectionnée : fond + liseré suffisent. */
 
   /* #10 — titre complet, sans troncature */
   .sel-entity-label {
