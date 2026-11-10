@@ -484,7 +484,7 @@ REQUEUE_KB = timeout $$(( $(REQUEUE_REQUEST_SECONDS) * 3 )) $(REQUEUE_K) --reque
 
 .PHONY: bundle-requeue-abandoned
 bundle-requeue-abandoned: ## Regenerate the self-contained requeue bundle (esbuild 0.25.12, pinned)
-	@docker run --rm -v "$(ROOT):/workspace" -w /workspace node:24-bookworm-slim \
+	@docker run --rm --user "$$(id -u):$$(id -g)" -e HOME=/tmp -e npm_config_cache=/tmp/npm-cache -v "$(ROOT):/workspace" -w /workspace node:24-bookworm-slim \
 	  sh -ceu 'npm install --no-save --ignore-scripts esbuild@0.25.12 >/dev/null 2>&1; node deploy/k8s/refresh-cronjobs/requeue-abandoned/bundle.mjs'
 
 .PHONY: guard-requeue
@@ -610,7 +610,7 @@ REQUEUE_STAGGER_AWK := $(OVERLAY)/requeue-stagger.awk
 
 .PHONY: bundle-requeue-recurrent
 bundle-requeue-recurrent: ## Regenerate the self-contained recurrent bundle (esbuild 0.25.12, pinned)
-	@docker run --rm -v "$(ROOT):/workspace" -w /workspace node:24-bookworm-slim \
+	@docker run --rm --user "$$(id -u):$$(id -g)" -e HOME=/tmp -e npm_config_cache=/tmp/npm-cache -v "$(ROOT):/workspace" -w /workspace node:24-bookworm-slim \
 	  sh -ceu 'npm install --no-save --ignore-scripts esbuild@0.25.12 >/dev/null 2>&1; node deploy/k8s/refresh-cronjobs/requeue-recurrent/bundle.mjs'
 
 .PHONY: render-requeue-recurrent
