@@ -9,12 +9,13 @@ export COMPOSE_PROJECT_NAME ?= radar-$(ENV)
 
 # UIDFIX-EX1: run bind-mount writer services as the host user so
 # container outputs stay host-owned (no sudo cleanup). Compose
-# interpolates UID/GID (docker-compose.dev/.test/.e2e.yml); raw
-# `docker run` calls with a workspace mount use DOCKER_RUN_USER
-# (Sentropic PRs #973/#987 pattern).
-export UID := $(shell id -u)
-export GID := $(shell id -g)
-DOCKER_RUN_USER := -u $(UID):$(GID) -e HOME=/tmp
+# interpolates UID/GID (docker-compose.dev/.test/.e2e.yml).
+# `?=` respects a caller-provided UID/GID (Sentropic PRs #973/#987
+# pattern). Raw `docker run` writers live in standalone scripts that
+# never include this Makefile, so they pass `--user "$(id -u):$(id -g)"
+# -e HOME=/tmp` literally at their call sites; no shared variable here.
+export UID ?= $(shell id -u)
+export GID ?= $(shell id -g)
 
 DOCKER_COMPOSE        ?= docker compose
 COMPOSE_FILES_BASE    := -f docker-compose.yml
