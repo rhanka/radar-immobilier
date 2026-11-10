@@ -126,12 +126,16 @@ COMPOSE_RUN_API_NODEPS := $(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm --no-d
 # UIDFIX-EX1: fresh named node_modules volumes are root-owned; hand them
 # to the host user once (one-off root run) before the UID-mapped api
 # service installs into them. Fast path: skip when already host-owned.
+# The host-side mkdir -p runs first so Docker does not create the
+# bind-mount points as root-owned empty stubs in the workspace.
 .PHONY: chown-test-node-modules
 chown-test-node-modules: ## Hand test named node_modules volumes to the host user
+	@mkdir -p node_modules api/node_modules
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm --no-deps -T -u 0:0 --entrypoint sh api -c '[ "$$(stat -c %u /workspace/node_modules)" = "$(UID)" ] || chown -R $(UID):$(GID) /workspace/node_modules /workspace/api/node_modules'
 
 .PHONY: chown-dev-node-modules
 chown-dev-node-modules: ## Hand dev named node_modules volumes to the host user
+	@mkdir -p node_modules api/node_modules ui/node_modules
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm --no-deps -T -u 0:0 --entrypoint sh api -c '[ "$$(stat -c %u /workspace/node_modules)" = "$(UID)" ] || chown -R $(UID):$(GID) /workspace/node_modules /workspace/api/node_modules'
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm --no-deps -T -u 0:0 --entrypoint sh ui -c '[ "$$(stat -c %u /workspace/ui/node_modules)" = "$(UID)" ] || chown -R $(UID):$(GID) /workspace/ui/node_modules'
 
