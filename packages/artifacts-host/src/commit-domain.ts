@@ -22,6 +22,9 @@ import { createArtifactReadMetadata } from "./read-metadata.js";
 import { replayLegacyDelete } from "./legacy-delete-replay.js";
 import type { GitModeDeps } from "./git-mode/compose.js";
 
+/** Read paths that reconcile a pending build on demand before serving (package contract, 0.2.25). */
+const RECONCILE_ON_DEMAND_PATHS: ReadonlySet<string> = new Set(["/live_status", "/git_publish", "/get"]);
+
 /**
  * A prepared publication must finalize within this window: past it, the
  * preparation sweeper reclaims the staged blobs and finalization is refused
@@ -83,6 +86,7 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
       [artifact.getStore()]);
   };
   const publicationRefs = createPostgresClaimGuardedRefs(store, createPostgresCommitExecutor(pool));
+  const { pendingBuilds, ...gitDeps } = options.gitMode ?? {};
   const app = createHttpArtifactApp({ profile, coordinator, mapHostError,
     ...(options.uploadPage ? { uploadPage: options.uploadPage } : {}),
     derivation: { algorithm: "radar-derive-idempotency-v1", derive(input) {
@@ -131,7 +135,7 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
       locks: { "artifact-lifecycle": [lock("artifacts", "id")], acl: [lock("artifact_access", "artifact_id")],
         "current-pointer": [lock("artifact_current", "artifact_id")] } },
     ...(options.publicationUrls ? { publicationUrls: options.publicationUrls } : {}),
-    ...options.gitMode,
+    ...gitDeps,
   });
   const execute: typeof app.execute = async (request, invocation: ArtifactInvocationContext) => {
     try {
@@ -190,6 +194,17 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
               if (!await reserveArtifactAttempt(pool, scope, invocation.actorId)) {
                 return rateLimitedOutcome(invocation.invocationId, command.operation);
               }
+            }
+          }
+          // On-demand pending-build reconciliation (0.2.25): a builder failure
+          // closes the job and the binding before the read paths serve, so a
+          // stuck `build_pending` never blocks the next git_publish. A
+          // reconcile outage never fails the request itself.
+          if (pendingBuilds && body?.artifactId && RECONCILE_ON_DEMAND_PATHS.has(request.path)) {
+            try {
+              await pendingBuilds.reconcileArtifact(body.artifactId);
+            } catch {
+              console.error(JSON.stringify({ kind: "artifacts.reconcile_unavailable", path: request.path }));
             }
           }
           return reads.project(request, () => app.execute(request, invocation));

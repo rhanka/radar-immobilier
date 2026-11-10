@@ -1,0 +1,38 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: radar-immobilier-preprod
+
+resources:
+  - job.yaml
+
+configMapGenerator:
+  - name: radar-refresh-requeue-abandoned-script
+    files:
+      - requeue-abandoned.bundle.mjs
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+patches:
+  # Preprod writes its docs bucket with radar-docs-s3-credentials (the
+  # radar-scrape-s3-credentials Secret does not exist in preprod) — the same
+  # divergence as the refresh CronJob preprod overlay.
+  - target:
+      kind: Job
+      name: radar-refresh-requeue-abandoned
+    patch: |
+      apiVersion: batch/v1
+      kind: Job
+      metadata:
+        name: radar-refresh-requeue-abandoned
+      spec:
+        template:
+          spec:
+            containers:
+              - name: requeue-abandoned
+                env:
+                  - name: SCRAPE_S3_ACCESS_KEY
+                    valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_ACCESS_KEY } }
+                  - name: SCRAPE_S3_SECRET_KEY
+                    valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_SECRET_KEY } }

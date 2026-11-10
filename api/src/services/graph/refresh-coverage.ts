@@ -47,6 +47,13 @@ export interface RefreshCoverageEntry {
   readonly updatedAt: string;
   /** Failed extraction attempts, successes excluded. */
   readonly failures: number;
+  /**
+   * Times this document has been requeued from `abandoned` (recurring or
+   * operator). Absent on ledgers written before the recurring requeue: read
+   * as 0. At `REQUEUE_MAX_REQUEUES` the document is never requeued again and
+   * carries `lastReason: "requeue-ceiling-exceeded"`.
+   */
+  readonly requeues?: number;
   /** Redacted reason code of the last failure. */
   readonly lastReason?: string;
   /** Source publication date, when the index exposes one. */
@@ -267,6 +274,95 @@ function patch(
   const timestamp = now().toISOString();
   return { ...ledger, updatedAt: timestamp,
     documents: { ...ledger.documents, [sha]: { ...mutate(existing), updatedAt: timestamp } } };
+}
+
+/** Reason stamped on a document that used up its requeue ceiling. */
+export const REQUEUE_CEILING_REASON = "requeue-ceiling-exceeded";
+/** Default requeue ceiling: a document gets at most this many second chances. */
+export const DEFAULT_MAX_REQUEUES = 2;
+
+export interface RequeueAbandonedRefreshOptions {
+  /**
+   * Only requeue documents whose last failure is strictly after this instant.
+   * The last-failure instant is the entry `updatedAt`: `failRefreshDocument`
+   * stamps it on every counted failure, and no other transition touches an
+   * `abandoned` entry. Absent means every `abandoned` document.
+   */
+  readonly since?: Date;
+  /**
+   * Only requeue documents whose last failure is at most this many days
+   * before `now` (recurring catch-up: very old stock is left alone).
+   * Absent means no maximum age.
+   */
+  readonly maxAgeDays?: number;
+  /** At most this many documents requeued from this ledger (per city). */
+  readonly maxPerCity?: number;
+  /**
+   * A document already requeued this many times without success stays
+   * `abandoned` and is stamped `requeue-ceiling-exceeded`. Defaults to
+   * `DEFAULT_MAX_REQUEUES`.
+   */
+  readonly maxRequeues?: number;
+  readonly now: () => Date;
+}
+
+/**
+ * Operator requeue: `abandoned` -> `pending`, failures reset, `lastReason`
+ * removed. `sourceId`, `representationKey`, `firstSeenAt` and `publishedAt`
+ * are carried over unchanged; entries in any other state are untouched.
+ * Pure and idempotent: a ledger with nothing (left) to requeue is returned
+ * unchanged (`changed: false`, same `updatedAt`).
+ */
+export function requeueAbandonedRefreshDocuments(
+  ledger: RefreshCoverageLedger,
+  options: RequeueAbandonedRefreshOptions,
+): { ledger: RefreshCoverageLedger; requeued: readonly string[]; exhausted: readonly string[]; changed: boolean } {
+  const sinceMs = options.since?.getTime();
+  const maxRequeues = options.maxRequeues ?? DEFAULT_MAX_REQUEUES;
+  const nowMs = options.now().getTime();
+  const oldestMs = options.maxAgeDays !== undefined ? nowMs - options.maxAgeDays * 86_400_000 : undefined;
+  const documents: Record<string, RefreshCoverageEntry> = { ...ledger.documents };
+  const exhausted: string[] = [];
+  const eligible: [string, RefreshCoverageEntry][] = [];
+  for (const [sha, entry] of Object.entries(ledger.documents)) {
+    if (entry.state !== "abandoned") continue;
+    if ((entry.requeues ?? 0) >= maxRequeues) {
+      // Ceiling reached: never requeue again, and say so on the entry itself
+      // (idempotent: an already-stamped entry is not rewritten).
+      if (entry.lastReason !== REQUEUE_CEILING_REASON) {
+        documents[sha] = { ...entry, lastReason: REQUEUE_CEILING_REASON };
+        exhausted.push(sha);
+      }
+      continue;
+    }
+    const failedAt = Date.parse(entry.updatedAt);
+    if (sinceMs !== undefined && (!Number.isFinite(failedAt) || failedAt <= sinceMs)) continue;
+    if (oldestMs !== undefined && (!Number.isFinite(failedAt) || failedAt < oldestMs)) continue;
+    eligible.push([sha, entry]);
+  }
+  // Deterministic selection when a ceiling applies: most recently failed
+  // first, then sha — a capped run always picks the same documents.
+  eligible.sort((a, b) => b[1].updatedAt.localeCompare(a[1].updatedAt) || a[0].localeCompare(b[0]));
+  const selected = options.maxPerCity !== undefined ? eligible.slice(0, options.maxPerCity) : eligible;
+  const requeued: string[] = [];
+  const timestamp = options.now().toISOString();
+  for (const [sha, entry] of selected) {
+    documents[sha] = {
+      state: "pending",
+      sourceId: entry.sourceId,
+      representationKey: entry.representationKey,
+      firstSeenAt: entry.firstSeenAt,
+      updatedAt: timestamp,
+      failures: 0,
+      requeues: (entry.requeues ?? 0) + 1,
+      ...(entry.publishedAt !== undefined ? { publishedAt: entry.publishedAt } : {}),
+    };
+    requeued.push(sha);
+  }
+  requeued.sort();
+  exhausted.sort();
+  if (requeued.length === 0 && exhausted.length === 0) return { ledger, requeued, exhausted, changed: false };
+  return { ledger: { ...ledger, updatedAt: timestamp, documents }, requeued, exhausted, changed: true };
 }
 
 /** Counts a sweep can report without re-reading every ledger. */
