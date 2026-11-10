@@ -148,6 +148,8 @@ export function createLiveHostEndpoints(input: {
     },
     async handoff(body: unknown): Promise<HostEndpointResponse> {
       if (!parseHandoffRequest || !acceptHandoff || !refusalOf || !input.keys.receiptKey) return UNAVAILABLE;
+      let jobId: string | undefined;
+      let artifactId: string | undefined;
       try {
         const accept = { scopeId: input.scopeId, builderKeys, receiptKey: input.keys.receiptKey, now };
         // Authenticate before decoding: a malformed envelope is refused by parseHandoffRequest at its first
@@ -159,13 +161,26 @@ export function createLiveHostEndpoints(input: {
         }
         const { handoff, files } = parseHandoffRequest(body as never) as { handoff: { claims: { artifactId: string; jobId: string } };
           files: unknown[] };
+        jobId = handoff.claims.jobId;
+        artifactId = handoff.claims.artifactId;
         const receipt = await acceptHandoff({ ...accept,
           ledger: ledger.ledger,
           view: (claims: HandoffClaims) => ledger.view(claims),
           publish: (claims: HandoffClaims, candidate: readonly CandidateFile[]) => ledger.publish(claims, candidate) } as never,
         handoff as never, files as never);
         return { status: 200, body: { v: 1, receipt } };
-      } catch (error) { return refusal(error); }
+      } catch (error) {
+        const response = refusal(error);
+        const refused = record(response.body) ? response.body : {};
+        const reason = typeof refused.reason === "string" ? refused.reason
+          : typeof refused.error === "string" ? refused.error : "unknown";
+        if (!jobId && record(body) && record(body.handoff) && record(body.handoff.claims)) {
+          jobId = typeof body.handoff.claims.jobId === "string" ? body.handoff.claims.jobId : undefined;
+          artifactId = typeof body.handoff.claims.artifactId === "string" ? body.handoff.claims.artifactId : undefined;
+        }
+        console.error(JSON.stringify({ kind: "artifacts.handoff_refused", reason, jobId, artifactId }));
+        return response;
+      }
     },
   };
 }
