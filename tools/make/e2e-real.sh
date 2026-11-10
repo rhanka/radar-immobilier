@@ -11,6 +11,9 @@ case "$env_name" in
   *) echo "[test-e2e] refused: ENV=$env_name is not a test-* environment (synthetic data only)" >&2; exit 2;;
 esac
 project="radar-${env_name}"
+# UIDFIX-EX1: compose interpolates UID/GID for the host-user mapping
+# (docker-compose.e2e.yml); bash sets UID but does not export it.
+export UID="$(id -u)" GID="$(id -g)"
 export COMPOSE_DISABLE_ENV_FILE=1
 unset COMPOSE_FILE COMPOSE_ENV_FILES COMPOSE_PROFILES
 compose=(docker compose --env-file /dev/null -p "$project" -f docker-compose.yml -f docker-compose.e2e.yml)
@@ -21,6 +24,9 @@ if [ "${1:-run}" = "down" ]; then
   exit 0
 fi
 mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}" tmp/e2e-real
+# UIDFIX-EX1: pre-create the named-volume mount points host-side so
+# Docker does not create them as root-owned stubs in the workspace.
+mkdir -p node_modules api/node_modules ui/node_modules packages/immo-mcp/node_modules
 exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
 until flock -w 30 8; do echo "[test-e2e] waiting for the Docker campaign lock"; done
 cleanup() {
@@ -33,7 +39,12 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 "${compose[@]}" build api ui
+"${compose[@]}" --profile e2e build e2e
 "${compose[@]}" up -d --wait postgres minio
+# UIDFIX-EX1: fresh named volumes are root-owned; hand them (and the
+# e2e state volume) to the host user once, as root, before the
+# UID-mapped runner installs into them.
+"${compose[@]}" --profile e2e run --rm -T -u 0:0 --entrypoint sh e2e -c 'chown -R '"$(id -u):$(id -g)"' /workspace/node_modules /workspace/api/node_modules /workspace/ui/node_modules /workspace/packages/immo-mcp/node_modules /e2e-state'
 "${compose[@]}" --profile e2e run --rm -T e2e prepare
 "${compose[@]}" up -d api ui
 "${compose[@]}" --profile e2e run --rm -T e2e run
