@@ -5,9 +5,8 @@
    *
    * Owner contract: when a section fails to load, its header shows an
    * exclamation trigger at the top right, in place of the counter (« n/d »
-   * removed). The trigger is the standard DS `IconButton` (`variant="ghost"`,
-   * `size="sm"` — same as the signal classement trigger) and opens a DS menu
-   * (`MenuPopover`) with a single « Recharger » action. While the
+   * removed). The trigger opens a standard DS menu (`MenuPopover` +
+   * `MenuTriggerButton`) with a single « Recharger » action. While the
    * reload runs, a spinning wheel replaces the exclamation. On success the
    * parent renders the counter again; on a new failure this trigger comes
    * back. DS components and DS tokens only.
@@ -15,6 +14,7 @@
   import { tick } from "svelte";
   import { IconButton, MenuPopover } from "@sentropic/design-system-svelte";
   import { LoaderCircle, TriangleAlert } from "@lucide/svelte";
+  import { openPanelMenuId } from "$lib/components/maps/panel-menu.js";
 
   export let error: string | null = null;
   export let loading = false;
@@ -27,6 +27,9 @@
   export let menuLabel: string;
 
   let menuOpen = false;
+  $: panelMenuId = `reload-${menuId}`;
+  $: if (menuOpen && $openPanelMenuId !== null && $openPanelMenuId !== panelMenuId) menuOpen = false;
+  let placement: "bottom-end" | "top-end" = "bottom-end";
   let anchor: HTMLElement | null = null;
   let menuList: HTMLElement | null = null;
 
@@ -44,12 +47,21 @@
   }
 
   function openMenu(): void {
+    const rect = anchor?.getBoundingClientRect();
+    if (rect) {
+      const menuHeight = 48;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      placement = spaceBelow < menuHeight + 16 && spaceAbove > spaceBelow ? "top-end" : "bottom-end";
+    }
+    openPanelMenuId.set(panelMenuId);
     menuOpen = true;
     void tick().then(() => focusFirstItem());
   }
 
   function closeMenu(restoreFocus = false): void {
     menuOpen = false;
+    openPanelMenuId.update((v) => (v === panelMenuId ? null : v));
     if (restoreFocus) focusTrigger();
   }
 
@@ -125,8 +137,6 @@
     role="presentation"
     on:click|stopPropagation|preventDefault
   >
-    <!-- Standard DS icon button (ghost: transparent, light hover darkening,
-         no border) — same component/size as the signal classement trigger. -->
     <IconButton
       aria-label="Rechargement impossible, ouvrir les actions"
       aria-controls={menuId}
@@ -147,7 +157,7 @@
     id={menuId}
     bind:open={menuOpen}
     trigger={anchor}
-    placement="bottom-end"
+    placement={placement}
     label={menuLabel}
     closeOnEscape={false}
   >
@@ -180,14 +190,24 @@
     flex-shrink: 0;
   }
 
+  /* Parent .sel-bucket-head is already surface-subtle (= DS ghost hover), so the DS next-level hover token is used here. */
+  .reload-anchor :global(.st-iconButton:hover:not(:disabled)) {
+    background: var(--st-semantic-action-secondaryHover);
+  }
+
   .reload-icon {
     display: inline-flex;
     color: var(--st-semantic-warning-text);
   }
 
+  /* Same slot as the sm IconButton it replaces: identical box, centred. */
   .reload-spinner {
     display: inline-flex;
     flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: var(--st-component-iconButton-smSize, 2rem);
+    height: var(--st-component-iconButton-smSize, 2rem);
     color: var(--st-semantic-text-muted);
     animation: reload-spin 1s linear infinite;
   }
@@ -220,7 +240,7 @@
     background: transparent;
     color: var(--st-semantic-text-primary);
     font-size: var(--st-font-size-sm, 0.875rem);
-    font-weight: 600;
+    font-weight: 400;
     text-align: left;
     cursor: pointer;
   }
@@ -228,5 +248,6 @@
   .reload-menu__item:hover,
   .reload-menu__item:focus-visible {
     background: var(--st-semantic-surface-subtle);
+    outline: none;
   }
 </style>
