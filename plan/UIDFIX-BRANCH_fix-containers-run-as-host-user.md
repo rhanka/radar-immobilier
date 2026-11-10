@@ -25,6 +25,8 @@ Sentropic PRs #973 and #987 (`fix/compose-host-user`,
   - `plan/UIDFIX-BRANCH_fix-containers-run-as-host-user.md`
   - `LANE-REPORT.md`
   - `e2e/Dockerfile` (new: Chromium system deps for the UID-mapped runner)
+  - `api/Dockerfile.dev` (new: poppler-utils baked for the UID-mapped
+    dev/test api; no application code touched)
 - **Forbidden Paths (must not change in this branch)**:
   - `rules/**`
   - `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`
