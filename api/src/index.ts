@@ -254,7 +254,13 @@ const app = createApp({
   auth,
   tem,
   ops: (() => {
-    const ops = resolveOpsConfig(config);
+    const ops = resolveOpsConfig(config, auth.bearerAudiences);
+    if (config.OPS_RECIPIENTS_AUDIENCE && !ops.recipientsAudience) {
+      logger.error(
+        { event: "ops_recipients_audience_overlap" },
+        "OPS_RECIPIENTS_AUDIENCE overlaps a user bearer audience; recipients route stays closed (503)",
+      );
+    }
     return {
       db: dbHandle.db,
       issuer: auth.issuer,
