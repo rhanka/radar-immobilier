@@ -188,6 +188,8 @@ describe("git mode composition", () => {
     await service.execute("git_attach", { artifactId: "a", idempotencyKey: "k", repoId: "radar-immobilier",
       branch: "artifact/p/x/app-y", baseRef: "preview" }, invocation);
     expect(seen.at(-1)).toMatchObject({ branch: "artifact/p/x/app-y", baseRef: "preview" });
+    await expect(service.execute("git_attach", { artifactId: "a", idempotencyKey: "k", repoId: "autre" }, invocation))
+      .rejects.toMatchObject({ kind: "git_repo_not_registered" });
     await service.execute("git_attach", { artifactId: "a", idempotencyKey: "k", pause: true }, invocation);
     expect(seen.at(-1)).not.toHaveProperty("repoId");
     expect(seen.at(-1)).not.toHaveProperty("baseRef");
