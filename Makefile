@@ -135,11 +135,13 @@ COMPOSE_RUN_API_NODEPS := $(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm --no-d
 .PHONY: chown-test-node-modules
 chown-test-node-modules: ## Hand test named node_modules volumes to the host user
 	@mkdir -p node_modules api/node_modules
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) build api
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm --no-deps -T -u 0:0 --entrypoint sh api -c '[ "$$(stat -c %u /workspace/node_modules)" = "$(UID)" ] || chown -R $(UID):$(GID) /workspace/node_modules /workspace/api/node_modules; rm -rf /workspace/ui/node_modules /workspace/packages/*/node_modules'
 
 .PHONY: chown-dev-node-modules
 chown-dev-node-modules: ## Hand dev named node_modules volumes to the host user
 	@mkdir -p node_modules api/node_modules ui/node_modules
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) build api
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm --no-deps -T -u 0:0 --entrypoint sh api -c '[ "$$(stat -c %u /workspace/node_modules)" = "$(UID)" ] || chown -R $(UID):$(GID) /workspace/node_modules /workspace/api/node_modules'
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm --no-deps -T -u 0:0 --entrypoint sh ui -c '[ "$$(stat -c %u /workspace/ui/node_modules)" = "$(UID)" ] || chown -R $(UID):$(GID) /workspace/ui/node_modules'
 
@@ -168,7 +170,7 @@ format: ## Auto-format (prettier / dprint, defined later)
 	@echo "[format] no formatter wired yet — placeholder for a later branch"
 
 .PHONY: build
-build: ## Build all workspaces
+build: chown-dev-node-modules ## Build all workspaces
 	$(COMPOSE_RUN_API_NODEPS) npm run build --workspace=api
 	$(COMPOSE_RUN_API_NODEPS) npm run build --workspace=ui
 
@@ -273,7 +275,7 @@ db-generate: ## Generate a Drizzle migration from the schema
 	$(COMPOSE_RUN_API_NODEPS) npm run db:generate --workspace=api
 
 .PHONY: db-migrate
-db-migrate: ## Run Drizzle migrations against the running postgres
+db-migrate: chown-dev-node-modules ## Run Drizzle migrations against the running postgres
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm -T api npm run db:migrate --workspace=api
 
 .PHONY: db-backup
@@ -357,7 +359,7 @@ s3-ls: ## List keys under PREFIX=<prefix> (raw S3 ListObjectsV2 XML from s3mock)
 # ─────────────────────────────────────────────────────────────────────
 
 .PHONY: worker-live
-worker-live: ## Live-scrape config-only PV cities → configured object storage (CITIES="a b", LIMIT=n)
+worker-live: chown-dev-node-modules ## Live-scrape config-only PV cities → configured object storage (CITIES="a b", LIMIT=n)
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm -T \
 	  -e LIVE_SCRAPE_LIMIT=$(LIMIT) api \
 	  npx tsx src/scripts/worker-live.ts $(CITIES)

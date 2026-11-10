@@ -107,12 +107,15 @@ Unchanged, with reason:
 ## Known impact
 
 - The dev/test `api` entrypoint can no longer `apt-get install
-  poppler-utils` (needs root). It degrades as designed: the app
-  starts without `pdftotext`, so live-scrape PDF text extraction in
-  dev/test stacks yields empty text until a dev image bakes
-  poppler-utils (production `api/Dockerfile` already does). The API
-  test suite does not depend on the binary (fixtures carry the
-  extracted text; full suite green above).
+  poppler-utils` (needs root). Fixed by baking it: `api/Dockerfile.dev`
+  (new) builds `radar-immobilier-api-dev` from the stock node image +
+  `poppler-utils util-linux`, wired via `build:` in
+  `docker-compose.dev.yml` / `docker-compose.test.yml`; the chown
+  targets build it before any `run`. CI run 2 confirmed the two
+  poppler tests (`pdf-first-page`, `isPdftotextAvailable` preflight)
+  are the only consumers and now find the binary on PATH. The
+  entrypoint apt-get fallback stays for stock-image use and skips
+  itself when the binary is present.
 - Existing root-owned named volumes on other checkouts keep working:
   the chown targets hand them to the host user on the next
   `make install` / `make test-api` / `make typecheck`.
@@ -129,4 +132,17 @@ Unchanged, with reason:
 
 ## CI
 
-- Status: recorded after the report commit is pushed (final head).
+- Run 1 (head `3426d3d2`): Real-stack e2e PASS (4m05s), Branch policy
+  PASS, Quality gates FAIL at step `Test` — `npm ci` EACCES removing
+  `ui/node_modules/@sentropic`, a bind tree left by the dev-stack
+  install step (root-run history masked this; now blocked as the
+  host user). Fixed in `4b450bfd` (root pre-clean of bind
+  `node_modules` trees in `chown-test-node-modules`).
+- Run 2 (head `4b450bfd`): Real-stack e2e PASS (4m14s), Quality gates
+  FAIL at step `Test` with only the two poppler tests red
+  (`pdf-first-page.test.ts`,
+  `reglements-urbanisme-valleyfield.test.ts` preflight): `pdftotext`
+  missing because the entrypoint apt-get needs root. API (420),
+  UI (137) and other workspace suites all passed. Fixed by
+  `api/Dockerfile.dev` (this head).
+- Final status: recorded after this head's CI completes.

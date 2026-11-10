@@ -30,7 +30,12 @@ services:
     # UIDFIX-EX1: run as the host user so bind-mounted outputs stay
     # host-owned (Sentropic PRs #973/#987 pattern).
     user: "${UID:-1000}:${GID:-1000}"
-    image: node:24-bookworm-slim
+    # UIDFIX-EX1: poppler-utils baked in (api/Dockerfile.dev); the
+    # entrypoint apt-get fallback needs root and no longer applies.
+    build:
+      context: .
+      dockerfile: api/Dockerfile.dev
+    image: radar-immobilier-api-dev:${API_VERSION:-local}
     command: sh -c "npm run dev --workspace=api"
     ports:
       - "${API_PORT:-8803}:3000"
