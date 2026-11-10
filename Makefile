@@ -151,7 +151,7 @@ typecheck: chown-dev-node-modules ## TypeScript typecheck across the workspace
 	$(COMPOSE_RUN_API_NODEPS) npm run typecheck --workspaces --if-present
 
 .PHONY: lint
-lint: ## Lint across the workspace (ESLint flat config)
+lint: chown-dev-node-modules ## Lint across the workspace (ESLint flat config)
 	$(COMPOSE_RUN_API_NODEPS) npx eslint .
 
 .PHONY: audit
@@ -159,11 +159,11 @@ audit: ## Run npm audit gate (fails on critical or high vulnerabilities)
 	npm audit --audit-level=critical
 
 .PHONY: audit-security
-audit-security: ## Run HIGH/CRITICAL audit gate with expiring register exceptions
+audit-security: chown-dev-node-modules ## Run HIGH/CRITICAL audit gate with expiring register exceptions
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm --no-deps -T --entrypoint node api tools/security/audit-gate.mjs
 
 .PHONY: test-audit-security
-test-audit-security: ## Test audit matching and expiry without network access
+test-audit-security: chown-dev-node-modules ## Test audit matching and expiry without network access
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm --no-deps -T --entrypoint node api --test --test-concurrency=1 tools/security/*.test.mjs
 
 .PHONY: format
@@ -176,7 +176,7 @@ build: chown-dev-node-modules ## Build all workspaces
 	$(COMPOSE_RUN_API_NODEPS) npm run build --workspace=ui
 
 .PHONY: build-ui-artifact
-build-ui-artifact: ## Build the UI for artifact publication (named reader-op transport, relay basemap, /__app API base)
+build-ui-artifact: chown-dev-node-modules ## Build the UI for artifact publication (named reader-op transport, relay basemap, /__app API base)
 	# NOTE: the artifact variables live in ONE place, the root `build:artifact`
 	# script named by sentropic.artifact.json (G0 v3 §4.1), which every
 	# executor (caller, CI, sandbox) runs. `make build` is untouched.
@@ -241,7 +241,7 @@ test-api: chown-test-node-modules ## Run API tests (SCOPE=<file> for scoped runs
 	  npm run test --workspace=api $(if $(SCOPE),-- $(SCOPE),)"
 
 .PHONY: test-ui
-test-ui: ## Run UI unit tests (SCOPE=<file> for scoped runs)
+test-ui: chown-dev-node-modules ## Run UI unit tests (SCOPE=<file> for scoped runs)
 	$(COMPOSE_RUN_API_NODEPS) npm run test --workspace=ui $(if $(SCOPE),-- $(SCOPE),)
 
 .PHONY: test-immo-mcp
@@ -272,7 +272,7 @@ db-init: ## Bring up postgres and apply migrations
 	@$(MAKE) db-migrate ENV=$(ENV)
 
 .PHONY: db-generate
-db-generate: ## Generate a Drizzle migration from the schema
+db-generate: chown-dev-node-modules ## Generate a Drizzle migration from the schema
 	$(COMPOSE_RUN_API_NODEPS) npm run db:generate --workspace=api
 
 .PHONY: db-migrate
@@ -370,7 +370,7 @@ worker-live: chown-dev-node-modules ## Live-scrape config-only PV cities → con
 # ─────────────────────────────────────────────────────────────────────
 
 .PHONY: fixture-promote
-fixture-promote: ## Promote an S3/local PV capture to a golden fixture (CITY, INDEX_URL, INDEX_HTML, PV_URL, PV_TEXT[, OUT, STDOUT=1])
+fixture-promote: chown-dev-node-modules ## Promote an S3/local PV capture to a golden fixture (CITY, INDEX_URL, INDEX_HTML, PV_URL, PV_TEXT[, OUT, STDOUT=1])
 	$(COMPOSE_RUN_API_NODEPS) \
 	  -e CITY="$(CITY)" -e CITY_LABEL="$(CITY_LABEL)" \
 	  -e INDEX_URL="$(INDEX_URL)" -e INDEX_HTML="$(INDEX_HTML)" \
