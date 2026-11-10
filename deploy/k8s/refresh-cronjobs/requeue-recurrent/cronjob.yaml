@@ -57,6 +57,15 @@ spec:
       backoffLimit: 0
       activeDeadlineSeconds: 1800
       ttlSecondsAfterFinished: 86400
+      # Rétention du pod en échec : FailJob sur code non nul
+      # (backoffLimit: 0), pod terminé lisible jusqu'à ttlSecondsAfterFinished
+      # (86400 s ici, plancher commun 21600 s). Idem radar-refresh-pv.
+      podFailurePolicy:
+        rules:
+          - action: FailJob
+            onExitCodes:
+              operator: NotIn
+              values: [0]
       template:
         metadata:
           labels:
