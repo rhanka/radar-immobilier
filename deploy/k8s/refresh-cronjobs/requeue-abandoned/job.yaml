@@ -59,7 +59,8 @@ spec:
               # It lives in this shell block, not in env values: a `--since`
               # date or a `-` sentinel in a YAML env value is not a string.
               args="REQUEUE-ARGS-SET-BY-RENDER"
-              case " $args " in *" REQUEUE-ARGS-SET-BY-RENDER "*) echo "unrendered requeue arguments" >&2; exit 1;; esac
+              marker="REQUEUE-ARGS-SET-""BY-RENDER"
+              case " $args " in *" $marker "*) echo "unrendered requeue arguments" >&2; exit 1;; esac
               # Same lock as a refresh pass, non-blocking: refuse, never race.
               # A real run HOLDS the lock for its whole duration. A dry run
               # only CHECKS it (then releases): it writes nothing, and holding
