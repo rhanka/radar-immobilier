@@ -1,0 +1,160 @@
+# Recurring catch-up of the `abandoned` refresh-coverage stock.
+# CronJob `radar-refresh-requeue-abandoned`, daily. One run:
+#   1. seat check — minimal llm-mesh probe of the refresh cascade
+#      (api/src/scripts/refresh-requeue-recurrent.ts; llm-mesh 0.19.2 has
+#      no quota/availability API, so the probe is one tiny generation);
+#   2. if a seat answers, requeue `abandoned` -> `pending` under the
+#      REQUEUE_* ceilings (audit trace + backups in S3, as the one-off Job);
+#   3. nothing else — the regular radar-refresh-pv passes process the
+#      requeued pending entries.
+# If no seat answers the run logs a structured `decision: "skip"` line and
+# exits 0. Safety: `concurrencyPolicy: Forbid` (never two requeues at
+# once) AND the shared flock `/keyring/runtime/.refresh.lock` (never a
+# requeue racing a refresh pass); `backoffLimit: 0` (no retry that would
+# burn attempts on a dry seat — the next daily run is the retry).
+#
+# Schedule (UTC): prod `30 3 * * *`, preprod `30 4 * * *` (overlay patch).
+# `radar-refresh-pv` starts on the hour (prod 5,11,17,23; preprod
+# 0,6,12,18); minute 30 keeps every requeue start >= 30 min from every
+# refresh start and 60 min from the other environment's requeue —
+# above the 15 min minimum of the 2026-10-09 RWO incident rule
+# (refresh-018.mk REFRESH_STAGGER_MIN_MINUTES, deploy/ci/README.md).
+# `verify-renders` checks these gaps on the rendered overlays.
+#
+# DISARMED by default: this CronJob is applied ONLY by the CD steps gated
+# on REFRESH_REQUEUE_CRONJOB_PREPROD_ENABLED /
+# REFRESH_REQUEUE_CRONJOB_PROD_ENABLED (like REFRESH_CRONJOB_PROD_ENABLED
+# for radar-refresh-pv). Merging never arms it.
+# Ad hoc run, once applied: `kubectl -n <ns> create job
+# radar-refresh-requeue-abandoned-adhoc-01 --from=cronjob/radar-refresh-requeue-abandoned`
+# (or `make -f deploy/k8s/refresh-cronjobs/refresh-018.mk
+# trigger-requeue-recurrent ENV=preprod|prod`).
+#
+# The script arrives as a self-contained esbuild bundle mounted from a
+# ConfigMap (same pattern as the one-off requeue Job): it runs on the
+# frozen release image and resolves the image's own node_modules
+# (@aws-sdk/client-s3, @sentropic/llm-mesh-refresh, zod) from /workspace.
+# From the next release on, `dist/scripts/refresh-requeue-recurrent.js`
+# in the image is the same code (api/Dockerfile entrypoint).
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: radar-refresh-requeue-abandoned
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/component: refresh-requeue-abandoned
+spec:
+  suspend: false
+  schedule: "30 3 * * *"
+  timeZone: "Etc/UTC"
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 600
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      activeDeadlineSeconds: 1800
+      ttlSecondsAfterFinished: 86400
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: radar-immobilier
+            app.kubernetes.io/component: refresh-requeue-abandoned
+        spec:
+          restartPolicy: Never
+          terminationGracePeriodSeconds: 60
+          serviceAccountName: radar-app
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+            runAsGroup: 1001
+            fsGroup: 1001
+            seccompProfile: { type: RuntimeDefault }
+          initContainers:
+            - name: seed-keyring-once
+              image: ghcr.io/rhanka/radar-api:PINNED-BY-CI-AT-RELEASE-DO-NOT-APPLY-UNEDITED
+              imagePullPolicy: IfNotPresent
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities: { drop: ["ALL"] }
+              command:
+                - /bin/sh
+                - -ceu
+                - |
+                  mkdir -p /keyring/runtime
+                  flock -x /keyring/runtime/.bootstrap.lock -c '
+                    if [ ! -f /keyring/runtime/.key ]; then
+                      cp -a /bootstrap/. /keyring/runtime/
+                      chmod 0700 /keyring/runtime
+                      chmod 0600 /keyring/runtime/.key /keyring/runtime/*.json
+                    fi
+                  '
+              resources:
+                requests: { cpu: 5m, memory: 16Mi }
+                limits: { cpu: 50m, memory: 64Mi }
+              volumeMounts:
+                - { name: keyring, mountPath: /keyring }
+                - { name: keyring-bootstrap, mountPath: /bootstrap, readOnly: true }
+          containers:
+            - name: requeue-recurrent
+              image: ghcr.io/rhanka/radar-api:PINNED-BY-CI-AT-RELEASE-DO-NOT-APPLY-UNEDITED
+              imagePullPolicy: IfNotPresent
+              workingDir: /workspace
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities: { drop: ["ALL"] }
+              command: ["/usr/bin/flock", "-n", "/keyring/runtime/.refresh.lock", "node", "/workspace/requeue-recurrent.bundle.mjs"]
+              env:
+                - name: SCRAPE_S3_ENDPOINT
+                  valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_ENDPOINT } }
+                - name: SCRAPE_S3_BUCKET
+                  valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_BUCKET } }
+                - name: SCRAPE_S3_REGION
+                  valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_REGION } }
+                - name: SCRAPE_S3_FORCE_PATH_STYLE
+                  valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_FORCE_PATH_STYLE } }
+                - name: SCRAPE_S3_ACCESS_KEY
+                  valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ACCESS_KEY } }
+                - name: SCRAPE_S3_SECRET_KEY
+                  valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_SECRET_KEY } }
+                # Refresh cascade identity for the seat probe: same models
+                # and keyring as radar-refresh-pv (34-refresh-cronjob.yaml).
+                - { name: REFRESH_PROVIDER, value: "openai" }
+                - { name: REFRESH_MODEL, value: "gpt-6-astra" }
+                - { name: REFRESH_REASONING_EFFORT, value: "medium" }
+                - { name: REFRESH_FALLBACK_PROVIDER, value: "gemini" }
+                - { name: REFRESH_FALLBACK_MODEL, value: "gemini-3.8-flash" }
+                - { name: REFRESH_FALLBACK_REASONING_EFFORT, value: "low" }
+                - { name: SENTROPIC_LLM_MESH_KEYRING_DIR, value: "/keyring/runtime" }
+                - name: REFRESH_PRINCIPAL_REF
+                  valueFrom: { secretKeyRef: { name: radar-refresh-runtime, key: REFRESH_PRINCIPAL_REF } }
+                - name: REFRESH_OWNER_SCOPE_REF
+                  valueFrom: { secretKeyRef: { name: radar-refresh-runtime, key: REFRESH_OWNER_SCOPE_REF } }
+                # Recurring catch-up ceilings (see refresh-requeue-recurrent.ts).
+                - { name: REQUEUE_MAX_AGE_DAYS, value: "90" }
+                - { name: REQUEUE_MAX_PER_RUN, value: "50" }
+                - { name: REQUEUE_MAX_PER_CITY, value: "5" }
+                - { name: REQUEUE_MAX_REQUEUES, value: "2" }
+                - { name: REQUEUE_DRY_RUN, value: "0" }
+              resources:
+                requests: { cpu: 50m, memory: 256Mi }
+                limits: { cpu: 500m, memory: 512Mi }
+              volumeMounts:
+                - { name: keyring, mountPath: /keyring }
+                - { name: requeue-script, mountPath: /workspace/requeue-recurrent.bundle.mjs, subPath: requeue-recurrent.bundle.mjs, readOnly: true }
+                - { name: scratch, mountPath: /tmp }
+          volumes:
+            - name: keyring
+              persistentVolumeClaim: { claimName: radar-refresh-keyring }
+            - name: keyring-bootstrap
+              secret: { secretName: radar-refresh-keyring-bootstrap, defaultMode: 0440 }
+            - name: requeue-script
+              configMap:
+                name: radar-refresh-requeue-recurrent-script
+                defaultMode: 0444
+            - name: scratch
+              emptyDir: { sizeLimit: 64Mi }
