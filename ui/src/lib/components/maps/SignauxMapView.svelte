@@ -1883,8 +1883,10 @@
       // clic carte (handleLotClick) ; les autres kinds gardent l'exclusif géo
       // par défaut (zone+lot).
       if (!selectionState.selectedKeys.has(key)) {
+        const clickedKind = parseKey(key)?.kind;
+        // Une seule carte de signal sélectionnée à la fois (exclusif ENTRE signaux).
         const exclusiveKinds: readonly BucketKind[] | undefined =
-          parseKey(key)?.kind === "lot" ? ["lot"] : undefined;
+          clickedKind === "lot" ? ["lot"] : clickedKind === "signal" ? ["signal"] : undefined;
         selectionState = toggleExclusiveSelection(selectionState, key, exclusiveKinds);
       }
       selectionState = setFocus(selectionState, key);
