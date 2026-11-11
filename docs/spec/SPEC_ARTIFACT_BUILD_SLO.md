@@ -141,7 +141,8 @@ fails acceptance even if p95 passes.
 
 S6 is the owner requirement of §1.1 expressed end to end. The phase
 maxima above are **standalone ceilings**: they bound a phase measured
-on its own, and their sum (120 s) is *not* the S6 budget. S6 carries
+on its own, and their sums (85 s of p95 targets, 175 s of maxima) are
+*not* the S6 budget. S6 carries
 its own joint allocation below, which every phase on the S6 path must
 fit *in that run*. No phase on that path performs a network dependency
 install (§3.3).
@@ -167,7 +168,8 @@ joint maxima leaves 5 s of unallocated margin under the 60 s hard
 maximum. If a phase cannot fit its joint budget in measurement, the
 fix is to make the phase faster or overlap it explicitly (with the
 overlap measured from the §5.6 events) — never to raise S6 above
-60 s.
+60 s. This same joint allocation judges S6 in both cases (Warm and
+Cold-known, §7.1 and §7.2); no separate, looser cold allocation exists.
 
 Notes:
 
@@ -245,8 +247,8 @@ full dependency install. When a publish/start references a
 
 ## 4. Measured baseline — 2026-11-10/11 (facts)
 
-Sections §4.2–§4.4 and §4.6 are `[FACT]`, measured in preprod on
-2026-11-10/11 with the source named inline. §4.1 is
+Sections §4.2–§4.4 are `[FACT]`, measured in preprod on
+2026-11-10/11 with the source named inline. §4.1 and §4.6 are
 `source-gap` / `unverified` (see its header). It is the gap this spec
 exists to close: the current system does not meet a single SLO of §3,
 and its dominant failure mode is silence, not slowness.
@@ -351,33 +353,38 @@ Sources: `RECONCILE-REPORT.md`, `DISPATCH-REPORT.md`,
 | S6 end to end < 60 s | Not attainable: every phase above blocks it |
 | §3.4 zero silent failures | Violated: fire-and-forget dispatch, swallowed `catch {}`, pre-persist failures with no job/failure/log row |
 
-### 4.6 Fresh artifact still `REVIVING` — 2026-11-11 06:25–07:15Z
+### 4.6 Fresh artifact still `REVIVING` — `source-gap` / `unverified`
 
-Source: `LIVE-DISPATCH-REPORT.md` (mechanism proven there, §4.2) and
-the conductor observation window 2026-11-11 06:25–07:15Z in preprod.
+Status: `source-gap` / `unverified`. The mechanism below is proven in
+`LIVE-DISPATCH-REPORT.md` (§4.2), but no traceable source for this
+specific observation is retained: a recursive search of the cited
+artefact-focus reports finds no occurrence of `50b3866d`, `06:25` or
+`07:15` for this artifact or window, and that report covers only
+05:10–05:35Z. The account below is a conductor-relayed observation
+(2026-11-11 06:25–07:15Z, preprod) kept only as an unverified
+indication until a dated observation report is joined; it must not
+be cited as `[FACT]` and does not extend the §4.5 baseline.
 
-- `[FACT]` A fresh artifact (`50b3866d…`) created in that window
-  stayed in phase `REVIVING` for the full **50 minutes** of the
-  window (06:25–07:15Z), with `podUid=null` throughout.
-- `[FACT]` No builder pod was created for it, and its live start was
-  **never dispatched** to the builder: no draft staging, no reconcile
-  POST, no builder-side trace — the same fire-and-forget dispatch
-  failure proven in §4.2, reproduced on a fresh artifact after the
-  2026-11-11 04:39Z/04:49Z restarts.
-- `[FACT]` Nothing re-drove the intent during those 50 minutes: no
-  scheduler, tick, outbox or lease scanner picked the `REVIVING`
-  record up (§4.2), and no typed failure or structured log line
-  surfaced to the caller.
-- Baseline consequence: S1 and S6 remain at "never reached `LIVE`"
-  (§4.5) as of 2026-11-11 07:15Z; the §5.4 re-drive and typed-log
-  requirements are the blocking fix, ahead of any duration tuning.
+- `[UNVERIFIED]` A fresh artifact (`50b3866d…`) created in that window
+  reportedly stayed in phase `REVIVING` for the full **50 minutes**
+  of the window (06:25–07:15Z), with `podUid=null` throughout.
+- `[UNVERIFIED]` Reportedly no builder pod was created for it and its
+  live start was never dispatched to the builder — consistent with
+  the fire-and-forget dispatch failure proven in §4.2.
+- `[UNVERIFIED]` Reportedly nothing re-drove the intent during those
+  50 minutes and no typed failure or structured log line surfaced.
+- Consequence if confirmed: S1 and S6 would remain at "never reached
+  `LIVE`" (§4.5) as of 2026-11-11 07:15Z; the §5.4 re-drive and
+  typed-log requirements stay the blocking fix regardless, on the
+  strength of §4.2 alone.
 
 Source files (immo artefact-focus checkout, sibling of this repo):
 `/home/antoinefa/src/radar-immobilier-artefact-focus/LIVE-DISPATCH-REPORT.md`,
 `DISPATCH-REPORT.md`, `RECONCILE-REPORT.md`, `ATTACH-REPORT.md`.
-Step timings of §4.1: `source-gap` / `unverified` — no builder log
-is retained in this repo; the figures above are the conductor-relayed
-phase measurements for those installs, with no builder source joined.
+Step timings of §4.1 and the §4.6 observation: `source-gap` /
+`unverified` — no builder log or dated observation report is retained
+in this repo or in the cited reports; both are conductor-relayed
+accounts with no traceable source joined.
 
 ---
 
@@ -595,7 +602,7 @@ out-of-MCP gesture invalidates the run.
 | Gesture | Executor | Channel | Expected trace in report |
 | --- | --- | --- | --- |
 | Verify cache state `sealed` for the current `lockSha256` before §7.1 | Sentropic (builder) | Builder cache-state query (§5.1: `absent\|building\|sealed\|failed`) | `lockSha256` + state + timestamp per run set |
-| Drain the warm pool (§7.2) without touching the sealed cache | Sentropic (builder), k8s for pod ops | Builder pool control / k8s pod operations | Pool occupancy before/after, drain timestamp |
+| Drain the warm pool (§7.2) without touching the sealed cache — repeated before **each** §7.2 run | Sentropic (builder), k8s for pod ops | Builder pool control / k8s pod operations | Per-run cold proof: pool occupancy 0 / no warm pod available, cache state `sealed`, drain timestamp — recorded before that run starts |
 | Kill builder pod mid-start (F1), kill pod mid-session (F3) | k8s, coordinated by Sentropic | k8s pod delete on the named builder pod | Pod uid/name, kill timestamp, §5.6 records for the affected artifact |
 | Restart builder API (F2) | Sentropic (builder), k8s for rollout | k8s rollout restart of the builder API | Restart window timestamps, intent id surviving the restart |
 
@@ -628,15 +635,33 @@ runs reach a published URL; 0 silent failures, 0 untyped errors
 (§3.4). Phase durations are taken from the §5.6 records and
 cross-checked against client-observed latency (§3.2).
 
-### 7.2 Cold-known scenario (S1c)
+### 7.2 Cold-known scenario (S1c and S6 Cold-known)
 
-Destroy the warm pool claim without touching the sealed cache
-(builder-side pool drain, authorised out-of-MCP gesture per the §7
-table, coordinated with the Sentropic owner), then run §7.1 steps
-2–5 **20 times** (the §3.2 minimum for a p95 claim). **Pass**: S1c
-p95 < 30 s (nearest-rank over the 20 runs), every run < 60 s; no
-network install appears in the builder phase records (cache state
-`sealed` throughout).
+Executable campaign judging **both** Cold-known targets of §3.1:
+S1c and S6 Cold-known (full end-to-end path, `git_publish` included).
+Run the complete §7.1 scenario (steps 1–6) **20 times** (the §3.2
+minimum for a p95 claim), under a per-run cold precondition:
+
+1. Before **each** run, drain the warm pool without touching the
+   sealed cache (authorised out-of-MCP gesture per the §7 table,
+   coordinated with the Sentropic owner) and record that run's cold
+   proof: pool occupancy 0 / no warm pod available, cache state
+   `sealed` for the run's `lockSha256`, drain timestamp. A run
+   without a recorded cold proof, or started while a warm pod was
+   available, does not count as Cold-known and is discarded (not
+   counted toward the 20). Draining once before the campaign is
+   **not** sufficient: after a run's `stop`, the released pod may
+   become warm again, so runs 2–20 would otherwise be Warm.
+2. Run §7.1 steps 1–6 in full for that run, recording S1c, every
+   S6 step duration and the S6 total (attach → published URL).
+
+**Pass**: over the 20 cold-proven runs — S1c p95 < 30 s
+(nearest-rank, §3.2) and every run < 60 s; S6 Cold-known judged on
+the same §3.1 joint allocation as Warm (§3.1): total p95 < 40 s,
+every run total < 60 s, every step within its joint budget per run
+and in p95; 20/20 runs reach a published URL; no network install
+appears in the builder phase records (cache state `sealed`
+throughout); 0 silent failures, 0 untyped errors (§3.4).
 
 ### 7.3 Cold-lockfile scenario (§3.3, §5.1, §6.3)
 
@@ -677,7 +702,9 @@ lines, (c) automatic recovery with no manual DB/kubectl intervention,
 ### 7.5 Reporting
 
 The acceptance report (one per environment) publishes: per-phase
-p50/p95/max tables per case, all raw S6 durations (20 per campaign),
+p50/p95/max tables per case, all raw S6 durations (20 per campaign
+and per case — Warm §7.1, Cold-known §7.2 — with each Cold-known
+run's cold proof),
 cache-state transitions, and every failure observed with its typed code. Numbers
 come from the §5.6 records; any phase that cannot be measured is
 reported `source-gap` and blocks acceptance — an unmeasured SLO is
