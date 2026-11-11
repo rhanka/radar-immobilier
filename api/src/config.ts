@@ -233,9 +233,9 @@ const envSchema = z.object({
   // ── Ops recipients port v1 (L4, Sentropic port contract) ───────────────
   // `GET /api/v1/ops/recipients?target=...` serves the platform alert
   // service. All three values come from the deployment environment; none
-  // is hardcoded in the route. The audience is fixed by the Sentropic L1
-  // contract and only configured here. Absent audience or target keeps
-  // the route closed (503, fail-closed).
+  // is hardcoded in the route. The static opaque bearer is held by
+  // Sentropic and mirrored in the immo Secret; absent bearer or target
+  // keeps the route closed (503, fail-closed).
   /** This instance's alerting target: `immo-prod` or `immo-preprod`. */
   OPS_TARGET: z.preprocess(
     (v) => (v === "" ? undefined : v),
@@ -243,8 +243,8 @@ const envSchema = z.object({
   ),
   /** Slug of the reference workspace whose managers are recipients. */
   OPS_REFERENCE_WORKSPACE_SLUG: optStr(z.string().min(1)),
-  /** Exact `aud` required on the service-client bearer (set by L1). */
-  OPS_RECIPIENTS_AUDIENCE: optStr(z.string().min(1)),
+  /** Static opaque bearer (Secret radar-ops-recipients, key OPS_RECIPIENTS_BEARER). */
+  OPS_RECIPIENTS_BEARER: optStr(z.string().min(1)),
 
   // ── Scaleway Transactional Email (TEM) — emails d'invitation ────────────
   // L'egress SMTP est BLOQUÉ au niveau plateforme sur ce cluster (BR-37b), donc
@@ -570,32 +570,24 @@ export type OpsTarget = "immo-prod" | "immo-preprod";
 
 /**
  * Ops recipients wiring derived from the environment. Fields stay absent
- * when unconfigured so the route fails closed instead of guessing an
- * audience, a target, or a reference workspace.
+ * when unconfigured so the route fails closed instead of guessing a
+ * bearer, a target, or a reference workspace.
  */
 export interface OpsConfig {
   readonly expectedTarget?: OpsTarget;
   readonly referenceWorkspaceSlug?: string;
-  readonly recipientsAudience?: string;
+  readonly recipientsBearer?: string;
 }
 
-export function resolveOpsConfig(
-  config: AppConfig,
-  bearerAudiences: readonly string[] = [],
-): OpsConfig {
-  // Deployment gate (Minor-1): the recipients audience must be a dedicated
-  // L1 service audience. If it overlaps a user Bearer [REDACTED], any user
-  // token could enumerate admin emails, so the audience is dropped and
-  // the route stays closed (503) instead of serving unsafely.
-  const audience = config.OPS_RECIPIENTS_AUDIENCE;
-  const dedicated =
-    audience !== undefined && !bearerAudiences.includes(audience);
+export function resolveOpsConfig(config: AppConfig): OpsConfig {
   return {
     ...(config.OPS_TARGET ? { expectedTarget: config.OPS_TARGET } : {}),
     ...(config.OPS_REFERENCE_WORKSPACE_SLUG
       ? { referenceWorkspaceSlug: config.OPS_REFERENCE_WORKSPACE_SLUG }
       : {}),
-    ...(dedicated ? { recipientsAudience: audience } : {}),
+    ...(config.OPS_RECIPIENTS_BEARER
+      ? { recipientsBearer: config.OPS_RECIPIENTS_BEARER }
+      : {}),
   };
 }
 

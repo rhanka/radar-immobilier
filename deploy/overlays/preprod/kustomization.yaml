@@ -103,6 +103,14 @@ patches:
       kind: ConfigMap
       name: radar-api
     path: patch-radar-api-auth.yaml
+# Ops recipients port v1 (#1051): preprod target + reference workspace slug
+# on the same ConfigMap (the audience stays in the radar-ops-recipients
+# Secret, referenced by the base Deployment). Guarded by
+# deploy/ci/check-ops-recipients-render.sh.
+  - target:
+      kind: ConfigMap
+      name: radar-api
+    path: patch-ops-recipients.yaml
 # General opening (L4): API/MCP settings must stay aligned. Provisioning and
 # operator-owned Deployment/routing apply are documented in the L4 runbook.
   - target:
