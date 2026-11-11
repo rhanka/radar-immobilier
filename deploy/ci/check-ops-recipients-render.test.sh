@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 # Offline tests for check-ops-recipients-render.sh: the released wiring
 # passes, and each broken variant (wrong target, missing slug, literal
-# audience, prod leak, wrong Secret) is rejected for the expected reason.
+# bearer, prod leak, wrong Secret, removed env entry) is rejected for
+# the expected reason.
 # Needs kubectl (render only, no cluster).
+# Note (M3): mutations use exact-string sed patterns tied to the
+# one-line valueFrom spelling in 30-api.yaml; a reformatted manifest
+# breaks this harness (not the gate) — update the patterns with it.
 set -uo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -34,11 +38,14 @@ run_bad "$CASE_ROOT" 'rejects a preprod target of immo-prod' 'OPS_TARGET=immo-pr
 fixture; sed -i '/OPS_REFERENCE_WORKSPACE_SLUG/d' "$CASE_ROOT/$OPS_PATCH"
 run_bad "$CASE_ROOT" 'rejects a missing reference workspace slug' 'OPS_REFERENCE_WORKSPACE_SLUG=<missing>'; rm -rf "$CASE_ROOT"
 
-fixture; sed -i 's/valueFrom: { secretKeyRef: { name: radar-ops-recipients, key: OPS_RECIPIENTS_AUDIENCE, optional: true } }/value: "literal-audience"/' "$CASE_ROOT/$BASE_API"
-run_bad "$CASE_ROOT" 'rejects a literal audience value' 'literal value'; rm -rf "$CASE_ROOT"
+fixture; sed -i 's/valueFrom: { secretKeyRef: { name: radar-ops-recipients, key: OPS_RECIPIENTS_BEARER, optional: true } }/value: "literal-bearer"/' "$CASE_ROOT/$BASE_API"
+run_bad "$CASE_ROOT" 'rejects a literal bearer value' 'literal value'; rm -rf "$CASE_ROOT"
 
-fixture; sed -i 's/name: radar-ops-recipients, key: OPS_RECIPIENTS_AUDIENCE/name: radar-other-secret, key: OPS_RECIPIENTS_AUDIENCE/' "$CASE_ROOT/$BASE_API"
-run_bad "$CASE_ROOT" 'rejects an audience read from the wrong Secret' 'must read Secret radar-ops-recipients'; rm -rf "$CASE_ROOT"
+fixture; sed -i 's/name: radar-ops-recipients, key: OPS_RECIPIENTS_BEARER/name: radar-other-secret, key: OPS_RECIPIENTS_BEARER/' "$CASE_ROOT/$BASE_API"
+run_bad "$CASE_ROOT" 'rejects a bearer read from the wrong Secret' 'must read Secret radar-ops-recipients'; rm -rf "$CASE_ROOT"
+
+fixture; sed -i '/- name: OPS_RECIPIENTS_BEARER/{N;d}' "$CASE_ROOT/$BASE_API"
+run_bad "$CASE_ROOT" 'rejects removal of the bearer env entry' 'OPS_RECIPIENTS_BEARER env entry missing'; rm -rf "$CASE_ROOT"
 
 fixture; sed -i 's/^  PORT: "3000"$/  PORT: "3000"\n  OPS_TARGET: "immo-prod"/' "$CASE_ROOT/$BASE_API"
 run_bad "$CASE_ROOT" 'rejects OPS_TARGET leaking into the prod base' 'prod ConfigMap/radar-api must stay inert: OPS_TARGET=immo-prod'; rm -rf "$CASE_ROOT"
