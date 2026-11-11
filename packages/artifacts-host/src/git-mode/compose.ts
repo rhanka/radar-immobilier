@@ -1,7 +1,7 @@
 import {
   createGitHubForge, createGitPort, createPostgresLiveStore, type GitBindingStore, type GitCodeRightsPort, type GitHumanDirectory,
   type GitIdentity, type GitInstallationLeasePort, type GitPort, type LiveKeyPort, type LiveSessionService, type LiveStore,
-  type LiveWorkerPort, type PrincipalDirectoryPort,
+  type LiveRedriveItem, type LiveWorkerEvent, type LiveWorkerPort, type PrincipalDirectoryPort,
 } from "@sentropic/artifacts";
 import { createPostgresGitBindingStore } from "@sentropic/artifacts/adapters/postgres";
 import type { HttpAppDeps } from "@sentropic/artifacts/http";
@@ -19,7 +19,7 @@ import { createSealedLiveKeys, parseLiveDraftKeyring, type LiveDraftKeyring } fr
 import { SERVICE_SCOPE_BROKER, SERVICE_SCOPE_BUILDER, serviceTokenSource, type ServiceTokenConfig } from "./service-token.js";
 import { createAccountDirectory } from "../directory.js";
 import { createLiveWorkerClient, liveStoreDrafts, liveStoreFences } from "@sentropic/artifacts/live-host";
-import { composeLiveService, FAIL_CLOSED_LIVE_KEYS } from "./live.js";
+import { composeLiveService, FAIL_CLOSED_LIVE_KEYS, logLiveWorkerEvent } from "./live.js";
 import { NO_LIVE_INVITATIONS } from "./live-grant.js";
 import { composeLiveEdgeRevocationPush, createLiveSocketRegistry, liveSignerFrom, readLiveEdgeConfig, type LiveControlTransport,
   type LiveSocketRegistry } from "./live-edge.js";
@@ -140,6 +140,8 @@ export interface GitModePorts {
   readonly liveControlTransport?: LiveControlTransport;
   /** Receives the composed live service (the content host reads the same views). */
   readonly onLiveService?: (service: LiveSessionService) => void;
+  /** Worker settle observer (0.2.27); default: one structured JSON log line per event. */
+  readonly onLiveWorkerEvent?: (event: LiveWorkerEvent) => void;
 }
 
 export interface GitModeDeps {
@@ -148,6 +150,8 @@ export interface GitModeDeps {
   readonly live?: NonNullable<HttpAppDeps["live"]>;
   /** Pending-build reconciler (0.2.25); consumed by the host triggers, never passed to the provider app. */
   readonly pendingBuilds?: PendingBuildReconciler;
+  /** Live re-drive pass of this scope (0.2.27 `LiveSessionService.redrive`); host timer only, never the provider app. */
+  readonly liveRedrive?: () => Promise<LiveRedriveItem[]>;
 }
 
 const unavailable = (): never => { throw new ArtifactOperationError("provider_unavailable"); };
@@ -305,10 +309,12 @@ export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
     onService: (service) => { liveService = service; ports.onLiveService?.(service); },
     ...(liveStore ? { store: liveStore } : {}),
     ...(liveKeys ? { keys: liveKeys } : {}),
-    ...(liveWorker ? { worker: liveWorker } : {}), qualified })
+    ...(liveWorker ? { worker: liveWorker } : {}), onWorkerEvent: ports.onLiveWorkerEvent ?? logLiveWorkerEvent, qualified })
     : undefined;
+  // 0.2.27 durable re-drive: only a composed worker has runtimes to settle again.
+  const liveRedrive = live && liveWorker ? () => live.redrive(storageScopeId) : undefined;
   return { git: { bindings, codeRights }, [GIT_TOOLS_DEP_KEY]: gitTools, ...(live ? { live } : {}),
-    ...(pendingBuilds ? { pendingBuilds } : {}) };
+    ...(pendingBuilds ? { pendingBuilds } : {}), ...(liveRedrive ? { liveRedrive } : {}) };
 }
 
 /** Control push of a revoked invitation to the INTERNAL artifact-content Service; closed while the edge is unconfigured. */
