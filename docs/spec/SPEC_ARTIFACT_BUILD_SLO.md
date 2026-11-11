@@ -21,10 +21,14 @@ on the immo side.
 ### 1.1 Requirement
 
 `[TARGET]` A new artifact, from creation to a published URL, must build
-in **under 1 minute** on an already-known lockfile (§3). Every phase of
-the flow carries its own measurable SLO (§3), and **no failure may be
-silent**: every failure surfaces a typed error code and a structured log
-line (§3.4).
+in **under 1 minute** on an already-known lockfile (§3). This is a
+**hard per-run maximum**, not a percentile allowance: no single
+end-to-end run (S6) and no single static publish (S5) may reach 60 s.
+The p95 targets in §3.1 are tighter operational targets on top of that
+hard maximum; they never authorise a run at or above 60 s. Every phase
+of the flow carries its own measurable SLO (§3), and **no failure may
+be silent**: every failure surfaces a typed error code and a structured
+log line (§3.4).
 
 This spec is the consumer contract. It does not re-specify the builder
 internals; it states what immo requires from the builder (Sentropic
@@ -54,13 +58,16 @@ attach → live start → live_write → git_commit → stop → git_publish
 **Static artifacts** (batch publish):
 
 ```
-git_publish → publish_bundle → published URL
+git_publish → build_publish → published URL
 ```
 
-- `publish_bundle`: the builder builds the bound branch/subPath at a
+- `build_publish`: the builder builds the bound branch/subPath at a
   pinned commit and publishes the resulting bundle. This is the only
   path for artifacts never opened live, and the final step of the live
-  flow.
+  flow. This builder-side build is distinct from
+  `artifacts_publish_bundle_v2` (`SPEC_ARTIFACT_UI_PUBLISH.md`), which
+  publishes a caller-uploaded bundle of bytes and builds nothing; the
+  two mechanisms must not share a name.
 
 ### 1.3 Environments and bases
 
@@ -93,6 +100,14 @@ toward acceptance (§7).
 | **Cold-known** | The `lockSha256` has a sealed cache, but **no warm pod** is available (pod must be started and the sealed cache mounted/extracted). No network install runs. |
 | **Cold-new-lockfile** | The `lockSha256` has **no sealed cache** yet. A full dependency install is required. Per §3.3 this case must **never** occur on a user's start path; it is absorbed by pre-warming (§5.1, §6.3). |
 
+Cases are defined **per path**. On the live path, "warm pod" means a
+live-session pod (§5.2). On the static path (`build_publish`, S5), no
+live session is opened: the case is **Warm** when the `lockSha256` has
+a sealed cache and a builder build pod is available, **Cold-known**
+when the sealed cache exists but a build pod must be started, and
+**Cold-new-lockfile** as above. S6 is judged separately for Warm and
+for Cold-known (§3.1), never as one blended target.
+
 `lockSha256` is computed over the exact lockfile bytes the build will
 consume (`package-lock.json` of the bound repo/subPath at the pinned
 commit). Two artifacts with the same `lockSha256` share one sealed
@@ -117,16 +132,42 @@ fails acceptance even if p95 passes.
 | # | Phase (events) | Case | p95 | Max |
 | --- | --- | --- | --- | --- |
 | S1 | Live start → `LIVE`: `start_accepted` → `preview_routable` | Warm | < 30 s | 45 s |
-| S1c | Live start → `LIVE` | Cold-known | < 30 s | 60 s |
+| S1c | Live start → `LIVE` | Cold-known | < 30 s | < 60 s |
 | S2 | `live_write` accepted → change visible in preview | Warm session | < 5 s | 10 s |
 | S3 | `git_commit` accepted → commit present on bound branch | Warm session | < 10 s | 30 s |
 | S4 | `stop` accepted → session closed, pod released | Any | < 15 s | 30 s |
-| S5 | `git_publish` accepted → `url_routable` (`publish_bundle` included) | Warm | < 60 s | 90 s |
-| S6 | **End to end: new artifact → published URL** (attach → … → `git_publish` → `url_routable`, one small content write included) | Known lockfile (warm or cold-known) | **< 60 s** | 90 s |
+| S5 | `git_publish` accepted → `url_routable` (`build_publish` included) | Warm (static path, §2) | < 25 s | < 60 s |
+| S6 | **End to end: new artifact → published URL** (attach → … → `git_publish` → `url_routable`, one small content write included) | Warm, and separately Cold-known | **< 40 s** | **< 60 s** |
 
-S6 is the owner requirement of §1.1 expressed end to end. It holds
-only because no phase on that path performs a network dependency
+S6 is the owner requirement of §1.1 expressed end to end. The phase
+maxima above are **standalone ceilings**: they bound a phase measured
+on its own, and their sum (120 s) is *not* the S6 budget. S6 carries
+its own joint allocation below, which every phase on the S6 path must
+fit *in that run*. No phase on that path performs a network dependency
 install (§3.3).
+
+**S6 joint budget allocation** (sequential path
+`attach → live start → live_write → git_commit → stop → git_publish`,
+per run; the acceptance artifact is the small §7.1 artifact):
+
+| Step on S6 path | Joint p95 budget | Joint max budget |
+| --- | --- | --- |
+| `artifacts_git_attach` | 2 s | 3 s |
+| S1 live start → `LIVE` | 15 s | 20 s |
+| S2 `live_write` → visible | 3 s | 5 s |
+| S3 `git_commit` | 5 s | 7 s |
+| S4 `stop` | 3 s | 5 s |
+| S5 `git_publish` → `url_routable` | 12 s | 15 s |
+| **Sum of joint budgets** | **40 s** | **55 s** |
+
+Pass rule: a run meets S6 only if (a) its total is < 60 s, (b) every
+step fits its joint max budget, and (c) over the §7 runs the total p95
+is < 40 s and every step p95 fits its joint p95 budget. The 55 s sum of
+joint maxima leaves 5 s of unallocated margin under the 60 s hard
+maximum. If a phase cannot fit its joint budget in measurement, the
+fix is to make the phase faster or overlap it explicitly (with the
+overlap measured from the §5.6 events) — never to raise S6 above
+60 s.
 
 Notes:
 
@@ -144,10 +185,15 @@ Notes:
 
 ### 3.2 What counts as meeting the SLO
 
-- p95 and max are computed over the §7 scripted runs (5 runs minimum
-  per scenario), per environment, per case. Client-observed latency
-  and builder phase events are both recorded; discrepancies > 2 s
-  between them are themselves a defect (clock/observability gap).
+- p95 and max are computed over the §7 scripted runs, per
+  environment, per case. A p95 claim requires **at least 20 runs**
+  per scenario/case/environment; no p95 is reported or judged below
+  that count. The percentile method is fixed: sort the N durations
+  ascending and take the value at 1-based rank `ceil(0.95 × N)`
+  (nearest-rank; at N = 20, the 19th value). Max is the largest of
+  the N durations. Client-observed latency and builder phase events
+  are both recorded; discrepancies > 2 s between them are themselves
+  a defect (clock/observability gap).
 - A run that ends in a typed failure (§3.4) counts as a max breach for
   its phase, not as a missing sample.
 
