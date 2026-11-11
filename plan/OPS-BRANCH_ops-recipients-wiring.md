@@ -40,6 +40,11 @@ Secret) until an explicit activation decision.
   - `plan/NN-BRANCH_*.md` (other branches)
   - `deploy/k8s/refresh-cronjobs/**`
 - **Conditional Paths**: none.
+- **Exception (FIX lane, review #1072 B1 settled)**: `api/src/ops/**`,
+  `api/src/config.ts`, `api/src/index.ts`, `api/src/app.ts` — the
+  settled bearer contract is a static opaque bearer, not the JWT
+  audience wired originally; the L4 auth rewrite, its config, and its
+  unit tests are in scope for this fix. No other `api/**` change.
 
 ## Plan / Todo (lot-based)
 - [x] **Lot 1 — Manifest wiring**
