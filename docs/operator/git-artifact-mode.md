@@ -235,6 +235,42 @@ unchanged.
   admits pods labelled `app.kubernetes.io/name: radar-immobilier` and
   `app.kubernetes.io/component: api`.
 
+## Live worker: poll until ready, typed logs
+
+The builder `POST v1/live/reconcile` answers within its live wait (25 s in the
+product builder). A revive that takes longer answers `200` with
+`ready: false` and keeps running on the builder; the host is expected to ask
+again. Measured in preprod on 2026-11-11: `draft/seal` 204 in 0.3 s, then
+`reconcile` 200 `ready: false` after 25.1 s.
+
+The host wraps the package worker (`git-mode/live-worker-redrive.ts`):
+
+- `ready: false`: the accepted command keeps reconciling every 2 s (each call
+  long-polls the builder) until `ready: true`, until the session no longer
+  waits (stopped, or already `LIVE` on its current revision), or for 45 min at
+  most.
+- A refusal (`provider_unavailable`, `builder_unavailable`,
+  `git_not_attached`): retried after 5 s, 15 s, 45 s, 90 s; the fifth
+  consecutive failure is rethrown unchanged.
+- One poll per binding generation in the process; later callers join it.
+- The pre-build reconcile of `git_publish` is on the request path: it is
+  logged on failure and never polled.
+
+Structured log lines (stderr, one JSON object per line), all carrying
+`operation`, `storageScopeId`, `artifactId`, `bindingGeneration`:
+
+| `kind` | Meaning |
+| --- | --- |
+| `artifacts.live_worker_failed` | A reconcile or stop refusal, with its typed `code`, `attempt` and `terminal` (`reason: max_failures` on the last one) |
+| `artifacts.live_worker_pending` | First `ready: false` answer of a poll |
+| `artifacts.live_worker_ready` | The builder became ready after `polls` not-ready answers in `elapsedMs` |
+| `artifacts.live_worker_abandoned` | Poll ended without ready: `not_ready_deadline` or `session_not_waiting` |
+
+Limit: the poll lives in the process that accepted the command. A pod restart
+(every preprod rollout) ends it; the session then stays `REVIVING` until the
+next `live_write`/`live_reset` on that artifact. The durable re-drive across
+restarts needs the package to list and settle non-terminal runtimes.
+
 ## Not yet composed (fail-closed)
 
 - Live edge: composed only with `IMMO_ARTIFACTS_LIVE_EDGE_ENABLED=1`; nothing
