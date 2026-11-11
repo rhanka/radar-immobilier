@@ -15,19 +15,20 @@
  * endpoint falls back to `is_admin` alone; the `basis` of every returned
  * admin then carries only `app:is_admin`, which states the fallback.
  *
- * Authentication is service-to-service: a service-client bearer verified
- * with the same mechanism as the per-user bearer path — `verifyAccessToken`
- * (IdP JWKS signature, `iss`, `exp`, `aud`) in `services/auth/oidc.ts`,
- * the inbound counterpart of the OAuth `client_credentials` fetcher in
- * `packages/artifacts-host/src/git-mode/service-token.ts`. The exact
- * audience is fixed by the Sentropic L1 contract and injected via
- * `OPS_RECIPIENTS_AUDIENCE`; without it the route stays closed (503).
- * Deployment gate: that audience MUST be a dedicated L1 service
- * audience, distinct from every user Bearer [REDACTED]; an overlapping
- * value is refused in `resolveOpsConfig` (route stays closed).
+ * Authentication is service-to-service with a STATIC OPAQUE bearer:
+ * a 64-hex random string (Sentropic custody: `.env`
+ * `OPS_JOB_FAILURE_RECIPIENTS_BEARER_PREPROD`, Secret `sentropic-api`
+ * key `OPS_JOB_FAILURE_RECIPIENTS_BEARER`, rotated every 90 days).
+ * The immo side holds the same value in k8s Secret
+ * `radar-ops-recipients` key `OPS_RECIPIENTS_BEARER`, injected as env
+ * `OPS_RECIPIENTS_BEARER`. No JWT, no IdP, no iss/aud/sub/exp.
+ * Comparison is constant-time over SHA-256 hashes (equal length, so
+ * `timingSafeEqual` never leaks length). Without the configured
+ * bearer the route stays closed (503, fail-closed); an absent or
+ * wrong bearer answers 401. The value is never logged or echoed.
  */
 import { Hono } from "hono";
-import { createRemoteJWKSet, type JWTVerifyGetKey } from "jose";
+import { createHash, timingSafeEqual } from "node:crypto";
 import { and, eq, isNull } from "drizzle-orm";
 import type { OpsTarget } from "../config.js";
 import type { Database } from "../db/client.js";
@@ -36,7 +37,6 @@ import {
   workspaceMemberships,
   workspaces,
 } from "../db/schema.js";
-import { verifyAccessToken } from "../services/auth/oidc.js";
 
 export const OPS_RECIPIENTS_PATH = "/api/v1/ops/recipients";
 
@@ -204,31 +204,24 @@ export interface OpsRouteDeps {
   readonly db?: Database;
   /** Test seam replacing the Drizzle store. */
   readonly store?: RecipientsStore;
-  readonly issuer: string;
-  readonly jwksUri: string;
-  /** Exact `aud` required on the service-client bearer (L1 contract). */
-  readonly audience?: string;
+  /** Static opaque bearer from Secret `radar-ops-recipients`. */
+  readonly bearer?: string;
   /** This instance's target; any other `target` answers 404. */
   readonly expectedTarget?: OpsTarget;
   /** Reference workspace slug from `OPS_REFERENCE_WORKSPACE_SLUG`. */
   readonly referenceWorkspaceSlug?: string;
-  /** Test seam for JWKS verification (local key set). */
-  readonly getKey?: JWTVerifyGetKey;
   readonly now?: () => number;
   /** Fallback-tier signal; defaults to a structured `console.warn`. */
   readonly warn?: (event: Record<string, unknown>) => void;
 }
 
-/** Remote JWKS sets cached per URI so jose key caching survives requests. */
-const remoteJwkSets = new Map<string, JWTVerifyGetKey>();
+function sha256(value: string): Buffer {
+  return createHash("sha256").update(value, "utf8").digest();
+}
 
-function remoteJwkSet(jwksUri: string): JWTVerifyGetKey {
-  let set = remoteJwkSets.get(jwksUri);
-  if (!set) {
-    set = createRemoteJWKSet(new URL(jwksUri));
-    remoteJwkSets.set(jwksUri, set);
-  }
-  return set;
+/** Constant-time bearer check; hashes are always 32 bytes. */
+export function bearerMatches(presented: string, expected: string): boolean {
+  return timingSafeEqual(sha256(presented), sha256(expected));
 }
 
 function extractBearerToken(header: string | undefined): string | undefined {
@@ -250,31 +243,16 @@ export function opsRecipientsRoute(deps: OpsRouteDeps | null): Hono {
     c.header("cache-control", "no-store");
   });
   app.get(OPS_RECIPIENTS_PATH, async (c) => {
-    if (!deps || !deps.audience || !deps.expectedTarget || !deps.issuer) {
+    if (!deps || !deps.bearer || !deps.expectedTarget) {
       return c.json({ error: "ops_recipients_unconfigured" }, 503);
     }
     const store = deps.store ?? (deps.db ? createDrizzleRecipientsStore(deps.db) : undefined);
     if (!store) return c.json({ error: "ops_recipients_unconfigured" }, 503);
-    const bearer = extractBearerToken(c.req.header("authorization"));
-    if (!bearer) return c.json({ error: "unauthenticated" }, 401);
-    let getKey = deps.getKey;
-    if (!getKey) {
-      if (!deps.jwksUri) {
-        return c.json({ error: "ops_recipients_unconfigured" }, 503);
-      }
-      getKey = remoteJwkSet(deps.jwksUri);
-    }
-    const now = deps.now ?? (() => Date.now());
-    try {
-      await verifyAccessToken(bearer, {
-        issuer: deps.issuer,
-        audiences: [deps.audience],
-        getKey,
-        now: now(),
-      });
-    } catch {
+    const presented = extractBearerToken(c.req.header("authorization"));
+    if (!presented || !bearerMatches(presented, deps.bearer)) {
       return c.json({ error: "unauthenticated" }, 401);
     }
+    const now = deps.now ?? (() => Date.now());
     const target = c.req.query("target");
     if (target !== deps.expectedTarget) {
       return c.json({ error: "target_not_found" }, 404);
