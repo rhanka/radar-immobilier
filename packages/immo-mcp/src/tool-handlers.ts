@@ -20,6 +20,17 @@ export type ToolHandler = (
   ctx: InvocationContext,
 ) => Promise<ToolTextResult>;
 
+/** Provenance of a tool response (#1063): http seam = live radar API, mock seam = fixtures. */
+export type ResponseSource = "live" | "fixture";
+
+function domainSource(ctx: InvocationContext): ResponseSource {
+  return ctx.data.mode === "http" ? "live" : "fixture";
+}
+
+function rawSource(ctx: InvocationContext): ResponseSource {
+  return ctx.raw.mode === "http" ? "live" : "fixture";
+}
+
 function jsonResult(payload: unknown, isError = false): ToolTextResult {
   const result: ToolTextResult = {
     content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
@@ -36,8 +47,8 @@ function jsonResult(payload: unknown, isError = false): ToolTextResult {
 const MAX_GEOJSON_RESPONSE_CHARS = 1_000_000;
 
 /** GeoJSON results are serialized COMPACT (no indent): size matters here. */
-function geojsonResult(payload: RawFeatureCollectionResult): ToolTextResult {
-  const text = JSON.stringify(payload);
+function geojsonResult(payload: RawFeatureCollectionResult, source: ResponseSource): ToolTextResult {
+  const text = JSON.stringify({ ...payload, source });
   if (text.length > MAX_GEOJSON_RESPONSE_CHARS) {
     throw new Error(
       `response_too_large: ${text.length} caractères (max ${MAX_GEOJSON_RESPONSE_CHARS}). ` +
@@ -106,7 +117,7 @@ async function searchLotsHandler(
   const args = rawArgs as unknown as SearchLotsToolArgs;
   assertScope(ctx.auth, IMMO_SCOPES.search);
   const lots = await ctx.data.searchLots(args);
-  return jsonResult({ city: args.city, count: lots.length, lots });
+  return jsonResult({ source: domainSource(ctx), city: args.city, count: lots.length, lots });
 }
 
 async function getLotCardHandler(
@@ -116,8 +127,8 @@ async function getLotCardHandler(
   const args = rawArgs as unknown as GetLotCardToolArgs;
   assertScope(ctx.auth, IMMO_SCOPES.read);
   const card = await ctx.data.getLotCard(args);
-  if (!card) return jsonResult({ found: false, city: args.city, no_lot: args.no_lot });
-  return jsonResult({ found: true, lot: card });
+  if (!card) return jsonResult({ source: domainSource(ctx), found: false, city: args.city, no_lot: args.no_lot });
+  return jsonResult({ source: domainSource(ctx), found: true, lot: card });
 }
 
 async function searchSignalsHandler(
@@ -131,7 +142,7 @@ async function searchSignalsHandler(
   const callCtx = await resolveExchangedCallContext(ctx, "search_signals");
   try {
     const signals = await ctx.data.searchSignals(args, callCtx);
-    return jsonResult({ city: args.city, count: signals.length, signals });
+    return jsonResult({ source: domainSource(ctx), city: args.city, count: signals.length, signals });
   } catch (error) {
     if ((error instanceof RadarSignalReadError &&
       (error.upstreamStatus === 401 || error.upstreamStatus === 403)) ||
@@ -150,9 +161,9 @@ async function getOpportunityDossierHandler(
   assertScope(ctx.auth, IMMO_SCOPES.read);
   const dossier = await ctx.data.getOpportunityDossier(args);
   if (!dossier) {
-    return jsonResult({ found: false, city: args.city, opportunityId: args.opportunityId });
+    return jsonResult({ source: domainSource(ctx), found: false, city: args.city, opportunityId: args.opportunityId });
   }
-  return jsonResult({ found: true, dossier });
+  return jsonResult({ source: domainSource(ctx), found: true, dossier });
 }
 
 async function listDocumentsHandler(
@@ -162,7 +173,7 @@ async function listDocumentsHandler(
   const args = rawArgs as unknown as ListDocumentsToolArgs;
   assertScope(ctx.auth, IMMO_SCOPES.documentsRead);
   const documents = await ctx.data.listDocuments(args);
-  return jsonResult({ count: documents.length, documents });
+  return jsonResult({ source: domainSource(ctx), count: documents.length, documents });
 }
 
 async function readDocumentExcerptHandler(
@@ -172,11 +183,12 @@ async function readDocumentExcerptHandler(
   const args = rawArgs as unknown as ReadDocumentExcerptToolArgs;
   assertScope(ctx.auth, IMMO_SCOPES.documentsRead);
   const body = await ctx.data.readDocumentBody(args.documentId);
-  if (!body) return jsonResult({ found: false, documentId: args.documentId });
+  if (!body) return jsonResult({ source: domainSource(ctx), found: false, documentId: args.documentId });
   const total = body.text.length;
   const slice = body.text.slice(args.offset, args.offset + args.maxChars);
   const excerpt = redact(slice); // anti-PII defence-in-depth
   return jsonResult({
+    source: domainSource(ctx),
     found: true,
     documentId: args.documentId,
     title: body.title,
@@ -206,7 +218,7 @@ async function getZonesGeojsonHandler(
   const args = rawArgs as unknown as ZonesGeojsonToolArgs;
   assertScope(ctx.auth, IMMO_SCOPES.read);
   checkGeoBounds(args);
-  return geojsonResult(await ctx.raw.getZonesGeojson(args));
+  return geojsonResult(await ctx.raw.getZonesGeojson(args), rawSource(ctx));
 }
 
 async function getLotsGeojsonHandler(
@@ -216,7 +228,7 @@ async function getLotsGeojsonHandler(
   const args = rawArgs as unknown as LotsGeojsonToolArgs;
   assertScope(ctx.auth, IMMO_SCOPES.read);
   checkGeoBounds(args);
-  return geojsonResult(await ctx.raw.getLotsGeojson(args));
+  return geojsonResult(await ctx.raw.getLotsGeojson(args), rawSource(ctx));
 }
 
 interface GrillePdfToolArgs {
@@ -230,7 +242,7 @@ async function getGrillePdfHandler(
 ): Promise<ToolTextResult> {
   const args = rawArgs as unknown as GrillePdfToolArgs;
   assertScope(ctx.auth, IMMO_SCOPES.documentsRead);
-  return jsonResult(await ctx.raw.getGrillePdf(args));
+  return jsonResult({ ...(await ctx.raw.getGrillePdf(args)), source: rawSource(ctx) });
 }
 
 interface PvPdfToolArgs {
@@ -243,7 +255,7 @@ async function getPvPdfHandler(
 ): Promise<ToolTextResult> {
   const args = rawArgs as unknown as PvPdfToolArgs;
   assertScope(ctx.auth, IMMO_SCOPES.documentsRead);
-  return jsonResult(await ctx.raw.getPvPdf(args));
+  return jsonResult({ ...(await ctx.raw.getPvPdf(args)), source: rawSource(ctx) });
 }
 
 interface ReglementProvenanceToolArgs {
@@ -257,9 +269,10 @@ async function getReglementProvenanceHandler(
 ): Promise<ToolTextResult> {
   const args = rawArgs as unknown as ReglementProvenanceToolArgs;
   assertScope(ctx.auth, IMMO_SCOPES.read);
-  return jsonResult(
-    await ctx.raw.getReglementProvenance({ city: args.muni_slug, zone: args.zone_code }),
-  );
+  return jsonResult({
+    ...(await ctx.raw.getReglementProvenance({ city: args.muni_slug, zone: args.zone_code })),
+    source: rawSource(ctx),
+  });
 }
 
 interface QueryZoningEventsToolArgs {
@@ -275,14 +288,15 @@ async function queryZoningEventsHandler(
 ): Promise<ToolTextResult> {
   const args = rawArgs as unknown as QueryZoningEventsToolArgs;
   assertScope(ctx.auth, IMMO_SCOPES.read);
-  return jsonResult(
-    await ctx.raw.queryZoningEvents({
+  return jsonResult({
+    ...(await ctx.raw.queryZoningEvents({
       city: args.muni_slug,
       zoneCode: args.zone_code,
       documentType: args.document_type,
       decisionState: args.decision_state,
-    }),
-  );
+    })),
+    source: rawSource(ctx),
+  });
 }
 
 /**
