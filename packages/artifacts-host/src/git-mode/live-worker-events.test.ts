@@ -1,6 +1,6 @@
 import { createMemoryGitBindingStore, type LiveServiceDeps, type LiveStore, type LiveWorkerPort } from "@sentropic/artifacts";
 import { describe, expect, it, vi } from "vitest";
-import { composeGitMode } from "./compose.js";
+import { composeGitMode, readGitModeConfig } from "./compose.js";
 import { logLiveWorkerEvent } from "./live.js";
 
 const captured: { deps?: LiveServiceDeps } = {};
@@ -18,10 +18,10 @@ const resolution = { stage: "live", tools: ["artifacts_git_attach", "artifacts_f
   "artifacts_git_commit", "artifacts_live_write", "artifacts_live_read", "artifacts_live_reset", "artifacts_live_status",
   "artifacts_live_control"], unrouted: [] } as const;
 
-function compose(input: { worker?: LiveWorkerPort; onLiveWorkerEvent?: (event: unknown) => void } = {}) {
+function compose(input: { worker?: LiveWorkerPort; onLiveWorkerEvent?: (event: unknown) => void; redrive?: boolean } = {}) {
   const store = { pending: vi.fn(async () => []), transaction: vi.fn(), sessionIdentity: vi.fn() } as unknown as LiveStore;
   const deps = composeGitMode({ resolution, pool: { query: async () => ({ rows: [] }) } as never, storageScopeId: SCOPE,
-    config: { codeReaders: [], humans: [], installationRef: "inst" },
+    config: { codeReaders: [], humans: [], installationRef: "inst", liveRedriveEnabled: input.redrive ?? true },
     ports: { bindings: createMemoryGitBindingStore(), hasWriteScope: () => true, liveStore: store,
       gitToolFactory: () => ({ execute: async () => ({}) }),
       ...(input.worker ? { liveWorker: input.worker } : {}),
@@ -53,8 +53,18 @@ describe("live worker events (0.2.27 onWorkerEvent)", () => {
 });
 
 describe("live re-drive port", () => {
-  it("is composed only with a worker, and runs the package re-drive over this storage scope", async () => {
+  it("is composed only with a worker AND the explicit single-process flag", async () => {
+    const worker: LiveWorkerPort = { reconcile: vi.fn(), stop: vi.fn() };
     expect(compose().deps.liveRedrive).toBeUndefined();
+    expect(compose({ worker, redrive: false }).deps.liveRedrive).toBeUndefined();
+    expect(readGitModeConfig({}).liveRedriveEnabled).toBe(false);
+    for (const value of ["1", "yes", "TRUE"]) {
+      expect(readGitModeConfig({ IMMO_ARTIFACTS_LIVE_REDRIVE_ENABLED: value }).liveRedriveEnabled).toBe(false);
+    }
+    expect(readGitModeConfig({ IMMO_ARTIFACTS_LIVE_REDRIVE_ENABLED: "true" }).liveRedriveEnabled).toBe(true);
+  });
+
+  it("runs the package re-drive over this storage scope", async () => {
     const worker: LiveWorkerPort = { reconcile: vi.fn(), stop: vi.fn() };
     const { deps, store } = compose({ worker });
     await expect(deps.liveRedrive!()).resolves.toEqual([]);

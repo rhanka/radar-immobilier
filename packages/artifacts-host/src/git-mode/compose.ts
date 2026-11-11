@@ -69,6 +69,12 @@ export interface GitModeConfig {
    */
   readonly liveEdgeEnabled?: boolean | undefined;
   /**
+   * Durable live re-drive timer (IMMO_ARTIFACTS_LIVE_REDRIVE_ENABLED=true, default off), on top of the edge
+   * worker. Enabled in exactly one workload per storage scope (preprod: radar-immo-mcp, one replica, Recreate):
+   * the package re-drive guards are process-local, so two processes would settle the same runtimes twice.
+   */
+  readonly liveRedriveEnabled?: boolean | undefined;
+  /**
    * Worker qualification (IMMO_ARTIFACTS_LIVE_QUALIFIED=true, default false):
    * live_write / live_control(start) answer builder_unavailable while false.
    * Turned on by an ops change ONLY after an owner-recorded « GB4 GO preprod ».
@@ -104,6 +110,7 @@ export function readGitModeConfig(env: NodeJS.ProcessEnv): GitModeConfig {
     builderUrl: optional(env.IMMO_ARTIFACTS_BUILDER_URL),
     liveDraftKeys: parseLiveDraftKeyring(env.IMMO_ARTIFACTS_LIVE_DRAFT_KEYS, env.IMMO_ARTIFACTS_LIVE_DRAFT_KEY_CURRENT),
     liveEdgeEnabled: env.IMMO_ARTIFACTS_LIVE_EDGE_ENABLED?.trim() === "1",
+    liveRedriveEnabled: env.IMMO_ARTIFACTS_LIVE_REDRIVE_ENABLED?.trim() === "true",
     liveQualified: env.IMMO_ARTIFACTS_LIVE_QUALIFIED?.trim() === "true",
     liveInvitationsQualified: env.IMMO_ARTIFACTS_LIVE_INVITATIONS_QUALIFIED?.trim() === "true",
   };
@@ -311,8 +318,9 @@ export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
     ...(liveKeys ? { keys: liveKeys } : {}),
     ...(liveWorker ? { worker: liveWorker } : {}), onWorkerEvent: ports.onLiveWorkerEvent ?? logLiveWorkerEvent, qualified })
     : undefined;
-  // 0.2.27 durable re-drive: only a composed worker has runtimes to settle again.
-  const liveRedrive = live && liveWorker ? () => live.redrive(storageScopeId) : undefined;
+  // 0.2.27 durable re-drive: only a composed worker has runtimes to settle again, and only in the ONE process
+  // that enables it (IMMO_ARTIFACTS_LIVE_REDRIVE_ENABLED=true): the package overlap guards are process-local.
+  const liveRedrive = live && liveWorker && config.liveRedriveEnabled === true ? () => live.redrive(storageScopeId) : undefined;
   return { git: { bindings, codeRights }, [GIT_TOOLS_DEP_KEY]: gitTools, ...(live ? { live } : {}),
     ...(pendingBuilds ? { pendingBuilds } : {}), ...(liveRedrive ? { liveRedrive } : {}) };
 }
