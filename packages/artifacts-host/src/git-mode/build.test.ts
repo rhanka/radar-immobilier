@@ -8,6 +8,7 @@ import {
   verifyReceipt, type AcceptOptions, type CandidateFile, type HandoffClaims, type HandoffReceipt, type HostRecheckView,
 } from "@sentropic/artifacts/live-host";
 import { createHostBuildApiClient, createMemoryJobStore } from "./build-api.js";
+import { ArtifactOperationError, classifyArtifactFailure } from "@sentropic/artifacts/server/outcome-contract";
 import { composeGitMode, readGitModeConfig } from "./compose.js";
 import type { GitBuildPort } from "./provider-adapter.js";
 import { loadLiveHost } from "./live-host-adapter.js";
@@ -196,16 +197,38 @@ describe("host build API client (W7)", () => {
     expect(urls.some((url) => url.includes("/v1/live/"))).toBe(false);
   });
 
-  it("leaves the live-session refusal to the builder: 409 live_session_active fails closed, no reconcile, no retry", async () => {
-    const urls: string[] = [];
-    const fetcher = vi.fn(async (url: URL) => {
-      urls.push(String(url));
-      return new Response(JSON.stringify({ error: "live_session_active" }), { status: 409 });
+  it.each([{ error: "live_session_active" }, { error: "git_live_conflict", reason: "active_session" }])(
+    "answers the builder 409 %o with the package live conflict, a log line and no pending job", async (answer) => {
+      const urls: string[] = [];
+      const lines: string[] = [];
+      const fetcher = vi.fn(async (url: URL) => {
+        urls.push(String(url));
+        return new Response(JSON.stringify(answer), { status: 409 });
+      });
+      const jobs = createMemoryJobStore();
+      const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs, bindings, fetch: fetcher as never,
+        log: (line) => lines.push(line) });
+      const error = await client.request(job).catch((caught: unknown) => caught);
+      expect(error).toBeInstanceOf(ArtifactOperationError);
+      expect(error).toMatchObject({ kind: "git_live_conflict", details: { publicDetails: { reason: "active_session",
+        message: expect.stringContaining("artifacts_live_control") } } });
+      expect(classifyArtifactFailure(error, { invocationId: "i", operation: "git_publish", phase: "dispatch",
+        commitState: "not_committed" })).toMatchObject({ httpStatus: 409,
+        publicCode: "git_live_conflict", retriable: false });
+      expect(urls).toEqual([`${BASE}/v1/builds`]);
+      const [jobId] = [...jobs.jobs.keys()];
+      expect(jobs.states.get(jobId!)).toEqual({ state: "build_failed", code: "live_session_active", reason: "active_session" });
+      expect([...jobs.states.values()].filter((entry) => entry.state === "build_pending")).toEqual([]);
+      expect(lines.map((line) => JSON.parse(line))).toEqual([{ kind: "artifacts.build_refused", code: "live_session_active",
+        reason: "active_session", storageScopeId: "s", artifactId: job.artifactId, jobId, bindingGeneration: 2 }]);
+      // Once the session is stopped, the same command re-arms the same job and the build is requested.
+      fetcher.mockImplementation(async (url: URL) => {
+        urls.push(String(url));
+        return new Response(JSON.stringify({ jobId, state: "build_pending" }), { status: 202 });
+      });
+      await expect(client.request(job)).resolves.toEqual({ jobId, state: "build_pending" });
+      expect(jobs.states.get(jobId!)).toEqual({ state: "build_pending" });
     });
-    const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs: createMemoryJobStore(), bindings, fetch: fetcher as never });
-    await expect(client.request(job)).rejects.toMatchObject({ kind: "provider_unavailable" });
-    expect(urls).toEqual([`${BASE}/v1/builds`]);
-  });
 
   it("persists the job, then posts exactly { artifactId, jobId, binding } to /v1/builds (202 or 200)", async () => {
     const jobs = createMemoryJobStore();
