@@ -245,15 +245,22 @@ full dependency install. When a publish/start references a
 
 ## 4. Measured baseline — 2026-11-10/11 (facts)
 
-Everything in this section is `[FACT]`, measured in preprod on
-2026-11-10/11. It is the gap this spec exists to close: the current
-system does not meet a single SLO of §3, and its dominant failure mode
-is silence, not slowness.
+Sections §4.2–§4.4 and §4.6 are `[FACT]`, measured in preprod on
+2026-11-10/11 with the source named inline. §4.1 is
+`source-gap` / `unverified` (see its header). It is the gap this spec
+exists to close: the current system does not meet a single SLO of §3,
+and its dominant failure mode is silence, not slowness.
 
-### 4.1 Cold install decomposition
+### 4.1 Cold install decomposition — `source-gap` / `unverified`
 
-One cold dependency install on the builder, step by step (sum of steps
-≈ **3.5 min**, before any build):
+Status: `source-gap` / `unverified`. No builder log or phase record
+for these figures is retained in this repo or in the cited
+artefact-focus reports, so this decomposition cannot be traced to a
+source and must not be cited as `[FACT]`. The figures below are the
+conductor-relayed phase measurements reported for the 2026-11-10/11
+cold installs, kept only as an unverified indication of scale until a
+builder source is joined. One cold dependency install on the builder,
+step by step (sum of steps ≈ **3.5 min**, before any build):
 
 | Step | Duration | Volume / note |
 | --- | --- | --- |
@@ -340,17 +347,37 @@ Sources: `RECONCILE-REPORT.md`, `DISPATCH-REPORT.md`,
 | --- | --- |
 | S1 live start → `LIVE` < 30 s | Never reached `LIVE` in preprod (4 drafts stuck `REVIVING`) |
 | S2 `live_write` → visible < 5 s | Not measurable (no live session); writes returned edge 502 |
-| S5 `git_publish` → published < 60 s | Cold path ≈ 3.5 min of steps + 17–25 min drain; `phase_timeout:install:drain` at 20 min, ceiling raised to 45 min |
+| S5 `git_publish` → published < 60 s | `source-gap` / `unverified` (§4.1): cold path reported ≈ 3.5 min of steps + 17–25 min drain; `phase_timeout:install:drain` at 20 min, ceiling raised to 45 min — no builder source retained |
 | S6 end to end < 60 s | Not attainable: every phase above blocks it |
 | §3.4 zero silent failures | Violated: fire-and-forget dispatch, swallowed `catch {}`, pre-persist failures with no job/failure/log row |
+
+### 4.6 Fresh artifact still `REVIVING` — 2026-11-11 06:25–07:15Z
+
+Source: `LIVE-DISPATCH-REPORT.md` (mechanism proven there, §4.2) and
+the conductor observation window 2026-11-11 06:25–07:15Z in preprod.
+
+- `[FACT]` A fresh artifact (`50b3866d…`) created in that window
+  stayed in phase `REVIVING` for the full **50 minutes** of the
+  window (06:25–07:15Z), with `podUid=null` throughout.
+- `[FACT]` No builder pod was created for it, and its live start was
+  **never dispatched** to the builder: no draft staging, no reconcile
+  POST, no builder-side trace — the same fire-and-forget dispatch
+  failure proven in §4.2, reproduced on a fresh artifact after the
+  2026-11-11 04:39Z/04:49Z restarts.
+- `[FACT]` Nothing re-drove the intent during those 50 minutes: no
+  scheduler, tick, outbox or lease scanner picked the `REVIVING`
+  record up (§4.2), and no typed failure or structured log line
+  surfaced to the caller.
+- Baseline consequence: S1 and S6 remain at "never reached `LIVE`"
+  (§4.5) as of 2026-11-11 07:15Z; the §5.4 re-drive and typed-log
+  requirements are the blocking fix, ahead of any duration tuning.
 
 Source files (immo artefact-focus checkout, sibling of this repo):
 `/home/antoinefa/src/radar-immobilier-artefact-focus/LIVE-DISPATCH-REPORT.md`,
 `DISPATCH-REPORT.md`, `RECONCILE-REPORT.md`, `ATTACH-REPORT.md`.
-Step timings of §4.1: builder phase events for the 2026-11-10/11 cold
-installs (`source-gap` on the immo side: no builder log is retained
-in this repo; the figures above are the conductor-relayed phase
-measurements for those installs).
+Step timings of §4.1: `source-gap` / `unverified` — no builder log
+is retained in this repo; the figures above are the conductor-relayed
+phase measurements for those installs, with no builder source joined.
 
 ---
 
