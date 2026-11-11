@@ -13,8 +13,12 @@ import type { LiveRedriveItem } from "@sentropic/artifacts";
  *
  * SIGTERM stops the timer and drains the pass in flight (bounded under the
  * default 30 s pod grace); a drained pass leaves every unsettled intent
- * durable, and the next pod re-drives it. When no other SIGTERM listener
- * remains, the signal is raised again so the default termination applies.
+ * durable, and the next pod re-drives it. Node runs as PID 1 in the pods,
+ * where the kernel applies no default action to SIGTERM (a signal sent to
+ * itself is ignored as well): when no other SIGTERM listener remains, the
+ * process exits with code 0 after the drain; otherwise the other listener
+ * owns the shutdown. Requires terminationGracePeriodSeconds >= 30 on the
+ * workload that enables the loop (radar-immo-mcp: Kubernetes default, 30 s).
  */
 export const LIVE_REDRIVE_INTERVAL_MS = 15_000;
 export const LIVE_REDRIVE_DRAIN_MS = 25_000;
@@ -23,8 +27,7 @@ export interface ShutdownSignals {
   once(signal: "SIGTERM", listener: () => void): unknown;
   removeListener(signal: "SIGTERM", listener: () => void): unknown;
   listenerCount(signal: "SIGTERM"): number;
-  kill(pid: number, signal: "SIGTERM"): unknown;
-  readonly pid: number;
+  exit(code: number): unknown;
 }
 
 export interface LiveRedriveLoopOptions {
@@ -79,7 +82,10 @@ export function startLiveRedriveLoop(options: LiveRedriveLoopOptions): LiveRedri
   const onSigterm = () => {
     log(JSON.stringify({ kind: "artifacts.live_redrive_draining" }));
     void drain().finally(() => {
-      if (signals.listenerCount("SIGTERM") === 0) signals.kill(signals.pid, "SIGTERM");
+      if (signals.listenerCount("SIGTERM") === 0) {
+        log(JSON.stringify({ kind: "artifacts.live_redrive_exit" }));
+        signals.exit(0);
+      }
     });
   };
   signals.once("SIGTERM", onSigterm);
