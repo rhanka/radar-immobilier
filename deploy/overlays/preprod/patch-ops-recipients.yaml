@@ -1,0 +1,29 @@
+# PREPROD ops recipients wiring (port v1, #1051) for the api (ConfigMap
+# radar-api, read by the radar-api Deployment through envFrom and by the
+# radar-refresh-pv CronJob through its own envFrom on the same ConfigMap).
+# Strategic-merge patch: both keys are SET in preprod so neither can fall
+# back to a base value (the base carries no OPS_* key at all).
+#
+# - OPS_TARGET pins this instance's alerting target. The route answers
+#   `GET /api/v1/ops/recipients?target=immo-preprod` only; any other
+#   target (including immo-prod) gets 404. The refresh sweep stamps the
+#   same value on its systemic-failure emission.
+# - OPS_REFERENCE_WORKSPACE_SLUG names the workspace whose active
+#   `manage_members` members are alert recipients (plus app admins).
+#   The slug must exist in the preprod `workspaces` table: verify with
+#   the query in docs/operator/ops-recipients.md BEFORE the first apply.
+#   A slug that matches no workspace does not error — the endpoint then
+#   serves app admins only, without the fallback warning.
+#
+# OPS_RECIPIENTS_AUDIENCE is NOT here: it comes from the operator-held
+# Secret radar-ops-recipients (base Deployment, optional secretKeyRef),
+# so the L1-owned value never lands in git.
+#
+# Guarded by deploy/ci/check-ops-recipients-render.sh.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: radar-api
+data:
+  OPS_TARGET: "immo-preprod"
+  OPS_REFERENCE_WORKSPACE_SLUG: "agence-chaperon-immobilier"
