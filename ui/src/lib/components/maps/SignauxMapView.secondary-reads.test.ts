@@ -35,7 +35,7 @@ const lots: LotFeatureCollection = { type: "FeatureCollection", features: [{
 async function read(discarded = EMPTY_DISCARDED_KEYS, reveal = false) {
   vi.mocked(getSignalNodesForCity).mockResolvedValue(["A", "B", "C"].map((id) => ({
     id, type: "Signal", label: id, citySlug: CITY, sourceRef: null,
-    createdAt: new Date("2026-10-01T00:00:00Z"),
+    createdAt: new Date("2026-10-01T00:00:00Z"), effectiveDocumentDates: [], effectiveScrapDates: [],
     props: {
       rawRef: RAW, page: 1, excerpt: `Citation ${id}`,
       properties: id === "A" ? {} : {

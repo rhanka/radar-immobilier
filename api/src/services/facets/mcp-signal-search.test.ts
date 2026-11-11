@@ -24,7 +24,8 @@ vi.mock("../../routes/graph-signals.js", () => ({
 const db = {} as Database, store = {} as ObjectStore;
 const args = { city: "city", limit: 20, showDiscarded: false };
 const nodes = ["hidden", "visible"].map((id) => ({ id, type: "Signal", citySlug: "city",
-  label: id, props: {}, sourceRef: null, createdAt: new Date("2026-01-01T00:00:00Z") }));
+  label: id, props: {}, sourceRef: null, createdAt: new Date("2026-01-01T00:00:00Z"),
+  effectiveDocumentDates: [], effectiveScrapDates: [] }));
 beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(resolveMcpSignalWorkspace).mockResolvedValue("workspace");
