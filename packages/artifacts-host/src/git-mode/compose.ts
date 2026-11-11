@@ -20,6 +20,7 @@ import { SERVICE_SCOPE_BROKER, SERVICE_SCOPE_BUILDER, serviceTokenSource, type S
 import { createAccountDirectory } from "../directory.js";
 import { createLiveWorkerClient, liveStoreDrafts, liveStoreFences } from "@sentropic/artifacts/live-host";
 import { composeLiveService, FAIL_CLOSED_LIVE_KEYS } from "./live.js";
+import { createRedrivingLiveWorker, liveStoreWaiting, withLiveWorkerLogging } from "./live-worker-redrive.js";
 import { NO_LIVE_INVITATIONS } from "./live-grant.js";
 import { composeLiveEdgeRevocationPush, createLiveSocketRegistry, liveSignerFrom, readLiveEdgeConfig, type LiveControlTransport,
   type LiveSocketRegistry } from "./live-edge.js";
@@ -262,11 +263,12 @@ export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
   // Store/keys are stateless over the pool until a call runs.
   const buildLiveStore = ports.liveStore ?? createPostgresLiveStore(pool);
   const buildLiveKeys = ports.liveKeys ?? (config.liveDraftKeys ? createSealedLiveKeys(config.liveDraftKeys) : undefined);
-  const buildWorker = createLiveWorkerClient({ baseUrl: config.builderUrl,
+  // Request-path caller (git_publish awaits it): typed failure log only, no poll.
+  const buildWorker = withLiveWorkerLogging(createLiveWorkerClient({ baseUrl: config.builderUrl,
     identity: serviceTokenSource(config.service ?? {}, SERVICE_SCOPE_BUILDER, ports.fetch), fences: liveStoreFences(buildLiveStore),
     bindings, drafts: liveStoreDrafts(buildLiveStore, buildLiveKeys ?? FAIL_CLOSED_LIVE_KEYS), reconcileTimeoutMs: 60_000,
     sessionState: async (identity) => liveService ? liveService.liveInvitationState(identity) : NO_LIVE_INVITATIONS,
-    ...(ports.fetch ? { fetch: ports.fetch } : {}) });
+    ...(ports.fetch ? { fetch: ports.fetch } : {}) }));
   // M3-I: git_publish is selected only from the `build` stage; the sandbox
   // executor is admitted only once the builder base URL is set; the service
   // token source itself fails closed while the OAuth client is unconfigured.
@@ -300,12 +302,14 @@ export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
   const edgeWorker = liveSelected && input.resolution.stage === "live" && config.liveEdgeEnabled === true;
   const liveStore = ports.liveStore ?? (edgeWorker && !ports.liveWorker ? buildLiveStore : undefined);
   const liveKeys = buildLiveKeys;
-  const liveWorker = ports.liveWorker ?? (edgeWorker ? createLiveWorkerClient({ baseUrl: config.builderUrl,
+  // The builder answers `ready: false` while a revive outlasts its live wait and the package settle
+  // does not ask again: the host keeps the accepted command polling until ready, with typed logs.
+  const liveWorker = ports.liveWorker ?? (edgeWorker ? createRedrivingLiveWorker(createLiveWorkerClient({ baseUrl: config.builderUrl,
     identity: serviceTokenSource(config.service ?? {}, SERVICE_SCOPE_BUILDER, ports.fetch), fences: liveStoreFences(liveStore!), bindings,
     drafts: liveStoreDrafts(liveStore!, liveKeys ?? FAIL_CLOSED_LIVE_KEYS), reconcileTimeoutMs: 60_000,
     // Reconcile body `invitation: { epoch, expiresAt }` from the package liveInvitationState(identity).
     sessionState: async (identity) => liveService ? liveService.liveInvitationState(identity) : NO_LIVE_INVITATIONS,
-    ...(ports.fetch ? { fetch: ports.fetch } : {}) }) : undefined);
+    ...(ports.fetch ? { fetch: ports.fetch } : {}) }), { waiting: liveStoreWaiting(liveStore!) }) : undefined);
   // Qualification flags (default false), read from the configuration; an injected port wins (tests).
   const qualified = ports.liveQualified ?? (() => config.liveQualified === true);
   // Generic invitations port (0.2.22): off unless IMMO_ARTIFACTS_LIVE_INVITATIONS_QUALIFIED=true.
