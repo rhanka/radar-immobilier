@@ -1,5 +1,5 @@
 import { createLiveService, createPostgresLiveStore, type GitPort, type LiveInvitationPort, type LiveKeyPort, type LiveSessionService,
-  type LiveStore, type LiveWorkerPort } from "@sentropic/artifacts";
+  type LiveStore, type LiveWorkerEvent, type LiveWorkerPort } from "@sentropic/artifacts";
 import { ArtifactOperationError } from "@sentropic/artifacts/server/outcome-contract";
 import type pg from "pg";
 import { createLiveAuthorize, type LiveAuthorityDeps } from "./live-authority.js";
@@ -36,16 +36,31 @@ export interface ComposeLiveInput extends Omit<LiveAuthorityDeps, "qualified" | 
    * `liveInvitationState(identity)` for its reconcile body (the worker is built first).
    */
   readonly onService?: (service: LiveSessionService) => void;
+  /** Observer of every worker settle that did not complete (0.2.27); the package ignores a throw. */
+  readonly onWorkerEvent?: (event: LiveWorkerEvent) => void;
 }
 
+/**
+ * One structured JSON line on stderr per worker event (SPEC_ARTIFACT_BUILD_SLO
+ * §3.4, §6.1): a refusal, a timeout or a terminal builder failure is
+ * `artifacts.live_worker_failed` with its typed `code` (and `reason` for a
+ * builder failure); a builder still reviving is `artifacts.live_worker_pending`.
+ * Nothing is silent; the re-drive timer settles the same intent again.
+ */
+export function logLiveWorkerEvent(event: LiveWorkerEvent, write: (line: string) => void = console.error): void {
+  write(JSON.stringify({ kind: event.outcome === "failed" ? "artifacts.live_worker_failed" : "artifacts.live_worker_pending",
+    operation: event.action, storageScopeId: event.identity.storageScopeId, artifactId: event.identity.artifactId,
+    bindingGeneration: event.identity.bindingGeneration,
+    ...(event.code ? { code: event.code } : {}), ...(event.reason ? { reason: event.reason } : {}) }));
+}
 
 export function composeLiveService(input: ComposeLiveInput): LiveSessionService {
-  const { pool, git, store, keys, worker, qualified, invitations, onService, ...authority } = input;
+  const { pool, git, store, keys, worker, qualified, invitations, onService, onWorkerEvent, ...authority } = input;
   const service: LiveSessionService = createLiveService({ store: store ?? createPostgresLiveStore(pool), keys: keys ?? FAIL_CLOSED_LIVE_KEYS, git,
     authorize: createLiveAuthorize({ ...authority, qualified: qualified ?? (() => false),
       ...(invitations ? { invitations: { qualified: () => invitations.qualified === true,
         viewer: (identity, principalId) => service.liveViewer(identity, principalId) } } : {}) }),
-    ...(worker ? { worker } : {}), ...(invitations ? { invitations } : {}) });
+    ...(worker ? { worker } : {}), ...(invitations ? { invitations } : {}), ...(onWorkerEvent ? { onWorkerEvent } : {}) });
   onService?.(service);
   return service;
 }
