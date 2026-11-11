@@ -28,6 +28,9 @@
   let open = false;
   let pendingClass: SignalClass | null = null;
   let subSide: "left" | "right" = "left";
+  let drillDown = false;
+  let backEl: HTMLButtonElement | null = null;
+  let lastClassWidth = 192;
   let rootEl: HTMLElement | null = null;
   let popEl: HTMLElement | null = null;
   let classWrapEl: HTMLElement | null = null;
@@ -49,6 +52,7 @@
     cancelHover();
     open = false;
     pendingClass = null;
+    drillDown = false;
     openPanelMenuId.update((v) => (v === panelMenuId ? null : v));
     if (returnFocus) triggerButton()?.focus();
   }
@@ -56,6 +60,7 @@
     cancelHover();
     const last = pendingClass;
     pendingClass = null;
+    drillDown = false;
     void tick().then(() => {
       layout();
       if (last) focusClassItem(last);
@@ -78,7 +83,11 @@
     pendingClass = next;
     await tick();
     layout();
-    if (moveFocus) {
+    await tick();
+    layout();
+    if (drillDown) {
+      backEl?.focus();
+    } else if (moveFocus) {
       const first = reasonMenuEl()?.querySelector<HTMLButtonElement>('[role="menuitem"]:not(:disabled)');
       first?.focus();
     }
@@ -108,7 +117,8 @@
     popEl.style.right = "auto";
     popEl.style.overflow = "visible";
     const classMenu = classMenuEl();
-    const classWidth = classMenu?.offsetWidth || 192;
+    if (classMenu?.offsetWidth) lastClassWidth = classMenu.offsetWidth;
+    const classWidth = classMenu?.offsetWidth || lastClassWidth;
     const classHeight = classMenu?.offsetHeight || 160;
     const spaceBelow = window.innerHeight - rect.bottom - gap - margin;
     const spaceAbove = rect.top - gap - margin;
@@ -126,10 +136,32 @@
     popEl.dataset.side = subSide;
     decorate();
     const reasonMenu = reasonMenuEl();
+    if (!pendingClass && drillDown) drillDown = false;
     if (reasonMenu && pendingClass && reasonWrapEl) {
       const reasonWidth = reasonMenu.offsetWidth || 192;
-      const measured = (classMenu?.offsetWidth ?? 0) > 0 || rect.width > 0;
-      subSide = measured && left - reasonWidth - gap < margin ? "right" : "left";
+      const measured = (classMenu?.offsetWidth ?? 0) > 0 || rect.width > 0 || (drillDown && lastClassWidth > 0 && rect.width > 0);
+      // Geometric threshold (Option A): drill-down when the space left of
+      // the class menu cannot hold the reason menu width.
+      const shouldDrill = measured && left - reasonWidth - gap < margin;
+      if (shouldDrill !== drillDown) drillDown = shouldDrill;
+      popEl.dataset.mode = drillDown ? "drill" : "cascade";
+      reasonWrapEl.dataset.mode = drillDown ? "drill" : "cascade";
+      if (drillDown) {
+        subSide = "left";
+        popEl.dataset.side = subSide;
+        reasonWrapEl.dataset.side = subSide;
+        const drillWidth = Math.min(reasonWidth, Math.max(window.innerWidth - margin * 2, 0));
+        const drillLeft = Math.min(Math.max(margin, rect.right - drillWidth), Math.max(margin, window.innerWidth - drillWidth - margin));
+        popEl.style.left = `${drillLeft}px`;
+        popEl.style.width = `${drillWidth}px`;
+        reasonMenu.style.setProperty("--st-menu-maxHeight", `${classMax}px`);
+        reasonWrapEl.style.top = "0px";
+        reasonWrapEl.style.left = "0px";
+        reasonWrapEl.style.width = `${drillWidth}px`;
+        return;
+      }
+      if (!classMenu) return;
+      subSide = "left";
       popEl.dataset.side = subSide;
       reasonWrapEl.dataset.side = subSide;
       const reasonMax = Math.max(window.innerHeight - margin * 2, minHeight);
@@ -215,6 +247,7 @@
       cancelHover();
       open = false;
       pendingClass = null;
+      drillDown = false;
       openPanelMenuId.update((v) => (v === panelMenuId ? null : v));
       onApply("non_classe", null);
       triggerButton()?.focus();
@@ -231,6 +264,7 @@
     cancelHover();
     open = false;
     pendingClass = null;
+    drillDown = false;
     openPanelMenuId.update((v) => (v === panelMenuId ? null : v));
     onApply(chosen, code);
     triggerButton()?.focus();
@@ -241,6 +275,7 @@
     openPanelMenuId.set(panelMenuId);
     open = true;
     pendingClass = null;
+    drillDown = false;
     await tick();
     layout();
     classMenuEl()?.querySelector<HTMLButtonElement>('[role="menuitem"]:not(:disabled)')?.focus();
@@ -305,6 +340,12 @@
       }
       return;
     }
+    if (drillDown && target === backEl && event.key === "ArrowDown") {
+      event.preventDefault();
+      event.stopPropagation();
+      reasonMenuEl()?.querySelector<HTMLButtonElement>('[role="menuitem"]:not(:disabled)')?.focus();
+      return;
+    }
     if (event.key === closeKey) {
       event.preventDefault();
       event.stopPropagation();
@@ -330,13 +371,20 @@
     <svelte:component this={CurrentIcon} size={15} aria-hidden="true" />
   </IconButton>
   {#if open}
-    <span class="classement-pop" data-testid="classement-pop" data-side={subSide} use:portalPop={pendingClass ?? "class"}>
+    <span class="classement-pop" data-testid="classement-pop" data-side={subSide} data-mode={drillDown && pendingClass ? "drill" : "cascade"} use:portalPop={pendingClass ?? "class"}>
       <span class="cascade" role="presentation" on:keydown={onCascadeKeydown}>
-        <span class="cascade-class" data-testid="classement-class-menu" bind:this={classWrapEl} role="presentation" on:mouseover={onClassHover}>
-          <Menu label="Classement" items={classItems} open={true} dense onselect={onClassSelect} />
-        </span>
+        {#if !(drillDown && pendingClass)}
+          <span class="cascade-class" data-testid="classement-class-menu" bind:this={classWrapEl} role="presentation" on:mouseover={onClassHover}>
+            <Menu label="Classement" items={classItems} open={true} dense onselect={onClassSelect} />
+          </span>
+        {/if}
         {#if pendingClass}
-          <span class="cascade-reason" data-testid="classement-reason-menu" data-side={subSide} bind:this={reasonWrapEl}>
+          <span class="cascade-reason" class:cascade-reason--drill={drillDown} data-testid="classement-reason-menu" data-side={subSide} data-mode={drillDown ? "drill" : "cascade"} bind:this={reasonWrapEl}>
+            {#if drillDown}
+              <button type="button" class="drill-back" data-testid="classement-reason-back" bind:this={backEl} on:click={(event: MouseEvent) => { event.stopPropagation(); closeSub(); }}>
+                <span aria-hidden="true">‹</span><span>{CLASSEMENT_META[pendingClass].label}</span>
+              </button>
+            {/if}
             {#if pendingReasons.length === 0}
               <span class="classement-empty" data-testid="classement-reasons-empty">Motifs indisponibles</span>
             {/if}
@@ -355,7 +403,11 @@
   .cascade-class { display: block; }
   .cascade-class :global(.st-menu) { box-shadow: var(--st-component-popover-shadow, var(--st-shadow-floating)); }
   .cascade-reason { position: absolute; display: block; }
+  .cascade-reason--drill { position: relative; background: var(--st-semantic-surface-raised); border-radius: var(--st-component-popover-radius, var(--st-radius-lg, 0.5rem)); }
   .cascade-reason :global(.st-menu) { box-shadow: var(--st-component-popover-shadow, var(--st-shadow-floating)); }
+  .drill-back { display: flex; align-items: center; gap: var(--st-spacing-2, 0.5rem); width: 100%; box-sizing: border-box; border: 0; border-bottom: 1px solid var(--st-semantic-border-subtle); background: var(--st-semantic-surface-raised); color: var(--st-semantic-text-primary); font: inherit; font-weight: 600; text-align: left; padding: var(--st-spacing-2, 0.5rem) var(--st-spacing-3, 0.75rem); cursor: pointer; border-radius: var(--st-component-popover-radius, var(--st-radius-lg, 0.5rem)) var(--st-component-popover-radius, var(--st-radius-lg, 0.5rem)) 0 0; }
+  .drill-back:hover { background: var(--st-semantic-surface-hover); }
+  .drill-back:focus-visible { outline: 2px solid var(--st-semantic-action-primary); outline-offset: -2px; }
   :global(.classement-item--selected) { background: var(--st-component-selectableRow-selectedBackground, var(--st-semantic-surface-subtle)); color: var(--st-component-selectableRow-selectedText, var(--st-semantic-text-primary)); font-weight: 600; }
   :global(.classement-chevron) { display: inline-flex; align-items: center; justify-content: center; width: 1rem; min-width: 1rem; font-size: 1rem; line-height: 1; color: var(--st-semantic-text-secondary); flex: 0 0 1rem; }
   :global(.st-menu [data-class] svg) { color: var(--st-component-iconButton-text, var(--st-semantic-text-primary)); }

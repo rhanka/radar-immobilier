@@ -93,6 +93,7 @@ import { designKitMimeFor, getDesignKitBytes, resolveDesignKitAsset } from "./de
 import { ClassificationError, classificationFailure } from "../services/facets/classification-errors.js";
 import { decodeQuery } from "../services/facets/classification-query.js";
 import type { WritePageSurface } from "./write-intent-page-surface.js";
+import { handleReaderRelay, type ReaderRelayDeps } from "./reader-relay.js";
 
 /**
  * Files parity LOT 2 §B.4 — RFC 9110 §14 single-range subset, mirrored from
@@ -201,6 +202,13 @@ export interface ContentServeDeps {
    * optional field (tests inject a tight budget).
    */
   readonly geoBudget?: GeoReaderBudget;
+  /**
+   * Generic app-API relay (`/__reader/app/api/*`, RW, no operation
+   * allowlist — owner decision). Absent keeps the relay closed (503).
+   * The application dispatch is late-bound by the composition root:
+   * the reader app is created before the application it forwards to.
+   */
+  readonly relay?: ReaderRelayDeps;
 }
 type AuthorizedReader = ApiReaderContext & { readonly validUntil: number; readonly authorityVersion: string };
 
@@ -639,6 +647,32 @@ export function createReaderContentApp(deps: ContentServeDeps): Hono & {
       budgets.leave(slot);
     }
   }
+
+  // Generic app-API relay (owner decision: every /api/* call, RW, no
+  // operation allowlist). Reader authentication + authority freshness
+  // only; the application's own authorisations decide. No capability
+  // check, no basket-consent gate, application refusals pass through.
+  app.all("/__reader/app/*", async (c) => {
+    if (parseContentHost(c.req.header("host"), deps.contentBase).kind === "other") {
+      return c.json({ error: "not_found" }, 404);
+    }
+    const auth = await authorized(c);
+    if (!auth) {
+      applyReaderContentHeaders(c);
+      return c.json({ error: "unauthenticated" }, 401);
+    }
+    if (!await authorityCurrent(auth)) {
+      applyReaderContentHeaders(c);
+      return c.json({ error: "unauthenticated" }, 401);
+    }
+    if (!deps.relay) {
+      applyReaderContentHeaders(c);
+      return c.json({ error: "capability_unavailable" }, 503);
+    }
+    const response = await handleReaderRelay({ request: c.req.raw, readerSub: auth.readerSub, relay: deps.relay });
+    applyReaderContentHeaders(c);
+    return response;
+  });
 
   app.all("/__reader/api/:op", async (c) => {
     const parsed = parseContentHost(c.req.header("host"), deps.contentBase);
