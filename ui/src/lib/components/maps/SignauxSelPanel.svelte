@@ -1276,6 +1276,16 @@
                   {#if cardClassementError && openClassementErrorKey === cardClassementKey}
                     <p class="classement-error-detail" data-testid="classement-error-detail">{cardClassementError}</p>
                   {/if}
+                  {#if formatDate(signalPublishedAt(node)) || formatDocumentDate(signalEvidence(node).documentDate)}
+                    <div class="sel-entity-dates" data-testid="signal-card-dates">
+                      {#if formatDate(signalPublishedAt(node))}
+                        <span>Publié {formatDate(signalPublishedAt(node))}</span>
+                      {/if}
+                      {#if formatDocumentDate(signalEvidence(node).documentDate)}
+                        <span>Date doc. {formatDocumentDate(signalEvidence(node).documentDate)}</span>
+                      {/if}
+                    </div>
+                  {/if}
                   {#if classementEntry.reasonCode}
                     <div class="sel-entity-reason-row">
                       <span class="classement-reason-chip" data-testid="classement-reason-chip" title={classementEntry.reasonCode}>{reasonEntryLabel(classementReasonCodes.find((entry) => entry.code === classementEntry.reasonCode) ?? { code: classementEntry.reasonCode })}</span>
@@ -2382,6 +2392,15 @@
 
   .classement-error-detail {
     margin: 0;
+    padding: 0 0.85rem 0.34rem;
+    font-size: var(--signaux-fs-caption);
+    color: var(--st-semantic-text-secondary, #475569);
+  }
+
+  .sel-entity-dates {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
     padding: 0 0.85rem 0.34rem;
     font-size: var(--signaux-fs-caption);
     color: var(--st-semantic-text-secondary, #475569);
