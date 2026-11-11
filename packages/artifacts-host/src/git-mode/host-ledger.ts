@@ -104,6 +104,7 @@ interface JobRow {
 interface BindingRow {
   artifact_id: string; repo_id: string; branch: string; sub_path: string; state: string; generation: number; executor: string;
   auto_publish: boolean; pending_job_id: string | null; pending_commit_sha: string | null; personal_principal_id: string | null;
+  attached_by: string;
   release_commit_sha: string | null; version: number;
 }
 
@@ -137,7 +138,7 @@ export function createPostgresHostBuildLedger(options: HostBuildLedgerOptions) {
 
   async function lockedRows(client: Client, artifactId: string, jobId: string) {
     const binding = (await client.query<BindingRow>(`SELECT artifact_id, repo_id, branch, sub_path, state, generation, executor,
-      auto_publish, pending_job_id, pending_commit_sha, personal_principal_id, release_commit_sha, version
+      auto_publish, pending_job_id, pending_commit_sha, personal_principal_id, attached_by, release_commit_sha, version
       FROM artifacts.git_bindings WHERE artifact_id = $1 AND storage_scope_id = $2 FOR UPDATE`, [artifactId, scopeId])).rows[0];
     const job = (await client.query<JobRow>(`SELECT * FROM artifacts.host_build_jobs
       WHERE job_id = $1 AND storage_scope_id = $2 AND artifact_id = $3 FOR UPDATE`, [jobId, scopeId, artifactId])).rows[0];
@@ -153,8 +154,11 @@ export function createPostgresHostBuildLedger(options: HostBuildLedgerOptions) {
       currentReleaseId: rows.currentReleaseId, headReachable: extra.headReachable,
       binding: binding ? { artifactId: binding.artifact_id, state: binding.state, generation: Number(binding.generation),
         executor: binding.executor, autoPublish: binding.auto_publish, pendingJobId: binding.pending_job_id,
-        pendingCommitSha: binding.pending_commit_sha }
-        : { artifactId: "", state: "detached", generation: 0, executor: "", autoPublish: false, pendingJobId: null, pendingCommitSha: null },
+        pendingCommitSha: binding.pending_commit_sha,
+        // 0.2.27: the builder's only owner source before any live reconcile (personal owner, attachedBy fallback).
+        ownerId: binding.personal_principal_id ?? binding.attached_by }
+        : { artifactId: "", state: "detached", generation: 0, executor: "", autoPublish: false, pendingJobId: null, pendingCommitSha: null,
+          ownerId: "" },
       job: job ? { jobId: job.job_id, state: job.state, bindingGeneration: Number(job.binding_generation), commitSha: job.commit_sha,
         expectedCurrentReleaseId: job.expected_current_release_id,
         fence: job.fence_run_id && job.fence_attempt ? { runId: job.fence_run_id, attempt: job.fence_attempt } : null } : undefined,
