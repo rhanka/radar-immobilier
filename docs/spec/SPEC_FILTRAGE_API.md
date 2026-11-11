@@ -49,7 +49,7 @@ signals, legacyProjection, counts`). Chaque signal porte :
 - identité : `id, type, citySlug, label, sourceRef, facetFingerprint, createdAt`
 - champs de carte : `description, publishedAt, etape, regulatoryStatus,
   classification, legacySubset, bPrime`
-- `docRefs` dégradés (extraits des `props` persistés, **sans** appel S3) ;
+- `docRefs` d'abord dégradés (extraits des `props` persistés), dates restaurées ensuite selon le paragraphe ci-dessous (graphe, sinon lecture S3 bornée) ;
   `evidence` construite sur ces refs dégradées
 - `props` réduit à la projection fermée §5.4 déjà en production
   (`projectProps` de `reader-coherent-city.ts`, fail-closed)
@@ -62,7 +62,10 @@ store ; une date qui ne vit que dans les métadonnées S3 est récupérée par
 une lecture légère mise en cache — `findDocumentMetadata`, soit un HEAD
 + un GET du petit sidecar `.meta.json` par `rawRef` distinct (jamais de
 list/scan du bucket), cache partagé par requête et borne du budget
-d'enrichissement documentaire existant. Au-delà du budget ou en échec, la
+d'enrichissement documentaire existant : un `AbortSignal` global annule
+les lectures en vol à la deadline, chaque attente court contre cette
+deadline, et les lectures par `rawRef` distinct sont plafonnées en
+concurrence (8). Au-delà du budget ou en échec, la
 carte reste dégradée (dates du graphe seules). Les titres de documents
 qui ne vivent que dans les métadonnées S3 restent hors de ce chemin
 (`docTitle` retombe sur `sourceUrl ?? rawRef ?? docSha`, le lien de
