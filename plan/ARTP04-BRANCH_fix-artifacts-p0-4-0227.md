@@ -21,6 +21,7 @@
   - `tools/mcp-p0b.mk`
   - `tools/mcp-p0b-candidate.sh`
   - `docs/operator/git-artifact-mode.md`
+  - `deploy/overlays/preprod/patch-immo-mcp-config.yaml` (re-drive flag, one workload)
   - `plan/ARTP04-BRANCH_fix-artifacts-p0-4-0227.md`
 - **Forbidden Paths (must not change in this branch)**:
   - `Makefile`
@@ -47,4 +48,8 @@
 - [x] Lot 2: Drop the pre-build live reconcile (A7); host view carries `ownerId`.
 - [x] Lot 3: Boot + 15 s re-drive timer, SIGTERM drain, `onWorkerEvent` JSON logs (A1, A3, A9).
 - [x] Lot 4: Unit tests for the three points; typecheck, lint, test on `ENV=test-artp04`.
-- [ ] Lot 5: Push, open the PR, CI green; conductor reviews and merges.
+- [x] Lot 5: Push, open the PR (#1079), CI green.
+- [x] Lot 6 (review): 409 `live_session_active` as `git_live_conflict`/`active_session`, logged, job closed and re-armed on retry.
+- [x] Lot 6 (review): re-drive gated by `IMMO_ARTIFACTS_LIVE_REDRIVE_ENABLED=true`, set on radar-immo-mcp only.
+- [x] Lot 6 (review): SIGTERM drain ends with exit 0 (PID 1); composition wiring and ownerId fallback tests in CI.
+- [ ] Conductor: review and merge with a merge commit.

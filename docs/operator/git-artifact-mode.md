@@ -161,8 +161,12 @@ is an A1 refused write path: a branch can never change it.
   `ownerId` the host ledger view supplies (personal owner, `attachedBy`
   fallback). A pre-build reconcile used to wake a REVIVING live session, which
   then refused the build with `pending_publication`. While a live session is
-  LIVE or REVIVING the builder answers `409 live_session_active`
-  (`provider_unavailable` on the host). Then
+  LIVE or REVIVING the builder answers `409 live_session_active`: the host
+  closes the job it persisted (`build_failed`, code `live_session_active`,
+  reason `active_session`; a retry of the same command re-arms it), logs
+  `artifacts.build_refused`, and answers `git_live_conflict` (reason
+  `active_session`, 409, not retriable) with a message to stop the live
+  session (`artifacts_live_control`, action `stop`) before publishing. Then
   job persistence before `POST /v1/builds` (body exactly `{artifactId, jobId, binding}`, `binding = {repoId, branch, subPath}` read from the package git binding of that artifact and job generation, `git_not_attached` before any call when absent), attempt fence, receipt ledger and
   the publish step in one transaction; composed by radar-api from the `build`
   stage on. Without the receipt key or the builder keys, `git_publish` and the
@@ -243,14 +247,26 @@ unchanged.
 
 ## Live re-drive and worker logs (0.2.27)
 
-With the edge worker composed, the host runs the package re-drive
+With the edge worker composed AND `IMMO_ARTIFACTS_LIVE_REDRIVE_ENABLED=true`
+(literal `true` only), the host runs the package re-drive
 (`LiveSessionService.redrive`) once at boot and every 15 s
 (`packages/artifacts-host/src/live-redrive.ts`). Each pass settles again every
 runtime of the scope that still waits for the builder (REVIVING, LIVE behind
 its draft, a stop not DORMANT yet): at most 4 items in flight, 35 s each, so a
-start waits under 60 s for its next settle, also after a pod restart. SIGTERM
-stops the timer and drains the pass in flight (25 s at most); the unsettled
-intents stay durable for the next pod.
+start waits under 60 s for its next settle, also after a pod restart.
+
+The package overlap guards are process-local, so the flag is set in exactly
+one workload per storage scope. Preprod: `radar-immo-mcp` only
+(`deploy/overlays/preprod/patch-immo-mcp-config.yaml`), never `radar-api`
+(1 to 2 replicas). `radar-immo-mcp` carries the MCP live flow and runs one
+replica with a `Recreate` strategy, so a rollout never runs two loops.
+
+SIGTERM stops the timer and drains the pass in flight (25 s at most); the
+unsettled intents stay durable for the next pod. Node runs as PID 1 in the
+pod, where SIGTERM has no default action: after the drain the process exits
+with code 0 when no other SIGTERM listener is installed. The workload needs
+`terminationGracePeriodSeconds` of at least 30 s (`radar-immo-mcp`:
+Kubernetes default, 30 s).
 
 Structured log lines (stderr, one JSON object per line):
 
@@ -261,6 +277,8 @@ Structured log lines (stderr, one JSON object per line):
 | `artifacts.live_redrive` | A non-empty pass: `items`, `settled`, `pending`, `failed`, `skipped` |
 | `artifacts.live_redrive_unavailable` | A pass that could not list or settle (store failure) |
 | `artifacts.live_redrive_draining` | SIGTERM received, the pass in flight is drained |
+| `artifacts.live_redrive_exit` | Drain over, no other SIGTERM listener: the process exits 0 |
+| `artifacts.build_refused` | The builder refused a build with `409 live_session_active`; the job is closed |
 
 ## Not yet composed (fail-closed)
 
