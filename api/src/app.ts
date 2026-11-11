@@ -139,9 +139,9 @@ export function createApp(deps: AppDeps): Hono {
   app.all("/__app", (c) => c.json({ error: "not_found" }, 404));
   app.all("/__app/*", (c) => c.json({ error: "not_found" }, 404));
 
-  // Ops recipients (S2S service-client bearer): mounted before protect,
+  // Ops recipients (S2S static opaque bearer): mounted before protect,
   // like the artifacts live-host routes, and authenticated by the route
-  // itself against the IdP JWKS. Absent deps keep it closed (503).
+  // itself (constant-time hash comparison). Absent deps keep it closed (503).
   app.route("/", opsRecipientsRoute(deps.ops ?? null));
 
   // Control requests use the official cookie guard before general bearer auth.
