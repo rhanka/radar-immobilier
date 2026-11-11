@@ -36,8 +36,15 @@ enregistrées. Les scopes `immo:notes:write` / `immo:decisions:propose` /
   identifiants de session ; `read_document_excerpt` y passe tout extrait.
 - **Data boundary**: stdio creates fixture sources with an empty environment.
   Only HTTP uses `RADAR_API_BASE_URL` to select real signal/raw-data sources.
-  Its five other domain tools remain `not_wired_yet`; real account authorization
+  Its five other domain tools remain `not_wired`; real account authorization
   requires `IMMO_MCP_ACCOUNT_DATABASE_URL` and is rechecked for each invocation.
+- **Source provenance (#1063)**: every tool response carries
+  `source: "live" | "fixture"` (`live` = http seam against the radar API,
+  `fixture` = deterministic mocks). The connected HTTP server refuses to
+  start without `RADAR_API_BASE_URL`, so a preprod/prod instance never
+  serves fixtures; unwired domain tools fail with `not_wired:` instead.
+  The local stdio connector is a synthetic fixture server by design — its
+  answers are labelled `source: "fixture"`, never presented as real data.
 
 ## Build / test / preuve
 
@@ -115,7 +122,8 @@ L'entrée `immo` suit exactement le même contrat stdio :
 - les **claims** du token validé sont mappés vers `ImmoMcpAuthContext` (`authContextFromMcp`) —
   c'est l'équivalent HTTP de `resolveAuthContext(env)` du mode stdio ; le scope-gating par tool
   (`assertScope`) reste appliqué. **Aucun** claim ne vient des arguments LLM.
-- **Data**: fixtures by default; `RADAR_API_BASE_URL` selects real sources.
+- **Data**: `RADAR_API_BASE_URL` is required at startup (the connected server
+  refuses to serve fixtures); it selects real sources.
   Missing or unavailable account bindings deny real business calls before dispatch.
 
 > Écart vs brief assumé : le brief citait `createRequireServiceAuth`. C'est en réalité la
@@ -127,7 +135,7 @@ L'entrée `immo` suit exactement le même contrat stdio :
 
 | Var | Défaut | Rôle |
 |-----|--------|------|
-| `RADAR_API_BASE_URL` | — | Selects real signal/raw-data API sources (HTTP only). |
+| `RADAR_API_BASE_URL` | — (**required**) | Selects real signal/raw-data API sources (HTTP only); startup fails without it. |
 | `IMMO_MCP_ACCOUNT_DATABASE_URL` | — | Trusted read-only account and membership database (HTTP only). |
 | `IMMO_MCP_DATA_MODE` | `mock` | Startup label; request audits follow the actual selected source mode. |
 | `IMMO_MCP_OAUTH_ISSUER` | — (**requis**) | issuer IdP / authorization server (ex. `https://auth.sent-tech.ca`) |
