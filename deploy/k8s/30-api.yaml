@@ -220,6 +220,18 @@ spec:
             # out-of-band in the namespace.
             - name: SCW_TEM_SECRET_KEY
               valueFrom: { secretKeyRef: { name: radar-tem-credentials, key: SCW_TEM_SECRET_KEY, optional: true } }
+            # Ops recipients port v1 (#1051): exact `aud` required on the
+            # Sentropic L1 service bearer. The value is fixed by the L1
+            # contract and provisioned out-of-band in the Secret
+            # radar-ops-recipients (never in git; see
+            # docs/operator/ops-recipients.md). Optional: an environment
+            # without the Secret keeps the route closed (503). The bearer
+            # JWT itself is never stored here — the api verifies it against
+            # the IdP JWKS. Prod stays inert: the base ConfigMap carries no
+            # OPS_TARGET / OPS_REFERENCE_WORKSPACE_SLUG (see the preprod
+            # overlay patch-ops-recipients.yaml for the active wiring).
+            - name: OPS_RECIPIENTS_AUDIENCE
+              valueFrom: { secretKeyRef: { name: radar-ops-recipients, key: OPS_RECIPIENTS_AUDIENCE, optional: true } }
           # Probes DÉCOUPLÉES des dépendances (étude crashloop 2026-07-02, C2) :
           # startup + liveness tapent /livez (process vivant, SANS DB/S3) — un
           # hoquet Postgres/S3 ne doit PAS tuer le pod. Seule la readiness tape
