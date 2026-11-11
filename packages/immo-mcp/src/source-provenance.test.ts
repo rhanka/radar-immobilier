@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { HttpDataSource, MockDataSource } from "./data-source.js";
 import { captureInvocationContext } from "./invocation-context.js";
 import { HttpRawDataSource, MockRawDataSource } from "./raw-data.js";
+import { RadarSignalReadError } from "./signal-read-error.js";
 import { signalSearchBody, signalSearchItem } from "./signal-search-test-fixture.js";
 import { assertNoFixtureOnConnectedServer } from "./server-http.js";
 import { invokeTool } from "./tools.js";
@@ -128,6 +129,42 @@ describe("source provenance contract (#1063)", () => {
       expect(result.isError, name).toBeFalsy();
       expect(parse(result)["source"], name).toBe("fixture");
     }
+  });
+
+  it("should carry source live on a typed search_signals error in real mode", async () => {
+    const ctx = context(
+      "real",
+      new HttpDataSource({
+        baseUrl: "https://api.test.local",
+        fetchImpl: (async () => Response.json({ error: "unavailable" }, { status: 503 })) as typeof fetch,
+      }),
+      new HttpRawDataSource({
+        baseUrl: "https://api.test.local",
+        publicBaseUrl: "https://api.test.local",
+        fetchImpl: liveFetch as typeof fetch,
+      }),
+    );
+    const result = await invokeTool("search_signals", TOOL_ARGS["search_signals"]!, ctx);
+    const payload = parse(result);
+    expect(result.isError).toBe(true);
+    expect(payload["error"]).toBe("radar_api_unavailable");
+    expect(payload["upstreamStatus"]).toBe(503);
+    expect(payload["source"]).toBe("live");
+  });
+
+  it("should carry source fixture on a typed search_signals error in simulation mode", async () => {
+    const failingMock = {
+      mode: "mock" as const,
+      searchSignals: async (): Promise<never> => {
+        throw new RadarSignalReadError("radar_api_unavailable", 503);
+      },
+    };
+    const ctx = context("simulation", failingMock, new MockRawDataSource());
+    const result = await invokeTool("search_signals", TOOL_ARGS["search_signals"]!, ctx);
+    const payload = parse(result);
+    expect(result.isError).toBe(true);
+    expect(payload["error"]).toBe("radar_api_unavailable");
+    expect(payload["source"]).toBe("fixture");
   });
 
   it("should refuse to start a real-configured connected server without the live API", () => {
