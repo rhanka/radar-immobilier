@@ -383,3 +383,133 @@ may not.
   `pending_publication`, `phase_timeout:<phase>:<step>`, …); new
   codes are added to the contract, not invented per release.
 - `[TARGET]` **Idempotency end to end.** Re-driving or retrying with
+  the same idempotency key never duplicates a session, commit or
+  publication; a repeated `live_control(start)` on a `REVIVING`
+  record joins/re-drives the existing intent instead of refusing
+  `active_session`.
+
+### 5.5 Session lifecycle and orphan teardown
+
+- `[TARGET]` The builder reaps **orphan sessions**: sessions in
+  `REVIVING`/`QUIESCING` with no live pod and no progress for
+  > 10 min are torn down, their binding lock released, and the draft
+  lands in a typed terminal state the host can read. Teardown events
+  are logged and counted (§5.6).
+- `[TARGET]` `stop` is total: for any non-terminal session state,
+  `stop` either closes the session (S4) or returns a typed code that
+  names the exact blocker. `invalid_request` on stopping an orphan
+  (§4.2) is a spec violation.
+- `[TARGET]` Pod death mid-session is detected by the builder; the
+  session is re-driven onto a healthy pod (draft content preserved)
+  or failed typed (§7.4) — never left `REVIVING` forever.
+
+### 5.6 Edge/MCP timeouts and per-phase metrics
+
+- `[TARGET]` **No 502 on an operation that succeeds.** Edge and MCP
+  gateway timeouts are set **above the max** of every synchronous
+  phase (§3.1), or the operation answers **asynchronously**: accepted
+  with an invocation id, outcome read via status poll. A transport
+  timeout must never be the only signal for an operation whose real
+  latency is within its SLO max (§4.4).
+- `[TARGET]` **Per-phase metrics exposed to the conductor.** For every
+  phase event of §2 the builder emits a timestamped record queryable
+  by the conductor (API or metrics endpoint), keyed by artifact id +
+  invocation id: `start_accepted`, `pod_ready`, `cache_ready`
+  (with `lockSha256` and cache state), `preview_routable`,
+  `build_started`, `build_finished`, `bundle_published`,
+  `url_routable`, plus terminal typed failures. Retention ≥ 30 days
+  in preprod/prod (`[OPEN]` Q4).
+- `[TARGET]` From these records the conductor computes p50/p95/max
+  per phase, per case (warm/cold-known), per environment — the §7
+  acceptance numbers and the §6.4 dashboard read the same source.
+
+---
+
+## 6. Requirements on immo (host)
+
+### 6.1 Reconcile before build — done (#1067)
+
+`[FACT]` Done. Every `git_publish` now reconciles the binding with the
+builder (`POST v1/live/reconcile`) before persisting the build job and
+before `POST v1/builds`; a reconcile refusal fails closed with a typed
+code and no build is requested. A retry after `build_failed`
+re-reconciles instead of staying blocked on `stale_session`
+(`RECONCILE-REPORT.md`; host package `packages/artifacts-host`).
+Remaining host-side duty under §5.4: the composed live worker's
+failures are logged as structured JSON before propagating (no
+swallowed dispatch on the host path).
+
+### 6.2 Generic RW relay — done (#1076)
+
+`[FACT]` Done. The host exposes a generic read/write relay for
+artifact content (no per-artifact bespoke wiring), so live and static
+flows share one host surface. New artifact kinds onboard through the
+relay without host code changes; relay operations carry the same
+typed-code + structured-log contract (§3.4).
+
+### 6.3 Pre-warming triggered on immo `main` merge
+
+- `[TARGET]` On every merge to immo `main` (and on prod-tag creation)
+  that changes a consumed lockfile, immo computes the new
+  `lockSha256` and calls the builder pre-warm API (§5.1) in the same
+  delivery pipeline — **before** any user can start an artifact on
+  that lockfile.
+- `[TARGET]` The trigger is idempotent and observable: the merge
+  pipeline records `lockSha256` + pre-warm invocation id; failure to
+  trigger is a pipeline failure (typed, logged), never a silent skip.
+  Until sealing completes, §3.3 fast rejection applies.
+- `[TARGET]` Immo also pre-warms on conductor request (manual trigger)
+  for incident recovery and for the §7.3 cold-lockfile test.
+
+### 6.4 Conductor dashboard (phase durations)
+
+- `[TARGET]` The conductor dashboard shows, per environment: live
+  phase durations (p50/p95/max per §3.1 phase and case), cache state
+  per current `lockSha256` (`absent|building|sealed|failed`), warm
+  pool occupancy, orphan/re-drive counters, and the typed-failure
+  rate. Source: the §5.6 builder records joined with host invocation
+  logs — one source of truth, no hand-kept spreadsheet.
+- `[TARGET]` SLO breach (p95 over target over a rolling 24 h window,
+  or any silent failure) is flagged on the dashboard the day it
+  happens. `unknown` / `source-gap` states are displayed as such,
+  never as zero.
+
+### 6.5 Host contract hygiene
+
+- `[TARGET]` Documented MCP calls work as documented: host defaults
+  (`repoId`, `baseRef`) are applied by the host, not rediscovered per
+  call (the §4.3 `invalid_request` attach failure stays fixed).
+- `[TARGET]` Host never swallows a builder/worker error: every
+  failure is logged structured (§3.4) and propagated typed, unchanged,
+  to the MCP caller.
+
+---
+
+## 7. Acceptance tests
+
+All acceptance runs execute in **preprod** through **MCP calls only**
+(the claude.ai connector surface: `attach`, `live_control`,
+`live_write`, `git_commit`, `git_publish`, status reads). No kubectl,
+no direct builder HTTP, no DB writes — if the flow cannot be proven
+through MCP, it is not accepted. Prod acceptance repeats §7.1 after
+the preprod pass, before the SLO is declared live in prod.
+
+### 7.1 Warm end-to-end scenario (S6, S1, S2, S3, S4, S5)
+
+Scripted scenario, **run 5 times** consecutively:
+
+1. Create a new artifact on the current immo `main` lockfile
+   (pre-warmed per §6.3; verify cache state `sealed` first).
+2. `attach` (base `main`), `live start` → assert phase `LIVE`;
+   record S1.
+3. One small `live_write` (single file change); poll the preview
+   until the new asset hash is served; record S2.
+4. `git_commit`; assert the commit exists on the bound branch;
+   record S3.
+5. `stop`; assert session closed and pod released; record S4.
+6. `git_publish`; poll the published URL until it serves the bundle
+   (HTTP 200); record S5 and S6 (attach → URL).
+
+**Pass**: for every phase, p95 over the 5 runs < target **and** every
+single run < max (§3.1); 5/5 runs reach a published URL; 0 silent
+failures, 0 untyped errors (§3.4). Phase durations are taken from the
