@@ -57,6 +57,6 @@ Secret) until an explicit activation decision.
   - Lot gate: `check-ops-recipients-render.sh` passes on the branch;
     hermetic test 7 passed / 0 failed (wrong target, missing slug,
     literal audience, wrong Secret, prod leak all rejected).
-- [ ] **Lot 3 — Runbook + close-out**
-  - [ ] `docs/operator/ops-recipients.md` (Secret, rotation, verify).
+- [x] **Lot 3 — Runbook + close-out**
+  - [x] `docs/operator/ops-recipients.md` (Secret, rotation, verify).
   - [ ] Push, PR to `main`, CI green. No merge.
