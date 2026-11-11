@@ -513,3 +513,124 @@ Scripted scenario, **run 5 times** consecutively:
 **Pass**: for every phase, p95 over the 5 runs < target **and** every
 single run < max (§3.1); 5/5 runs reach a published URL; 0 silent
 failures, 0 untyped errors (§3.4). Phase durations are taken from the
+§5.6 records and cross-checked against client-observed latency
+(§3.2).
+
+### 7.2 Cold-known scenario (S1c)
+
+Destroy the warm pool claim without touching the sealed cache
+(builder-side pool drain, coordinated with the Sentropic owner), then
+run §7.1 steps 2–5 **3 times**. **Pass**: S1c p95 < 30 s, max < 60 s;
+no network install appears in the builder phase records (cache state
+`sealed` throughout).
+
+### 7.3 Cold-lockfile scenario (§3.3, §5.1, §6.3)
+
+1. Land a lockfile change on a test branch/fork whose `lockSha256`
+   has never been sealed. Attempt `live start` **without**
+   pre-warming. **Pass**: fast typed rejection
+   (`cache_not_prewarmed`, ≤ 5 s) — not an install, not a hang, not
+   a silent `REVIVING`.
+2. Trigger pre-warming the way a `main` merge would (§6.3). **Pass**:
+   cache state reaches `sealed` < 15 min, observable throughout.
+3. Re-run §7.1 once on the new lockfile. **Pass**: warm SLOs hold.
+
+### 7.4 Failure scenarios (typed failure + automatic recovery)
+
+Each scenario is injected in preprod, coordinated with the Sentropic
+owner, and driven only through MCP + the §5.6 records:
+
+| # | Injection | Expected outcome |
+| --- | --- | --- |
+| F1 | **Dead pod**: kill the builder pod mid-`live start` (during `REVIVING`) | Re-drive (§5.4) re-dispatches; session reaches `LIVE` within max + one re-drive interval, **or** lands in a typed terminal failure the caller can read. Never stuck `REVIVING` > 10 min; failure carries a typed code + log line. |
+| F2 | **API restart during a start**: restart the builder API between acceptance and `LIVE` | Durably recorded intent survives; re-drive scanner resumes it after restart; same terminal guarantee as F1. No duplicate session (idempotency, §5.4). |
+| F3 | **Pod death mid-session** (after `LIVE`, before `stop`) | §5.5: session re-driven with draft preserved, or typed failure; `stop` afterwards still succeeds or fails typed — never `invalid_request` on an orphan. No orphan remains after 10 min. |
+| F4 | **Edge timeout pressure**: `live_write` + `git_commit` under the pre-fix gateway timeout conditions | No 502 masking: each call returns its real typed outcome, or an async invocation id whose poll returns it (§5.6). |
+
+**Pass (all)**: every injected failure produces (a) a typed code to
+the caller or a recovered success, (b) exactly the §3.4 structured log
+lines, (c) automatic recovery with no manual DB/kubectl intervention,
+(d) zero silent failures across the whole acceptance campaign.
+
+### 7.5 Reporting
+
+The acceptance report (one per environment) publishes: per-phase
+p50/p95/max tables per case, the 5 raw S6 durations, cache-state
+transitions, and every failure observed with its typed code. Numbers
+come from the §5.6 records; any phase that cannot be measured is
+reported `source-gap` and blocks acceptance — an unmeasured SLO is
+not a passed SLO.
+
+---
+
+## 8. Lots, owners, dependencies, open questions
+
+### 8.1 Lots
+
+| Lot | Deliverable | Owner | Depends on |
+| --- | --- | --- | --- |
+| L1 | Sealed cache per `lockSha256` + cache-state query + pre-warm API (§5.1) | Sentropic (builder) | — |
+| L2 | Warm pod pool ≥ 1/tenant + pool metrics (§5.2) | Sentropic (builder), k8s (pool placement/sizing) | L1 (cache mount contract) |
+| L3 | Incremental vite build + built-revision reporting (§5.3) | Sentropic (builder) | L1 |
+| L4 | Dispatch retry + re-drive scanner + typed logs (§5.4); host-side worker-failure logging (§6.1) | Sentropic (package/builder) + immo (host composition) | — |
+| L5 | Orphan teardown + total `stop` (§5.5) | Sentropic (builder) | L4 |
+| L6 | Edge/MCP timeout fix or async responses; per-phase metrics endpoint (§5.6) | Sentropic (edge/builder), k8s (gateway timeouts) | — |
+| L7 | Pre-warm trigger on immo `main` merge + prod tag (§6.3) | immo | L1 |
+| L8 | Conductor dashboard: phase durations, cache/pool state (§6.4) | immo | L6 |
+| L9 | Acceptance campaign §7 in preprod, then prod (§7.1–§7.5) | immo (conductor), Sentropic on call for injections | L1–L8 |
+
+Owners: **immo** = this repo (host, MCP surface, dashboard, acceptance
+driver); **Sentropic** = artifact builder + `@sentropic/artifacts`
+package + edge; **k8s** = cluster/platform (gateway timeouts, pool
+scheduling, pod lifecycle primitives the builder consumes).
+
+### 8.2 Dependencies and order
+
+- The user-path SLOs (S6 above all) depend on **L1 + L2 landing
+  first**: without a sealed cache and a warm pod, no dispatch fix can
+  bring a 3.5-minute install under 60 s.
+- L4/L5 are independent of L1/L2 and close the §4.2/§4.3 silence
+  defects; they should land in parallel — a fast system that still
+  fails silently does not meet this spec (§3.4).
+- L7 depends on the L1 pre-warm API contract (`lockSha256` + state
+  query). L8 depends on the L6 metrics contract. Both contracts are
+  small and should be frozen before implementation starts
+  (`[OPEN]` Q1/Q4).
+- Already landed on the immo side: reconcile-before-build (#1067,
+  §6.1) and the generic RW relay (#1076, §6.2). Attach host defaults
+  (PR #1064, §6.5) must be merged/deployed before §7 runs, or §7.1
+  step 2 uses the explicit-`repoId` call form.
+
+### 8.3 Open questions
+
+- **Q1 — Un-prewarmed request shape.** Fast typed rejection
+  (`cache_not_prewarmed`, §3.3) vs non-blocking queue with async
+  completion. This spec defaults to fast rejection; a queue is
+  acceptable only if the session is never blocked and completion is
+  pollable. *Decider: owner, with Sentropic.*
+- **Q2 — Sealed-cache retention/grace.** How long a sealed cache for
+  a superseded `lockSha256` is kept (storage cost vs rollback to a
+  prod tag). *Decider: Sentropic (cost), immo (rollback need).*
+- **Q3 — Warm pool sizing.** Min ≥ 1/tenant is the floor; burst
+  sizing and whether cold-known keeps the 30 s p95 (S1c) or the pool
+  minimum rises per tenant need load data from the first preprod
+  campaign. *Decider: k8s + Sentropic.*
+- **Q4 — Metrics surface.** Builder phase records via dedicated API,
+  metrics endpoint, or log export; retention ≥ 30 days proposed.
+  The §7 numbers and §6.4 dashboard need one frozen contract.
+  *Decider: Sentropic, immo consumes.*
+- **Q5 — Prod-tag pre-warming.** Whether prod-tag creation pre-warms
+  synchronously in the tag pipeline or via the same async trigger as
+  `main` merges (§6.3). *Decider: immo.*
+- **Q6 — Error-code registry.** Where the stable typed-code list
+  (§5.4) lives (builder contract doc vs package) and its change
+  process. *Decider: Sentropic, immo reviews.*
+
+No open question blocks writing code against §5.1/§5.4; Q1 and Q4
+block freezing the L7/L8 contracts and must be answered before those
+lots start.
+
+
+
+
+
