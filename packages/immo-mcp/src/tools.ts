@@ -63,7 +63,10 @@ export async function invokeTool(name: string, args: Record<string, unknown>, sn
           return await handler(args as Record<string, unknown>, snapshot);
         } catch (err) {
           if (err instanceof RadarSignalReadError) {
-            const payload = err.toPublicPayload(def.name, correlationId);
+            const payload = {
+              ...err.toPublicPayload(def.name, correlationId),
+              source: snapshot.data.mode === "http" ? "live" : "fixture",
+            };
             process.stderr.write(`${JSON.stringify({ kind: "immo-mcp.error", ...payload })}\n`);
             return { isError: true, content: [{ type: "text", text: JSON.stringify(payload) }] };
           }
