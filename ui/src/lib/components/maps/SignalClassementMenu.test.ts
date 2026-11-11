@@ -215,29 +215,107 @@ describe("SignalClassementMenu — cascade sub-menu", () => {
     expect(chosen.querySelector(".classement-chevron")?.textContent).toBe("‹");
   });
 
-  it("sub-menu flips to the right when there is not enough room on the left", async () => {
+  it("should drill down in place when space left of the class menu is smaller than the reason menu", async () => {
     const onApply = vi.fn();
     const rectSpy = vi
       .spyOn(HTMLElement.prototype, "getBoundingClientRect")
       .mockImplementation(function (this: HTMLElement) {
         if (this.getAttribute("data-testid") === "signal-classement-button") {
-          return { top: 100, bottom: 120, left: 8, right: 28, width: 20, height: 20, x: 8, y: 100, toJSON: () => ({}) } as DOMRect;
+          return { top: 100, bottom: 120, left: 350, right: 370, width: 20, height: 20, x: 350, y: 100, toJSON: () => ({}) } as DOMRect;
         }
         return { top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0, x: 0, y: 0, toJSON: () => ({}) } as DOMRect;
       });
-    const widthSpy = vi.spyOn(window, "innerWidth", "get").mockReturnValue(400);
+    const widthSpy = vi.spyOn(window, "innerWidth", "get").mockReturnValue(390);
+    const heightSpy = vi.spyOn(window, "innerHeight", "get").mockReturnValue(844);
+    try {
+      const view = render(SignalClassementMenu, {
+        props: { classe: "non_classe" as const, reasonCodes: CODES, onApply },
+      });
+      await fireEvent.click(view.getByTestId("signal-classement-button"));
+      // Tap (click, no hover) opens the reason step.
+      await fireEvent.click(screen.getByRole("menuitem", { name: "Écarté" }));
+      await sleep(50);
+      expect(screen.queryByTestId("classement-class-menu")).toBeNull();
+      expect(reasonMenu().getAttribute("data-mode")).toBe("drill");
+      expect(screen.getByTestId("classement-pop").getAttribute("data-mode")).toBe("drill");
+      const back = screen.getByTestId("classement-reason-back");
+      expect(back.textContent).toContain("Écarté");
+      expect(document.activeElement).toBe(back);
+      expect(screen.getByRole("menuitem", { name: "Non résidentiel" })).toBeTruthy();
+      // Back header returns to the class step.
+      await fireEvent.click(back);
+      expect(screen.queryByTestId("classement-reason-menu")).toBeNull();
+      expect(within(classMenu()).getByRole("menuitem", { name: "Écarté" })).toBeTruthy();
+    } finally {
+      rectSpy.mockRestore();
+      widthSpy.mockRestore();
+      heightSpy.mockRestore();
+    }
+  });
+
+  it("should keep the left cascade when space left can hold the reason menu", async () => {
+    const onApply = vi.fn();
+    const rectSpy = vi
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockImplementation(function (this: HTMLElement) {
+        if (this.getAttribute("data-testid") === "signal-classement-button") {
+          return { top: 100, bottom: 120, left: 880, right: 900, width: 20, height: 20, x: 880, y: 100, toJSON: () => ({}) } as DOMRect;
+        }
+        return { top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0, x: 0, y: 0, toJSON: () => ({}) } as DOMRect;
+      });
+    const widthSpy = vi.spyOn(window, "innerWidth", "get").mockReturnValue(1440);
     try {
       const view = render(SignalClassementMenu, {
         props: { classe: "non_classe" as const, reasonCodes: CODES, onApply },
       });
       await fireEvent.click(view.getByTestId("signal-classement-button"));
       await fireEvent.click(screen.getByRole("menuitem", { name: "Pertinent" }));
-      expect(reasonMenu().getAttribute("data-side")).toBe("right");
-      const chosen = within(classMenu()).getByRole("menuitem", { name: "Pertinent" });
-      expect(chosen.querySelector(".classement-chevron")?.textContent).toBe("›");
+      await sleep(50);
+      expect(reasonMenu().getAttribute("data-mode")).toBe("cascade");
+      expect(reasonMenu().getAttribute("data-side")).toBe("left");
+      expect(screen.queryByTestId("classement-reason-back")).toBeNull();
+      expect(within(classMenu()).getByRole("menuitem", { name: "Écarté" })).toBeTruthy();
     } finally {
       rectSpy.mockRestore();
       widthSpy.mockRestore();
+    }
+  });
+
+  it("should Escape back to class then close in drill-down, and ArrowDown reaches the reason list", async () => {
+    const onApply = vi.fn();
+    const rectSpy = vi
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockImplementation(function (this: HTMLElement) {
+        if (this.getAttribute("data-testid") === "signal-classement-button") {
+          return { top: 100, bottom: 120, left: 350, right: 370, width: 20, height: 20, x: 350, y: 100, toJSON: () => ({}) } as DOMRect;
+        }
+        return { top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0, x: 0, y: 0, toJSON: () => ({}) } as DOMRect;
+      });
+    const widthSpy = vi.spyOn(window, "innerWidth", "get").mockReturnValue(390);
+    const heightSpy = vi.spyOn(window, "innerHeight", "get").mockReturnValue(844);
+    try {
+      const view = render(SignalClassementMenu, {
+        props: { classe: "non_classe" as const, reasonCodes: CODES, onApply },
+      });
+      const trigger = view.getByTestId("signal-classement-button");
+      await fireEvent.click(trigger);
+      await fireEvent.click(screen.getByRole("menuitem", { name: "Pertinent" }));
+      await sleep(50);
+      const back = screen.getByTestId("classement-reason-back");
+      expect(document.activeElement).toBe(back);
+      await fireEvent.keyDown(back, { key: "ArrowDown" });
+      expect(document.activeElement).toBe(screen.getByRole("menuitem", { name: "Sans motif" }));
+      await fireEvent.keyDown(window, { key: "Escape" });
+      await sleep(50);
+      expect(screen.queryByTestId("classement-reason-menu")).toBeNull();
+      expect(within(classMenu()).getByRole("menuitem", { name: "Pertinent" })).toBeTruthy();
+      await fireEvent.keyDown(window, { key: "Escape" });
+      expect(screen.queryByTestId("classement-class-menu")).toBeNull();
+      expect(document.activeElement).toBe(trigger);
+    } finally {
+      rectSpy.mockRestore();
+      widthSpy.mockRestore();
+      heightSpy.mockRestore();
     }
   });
 
@@ -261,7 +339,7 @@ describe("SignalClassementMenu — cascade sub-menu", () => {
       .spyOn(HTMLElement.prototype, "getBoundingClientRect")
       .mockImplementation(function (this: HTMLElement) {
         if (this.getAttribute("data-testid") === "signal-classement-button") {
-          return { top: 260, bottom: 280, left: 90, right: 110, width: 20, height: 20, x: 90, y: 260, toJSON: () => ({}) } as DOMRect;
+          return { top: 260, bottom: 280, left: 580, right: 600, width: 20, height: 20, x: 580, y: 260, toJSON: () => ({}) } as DOMRect;
         }
         return { top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0, x: 0, y: 0, toJSON: () => ({}) } as DOMRect;
       });
