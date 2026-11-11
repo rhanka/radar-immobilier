@@ -127,9 +127,10 @@ export class S3ObjectStore implements ObjectStore {
     return this.putUnchecked(key, body, contentType, conditions);
   }
 
-  async get(key: string): Promise<Uint8Array> {
+  async get(key: string, options?: { signal?: AbortSignal }): Promise<Uint8Array> {
     const res = await this.client.send(
       new GetObjectCommand({ Bucket: this.bucket, Key: key }),
+      options?.signal ? { abortSignal: options.signal } : undefined,
     );
     if (!res.Body) throw new Error(`empty body for ${key}`);
     return res.Body.transformToByteArray();
@@ -162,10 +163,11 @@ export class S3ObjectStore implements ObjectStore {
     return { key, body: await res.Body.transformToByteArray(), etag: res.ETag ?? null };
   }
 
-  async head(key: string): Promise<ObjectInfo | null> {
+  async head(key: string, options?: { signal?: AbortSignal }): Promise<ObjectInfo | null> {
     try {
       const res = await this.client.send(
         new HeadObjectCommand({ Bucket: this.bucket, Key: key }),
+        options?.signal ? { abortSignal: options.signal } : undefined,
       );
       return {
         key,
@@ -242,18 +244,20 @@ export class S3ObjectReader implements ObjectReader {
     private readonly bucket: string,
   ) {}
 
-  async get(key: string): Promise<Uint8Array> {
+  async get(key: string, options?: { signal?: AbortSignal }): Promise<Uint8Array> {
     const res = await this.client.send(
       new GetObjectCommand({ Bucket: this.bucket, Key: key }),
+      options?.signal ? { abortSignal: options.signal } : undefined,
     );
     if (!res.Body) throw new Error(`empty body for ${key}`);
     return res.Body.transformToByteArray();
   }
 
-  async head(key: string): Promise<ObjectInfo | null> {
+  async head(key: string, options?: { signal?: AbortSignal }): Promise<ObjectInfo | null> {
     try {
       const res = await this.client.send(
         new HeadObjectCommand({ Bucket: this.bucket, Key: key }),
+        options?.signal ? { abortSignal: options.signal } : undefined,
       );
       return {
         key,
