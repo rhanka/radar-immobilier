@@ -446,8 +446,8 @@ may not.
   accepted-but-unpublished) until it reaches a terminal state. An API
   or builder restart must not strand an intent (§7.4).
 - `[TARGET]` **Dispatch retries with backoff** on retriable failures
-  (transport, 5xx, admission races), bounded (e.g. 5 attempts over
-  ≤ 5 min), after which the intent lands in a **typed terminal
+  (transport, 5xx, admission races), bounded at **5 attempts over
+  ≤ 5 min**, after which the intent lands in a **typed terminal
   failure** visible to the caller — never in limbo.
 - `[TARGET]` **Typed logs everywhere.** Every dispatch attempt and
   every failure emits the §3.4 structured log line. A swallowed
@@ -495,6 +495,23 @@ may not.
 - `[TARGET]` From these records the conductor computes p50/p95/max
   per phase, per case (warm/cold-known), per environment — the §7
   acceptance numbers and the §6.4 dashboard read the same source.
+
+### 5.7 Platform requirements (k8s owner)
+
+- `[TARGET]` **Gateway timeout value.** The k8s owner sets the
+  edge/gateway timeout for every synchronous MCP/builder route
+  **above 60 s** (the §3.1 hard maximum) — or the route answers
+  asynchronously per §5.6. The configured value, per route, is
+  recorded in the §7 acceptance report; an unrecorded value is a
+  failed check, not an assumption.
+- `[TARGET]` **Pool primitives.** The k8s owner provides the
+  scheduling primitives the §5.2 warm pool consumes (pod placement,
+  pre-pull of the builder image, priority/preemption policy that
+  keeps ≥ 1 warm pod per tenant schedulable) and the pod-kill /
+  rollout-restart operations used by the §7 fault injections. Pool
+  pods that cannot be scheduled within the S1 joint budget (20 s,
+  §3.1) surface as a typed pool-exhaustion event (§5.2), never as a
+  silent pending pod.
 
 ---
 
@@ -560,41 +577,65 @@ typed-code + structured-log contract (§3.4).
 
 ## 7. Acceptance tests
 
-All acceptance runs execute in **preprod** through **MCP calls only**
-(the claude.ai connector surface: `attach`, `live_control`,
-`live_write`, `git_commit`, `git_publish`, status reads). No kubectl,
-no direct builder HTTP, no DB writes — if the flow cannot be proven
-through MCP, it is not accepted. Prod acceptance repeats §7.1 after
-the preprod pass, before the SLO is declared live in prod.
+**Duration measurement is MCP-only**: every artifact-flow step and
+every timed duration in §7.1–§7.3 is executed and measured through
+the real MCP surface — `artifacts_git_attach`,
+`artifacts_live_control` (start/stop), `artifacts_live_write`,
+`artifacts_live_status`, `artifacts_git_commit`,
+`artifacts_git_publish` — with no kubectl, no direct builder HTTP and
+no DB writes on the measurement path. If a duration cannot be proven
+through MCP, it is not accepted.
+
+Fault injection and environment preparation (§7.2, §7.4) are **not**
+MCP operations. They are authorised only as the explicit out-of-MCP
+gestures in the table below, executed by the named owner, and each
+must leave the expected trace in the acceptance report. Any other
+out-of-MCP gesture invalidates the run.
+
+| Gesture | Executor | Channel | Expected trace in report |
+| --- | --- | --- | --- |
+| Verify cache state `sealed` for the current `lockSha256` before §7.1 | Sentropic (builder) | Builder cache-state query (§5.1: `absent\|building\|sealed\|failed`) | `lockSha256` + state + timestamp per run set |
+| Drain the warm pool (§7.2) without touching the sealed cache | Sentropic (builder), k8s for pod ops | Builder pool control / k8s pod operations | Pool occupancy before/after, drain timestamp |
+| Kill builder pod mid-start (F1), kill pod mid-session (F3) | k8s, coordinated by Sentropic | k8s pod delete on the named builder pod | Pod uid/name, kill timestamp, §5.6 records for the affected artifact |
+| Restart builder API (F2) | Sentropic (builder), k8s for rollout | k8s rollout restart of the builder API | Restart window timestamps, intent id surviving the restart |
+
+Prod acceptance repeats §7.1 after the preprod pass, before the SLO
+is declared live in prod.
 
 ### 7.1 Warm end-to-end scenario (S6, S1, S2, S3, S4, S5)
 
-Scripted scenario, **run 5 times** consecutively:
+Scripted scenario, **run 20 times** consecutively (the §3.2 minimum
+for a p95 claim):
 
 1. Create a new artifact on the current immo `main` lockfile
-   (pre-warmed per §6.3; verify cache state `sealed` first).
-2. `attach` (base `main`), `live start` → assert phase `LIVE`;
-   record S1.
-3. One small `live_write` (single file change); poll the preview
-   until the new asset hash is served; record S2.
-4. `git_commit`; assert the commit exists on the bound branch;
-   record S3.
-5. `stop`; assert session closed and pod released; record S4.
-6. `git_publish`; poll the published URL until it serves the bundle
-   (HTTP 200); record S5 and S6 (attach → URL).
+   (pre-warmed per §6.3; cache state `sealed` verified via the §7
+   out-of-MCP gesture table, not via MCP).
+2. `artifacts_git_attach` (base `main`), `artifacts_live_control`
+   start → assert phase `LIVE` via `artifacts_live_status`; record S1.
+3. One small `artifacts_live_write` (single file change); poll the
+   preview until the new asset hash is served; record S2.
+4. `artifacts_git_commit`; assert the commit exists on the bound
+   branch; record S3.
+5. `artifacts_live_control` stop; assert session closed and pod
+   released; record S4.
+6. `artifacts_git_publish`; poll the published URL until it serves
+   the bundle (HTTP 200); record S5 and S6 (attach → URL).
 
-**Pass**: for every phase, p95 over the 5 runs < target **and** every
-single run < max (§3.1); 5/5 runs reach a published URL; 0 silent
-failures, 0 untyped errors (§3.4). Phase durations are taken from the
-§5.6 records and cross-checked against client-observed latency
-(§3.2).
+**Pass**: for every phase, p95 over the 20 runs (nearest-rank,
+§3.2) < target **and** every single run < max (§3.1); for S6, the
+joint budget allocation of §3.1 also holds per run and in p95; 20/20
+runs reach a published URL; 0 silent failures, 0 untyped errors
+(§3.4). Phase durations are taken from the §5.6 records and
+cross-checked against client-observed latency (§3.2).
 
 ### 7.2 Cold-known scenario (S1c)
 
 Destroy the warm pool claim without touching the sealed cache
-(builder-side pool drain, coordinated with the Sentropic owner), then
-run §7.1 steps 2–5 **3 times**. **Pass**: S1c p95 < 30 s, max < 60 s;
-no network install appears in the builder phase records (cache state
+(builder-side pool drain, authorised out-of-MCP gesture per the §7
+table, coordinated with the Sentropic owner), then run §7.1 steps
+2–5 **20 times** (the §3.2 minimum for a p95 claim). **Pass**: S1c
+p95 < 30 s (nearest-rank over the 20 runs), every run < 60 s; no
+network install appears in the builder phase records (cache state
 `sealed` throughout).
 
 ### 7.3 Cold-lockfile scenario (§3.3, §5.1, §6.3)
@@ -606,16 +647,24 @@ no network install appears in the builder phase records (cache state
    a silent `REVIVING`.
 2. Trigger pre-warming the way a `main` merge would (§6.3). **Pass**:
    cache state reaches `sealed` < 15 min, observable throughout.
-3. Re-run §7.1 once on the new lockfile. **Pass**: warm SLOs hold.
+3. Re-run §7.1 once on the new lockfile as a functional smoke only
+   (a single run carries no p95 claim, §3.2). **Pass**: the run
+   reaches a published URL within the S6 hard maximum (< 60 s); the
+   warm SLO p95 claim itself requires the full 20-run §7.1 campaign.
 
 ### 7.4 Failure scenarios (typed failure + automatic recovery)
 
 Each scenario is injected in preprod, coordinated with the Sentropic
-owner, and driven only through MCP + the §5.6 records:
+owner. The injection itself uses the authorised out-of-MCP gestures
+of the §7 table; the artifact flow and all outcome reads stay on MCP
++ the §5.6 records. In F1/F2, "max" means the **S1 standalone max**
+(45 s warm, §3.1) and "one re-drive interval" means the §5.4 scanner
+interval (≤ 60 s): the session must reach `LIVE` or a typed terminal
+failure within **S1 max + 60 s** of the injection.
 
 | # | Injection | Expected outcome |
 | --- | --- | --- |
-| F1 | **Dead pod**: kill the builder pod mid-`live start` (during `REVIVING`) | Re-drive (§5.4) re-dispatches; session reaches `LIVE` within max + one re-drive interval, **or** lands in a typed terminal failure the caller can read. Never stuck `REVIVING` > 10 min; failure carries a typed code + log line. |
+| F1 | **Dead pod**: kill the builder pod mid-`live start` (during `REVIVING`) | Re-drive (§5.4) re-dispatches; session reaches `LIVE` within S1 max + 60 s, **or** lands in a typed terminal failure the caller can read. Never stuck `REVIVING` > 10 min; failure carries a typed code + log line. |
 | F2 | **API restart during a start**: restart the builder API between acceptance and `LIVE` | Durably recorded intent survives; re-drive scanner resumes it after restart; same terminal guarantee as F1. No duplicate session (idempotency, §5.4). |
 | F3 | **Pod death mid-session** (after `LIVE`, before `stop`) | §5.5: session re-driven with draft preserved, or typed failure; `stop` afterwards still succeeds or fails typed — never `invalid_request` on an orphan. No orphan remains after 10 min. |
 | F4 | **Edge timeout pressure**: `live_write` + `git_commit` under the pre-fix gateway timeout conditions | No 502 masking: each call returns its real typed outcome, or an async invocation id whose poll returns it (§5.6). |
@@ -628,8 +677,8 @@ lines, (c) automatic recovery with no manual DB/kubectl intervention,
 ### 7.5 Reporting
 
 The acceptance report (one per environment) publishes: per-phase
-p50/p95/max tables per case, the 5 raw S6 durations, cache-state
-transitions, and every failure observed with its typed code. Numbers
+p50/p95/max tables per case, all raw S6 durations (20 per campaign),
+cache-state transitions, and every failure observed with its typed code. Numbers
 come from the §5.6 records; any phase that cannot be measured is
 reported `source-gap` and blocks acceptance — an unmeasured SLO is
 not a passed SLO.
@@ -671,8 +720,9 @@ scheduling, pod lifecycle primitives the builder consumes).
   (`[OPEN]` Q1/Q4).
 - Already landed on the immo side: reconcile-before-build (#1067,
   §6.1) and the generic RW relay (#1076, §6.2). Attach host defaults
-  (PR #1064, §6.5) must be merged/deployed before §7 runs, or §7.1
-  step 2 uses the explicit-`repoId` call form.
+  (PR #1064, §6.5) are merged (2026-11-10); only their preprod
+  deployment remains to be confirmed before §7 runs, or §7.1 step 2
+  uses the explicit-`repoId` call form.
 
 ### 8.3 Open questions
 
