@@ -263,7 +263,7 @@ jobs:
     # Same arming as deploy-preprod: a disarmed preprod CD never prepares (variable read only).
     if: github.ref == 'refs/heads/main' && vars.PREPROD_CD_ENABLED == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 240
     permissions:
       contents: read
       actions: read
