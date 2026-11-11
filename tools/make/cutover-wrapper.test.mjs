@@ -37,6 +37,24 @@ test('wrapper retains bounded hashed inventory anomalies without exposing docume
   }
   rmSync('/dev/termination-log');
 });
+test('wrapper retains bounded docs refusal counters without exposing object keys', () => {
+  const wrapper = readFileSync('deploy/cutover/job-wrapper.cjs', 'utf8');
+  const injected = 'synthetic-private-document-key';
+  const raw = { ok: false, date: '2026-11-10', notInBackup: 0, unresolved: 3,
+    unresolvedReasons: { 'version-gone': 2, 'etag-mismatch': 1, [injected]: 9 },
+    excluded: 5, upToDate: 10, toCopy: 3, copyErrors: 0, key: injected };
+  const command = [process.execPath, '-e', 'console.log(' + JSON.stringify(JSON.stringify(raw)) + ');process.exit(2)'];
+  const result = spawnSync(process.execPath, ['-e', wrapper], { encoding: 'utf8', env: { ...process.env,
+    CUTOVER_COMMAND: JSON.stringify(command), CUTOVER_TIMEOUT: '5' } });
+  assert.equal(result.status, 1);
+  const verdict = readFileSync('/dev/termination-log', 'utf8');
+  assert.equal(verdict.includes(injected), false);
+  assert.deepEqual(JSON.parse(verdict), { ok: false, date: '2026-11-10', notInBackup: 0, unresolved: 3,
+    excluded: 5, upToDate: 10, toCopy: 3, copyErrors: 0,
+    unresolvedReasons: { 'version-gone': 2, 'etag-mismatch': 1 } });
+  assert.ok(Buffer.byteLength(verdict) < 4096);
+  rmSync('/dev/termination-log');
+});
 test('shell wrapper preserves failure status and suppresses command output', () => {
   const wrapper = readFileSync('deploy/cutover/shell-wrapper.sh', 'utf8');
   for (const status of [0, 17]) {
