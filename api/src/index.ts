@@ -180,6 +180,10 @@ const readerDocumentRead = createReaderDocumentRead({
 const geoReadOperation = createGeoReadOperation({
   listCitiesImpl: () => listGeoCities(dbHandle.db),
 });
+// Generic relay dispatch is late-bound: the reader app is created before
+// the application it forwards to; every relayed call resolves the composed
+// app at request time (503 until the binding lands, never at boot).
+const relayBinding: { dispatch?: (request: Request) => Promise<Response> | Response } = {};
 const readerContent = contentHost.enabled && artifactsControl?.readerStorage && readerGrantSecret.length >= 32 && readerSessionSecret.length >= 32
   ? createReaderContentApp({
     contentBase: contentHost.contentBase,
@@ -197,6 +201,14 @@ const readerContent = contentHost.enabled && artifactsControl?.readerStorage && 
     readOperation: async (op, params, context) => {
       if (op === "geo.cities.v1" || op === "geo.collection-items.v1") return geoReadOperation(op, params);
       return basketReadOperation(op, params, context);
+    },
+    relay: {
+      appOrigin: auth.enabled && auth.appBaseUrl ? auth.appBaseUrl : "https://app.invalid",
+      appSessionSecret: auth.enabled ? auth.sessionSecret : "",
+      dispatch: (request) => relayBinding.dispatch
+        ? relayBinding.dispatch(request)
+        : new Response(JSON.stringify({ ok: false, error: "capability_unavailable" }), {
+          status: 503, headers: { "Content-Type": "application/json" } }),
     },
   })
   : undefined;
@@ -281,6 +293,7 @@ const app = createApp({
   ...(readerCursorKeyring ? { classification: { cursorKeyring: readerCursorKeyring } } : {}),
   ...(artifactsControl ? { artifactsControl } : {}),
 });
+relayBinding.dispatch = (request) => app.fetch(request);
 
 // Ensure the raw-metadata bucket exists before serving RECUEIL collect requests.
 void objectStore
