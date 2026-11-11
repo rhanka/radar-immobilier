@@ -63,7 +63,10 @@ export async function invokeTool(name: string, args: Record<string, unknown>, sn
           return await handler(args as Record<string, unknown>, snapshot);
         } catch (err) {
           if (err instanceof RadarSignalReadError) {
-            const payload = err.toPublicPayload(def.name, correlationId);
+            const payload = {
+              ...err.toPublicPayload(def.name, correlationId),
+              source: snapshot.data.mode === "http" ? "live" : "fixture",
+            };
             process.stderr.write(`${JSON.stringify({ kind: "immo-mcp.error", ...payload })}\n`);
             return { isError: true, content: [{ type: "text", text: JSON.stringify(payload) }] };
           }
@@ -78,8 +81,10 @@ export async function invokeTool(name: string, args: Record<string, unknown>, sn
               message,
             })}\n`,
           );
+          const isRawTool = (RAW_TOOL_NAMES as readonly string[]).includes(def.name);
+          const sourceMode = isRawTool ? snapshot.raw.mode : snapshot.data.mode;
           const result: ToolTextResult = {
-            content: [{ type: "text", text: JSON.stringify({ error: message, tool: def.name, correlationId }, null, 2) }],
+            content: [{ type: "text", text: JSON.stringify({ error: message, source: sourceMode === "http" ? "live" : "fixture", tool: def.name, correlationId }, null, 2) }],
           };
           result.isError = true;
           return result;
