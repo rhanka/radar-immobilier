@@ -59,4 +59,5 @@ Secret) until an explicit activation decision.
     literal audience, wrong Secret, prod leak all rejected).
 - [x] **Lot 3 — Runbook + close-out**
   - [x] `docs/operator/ops-recipients.md` (Secret, rotation, verify).
-  - [ ] Push, PR to `main`, CI green. No merge.
+  - [x] Push, PR to `main` (#1072). Not merged by this lane; CI result
+    recorded in the lane wiring report.
