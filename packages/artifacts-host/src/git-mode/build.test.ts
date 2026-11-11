@@ -44,7 +44,8 @@ function seal(files: readonly CandidateFile[] = index, overrides: Partial<Handof
 function view(current: GitBinding = binding): HostRecheckView {
   return { scopeId: "s", killSwitch: false, imageAllowlist: [IMAGE], currentReleaseId: null, headReachable: true,
     binding: { artifactId: current.artifactId, state: current.state, generation: current.generation, executor: current.executor,
-      autoPublish: current.autoPublish, pendingJobId: current.pendingJobId, pendingCommitSha: current.pendingCommitSha },
+      autoPublish: current.autoPublish, pendingJobId: current.pendingJobId, pendingCommitSha: current.pendingCommitSha,
+      ownerId: current.personalPrincipalId ?? current.attachedBy },
     job: { jobId: "job-1", state: "building", bindingGeneration: 2, commitSha: SHA, expectedCurrentReleaseId: null,
       fence: { runId: "run-1", attempt: 1 } },
     policy: { ownerAuthorized: true, automaticAuthorized: false, automaticEligible: false } };
