@@ -7,17 +7,16 @@ const ITEM = { storageScopeId: "scope", artifactId: "11111111-1111-4111-8111-111
 
 function fakeSignals(extraListeners = 0) {
   let listener: (() => void) | undefined;
-  const kill = vi.fn();
+  const exit = vi.fn();
   const signals: ShutdownSignals = {
-    pid: 4242,
     once: (_signal, next) => { listener = next; },
     removeListener: (_signal, next) => { if (listener === next) listener = undefined; },
     listenerCount: () => (listener ? 1 : 0) + extraListeners,
-    kill,
+    exit,
   };
   // Node removes a `once` listener before calling it.
   const sigterm = () => { const next = listener; listener = undefined; next?.(); };
-  return { signals, kill, sigterm, registered: () => listener !== undefined };
+  return { signals, exit, sigterm, registered: () => listener !== undefined };
 }
 
 describe("live re-drive loop (0.2.27 durable re-drive)", () => {
@@ -68,19 +67,19 @@ describe("live re-drive loop (0.2.27 durable re-drive)", () => {
     loop.stop();
   });
 
-  it("on SIGTERM stops the timer, drains the pass in flight, then re-raises the signal for the default exit", async () => {
+  it("on SIGTERM stops the timer, drains the pass in flight, then exits 0 (PID 1 ignores a self-sent signal)", async () => {
     let release: (items: LiveRedriveItem[]) => void = () => {};
     const redrive = vi.fn(() => new Promise<LiveRedriveItem[]>((resolve) => { release = resolve; }));
-    const { signals, kill, sigterm } = fakeSignals();
+    const { signals, exit, sigterm } = fakeSignals();
     const lines: string[] = [];
     startLiveRedriveLoop({ redrive, signals, log: (line) => lines.push(line) });
     sigterm();
     expect(lines).toContain(JSON.stringify({ kind: "artifacts.live_redrive_draining" }));
     await vi.advanceTimersByTimeAsync(5_000);
-    expect(kill).not.toHaveBeenCalled();
+    expect(exit).not.toHaveBeenCalled();
     release([]);
     await vi.advanceTimersByTimeAsync(0);
-    expect(kill).toHaveBeenCalledWith(4242, "SIGTERM");
+    expect(exit).toHaveBeenCalledWith(0);
     await vi.advanceTimersByTimeAsync(60_000);
     expect(redrive).toHaveBeenCalledTimes(1);
   });
@@ -91,12 +90,12 @@ describe("live re-drive loop (0.2.27 durable re-drive)", () => {
     startLiveRedriveLoop({ redrive, signals: bounded.signals, log: () => {}, drainTimeoutMs: 1_000 });
     bounded.sigterm();
     await vi.advanceTimersByTimeAsync(1_000);
-    expect(bounded.kill).toHaveBeenCalledWith(4242, "SIGTERM");
+    expect(bounded.exit).toHaveBeenCalledWith(0);
     const shared = fakeSignals(1);
     startLiveRedriveLoop({ redrive: async () => [], signals: shared.signals, log: () => {} });
     shared.sigterm();
     await vi.advanceTimersByTimeAsync(0);
-    expect(shared.kill).not.toHaveBeenCalled();
+    expect(shared.exit).not.toHaveBeenCalled();
   });
 
   it("removes its SIGTERM handler on close", () => {
