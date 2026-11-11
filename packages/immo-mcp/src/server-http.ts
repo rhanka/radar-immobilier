@@ -449,16 +449,24 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
   return app;
 }
 
-async function main(): Promise<void> {
-  // #1063: a connected (OAuth) server must never serve fixtures. Without the
-  // radar API base URL both seams fall back to deterministic mocks, so refuse
-  // to start instead of presenting fixture data as real.
-  if (!process.env.RADAR_API_BASE_URL) {
+/**
+ * #1063 fail-closed guard: a server configured as real (`IMMO_MCP_DATA_MODE=http`)
+ * must have the live radar API wired. Without `RADAR_API_BASE_URL` both seams
+ * fall back to deterministic mocks, so refuse to start instead of presenting
+ * fixture data as real. An explicitly simulated server stays allowed: every
+ * one of its responses is labelled `source: "fixture"`.
+ */
+export function assertNoFixtureOnConnectedServer(env: NodeJS.ProcessEnv): void {
+  if (env.IMMO_MCP_DATA_MODE === "http" && !env.RADAR_API_BASE_URL) {
     throw new Error(
-      "config_error: RADAR_API_BASE_URL is required for the connected immo MCP " +
-        "(without it the server would serve fixture data as real)",
+      "config_error: RADAR_API_BASE_URL is required when IMMO_MCP_DATA_MODE=http " +
+        "(without it the connected server would serve fixture data as real)",
     );
   }
+}
+
+async function main(): Promise<void> {
+  assertNoFixtureOnConnectedServer(process.env);
   const config = loadHttpConfig(process.env);
   // BOTH seams are env-wired from the REAL process env (in-cluster:
   // RADAR_API_BASE_URL=http://radar-api:3000). The domain source now serves REAL

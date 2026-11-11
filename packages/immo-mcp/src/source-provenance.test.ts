@@ -3,6 +3,7 @@ import { HttpDataSource, MockDataSource } from "./data-source.js";
 import { captureInvocationContext } from "./invocation-context.js";
 import { HttpRawDataSource, MockRawDataSource } from "./raw-data.js";
 import { signalSearchBody, signalSearchItem } from "./signal-search-test-fixture.js";
+import { assertNoFixtureOnConnectedServer } from "./server-http.js";
 import { invokeTool } from "./tools.js";
 
 /**
@@ -127,6 +128,13 @@ describe("source provenance contract (#1063)", () => {
       expect(result.isError, name).toBeFalsy();
       expect(parse(result)["source"], name).toBe("fixture");
     }
+  });
+
+  it("should refuse to start a real-configured connected server without the live API", () => {
+    expect(() => assertNoFixtureOnConnectedServer({ IMMO_MCP_DATA_MODE: "http" })).toThrow(/^config_error: RADAR_API_BASE_URL is required/);
+    expect(() => assertNoFixtureOnConnectedServer({ IMMO_MCP_DATA_MODE: "http", RADAR_API_BASE_URL: "https://api.test.local" })).not.toThrow();
+    expect(() => assertNoFixtureOnConnectedServer({ IMMO_MCP_DATA_MODE: "mock" })).not.toThrow();
+    expect(() => assertNoFixtureOnConnectedServer({})).not.toThrow();
   });
 
   it("should fail unwired domain tools with an explicit not_wired error in http mode", async () => {
