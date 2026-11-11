@@ -26,11 +26,18 @@ for (const key of ['date', 'backupId', 'dumpStartedAt', 'startedAt']) {
 for (const key of ['manifestSha256', 'pgSha256', 'codeSha']) {
   if (typeof raw[key] === 'string' && /^[a-f0-9]{7,64}$/.test(raw[key])) clean[key] = raw[key];
 }
-for (const key of ['pgSizeBytes', 'docsObjects', 'migrations', 'ageHours', 'copied', 'missing', 'sizeMismatch', 'sealedUnresolved', 'streamsBound', 'pendingReceipts', 'inventoryAnomalyCount']) {
+for (const key of ['pgSizeBytes', 'docsObjects', 'migrations', 'ageHours', 'copied', 'missing', 'sizeMismatch', 'sealedUnresolved', 'streamsBound', 'pendingReceipts', 'inventoryAnomalyCount', 'notInBackup', 'unresolved', 'excluded', 'upToDate', 'toCopy', 'copyErrors']) {
   if (Number.isFinite(raw[key]) && raw[key] >= 0) clean[key] = raw[key];
 }
 for (const key of ['stale', 'staleOverridden', 'maintenanceBarrier', 'inventoryAnomaliesTruncated']) {
   if (typeof raw[key] === 'boolean') clean[key] = raw[key];
+}
+// Refusal causes are the fixed chooseVersion tokens (backup-restore.cjs) with numeric counts.
+const REFUSAL_REASONS = ['version-gone', 'etag-mismatch', 'etag-not-found', 'no-version', 'no-backup-etag', 'invalid-version-size'];
+if (raw.unresolvedReasons && typeof raw.unresolvedReasons === 'object' && !Array.isArray(raw.unresolvedReasons)) {
+  const reasons = Object.entries(raw.unresolvedReasons)
+    .filter(([k, v]) => REFUSAL_REASONS.includes(k) && Number.isFinite(v) && v >= 0).slice(0, 8);
+  if (reasons.length) clean.unresolvedReasons = Object.fromEntries(reasons);
 }
 if (raw.status === 'open-success') clean.status = raw.status;
 if (raw.epoch === 'scoped') clean.epoch = raw.epoch;
