@@ -24,7 +24,7 @@ it.each([...publicTools, ...stubs])("%s performs no exchange with full authentic
     city: "longueuil", muni_slug: "longueuil", limit: 2, zone: "H-001", rawRef: "synthetic",
     no_lot: "synthetic", opportunityId: "synthetic", documentId: "synthetic", offset: 0, maxChars: 100,
   }, ctx));
-  if (stubs.includes(name)) await expect(result).rejects.toThrow(/not_wired_yet/);
+  if (stubs.includes(name)) await expect(result).rejects.toThrow(/not_wired/);
   else expect(JSON.stringify(await result)).not.toContain(subject);
   expect(fixture.issuedExchangedTokens).toHaveLength(0);
   expect(JSON.stringify(ctx)).not.toContain(subject);

@@ -65,7 +65,7 @@ it("exchanges over HTTP across isolated issuer, MCP and synthetic receiver witho
       ["list_documents", {}], ["read_document_excerpt", { documentId: "synthetic" }],
     ] as const) {
       const result = await (await call(name, args)).json();
-      expect(JSON.stringify(result)).toContain("not_wired_yet");
+      expect(JSON.stringify(result)).toContain("not_wired");
     }
     expect(f.issuer.issued).toHaveLength(1);
     expect(f.seen).toHaveLength(1);
