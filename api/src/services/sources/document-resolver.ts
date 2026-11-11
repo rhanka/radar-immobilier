@@ -238,15 +238,16 @@ export function apiDocumentUrl(rawRef: string): string {
 export async function loadDocumentMetadata(
   store: ObjectReader,
   rawRef: string,
+  signal?: AbortSignal,
 ): Promise<DocumentMetadata | null> {
   const normalizedRawRef = normalizeRawRef(rawRef);
-  if (!normalizedRawRef) return null;
+  if (!normalizedRawRef || signal?.aborted) return null;
 
-  const head = await store.head(rawMetaKey(normalizedRawRef));
-  if (!head) return null;
+  const head = await store.head(rawMetaKey(normalizedRawRef), { signal });
+  if (!head || signal?.aborted) return null;
 
   const parsed = RawDocumentRecordSchema.safeParse(
-    tryParseJson(await store.get(rawMetaKey(normalizedRawRef))),
+    tryParseJson(await store.get(rawMetaKey(normalizedRawRef), { signal })),
   );
   if (!parsed.success) return null;
 
@@ -282,10 +283,10 @@ export async function loadDocumentMetadata(
  */
 export async function findDocumentMetadata(
   store: ObjectReader,
-  params: { rawRef?: string; docSha?: string },
+  params: { rawRef?: string; docSha?: string; signal?: AbortSignal },
 ): Promise<DocumentMetadata | null> {
   if (!params.rawRef) return null;
-  return loadDocumentMetadata(store, params.rawRef);
+  return loadDocumentMetadata(store, params.rawRef, params.signal);
 }
 
 /**
