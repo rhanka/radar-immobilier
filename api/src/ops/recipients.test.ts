@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { SignJWT, createLocalJWKSet, exportJWK, generateKeyPair } from "jose";
 import { PgDialect } from "drizzle-orm/pg-core";
 import { loadConfig, resolveOpsConfig } from "../config.js";
 import {
+  bearerMatches,
   createDrizzleRecipientsStore,
   isMissingWorkspaceTablesError,
   mergeRecipients,
@@ -11,23 +11,11 @@ import {
   type RecipientsStore,
 } from "./recipients.js";
 
-const ISSUER = "https://auth.example.test";
-const AUDIENCE = "https://ops.example.test/recipients";
+const BEARER = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 const NOW = new Date("2026-11-09T12:00:00.000Z");
 
-const { privateKey, publicKey } = await generateKeyPair("EdDSA");
-const publicJwk = await exportJWK(publicKey);
-const getKey = createLocalJWKSet({ keys: [publicJwk] });
-
-async function serviceToken(audience: string = AUDIENCE): Promise<string> {
-  return new SignJWT({})
-    .setProtectedHeader({ alg: "EdDSA" })
-    .setSubject("platform-alerts")
-    .setIssuer(ISSUER)
-    .setAudience(audience)
-    .setIssuedAt(Math.floor(NOW.getTime() / 1000))
-    .setExpirationTime(Math.floor(NOW.getTime() / 1000) + 300)
-    .sign(privateKey);
+function authHeader(value: string = BEARER): { authorization: string } {
+  return { authorization: `Bearer ${value}` };
 }
 
 function fakeStore(overrides: Partial<RecipientsStore> = {}): RecipientsStore {
@@ -47,12 +35,9 @@ function fakeStore(overrides: Partial<RecipientsStore> = {}): RecipientsStore {
 function route(store: RecipientsStore) {
   return opsRecipientsRoute({
     store,
-    issuer: ISSUER,
-    jwksUri: `${ISSUER}/.well-known/jwks.json`,
-    audience: AUDIENCE,
+    bearer: BEARER,
     expectedTarget: "immo-preprod",
     referenceWorkspaceSlug: "ref-workspace",
-    getKey,
     now: () => NOW.getTime(),
   });
 }
@@ -150,7 +135,7 @@ describe("opsRecipientsRoute", () => {
   it("answers the frozen v1 shape for a valid service-client bearer", async () => {
     const res = await route(fakeStore()).request(
       "/api/v1/ops/recipients?target=immo-preprod",
-      { headers: { authorization: `Bearer ${await serviceToken()}` } },
+      { headers: authHeader() },
     );
     expect(res.status).toBe(200);
     expect(res.headers.get("cache-control")).toBe("no-store");
@@ -180,22 +165,33 @@ describe("opsRecipientsRoute", () => {
     expect(noToken.status).toBe(401);
     const wrongTarget = await app.request(
       "/api/v1/ops/recipients?target=immo-prod",
-      { headers: { authorization: `Bearer ${await serviceToken()}` } },
+      { headers: authHeader() },
     );
     expect(wrongTarget.status).toBe(404);
     expect(await wrongTarget.json()).toEqual({ error: "target_not_found" });
   });
 
-  it("refuses a bearer minted for another audience with 401", async () => {
+  it("should refuse a wrong bearer with 401 when the value differs", async () => {
     const res = await route(fakeStore()).request(
       "/api/v1/ops/recipients?target=immo-preprod",
-      {
-        headers: {
-          authorization: `Bearer ${await serviceToken("https://other.example.test")}`,
-        },
-      },
+      { headers: authHeader("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff") },
     );
     expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({ error: "unauthenticated" });
+  });
+
+  it("should refuse a wrong-length bearer with 401 when lengths differ", async () => {
+    const res = await route(fakeStore()).request(
+      "/api/v1/ops/recipients?target=immo-preprod",
+      { headers: authHeader("short") },
+    );
+    expect(res.status).toBe(401);
+  });
+
+  it("bearerMatches is exact and length-safe", () => {
+    expect(bearerMatches(BEARER, BEARER)).toBe(true);
+    expect(bearerMatches("short", BEARER)).toBe(false);
+    expect(bearerMatches(BEARER, "short")).toBe(false);
   });
 
   it("answers 503 recipients_unavailable when the store fails", async () => {
@@ -206,7 +202,7 @@ describe("opsRecipientsRoute", () => {
     });
     const res = await route(store).request(
       "/api/v1/ops/recipients?target=immo-preprod",
-      { headers: { authorization: `Bearer ${await serviceToken()}` } },
+      { headers: authHeader() },
     );
     expect(res.status).toBe(503);
     expect(await res.json()).toEqual({ error: "recipients_unavailable" });
@@ -214,7 +210,7 @@ describe("opsRecipientsRoute", () => {
 
   it("answers 404 when the target parameter is missing", async () => {
     const res = await route(fakeStore()).request("/api/v1/ops/recipients", {
-      headers: { authorization: `Bearer ${await serviceToken()}` },
+      headers: authHeader(),
     });
     expect(res.status).toBe(404);
     expect(await res.json()).toEqual({ error: "target_not_found" });
@@ -234,18 +230,15 @@ describe("opsRecipientsRoute", () => {
     });
     const app = opsRecipientsRoute({
       store,
-      issuer: ISSUER,
-      jwksUri: `${ISSUER}/.well-known/jwks.json`,
-      audience: AUDIENCE,
+      bearer: BEARER,
       expectedTarget: "immo-preprod",
       referenceWorkspaceSlug: "ref-workspace",
-      getKey,
       now: () => NOW.getTime(),
       warn: (event) => events.push(event),
     });
     const res = await app.request(
       "/api/v1/ops/recipients?target=immo-preprod",
-      { headers: { authorization: `Bearer ${await serviceToken()}` } },
+      { headers: authHeader() },
     );
     expect(res.status).toBe(200);
     expect(events).toEqual([
@@ -256,17 +249,14 @@ describe("opsRecipientsRoute", () => {
     ]);
   });
 
-  it("stays closed (503) while the L1 audience is not configured", async () => {
+  it("should stay closed with 503 when the bearer is not configured", async () => {
     const app = opsRecipientsRoute({
       store: fakeStore(),
-      issuer: ISSUER,
-      jwksUri: `${ISSUER}/.well-known/jwks.json`,
       expectedTarget: "immo-preprod",
-      getKey,
       now: () => NOW.getTime(),
     });
     const res = await app.request("/api/v1/ops/recipients?target=immo-preprod", {
-      headers: { authorization: `Bearer ${await serviceToken()}` },
+      headers: authHeader(),
     });
     expect(res.status).toBe(503);
   });
@@ -291,41 +281,17 @@ describe("ops config", () => {
           ...base,
           OPS_TARGET: "immo-prod",
           OPS_REFERENCE_WORKSPACE_SLUG: "ref-workspace",
-          OPS_RECIPIENTS_AUDIENCE: AUDIENCE,
+          OPS_RECIPIENTS_BEARER: BEARER,
         }),
       ),
     ).toEqual({
       expectedTarget: "immo-prod",
       referenceWorkspaceSlug: "ref-workspace",
-      recipientsAudience: AUDIENCE,
+      recipientsBearer: BEARER,
     });
     expect(() =>
       loadConfig({ ...base, OPS_TARGET: "staging" }),
     ).toThrow();
-  });
-
-  it("drops an audience overlapping a user Bearer [REDACTED]", () => {
-    const base = {
-      NODE_ENV: "test",
-      POSTGRES_HOST: "localhost",
-      POSTGRES_USER: "radar",
-      POSTGRES_PASSWORD: "pw",
-      POSTGRES_DB: "radar",
-      S3_ENDPOINT: "http://localhost:9000",
-      S3_ACCESS_KEY: "minio",
-      S3_SECRET_KEY: "minio",
-      OPS_TARGET: "immo-prod",
-      OPS_RECIPIENTS_AUDIENCE: "https://app.example.test",
-    } as NodeJS.ProcessEnv;
-    expect(
-      resolveOpsConfig(loadConfig(base), ["https://app.example.test"]),
-    ).toEqual({ expectedTarget: "immo-prod" });
-    expect(
-      resolveOpsConfig(loadConfig(base), ["https://other.example.test"]),
-    ).toEqual({
-      expectedTarget: "immo-prod",
-      recipientsAudience: "https://app.example.test",
-    });
   });
 });
 
