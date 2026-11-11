@@ -1,22 +1,16 @@
 #!/usr/bin/env bash
-# Ops recipients wiring gate (port v1, #1051): the RENDERED manifests must
-# open the recipients route in preprod only, with the audience sourced
-# from the operator-held Secret — never as a literal.
-#
-# Why rendered: reconcile-preprod.sh server-side-applies the preprod
-# radar-api ConfigMap, and the radar-api Deployment of both environments
-# comes from the same base. Only the render shows which OPS_* values an
-# apply would write: a missing pin silently leaves the route at its
-# fail-closed 503, and a literal audience would put the L1-owned value
-# in git.
+# Ops recipients wiring gate (port v1): the RENDERED manifests must
+# open the recipients route in preprod only, with the static opaque
+# bearer sourced from the operator-held Secret — never as a literal.
 #
 # Rules:
 #   1. Preprod ConfigMap radar-api pins OPS_TARGET=immo-preprod and
 #      OPS_REFERENCE_WORKSPACE_SLUG to the expected reference slug.
 #   2. The radar-api Deployment (both renders) reads
-#      OPS_RECIPIENTS_AUDIENCE from Secret radar-ops-recipients
-#      (key OPS_RECIPIENTS_AUDIENCE, optional) and never as a literal
-#      env value or ConfigMap key.
+#      OPS_RECIPIENTS_BEARER from Secret radar-ops-recipients
+#      (key OPS_RECIPIENTS_BEARER, optional) and never as a literal
+#      env value or ConfigMap key. The env entry MUST be present:
+#      its removal fails this gate (B2).
 #   3. The prod base render carries no OPS_TARGET /
 #      OPS_REFERENCE_WORKSPACE_SLUG: prod stays inert until its own
 #      Secret and ConfigMap keys are decided.
@@ -49,10 +43,10 @@ check_render() {
     function unquote(v) { gsub(/^[ \t]+|[ \t]+$/, "", v); gsub(/^"|"$/, "", v); return v }
     function flush_env() {
       if (!env_ops) return
-      if (env_literal) report("OPS_RECIPIENTS_AUDIENCE set as a literal value (must come from Secret radar-ops-recipients)")
-      if (env_secret != "radar-ops-recipients" || env_key != "OPS_RECIPIENTS_AUDIENCE")
-        report("OPS_RECIPIENTS_AUDIENCE must read Secret radar-ops-recipients key OPS_RECIPIENTS_AUDIENCE")
-      if (!env_optional) report("OPS_RECIPIENTS_AUDIENCE secretKeyRef must be optional (absent Secret keeps the route closed)")
+      if (env_literal) report("OPS_RECIPIENTS_BEARER set as a literal value (must come from Secret radar-ops-recipients)")
+      if (env_secret != "radar-ops-recipients" || env_key != "OPS_RECIPIENTS_BEARER")
+        report("OPS_RECIPIENTS_BEARER must read Secret radar-ops-recipients key OPS_RECIPIENTS_BEARER")
+      if (!env_optional) report("OPS_RECIPIENTS_BEARER secretKeyRef must be optional (absent Secret keeps the route closed)")
       env_ops = 0; env_literal = 0; env_optional = 0; env_secret = ""; env_key = ""; inref = 0
     }
     function report(msg) { print "FAIL: " msg > "/dev/stderr"; bad++ }
@@ -61,13 +55,15 @@ check_render() {
       cm = 1
       if ($0 ~ /\n  OPS_TARGET:/) { t = $0; sub(/.*\n  OPS_TARGET:[ \t]*/, "", t); sub(/\n.*/, "", t); target = unquote(t) }
       if ($0 ~ /\n  OPS_REFERENCE_WORKSPACE_SLUG:/) { s = $0; sub(/.*\n  OPS_REFERENCE_WORKSPACE_SLUG:[ \t]*/, "", s); sub(/\n.*/, "", s); refslug = unquote(s) }
-      if ($0 ~ /\n  OPS_RECIPIENTS_AUDIENCE:/) report("OPS_RECIPIENTS_AUDIENCE must not be a ConfigMap key (Secret radar-ops-recipients only)")
+      if ($0 ~ /\n  OPS_RECIPIENTS_BEARER:/) report("OPS_RECIPIENTS_BEARER must not be a ConfigMap key (Secret radar-ops-recipients only)")
+      if ($0 ~ /\n  OPS_RECIPIENTS_AUDIENCE:/) report("OPS_RECIPIENTS_AUDIENCE must not be a ConfigMap key (removed JWT wiring)")
     }
     /kind: Deployment/ && /name: radar-api/ {
       dep = 1
       n = split($0, lines, "\n")
       for (i = 1; i <= n; i++) {
-        if (lines[i] ~ /- name: OPS_RECIPIENTS_AUDIENCE/) { flush_env(); env_ops = 1; continue }
+        if (lines[i] ~ /- name: OPS_RECIPIENTS_BEARER/) { flush_env(); env_ops = 1; env_seen = 1; continue }
+        if (lines[i] ~ /- name: OPS_RECIPIENTS_AUDIENCE/) { report("OPS_RECIPIENTS_AUDIENCE env entry must be removed (static bearer replaces JWT audience)"); continue }
         if (!env_ops) continue
         if (lines[i] ~ /- name:/) { flush_env(); continue }
         if (lines[i] ~ /^[ \t]*value:/) env_literal = 1
@@ -81,6 +77,7 @@ check_render() {
     END {
       if (!cm) report("ConfigMap/radar-api not found in render (nothing checked)")
       if (!dep) report("Deployment/radar-api not found in render (nothing checked)")
+      if (dep && !env_seen) report("OPS_RECIPIENTS_BEARER env entry missing from Deployment/radar-api (must read Secret radar-ops-recipients key OPS_RECIPIENTS_BEARER)")
       if (mode == "preprod") {
         if (target != "immo-preprod") report("ConfigMap/radar-api: OPS_TARGET=" (target == "" ? "<missing>" : target) " (expected immo-preprod)")
         if (refslug != slug) report("ConfigMap/radar-api: OPS_REFERENCE_WORKSPACE_SLUG=" (refslug == "" ? "<missing>" : refslug) " (expected " slug ")")
