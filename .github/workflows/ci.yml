@@ -69,6 +69,9 @@ jobs:
       - name: Validate preprod auth isolation (offline render, no PROD auth value)
         run: bash deploy/ci/check-preprod-auth-isolation.test.sh
 
+      - name: Validate ops recipients wiring (offline render, preprod open / prod inert)
+        run: bash deploy/ci/check-ops-recipients-render.test.sh
+
       - name: Validate preprod reconcile immo-mcp branch (hermetic, fake kubectl)
         run: bash deploy/ci/reconcile-preprod-mcp.test.sh
 

@@ -52,8 +52,11 @@ Secret) until an explicit activation decision.
     the prod render carries no `OPS_*` ConfigMap key (inert);
     `check-preprod-auth-isolation.sh` still passes. No TS in scope, so
     typecheck/lint are not applicable to this lot.
-- [ ] **Lot 2 — Rendering check**
-  - [ ] `check-ops-recipients-render.sh` + hermetic test, CI step.
+- [x] **Lot 2 — Rendering check**
+  - [x] `check-ops-recipients-render.sh` + hermetic test, CI step.
+  - Lot gate: `check-ops-recipients-render.sh` passes on the branch;
+    hermetic test 7 passed / 0 failed (wrong target, missing slug,
+    literal audience, wrong Secret, prod leak all rejected).
 - [ ] **Lot 3 — Runbook + close-out**
   - [ ] `docs/operator/ops-recipients.md` (Secret, rotation, verify).
   - [ ] Push, PR to `main`, CI green. No merge.
