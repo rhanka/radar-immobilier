@@ -255,25 +255,13 @@ export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
   const { pool, storageScopeId, config } = input;
   const { ports, hasWriteScope, bindings, codeRights, registry, directory, git } = composeGitAccess(input);
   let liveService: LiveSessionService | undefined;
-  // Pre-build reconcile worker: the package live-open client
-  // (`createLiveWorkerClient`, @sentropic/artifacts/live-host 0.2.25) on the
-  // host LiveStore, composed for the build client as for a live open (same
-  // fences/drafts/invitation sources, same closed body, same strict ack).
-  // Store/keys are stateless over the pool until a call runs.
-  const buildLiveStore = ports.liveStore ?? createPostgresLiveStore(pool);
-  const buildLiveKeys = ports.liveKeys ?? (config.liveDraftKeys ? createSealedLiveKeys(config.liveDraftKeys) : undefined);
-  const buildWorker = createLiveWorkerClient({ baseUrl: config.builderUrl,
-    identity: serviceTokenSource(config.service ?? {}, SERVICE_SCOPE_BUILDER, ports.fetch), fences: liveStoreFences(buildLiveStore),
-    bindings, drafts: liveStoreDrafts(buildLiveStore, buildLiveKeys ?? FAIL_CLOSED_LIVE_KEYS), reconcileTimeoutMs: 60_000,
-    sessionState: async (identity) => liveService ? liveService.liveInvitationState(identity) : NO_LIVE_INVITATIONS,
-    ...(ports.fetch ? { fetch: ports.fetch } : {}) });
   // M3-I: git_publish is selected only from the `build` stage; the sandbox
   // executor is admitted only once the builder base URL is set; the service
   // token source itself fails closed while the OAuth client is unconfigured.
   const buildApi = ports.buildApi ?? (input.resolution.tools.includes("artifacts_git_publish")
     ? createHostBuildApiClient({ baseUrl: config.builderUrl,
       identity: serviceTokenSource(config.service ?? {}, SERVICE_SCOPE_BUILDER, ports.fetch),
-      jobs: ports.jobs ?? createPostgresHostJobStore({ pool, scopeId: storageScopeId }), bindings, liveWorker: buildWorker,
+      jobs: ports.jobs ?? createPostgresHostJobStore({ pool, scopeId: storageScopeId }), bindings,
       ...(ports.fetch ? { fetch: ports.fetch } : {}) })
     : undefined);
   const build = ports.build ?? buildApi;
@@ -298,8 +286,8 @@ export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
   // client (it reads the package fences sent to the controller). Flag off:
   // no worker, as before (live_write / live_control(start) answer builder_unavailable).
   const edgeWorker = liveSelected && input.resolution.stage === "live" && config.liveEdgeEnabled === true;
-  const liveStore = ports.liveStore ?? (edgeWorker && !ports.liveWorker ? buildLiveStore : undefined);
-  const liveKeys = buildLiveKeys;
+  const liveStore = ports.liveStore ?? (edgeWorker && !ports.liveWorker ? createPostgresLiveStore(pool) : undefined);
+  const liveKeys = ports.liveKeys ?? (config.liveDraftKeys ? createSealedLiveKeys(config.liveDraftKeys) : undefined);
   const liveWorker = ports.liveWorker ?? (edgeWorker ? createLiveWorkerClient({ baseUrl: config.builderUrl,
     identity: serviceTokenSource(config.service ?? {}, SERVICE_SCOPE_BUILDER, ports.fetch), fences: liveStoreFences(liveStore!), bindings,
     drafts: liveStoreDrafts(liveStore!, liveKeys ?? FAIL_CLOSED_LIVE_KEYS), reconcileTimeoutMs: 60_000,
