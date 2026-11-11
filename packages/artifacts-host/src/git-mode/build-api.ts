@@ -12,7 +12,9 @@ import type { GitBuildExecutor, GitBuildJobRequest, GitBuildJobState, GitBuildPo
  *   pre-build `POST v1/live/reconcile` used to wake a REVIVING live session,
  *   and the build then refused itself with `pending_publication` (cause A7).
  *   While a live session is LIVE or REVIVING the builder refuses the build
- *   with `409 live_session_active` (projected as `provider_unavailable`);
+ *   with `409 live_session_active`: the host closes the job (`build_failed`),
+ *   logs `artifacts.build_refused` and answers the package live conflict
+ *   (`git_live_conflict`, reason `active_session`: stop the session first);
  *   the live re-drive (live-redrive.ts) is the only reconcile caller;
  * - immo persists the job first (G0 v3 §2.6: the job identity, never a
  *   caller SHA later) and gets its jobId from the host job store;
@@ -30,27 +32,51 @@ import type { GitBuildExecutor, GitBuildJobRequest, GitBuildJobState, GitBuildPo
  * Only `sandbox` is admitted, and only when the builder base is configured.
  */
 export interface HostBuildJobStore {
-  /** Persists the job (idempotent on requestedBy + idempotencyKey) and returns its id. */
+  /**
+   * Persists the job (idempotent on requestedBy + idempotencyKey) and returns its id. A job the builder refused
+   * at request time (`live_session_active`) never reached a build: a retry with the same key re-arms it.
+   */
   persist(job: GitBuildJobRequest): Promise<string>;
+  /** Marks a job the builder refused at request time terminal (`build_failed`, code and reason), never left pending. */
+  refuse(jobId: string, refusal: { readonly code: string; readonly reason: string }): Promise<void>;
 }
+
+/** Builder refusal of a build while a live session of the artifact is LIVE or REVIVING (no build started). */
+export const LIVE_SESSION_ACTIVE = Object.freeze({ code: "live_session_active", reason: "active_session" });
 
 /** TODO(M3-I durable ledger): Postgres job table shared with the SG4b ledger. Until then git_publish refuses. */
 export const FAIL_CLOSED_JOB_STORE: HostBuildJobStore = Object.freeze({
   async persist(): Promise<never> { throw new ArtifactOperationError("provider_unavailable"); },
+  async refuse(): Promise<never> { throw new ArtifactOperationError("provider_unavailable"); },
 });
 
-export function createMemoryJobStore(): HostBuildJobStore & { jobs: Map<string, GitBuildJobRequest> } {
+export function createMemoryJobStore(): HostBuildJobStore & { jobs: Map<string, GitBuildJobRequest>;
+  states: Map<string, { state: GitBuildJobState; code?: string; reason?: string }> } {
   const jobs = new Map<string, GitBuildJobRequest>();
+  const states = new Map<string, { state: GitBuildJobState; code?: string; reason?: string }>();
   const keys = new Map<string, string>();
-  return { jobs, async persist(job) {
+  return { jobs, states, async persist(job) {
     const key = JSON.stringify([job.storageScopeId, job.requestedBy, job.idempotencyKey]);
     const existing = keys.get(key);
-    if (existing) return existing;
+    if (existing) {
+      if (states.get(existing)?.code === LIVE_SESSION_ACTIVE.code) states.set(existing, { state: "build_pending" });
+      return existing;
+    }
     const jobId = randomUUID();
     keys.set(key, jobId);
     jobs.set(jobId, structuredClone(job));
+    states.set(jobId, { state: "build_pending" });
     return jobId;
+  }, async refuse(jobId, refusal) {
+    if (states.get(jobId)?.state === "build_pending") states.set(jobId, { state: "build_failed", ...refusal });
   } };
+}
+
+/** `409 { error: "live_session_active" }`, or the builder LiveError form `{ error: "git_live_conflict", reason: "active_session" }`. */
+function isLiveSessionActive(status: number, body: unknown): boolean {
+  const record = body as Record<string, unknown> | null;
+  return status === 409 && !!record && typeof record === "object" && (record.error === LIVE_SESSION_ACTIVE.code ||
+    (record.error === "git_live_conflict" && record.reason === LIVE_SESSION_ACTIVE.reason));
 }
 
 export interface HostBuildApiOptions {
@@ -62,6 +88,17 @@ export interface HostBuildApiOptions {
   readonly bindings?: BuilderBindingSource | undefined;
   readonly fetch?: typeof fetch;
   readonly timeoutMs?: number;
+  /** Structured log line sink (default stderr). */
+  readonly log?: (line: string) => void;
+}
+
+/**
+ * The package live conflict (`git_live_conflict`, reason `active_session`, 409, not retriable) with the next step
+ * for the caller: retrying the publish cannot succeed while the session runs.
+ */
+function liveSessionActive(): ArtifactOperationError {
+  return new ArtifactOperationError("git_live_conflict", { publicDetails: { reason: LIVE_SESSION_ACTIVE.reason,
+    message: "A live session of this artifact is active: stop it (artifacts_live_control action stop) before publishing." } });
 }
 
 export interface HostBuildStatus {
@@ -110,18 +147,32 @@ export function createHostBuildApiClient(options: HostBuildApiOptions): GitBuild
     if (notFound && response.status === 404) return undefined;
     let body: unknown;
     try { body = await response.json(); } catch { throw new ArtifactOperationError("provider_unavailable"); }
+    if (isLiveSessionActive(response.status, body)) throw liveSessionActive();
     if (!accepted.includes(response.status)) throw new ArtifactOperationError("provider_unavailable");
     return parseStatus(body, jobId);
   };
+  const log = options.log ?? ((line: string) => console.error(line));
   return {
     async admits(executor: GitBuildExecutor) { return base !== undefined && executor === "sandbox"; },
     async request(job: GitBuildJobRequest) {
       if (!base || job.executor !== "sandbox") throw new ArtifactOperationError("provider_unavailable");
       const binding = await resolveBuilderBinding(options.bindings, { storageScopeId: job.storageScopeId, artifactId: job.artifactId,
         bindingGeneration: job.bindingGeneration });
+      // Persisted first: the builder pulls the job by id once it accepted it (live-host /v1/job).
       const jobId = await jobs.persist(job);
-      const status = await call(new URL("v1/builds", base), { method: "POST", headers: { "content-type": "application/json" },
-        body: JSON.stringify({ artifactId: job.artifactId, jobId, binding }) }, [200, 202], jobId);
+      let status: HostBuildStatus | undefined;
+      try {
+        status = await call(new URL("v1/builds", base), { method: "POST", headers: { "content-type": "application/json" },
+          body: JSON.stringify({ artifactId: job.artifactId, jobId, binding }) }, [200, 202], jobId);
+      } catch (error) {
+        if (error instanceof ArtifactOperationError && error.kind === "git_live_conflict") {
+          // No build started: the job is closed, never left build_pending, and the refusal is logged.
+          await jobs.refuse(jobId, LIVE_SESSION_ACTIVE);
+          log(JSON.stringify({ kind: "artifacts.build_refused", code: LIVE_SESSION_ACTIVE.code, reason: LIVE_SESSION_ACTIVE.reason,
+            storageScopeId: job.storageScopeId, artifactId: job.artifactId, jobId, bindingGeneration: job.bindingGeneration }));
+        }
+        throw error;
+      }
       if (!status) throw new ArtifactOperationError("provider_unavailable");
       return { jobId: status.jobId, state: status.state };
     },
