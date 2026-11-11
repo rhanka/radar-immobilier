@@ -15,9 +15,9 @@
 #   A slug that matches no workspace does not error — the endpoint then
 #   serves app admins only, without the fallback warning.
 #
-# OPS_RECIPIENTS_AUDIENCE is NOT here: it comes from the operator-held
+# OPS_RECIPIENTS_BEARER is NOT here: it comes from the operator-held
 # Secret radar-ops-recipients (base Deployment, optional secretKeyRef),
-# so the L1-owned value never lands in git.
+# so the static opaque bearer never lands in git.
 #
 # Guarded by deploy/ci/check-ops-recipients-render.sh.
 apiVersion: v1
