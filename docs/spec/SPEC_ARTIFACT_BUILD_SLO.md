@@ -253,3 +253,133 @@ Source: `LIVE-DISPATCH-REPORT.md` (investigation 2026-11-11
 ### 4.3 Publish path: reconcile, stale session, pending publication
 
 Sources: `RECONCILE-REPORT.md`, `DISPATCH-REPORT.md`,
+`ATTACH-REPORT.md` (2026-11-10, preprod read-only).
+
+- Before the immo fix (#1067, "reconcile before build"), `git_publish`
+  sent only `POST v1/builds`: an artifact attached and committed
+  **without ever being opened live** had no builder session and was
+  refused at admission with `git_live_conflict` / `stale_session`,
+  then closed `build_failed` ~13 min later by the pending-build
+  reconciler. Jobs `5fd74595`, `07ab4c5c` failed exactly this way.
+- The builder-side gate also surfaces as `pending_publication`: a
+  `live_control start` on a binding in `build_failed` is refused
+  `git_live_conflict/pending_publication`, and without a reconcile
+  the publish retry loop returns the same `stale_session`.
+- The first #1067 reconcile attempt made the failure **earlier and
+  silent**: the package live worker requires a live runtime (fences)
+  that an attach-only artifact does not have, so reconcile threw
+  `provider_unavailable` locally — projected to the caller as HTTP 503
+  `capability_unavailable` / `dispatch_failure` — **before** any job
+  row, binding event, failure-ledger row or log line was written.
+  Two publish invocations (2026-11-10 ~10:43 and ~10:45 Montréal)
+  left zero trace in either pod.
+- `attach` itself failed typed-but-undocumented: the documented call
+  `artifacts_git_attach({artifactId, idempotencyKey})` returned
+  `invalid_request` because the deployed provider requires `repoId`
+  (and `baseRef` for a new branch) that the host never defaulted
+  (immo fix: PR #1064). Three failed attaches left no durable trace.
+
+### 4.4 Transport masking
+
+- `live_write` and `git_commit` calls have returned **Cloudflare 502**
+  at the edge while the underlying operation's real latency exceeded
+  the gateway timeout: the caller sees an untyped transport failure
+  and cannot tell whether the write landed (idempotency keys make the
+  retry safe, but the outcome of the first call stays `unknown` to
+  the caller). This is the §3.4 "success masked as failure" defect.
+
+### 4.5 Baseline vs SLO summary
+
+| SLO | Baseline 2026-11-10/11 |
+| --- | --- |
+| S1 live start → `LIVE` < 30 s | Never reached `LIVE` in preprod (4 drafts stuck `REVIVING`) |
+| S2 `live_write` → visible < 5 s | Not measurable (no live session); writes returned edge 502 |
+| S5 `git_publish` → published < 60 s | Cold path ≈ 3.5 min of steps + 17–25 min drain; `phase_timeout:install:drain` at 20 min, ceiling raised to 45 min |
+| S6 end to end < 60 s | Not attainable: every phase above blocks it |
+| §3.4 zero silent failures | Violated: fire-and-forget dispatch, swallowed `catch {}`, pre-persist failures with no job/failure/log row |
+
+Source files (immo artefact-focus checkout, sibling of this repo):
+`/home/antoinefa/src/radar-immobilier-artefact-focus/LIVE-DISPATCH-REPORT.md`,
+`DISPATCH-REPORT.md`, `RECONCILE-REPORT.md`, `ATTACH-REPORT.md`.
+Step timings of §4.1: builder phase events for the 2026-11-10/11 cold
+installs (`source-gap` on the immo side: no builder log is retained
+in this repo; the figures above are the conductor-relayed phase
+measurements for those installs).
+
+---
+
+## 5. Requirements on the builder (Sentropic owner)
+
+Each requirement is observable from the immo side; none prescribes
+builder internals beyond the stated observable property.
+
+### 5.1 Dependency cache: pre-warmed and sealed per `lockSha256`
+
+- `[TARGET]` For each `lockSha256`, the builder produces **one sealed,
+  immutable cache unit** (layer or image) containing the installed
+  dependency tree. A sealed unit is content-addressed by `lockSha256`,
+  is never mutated in place, and can be mounted/extracted by any
+  builder pod without network access.
+- `[TARGET]` Cache states are queryable per `lockSha256`:
+  `absent | building | sealed | failed(typed)`. `live start` and
+  `git_publish` on a `sealed` cache perform **zero network install**
+  (no `forge_redownload`, no `tarball_stream` of dependencies, no
+  `npm ci` against a registry) — this is what removes the §4.1 steps
+  from the user path.
+- `[TARGET]` A **pre-warm API** (or equivalent builder endpoint) lets
+  immo request sealing for a `lockSha256` ahead of need (§6.3). The
+  request is asynchronous, idempotent per `lockSha256`, and its
+  completion is observable (state reaches `sealed` or typed `failed`).
+  Pre-warm latency soft target: < 15 min p95 (§3.3).
+- `[TARGET]` Retention: a sealed cache is kept while any immo `main`
+  or prod-tag lockfile references it, plus a grace window
+  (`[OPEN]` Q2). Eviction is reported, never discovered by a failed
+  start.
+
+### 5.2 Warm pod pool
+
+- `[TARGET]` The builder keeps a pool of **warm pods per tenant**
+  (pod started, runtime ready, able to mount a sealed cache
+  immediately): **minimum ≥ 1 per tenant** at all times in preprod
+  and prod, sized up under load (`[OPEN]` Q3).
+- `[TARGET]` Claiming a warm pod is part of S1's 30 s budget. Pool
+  exhaustion degrades to cold-known (S1c), never to an install and
+  never to an untyped queue wait: the caller sees either `LIVE`
+  within max, or a typed, retriable failure.
+- `[TARGET]` Pool state (warm count, claims, exhaustion events) is
+  exposed as metrics (§5.6).
+
+### 5.3 Incremental build for live preview
+
+- `[TARGET]` `live_write` triggers an **incremental vite build**: only
+  changed modules are rebuilt; a one-file edit must fit S2 (< 5 s to
+  visible). A full rebuild on every write is a spec violation when it
+  breaches S2 p95.
+- `[TARGET]` "Visible" is verifiable: the preview serves the new asset
+  hash; the write response (or a status read) carries the built
+  revision so the conductor can poll the exact expected content.
+
+### 5.4 Dispatch reliability: retry, re-drive, typed logs
+
+This subsection closes §4.2/§4.3. It applies to whichever side owns
+each mechanism; the split below follows the current architecture
+(package worker on the Sentropic side, host composition on the immo
+side, §6.1) and may be re-cut by agreement — the observable properties
+may not.
+
+- `[TARGET]` **No fire-and-forget.** Accepting a start/publish durably
+  records the intent, and a **re-drive scanner** (periodic, ≤ 60 s
+  interval) re-dispatches every non-terminal intent (`REVIVING`,
+  accepted-but-unpublished) until it reaches a terminal state. An API
+  or builder restart must not strand an intent (§7.4).
+- `[TARGET]` **Dispatch retries with backoff** on retriable failures
+  (transport, 5xx, admission races), bounded (e.g. 5 attempts over
+  ≤ 5 min), after which the intent lands in a **typed terminal
+  failure** visible to the caller — never in limbo.
+- `[TARGET]` **Typed logs everywhere.** Every dispatch attempt and
+  every failure emits the §3.4 structured log line. A swallowed
+  `catch {}` on a dispatch path is a spec violation. Error codes are
+  stable and documented (`cache_not_prewarmed`, `stale_session`,
+  `pending_publication`, `phase_timeout:<phase>:<step>`, …); new
+  codes are added to the contract, not invented per release.
+- `[TARGET]` **Idempotency end to end.** Re-driving or retrying with
