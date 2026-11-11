@@ -36,7 +36,11 @@ spec:
   jobTemplate:
     spec:
       backoffLimit: 1
-      ttlSecondsAfterFinished: 3600
+      ttlSecondsAfterFinished: 21600
+      # 21600 s (6 h, plancher commun des CronJobs) : le dernier pod en
+      # échec reste lisible après BackoffLimitExceeded (backoffLimit: 1
+      # conservé pour absorber un aléa transitoire, pas de podFailurePolicy
+      # FailJob qui supprimerait cette relance).
       activeDeadlineSeconds: 900
       template:
         metadata:

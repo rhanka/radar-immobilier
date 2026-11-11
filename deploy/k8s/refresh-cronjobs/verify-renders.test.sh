@@ -23,6 +23,7 @@ fixture() {
   mkdir -p "$CASE_ROOT/deploy/k8s"
   cp "$SRC"/deploy/k8s/34-refresh-cronjob.yaml "$SRC"/deploy/k8s/34-refresh-keyring-pvc.yaml \
      "$SRC"/deploy/k8s/34-refresh-pending-watchdog.yaml "$CASE_ROOT/deploy/k8s/"
+  cp "$SRC"/deploy/k8s/35-consistency-snapshot-cronjob.yaml "$SRC"/deploy/k8s/35b-populate-geo-cronjob.yaml "$CASE_ROOT/deploy/k8s/"
   cp -r "$SRC/deploy/k8s/refresh-cronjobs" "$SRC/deploy/k8s/refresh-cronjobs-prod" "$CASE_ROOT/deploy/k8s/"
   mkdir -p "$CASE_ROOT/.github/workflows" && cp "$SRC/.github/workflows/bascule-preprod.yml" "$CASE_ROOT/.github/workflows/"
   mkdir -p "$CASE_ROOT/deploy/ci/backup" && cp "$SRC/deploy/ci/backup/cronjob-backup-daily.yaml" "$CASE_ROOT/deploy/ci/backup/"
@@ -99,6 +100,15 @@ run_bad "watchdog deadline below the 60 s floor the script enforces" "refresh pe
 
 fixture; sed -i 's#value: "900" }#value: "60" }#' "$CASE_ROOT/$DOG"
 run_ok "watchdog deadline at the 60 s floor passes"
+
+fixture; sed -i 's#ttlSecondsAfterFinished: 21600#ttlSecondsAfterFinished: 3600#' "$CASE_ROOT/$DOG"
+run_bad "watchdog TTL below the 6 h floor" "refresh retention contract failed"
+
+fixture; sed -i 's#failedJobsHistoryLimit: 73#failedJobsHistoryLimit: 3#' "$CASE_ROOT/$DOG"
+run_bad "watchdog failedJobsHistoryLimit pruning before 6 h" "refresh retention contract failed"
+
+fixture; sed -i '/podFailurePolicy:/,/values: \[0\]/d' "$CASE_ROOT/$BASE"
+run_bad "refresh Job without FailJob podFailurePolicy" "refresh retention contract failed"
 
 fixture; sed -i 's#schedule: "0 5,11,17,23 \* \* \*"#schedule: "0 * * * *"#' "$CASE_ROOT/$BASE"
 pre_sched "0 * * * *"
