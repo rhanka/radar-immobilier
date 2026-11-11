@@ -123,3 +123,133 @@ fails acceptance even if p95 passes.
 | S4 | `stop` accepted → session closed, pod released | Any | < 15 s | 30 s |
 | S5 | `git_publish` accepted → `url_routable` (`publish_bundle` included) | Warm | < 60 s | 90 s |
 | S6 | **End to end: new artifact → published URL** (attach → … → `git_publish` → `url_routable`, one small content write included) | Known lockfile (warm or cold-known) | **< 60 s** | 90 s |
+
+S6 is the owner requirement of §1.1 expressed end to end. It holds
+only because no phase on that path performs a network dependency
+install (§3.3).
+
+Notes:
+
+- S2 "visible in the preview" means the preview endpoint serves the
+  new content (HTTP 200 with the new asset hash), not merely that the
+  write was accepted. Incremental build (§5.3) is measured inside S2.
+- S5 starts at publish acceptance with the content already committed;
+  it includes builder admission, build, bundle upload and URL
+  routing. It excludes user think time between `git_commit` and
+  `git_publish`.
+- Cold-known (S1c) shares the S1 p95 target: pod start plus sealed
+  cache mount must fit the same budget. If measurement shows this is
+  not attainable, the warm-pool minimum (§5.2) is raised instead of
+  relaxing S1c — `[OPEN]` Q3.
+
+### 3.2 What counts as meeting the SLO
+
+- p95 and max are computed over the §7 scripted runs (5 runs minimum
+  per scenario), per environment, per case. Client-observed latency
+  and builder phase events are both recorded; discrepancies > 2 s
+  between them are themselves a defect (clock/observability gap).
+- A run that ends in a typed failure (§3.4) counts as a max breach for
+  its phase, not as a missing sample.
+
+### 3.3 New lockfile behaviour (cold-new-lockfile)
+
+`[TARGET]` A user's `live start` or `git_publish` must **never** pay a
+full dependency install. When a publish/start references a
+`lockSha256` with no sealed cache:
+
+1. The builder **rejects fast** (≤ 5 s) with typed code
+   `cache_not_prewarmed` (retriable, with the `lockSha256` in the
+   error detail) — or queues the request *without* blocking the
+   session, if a queueing contract is agreed (`[OPEN]` Q1). A
+   multi-minute install inside the request is a spec violation.
+2. The **pre-warming path** (§5.1, §6.3) seals the cache ahead of
+   need: triggered by immo when a lockfile change merges to immo
+   `main` (and on prod-tag creation), never during a user's start.
+3. Pre-warming itself has a soft target, measured but not on the user
+   path: sealed cache ready **< 15 min p95** from merge to `main`.
+   Until it completes, artifacts on the new lockfile degrade to the
+   fast typed rejection above — visible, never silent, never a
+   20-minute hang (§4).
+
+### 3.4 Tolerated errors
+
+`[TARGET]` **Zero silent failures.** Concretely:
+
+- Every failed operation returns a **typed error code** (stable string
+  code, `retriable` flag, human-readable detail) to the MCP caller.
+  Fire-and-forget dispatch with a swallowed error is forbidden on
+  every path (§4 shows why).
+- Every failure emits **one structured log line** on the failing side
+  (host or builder) carrying at least: artifact id, operation, phase,
+  typed code, correlation/invocation id. A failure with no log line
+  is a defect even if the caller saw the typed error.
+- No operation may report success (2xx / accepted) and then fail
+  invisibly: acceptance means the intent is durably recorded **and**
+  a re-drive mechanism (§5.4) owns it until a terminal state
+  (`LIVE` / `published` / typed failure).
+- Edge/MCP transport must not mask outcomes: a gateway timeout
+  (e.g. Cloudflare 502) on an operation that later succeeds is a
+  defect (§5.5). Retriable typed failures with automatic recovery
+  (§7.4) are tolerated; untyped 5xx are not.
+- Error budget: within the §7 acceptance runs, **0** silent failures
+  and **0** untyped errors are tolerated. In production, any silent
+  failure is a severity-1 defect against this spec regardless of rate.
+
+---
+
+## 4. Measured baseline — 2026-11-10/11 (facts)
+
+Everything in this section is `[FACT]`, measured in preprod on
+2026-11-10/11. It is the gap this spec exists to close: the current
+system does not meet a single SLO of §3, and its dominant failure mode
+is silence, not slowness.
+
+### 4.1 Cold install decomposition
+
+One cold dependency install on the builder, step by step (sum of steps
+≈ **3.5 min**, before any build):
+
+| Step | Duration | Volume / note |
+| --- | --- | --- |
+| `cache_lookup` | 8 ms | sealed-cache miss on the new `lockSha256` |
+| `heavy_admit` | 18 ms | admission of a heavy (install-class) job |
+| `forge_redownload` | 21 s | 187 MB, 4 004 files re-downloaded |
+| `source_transfer` | 41 s | source tree transfer to the builder pod |
+| `tarball_stream` | 108 s | 384 MB streamed tarball |
+| `npm ci` | 30 s | install inside the pod |
+
+After the steps above, **drain added 17–25 min** (pod drain /
+install-phase completion wait) on top, so a cold publish ran far past
+every §3 target. The install phase first hit the old **20 min ceiling**
+and failed with typed phase timeout `phase_timeout:install:drain`;
+the ceiling was then raised to **45 min**, which converts the failure
+into a 45-minute wait instead of fixing the path. Neither behaviour is
+compatible with §3.3: the install must leave the user path entirely
+(pre-warming, §5.1), not get a larger timeout.
+
+### 4.2 Live dispatch: fire-and-forget, no re-drive, no log
+
+Source: `LIVE-DISPATCH-REPORT.md` (investigation 2026-11-11
+05:10–05:35Z, preprod read-only).
+
+- The live start is dispatched **exactly once, fire-and-forget**,
+  inside `radar-immo-mcp`; its failure is swallowed with **no log and
+  no retry**. A staging rejection means the reconcile POST is never
+  sent and no builder pod is ever created.
+- **No re-drive exists**: no scheduler, tick, outbox or lease scanner
+  re-runs a stuck `REVIVING` draft on either side. A repeated explicit
+  `live_control(start)` on a `REVIVING` record is refused
+  (`active_session`), so an operator cannot even re-trigger dispatch.
+- Census at investigation time: 6 live drafts ever in preprod —
+  **4 stuck `REVIVING`, 1 stuck `QUIESCING` since 2026-11-08, 1 never
+  started. No draft has ever reached `LIVE` in preprod.**
+- Orphan sessions follow directly: sessions whose start or `stop`
+  failed invisibly remain `REVIVING`/`QUIESCING` with `podUid=null`,
+  holding their binding until manual DB inspection finds them.
+  `stop` on such a record returns `invalid_request` (its worker call
+  cannot settle), so the orphan cannot be cleaned up through the API
+  either.
+
+### 4.3 Publish path: reconcile, stale session, pending publication
+
+Sources: `RECONCILE-REPORT.md`, `DISPATCH-REPORT.md`,
