@@ -55,8 +55,8 @@ export function canonicalGraphKey(citySlug: string): string {
  * geo bucket and can do nothing else to it (zero-copy, strictly read-only).
  */
 export interface ObjectReader {
-  get(key: string): Promise<Uint8Array>;
-  head(key: string): Promise<ObjectInfo | null>;
+  get(key: string, options?: { signal?: AbortSignal | undefined }): Promise<Uint8Array>;
+  head(key: string, options?: { signal?: AbortSignal | undefined }): Promise<ObjectInfo | null>;
 }
 
 /**
