@@ -193,6 +193,17 @@ describe("SignauxSelPanel — carte signal : bulle d'étape, sans effet densifia
     expect(container.querySelector(".signal-rank-row")).toBeNull();
   });
 
+  it("affiche les dates de publication et de document sur la carte compacte", () => {
+    const { getAllByTestId } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: NODES },
+    });
+    const dates = getAllByTestId("signal-card-dates");
+    expect(dates).toHaveLength(2);
+    expect(dates[0]!.textContent).toContain("Publié");
+    expect(dates[0]!.textContent).toContain("2026-05-19");
+    expect(dates[0]!.textContent).toContain("Date doc.");
+  });
+
   it("étape inconnue → repli honnête : AUCUNE bulle inventée", () => {
     const node = makeSignal("sig-noetape", "Signal sans étape", "Aucune étape annotée.");
     // props sans etape ; aucune classification.

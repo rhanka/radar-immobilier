@@ -10,11 +10,10 @@ import type { Database } from "../db/client.js";
 import { getSignalNodesForCity } from "../services/graph/graph-store.js";
 import {
   buildScopedSignalCards,
+  buildScopedSignalCardViews,
   scopedLegacyProjection,
-  toSignalCardView,
   type ScopedSignalCardDeps,
 } from "../services/facets/scoped-signal-cards.js";
-import { toDegradedSignalCard } from "./graph-signals.js";
 import { FacetError, targetFingerprint } from "../services/facets/target.js";
 import { ScopeError } from "../services/facets/scope.js";
 import { WorkspaceError } from "../services/workspaces/types.js";
@@ -136,7 +135,7 @@ export function scopedProjectionRevisionsRoute(deps: ScopedProjectionRevisionsDe
       const visibleNodes = coherent.payload.signals.filter((node) => !hiddenKeys.has(key(node)));
       const cardView = params.data.view === "card";
       const cards = cardView
-        ? visibleNodes.map((node) => toSignalCardView(toDegradedSignalCard(node)))
+        ? await buildScopedSignalCardViews(deps, visibleNodes, params.data.citySlug)
         : await buildScopedSignalCards(deps, visibleNodes, params.data.citySlug);
       const signals = visibleNodes.map((node, index) => ({
         ...cards[index]!,
