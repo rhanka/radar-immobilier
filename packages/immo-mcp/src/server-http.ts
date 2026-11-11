@@ -46,7 +46,7 @@ import { createArtifactBinding } from "./artifact-binding.js";
  * Domain data: `search_signals` is WIRED to the real radar API (the same
  * `GET /api/graph-signals/:city` feed the web app reads) when RADAR_API_BASE_URL
  * is set — so the MCP and the app serve the SAME signals (D12). The other v0
- * domain tools (lots/opportunities/documents) remain `not_wired_yet`. The
+ * domain tools (lots/opportunities/documents) remain `not_wired`. The
  * RAW-DATA seam (raw-data.ts — zones/lots GeoJSON, grille & PV PDFs) is likewise
  * wired to the real radar API when RADAR_API_BASE_URL is set.
  */
@@ -449,7 +449,24 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
   return app;
 }
 
+/**
+ * #1063 fail-closed guard: a server configured as real (`IMMO_MCP_DATA_MODE=http`)
+ * must have the live radar API wired. Without `RADAR_API_BASE_URL` both seams
+ * fall back to deterministic mocks, so refuse to start instead of presenting
+ * fixture data as real. An explicitly simulated server stays allowed: every
+ * one of its responses is labelled `source: "fixture"`.
+ */
+export function assertNoFixtureOnConnectedServer(env: NodeJS.ProcessEnv): void {
+  if (env.IMMO_MCP_DATA_MODE === "http" && !env.RADAR_API_BASE_URL) {
+    throw new Error(
+      "config_error: RADAR_API_BASE_URL is required when IMMO_MCP_DATA_MODE=http " +
+        "(without it the connected server would serve fixture data as real)",
+    );
+  }
+}
+
 async function main(): Promise<void> {
+  assertNoFixtureOnConnectedServer(process.env);
   const config = loadHttpConfig(process.env);
   // BOTH seams are env-wired from the REAL process env (in-cluster:
   // RADAR_API_BASE_URL=http://radar-api:3000). The domain source now serves REAL
@@ -481,7 +498,7 @@ async function main(): Promise<void> {
   serve({ fetch: app.fetch, port: config.port });
   process.stderr.write(
     `[immo-mcp-http] listening port=${config.port} resource=${config.resource} ` +
-      `issuer=${config.issuer} dataMode=${config.dataMode} domainMode=${data.mode} ` +
+      `issuer=${config.issuer} dataMode=${data.mode === "http" ? "real" : "simulation"} domainMode=${data.mode} ` +
       `rawMode=${raw.mode} requiredScopes=${config.requiredScopes.join(",")} ` +
       `artifacts=${artifacts ? (artifacts.binding.scopePolicy.legacyReadScope ? "legacy-read" : "strict") : "off"}\n`,
   );

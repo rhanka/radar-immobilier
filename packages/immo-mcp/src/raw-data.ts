@@ -4,7 +4,7 @@
  *
  * Same pattern as `data-source.ts` (interface + mock impl + http impl +
  * env factory), but a SEPARATE seam on purpose: the v0 `ImmoDataSource` is
- * mock-only in production (its HttpDataSource is `not_wired_yet`), while
+ * mock-only in production (its HttpDataSource is `not_wired`), while
  * these raw tools must reach the REAL radar API in-cluster without changing
  * the v0 tools' behaviour. Selection is keyed off `RADAR_API_BASE_URL`
  * alone: set → HTTP against the radar API; unset → deterministic mocks.
