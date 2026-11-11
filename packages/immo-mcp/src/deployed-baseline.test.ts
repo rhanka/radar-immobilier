@@ -48,19 +48,28 @@ beforeAll(async () => {
 });
 
 // Preserve JSON formatting and all error fields; only the random UUID is variable.
+// #1063 amendment: responses now carry `source: "live" | "fixture"` and the
+// unwired error prefix is `not_wired:` — the historical capture predates both,
+// so canonicalise them away here (the new contract is asserted directly by
+// source-provenance.test.ts) while keeping every other byte anchored.
 function normalize(result: ToolResult): ToolResult {
   return {
     ...result,
     content: result.content.map((block) => {
       if (block.type !== "text" || !block.text) return block;
-      const payload = JSON.parse(block.text) as { correlationId?: unknown };
-      if (payload.correlationId === undefined) return block;
+      const payload = JSON.parse(block.text) as { correlationId?: unknown; source?: unknown };
+      let text = block.text;
+      if (payload.source !== undefined) {
+        expect(payload.source).toMatch(/^(live|fixture)$/);
+        delete payload.source;
+        text = text.includes("\n") ? JSON.stringify(payload, null, 2) : JSON.stringify(payload);
+      }
+      text = text.replace("not_wired:http_data_source", "not_wired_yet:http_data_source");
+      if (payload.correlationId === undefined) return { ...block, text };
       expect(payload.correlationId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
       return {
         ...block,
-        text: block.text.replace(
-          String(payload.correlationId), "00000000-0000-4000-8000-000000000000",
-        ),
+        text: text.replace(String(payload.correlationId), "00000000-0000-4000-8000-000000000000"),
       };
     }),
   };

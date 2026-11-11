@@ -194,7 +194,7 @@ export interface HttpDataSourceOptions {
  * is surfaced as a typed authentication or authorization error.
  *
  * The other v0 domain tools (lots, opportunities, documents) are NOT wired yet:
- * they throw `not_wired_yet`. Real lots/zones/PV are already served by the
+ * they throw `not_wired`. Real lots/zones/PV are already served by the
  * raw-data tools; wiring the remaining domain tools is tracked separately.
  */
 export class HttpDataSource implements ImmoDataSource {
@@ -209,7 +209,7 @@ export class HttpDataSource implements ImmoDataSource {
 
   private notWired(endpoint: string): never {
     throw new Error(
-      `not_wired_yet:http_data_source ${endpoint} base=${this.baseUrl} ` +
+      `not_wired:http_data_source ${endpoint} base=${this.baseUrl} ` +
         "(only search_signals is wired to the real radar API in this seam)",
     );
   }
@@ -266,7 +266,7 @@ export class HttpDataSource implements ImmoDataSource {
  * radar API); unset → `MockDataSource` (deterministic fixtures). Mirrors
  * `createRawDataSource` so BOTH the domain and raw seams flip on the SAME env
  * var — no more `IMMO_MCP_DATA_MODE=http` gate that left `searchSignals` a
- * `not_wired_yet` stub in prod (root cause of the MCP-returns-0-signals bug).
+ * `not_wired` stub in prod (root cause of the MCP-returns-0-signals bug).
  */
 export function createDataSource(env: NodeJS.ProcessEnv): ImmoDataSource {
   const base = env.RADAR_API_BASE_URL;
