@@ -214,7 +214,7 @@ export async function main(argv = process.argv.slice(2)) {
   const k = argv.includes('--series') ? argv[argv.indexOf('--series') + 1] : process.env.SERIES;
   if (!k) { process.stderr.write('classif-l4-blind: pass SERIES=<k>\n'); process.exit(2); }
   const deferred = argv.includes('--deferred') ? argv[argv.indexOf('--deferred') + 1].split(',').filter(Boolean) : [];
-  // A GEPA series (series-<k>.json method gepa) is scored on the 4 GEPA routes.
+  // A GEPA series (series-<k>.json method gepa) is scored on the GEPA routes.
   const universe = seriesRouteUniverse(seriesMethod(k), EVAL_ROUTES);
   const routes = universe.filter((r) => !deferred.includes(r));
   const concurrency = Number(argv.includes('--concurrency') ? argv[argv.indexOf('--concurrency') + 1] : 2);

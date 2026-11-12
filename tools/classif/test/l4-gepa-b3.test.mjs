@@ -77,9 +77,9 @@ test('B3 (retry-trip replay): 2 persistent tool events on a 48-case D_pareto nev
 
 test('B3b: retries are bounded per (candidate, route, case) over the run; past the bound the failure is definitive', withTempHome(async (home) => {
   setup(home);
-  // Every seed misses p0 on mistral (no candidate, so the run can be resumed); P1 keeps 2 persistent tool events.
+  // Every seed misses p0 on opus (no candidate, so the run can be resumed); P1 keeps 2 persistent tool events.
   const override = (label, mark, id) => {
-    if (mark.startsWith('seed') && label === 'mistral-large-4-low' && id === 'p0') return { code: 0, text: JSON.stringify({ verdict: 'non_pertinent', code: CODE.non_pertinent }) };
+    if (mark.startsWith('seed') && label === 'opus-5.5-low' && id === 'p0') return { code: 0, text: JSON.stringify({ verdict: 'non_pertinent', code: CODE.non_pertinent }) };
     if (mark === 'seed-1' && label === 'sol-6.1-low' && TOOL_IDS.includes(id)) return { ...okAnswer(id), toolEvents: 1 };
     return null;
   };
@@ -146,20 +146,20 @@ test('B4 (final-reserve replay): a breaker stop during the final choice resumes 
   const infraIds = SPLIT.feedback.filter((x) => x.startsWith('p')).slice(0, 4);
   let down = true;
   const override = (label, _mark, id) => (down && label === 'sol-6.1-low' && infraIds.includes(id) ? { code: 1, text: '' } : null);
-  // 960 seed calls + 288 final reserve fit in 1298; the final evaluation of P0 trips (4 > 3 of 72).
-  await assert.rejects(runGepa({ home, k: K, maxIterations: 0, maxCalls: 1298, seat: fakeSeat(override).seat, log: quiet }),
+  // 480 seed calls + 144 final reserve fit in 674; the final evaluation of P0 trips (4 > 3 of 72).
+  await assert.rejects(runGepa({ home, k: K, maxIterations: 0, maxCalls: 674, seat: fakeSeat(override).seat, log: quiet }),
     /route sol-6.1-low had 4 infrastructure failures on final-P0 \(> 3 of 72\)/);
   assert.ok(!existsSync(manifestFile(repo)));
   down = false;
   const f = fakeSeat(override);
-  const m = await runGepa({ home, k: K, maxIterations: 0, maxCalls: 1298, seat: f.seat, log: quiet });
+  const m = await runGepa({ home, k: K, maxIterations: 0, maxCalls: 674, seat: f.seat, log: quiet });
   assert.ok(existsSync(manifestFile(repo)), 'the resume writes the manifest');
   assert.equal(m.result.status, 'selected');
   // Only the final calls of P0 left unanswered by the stop are paid: the rest of sol.
   assert.ok(f.seen.every((c) => c.mark === 'seed-0' && SPLIT.feedback.includes(c.id) && c.label === 'sol-6.1-low'));
   assert.ok(infraIds.every((id) => f.seen.some((c) => c.label === 'sol-6.1-low' && c.id === id)), 'the failed calls are retried');
   assert.ok(f.seen.length <= 72);
-  assert.ok(m.callsSpent <= 1298);
+  assert.ok(m.callsSpent <= 674);
   assert.ok(m.finalCoverage.notEvaluated > 0, 'the candidates the budget could not cover are counted');
 }));
 
@@ -168,7 +168,7 @@ test('N1: a 429 is retried after a bounded backoff before it counts; the retries
   const target = SPLIT.pareto[0];
   const attempts = new Map();
   const override = (label, mark, id) => {
-    if (label !== 'glm-5.3-low') return null;
+    if (label !== 'opus-5.5-low') return null;
     const k = `${mark}|${id}`;
     attempts.set(k, (attempts.get(k) ?? 0) + 1);
     if (mark === 'seed-0' && id === target && attempts.get(k) <= 2) return { code: 1, text: '', stderrTail: 'HTTP 429 Too Many Requests' };
@@ -177,7 +177,7 @@ test('N1: a 429 is retried after a bounded backoff before it counts; the retries
   };
   const sleeps = [];
   await assert.rejects(runGepa({ home, k: K, maxIterations: 0, seat: fakeSeat(override).seat, log: quiet, sleep: async (ms) => { sleeps.push(ms); } }),
-    /route glm-5.3-low had 3 infrastructure failures on seed-P2 \(> 2 of 48\)/);
+    /route opus-5.5-low had 3 infrastructure failures on seed-P2 \(> 2 of 48\)/);
   // seed-0: 2 failures then an answer (cached, no breaker); seed-2: 3 cases fail all 4 attempts.
   assert.equal(attempts.get(`seed-0|${target}`), 3);
   for (const id of SPLIT.pareto.slice(0, 3)) assert.equal(attempts.get(`seed-2|${id}`), 4, 'first call + 3 retries');
@@ -188,7 +188,7 @@ test('N1: a 429 is retried after a bounded backoff before it counts; the retries
   assert.equal(retried.length, 2 + 3 * 3, 'every retry is a logged intent (counted by the run budget)');
   assert.ok(retried.every((c) => c.phase === `l4-gepa-s${K}.eval` && typeof c.backoffMs === 'number'));
   const p0 = JSON.parse(readFileSync(path.join(home, 'l4', `gepa-s${K}`, 'candidates', 'P0.json'), 'utf8'));
-  assert.equal(p0.pareto[target]['glm-5.3-low'].failed, false, 'the answer after the backoff counts, not the 429');
+  assert.equal(p0.pareto[target]['opus-5.5-low'].failed, false, 'the answer after the backoff counts, not the 429');
 }));
 
 test('B5 (quota-cap replay): a quota retry never takes the budget of reserved calls; a batch filling the cap ends at callsSpent <= MAX_CALLS', withTempHome(async (home) => {
@@ -196,13 +196,13 @@ test('B5 (quota-cap replay): a quota retry never takes the budget of reserved ca
   const qIds = SPLIT.feedback.slice(0, 3);
   const hit = new Set();
   const override = (label, mark, id) => {
-    if (label === 'glm-5.3-low' && mark === 'seed-0' && qIds.includes(id) && !hit.has(id)) { hit.add(id); return { code: 1, text: '', stderrTail: 'HTTP 429 Too Many Requests' }; }
+    if (label === 'opus-5.5-low' && mark === 'seed-0' && qIds.includes(id) && !hit.has(id)) { hit.add(id); return { code: 1, text: '', stderrTail: 'HTTP 429 Too Many Requests' }; }
     return null;
   };
-  // 960 seed calls + 288 for one finalist = 1248: the final batch fills the cap exactly.
-  const m = await runGepa({ home, k: K, maxIterations: 0, maxCalls: 1248, quotaBackoffMs: [0, 0, 0], sleep: async () => {}, seat: fakeSeat(override).seat, log: quiet });
-  assert.ok(m.callsSpent <= 1248, `callsSpent ${m.callsSpent} <= 1248`);
-  assert.equal(m.callsSpent, 1248);
+  // 480 seed calls + 144 for one finalist = 624: the final batch fills the cap exactly.
+  const m = await runGepa({ home, k: K, maxIterations: 0, maxCalls: 624, quotaBackoffMs: [0, 0, 0], sleep: async () => {}, seat: fakeSeat(override).seat, log: quiet });
+  assert.ok(m.callsSpent <= 624, `callsSpent ${m.callsSpent} <= 624`);
+  assert.equal(m.callsSpent, 624);
   assert.ok(existsSync(manifestFile(repo)));
   const calls = readFileSync(path.join(home, 'l2', 'calls.jsonl'), 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l));
   assert.equal(calls.filter((c) => c.intent === true && c.attempt).length, 0, 'no retry could fit next to the reserved calls');
@@ -218,12 +218,12 @@ test('N6: quota detection reads stderr and the CLI error envelope only; a vibe -
   assert.ok(looksLikeMaxPrice(maxPrice) && !looksLikeQuotaFailure(maxPrice));
   assert.deepEqual(parseSeatResult(maxPrice, loadCodes()), { verdict: null, code: null, failed: true, why: 'max-price', infra: false });
   assert.equal(codexErrorEnvelope('{"type":"turn.failed","error":{"message":"429 Too Many Requests"}}\n{"type":"item.completed","item":{"type":"agent_message","text":"429"}}'), '429 Too Many Requests');
-  // Loop: 3 max-price stops on a 48-case batch (the infra allowance is 2) — cached as answers, no retry, no breaker.
+  // Loop: 3 max-price stops on a 48-case batch (the infra allowance is 2), faked on a GEPA route — cached as answers, no retry, no breaker.
   setup(home);
   const ids = SPLIT.pareto.slice(0, 3);
   const attempts = new Map();
   const override = (label, mark, id) => {
-    if (label !== 'mistral-large-4-low' || mark !== 'seed-0' || !ids.includes(id)) return null;
+    if (label !== 'opus-5.5-low' || mark !== 'seed-0' || !ids.includes(id)) return null;
     attempts.set(id, (attempts.get(id) ?? 0) + 1);
     return maxPrice;
   };
@@ -231,13 +231,13 @@ test('N6: quota detection reads stderr and the CLI error envelope only; a vibe -
   assert.ok(m.result);
   assert.deepEqual([...attempts.values()], [1, 1, 1], 'never retried, never re-paid');
   const p0 = JSON.parse(readFileSync(path.join(home, 'l4', `gepa-s${K}`, 'candidates', 'P0.json'), 'utf8'));
-  for (const id of ids) assert.deepEqual([p0.pareto[id]['mistral-large-4-low'].failed, p0.pareto[id]['mistral-large-4-low'].infra], [true, false]);
+  for (const id of ids) assert.deepEqual([p0.pareto[id]['opus-5.5-low'].failed, p0.pareto[id]['opus-5.5-low'].infra], [true, false]);
 }));
 
-test('owner 4 routes: a missing seat binary stops the run at its first call; the resume reuses the answers of the other routes (run s5 case)', withTempHome(async (home) => {
+test('owner GEPA routes: a missing seat binary stops the run at its first call; the resume reuses the answers of the other routes (run s5 case)', withTempHome(async (home) => {
   const repo = setup(home);
-  // Every seed misses p0 on mistral (no candidate: the run can be resumed again afterwards).
-  const miss = (label, mark, id) => (mark.startsWith('seed') && label === 'mistral-large-4-low' && id === 'p0' ? { code: 0, text: JSON.stringify({ verdict: 'non_pertinent', code: CODE.non_pertinent }) } : null);
+  // Every seed misses p0 on opus (no candidate: the run can be resumed again afterwards).
+  const miss = (label, mark, id) => (mark.startsWith('seed') && label === 'opus-5.5-low' && id === 'p0' ? { code: 0, text: JSON.stringify({ verdict: 'non_pertinent', code: CODE.non_pertinent }) } : null);
   const absent = fakeSeat((label, mark, id) => (label === 'sol-6.1-low' ? { code: -2, text: '', binaryMissing: 'codex' } : miss(label, mark, id)));
   await assert.rejects(runGepa({ home, k: K, maxIterations: 0, seat: absent.seat, log: quiet }),
     /codex not found in PATH \(codex introuvable dans PATH\) for route sol-6.1-low on seed-P0: seat infrastructure, run stopped at the first call/);
@@ -255,17 +255,21 @@ test('owner 4 routes: a missing seat binary stops the run at its first call; the
   assert.ok(existsSync(manifestFile(repo)));
   const p0 = g.seen.filter((c) => c.mark === 'seed-0' && SPLIT.pareto.includes(c.id));
   assert.equal(p0.filter((c) => c.label === 'sol-6.1-low').length, 48);
-  assert.equal(p0.length, 4 * 48 - answered.length);
+  assert.equal(p0.length, GEPA_ROUTES.length * 48 - answered.length);
   assert.ok(!p0.some((c) => answered.includes(`${c.label}|${c.id}`)), 'an answered call is never repaid');
   assert.deepEqual(m.routes, GEPA_ROUTES);
-  // A candidate file still holding a luna row (5-route era) loads, and luna is never retried.
+  // A candidate file still holding a luna row (5-route era) or Vibe rows (4-route era, owner 12/11:
+  // no Vibe) loads, is scored on the GEPA routes only, and the dropped routes are never retried.
   const f = path.join(home, 'l4', `gepa-s${K}`, 'candidates', 'P1.json');
   const p1 = JSON.parse(readFileSync(f, 'utf8'));
   p1.pareto[SPLIT.pareto[0]]['luna-6-low'] = { failed: true, infra: true, pred: null };
+  p1.pareto[SPLIT.pareto[0]]['glm-5.3-low'] = { failed: true, infra: true, pred: null };
+  p1.pareto[SPLIT.pareto[1]]['mistral-large-4-low'] = { failed: false, infra: false, pred: { verdict: 'non_pertinent', code: CODE.non_pertinent } };
   writeFileSync(f, JSON.stringify(p1));
   const again = fakeSeat(miss);
-  await runGepa({ home, k: K, maxIterations: 0, seat: again.seat, log: quiet });
-  assert.equal(again.seen.length, 0, 'no luna call, nothing repaid');
+  const m2 = await runGepa({ home, k: K, maxIterations: 0, seat: again.seat, log: quiet });
+  assert.equal(again.seen.length, 0, 'no luna nor Vibe call, nothing repaid');
+  assert.equal(m2.population.find((c) => c.id === 'P1').pareto.failures, 0, 'a dropped route never counts in the score');
 }));
 
 test('callSeat reports a seat binary absent from PATH (spawn ENOENT, exit -2) as binaryMissing', async () => {
