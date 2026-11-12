@@ -1,0 +1,51 @@
+{
+ "kind": "l4-series",
+ "series": 5,
+ "method": "gepa",
+ "promptSha256": "762e164630cd48475fd3c0bc2fe79c3fad00a913d51be391fe6df4708606f6b6",
+ "routes": [
+  "sol-6.1-low"
+ ],
+ "seed": "gepa-s5",
+ "run": "s5",
+ "gepa": {
+  "candidate": "P3",
+  "origin": "seed:P3",
+  "routes": [
+   "opus-5.5-low",
+   "sol-6.1-low"
+  ],
+  "contextSha256": "04dce24ccbc5e9ad3b18cfb73976334332d981e0827fda56153beec3da01cab2",
+  "callsSpent": 6851,
+  "maxCalls": 7000,
+  "tuningTotal": {
+   "misses": 0,
+   "noise": 131,
+   "failures": 0,
+   "cases": 252
+  }
+ },
+ "sameAsSeries": {
+  "series": 3,
+  "promptSha256": "762e164630cd48475fd3c0bc2fe79c3fad00a913d51be391fe6df4708606f6b6",
+  "sameSha": true
+ },
+ "halves": {
+  "tuningSha256": "dcaf04fa8d740565b1832d55df705f6b28ac99e0f5b184c78614f2e2cd7efc86",
+  "blindSha256": "8c7f4650ba8235da9efa3cc242b3c6ab085c9a2c2afa3058556d3a3d9bd8a46c"
+ },
+ "failureCeiling": 0.05,
+ "supports": {
+  "recall": 30,
+  "precision": 30
+ },
+ "budget": {
+  "cap": 30000,
+  "spent": 23337,
+  "planned": {
+   "blind": 252,
+   "s113": 113
+  }
+ },
+ "note": "Pre-registered by the conductor after the GEPA run s5 and BEFORE the series-5 dev manifest and any blind run (Annex M M.5). GEPA winner = seed P3 (frozen as P5, same bytes and sha as series 3): 0 miss on the whole tuning half on opus-5.5-low and sol-6.1-low. Registered route: sol-6.1-low only — opus-5.5-low with this sha was already scored blind in series 3 and the blind guard admits one run per (prompt sha, model, effort); the opus-5.5-low blind reading of P3 is the series-3 one. GEPA rule verdict (0 miss, failures <= 5 %); precision reported, never a floor."
+}
