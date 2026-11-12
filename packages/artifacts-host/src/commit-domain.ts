@@ -86,7 +86,8 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
       [artifact.getStore()]);
   };
   const publicationRefs = createPostgresClaimGuardedRefs(store, createPostgresCommitExecutor(pool));
-  const { pendingBuilds, ...gitDeps } = options.gitMode ?? {};
+  // Host triggers only (pending-build sweep, live re-drive timer): never handed to the provider app.
+  const { pendingBuilds, liveRedrive: _hostTimerOnly, ...gitDeps } = options.gitMode ?? {};
   const app = createHttpArtifactApp({ profile, coordinator, mapHostError,
     ...(options.uploadPage ? { uploadPage: options.uploadPage } : {}),
     derivation: { algorithm: "radar-derive-idempotency-v1", derive(input) {

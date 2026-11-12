@@ -92,6 +92,14 @@ data:
   # live_write and live_control(start) reach the builder instead of answering
   # builder_unavailable. The forward URL stays on radar-api (reader mount).
   IMMO_ARTIFACTS_LIVE_EDGE_ENABLED: "1"
+  # Durable live re-drive (@sentropic/artifacts 0.2.27), PREPROD ONLY and in
+  # THIS workload only (never on radar-api): boot pass + every 15 s, SIGTERM
+  # stops the timer. The package overlap guards are process-local, so exactly one
+  # process per storage scope may run it. radar-immo-mcp carries the MCP live
+  # flow (live_write, live_control) and runs 1 replica with a Recreate
+  # strategy, so a rollout never runs two loops; radar-api has 1 to 2
+  # replicas. Only the literal `true` counts.
+  IMMO_ARTIFACTS_LIVE_REDRIVE_ENABLED: "true"
   # GB4 GO preprod (owner, recorded 07/11 ~22 h 10 Montreal): live worker and
   # generic invitations qualified, PREPROD ONLY. Only the literal `true` counts.
   IMMO_ARTIFACTS_LIVE_QUALIFIED: "true"

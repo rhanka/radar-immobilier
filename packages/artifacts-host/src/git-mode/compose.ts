@@ -1,7 +1,7 @@
 import {
   createGitHubForge, createGitPort, createPostgresLiveStore, type GitBindingStore, type GitCodeRightsPort, type GitHumanDirectory,
   type GitIdentity, type GitInstallationLeasePort, type GitPort, type LiveKeyPort, type LiveSessionService, type LiveStore,
-  type LiveWorkerPort, type PrincipalDirectoryPort,
+  type LiveRedriveItem, type LiveWorkerEvent, type LiveWorkerPort, type PrincipalDirectoryPort,
 } from "@sentropic/artifacts";
 import { createPostgresGitBindingStore } from "@sentropic/artifacts/adapters/postgres";
 import type { HttpAppDeps } from "@sentropic/artifacts/http";
@@ -19,7 +19,7 @@ import { createSealedLiveKeys, parseLiveDraftKeyring, type LiveDraftKeyring } fr
 import { SERVICE_SCOPE_BROKER, SERVICE_SCOPE_BUILDER, serviceTokenSource, type ServiceTokenConfig } from "./service-token.js";
 import { createAccountDirectory } from "../directory.js";
 import { createLiveWorkerClient, liveStoreDrafts, liveStoreFences } from "@sentropic/artifacts/live-host";
-import { composeLiveService, FAIL_CLOSED_LIVE_KEYS } from "./live.js";
+import { composeLiveService, FAIL_CLOSED_LIVE_KEYS, logLiveWorkerEvent } from "./live.js";
 import { NO_LIVE_INVITATIONS } from "./live-grant.js";
 import { composeLiveEdgeRevocationPush, createLiveSocketRegistry, liveSignerFrom, readLiveEdgeConfig, type LiveControlTransport,
   type LiveSocketRegistry } from "./live-edge.js";
@@ -69,6 +69,12 @@ export interface GitModeConfig {
    */
   readonly liveEdgeEnabled?: boolean | undefined;
   /**
+   * Durable live re-drive timer (IMMO_ARTIFACTS_LIVE_REDRIVE_ENABLED=true, default off), on top of the edge
+   * worker. Enabled in exactly one workload per storage scope (preprod: radar-immo-mcp, one replica, Recreate):
+   * the package re-drive guards are process-local, so two processes would settle the same runtimes twice.
+   */
+  readonly liveRedriveEnabled?: boolean | undefined;
+  /**
    * Worker qualification (IMMO_ARTIFACTS_LIVE_QUALIFIED=true, default false):
    * live_write / live_control(start) answer builder_unavailable while false.
    * Turned on by an ops change ONLY after an owner-recorded « GB4 GO preprod ».
@@ -104,6 +110,7 @@ export function readGitModeConfig(env: NodeJS.ProcessEnv): GitModeConfig {
     builderUrl: optional(env.IMMO_ARTIFACTS_BUILDER_URL),
     liveDraftKeys: parseLiveDraftKeyring(env.IMMO_ARTIFACTS_LIVE_DRAFT_KEYS, env.IMMO_ARTIFACTS_LIVE_DRAFT_KEY_CURRENT),
     liveEdgeEnabled: env.IMMO_ARTIFACTS_LIVE_EDGE_ENABLED?.trim() === "1",
+    liveRedriveEnabled: env.IMMO_ARTIFACTS_LIVE_REDRIVE_ENABLED?.trim() === "true",
     liveQualified: env.IMMO_ARTIFACTS_LIVE_QUALIFIED?.trim() === "true",
     liveInvitationsQualified: env.IMMO_ARTIFACTS_LIVE_INVITATIONS_QUALIFIED?.trim() === "true",
   };
@@ -140,6 +147,8 @@ export interface GitModePorts {
   readonly liveControlTransport?: LiveControlTransport;
   /** Receives the composed live service (the content host reads the same views). */
   readonly onLiveService?: (service: LiveSessionService) => void;
+  /** Worker settle observer (0.2.27); default: one structured JSON log line per event. */
+  readonly onLiveWorkerEvent?: (event: LiveWorkerEvent) => void;
 }
 
 export interface GitModeDeps {
@@ -148,6 +157,8 @@ export interface GitModeDeps {
   readonly live?: NonNullable<HttpAppDeps["live"]>;
   /** Pending-build reconciler (0.2.25); consumed by the host triggers, never passed to the provider app. */
   readonly pendingBuilds?: PendingBuildReconciler;
+  /** Live re-drive pass of this scope (0.2.27 `LiveSessionService.redrive`); host timer only, never the provider app. */
+  readonly liveRedrive?: () => Promise<LiveRedriveItem[]>;
 }
 
 const unavailable = (): never => { throw new ArtifactOperationError("provider_unavailable"); };
@@ -255,25 +266,13 @@ export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
   const { pool, storageScopeId, config } = input;
   const { ports, hasWriteScope, bindings, codeRights, registry, directory, git } = composeGitAccess(input);
   let liveService: LiveSessionService | undefined;
-  // Pre-build reconcile worker: the package live-open client
-  // (`createLiveWorkerClient`, @sentropic/artifacts/live-host 0.2.25) on the
-  // host LiveStore, composed for the build client as for a live open (same
-  // fences/drafts/invitation sources, same closed body, same strict ack).
-  // Store/keys are stateless over the pool until a call runs.
-  const buildLiveStore = ports.liveStore ?? createPostgresLiveStore(pool);
-  const buildLiveKeys = ports.liveKeys ?? (config.liveDraftKeys ? createSealedLiveKeys(config.liveDraftKeys) : undefined);
-  const buildWorker = createLiveWorkerClient({ baseUrl: config.builderUrl,
-    identity: serviceTokenSource(config.service ?? {}, SERVICE_SCOPE_BUILDER, ports.fetch), fences: liveStoreFences(buildLiveStore),
-    bindings, drafts: liveStoreDrafts(buildLiveStore, buildLiveKeys ?? FAIL_CLOSED_LIVE_KEYS), reconcileTimeoutMs: 60_000,
-    sessionState: async (identity) => liveService ? liveService.liveInvitationState(identity) : NO_LIVE_INVITATIONS,
-    ...(ports.fetch ? { fetch: ports.fetch } : {}) });
   // M3-I: git_publish is selected only from the `build` stage; the sandbox
   // executor is admitted only once the builder base URL is set; the service
   // token source itself fails closed while the OAuth client is unconfigured.
   const buildApi = ports.buildApi ?? (input.resolution.tools.includes("artifacts_git_publish")
     ? createHostBuildApiClient({ baseUrl: config.builderUrl,
       identity: serviceTokenSource(config.service ?? {}, SERVICE_SCOPE_BUILDER, ports.fetch),
-      jobs: ports.jobs ?? createPostgresHostJobStore({ pool, scopeId: storageScopeId }), bindings, liveWorker: buildWorker,
+      jobs: ports.jobs ?? createPostgresHostJobStore({ pool, scopeId: storageScopeId }), bindings,
       ...(ports.fetch ? { fetch: ports.fetch } : {}) })
     : undefined);
   const build = ports.build ?? buildApi;
@@ -298,8 +297,8 @@ export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
   // client (it reads the package fences sent to the controller). Flag off:
   // no worker, as before (live_write / live_control(start) answer builder_unavailable).
   const edgeWorker = liveSelected && input.resolution.stage === "live" && config.liveEdgeEnabled === true;
-  const liveStore = ports.liveStore ?? (edgeWorker && !ports.liveWorker ? buildLiveStore : undefined);
-  const liveKeys = buildLiveKeys;
+  const liveStore = ports.liveStore ?? (edgeWorker && !ports.liveWorker ? createPostgresLiveStore(pool) : undefined);
+  const liveKeys = ports.liveKeys ?? (config.liveDraftKeys ? createSealedLiveKeys(config.liveDraftKeys) : undefined);
   const liveWorker = ports.liveWorker ?? (edgeWorker ? createLiveWorkerClient({ baseUrl: config.builderUrl,
     identity: serviceTokenSource(config.service ?? {}, SERVICE_SCOPE_BUILDER, ports.fetch), fences: liveStoreFences(liveStore!), bindings,
     drafts: liveStoreDrafts(liveStore!, liveKeys ?? FAIL_CLOSED_LIVE_KEYS), reconcileTimeoutMs: 60_000,
@@ -317,10 +316,13 @@ export function composeGitMode(input: ComposeGitModeInput): GitModeDeps {
     onService: (service) => { liveService = service; ports.onLiveService?.(service); },
     ...(liveStore ? { store: liveStore } : {}),
     ...(liveKeys ? { keys: liveKeys } : {}),
-    ...(liveWorker ? { worker: liveWorker } : {}), qualified })
+    ...(liveWorker ? { worker: liveWorker } : {}), onWorkerEvent: ports.onLiveWorkerEvent ?? logLiveWorkerEvent, qualified })
     : undefined;
+  // 0.2.27 durable re-drive: only a composed worker has runtimes to settle again, and only in the ONE process
+  // that enables it (IMMO_ARTIFACTS_LIVE_REDRIVE_ENABLED=true): the package overlap guards are process-local.
+  const liveRedrive = live && liveWorker && config.liveRedriveEnabled === true ? () => live.redrive(storageScopeId) : undefined;
   return { git: { bindings, codeRights }, [GIT_TOOLS_DEP_KEY]: gitTools, ...(live ? { live } : {}),
-    ...(pendingBuilds ? { pendingBuilds } : {}) };
+    ...(pendingBuilds ? { pendingBuilds } : {}), ...(liveRedrive ? { liveRedrive } : {}) };
 }
 
 /** Control push of a revoked invitation to the INTERNAL artifact-content Service; closed while the edge is unconfigured. */
