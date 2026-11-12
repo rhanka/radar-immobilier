@@ -97,8 +97,26 @@ export async function podDryRun(PLAN) {
       else if (top.length > 1) match.ambiguous.push({ row: t.row, nodeId: t.nodeId, candidates: top.length });
       else match.notFound.push({ row: t.row, nodeId: t.nodeId });
     }
-    out.match = { targets: PLAN.targets.length, ...match };
-    out.targets = resolved.map(({ t, n, how }) => ({ row: t.row, citySlug: n.city_slug, type: n.type, id: n.id, how,
+    // Several sheet ids may resolve (by key) to one graph node: one target per (city, type, id).
+    // Same decision: kept once and reported; different decisions: excluded and reported (apply refuses).
+    const byNode = new Map();
+    for (const entry of resolved) {
+      const k = JSON.stringify([entry.n.city_slug, entry.n.type, entry.n.id]);
+      byNode.set(k, [...(byNode.get(k) || []), entry]);
+    }
+    match.resolvedDuplicates = []; match.resolvedConflicts = [];
+    const unique = [];
+    for (const group of byNode.values()) {
+      const rows = group.map((g) => g.t.row);
+      if (group.some((g) => g.t.verdict !== group[0].t.verdict || g.t.reasonCode !== group[0].t.reasonCode)) {
+        match.resolvedConflicts.push({ rows, id: group[0].n.id });
+        continue;
+      }
+      if (group.length > 1) match.resolvedDuplicates.push({ rows, id: group[0].n.id });
+      unique.push(group[0]);
+    }
+    out.match = { targets: PLAN.targets.length, resolvedTargets: unique.length, ...match };
+    out.targets = unique.map(({ t, n, how }) => ({ row: t.row, citySlug: n.city_slug, type: n.type, id: n.id, how,
       verdict: t.verdict, reasonCode: t.reasonCode, fingerprint: fingerprint(n) }));
 
     // Per account: existing heads on each target decide insert / noop / skipExisting.
