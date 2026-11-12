@@ -389,7 +389,7 @@ async function callOne(ctx, cand, route, id, step) {
     appendJsonlRecord(ctx.callsLog, { at: new Date().toISOString(), intent: true, phase, route, itemId: id, candidate: cand.id, step, ...(attempt ? { attempt, backoffMs } : {}) });
     r = await ctx.seat(route, prompt, { base: ctx.seatTmp, timeoutMs: 1800000 });
     appendJsonlRecord(ctx.callsLog, { at: new Date().toISOString(), intent: false, phase, route, itemId: id, candidate: cand.id, step, ...(attempt ? { attempt, backoffMs } : {}),
-      exitCode: r.code, latencyMs: r.latencyMs ?? null, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null, toolEvents: r.toolEvents ?? null,
+      exitCode: r.code, latencyMs: r.latencyMs ?? null, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null, toolEvents: r.toolEvents ?? null, ...(r.toolEvents && r.toolKinds ? { toolKinds: r.toolKinds } : {}),
       ...(looksLikeQuotaFailure(r) ? { quota: true } : {}), ...quotaFields(r) });
     // ChatGPT quota guard: a codex measurement over the threshold pauses every codex seat.
     if (ctx.quotaGuard.observe(route, r.rateLimits)) break;

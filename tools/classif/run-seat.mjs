@@ -421,28 +421,32 @@ const CODEX_TOOL_KEY = /(tool_call|toolcall|function_call|exec_command|shell_com
 export function countCodexToolEvents(stdout) {
   let toolEvents = 0;
   const unknownTypes = [];
+  // Diagnostic (owner 12/11): kind of every counted event — event and item types only, never
+  // a message, a command or any model text — so an intermittent refusal can be explained.
+  const toolKinds = {};
+  const kind = (k) => { toolKinds[k] = (toolKinds[k] ?? 0) + 1; };
   for (const line of String(stdout ?? '').split('\n')) {
     if (!line.trim()) continue;
     let e;
     // Review §10: fail closed on form — a non-JSON line is not a benign event.
-    try { e = JSON.parse(line); } catch { toolEvents++; unknownTypes.push('<non-json>'); continue; }
+    try { e = JSON.parse(line); } catch { toolEvents++; unknownTypes.push('<non-json>'); kind('<non-json>'); continue; }
     const type = e?.type ?? e?.event ?? null;
-    if (!type || typeof type !== 'string') { toolEvents++; unknownTypes.push('<missing-type>'); continue; }
+    if (!type || typeof type !== 'string') { toolEvents++; unknownTypes.push('<missing-type>'); kind('<missing-type>'); continue; }
     // Quota metering (`token_count`, carrying `rate_limits`) is benign; any other unknown type still counts.
     if (type === 'token_count' || (type === 'event_msg' && e?.payload?.type === 'token_count')) continue;
-    if (!CODEX_KNOWN_EVENT_TYPES.has(type)) { toolEvents++; unknownTypes.push(type); continue; }
+    if (!CODEX_KNOWN_EVENT_TYPES.has(type)) { toolEvents++; unknownTypes.push(type); kind(type); continue; }
     if (type.startsWith('item.')) {
       const item = e?.item ?? e?.data ?? e;
       const itype = item?.type ?? null;
-      if (!itype || typeof itype !== 'string') { toolEvents++; unknownTypes.push(`${type}:<missing-item-type>`); continue; }
+      if (!itype || typeof itype !== 'string') { toolEvents++; unknownTypes.push(`${type}:<missing-item-type>`); kind(`${type}:<missing-item-type>`); continue; }
       if (benignErrorItem(item)) continue;
-      if (!CODEX_BENIGN_ITEM_TYPES.has(itype)) { toolEvents++; continue; }
+      if (!CODEX_BENIGN_ITEM_TYPES.has(itype)) { toolEvents++; kind(`${type}:${itype}`); continue; }
       // Fail closed on a tool payload nested inside a benign item (keys only, never the
       // model text: the word "tool" in prose must not count).
-      if (CODEX_TOOL_KEY.test(JSON.stringify(Object.keys(item)))) toolEvents++;
+      if (CODEX_TOOL_KEY.test(JSON.stringify(Object.keys(item)))) { toolEvents++; kind(`${type}:${itype}:tool-key`); }
     }
   }
-  return { toolEvents, unknownTypes };
+  return { toolEvents, unknownTypes, toolKinds };
 }
 
 export function parseCodex(stdout, dir) {
@@ -477,8 +481,8 @@ export function parseCodex(stdout, dir) {
   for (const line of String(stdout ?? '').split('\n')) {
     try { walk(JSON.parse(line)); } catch { /* not json */ }
   }
-  const { toolEvents, unknownTypes } = countCodexToolEvents(stdout);
-  return { text, usage, toolEvents, unknownTypes, errorEnvelope: codexErrorEnvelope(stdout), rateLimits: extractCodexRateLimits(stdout) };
+  const { toolEvents, unknownTypes, toolKinds } = countCodexToolEvents(stdout);
+  return { text, usage, toolEvents, unknownTypes, toolKinds, errorEnvelope: codexErrorEnvelope(stdout), rateLimits: extractCodexRateLimits(stdout) };
 }
 
 /**
