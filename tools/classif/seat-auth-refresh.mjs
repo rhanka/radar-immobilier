@@ -9,7 +9,7 @@ import { refreshCodexAuth } from './run-seat.mjs';
 
 const argv = process.argv.slice(2);
 const seat = argv.includes('--seat') ? argv[argv.indexOf('--seat') + 1] : process.env.SEAT;
-if (!seat) { process.stderr.write('classif-seat-auth-refresh: pass SEAT=<seat> (astra-max, astra-low, astra-medium, sol-6.1-low, sol-6.1-medium, luna-6-low)\n'); process.exit(2); }
+if (!seat) { process.stderr.write('classif-seat-auth-refresh: pass SEAT=<seat> (astra-max, astra-low, astra-medium, sol-6.1-low, sol-6.1-medium, luna-6-low, luna-6-medium)\n'); process.exit(2); }
 try {
   process.stdout.write(`classif-seat-auth-refresh: ${seat} auth refreshed in ${refreshCodexAuth(seat)}\n`);
 } catch (e) {
