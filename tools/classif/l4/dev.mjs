@@ -22,6 +22,7 @@ import { groupRoutesByFamily, runFamiliesParallel } from './families.mjs';
 import { check as budgetCheck } from '../lib/budget.mjs';
 import { assertNoVerbatim } from '../lib/freeze.mjs';
 import { loadCodes } from '../l2/run.mjs';
+import { createAccountGuard } from '../lib/account-guard.mjs';
 
 // Evaluated routes (plan v3 C–D): low and medium models. Argon runs once its seat quota is
 // back; pass --deferred gemini-4-argon-low,gemini-4-argon-medium to skip it. The vibe
@@ -164,6 +165,8 @@ export async function main(argv = process.argv.slice(2)) {
   // sequentially with the existing per-route concurrency (per-seat limit unchanged).
   // Per-item caches and per-route files are written inside the route task, so a
   // family failure keeps the cached items of the other families on disk.
+  // Account-refusal guard (owner 12/11): the first refused account stops every launch.
+  const accountGuard = createAccountGuard();
   const runDevRoute = async (route) => {
     const outFile = path.join(dir, `dev-${route}.jsonl`);
     // Review §8: per-item persistence with key (series,promptSha,route,itemId) verified on
@@ -173,13 +176,14 @@ export async function main(argv = process.argv.slice(2)) {
     const rows = await pool(tuning.map((item) => async () => {
       const hit = loadCached(item.itemId);
       if (hit) return hit;
-      if (quotaGuard.blocks(route)) return null;
+      if (quotaGuard.blocks(route) || accountGuard.blocks()) return null;
       const prompt = devPrompt(frozen, item);
       appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: true, phase: `l4-dev-s${k}`, route, itemId: item.itemId });
       const r = await callSeat(route, prompt, { base: seatTmp, timeoutMs: 1800000 });
       appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: `l4-dev-s${k}`, route, itemId: item.itemId,
         exitCode: r.code, latencyMs: r.latencyMs, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null, toolEvents: r.toolEvents ?? null, ...(r.toolEvents && r.toolKinds ? { toolKinds: r.toolKinds } : {}), ...quotaFields(r) });
       quotaGuard.observe(route, r.rateLimits);
+      accountGuard.observe(route, r);
       const parsed = parseSeatResult(r, codes);
       const row = { itemId: item.itemId, ref: item.code, refVerdict: item.verdict, unresolved: item.status === 'unresolved',
         pred: parsed.failed ? null : { verdict: parsed.verdict, code: parsed.code }, failed: parsed.failed, why: parsed.why,
@@ -193,6 +197,7 @@ export async function main(argv = process.argv.slice(2)) {
     }), concurrency);
     // Answered items are cached above; a paused codex route stops the run before any aggregate.
     if (quotaGuard.paused && isCodexSeat(route)) throw quotaGuard.error(resumeCommand);
+    if (accountGuard.tripped) throw accountGuard.error(resumeCommand);
     writeFileSync(outFile, `${rows.map((r) => JSON.stringify(r)).join('\n')}\n`, { mode: 0o600 });
     return rows;
   };
