@@ -91,18 +91,23 @@ export const ROUTES = {
       env: { CODEX_HOME: ensureAstraHome() } }),
     parse: parseCodex,
   },
-  // GEPA evaluation seats (owner decision, GEPA method): two low-effort ChatGPT models on the
-  // same isolated codex route as astra-max — own CODEX_HOME per seat (config with NO
-  // mcp_servers, copied auth), empty cwd, scrubbed env, read-only sandbox, session file read for
-  // the quota then deleted, --json + -o last-message.md for parsing, prompt on stdin, parseCodex (fail-closed tools).
+  // ChatGPT evaluation seats on the same isolated codex route as astra-max — own CODEX_HOME per
+  // seat (config with NO mcp_servers, copied auth), empty cwd, scrubbed env, read-only sandbox,
+  // session file read for the quota then deleted, --json + -o last-message.md for parsing, prompt
+  // on stdin, parseCodex (fail-closed tools). sol-6.1-low and luna-6-low: GEPA method (owner,
+  // sol not luna); sol-6.1-medium, astra-low and astra-medium: owner 12/11, P0 evaluated on Astra
+  // and Sol in low and medium (Astra was only an annotator and the GEPA mutator before).
   ...Object.fromEntries([
-    ['sol-6.1-low', 'Sol 6.1', 'gpt-6.1-sol'],
-    ['luna-6-low', 'Luna 6', 'gpt-6-luna'],
-  ].map(([label, family, model]) => [label, {
-    family, model, effort: 'low', route: `codex exec -m ${model} -c model_reasoning_effort=low -s read-only, isolated CODEX_HOME, empty cwd, scrubbed env (--json + -o last-message.md for parsing, prompt on stdin)`,
-    build: (dir, _file, prompt) => ({ cmd: 'codex', args: ['exec', '-m', model, '-c', 'model_reasoning_effort=low', '-s', 'read-only',
+    ['sol-6.1-low', 'Sol 6.1', 'gpt-6.1-sol', 'low'],
+    ['sol-6.1-medium', 'Sol 6.1', 'gpt-6.1-sol', 'medium'],
+    ['luna-6-low', 'Luna 6', 'gpt-6-luna', 'low'],
+    ['astra-low', 'Astra', 'gpt-6-astra', 'low'],
+    ['astra-medium', 'Astra', 'gpt-6-astra', 'medium'],
+  ].map(([label, family, model, effort]) => [label, {
+    family, model, effort, route: `codex exec -m ${model} -c model_reasoning_effort=${effort} -s read-only, isolated CODEX_HOME, empty cwd, scrubbed env (--json + -o last-message.md for parsing, prompt on stdin)`,
+    build: (dir, _file, prompt) => ({ cmd: 'codex', args: ['exec', '-m', model, '-c', `model_reasoning_effort=${effort}`, '-s', 'read-only',
       '--skip-git-repo-check', '--json', '-o', path.join(dir, 'last-message.md'), '-'], stdin: prompt,
-      env: { CODEX_HOME: ensureCodexHome(label, { model, effort: 'low' }) } }),
+      env: { CODEX_HOME: ensureCodexHome(label, { model, effort }) } }),
     parse: parseCodex,
   }])),
   // vibe: per-effort VIBE_HOME (lib/vibe-home.mjs) + classification alias; L0 aliases kept for reference.
@@ -228,7 +233,7 @@ export function sweepStaleCodexSessions(codexHome, now = Date.now()) {
   if (fs.existsSync(root)) pruneEmptyDirs(root);
 }
 
-/** Codex seats (ChatGPT quota shared with the production immo detection): astra-max, sol-6.1-low, luna-6-low. */
+/** Codex seats (ChatGPT quota shared with the production immo detection): astra-max, astra-low/medium, sol-6.1-low/medium, luna-6-low. */
 export const isCodexSeat = (label) => ROUTES[label]?.parse === parseCodex;
 
 /** Exact command that refreshes a codex seat auth from ~/.codex/auth.json (review GEPA R5). */
