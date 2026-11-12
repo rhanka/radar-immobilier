@@ -4,7 +4,7 @@ import { composeArtifactHost } from "./composition.js";
 import { createDeleteConfirmation } from "./delete-confirmation.js";
 import { startLiveRedriveLoop } from "./live-redrive.js";
 
-const loop = vi.hoisted(() => ({ stop: vi.fn(), drain: vi.fn(async () => undefined) }));
+const loop = vi.hoisted(() => ({ stop: vi.fn() }));
 const redrive = vi.hoisted(() => vi.fn(async () => []));
 const cleanupFails = vi.hoisted(() => ({ value: false }));
 
@@ -33,7 +33,7 @@ describe("live re-drive wiring in the artifact host composition", () => {
   afterEach(() => { vi.clearAllMocks(); cleanupFails.value = false; });
 
   it("starts the loop on the composed re-drive port and stops it on close", async () => {
-    const signals = { once: vi.fn(), removeListener: vi.fn(), listenerCount: vi.fn(() => 0), exit: vi.fn() };
+    const signals = { once: vi.fn(), removeListener: vi.fn() };
     const host = await composeArtifactHost(pool(), config, undefined, { ...options, signals });
     expect(startLiveRedriveLoop).toHaveBeenCalledTimes(1);
     expect(startLiveRedriveLoop).toHaveBeenCalledWith(expect.objectContaining({ redrive, signals }));

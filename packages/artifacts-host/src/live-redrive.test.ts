@@ -5,18 +5,15 @@ import { LIVE_REDRIVE_INTERVAL_MS, startLiveRedriveLoop, type ShutdownSignals } 
 const ITEM = { storageScopeId: "scope", artifactId: "11111111-1111-4111-8111-111111111111", bindingGeneration: 1,
   action: "project" as const };
 
-function fakeSignals(extraListeners = 0) {
+function fakeSignals() {
   let listener: (() => void) | undefined;
-  const exit = vi.fn();
   const signals: ShutdownSignals = {
     once: (_signal, next) => { listener = next; },
     removeListener: (_signal, next) => { if (listener === next) listener = undefined; },
-    listenerCount: () => (listener ? 1 : 0) + extraListeners,
-    exit,
   };
   // Node removes a `once` listener before calling it.
   const sigterm = () => { const next = listener; listener = undefined; next?.(); };
-  return { signals, exit, sigterm, registered: () => listener !== undefined };
+  return { signals, sigterm, registered: () => listener !== undefined };
 }
 
 describe("live re-drive loop (0.2.27 durable re-drive)", () => {
@@ -67,36 +64,25 @@ describe("live re-drive loop (0.2.27 durable re-drive)", () => {
     loop.stop();
   });
 
-  it("on SIGTERM stops the timer, drains the pass in flight, then exits 0 (PID 1 ignores a self-sent signal)", async () => {
-    let release: (items: LiveRedriveItem[]) => void = () => {};
-    const redrive = vi.fn(() => new Promise<LiveRedriveItem[]>((resolve) => { release = resolve; }));
-    const { signals, exit, sigterm } = fakeSignals();
-    const lines: string[] = [];
-    startLiveRedriveLoop({ redrive, signals, log: (line) => lines.push(line) });
-    sigterm();
-    expect(lines).toContain(JSON.stringify({ kind: "artifacts.live_redrive_draining" }));
-    await vi.advanceTimersByTimeAsync(5_000);
-    expect(exit).not.toHaveBeenCalled();
-    release([]);
-    await vi.advanceTimersByTimeAsync(0);
-    expect(exit).toHaveBeenCalledWith(0);
-    await vi.advanceTimersByTimeAsync(60_000);
-    expect(redrive).toHaveBeenCalledTimes(1);
-  });
-
-  it("bounds the drain, and leaves the exit to another SIGTERM listener when one remains", async () => {
-    const redrive = vi.fn(() => new Promise<LiveRedriveItem[]>(() => {}));
-    const bounded = fakeSignals();
-    startLiveRedriveLoop({ redrive, signals: bounded.signals, log: () => {}, drainTimeoutMs: 1_000 });
-    bounded.sigterm();
-    await vi.advanceTimersByTimeAsync(1_000);
-    expect(bounded.exit).toHaveBeenCalledWith(0);
-    const shared = fakeSignals(1);
-    startLiveRedriveLoop({ redrive: async () => [], signals: shared.signals, log: () => {} });
-    shared.sigterm();
-    await vi.advanceTimersByTimeAsync(0);
-    expect(shared.exit).not.toHaveBeenCalled();
-  });
+  it("on SIGTERM only stops the timer: the pass in flight finishes, no new pass starts, the process is never exited",
+    async () => {
+      let release: (items: LiveRedriveItem[]) => void = () => {};
+      const redrive = vi.fn(() => new Promise<LiveRedriveItem[]>((resolve) => { release = resolve; }));
+      const { signals, sigterm } = fakeSignals();
+      const exit = vi.spyOn(process, "exit").mockImplementation((() => undefined) as never);
+      const lines: string[] = [];
+      startLiveRedriveLoop({ redrive, signals, log: (line) => lines.push(line) });
+      sigterm();
+      expect(lines).toEqual([JSON.stringify({ kind: "artifacts.live_redrive_stopped", passInFlight: true })]);
+      release([{ ...ITEM, outcome: "settled" }]);
+      await vi.advanceTimersByTimeAsync(0);
+      expect(lines.at(-1)).toBe(JSON.stringify({ kind: "artifacts.live_redrive", items: 1, settled: 1, pending: 0, failed: 0,
+        skipped: 0 }));
+      await vi.advanceTimersByTimeAsync(60_000);
+      expect(redrive).toHaveBeenCalledTimes(1);
+      expect(exit).not.toHaveBeenCalled();
+      exit.mockRestore();
+    });
 
   it("removes its SIGTERM handler on close", () => {
     const { signals, registered } = fakeSignals();
