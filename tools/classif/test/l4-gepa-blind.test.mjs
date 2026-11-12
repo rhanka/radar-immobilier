@@ -1,6 +1,6 @@
 // GEPA series in dev and blind (series-<k>.json method gepa): hermetic, fake data only
 // (l4-blind-fixture.mjs PATH seats + a fake `codex` for sol-6.1-low). The blind
-// verdict passes only with 0 blind miss on each of the 4 GEPA routes and a call failure share
+// verdict passes only with 0 blind miss on each of the GEPA routes and a call failure share
 // <= 5 %; precision is reported in the private aggregates, never a floor. Classic series are
 // unchanged (their own tests run as before).
 import { test } from 'node:test';
@@ -42,7 +42,7 @@ exit 0
   return () => { restore(); rmSync(bin, { recursive: true, force: true }); };
 }
 
-/** Blind fixture turned into a GEPA series: method gepa, the 5 GEPA routes, ceiling 5 %, no floors. */
+/** Blind fixture turned into a GEPA series: method gepa, the GEPA routes, ceiling 5 %, no floors. */
 async function setupGepa(home) {
   const s = await setupBlind(home, { k: K, routes: GEPA_ROUTES, ids: IDS, supports: { recall: 10, precision: 10 } });
   const rel = `tools/classif/l4/manifests/series-${K}.json`;
@@ -53,12 +53,12 @@ async function setupGepa(home) {
   return { ...s, cleanup: () => { restoreCodex(); s.cleanup(); } };
 }
 
-const answering = (n) => IDS.slice(0, n).join(' ');
+const failing = (n) => IDS.slice(N - n).join(' ');
 
 test('gepa blind: pass on every route at 0 miss, precision reported privately, repo manifest marked gepa without scores', withTempHome(async (home) => {
   const s = await setupGepa(home);
   try {
-    const r = await blindPass(home, { k: K, routes: GEPA_ROUTES, fake: { FAKE_GLM: answering(N - 2) } });
+    const r = await blindPass(home, { k: K, routes: GEPA_ROUTES, fake: { FAKE_SOL_FAIL: failing(2) } });
     assert.equal(r.error, null, r.error?.stack);
     const agg = readAggregates(home, K);
     assert.deepEqual(Object.keys(agg.perRoute).sort(), [...GEPA_ROUTES].sort());
@@ -67,7 +67,7 @@ test('gepa blind: pass on every route at 0 miss, precision reported privately, r
       assert.equal(agg.perRoute[route].misses, 0);
       assert.equal(typeof agg.perRoute[route].precision, 'number', 'precision reported');
     }
-    assert.equal(agg.perRoute['glm-5.3-low'].failureShare, 0.05, '2/40 failures sit exactly at the 5 % ceiling');
+    assert.equal(agg.perRoute['sol-6.1-low'].failureShare, 0.05, '2/40 failures sit exactly at the 5 % ceiling');
     assert.equal(agg.gepa.verdict, 'pass');
     assert.deepEqual(Object.keys(agg.s113).sort(), [...GEPA_ROUTES].sort(), 'S113 secondary still measured');
     assert.equal(r.manifest.method, 'gepa');
@@ -75,7 +75,7 @@ test('gepa blind: pass on every route at 0 miss, precision reported privately, r
     const blob = JSON.stringify(r.manifest);
     for (const bad of [...SCORE_KEYS, 'misses', 'failureShare']) assert.ok(!blob.includes(bad), `repo manifest must not contain ${bad}`);
     // A resumed pass makes no seat call and keeps the GEPA gate fields.
-    const again = await blindPass(home, { k: K, routes: GEPA_ROUTES, fake: { FAKE_GLM: answering(N - 2) } });
+    const again = await blindPass(home, { k: K, routes: GEPA_ROUTES, fake: { FAKE_SOL_FAIL: failing(2) } });
     assert.equal(again.error, null, again.error?.stack);
     assert.equal(again.calls.length, 0);
     assert.equal(again.manifest.aggregatesSha256, r.manifest.aggregatesSha256);
@@ -85,19 +85,19 @@ test('gepa blind: pass on every route at 0 miss, precision reported privately, r
 test('gepa blind: one miss on a single route fails it, over 5 % failures fails it, the series fails', withTempHome(async (home) => {
   const s = await setupGepa(home);
   try {
-    const r = await blindPass(home, { k: K, routes: GEPA_ROUTES, fake: { FAKE_SOL_NP: 'b-007', FAKE_MISTRAL: answering(N - 3) } });
+    // opus: one miss; sol: 3 failures out of 40.
+    const r = await blindPass(home, { k: K, routes: GEPA_ROUTES, fake: { FAKE_CLAUDE_NP: 'b-007', FAKE_SOL_FAIL: failing(3) } });
     assert.equal(r.error, null, r.error?.stack);
     const agg = readAggregates(home, K);
-    assert.deepEqual([agg.perRoute['sol-6.1-low'].verdict, agg.perRoute['sol-6.1-low'].misses], ['fail', 1]);
-    assert.ok(agg.perRoute['sol-6.1-low'].recall > 0.97, 'a high recall does not rescue a single miss');
-    assert.deepEqual([agg.perRoute['mistral-large-4-low'].verdict, agg.perRoute['mistral-large-4-low'].misses, agg.perRoute['mistral-large-4-low'].failureShare],
+    assert.deepEqual([agg.perRoute['opus-5.5-low'].verdict, agg.perRoute['opus-5.5-low'].misses], ['fail', 1]);
+    assert.ok(agg.perRoute['opus-5.5-low'].recall > 0.97, 'a high recall does not rescue a single miss');
+    assert.deepEqual([agg.perRoute['sol-6.1-low'].verdict, agg.perRoute['sol-6.1-low'].misses, agg.perRoute['sol-6.1-low'].failureShare],
       ['fail', 0, 3 / 40], 'failures count as shown (no miss) but exceed the 5 % ceiling');
-    for (const route of ['opus-5.5-low', 'glm-5.3-low']) assert.equal(agg.perRoute[route].verdict, 'pass');
-    assert.deepEqual([agg.gepa.verdict, agg.gepa.failing.sort()], ['fail', ['mistral-large-4-low', 'sol-6.1-low']]);
+    assert.deepEqual([agg.gepa.verdict, agg.gepa.failing.sort()], ['fail', ['opus-5.5-low', 'sol-6.1-low']]);
   } finally { s.cleanup(); }
 }));
 
-test('gepa dev: a gepa series evaluates the 4 GEPA routes with the 0-miss verdict', withTempHome(async (home) => {
+test('gepa dev: a gepa series evaluates the GEPA routes with the 0-miss verdict', withTempHome(async (home) => {
   const s = await setupGepa(home);
   try {
     mkdirSync(path.join(home, 'l3b'), { recursive: true });
@@ -131,7 +131,7 @@ test('review B1a: blind and S113 count a codex answer carrying a tool event as f
     assert.equal(r.error, null, r.error?.stack);
     const agg = readAggregates(home, K);
     assert.equal(agg.perRoute['sol-6.1-low'].failures, 1, 'the tool-event answer is a failure');
-    assert.equal(agg.perRoute['glm-5.3-low'].failures, 0);
+    assert.equal(agg.perRoute['opus-5.5-low'].failures, 0);
     const files = readdirSync(path.join(home, 'blind'));
     assert.ok(!files.includes(`blind-s${K}-sol-6.1-low.b-003.json`), 'never cached');
     assert.ok(files.includes(`blind-s${K}-sol-6.1-low.b-004.json`));
@@ -161,7 +161,7 @@ test('review B1a: dev counts a codex answer carrying a tool event as failed and 
     const row = JSON.parse(readFileSync(path.join(dir, 'dev-sol-6.1-low.jsonl'), 'utf8').trim());
     assert.deepEqual([row.failed, row.why, row.pred], [true, 'tool-events', null]);
     assert.ok(!existsSync(path.join(dir, 'dev-sol-6.1-low.rr-tuning-1.json')), 'never cached');
-    assert.ok(existsSync(path.join(dir, 'dev-glm-5.3-low.rr-tuning-1.json')));
+    assert.ok(existsSync(path.join(dir, 'dev-opus-5.5-low.rr-tuning-1.json')));
   } finally { s.cleanup(); }
 }));
 

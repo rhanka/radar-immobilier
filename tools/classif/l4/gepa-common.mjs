@@ -2,7 +2,7 @@
 // optimiser loop (l4/gepa.mjs), the series manifest loader, dev and blind. No disk read, no
 // model call.
 //
-// Lexicographic objective, per case and aggregated over the 4 evaluation routes:
+// Lexicographic objective, per case and aggregated over the GEPA evaluation routes:
 //   1. misses: reference pertinent/a_surveiller predicted non_pertinent, on ANY route (each
 //      route counts); a failed call counts as shown (metrics.mjs isShownPred), never a miss;
 //   2. noise: reference non_pertinent predicted shown (a failed call counts as shown).
@@ -11,10 +11,13 @@ import { isShownPred, isShownRef } from './metrics.mjs';
 
 export const GEPA_METHOD = 'gepa';
 /**
- * Mandatory evaluation routes: a miss on any of them counts. Owner decision (« on prend sol pas
- * luna »): 4 routes; luna-6-low stays a run-seat.mjs seat but is no GEPA route.
+ * Mandatory evaluation routes: a miss on any of them counts. Owner decisions: « on prend sol pas
+ * luna » (06/11, luna-6-low stays a run-seat.mjs seat but is no GEPA route), then 12/11 « le
+ * pilote se finit sans Vibe »: glm-5.3-low and mistral-large-4-low are dropped (Vibe budget
+ * exhausted, 402), 2 routes remain. A resume keeps the per-route cache (the context sha does
+ * not cover the routes); the candidates are re-scored on these routes at load.
  */
-export const GEPA_ROUTES = ['opus-5.5-low', 'glm-5.3-low', 'sol-6.1-low', 'mistral-large-4-low'];
+export const GEPA_ROUTES = ['opus-5.5-low', 'sol-6.1-low'];
 /** Reflective mutation / crossover seat, and its reconciliation + fallback seat. */
 export const GEPA_MUTATOR = 'astra-max';
 export const GEPA_RECONCILER = 'opus-5.5-max';

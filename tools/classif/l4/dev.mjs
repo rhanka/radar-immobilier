@@ -110,7 +110,7 @@ export async function main(argv = process.argv.slice(2)) {
   const k = argv.includes('--series') ? argv[argv.indexOf('--series') + 1] : process.env.SERIES;
   if (!k) { process.stderr.write('classif-l4-dev: pass SERIES=<k>\n'); process.exit(2); }
   const deferred = argv.includes('--deferred') ? argv[argv.indexOf('--deferred') + 1].split(',').filter(Boolean) : [];
-  // A GEPA series (series-<k>.json method gepa) evaluates the 4 GEPA routes instead.
+  // A GEPA series (series-<k>.json method gepa) evaluates the GEPA routes instead.
   const routes = seriesRouteUniverse(seriesMethod(k), EVAL_ROUTES).filter((r) => !deferred.includes(r));
   const concurrency = Number(argv.includes('--concurrency') ? argv[argv.indexOf('--concurrency') + 1] : 2);
   // ChatGPT quota guard (codex seats share the weekly quota with the production detection).

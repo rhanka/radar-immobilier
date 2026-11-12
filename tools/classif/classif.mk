@@ -178,8 +178,8 @@ classif-l4-blind: ## Classification pilot L4: executor-only blind-half scoring +
 	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l4/blind.mjs --series $(SERIES) $(if $(DEFERRED),--deferred $(DEFERRED),) --concurrency $(if $(CONCURRENCY),$(CONCURRENCY),2) $(if $(RERUN_INFRA_FAILED),--rerun-infra-failed $(RERUN_INFRA_FAILED),) $(CODEX_QUOTA_FLAG)
 
 # L4 GEPA — population of prompts (P0..P4), reflective mutation by astra-max (fallback and
-# repair opus-5.5-max), per-case Pareto selection on the tuning half only, 4 evaluation routes
-# (opus-5.5-low, glm-5.3-low, sol-6.1-low, mistral-large-4-low; owner: sol, not luna). MAX_CALLS caps the
+# repair opus-5.5-max), per-case Pareto selection on the tuning half only, 2 evaluation routes
+# (opus-5.5-low, sol-6.1-low; owner: sol not luna 06/11, no Vibe 12/11). MAX_CALLS caps the
 # run (lib/budget.mjs runBudget, on top of the pilot cap); resume = same SERIES/RUN/SEED.
 # GEPA_CONCURRENCY = calls in flight per route (2 per seat, branch guardrail).
 MAX_CALLS ?= 5000

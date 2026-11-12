@@ -3,9 +3,9 @@
 // (owner-validated method: population of prompts, reflective mutation, per-case Pareto selection).
 //
 // Objective (lexicographic, l4/gepa-common.mjs): 1. zero miss — a reference pertinent or
-// a_surveiller predicted non_pertinent on ANY of the 4 evaluation routes counts (a failed call
+// a_surveiller predicted non_pertinent on ANY of the GEPA evaluation routes counts (a failed call
 // counts as shown); 2. then minimise noise — a reference non_pertinent predicted shown. A
-// pertinent <-> a_surveiller confusion is not penalised. A case score sums the 4 routes.
+// pertinent <-> a_surveiller confusion is not penalised. A case score sums the GEPA routes.
 //
 // Data: the TUNING half only (half === 'tuning', status resolved), split by a recorded seed
 // into D_feedback (~60 %, mutations) and D_pareto (~40 %, selection), stratified by verdict.
@@ -24,11 +24,11 @@
 // iteration in three is a crossover of two front parents instead. Fallback and repair seat:
 // opus-5.5-max; every candidate passes assertNoVerbatim with the bounded repair of
 // optimise.mjs (2 rewrites at most). Admission: the child is evaluated on the mini-batch over
-// the 4 routes; rejected with more misses than the parent, or with equal misses and no less
+// the GEPA routes; rejected with more misses than the parent, or with equal misses and no less
 // noise; otherwise evaluated on D_pareto and added to the population.
 //
 // Final choice: EVERY front candidate with 0 miss on D_pareto is evaluated on the whole tuning
-// half (D_feedback too, 4 routes), least D_pareto noise first, as long as the budget holds (the
+// half (D_feedback too, every GEPA route), least D_pareto noise first, as long as the budget holds (the
 // manifest counts the ones left out). Only 0 miss in total with a failed-call share <= 5 % per
 // route (the blind gate rule) is retained, the least noise wins. None retained → result
 // `no-candidate` (flagged incomplete when candidates were left out), no fallback. The winner is
@@ -345,7 +345,7 @@ ${promptB.trim()}
 ---`;
 }
 
-// ---------------------------------------------------------------- evaluation (4 routes)
+// ---------------------------------------------------------------- evaluation (GEPA routes)
 
 /** sha of what was really sent for one case: the full devPrompt (template + candidate + item input) and the code registry. */
 function evalKey(ctx, cand, id) {
@@ -880,8 +880,8 @@ export async function runGepa({ home = classifHome(), repoClassif = classifDir(p
   const journalAll = readJsonlRecords(journalFile).filter((r) => Number.isInteger(r.iter) && r.status);
   const count = (pred) => journalAll.filter(pred).length;
   const noCandidateReason = coverage.notEvaluated
-    ? `no evaluated candidate reached 0 miss on the whole tuning half (4 routes) within the failure ceiling; ${coverage.notEvaluated} eligible candidate(s) not evaluated (budget): result incomplete; no fallback`
-    : 'no front candidate reached 0 miss on the whole tuning half (4 routes) within the failure ceiling; no fallback';
+    ? `no evaluated candidate reached 0 miss on the whole tuning half (${ctx.routes.length} routes) within the failure ceiling; ${coverage.notEvaluated} eligible candidate(s) not evaluated (budget): result incomplete; no fallback`
+    : `no front candidate reached 0 miss on the whole tuning half (${ctx.routes.length} routes) within the failure ceiling; no fallback`;
   const manifest = { kind: 'l4-gepa', method: GEPA_METHOD, series: String(k), run: runId, createdAt: new Date().toISOString(),
     seed: split.seed, split: { feedback: split.feedback.length, pareto: split.pareto.length, feedbackShare: split.feedbackShare, strata: split.strata, sha256: split.sha256 },
     contextSha256: split.contextSha256,
