@@ -78,11 +78,11 @@ absent_job() { printf '%s\n' '              node dist/scripts/absent.js __ARGS__
 run_ok "$ROOT" 'accepts the released manifests and api/Dockerfile'
 released="$(bash "$CHECK" "$ROOT" 2>&1)"
 # The 25 existing API entrypoints plus the refresh requeue operator and
-# recurrent scripts.
-grep -Fq ', 27 entrypoint(s))' <<<"$released" && ok 'counts the 27 active API entrypoints of api/Dockerfile' \
-  || bad "counts the 27 active API entrypoints of api/Dockerfile (got: $released)"
+# recurrent scripts, plus the Chaperon triage reprise operator.
+grep -Fq ', 28 entrypoint(s))' <<<"$released" && ok 'counts the 28 active API entrypoints of api/Dockerfile' \
+  || bad "counts the 28 active API entrypoints of api/Dockerfile (got: $released)"
 
-for script in init-workspace-authority attach-personal-history base-api-personal-activation base-preprod-job; do
+for script in init-workspace-authority attach-personal-history base-api-personal-activation base-preprod-job chaperon-reprise-apply; do
   fixture
   cp "$ROOT/api/Dockerfile" "$CASE_ROOT/api/Dockerfile"
   while IFS= read -r source; do

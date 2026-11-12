@@ -93,6 +93,9 @@ jobs:
       - name: Validate git-artifact guards (descriptor, build env, tag ancestry, pre-flight, workflows)
         run: make -f tools/make/git-artifact.mk test ENV=test-git-artifact
 
+      - name: Validate the Chaperon triage reprise (plan unit tests, insert-only apply on the migrated schema)
+        run: make -f tools/make/chaperon-reprise.mk test ENV=test-chaperon-reprise
+
       - name: Install workspace deps
         run: make install ENV=ci
 
