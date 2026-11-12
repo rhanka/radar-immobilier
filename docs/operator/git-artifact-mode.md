@@ -156,7 +156,18 @@ is an A1 refused write path: a branch can never change it.
   idempotence rewrite, pinned by `artifacts-provenance.spec.ts`).
 
 - Host job and publication ledger (`HostBuildJobStore`, `HostBuildLedger`):
-  live reconcile through the package worker (`createLiveWorkerClient`, `@sentropic/artifacts/live-host` 0.2.25, `dist/live-host/worker-client.js`: closed `POST v1/live/reconcile` body `{artifactId, bindingGeneration, ownerId, liveSessionId, leaseEpoch, routeEpoch, binding, invitation}`, fences/draft/invitation from the host LiveStore, exactly 200 with the strict ack `{liveSessionId, leaseEpoch, routeEpoch, revision, ready}`) BEFORE job persistence and `POST /v1/builds` on every publish — a never-reconciled binding is refused by the builder with `git_live_conflict:stale_session`, the reconcile is idempotent, and a retry after `build_failed` re-reconciles instead of staying blocked; a refused reconcile (or no live runtime/draft on the host) fails closed (`provider_unavailable`, no job persisted, no build requested). Then
+  no live reconcile before a build (`@sentropic/artifacts` 0.2.27): the builder
+  admits a never-reconciled binding from the admitted host job, whose
+  `ownerId` the host ledger view supplies (personal owner, `attachedBy`
+  fallback). A pre-build reconcile used to wake a REVIVING live session, which
+  then refused the build with `pending_publication`. While a live session is
+  LIVE or REVIVING the builder answers `409 live_session_active`: the host
+  logs `artifacts.build_refused`, closes the job it persisted (`build_failed`,
+  host-only code `host_refused_live_session`, which the builder never emits,
+  reason `active_session`; a retry of the same command re-arms only such a
+  job), and always answers `git_live_conflict` (reason
+  `active_session`, 409, not retriable) with a message to stop the live
+  session (`artifacts_live_control`, action `stop`) before publishing. Then
   job persistence before `POST /v1/builds` (body exactly `{artifactId, jobId, binding}`, `binding = {repoId, branch, subPath}` read from the package git binding of that artifact and job generation, `git_not_attached` before any call when absent), attempt fence, receipt ledger and
   the publish step in one transaction; composed by radar-api from the `build`
   stage on. Without the receipt key or the builder keys, `git_publish` and the
@@ -234,6 +245,42 @@ unchanged.
 - Network: Sentropic policy `allow-immo-content-host-to-artifact-content`
   admits pods labelled `app.kubernetes.io/name: radar-immobilier` and
   `app.kubernetes.io/component: api`.
+
+## Live re-drive and worker logs (0.2.27)
+
+With the edge worker composed AND `IMMO_ARTIFACTS_LIVE_REDRIVE_ENABLED=true`
+(literal `true` only), the host runs the package re-drive
+(`LiveSessionService.redrive`) once at boot and every 15 s
+(`packages/artifacts-host/src/live-redrive.ts`). Each pass settles again every
+runtime of the scope that still waits for the builder (REVIVING, LIVE behind
+its draft, a stop not DORMANT yet): at most 4 items in flight, 35 s each, so a
+start waits under 60 s for its next settle, also after a pod restart.
+
+The package overlap guards are process-local, so the flag is set in exactly
+one workload per storage scope. Preprod: `radar-immo-mcp` only
+(`deploy/overlays/preprod/patch-immo-mcp-config.yaml`), never `radar-api`
+(1 to 2 replicas). `radar-immo-mcp` carries the MCP live flow and runs one
+replica with a `Recreate` strategy, so a rollout never runs two loops.
+
+SIGTERM only stops the timer: no new pass starts and the pass in flight keeps
+running. The handler never exits the process, so in-flight MCP requests keep
+the whole termination grace (`radar-immo-mcp`: Kubernetes default, 30 s) and
+the process ends at SIGKILL, as before (Node runs as PID 1, where SIGTERM has
+no default action). An interrupted pass leaves the unsettled intents durable
+for the next pod. A graceful shutdown of the immo-mcp HTTP server is a
+separate topic.
+
+Structured log lines (stderr, one JSON object per line):
+
+| `kind` | Meaning |
+| --- | --- |
+| `artifacts.live_worker_failed` | A settle refused, timed out or ended by a builder failure: `operation`, identity, typed `code`, builder `reason` |
+| `artifacts.live_worker_pending` | The builder is still reviving (`ready: false`) |
+| `artifacts.live_redrive` | A non-empty pass: `items`, `settled`, `pending`, `failed`, `skipped` |
+| `artifacts.live_redrive_unavailable` | A pass that could not list or settle (store failure) |
+| `artifacts.live_redrive_stopped` | SIGTERM received: timer stopped, `passInFlight` tells whether a pass is still running |
+| `artifacts.build_refused` | The builder refused a build with `409 live_session_active` |
+| `artifacts.build_refuse_unavailable` | Closing that refused job failed (store error); the conflict is answered anyway |
 
 ## Not yet composed (fail-closed)
 
