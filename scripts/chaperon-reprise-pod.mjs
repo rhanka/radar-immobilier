@@ -4,9 +4,10 @@
 // pod's own `pg`. One REPEATABLE READ READ ONLY transaction, always rolled back.
 //
 // Insert-only (owner decision 2026-11-12): for each account, a target that
-// already carries ANY facet head of that account is skipped and listed, never
-// superseded; only untouched targets are planned as inserts.
-/* global console, process */
+// already carries a facet head of that account is never superseded: `noop` when
+// that head was written by this reprise (same UUIDv5 command key as
+// api/src/scripts/chaperon-reprise-apply.ts), otherwise `skipExisting` (listed).
+/* global console, process, Buffer */
 export async function podDryRun(PLAN) {
   const { createRequire } = await import('node:module');
   const { createHash } = await import('node:crypto');
@@ -18,6 +19,10 @@ export async function podDryRun(PLAN) {
   const digest = (v) => createHash('sha256').update(canonicalJson(v)).digest('hex');
   const fingerprint = (n) => { const props = { ...n.props }; delete props.community; delete props.community_name;
     return digest({ type: n.type, label: n.label, source_ref: n.source_ref, props }); };
+  const uuidV5 = (name) => { const ns = Buffer.from(PLAN.keyNamespace.replace(/-/g, ''), 'hex');
+    const h = createHash('sha1').update(Buffer.concat([ns, Buffer.from(name, 'utf8')])).digest();
+    h[6] = (h[6] & 0x0f) | 0x50; h[8] = (h[8] & 0x3f) | 0x80; const x = h.subarray(0, 16).toString('hex');
+    return `${x.slice(0, 8)}-${x.slice(8, 12)}-${x.slice(12, 16)}-${x.slice(16, 20)}-${x.slice(20)}`; };
   const norm = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
   const c = new pg.Client({ host: process.env.POSTGRES_HOST, port: Number(process.env.POSTGRES_PORT),
     user: process.env.POSTGRES_USER, password: process.env.POSTGRES_PASSWORD, database: process.env.POSTGRES_DB });
@@ -101,7 +106,7 @@ export async function podDryRun(PLAN) {
     for (const owner of owners) {
       const [unresolved] = await one(`SELECT count(*)::int AS n FROM facet_events e
         LEFT JOIN facet_event_bindings b ON b.event_id = e.id WHERE e.owner_id = $1 AND b.event_id IS NULL`, [owner.accountId]);
-      const heads = await one(`SELECT s.city_slug, s.node_type, s.node_id, s.facet, s.basket, e.state, e.reason_code
+      const heads = await one(`SELECT s.city_slug, s.node_type, s.node_id, s.facet, s.basket, e.state, e.reason_code, e.command_key
         FROM facet_streams s JOIN facet_heads h ON h.stream_id = s.id JOIN facet_events e ON e.id = h.event_id
         WHERE s.workspace_id = $1 AND s.scope = 'personal' AND s.owner_id = $2 AND s.target_type = 'signal'`, [ws.id, owner.accountId]);
       const byTarget = new Map();
@@ -115,9 +120,8 @@ export async function podDryRun(PLAN) {
         if (existing.length === 0) {
           plan.insert += 1; perVerdict[facet === 'archive' ? 'archive' : basket] += 1; cities.add(t.citySlug); continue;
         }
-        const same = existing.length === 1 && existing[0].facet === facet && (existing[0].basket ?? null) === basket
-          && existing[0].state === 'active' && existing[0].reason_code === t.reasonCode;
-        if (same) plan.noop += 1;
+        const key = uuidV5(JSON.stringify([ws.id, owner.accountId, t.citySlug, t.type, t.id, facet, basket, t.reasonCode]));
+        if (existing.length === 1 && existing[0].command_key === key) plan.noop += 1;
         else plan.skipExisting.push({ row: t.row, id: t.id, existing: existing.map((h) => `${h.facet}/${h.basket ?? '-'}/${h.state}`) });
       }
       const [before] = await one(`SELECT
