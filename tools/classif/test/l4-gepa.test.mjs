@@ -234,3 +234,41 @@ test('agy seats: argon, carbon and 3.8 flash low on the same agy route; the stre
   assert.deepEqual(bad.toolKinds, { 'step_update:tool_call': 1, surprise: 1, '<non-json>': 1, 'step_update:agent_response:tool-key': 1 });
   assert.equal(bad.toolEvents, 4);
 });
+
+test('muse ember seats: contributor mode off on the isolated muse route; the muse parser fails closed and carries the failure reason', async () => {
+  const { parseMuse } = await import('../run-seat.mjs');
+  for (const e of ['xhigh', 'max']) {
+    const r = ROUTES[`muse-ember-1.0-${e}`];
+    assert.equal(r.model, 'muse-ember-1.0');
+    const b = r.build('/w', '/w/p.md');
+    assert.deepEqual(b.args.slice(0, 9), ['exec', '--model', 'muse-ember-1.0', '--reasoning-effort', e, '--contributor-mode', 'off', '--preset', 'empty']);
+    for (const f of ['--disable-web-tools', '--no-session-log', '--no-foreign-personal-context']) assert.ok(b.args.includes(f), f);
+    assert.equal(seatFamily(`muse-ember-1.0-${e}`), 'muse');
+  }
+  const ev = (pt, payload = {}) => JSON.stringify({ record_type: 'event', payload_type: pt, payload });
+  const ok = [ev('runtime.command.accepted'), ev('run.model.configured'), ev('task.lifecycle.side_effect_intent'), ev('run.output.delta', { text: 'a tool_call in prose' }),
+    ev('run.usage', { usage: { total: 3 } }), ev('run.terminal.completed', { terminal: 'completed', text: '{"verdict":"pertinent"}' })].join('\n');
+  const clean = parseMuse(ok);
+  assert.deepEqual([clean.toolEvents, clean.text, clean.errorEnvelope], [0, '{"verdict":"pertinent"}', '']);
+  const bad = parseMuse([ok, ev('tool.call.started', { name: 'shell' }), 'not json'].join('\n'));
+  assert.deepEqual(bad.toolKinds, { 'tool.call.started': 1, '<non-json>': 1 });
+  const failed = parseMuse([ev('task.lifecycle.failed', { reason: 'model `muse-ember-1.0` does not exist or you lack access' }), ev('run.terminal.failed')].join('\n'));
+  assert.match(failed.errorEnvelope, /lack access/);
+});
+
+test('account refusal: 401/403, disabled, terms or no access on a failed call; codex transport notices and answered calls never trip it', async () => {
+  const { looksLikeAccountRefusal, createAccountGuard } = await import('../lib/account-guard.mjs');
+  assert.ok(looksLikeAccountRefusal({ code: 3, errorEnvelope: 'This service has been disabled in this account for violation of Terms of Service.' }));
+  assert.ok(looksLikeAccountRefusal({ code: 3, stderrTail: 'AGY_ERROR: {"short_error":"PERMISSION_DENIED (code 403)' }));
+  assert.ok(looksLikeAccountRefusal({ code: 1, errorEnvelope: 'model `x` does not exist or you lack access' }));
+  assert.ok(looksLikeAccountRefusal({ code: 1, stderrTail: 'HTTP 401 Unauthorized' }));
+  assert.ok(!looksLikeAccountRefusal({ code: 0, errorEnvelope: 'Reconnecting... 2/5 (unexpected status 403 Forbidden)' }), 'an answered call never trips it');
+  assert.ok(!looksLikeAccountRefusal({ code: 1, errorEnvelope: 'Reconnecting... 2/5 (unexpected status 403 Forbidden)\nFalling back from WebSockets to HTTPS transport. 403' }), 'transport notices are ignored');
+  assert.ok(!looksLikeAccountRefusal({ code: 1, stderrTail: 'HTTP 429 Too Many Requests' }), 'a rate limit is not an account refusal');
+  assert.ok(!looksLikeAccountRefusal({ code: 1, text: 'the bylaw was disabled by council', stderrTail: '' }), 'the answer text is never read');
+  const g = createAccountGuard();
+  assert.equal(g.blocks(), false);
+  g.observe('r1', { code: 3, errorEnvelope: 'terms of service' });
+  assert.equal(g.blocks(), true);
+  assert.match(g.error('make x ENV=preprod').message, /no further call launched on any seat.*`make x ENV=preprod`/);
+});

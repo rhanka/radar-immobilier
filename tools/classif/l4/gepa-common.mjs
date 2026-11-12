@@ -21,10 +21,11 @@ export const GEPA_ROUTES = ['opus-5.5-low', 'sol-6.1-low'];
 /**
  * Routes a series scored with the GEPA rule (0 miss, failures <= 5 %) may register: the GEPA
  * routes plus the ChatGPT routes of the owner 12/11 decisions (P0 on Astra and Sol, then on
- * Luna, low and medium, then Gemini Argon, Carbon and 3.8 Flash low). Optimisation (gepa.mjs) still uses GEPA_ROUTES only (sol, not luna).
+ * Luna, low and medium, then Gemini Argon, Carbon and 3.8 Flash low, then Muse Ember 1.0 xhigh
+ * and max). Optimisation (gepa.mjs) still uses GEPA_ROUTES only (sol, not luna).
  */
 export const GEPA_SERIES_ROUTES = [...GEPA_ROUTES, 'sol-6.1-medium', 'astra-low', 'astra-medium', 'luna-6-low', 'luna-6-medium',
-  'gemini-4-argon-low', 'gemini-4-carbon-low', 'gemini-3.8-flash-low'];
+  'gemini-4-argon-low', 'gemini-4-carbon-low', 'gemini-3.8-flash-low', 'muse-ember-1.0-xhigh', 'muse-ember-1.0-max'];
 /** Reflective mutation / crossover seat, and its reconciliation + fallback seat. */
 export const GEPA_MUTATOR = 'astra-max';
 export const GEPA_RECONCILER = 'opus-5.5-max';

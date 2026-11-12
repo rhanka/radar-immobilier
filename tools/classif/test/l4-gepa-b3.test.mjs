@@ -288,3 +288,18 @@ test('callSeat reports a seat binary absent from PATH (spawn ENOENT, exit -2) as
     assert.equal(parseSeatResult(r, loadCodes()).infra, true);
   } finally { rmSync(base, { recursive: true, force: true }); }
 });
+
+test('account refusal guard: the first refused call stops every route of GEPA, no retry, no further launch, resumable', withTempHome(async (home) => {
+  setup(home);
+  const refuse = (label, mark, id) => (label === 'sol-6.1-low' && mark === 'seed-0' && id === SPLIT.pareto[3]
+    ? { code: 3, text: '', errorEnvelope: 'This service has been disabled in this account for violation of Terms of Service.' } : null);
+  const f = fakeSeat(refuse);
+  await assert.rejects(runGepa({ home, k: K, maxIterations: 0, seat: f.seat, log: quiet, sleep: async () => { throw new Error('no backoff on a refusal'); } }),
+    (e) => e.name === 'AccountRefusal' && /no further call launched on any seat/.test(e.message));
+  const refusedCalls = f.seen.filter((s) => s.label === 'sol-6.1-low' && s.id === SPLIT.pareto[3]);
+  assert.equal(refusedCalls.length, 1, 'never retried');
+  assert.ok(f.seen.length < 2 * 48, 'no further launch after the refusal (only calls already in flight)');
+  const g = fakeSeat();
+  const m = await runGepa({ home, k: K, maxIterations: 0, seat: g.seat, log: quiet });
+  assert.ok(m.result, 'the run resumes once the account is back');
+}));

@@ -23,6 +23,7 @@ import { GEPA_METHOD, gepaRouteVerdict, gepaSeriesVerdict, seriesRouteUniverse }
 import { check as budgetCheck } from '../lib/budget.mjs';
 import { assertNoVerbatim } from '../lib/freeze.mjs';
 import { loadCodes } from '../l2/run.mjs';
+import { createAccountGuard } from '../lib/account-guard.mjs';
 import { assertBlindRunAllowed, audit, blindDir, openBlindSet, readAudit } from '../lib/blind.mjs';
 import { assertEvalRunAllowed, audit as auditEval, openEvalSet, readAudit as readEvalAudit } from '../guard/evalset.mjs';
 import { assertSeriesHalves, assertSeriesRoutes, gepaSeriesRoutes, loadSeriesManifest, seriesMethod } from './series.mjs';
@@ -333,6 +334,9 @@ function readdirSyncSafe(dir) {
   // sequentially with the existing per-route concurrency (per-seat limit unchanged).
   // Per-item caches and per-route files are written inside the route task, so a
   // family failure keeps the cached items of the other families on disk.
+  // Account-refusal guard (owner 12/11): the first refused account stops every launch, blind
+  // and S113, before any blind-run or eval-run audit (the one-shot run is never consumed).
+  const accountGuard = createAccountGuard();
   const runBlindRoute = async (route) => {
     const { model, effort } = ROUTES[route];
     const routeFile = path.join(outDir, `series-${k}-${route}.json`);
@@ -378,12 +382,13 @@ function readdirSyncSafe(dir) {
     const rows = await pool(blind.map((item) => async () => {
       const hit = loadBlindCached(item.itemId);
       if (hit) return hit;
-      if (quotaGuard.blocks(route)) return null;
+      if (quotaGuard.blocks(route) || accountGuard.blocks()) return null;
       appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: true, phase: `l4-blind-s${k}`, route, itemId: item.itemId });
       const r = await callSeat(route, devPrompt(frozen, item), { base: seatTmp, timeoutMs: 1800000 });
       appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: `l4-blind-s${k}`, route, itemId: item.itemId,
         exitCode: r.code, latencyMs: r.latencyMs, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null, toolEvents: r.toolEvents ?? null, ...(r.toolEvents && r.toolKinds ? { toolKinds: r.toolKinds } : {}), ...quotaFields(r) });
       quotaGuard.observe(route, r.rateLimits);
+      accountGuard.observe(route, r);
       const parsed = parseSeatResult(r, codes);
       const row = { itemId: item.itemId, failed: parsed.failed, why: parsed.why ?? null,
         pred: parsed.failed ? null : { verdict: parsed.verdict, code: parsed.code } };
@@ -397,6 +402,7 @@ function readdirSyncSafe(dir) {
     }), concurrency);
     // Answered items are cached above; a paused codex route stops before its blind-run audit.
     if (quotaGuard.paused && isCodexSeat(route)) throw quotaGuard.error(resumeCommand);
+    if (accountGuard.tripped) throw accountGuard.error(resumeCommand);
     // Review §9a: indeterminate supports come from the pre-registered series manifest.
     const supports = seriesSpec.supports ?? {};
     const stats = shownStats(blind.map((b, i) => ({ ref: b.verdict, pred: rows[i].failed ? { failed: true } : rows[i].pred, unresolved: b.status === 'unresolved' })),
@@ -461,12 +467,13 @@ function readdirSyncSafe(dir) {
     const rows = await pool(inputs.map((item) => async () => {
       const hit = loadS113Cached(item.evalId);
       if (hit) return hit;
-      if (quotaGuard.blocks(route)) return null;
+      if (quotaGuard.blocks(route) || accountGuard.blocks()) return null;
       appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: true, phase: `l4-s113-s${k}`, route, itemId: item.evalId });
       const r = await callSeat(route, devPrompt(frozen, item), { base: seatTmp, timeoutMs: 1800000 });
       appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: `l4-s113-s${k}`, route, itemId: item.evalId,
         exitCode: r.code, latencyMs: r.latencyMs, toolEvents: r.toolEvents ?? null, ...(r.toolEvents && r.toolKinds ? { toolKinds: r.toolKinds } : {}), ...quotaFields(r) });
       quotaGuard.observe(route, r.rateLimits);
+      accountGuard.observe(route, r);
       const parsed = parseSeatResult(r, codes);
       const row = { failed: parsed.failed, pred: parsed.failed ? null : { verdict: parsed.verdict, code: parsed.code } };
       // Review N4: failures are never cached — retried on resume.
@@ -476,6 +483,7 @@ function readdirSyncSafe(dir) {
       }
       return row;
     }), concurrency);
+    if (accountGuard.tripped) throw accountGuard.error(resumeCommand);
     if (quotaGuard.paused && isCodexSeat(route)) throw quotaGuard.error(resumeCommand);
     const exp = inputs.map((i) => expById.get(i.evalId));
     const s113supports = seriesSpec.supports ?? {};
