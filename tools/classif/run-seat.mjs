@@ -101,6 +101,9 @@ export const ROUTES = {
     ['sol-6.1-low', 'Sol 6.1', 'gpt-6.1-sol', 'low'],
     ['sol-6.1-medium', 'Sol 6.1', 'gpt-6.1-sol', 'medium'],
     ['luna-6-low', 'Luna 6', 'gpt-6-luna', 'low'],
+    // Owner 12/11: Luna evaluated in low and medium; codex lists no gpt-6.1-luna (models cache
+    // of 12/11), so the Luna seats run gpt-6-luna.
+    ['luna-6-medium', 'Luna 6', 'gpt-6-luna', 'medium'],
     ['astra-low', 'Astra', 'gpt-6-astra', 'low'],
     ['astra-medium', 'Astra', 'gpt-6-astra', 'medium'],
   ].map(([label, family, model, effort]) => [label, {
@@ -233,7 +236,7 @@ export function sweepStaleCodexSessions(codexHome, now = Date.now()) {
   if (fs.existsSync(root)) pruneEmptyDirs(root);
 }
 
-/** Codex seats (ChatGPT quota shared with the production immo detection): astra-max, astra-low/medium, sol-6.1-low/medium, luna-6-low. */
+/** Codex seats (ChatGPT quota shared with the production immo detection): astra-max, astra-low/medium, sol-6.1-low/medium, luna-6-low/medium. */
 export const isCodexSeat = (label) => ROUTES[label]?.parse === parseCodex;
 
 /** Exact command that refreshes a codex seat auth from ~/.codex/auth.json (review GEPA R5). */
