@@ -100,7 +100,9 @@ async function main(argv) {
     if (keyOnly) throw new Error('--key-only is a dry-run measurement');
     if (arg(argv, '--confirm') !== WORKSPACE_SLUG) throw new Error(`--apply requires --confirm ${WORKSPACE_SLUG}`);
     if (!dry.writable) throw new Error('refused: workspace, accounts or reason codes not writable (see dryRun)');
-    if (dry.match.ambiguous.length || dry.match.notFound.length) throw new Error('refused: unresolved targets');
+    if (dry.match.ambiguous.length || dry.match.notFound.length || dry.match.resolvedConflicts.length) {
+      throw new Error('refused: unresolved or conflicting targets');
+    }
     kubectl(kubeconfig, ['exec', 'deploy/radar-api', '--', 'test', '-f', 'api/dist/scripts/chaperon-reprise-apply.js']);
     const payload = JSON.stringify({ workspaceSlug: WORKSPACE_SLUG, ownerAccountIds: dry.accounts.map((a) => a.accountId),
       keyNamespace: KEY_NAMESPACE, manifestSha: csvSha, mapping: MAPPING_VERSION,
@@ -110,9 +112,13 @@ async function main(argv) {
     const run = kubectlRaw(kubeconfig, ['exec', '-i', 'deploy/radar-api', '--', 'node',
       'api/dist/scripts/chaperon-reprise-apply.js', '--apply', '--confirm', WORKSPACE_SLUG], payload);
     if (run.status !== 0 && run.status !== 2) {
-      throw new Error(`apply failed, nothing committed: ${(run.stderr || '').trim().split('\n').slice(-3).join(' | ')}`);
+      throw new Error(`apply failed, commit status unknown: run the dry run again to observe it (${(run.stderr || '').trim().split('\n').slice(-3).join(' | ')})`);
     }
-    report.apply = lastJson(run.stdout);
+    try {
+      report.apply = lastJson(run.stdout);
+    } catch {
+      throw new Error('apply result unreadable, commit status unknown: run the dry run again to observe it');
+    }
   }
   if (receipt) {
     // Source hash, counts, release, workspace and account ids; no row number, node id or sheet text.
@@ -120,7 +126,8 @@ async function main(argv) {
       keyNamespace: KEY_NAMESPACE, release: report.release, workspace: dry.workspace,
       accounts: dry.accounts.map((a) => ({ accountId: a.accountId, plan: { insert: a.plan.insert, noop: a.plan.noop,
         skipExisting: a.plan.skipExisting.length }, counts: a.counts })),
-      apply: report.apply ? { accounts: report.apply.accounts.map((a) => ({ accountId: a.accountId, applied: a.applied,
+      apply: report.apply ? { accounts: report.apply.accounts.map((a) => ({ accountId: a.accountId,
+        applied: { inserted: a.applied.inserted, noop: a.applied.noop, skipped: a.applied.skipped },
         readback: { ...a.readback, mismatchedRows: a.readback.mismatchedRows.length } })) } : null,
       at: new Date().toISOString() }, null, 2)}\n`, { flag: 'wx', mode: 0o600 });
   }
