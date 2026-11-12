@@ -20,10 +20,10 @@ export const GEPA_METHOD = 'gepa';
 export const GEPA_ROUTES = ['opus-5.5-low', 'sol-6.1-low'];
 /**
  * Routes a series scored with the GEPA rule (0 miss, failures <= 5 %) may register: the GEPA
- * routes plus the ChatGPT routes of the owner 12/11 decision (P0 on Astra and Sol, low and
- * medium). Optimisation (gepa.mjs) still uses GEPA_ROUTES only.
+ * routes plus the ChatGPT routes of the owner 12/11 decisions (P0 on Astra and Sol, then on
+ * Luna, low and medium). Optimisation (gepa.mjs) still uses GEPA_ROUTES only (sol, not luna).
  */
-export const GEPA_SERIES_ROUTES = [...GEPA_ROUTES, 'sol-6.1-medium', 'astra-low', 'astra-medium'];
+export const GEPA_SERIES_ROUTES = [...GEPA_ROUTES, 'sol-6.1-medium', 'astra-low', 'astra-medium', 'luna-6-low', 'luna-6-medium'];
 /** Reflective mutation / crossover seat, and its reconciliation + fallback seat. */
 export const GEPA_MUTATOR = 'astra-max';
 export const GEPA_RECONCILER = 'opus-5.5-max';
