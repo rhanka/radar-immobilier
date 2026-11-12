@@ -1,0 +1,35 @@
+{
+ "kind": "l4-series",
+ "series": 10,
+ "method": "gepa",
+ "promptSha256": "a60713366128ae4348a45a7323d0b0984cef87ca6cb33eda15073c045235b016",
+ "routes": [
+  "muse-ember-1.0-xhigh",
+  "muse-ember-1.0-max"
+ ],
+ "seed": "gepa-s5",
+ "halves": {
+  "tuningSha256": "dcaf04fa8d740565b1832d55df705f6b28ac99e0f5b184c78614f2e2cd7efc86",
+  "blindSha256": "8c7f4650ba8235da9efa3cc242b3c6ab085c9a2c2afa3058556d3a3d9bd8a46c"
+ },
+ "failureCeiling": 0.05,
+ "supports": {
+  "recall": 30,
+  "precision": 30
+ },
+ "budget": {
+  "cap": 30000,
+  "spent": 23370,
+  "planned": {
+   "dev": 504,
+   "blind": 504,
+   "s113": 226
+  }
+ },
+ "museQuotaAtRegistration": {
+  "weekly": "73 %",
+  "window": "14 %",
+  "pauseAt": "weekly 85 % (conductor watcher), xhigh before max"
+ },
+ "note": "Pre-registered by the conductor BEFORE any evaluation call of this series (Annex M M.5). Owner decision 12/11: P0 on Muse Ember 1.0 in xhigh and max (catalog efforts: minimal to max; xhigh and max per the owner). Route: isolated muse seat with --contributor-mode off (the empty preset otherwise resolves to the inaccessible -contributor variant). P10 = P0 bytes. Volume caution after the Google account disablement: concurrency 2, account-refusal guard, Muse weekly quota watched. Verdict per route: 0 miss and failed-call share <= 5 % (GEPA rule); recall and precision with lower bounds reported. Blind half and S113 (golden-exposed, secondary) scored once by the executor role."
+}
