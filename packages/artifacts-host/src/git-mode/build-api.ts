@@ -12,8 +12,9 @@ import type { GitBuildExecutor, GitBuildJobRequest, GitBuildJobState, GitBuildPo
  *   pre-build `POST v1/live/reconcile` used to wake a REVIVING live session,
  *   and the build then refused itself with `pending_publication` (cause A7).
  *   While a live session is LIVE or REVIVING the builder refuses the build
- *   with `409 live_session_active`: the host closes the job (`build_failed`),
- *   logs `artifacts.build_refused` and answers the package live conflict
+ *   with `409 live_session_active`: the host logs `artifacts.build_refused`,
+ *   closes the job (`build_failed`, host-only code `host_refused_live_session`)
+ *   and always answers the package live conflict
  *   (`git_live_conflict`, reason `active_session`: stop the session first);
  *   the live re-drive (live-redrive.ts) is the only reconcile caller;
  * - immo persists the job first (G0 v3 §2.6: the job identity, never a
@@ -34,15 +35,20 @@ import type { GitBuildExecutor, GitBuildJobRequest, GitBuildJobState, GitBuildPo
 export interface HostBuildJobStore {
   /**
    * Persists the job (idempotent on requestedBy + idempotencyKey) and returns its id. A job the builder refused
-   * at request time (`live_session_active`) never reached a build: a retry with the same key re-arms it.
+   * at request time (code `HOST_LIVE_SESSION_REFUSAL.code`) never reached a build: a retry with the same key re-arms it.
    */
   persist(job: GitBuildJobRequest): Promise<string>;
   /** Marks a job the builder refused at request time terminal (`build_failed`, code and reason), never left pending. */
   refuse(jobId: string, refusal: { readonly code: string; readonly reason: string }): Promise<void>;
 }
 
-/** Builder refusal of a build while a live session of the artifact is LIVE or REVIVING (no build started). */
-export const LIVE_SESSION_ACTIVE = Object.freeze({ code: "live_session_active", reason: "active_session" });
+/** Builder refusal code of a build while a live session of the artifact is LIVE or REVIVING (no build started). */
+export const BUILDER_LIVE_SESSION_ACTIVE = "live_session_active";
+/**
+ * Host-only job code of that refusal: never emitted by the builder (whose failure codes `markFailed` may also write),
+ * so only a job the host closed itself at request time is re-armed on retry.
+ */
+export const HOST_LIVE_SESSION_REFUSAL = Object.freeze({ code: "host_refused_live_session", reason: "active_session" });
 
 /** TODO(M3-I durable ledger): Postgres job table shared with the SG4b ledger. Until then git_publish refuses. */
 export const FAIL_CLOSED_JOB_STORE: HostBuildJobStore = Object.freeze({
@@ -59,7 +65,7 @@ export function createMemoryJobStore(): HostBuildJobStore & { jobs: Map<string, 
     const key = JSON.stringify([job.storageScopeId, job.requestedBy, job.idempotencyKey]);
     const existing = keys.get(key);
     if (existing) {
-      if (states.get(existing)?.code === LIVE_SESSION_ACTIVE.code) states.set(existing, { state: "build_pending" });
+      if (states.get(existing)?.code === HOST_LIVE_SESSION_REFUSAL.code) states.set(existing, { state: "build_pending" });
       return existing;
     }
     const jobId = randomUUID();
@@ -75,8 +81,8 @@ export function createMemoryJobStore(): HostBuildJobStore & { jobs: Map<string, 
 /** `409 { error: "live_session_active" }`, or the builder LiveError form `{ error: "git_live_conflict", reason: "active_session" }`. */
 function isLiveSessionActive(status: number, body: unknown): boolean {
   const record = body as Record<string, unknown> | null;
-  return status === 409 && !!record && typeof record === "object" && (record.error === LIVE_SESSION_ACTIVE.code ||
-    (record.error === "git_live_conflict" && record.reason === LIVE_SESSION_ACTIVE.reason));
+  return status === 409 && !!record && typeof record === "object" && (record.error === BUILDER_LIVE_SESSION_ACTIVE ||
+    (record.error === "git_live_conflict" && record.reason === HOST_LIVE_SESSION_REFUSAL.reason));
 }
 
 export interface HostBuildApiOptions {
@@ -97,7 +103,7 @@ export interface HostBuildApiOptions {
  * for the caller: retrying the publish cannot succeed while the session runs.
  */
 function liveSessionActive(): ArtifactOperationError {
-  return new ArtifactOperationError("git_live_conflict", { publicDetails: { reason: LIVE_SESSION_ACTIVE.reason,
+  return new ArtifactOperationError("git_live_conflict", { publicDetails: { reason: HOST_LIVE_SESSION_REFUSAL.reason,
     message: "A live session of this artifact is active: stop it (artifacts_live_control action stop) before publishing." } });
 }
 
@@ -166,10 +172,14 @@ export function createHostBuildApiClient(options: HostBuildApiOptions): GitBuild
           body: JSON.stringify({ artifactId: job.artifactId, jobId, binding }) }, [200, 202], jobId);
       } catch (error) {
         if (error instanceof ArtifactOperationError && error.kind === "git_live_conflict") {
-          // No build started: the job is closed, never left build_pending, and the refusal is logged.
-          await jobs.refuse(jobId, LIVE_SESSION_ACTIVE);
-          log(JSON.stringify({ kind: "artifacts.build_refused", code: LIVE_SESSION_ACTIVE.code, reason: LIVE_SESSION_ACTIVE.reason,
-            storageScopeId: job.storageScopeId, artifactId: job.artifactId, jobId, bindingGeneration: job.bindingGeneration }));
+          // No build started: log the refusal, close the job (never left build_pending), and always answer the
+          // conflict, even when closing the job fails (that failure is logged, never thrown in its place).
+          const ids = { storageScopeId: job.storageScopeId, artifactId: job.artifactId, jobId, bindingGeneration: job.bindingGeneration };
+          log(JSON.stringify({ kind: "artifacts.build_refused", code: BUILDER_LIVE_SESSION_ACTIVE,
+            reason: HOST_LIVE_SESSION_REFUSAL.reason, ...ids }));
+          try { await jobs.refuse(jobId, HOST_LIVE_SESSION_REFUSAL); } catch {
+            log(JSON.stringify({ kind: "artifacts.build_refuse_unavailable", ...ids }));
+          }
         }
         throw error;
       }

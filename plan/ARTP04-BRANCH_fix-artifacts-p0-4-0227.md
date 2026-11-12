@@ -51,5 +51,6 @@
 - [x] Lot 5: Push, open the PR (#1079), CI green.
 - [x] Lot 6 (review): 409 `live_session_active` as `git_live_conflict`/`active_session`, logged, job closed and re-armed on retry.
 - [x] Lot 6 (review): re-drive gated by `IMMO_ARTIFACTS_LIVE_REDRIVE_ENABLED=true`, set on radar-immo-mcp only.
-- [x] Lot 6 (review): SIGTERM drain ends with exit 0 (PID 1); composition wiring and ownerId fallback tests in CI.
+- [x] Lot 6 (review): SIGTERM only stops the timer (no exit); composition wiring and ownerId fallback tests in CI.
+- [x] Lot 7 (review 2): conflict always answered when closing the job fails; host-only refusal code `host_refused_live_session`.
 - [ ] Conductor: review and merge with a merge commit.
