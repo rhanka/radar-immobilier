@@ -68,7 +68,7 @@ Lots L1 and L2 of the Steve-aligned classification pilot (plan-pilote-v2 §B-L1,
   - [x] Owner decision (« on prend sol pas luna »): GEPA routes = opus-5.5-low, glm-5.3-low, sol-6.1-low, mistral-large-4-low (luna-6-low stays a seat); a seat binary absent from PATH stops the run at its first call; a resume keeps the cache across the route change (the context sha does not cover the routes).
   - [x] ChatGPT quota guard of the codex seats (shared with the production immo detection): rate_limits logged per codex call (`quotaUsedPercent`, `quotaResetsAt`), dev, blind and GEPA stop launching codex calls at `CODEX_QUOTA_PAUSE` (default 85 %) or on a reached rate limit, with the exact resume; `make classif-quota-status ENV=preprod` shows the last measurement per seat.
   - [x] Quota source fixed after a real call: codex writes `rate_limits` only to its session file — the codex seats run without `--ephemeral`, callSeat reads the session file (rate_limits keys only) then deletes it in a finally; the "Code Mode is unavailable" error item is benign.
-  - [ ] Real GEPA run, freeze of the winner and pre-registration of the GEPA series (conductor, paid calls).
+  - [x] Real GEPA run, freeze of the winner and pre-registration of the GEPA series (conductor, paid calls): run s5 on opus-5.5-low and sol-6.1-low (owner 12/11, no Vibe), MAX_CALLS 7000, winner seed P3 frozen as P5, series 5 = P5 × sol-6.1-low (opus-5.5-low blind of this sha is series 3); P0 benchmark series 7 (Astra, Sol low/medium), 8 (Luna low/medium), 9 (Gemini low, incomplete: agy account disabled).
 
 - [x] **Gate**
   - [x] `make classif-check ENV=preprod` + `make classif-test ENV=preprod` (46/46, passe 4).
