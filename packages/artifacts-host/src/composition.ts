@@ -81,7 +81,7 @@ export interface ArtifactHostOptions {
    */
   readonly gitMode?: { readonly resolution?: typeof ARTIFACT_GIT_MODE; readonly config?: GitModeConfig;
     readonly ports?: GitModePorts };
-  /** SIGTERM source of the live re-drive drain; production leaves it absent (`process`). */
+  /** SIGTERM source of the live re-drive timer stop; production leaves it absent (`process`). */
   readonly signals?: ShutdownSignals;
 }
 
@@ -221,7 +221,7 @@ export async function composeArtifactHost(
       reconcileTimer.unref();
     }
     // Durable live re-drive (0.2.27): one pass now, then every 15 s; SIGTERM
-    // stops the timer and drains the pass in flight (live-redrive.ts).
+    // stops the timer and lets the pass in flight finish (live-redrive.ts).
     if (gitMode.liveRedrive) liveRedrive = startLiveRedriveLoop({ redrive: gitMode.liveRedrive,
       ...(options.signals ? { signals: options.signals } : {}),
       ...(options.onProviderFailure ? { onError: options.onProviderFailure } : {}) });
