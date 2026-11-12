@@ -132,11 +132,13 @@ spec:
                   valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_SECRET_KEY } }
                 # Refresh cascade identity for the seat probe: same models
                 # and keyring as radar-refresh-pv (34-refresh-cronjob.yaml).
+                # No Gemini route (owner decision 2026-11-12: Google account
+                # disabled); `verify-renders` refuses any `gemini` here.
                 - { name: REFRESH_PROVIDER, value: "openai" }
                 - { name: REFRESH_MODEL, value: "gpt-6-astra" }
                 - { name: REFRESH_REASONING_EFFORT, value: "medium" }
-                - { name: REFRESH_FALLBACK_PROVIDER, value: "gemini" }
-                - { name: REFRESH_FALLBACK_MODEL, value: "gemini-3.8-flash" }
+                - { name: REFRESH_FALLBACK_PROVIDER, value: "openai" }
+                - { name: REFRESH_FALLBACK_MODEL, value: "gpt-6-astra" }
                 - { name: REFRESH_FALLBACK_REASONING_EFFORT, value: "low" }
                 - { name: SENTROPIC_LLM_MESH_KEYRING_DIR, value: "/keyring/runtime" }
                 - name: REFRESH_PRINCIPAL_REF
