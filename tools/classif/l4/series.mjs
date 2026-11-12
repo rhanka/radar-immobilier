@@ -20,7 +20,8 @@ export function seriesManifestFile(k, env = process.env) {
     Review §9b/c: routes, halves sha, floors in ]0,1], failure ceiling in ]0,1] and supports
     shapes are validated — a `floors:{}` no longer passes with floors at 0.
     Review §9: halves are REQUIRED (a manifest without frozen halves refuses).
-    GEPA series (`method: 'gepa'`): routes = the GEPA routes, failureCeiling <= 5 %, no
+    GEPA series (`method: 'gepa'`): routes = a non-empty subset of the GEPA routes (owner 12/11:
+    a single-route evaluation such as P0 × sol-6.1-low), failureCeiling <= 5 %, no
     floors (precision reported, never a floor), no recallNonRegression (own verdict). */
 export function loadSeriesManifest(k, env = process.env) {
   const file = seriesManifestFile(k, env);
@@ -59,11 +60,14 @@ export function loadSeriesManifest(k, env = process.env) {
   return m;
 }
 
-/** GEPA series shape: exactly the GEPA routes, a failure ceiling in ]0, 5 %], no floors, no recallNonRegression. */
+/**
+ * GEPA series shape: a non-empty subset of the GEPA routes without duplicates (the registered
+ * routes are the mandatory routes of the series verdict), a failure ceiling in ]0, 5 %], no
+ * floors, no recallNonRegression.
+ */
 export function assertGepaSeriesShape(m, k, rel = `series-${k}.json`) {
-  const want = [...GEPA_ROUTES].sort().join(',');
-  if ([...new Set(m.routes)].sort().join(',') !== want || m.routes.length !== GEPA_ROUTES.length) {
-    throw new Error(`series ${k} refused: ${rel} gepa routes must be exactly [${GEPA_ROUTES.join(',')}]`);
+  if (!Array.isArray(m.routes) || !m.routes.length || new Set(m.routes).size !== m.routes.length || m.routes.some((r) => !GEPA_ROUTES.includes(r))) {
+    throw new Error(`series ${k} refused: ${rel} gepa routes must be a non-empty subset of [${GEPA_ROUTES.join(',')}] without duplicates`);
   }
   if (typeof m.failureCeiling !== 'number' || !(m.failureCeiling > 0) || m.failureCeiling > GEPA_FAILURE_CEILING) {
     throw new Error(`series ${k} refused: ${rel} gepa failureCeiling must be in ]0,${GEPA_FAILURE_CEILING}]`);
@@ -76,6 +80,17 @@ export function assertGepaSeriesShape(m, k, rel = `series-${k}.json`) {
  * Route universe hint before the full manifest load: 'gepa' when series-<k>.json exists and
  * declares method gepa, 'classic' otherwise (the full load still validates everything).
  */
+/**
+ * Routes of a GEPA series before the full manifest load (its registered routes), null for a
+ * classic series or an unreadable manifest (the full load still validates everything).
+ */
+export function gepaSeriesRoutes(k, env = process.env) {
+  try {
+    const m = JSON.parse(readFileSync(seriesManifestFile(k, env), 'utf8'));
+    return m?.method === GEPA_METHOD && Array.isArray(m.routes) ? m.routes : null;
+  } catch { return null; }
+}
+
 export function seriesMethod(k, env = process.env) {
   try {
     const m = JSON.parse(readFileSync(seriesManifestFile(k, env), 'utf8'));

@@ -1,0 +1,33 @@
+{
+ "kind": "l4-series",
+ "series": 6,
+ "method": "gepa",
+ "promptSha256": "a60713366128ae4348a45a7323d0b0984cef87ca6cb33eda15073c045235b016",
+ "routes": [
+  "sol-6.1-low"
+ ],
+ "seed": "gepa-s5",
+ "sourceRun": {
+  "run": "s5",
+  "finalist": "P0",
+  "contextSha256": "04dce24ccbc5e9ad3b18cfb73976334332d981e0827fda56153beec3da01cab2"
+ },
+ "halves": {
+  "tuningSha256": "dcaf04fa8d740565b1832d55df705f6b28ac99e0f5b184c78614f2e2cd7efc86",
+  "blindSha256": "8c7f4650ba8235da9efa3cc242b3c6ab085c9a2c2afa3058556d3a3d9bd8a46c"
+ },
+ "failureCeiling": 0.05,
+ "supports": {
+  "recall": 30,
+  "precision": 30
+ },
+ "budget": {
+  "cap": 30000,
+  "spent": 19164,
+  "planned": {
+   "blind": 252,
+   "s113": 113
+  }
+ },
+ "note": "Pre-registered by the conductor BEFORE the dev manifest and any blind run of this series (Annex M M.5). Owner decision 12/11 « complète l'éval de sol »: P6 = P0 bytes (same sha as series 0), single route sol-6.1-low (luna not a route, no Vibe). The tuning-half answers are those of the GEPA run s5 final choice (P0 finalist, 252 cases), replayed into the series-6 dev cache without a paid call. Verdict per route: 0 miss and failed-call share <= 5 % (GEPA rule); precision reported, never a floor. Blind half and S113 (golden-exposed, secondary) scored once by the executor role."
+}

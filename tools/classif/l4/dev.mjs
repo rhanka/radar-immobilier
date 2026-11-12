@@ -16,7 +16,7 @@ import { appendJsonlRecord, parseJsonlTolerant } from '../lib/jsonl.mjs';
 import { sha256 } from '../lib/render.mjs';
 import { classifDir, classifHome, privateDir } from '../lib/paths.mjs';
 import { buildRecallComparison, compareRoutes, routeFailed, seriesVerdict, shownMisses, shownStats } from './metrics.mjs';
-import { assertSeriesHalves, assertSeriesRoutes, loadSeriesManifest, loadTuningRecallBaseline, seriesMethod } from './series.mjs';
+import { assertSeriesHalves, assertSeriesRoutes, gepaSeriesRoutes, loadSeriesManifest, loadTuningRecallBaseline, seriesMethod } from './series.mjs';
 import { GEPA_METHOD, gepaRouteVerdict, gepaSeriesVerdict, seriesRouteUniverse } from './gepa-common.mjs';
 import { groupRoutesByFamily, runFamiliesParallel } from './families.mjs';
 import { check as budgetCheck } from '../lib/budget.mjs';
@@ -110,8 +110,8 @@ export async function main(argv = process.argv.slice(2)) {
   const k = argv.includes('--series') ? argv[argv.indexOf('--series') + 1] : process.env.SERIES;
   if (!k) { process.stderr.write('classif-l4-dev: pass SERIES=<k>\n'); process.exit(2); }
   const deferred = argv.includes('--deferred') ? argv[argv.indexOf('--deferred') + 1].split(',').filter(Boolean) : [];
-  // A GEPA series (series-<k>.json method gepa) evaluates the GEPA routes instead.
-  const routes = seriesRouteUniverse(seriesMethod(k), EVAL_ROUTES).filter((r) => !deferred.includes(r));
+  // A GEPA series (series-<k>.json method gepa) evaluates its registered GEPA routes instead.
+  const routes = seriesRouteUniverse(seriesMethod(k), EVAL_ROUTES, gepaSeriesRoutes(k)).filter((r) => !deferred.includes(r));
   const concurrency = Number(argv.includes('--concurrency') ? argv[argv.indexOf('--concurrency') + 1] : 2);
   // ChatGPT quota guard (codex seats share the weekly quota with the production detection).
   const quotaPause = parseQuotaPause(argv.includes('--codex-quota-pause') ? argv[argv.indexOf('--codex-quota-pause') + 1] : undefined);
