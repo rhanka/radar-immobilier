@@ -66,6 +66,14 @@ export const ROUTES = {
       '--disable-slash-commands', '--print='], stdin: `${JSON.stringify({ event: 'user', message: { role: 'user', content: prompt } })}\n` }),
     parse: parseAgyStream,
   }])),
+  // Owner 12/11: Gemini 4 Carbon low and Gemini 3.8 Flash low (the production detection fallback
+  // and check model), same agy route as Argon (ids from `agy models` of 12/11).
+  ...Object.fromEntries([['gemini-4-carbon-low', 'Gemini 4 Carbon'], ['gemini-3.8-flash-low', 'Gemini 3.8 Flash']].map(([label, family]) => [label, {
+    family, model: label, effort: 'low', route: 'agy --print= with stream-json stdin input, slash commands disabled, empty cwd',
+    build: (_dir, _file, prompt) => ({ cmd: 'agy', args: ['--model', label, '--input-format', 'stream-json', '--output-format', 'stream-json',
+      '--disable-slash-commands', '--print='], stdin: `${JSON.stringify({ event: 'user', message: { role: 'user', content: prompt } })}\n` }),
+    parse: parseAgyStream,
+  }])),
   ...Object.fromEntries(['max', 'medium', 'low'].map((e) => [`opus-5.5-${e}`, {
     family: 'Opus 5.5', model: 'claude-opus-5-5', effort: e, route: 'isolated claude -p: no tools, no CLAUDE.md (CLAUDE_CODE_DISABLE_CLAUDE_MDS=1), project settings only, neutral system prompt, empty MCP config, no session persistence, empty cwd',
     build: (_dir, _file, prompt) => ({ cmd: 'claude', args: ['-p', '--model', 'claude-opus-5-5', '--effort', e, '--output-format', 'json',
@@ -531,17 +539,35 @@ export function parseVibe(stdout, dir) {
 }
 
 // agy stream-json output: one JSON event per line; the final "result" event carries the answer
-// and usage. Tool-call events are counted (an answer that used a tool is flagged by the caller).
-function parseAgyStream(stdout) {
+// and usage. Fail closed (owner 12/11, same rule as codex): only the events of a plain answer are
+// benign — init, step_update of a user_input or agent_response step, result (observed 12/11 on
+// gemini-4-argon-low, gemini-4-carbon-low, gemini-3.8-flash-low). Any other event, any other
+// step type, a non-JSON line or a tool payload key counts as a tool event; toolKinds names them
+// (types only, never text).
+export const AGY_BENIGN_EVENTS = new Set(['init', 'step_update', 'result']);
+export const AGY_BENIGN_STEP_TYPES = new Set(['user_input', 'agent_response']);
+const AGY_TOOL_KEY = /(tool_call|toolcall|function_call|tool_use|command|file_change|mcp|web_search)/i;
+export function parseAgyStream(stdout) {
   let result = null;
   let toolEvents = 0;
-  for (const line of stdout.split('\n')) {
+  const toolKinds = {};
+  const tool = (k) => { toolEvents++; toolKinds[k] = (toolKinds[k] ?? 0) + 1; };
+  for (const line of String(stdout ?? '').split('\n')) {
+    if (!line.trim()) continue;
     let e;
-    try { e = JSON.parse(line); } catch { continue; }
-    if (e.event === 'result') result = e.result;
-    else if (/tool/i.test(String(e.event ?? '')) || e.tool_call || e.toolCall) toolEvents++;
+    try { e = JSON.parse(line); } catch { tool('<non-json>'); continue; }
+    const ev = String(e?.event ?? '');
+    if (!AGY_BENIGN_EVENTS.has(ev)) { tool(ev || '<missing-event>'); continue; }
+    if (ev === 'result') { result = e.result; continue; }
+    if (ev === 'step_update') {
+      const st = e.step_update ?? {};
+      if (!AGY_BENIGN_STEP_TYPES.has(st.step_type)) { tool(`step_update:${st.step_type ?? '<missing-step-type>'}`); continue; }
+      if (AGY_TOOL_KEY.test(JSON.stringify(Object.keys(st)))) tool(`step_update:${st.step_type}:tool-key`);
+      continue;
+    }
+    if (e.tool_call || e.toolCall) tool('init:tool-key');
   }
-  return { text: result?.response ?? '', usage: result?.usage ?? null, status: result?.status ?? null, error: result?.error ?? null, toolEvents,
+  return { text: result?.response ?? '', usage: result?.usage ?? null, status: result?.status ?? null, error: result?.error ?? null, toolEvents, toolKinds,
     errorEnvelope: result?.error ? (typeof result.error === 'string' ? result.error : JSON.stringify(result.error)) : '' };
 }
 
