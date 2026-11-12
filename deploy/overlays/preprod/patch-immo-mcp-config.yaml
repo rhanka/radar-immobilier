@@ -94,7 +94,7 @@ data:
   IMMO_ARTIFACTS_LIVE_EDGE_ENABLED: "1"
   # Durable live re-drive (@sentropic/artifacts 0.2.27), PREPROD ONLY and in
   # THIS workload only (never on radar-api): boot pass + every 15 s, SIGTERM
-  # drain. The package overlap guards are process-local, so exactly one
+  # stops the timer. The package overlap guards are process-local, so exactly one
   # process per storage scope may run it. radar-immo-mcp carries the MCP live
   # flow (live_write, live_control) and runs 1 replica with a Recreate
   # strategy, so a rollout never runs two loops; radar-api has 1 to 2
