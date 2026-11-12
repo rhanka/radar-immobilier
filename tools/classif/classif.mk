@@ -144,7 +144,7 @@ classif-l3b-reference: ## Classification pilot L3b: reference set D (provenances
 	@test "$(CLASSIF_ROLE)" = "test-executor" || { echo "[classif-l3b-reference] CLASSIF_ROLE=test-executor required"; exit 2; }
 	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l3/reference-d.mjs
 
-# ChatGPT quota guard: the codex seats (astra-max, sol-6.1-low, luna-6-low) share the weekly quota
+# ChatGPT quota guard: the codex seats (astra-max/low/medium, sol-6.1-low/medium, luna-6-low) share the weekly quota
 # with the production immo detection. dev, blind and GEPA stop launching codex calls, and stop the
 # run, once a call reports at least CODEX_QUOTA_PAUSE % used (default 85) or a reached rate limit.
 CODEX_QUOTA_PAUSE ?=
@@ -195,7 +195,7 @@ classif-l4-gepa: ## Classification pilot L4: GEPA prompt optimisation, tuning ha
 # (outside $(CLASSIF_HOME)). After a new codex login, or when a run stops on authentication errors,
 # refresh the seat then resume the stopped run with the same command.
 .PHONY: classif-seat-auth-refresh
-classif-seat-auth-refresh: ## Classification pilot: copy ~/.codex/auth.json atomically into one codex seat home (SEAT=astra-max|sol-6.1-low|luna-6-low)
+classif-seat-auth-refresh: ## Classification pilot: copy ~/.codex/auth.json atomically into one codex seat home (SEAT=astra-max|astra-low|astra-medium|sol-6.1-low|sol-6.1-medium|luna-6-low)
 	@test "$(ENV)" = "preprod" || { echo "[classif-seat-auth-refresh] ENV=preprod required"; exit 2; }
 	@test -n "$(SEAT)" || { echo "[classif-seat-auth-refresh] SEAT=<seat> required"; exit 2; }
 	@$(CLASSIF_NODE) $(CLASSIF_DIR)/seat-auth-refresh.mjs --seat $(SEAT)

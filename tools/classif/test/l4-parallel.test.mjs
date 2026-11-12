@@ -152,7 +152,8 @@ test('l4 families: routes grouped by seat family, input order kept inside a fami
     { family: 'agy', routes: ['gemini-4-argon-low', 'gemini-4-argon-medium'] },
   ]);
   assert.deepEqual(SEAT_FAMILY_ORDER, ['muse', 'claude', 'vibe', 'agy']);
-  assert.equal(seatFamily('astra-max'), 'other', 'an unknown prefix never joins a known seat family');
+  assert.equal(seatFamily('astra-medium'), 'astra', 'owner 12/11: the Astra seats form their own family');
+  assert.equal(seatFamily('kimi-low'), 'other', 'an unknown prefix never joins a known seat family');
   assert.deepEqual(groupRoutesByFamily(['glm-5.3-low']), [{ family: 'vibe', routes: ['glm-5.3-low'] }]);
   assert.deepEqual(groupRoutesByFamily([]), []);
 });
