@@ -51,8 +51,8 @@ function fakeSeat(quota = () => rl(40)) {
     const rateLimits = ['sol-6.1-low', 'astra-max'].includes(label) ? quota(label) : undefined;
     if (!GEPA_ROUTES.includes(label)) return { code: 0, text: `${RULES}MARK:child-${seen.length}`, latencyMs: 1, rateLimits };
     const id = /### item_id: (\S+)/.exec(prompt)[1];
-    // Seeds miss every P case on mistral: every iteration has an error to reflect on.
-    const v = /MARK:seed/.test(prompt) && label === 'mistral-large-4-low' && REF.get(id) === 'pertinent' ? 'non_pertinent' : REF.get(id);
+    // Seeds miss every P case on opus: every iteration has an error to reflect on.
+    const v = /MARK:seed/.test(prompt) && label === 'opus-5.5-low' && REF.get(id) === 'pertinent' ? 'non_pertinent' : REF.get(id);
     return { code: 0, text: JSON.stringify({ verdict: v, code: CODE[v] }), latencyMs: 1, rateLimits };
   };
   return { seat, seen, codex: () => seen.filter((s) => ['sol-6.1-low', 'astra-max'].includes(s.label)) };
