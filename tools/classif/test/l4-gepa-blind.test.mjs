@@ -42,9 +42,9 @@ exit 0
   return () => { restore(); rmSync(bin, { recursive: true, force: true }); };
 }
 
-/** Blind fixture turned into a GEPA series: method gepa, the GEPA routes, ceiling 5 %, no floors. */
-async function setupGepa(home) {
-  const s = await setupBlind(home, { k: K, routes: GEPA_ROUTES, ids: IDS, supports: { recall: 10, precision: 10 } });
+/** Blind fixture turned into a GEPA series: method gepa, the GEPA routes (or `routes`), ceiling 5 %, no floors. */
+async function setupGepa(home, { routes = GEPA_ROUTES } = {}) {
+  const s = await setupBlind(home, { k: K, routes, ids: IDS, supports: { recall: 10, precision: 10 } });
   const rel = `tools/classif/l4/manifests/series-${K}.json`;
   const { floors: _floors, ...m } = JSON.parse(readFileSync(path.join(s.repo, rel), 'utf8'));
   writeRepoFile(s.repo, rel, JSON.stringify({ ...m, method: 'gepa', failureCeiling: 0.05 }));
@@ -192,5 +192,22 @@ test('quota guard: dev and blind stop launching codex calls at 85 % and resume w
     const solIds = [...first.calls, ...again.calls].filter((c) => c.intent && c.phase === `l4-blind-s${K}` && c.route === 'sol-6.1-low').map((c) => c.itemId);
     assert.equal(solIds.length, new Set(solIds).size, 'no blind sol item paid twice');
     assert.equal(new Set(solIds).size, N);
+  } finally { s.cleanup(); }
+}));
+
+test('owner 12/11: a single-route GEPA series (P0 × sol-6.1-low) scores sol only on blind and S113, without DEFERRED', withTempHome(async (home) => {
+  const s = await setupGepa(home, { routes: ['sol-6.1-low'] });
+  try {
+    const { main } = await import('../l4/blind.mjs');
+    const before = callsOf(home).length;
+    const manifest = await main(['--series', K, '--concurrency', '8']);
+    const calls = callsOf(home).slice(before).filter((c) => c.intent);
+    assert.deepEqual([...new Set(calls.map((c) => c.route))], ['sol-6.1-low'], 'no other route is called');
+    assert.equal(calls.filter((c) => c.phase === `l4-blind-s${K}`).length, N);
+    assert.ok(calls.some((c) => c.phase === `l4-s113-s${K}`), 'S113 secondary measured on sol');
+    const agg = readAggregates(home, K);
+    assert.deepEqual(Object.keys(agg.perRoute), ['sol-6.1-low']);
+    assert.deepEqual([agg.gepa.verdict, agg.gepa.missing, agg.gepa.failing], ['pass', [], []]);
+    assert.deepEqual(manifest.routes, ['sol-6.1-low']);
   } finally { s.cleanup(); }
 }));

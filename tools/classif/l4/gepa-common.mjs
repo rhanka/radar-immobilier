@@ -83,7 +83,7 @@ export function gepaSeriesVerdict(perRoute, routes = GEPA_ROUTES) {
   return { verdict: missing.length || failing.length ? 'fail' : 'pass', missing, failing };
 }
 
-/** Route universe of a series: the GEPA routes for a GEPA series, `classic` otherwise. */
-export function seriesRouteUniverse(method, classic) {
-  return method === GEPA_METHOD ? GEPA_ROUTES : classic;
+/** Route universe of a series: its registered GEPA routes (default: every GEPA route) for a GEPA series, `classic` otherwise. */
+export function seriesRouteUniverse(method, classic, gepaRoutes = null) {
+  return method === GEPA_METHOD ? (gepaRoutes ?? GEPA_ROUTES) : classic;
 }

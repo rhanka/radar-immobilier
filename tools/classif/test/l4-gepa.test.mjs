@@ -193,11 +193,14 @@ test('gepa seats: sol-6.1-low and luna-6-low on the isolated codex route, mistra
   assert.equal(process.env.CLASSIF_TEST_MODE, '1');
 }));
 
-test('gepa series shape: exactly the GEPA routes, ceiling <= 5 %, no floors, no recallNonRegression', () => {
+test('gepa series shape: a non-empty subset of the GEPA routes, ceiling <= 5 %, no floors, no recallNonRegression', () => {
   const ok = { routes: [...GEPA_ROUTES].reverse(), failureCeiling: 0.05 };
   assert.doesNotThrow(() => assertGepaSeriesShape(ok, 5));
-  assert.throws(() => assertGepaSeriesShape({ ...ok, routes: GEPA_ROUTES.slice(1) }, 5), /gepa routes must be exactly/);
-  assert.throws(() => assertGepaSeriesShape({ ...ok, routes: [...GEPA_ROUTES, 'opus-5.5-medium'] }, 5), /gepa routes must be exactly/);
+  assert.doesNotThrow(() => assertGepaSeriesShape({ ...ok, routes: ['sol-6.1-low'] }, 6), 'owner 12/11: single-route series P0 × sol');
+  assert.throws(() => assertGepaSeriesShape({ ...ok, routes: [] }, 5), /non-empty subset/);
+  assert.throws(() => assertGepaSeriesShape({ ...ok, routes: ['sol-6.1-low', 'sol-6.1-low'] }, 5), /without duplicates/);
+  assert.throws(() => assertGepaSeriesShape({ ...ok, routes: [...GEPA_ROUTES, 'opus-5.5-medium'] }, 5), /non-empty subset/);
+  assert.throws(() => assertGepaSeriesShape({ ...ok, routes: ['glm-5.3-low'] }, 5), /non-empty subset/);
   assert.throws(() => assertGepaSeriesShape({ ...ok, failureCeiling: 0.1 }, 5), /failureCeiling must be in \]0,0.05\]/);
   assert.throws(() => assertGepaSeriesShape({ ...ok, floors: { recall: 0.8, precision: 0.5 } }, 5), /no floors/);
   assert.throws(() => assertGepaSeriesShape({ ...ok, recallNonRegression: { baselineSeries: 0 } }, 5), /own verdict/);
