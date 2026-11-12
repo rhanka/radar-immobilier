@@ -68,7 +68,21 @@ export function buildPlan(csvText) {
         sens: r[c.p].trim() || null, rawRefs, citations: citationSegments(r[c.citation]) });
     }
   }
-  return { rows: rows.length, columns: header.length, targets, issues };
+  // One target per node (the writer works per account and node): duplicates with the same
+  // decision collapse onto the first row; conflicting duplicates are excluded and reported.
+  const byNode = new Map();
+  for (const t of targets) byNode.set(t.nodeId, [...(byNode.get(t.nodeId) || []), t]);
+  const unique = [];
+  for (const [nodeId, group] of byNode) {
+    const rowsOf = group.map((t) => t.row);
+    if (group.some((t) => t.verdict !== group[0].verdict || t.reasonCode !== group[0].reasonCode)) {
+      issues.push({ row: rowsOf.join('+'), nodeId, issue: 'conflicting_duplicate' });
+    } else {
+      if (group.length > 1) issues.push({ row: rowsOf.join('+'), nodeId, issue: 'duplicate_merged' });
+      unique.push(group[0]);
+    }
+  }
+  return { rows: rows.length, columns: header.length, targets: unique, issues };
 }
 
 /** Minimal xlsx reader (unzip binary, no dependency): rows of one named sheet. */
