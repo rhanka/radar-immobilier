@@ -413,8 +413,20 @@ export const CODEX_BENIGN_ITEM_TYPES = new Set(['agent_message', 'reasoning']);
  * `error` items codex emits on EVERY call of the isolated seats, unrelated to tools (the tool
  * features are disabled): benign by exact notice only — any other error item still counts.
  */
-export const CODEX_BENIGN_ERROR_NOTICES = [/^Code Mode is unavailable because code-mode host is disabled/];
+export const CODEX_BENIGN_ERROR_NOTICES = [/^Code Mode is unavailable because code-mode host is disabled/,
+  // Transport fallback (observed 12/11 on astra-low and sol-6.1-medium, answered calls): the
+  // ChatGPT WebSocket refuses (403), codex falls back to HTTPS — a CLI transport notice, no tool.
+  /^Falling back from WebSockets to HTTPS transport\. /];
 const benignErrorItem = (item) => item?.type === 'error' && CODEX_BENIGN_ERROR_NOTICES.some((re) => re.test(String(item.message ?? item.text ?? '')));
+
+/**
+ * Top-level `error` events of the codex CLI that only report a transport reconnection (`Reconnecting...
+ * n/m (...)`, emitted before the WebSocket to HTTPS fallback): benign by exact prefix only — any
+ * other top-level error event still counts (fail closed). Never model text: the model's answer
+ * rides in agent_message items.
+ */
+export const CODEX_BENIGN_TOP_ERRORS = [/^Reconnecting\.\.\. \d+\/\d+ \(/];
+const benignTopError = (e) => e?.type === 'error' && CODEX_BENIGN_TOP_ERRORS.some((re) => re.test(String(e.message ?? e.error?.message ?? '')));
 
 const CODEX_TOOL_KEY = /(tool_call|toolcall|function_call|exec_command|shell_command|command_execution|file_change|mcp|web_search|websearch)/i;
 
@@ -434,6 +446,7 @@ export function countCodexToolEvents(stdout) {
     if (!type || typeof type !== 'string') { toolEvents++; unknownTypes.push('<missing-type>'); kind('<missing-type>'); continue; }
     // Quota metering (`token_count`, carrying `rate_limits`) is benign; any other unknown type still counts.
     if (type === 'token_count' || (type === 'event_msg' && e?.payload?.type === 'token_count')) continue;
+    if (benignTopError(e)) continue;
     if (!CODEX_KNOWN_EVENT_TYPES.has(type)) { toolEvents++; unknownTypes.push(type); kind(type); continue; }
     if (type.startsWith('item.')) {
       const item = e?.item ?? e?.data ?? e;

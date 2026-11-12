@@ -166,6 +166,16 @@ test('quota: the "Code Mode is unavailable" error item is benign (no tool event,
     assert.deepEqual(parseSeatResult({ code: 0, ...r }, loadCodes()), { verdict: 'pertinent', code: 'P-DENSITE', failed: false, why: null, infra: false });
   } finally { rmSync(dir, { recursive: true, force: true }); }
   assert.equal(countCodexToolEvents(JSON.stringify({ type: 'item.completed', item: { type: 'error', message: 'tool call failed: cat' } })).toolEvents, 1);
+  // Transport fallback notices (owner 12/11, astra-low / sol-6.1-medium): benign by exact prefix only.
+  const fallback = [JSON.stringify({ type: 'thread.started', thread_id: 't' }),
+    ...[2, 3, 4, 5].map((n) => JSON.stringify({ type: 'error', message: `Reconnecting... ${n}/5 (unexpected status 403 Forbidden: Unknown error, url: wss://chatgpt.com/backend-api/codex/responses)` })),
+    JSON.stringify({ type: 'item.completed', item: { id: 'i', type: 'error', message: 'Falling back from WebSockets to HTTPS transport. unexpected status 403 Forbidden: Unknown error' } }),
+    JSON.stringify({ type: 'item.completed', item: { id: 'a', type: 'agent_message', text: '{"verdict":"pertinent"}' } }),
+    JSON.stringify({ type: 'turn.completed', usage: { input_tokens: 1 } })].join('\n');
+  assert.equal(countCodexToolEvents(fallback).toolEvents, 0, 'reconnection and HTTPS fallback notices are benign');
+  assert.equal(countCodexToolEvents(JSON.stringify({ type: 'error', message: 'stream disconnected before completion' })).toolEvents, 1, 'any other top-level error still counts');
+  assert.equal(countCodexToolEvents(JSON.stringify({ type: 'error', message: 'Running tool: Reconnecting... 1/5 (' })).toolEvents, 1, 'prefix only, never a substring');
+  assert.equal(countCodexToolEvents(JSON.stringify({ type: 'item.completed', item: { type: 'error', message: 'Falling back from WebSockets to a shell' } })).toolEvents, 1);
   // Diagnostic kinds: event and item types only, never the message text.
   const kinds = countCodexToolEvents([JSON.stringify({ type: 'item.completed', item: { type: 'error', message: 'tool call failed: cat secret' } }),
     JSON.stringify({ type: 'item.started', item: { type: 'command_execution', command: 'cat x' } }), JSON.stringify({ type: 'surprise' })].join('\n')).toolKinds;
