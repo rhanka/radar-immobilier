@@ -25,7 +25,7 @@ import { assertNoVerbatim } from '../lib/freeze.mjs';
 import { loadCodes } from '../l2/run.mjs';
 import { assertBlindRunAllowed, audit, blindDir, openBlindSet, readAudit } from '../lib/blind.mjs';
 import { assertEvalRunAllowed, audit as auditEval, openEvalSet, readAudit as readEvalAudit } from '../guard/evalset.mjs';
-import { assertSeriesHalves, assertSeriesRoutes, loadSeriesManifest, seriesMethod } from './series.mjs';
+import { assertSeriesHalves, assertSeriesRoutes, gepaSeriesRoutes, loadSeriesManifest, seriesMethod } from './series.mjs';
 import { groupRoutesByFamily, runFamiliesParallel } from './families.mjs';
 
 async function pool(tasks, n) {
@@ -215,7 +215,7 @@ export async function main(argv = process.argv.slice(2)) {
   if (!k) { process.stderr.write('classif-l4-blind: pass SERIES=<k>\n'); process.exit(2); }
   const deferred = argv.includes('--deferred') ? argv[argv.indexOf('--deferred') + 1].split(',').filter(Boolean) : [];
   // A GEPA series (series-<k>.json method gepa) is scored on the GEPA routes.
-  const universe = seriesRouteUniverse(seriesMethod(k), EVAL_ROUTES);
+  const universe = seriesRouteUniverse(seriesMethod(k), EVAL_ROUTES, gepaSeriesRoutes(k));
   const routes = universe.filter((r) => !deferred.includes(r));
   const concurrency = Number(argv.includes('--concurrency') ? argv[argv.indexOf('--concurrency') + 1] : 2);
   // ChatGPT quota guard (codex seats share the weekly quota with the production detection).
