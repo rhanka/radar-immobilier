@@ -53,6 +53,17 @@ export const ROUTES = {
       '--disable-web-tools', '--disable-reminders', '--disable-request-user-input', '--no-foreign-personal-context', '--no-session-log', '--workspace', dir] }),
     parse: parseMuse,
   }])),
+  // Owner 12/11: Muse Ember 1.0 in xhigh and max. Same isolated muse route as Spark, plus
+  // --contributor-mode off: with --preset empty the CLI otherwise resolves the model to the hidden
+  // muse-ember-1.0-contributor variant, which this account cannot use (« does not exist or you
+  // lack access », observed 12/11; the owner's shell, without the preset, reaches muse-ember-1.0).
+  ...Object.fromEntries(['xhigh', 'max'].map((e) => [`muse-ember-1.0-${e}`, {
+    // evalOnly: an evaluated classifier route, never an optimiser seat (optimise.mjs MAX_SEATS).
+    family: 'Muse Ember 1.0', model: 'muse-ember-1.0', effort: e, evalOnly: true, route: 'muse exec --prompt-file, preset empty, contributor mode off, no web tools, no session log',
+    build: (dir, file) => ({ cmd: 'muse', args: ['exec', '--model', 'muse-ember-1.0', '--reasoning-effort', e, '--contributor-mode', 'off', '--preset', 'empty', '--prompt-file', file, '--json',
+      '--disable-web-tools', '--disable-reminders', '--disable-request-user-input', '--no-foreign-personal-context', '--no-session-log', '--workspace', dir] }),
+    parse: parseMuse,
+  }])),
   'gemini-4-argon-low': {
     family: 'Gemini 4 Argon', model: 'gemini-4-argon-low', effort: 'low', route: 'agy --print= with stream-json stdin input, slash commands disabled, empty cwd',
     build: (_dir, _file, prompt) => ({ cmd: 'agy', args: ['--model', 'gemini-4-argon-low', '--input-format', 'stream-json', '--output-format', 'stream-json',
@@ -573,9 +584,21 @@ export function parseAgyStream(stdout) {
 
 // muse exec --json emits JSONL events; the final answer is the "text" of the completed
 // run_terminal payload (nested), usage objects may appear at any depth.
-function parseMuse(stdout) {
+// Fail closed (owner 12/11, same rule as codex and agy): only the payload types of a plain
+// answer are benign (observed 12/11 on muse-ember-1.0 xhigh, answered and failed runs); any other
+// payload type (tool, command, file, MCP, web, an unknown one) or a non-JSON line is a tool
+// event, named in toolKinds (types only, never text). errorEnvelope carries the failure reason
+// of failed lifecycle or terminal payloads (CLI text, never the model's answer).
+export const MUSE_BENIGN_PAYLOADS = new Set(['runtime.command.accepted', 'session.run.linked', 'run.model.configured', 'run.lifecycle.started',
+  'turn.input.user', 'task.stream.linked', 'task.lifecycle.proposed', 'task.lifecycle.accepted', 'task.lifecycle.scheduled',
+  'task.lifecycle.side_effect_intent', 'task.lifecycle.started', 'task.lifecycle.status', 'task.lifecycle.completed', 'task.lifecycle.failed',
+  'run.output.delta', 'run.usage', 'run.terminal.completed', 'run.terminal.failed']);
+export function parseMuse(stdout) {
   let text = '';
   let usage = null;
+  let toolEvents = 0;
+  const toolKinds = {};
+  const errors = [];
   const walk = (o) => {
     if (!o || typeof o !== 'object') return;
     if (o.terminal === 'completed' && typeof o.text === 'string') text = o.text;
@@ -584,10 +607,20 @@ function parseMuse(stdout) {
       else walk(v);
     }
   };
-  for (const line of stdout.split('\n')) {
-    try { walk(JSON.parse(line)); } catch { /* not json */ }
+  for (const line of String(stdout ?? '').split('\n')) {
+    if (!line.trim()) continue;
+    let e;
+    try { e = JSON.parse(line); } catch { toolEvents++; toolKinds['<non-json>'] = (toolKinds['<non-json>'] ?? 0) + 1; continue; }
+    const pt = e?.payload_type;
+    if (typeof pt === 'string' && !MUSE_BENIGN_PAYLOADS.has(pt)) { toolEvents++; toolKinds[pt] = (toolKinds[pt] ?? 0) + 1; }
+    if (typeof pt === 'string' && pt.endsWith('.failed')) {
+      const p = e.payload ?? {};
+      const why = p.reason ?? p.error?.message ?? p.error ?? p.message ?? null;
+      if (why) errors.push(typeof why === 'string' ? why : JSON.stringify(why));
+    }
+    walk(e);
   }
-  return { text: text || stdout.slice(-4000), usage };
+  return { text: text || String(stdout ?? '').slice(-4000), usage, toolEvents, toolKinds, errorEnvelope: [...new Set(errors)].join('\n') };
 }
 
 /**

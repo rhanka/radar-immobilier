@@ -48,7 +48,7 @@ export const MAX_REPAIRS = 2;
 export const REPAIR_INSTRUCTION = 'The candidate prompt contains text copied verbatim from source documents; rewrite every example or quoted passage in your own general words, never quote document text, keep all rules.';
 export const TUNING_KEYS = ['tuningRef', 'tuningOutputs', 'errors', 'aggregates', 'currentPrompt', 'baselinePrompt'];
 /** Seats an override may name: the max-effort routes of run-seat.mjs. */
-export const MAX_SEATS = Object.entries(ROUTES).filter(([, r]) => r.effort === 'max').map(([label]) => label);
+export const MAX_SEATS = Object.entries(ROUTES).filter(([, r]) => r.effort === 'max' && !r.evalOnly).map(([label]) => label);
 export const OWNER_DEVIATION_0611 = {
   optimisers: ['astra-max', 'opus-5.5-max'],
   reconciler: 'opus-5.5-max',
