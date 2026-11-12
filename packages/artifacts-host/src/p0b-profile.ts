@@ -3,7 +3,7 @@ import { gitProfileOperations, resolveGitMode, type GitArtifactTool } from "./gi
 
 /** Package qualification and deployment qualification are separate switches. */
 export const ARTIFACT_PROVIDER_VERSION: string = ARTIFACTS_PROVIDER_VERSION;
-export const ARTIFACT_P0B_VERSIONS: readonly string[] = Object.freeze(["0.2.5", "0.2.6", "0.2.8", "0.2.9", "0.2.10", "0.2.12", "0.2.13", "0.2.15", "0.2.16", "0.2.17", "0.2.18", "0.2.20", "0.2.22", "0.2.23", "0.2.24", "0.2.25"]);
+export const ARTIFACT_P0B_VERSIONS: readonly string[] = Object.freeze(["0.2.5", "0.2.6", "0.2.8", "0.2.9", "0.2.10", "0.2.12", "0.2.13", "0.2.15", "0.2.16", "0.2.17", "0.2.18", "0.2.20", "0.2.22", "0.2.23", "0.2.24", "0.2.25", "0.2.27"]);
 export const ARTIFACT_P0B = ARTIFACT_P0B_VERSIONS.includes(ARTIFACT_PROVIDER_VERSION);
 if (ARTIFACT_PROVIDER_VERSION !== "0.2.2" && !ARTIFACT_P0B) throw new Error("artifact_provider_version_unqualified");
 export function artifactProfileDescriptor(env: NodeJS.ProcessEnv = process.env) {
@@ -14,7 +14,7 @@ export function artifactProfileDescriptor(env: NodeJS.ProcessEnv = process.env) 
   }
   const strict = revision === "immo-artifacts.cas.v2" || revision === "immo-artifacts.v2";
   if ((revision === "immo-artifacts.v1") !== !ARTIFACT_P0B) throw new Error("artifact_profile_provider_mismatch");
-  if (strict && ARTIFACT_PROVIDER_VERSION !== "0.2.9" && ARTIFACT_PROVIDER_VERSION !== "0.2.10" && ARTIFACT_PROVIDER_VERSION !== "0.2.12" && ARTIFACT_PROVIDER_VERSION !== "0.2.13" && ARTIFACT_PROVIDER_VERSION !== "0.2.15" && ARTIFACT_PROVIDER_VERSION !== "0.2.16" && ARTIFACT_PROVIDER_VERSION !== "0.2.17" && ARTIFACT_PROVIDER_VERSION !== "0.2.18" && ARTIFACT_PROVIDER_VERSION !== "0.2.20" && ARTIFACT_PROVIDER_VERSION !== "0.2.22" && ARTIFACT_PROVIDER_VERSION !== "0.2.23" && ARTIFACT_PROVIDER_VERSION !== "0.2.24" && ARTIFACT_PROVIDER_VERSION !== "0.2.25") {
+  if (strict && ARTIFACT_PROVIDER_VERSION !== "0.2.9" && ARTIFACT_PROVIDER_VERSION !== "0.2.10" && ARTIFACT_PROVIDER_VERSION !== "0.2.12" && ARTIFACT_PROVIDER_VERSION !== "0.2.13" && ARTIFACT_PROVIDER_VERSION !== "0.2.15" && ARTIFACT_PROVIDER_VERSION !== "0.2.16" && ARTIFACT_PROVIDER_VERSION !== "0.2.17" && ARTIFACT_PROVIDER_VERSION !== "0.2.18" && ARTIFACT_PROVIDER_VERSION !== "0.2.20" && ARTIFACT_PROVIDER_VERSION !== "0.2.22" && ARTIFACT_PROVIDER_VERSION !== "0.2.23" && ARTIFACT_PROVIDER_VERSION !== "0.2.24" && ARTIFACT_PROVIDER_VERSION !== "0.2.25" && ARTIFACT_PROVIDER_VERSION !== "0.2.27") {
     throw new Error("artifact_strict_provider_unqualified");
   }
   if (revision === "immo-artifacts.v2" &&

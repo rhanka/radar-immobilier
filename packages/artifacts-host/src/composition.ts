@@ -27,6 +27,7 @@ import { HOST_ARTIFACT_PROFILE, HOST_MIME_TYPES, isArtifactMutation, RELEASE_FIL
 import type { ArtifactDeleteConfirmation } from "./delete-confirmation.js";
 import { ARTIFACT_GIT_MODE } from "./p0b-profile.js";
 import { composeGitModeFromEnv, type GitModeConfig, type GitModePorts } from "./git-mode/compose.js";
+import { startLiveRedriveLoop, type LiveRedriveLoop, type ShutdownSignals } from "./live-redrive.js";
 
 /**
  * S3 sockets kept warm for a publish. Every file costs one PUT and one
@@ -80,6 +81,8 @@ export interface ArtifactHostOptions {
    */
   readonly gitMode?: { readonly resolution?: typeof ARTIFACT_GIT_MODE; readonly config?: GitModeConfig;
     readonly ports?: GitModePorts };
+  /** SIGTERM source of the live re-drive timer stop; production leaves it absent (`process`). */
+  readonly signals?: ShutdownSignals;
 }
 
 export async function composeArtifactHost(
@@ -128,6 +131,7 @@ export async function composeArtifactHost(
     resolvePublishDeadlines(config.publishBlobDeadlineMs ?? PUBLISH_BLOB_DEADLINE_MS);
   let uploadSweepTimer: NodeJS.Timeout | undefined;
   let reconcileTimer: NodeJS.Timeout | undefined;
+  let liveRedrive: LiveRedriveLoop | undefined;
   try {
     // Files parity — upload staging + presigned PUT signer on the same
     // bucket/client as publication blobs (disjoint `staging/` key prefix),
@@ -216,6 +220,11 @@ export async function composeArtifactHost(
       }, 5 * 60_000);
       reconcileTimer.unref();
     }
+    // Durable live re-drive (0.2.27): one pass now, then every 15 s; SIGTERM
+    // stops the timer and lets the pass in flight finish (live-redrive.ts).
+    if (gitMode.liveRedrive) liveRedrive = startLiveRedriveLoop({ redrive: gitMode.liveRedrive,
+      ...(options.signals ? { signals: options.signals } : {}),
+      ...(options.onProviderFailure ? { onError: options.onProviderFailure } : {}) });
     const cleanup = startPreparationCleanup(pool, domain.store, blobs, options.onProviderFailure);
     const execute: typeof domain.execute = async (request, invocation) => {
       const dispatch = () => domain.execute(request, invocation);
@@ -250,6 +259,9 @@ export async function composeArtifactHost(
       authorizeCommit: authorizeArtifactCommit,
       ...(uploadPageService ? { uploadPageService, uploadPageConfig: {
         controlOrigin: options.uploadPage!.controlOrigin, s3Origins: options.uploadPage!.s3Origins } } : {}),
-      close: () => { clearInterval(uploadSweepTimer); clearInterval(reconcileTimer); cleanup.stop(); destroyTransport(); } };
-  } catch (error) { clearInterval(uploadSweepTimer); clearInterval(reconcileTimer); destroyTransport(); throw error; }
+      close: () => { clearInterval(uploadSweepTimer); clearInterval(reconcileTimer); liveRedrive?.stop(); cleanup.stop();
+        destroyTransport(); } };
+  } catch (error) {
+    clearInterval(uploadSweepTimer); clearInterval(reconcileTimer); liveRedrive?.stop(); destroyTransport(); throw error;
+  }
 }

@@ -78,10 +78,10 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("SG4b host build ledger on the im
     const admitted = await ledger.admitJob(artifactId, jobId, (view) => {
       seen = view;
       return view.job && view.binding.pendingJobId === jobId
-        ? { job: { jobId, generation: 1, headSha: SHA, expectedReleaseId: currentReleaseId }, fence: { runId: "run-1", attempt: 1 } } : null;
+        ? { job: { jobId, generation: 1, headSha: SHA, expectedReleaseId: currentReleaseId, ownerId: "alice" }, fence: { runId: "run-1", attempt: 1 } } : null;
     });
-    expect(admitted).toEqual({ jobId, generation: 1, headSha: SHA, expectedReleaseId: currentReleaseId });
-    expect(seen?.binding).toMatchObject({ state: "build_pending", pendingJobId: jobId, executor: "sandbox" });
+    expect(admitted).toEqual({ jobId, generation: 1, headSha: SHA, expectedReleaseId: currentReleaseId, ownerId: "alice" });
+    expect(seen?.binding).toMatchObject({ state: "build_pending", pendingJobId: jobId, executor: "sandbox", ownerId: "alice" });
     const job = (await fixture.pool.query("SELECT state, fence_run_id, fence_attempt FROM artifacts.host_build_jobs WHERE job_id = $1", [jobId])).rows[0];
     expect(job).toEqual({ state: "building", fence_run_id: "run-1", fence_attempt: 1 });
 
@@ -122,7 +122,7 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("SG4b host build ledger on the im
     const ledger = ledgerWith();
     const decide = (attempt: number) => (view: HostRecheckView) =>
       view.job && (!view.job.fence || attempt >= view.job.fence.attempt)
-        ? { job: { jobId, generation: 1, headSha: SHA, expectedReleaseId: null }, fence: { runId: `run-${attempt}`, attempt } } : null;
+        ? { job: { jobId, generation: 1, headSha: SHA, expectedReleaseId: null, ownerId: "alice" }, fence: { runId: `run-${attempt}`, attempt } } : null;
     expect(await ledger.admitJob(artifactId, jobId, decide(2))).not.toBeNull();
     expect(await ledger.admitJob(artifactId, jobId, decide(1))).toBeNull();
     expect((await fixture.pool.query("SELECT fence_attempt FROM artifacts.host_build_jobs WHERE job_id = $1", [jobId])).rows[0].fence_attempt).toBe(2);
@@ -131,7 +131,7 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("SG4b host build ledger on the im
   it("rolls every Postgres row back on a release conflict, with a typed live-host refusal (blobs stay orphaned)", async () => {
     const { artifactId, jobId, currentReleaseId } = await pendingJob();
     const ledger = ledgerWith();
-    await ledger.admitJob(artifactId, jobId, () => ({ job: { jobId, generation: 1, headSha: SHA, expectedReleaseId: currentReleaseId },
+    await ledger.admitJob(artifactId, jobId, () => ({ job: { jobId, generation: 1, headSha: SHA, expectedReleaseId: currentReleaseId, ownerId: "alice" },
       fence: { runId: "run-1", attempt: 1 } }));
     const claims = claimsFor(artifactId, jobId, randomUUID(), files);
     const before = (await fixture.pool.query("SELECT count(*)::int AS n FROM artifacts.releases WHERE artifact_id = $1", [artifactId])).rows[0].n;
