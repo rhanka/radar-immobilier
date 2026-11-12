@@ -90,6 +90,7 @@ RUN npm install --no-save esbuild@0.25.12 \
   "    'api/src/scripts/repair-graph-city-key.ts'," \
   "    'api/src/scripts/init-workspace-authority.ts'," \
   "    'api/src/scripts/attach-personal-history.ts'," \
+  "    'api/src/scripts/chaperon-reprise-apply.ts'," \
   "    'api/src/scripts/base-api-personal-activation.ts'," \
 "    'api/src/scripts/database-cutover.ts'," \
   "    'api/src/scripts/base-preprod-job.ts'," \
