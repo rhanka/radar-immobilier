@@ -217,7 +217,7 @@ describe("host build API client (W7)", () => {
         publicCode: "git_live_conflict", retriable: false });
       expect(urls).toEqual([`${BASE}/v1/builds`]);
       const [jobId] = [...jobs.jobs.keys()];
-      expect(jobs.states.get(jobId!)).toEqual({ state: "build_failed", code: "live_session_active", reason: "active_session" });
+      expect(jobs.states.get(jobId!)).toEqual({ state: "build_failed", code: "host_refused_live_session", reason: "active_session" });
       expect([...jobs.states.values()].filter((entry) => entry.state === "build_pending")).toEqual([]);
       expect(lines.map((line) => JSON.parse(line))).toEqual([{ kind: "artifacts.build_refused", code: "live_session_active",
         reason: "active_session", storageScopeId: "s", artifactId: job.artifactId, jobId, bindingGeneration: 2 }]);
@@ -229,6 +229,26 @@ describe("host build API client (W7)", () => {
       await expect(client.request(job)).resolves.toEqual({ jobId, state: "build_pending" });
       expect(jobs.states.get(jobId!)).toEqual({ state: "build_pending" });
     });
+
+  it("still answers the live conflict, logged, when closing the refused job fails", async () => {
+    const lines: string[] = [];
+    const memory = createMemoryJobStore();
+    const jobs = { persist: memory.persist, refuse: vi.fn(async () => { throw Object.assign(new Error("lock"), { code: "55P03" }); }) };
+    const client = createHostBuildApiClient({ baseUrl: BASE, identity, jobs, bindings, log: (line) => lines.push(line),
+      fetch: (async () => new Response(JSON.stringify({ error: "live_session_active" }), { status: 409 })) as never });
+    await expect(client.request(job)).rejects.toMatchObject({ kind: "git_live_conflict",
+      details: { publicDetails: { reason: "active_session" } } });
+    expect(jobs.refuse).toHaveBeenCalledTimes(1);
+    expect(lines.map((line) => JSON.parse(line).kind)).toEqual(["artifacts.build_refused", "artifacts.build_refuse_unavailable"]);
+  });
+
+  it("re-arms only a job the host refused itself, never a job the builder failed with the same word", async () => {
+    const jobs = createMemoryJobStore();
+    const jobId = await jobs.persist(job);
+    jobs.states.set(jobId, { state: "build_failed", code: "live_session_active", reason: "active_session" });
+    expect(await jobs.persist(job)).toBe(jobId);
+    expect(jobs.states.get(jobId)).toEqual({ state: "build_failed", code: "live_session_active", reason: "active_session" });
+  });
 
   it("persists the job, then posts exactly { artifactId, jobId, binding } to /v1/builds (202 or 200)", async () => {
     const jobs = createMemoryJobStore();

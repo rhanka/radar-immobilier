@@ -60,11 +60,11 @@ describe("Postgres host job store: request-time refusal (fake pool)", () => {
   it("closes only a pending job as build_failed with the refusal code and reason", async () => {
     const query = vi.fn(async () => ({ rows: [] }));
     await createPostgresHostJobStore({ pool: { query } as never, scopeId: "s", now: () => 0 })
-      .refuse("job-1", { code: "live_session_active", reason: "active_session" });
+      .refuse("job-1", { code: "host_refused_live_session", reason: "active_session" });
     const [sql, values] = query.mock.calls[0] as unknown as [string, unknown[]];
     expect(sql).toMatch(/SET state = 'build_failed', code = \$3, reason = \$4/);
     expect(sql).toMatch(/AND state = 'build_pending'/);
-    expect(values.slice(0, 4)).toEqual(["s", "job-1", "live_session_active", "active_session"]);
+    expect(values.slice(0, 4)).toEqual(["s", "job-1", "host_refused_live_session", "active_session"]);
   });
 
   it("re-arms the same job when the refused command is retried", async () => {
@@ -75,6 +75,6 @@ describe("Postgres host job store: request-time refusal (fake pool)", () => {
     const [sql, values] = query.mock.calls[2] as unknown as [string, unknown[]];
     expect(sql).toMatch(/SET state = 'build_pending', code = NULL, reason = NULL/);
     expect(sql).toMatch(/state = 'build_failed' AND code = \$4/);
-    expect(values).toEqual(["s", "job-1", new Date(0).toISOString(), "live_session_active"]);
+    expect(values).toEqual(["s", "job-1", new Date(0).toISOString(), "host_refused_live_session"]);
   });
 });

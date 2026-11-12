@@ -162,9 +162,10 @@ is an A1 refused write path: a branch can never change it.
   fallback). A pre-build reconcile used to wake a REVIVING live session, which
   then refused the build with `pending_publication`. While a live session is
   LIVE or REVIVING the builder answers `409 live_session_active`: the host
-  closes the job it persisted (`build_failed`, code `live_session_active`,
-  reason `active_session`; a retry of the same command re-arms it), logs
-  `artifacts.build_refused`, and answers `git_live_conflict` (reason
+  logs `artifacts.build_refused`, closes the job it persisted (`build_failed`,
+  host-only code `host_refused_live_session`, which the builder never emits,
+  reason `active_session`; a retry of the same command re-arms only such a
+  job), and always answers `git_live_conflict` (reason
   `active_session`, 409, not retriable) with a message to stop the live
   session (`artifacts_live_control`, action `stop`) before publishing. Then
   job persistence before `POST /v1/builds` (body exactly `{artifactId, jobId, binding}`, `binding = {repoId, branch, subPath}` read from the package git binding of that artifact and job generation, `git_not_attached` before any call when absent), attempt fence, receipt ledger and
@@ -261,12 +262,13 @@ one workload per storage scope. Preprod: `radar-immo-mcp` only
 (1 to 2 replicas). `radar-immo-mcp` carries the MCP live flow and runs one
 replica with a `Recreate` strategy, so a rollout never runs two loops.
 
-SIGTERM stops the timer and drains the pass in flight (25 s at most); the
-unsettled intents stay durable for the next pod. Node runs as PID 1 in the
-pod, where SIGTERM has no default action: after the drain the process exits
-with code 0 when no other SIGTERM listener is installed. The workload needs
-`terminationGracePeriodSeconds` of at least 30 s (`radar-immo-mcp`:
-Kubernetes default, 30 s).
+SIGTERM only stops the timer: no new pass starts and the pass in flight keeps
+running. The handler never exits the process, so in-flight MCP requests keep
+the whole termination grace (`radar-immo-mcp`: Kubernetes default, 30 s) and
+the process ends at SIGKILL, as before (Node runs as PID 1, where SIGTERM has
+no default action). An interrupted pass leaves the unsettled intents durable
+for the next pod. A graceful shutdown of the immo-mcp HTTP server is a
+separate topic.
 
 Structured log lines (stderr, one JSON object per line):
 
@@ -276,9 +278,9 @@ Structured log lines (stderr, one JSON object per line):
 | `artifacts.live_worker_pending` | The builder is still reviving (`ready: false`) |
 | `artifacts.live_redrive` | A non-empty pass: `items`, `settled`, `pending`, `failed`, `skipped` |
 | `artifacts.live_redrive_unavailable` | A pass that could not list or settle (store failure) |
-| `artifacts.live_redrive_draining` | SIGTERM received, the pass in flight is drained |
-| `artifacts.live_redrive_exit` | Drain over, no other SIGTERM listener: the process exits 0 |
-| `artifacts.build_refused` | The builder refused a build with `409 live_session_active`; the job is closed |
+| `artifacts.live_redrive_stopped` | SIGTERM received: timer stopped, `passInFlight` tells whether a pass is still running |
+| `artifacts.build_refused` | The builder refused a build with `409 live_session_active` |
+| `artifacts.build_refuse_unavailable` | Closing that refused job failed (store error); the conflict is answered anyway |
 
 ## Not yet composed (fail-closed)
 
