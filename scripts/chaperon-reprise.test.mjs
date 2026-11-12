@@ -25,6 +25,16 @@ test('rows without classement, code or node id are reported, not planned', () =>
   assert.deepEqual(plan.issues.map((i) => i.issue), ['unknown_classement', 'missing_reason_code', 'no_node_id']);
 });
 
+test('duplicate node ids collapse when consistent and are excluded when conflicting', () => {
+  const plan = buildPlan(csv([
+    ['1', 'V', '', 'Pertinent', 'P-DENSITE', 'signal-v-a\nsignal-v-b', '', ''],
+    ['2', 'V', '', 'Pertinent', 'P-DENSITE', 'signal-v-a', '', ''],
+    ['3', 'V', '', 'Non pertinent', 'N-FORME', 'signal-v-b', '', ''],
+  ]));
+  assert.deepEqual(plan.targets.map((t) => [t.row, t.nodeId]), [[1, 'signal-v-a']]);
+  assert.deepEqual(plan.issues.map((i) => [i.row, i.issue]), [['1+2', 'duplicate_merged'], ['1+3', 'conflicting_duplicate']]);
+});
+
 test('citation segments and slugs are normalized', () => {
   assert.deepEqual(citationSegments('[p. 3] « Zone H-12 »  [p. 4] « Règlement 9 »').map((s) => s.page), [3, 4]);
   assert.equal(slugify('Saint-Jean-sur-Richelieu (Ville de)'), 'saint-jean-sur-richelieu-ville-de');
