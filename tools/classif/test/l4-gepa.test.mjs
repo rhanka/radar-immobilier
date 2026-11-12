@@ -212,3 +212,25 @@ test('gepa series shape: a non-empty subset of the GEPA routes, ceiling <= 5 %, 
   assert.throws(() => assertGepaSeriesShape({ ...ok, floors: { recall: 0.8, precision: 0.5 } }, 5), /no floors/);
   assert.throws(() => assertGepaSeriesShape({ ...ok, recallNonRegression: { baselineSeries: 0 } }, 5), /own verdict/);
 });
+
+test('agy seats: argon, carbon and 3.8 flash low on the same agy route; the stream parser fails closed', () => {
+  for (const [label, family] of [['gemini-4-argon-low', 'Gemini 4 Argon'], ['gemini-4-carbon-low', 'Gemini 4 Carbon'], ['gemini-3.8-flash-low', 'Gemini 3.8 Flash']]) {
+    const r = ROUTES[label];
+    assert.equal(r.family, family);
+    assert.equal(r.effort, 'low');
+    const b = r.build('/x', '/x/p', 'synthetic');
+    assert.deepEqual(b.args, ['--model', label, '--input-format', 'stream-json', '--output-format', 'stream-json', '--disable-slash-commands', '--print=']);
+    assert.equal(JSON.parse(b.stdin).message.content, 'synthetic');
+    assert.equal(seatFamily(label), 'agy');
+  }
+  const ok = [{ event: 'init', conversation_id: 'c', init: { model: 'm', cwd: '/x', tools: ['ask_custom_permission'], permission_mode: 'request-review' } },
+    { event: 'step_update', step_update: { step_index: 0, state: 'DONE', step_type: 'user_input' } },
+    { event: 'step_update', step_update: { step_index: 1, state: 'ACTIVE', step_type: 'agent_response', text_delta: 'a tool_call in prose' } },
+    { event: 'result', result: { status: 'SUCCESS', response: '{"verdict":"pertinent"}', usage: { total_tokens: 3 } } }].map((e) => JSON.stringify(e));
+  const clean = ROUTES['gemini-3.8-flash-low'].parse(ok.join('\n'));
+  assert.deepEqual([clean.toolEvents, clean.text], [0, '{"verdict":"pertinent"}'], 'the word tool in the answer text is not a tool event');
+  const bad = ROUTES['gemini-4-carbon-low'].parse([...ok, JSON.stringify({ event: 'step_update', step_update: { step_type: 'tool_call', state: 'DONE' } }),
+    JSON.stringify({ event: 'surprise' }), 'not json', JSON.stringify({ event: 'step_update', step_update: { step_type: 'agent_response', function_call: {} } })].join('\n'));
+  assert.deepEqual(bad.toolKinds, { 'step_update:tool_call': 1, surprise: 1, '<non-json>': 1, 'step_update:agent_response:tool-key': 1 });
+  assert.equal(bad.toolEvents, 4);
+});
