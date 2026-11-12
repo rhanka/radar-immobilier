@@ -166,6 +166,11 @@ test('quota: the "Code Mode is unavailable" error item is benign (no tool event,
     assert.deepEqual(parseSeatResult({ code: 0, ...r }, loadCodes()), { verdict: 'pertinent', code: 'P-DENSITE', failed: false, why: null, infra: false });
   } finally { rmSync(dir, { recursive: true, force: true }); }
   assert.equal(countCodexToolEvents(JSON.stringify({ type: 'item.completed', item: { type: 'error', message: 'tool call failed: cat' } })).toolEvents, 1);
+  // Diagnostic kinds: event and item types only, never the message text.
+  const kinds = countCodexToolEvents([JSON.stringify({ type: 'item.completed', item: { type: 'error', message: 'tool call failed: cat secret' } }),
+    JSON.stringify({ type: 'item.started', item: { type: 'command_execution', command: 'cat x' } }), JSON.stringify({ type: 'surprise' })].join('\n')).toolKinds;
+  assert.deepEqual(kinds, { 'item.completed:error': 1, 'item.started:command_execution': 1, surprise: 1 });
+  assert.ok(!JSON.stringify(kinds).includes('secret') && !JSON.stringify(kinds).includes('cat x'));
 });
 
 /** Fake codex (node): writes a realistic session file (prompt + token_count) unless FAKE_NO_SESSION, then answers. */
