@@ -3,7 +3,7 @@
  "method": "gepa",
  "series": "5",
  "run": "s5",
- "createdAt": "2026-11-12T15:18:01.875Z",
+ "createdAt": "2026-11-12T21:08:06.246Z",
  "seed": "gepa-s5",
  "split": {
   "feedback": 151,
@@ -39,15 +39,15 @@
  "mutator": "astra-max",
  "reconciler": "opus-5.5-max",
  "objective": "lexicographic: 0 miss (reference P/S predicted non_pertinent on any route, failed call = shown), then least noise (reference N predicted shown); P<->S not penalised; failed-call share per route <= 5 % (blind gate rule)",
- "maxCalls": 5000,
- "callsSpent": 4935,
+ "maxCalls": 7000,
+ "callsSpent": 6851,
  "stop": "budget",
  "iterations": {
-  "total": 7,
-  "mutation": 5,
-  "crossover": 2,
-  "admitted": 4,
-  "rejected": 3,
+  "total": 16,
+  "mutation": 11,
+  "crossover": 5,
+  "admitted": 8,
+  "rejected": 8,
   "skipped": 0
  },
  "population": [
@@ -149,6 +149,50 @@
     "failures": 0,
     "cases": 101
    }
+  },
+  {
+   "id": "i9",
+   "origin": "mutation:P2",
+   "promptSha256": "d18138f81d167bb210a7665f989d8e8dbc0ee5ad1f20709dd723d87d8c7a843c",
+   "pareto": {
+    "misses": 2,
+    "noise": 22,
+    "failures": 0,
+    "cases": 101
+   }
+  },
+  {
+   "id": "i12",
+   "origin": "mutation:i0",
+   "promptSha256": "c6090bcba5c5cf78dd5f01c1f008950367614e28a82b50a84b15be860c3ebc93",
+   "pareto": {
+    "misses": 3,
+    "noise": 18,
+    "failures": 0,
+    "cases": 101
+   }
+  },
+  {
+   "id": "i13",
+   "origin": "mutation:P4",
+   "promptSha256": "6714f0aa996735cf86b8f208f19b598667436a4f7b8c2e4f8409a2d4100753e4",
+   "pareto": {
+    "misses": 2,
+    "noise": 29,
+    "failures": 0,
+    "cases": 101
+   }
+  },
+  {
+   "id": "i15",
+   "origin": "mutation:i0",
+   "promptSha256": "4531124966116c12cd0d5dbcfff8c1c25ef87cfa9c7a7ba8e38f4465a7143a30",
+   "pareto": {
+    "misses": 2,
+    "noise": 19,
+    "failures": 0,
+    "cases": 101
+   }
   }
  ],
  "front": [
@@ -187,12 +231,28 @@
   {
    "id": "i6",
    "wins": 92
+  },
+  {
+   "id": "i9",
+   "wins": 93
+  },
+  {
+   "id": "i12",
+   "wins": 94
+  },
+  {
+   "id": "i13",
+   "wins": 88
+  },
+  {
+   "id": "i15",
+   "wins": 94
   }
  ],
  "finalCoverage": {
   "eligible": 3,
-  "evaluated": 1,
-  "notEvaluated": 2
+  "evaluated": 2,
+  "notEvaluated": 1
  },
  "finalists": [
   {
@@ -241,8 +301,27 @@
     "failures": 0,
     "cases": 101
    },
-   "status": "not-evaluated",
-   "reason": "budget"
+   "status": "evaluated",
+   "total": {
+    "misses": 0,
+    "noise": 131,
+    "failures": 0,
+    "cases": 252
+   },
+   "perRoute": {
+    "opus-5.5-low": {
+     "misses": 0,
+     "noise": 69,
+     "failures": 0,
+     "items": 252
+    },
+    "sol-6.1-low": {
+     "misses": 0,
+     "noise": 62,
+     "failures": 0,
+     "items": 252
+    }
+   }
   },
   {
    "id": "P4",
@@ -290,14 +369,59 @@
    "reason": "misses-on-d-pareto"
   },
   {
+   "id": "i15",
+   "origin": "mutation:i0",
+   "promptSha256": "4531124966116c12cd0d5dbcfff8c1c25ef87cfa9c7a7ba8e38f4465a7143a30",
+   "wins": 94,
+   "rank": 5,
+   "pareto": {
+    "misses": 2,
+    "noise": 19,
+    "failures": 0,
+    "cases": 101
+   },
+   "status": "excluded",
+   "reason": "misses-on-d-pareto"
+  },
+  {
    "id": "i0",
    "origin": "mutation:P2",
    "promptSha256": "74e9abd7b8a17ec0bc348654fca3aaa0ec6fbce38cbf34aca4e3af9eb6ea1128",
    "wins": 92,
-   "rank": 5,
+   "rank": 6,
    "pareto": {
     "misses": 2,
     "noise": 21,
+    "failures": 0,
+    "cases": 101
+   },
+   "status": "excluded",
+   "reason": "misses-on-d-pareto"
+  },
+  {
+   "id": "i9",
+   "origin": "mutation:P2",
+   "promptSha256": "d18138f81d167bb210a7665f989d8e8dbc0ee5ad1f20709dd723d87d8c7a843c",
+   "wins": 93,
+   "rank": 7,
+   "pareto": {
+    "misses": 2,
+    "noise": 22,
+    "failures": 0,
+    "cases": 101
+   },
+   "status": "excluded",
+   "reason": "misses-on-d-pareto"
+  },
+  {
+   "id": "i13",
+   "origin": "mutation:P4",
+   "promptSha256": "6714f0aa996735cf86b8f208f19b598667436a4f7b8c2e4f8409a2d4100753e4",
+   "wins": 88,
+   "rank": 8,
+   "pareto": {
+    "misses": 2,
+    "noise": 29,
     "failures": 0,
     "cases": 101
    },
@@ -309,7 +433,7 @@
    "origin": "mutation:P4",
    "promptSha256": "309ad055f2effe3e880255722ff0849749e5515a1fc6b45c30b2ae415d157b39",
    "wins": 88,
-   "rank": 6,
+   "rank": 9,
    "pareto": {
     "misses": 2,
     "noise": 30,
@@ -324,10 +448,25 @@
    "origin": "mutation:P4",
    "promptSha256": "f879ae0696ddee0089a82c6b5ada4f1ba3b1e3db749eacc2bcc503c6c088a8ba",
    "wins": 87,
-   "rank": 7,
+   "rank": 10,
    "pareto": {
     "misses": 2,
     "noise": 30,
+    "failures": 0,
+    "cases": 101
+   },
+   "status": "excluded",
+   "reason": "misses-on-d-pareto"
+  },
+  {
+   "id": "i12",
+   "origin": "mutation:i0",
+   "promptSha256": "c6090bcba5c5cf78dd5f01c1f008950367614e28a82b50a84b15be860c3ebc93",
+   "wins": 94,
+   "rank": 11,
+   "pareto": {
+    "misses": 3,
+    "noise": 18,
     "failures": 0,
     "cases": 101
    },
@@ -339,7 +478,7 @@
    "origin": "mutation:i0",
    "promptSha256": "95631f4b4a9cfab4fce5ba865b6332353fbddb9e3d1c67d94ca94ef8147c3be5",
    "wins": 92,
-   "rank": 8,
+   "rank": 12,
    "pareto": {
     "misses": 3,
     "noise": 20,
@@ -351,10 +490,18 @@
   }
  ],
  "result": {
-  "status": "no-candidate",
-  "incomplete": true,
-  "notEvaluated": 2,
-  "reason": "no evaluated candidate reached 0 miss on the whole tuning half (2 routes) within the failure ceiling; 2 eligible candidate(s) not evaluated (budget): result incomplete; no fallback"
+  "status": "selected",
+  "candidate": "P3",
+  "origin": "seed:P3",
+  "version": "P5",
+  "promptSha256": "762e164630cd48475fd3c0bc2fe79c3fad00a913d51be391fe6df4708606f6b6",
+  "total": {
+   "misses": 0,
+   "noise": 131,
+   "failures": 0,
+   "cases": 252
+  },
+  "notEvaluated": 1
  },
  "trackNote": "per-item tuning outputs, split ids and the iteration journal stay private in $CLASSIF_HOME/l4/gepa-<run>/; this manifest carries counts only"
 }
