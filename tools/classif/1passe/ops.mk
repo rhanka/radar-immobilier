@@ -1,5 +1,6 @@
 # Entrée autonome. Aucun include et aucune lecture de .env.
 SHELL := /bin/bash
+BC_SHARED_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 .PHONY: commit quota annotate finalize inspect syntax
 syntax:
 	@for f in tools/classif/1passe/*.mjs; do node --check "$$f" || exit; done
@@ -21,6 +22,12 @@ correction-freeze:
 	node tools/classif/1passe/correction-freeze.mjs
 resume-interrupted:
 	node tools/classif/1passe/resume-interrupted.mjs
+shared-recalc:
+	node $(BC_SHARED_DIR)shared-recalc.mjs $(LANE) $(if $(HALF),$(HALF),tuning) $(CHECK)
+snapshot-offline:
+	node tools/classif/1passe/correction-report.mjs --snapshot
+correction-report:
+	node tools/classif/1passe/correction-report.mjs
 test:
 	node --test tools/classif/1passe/matching.test.mjs
 arbitrate:
