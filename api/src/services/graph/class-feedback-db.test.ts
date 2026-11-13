@@ -50,7 +50,10 @@ describeDb("human classification feedback PostgreSQL", () => {
     expect(await writeClassAnnotation(f.db, { ...f.ai, promptSha256: "c".repeat(64) })).toBe("manual");
     await expect(f.pool.query("DELETE FROM signal_class_feedback")).rejects.toThrow(/append-only/);
     expect(await readClassFeedback(f.db, f.moderator.sub, f.workspaceId)).toHaveLength(0);
-    expect((await exportClassFeedback(f.db, f.contributor.sub, f.workspaceId)).aggregates[0]).toMatchObject({ up: 1, down: 0, positiveRate: 1, confusions: { "pertinent->pertinent": 1 } });
+    const exported = await exportClassFeedback(f.db, f.contributor.sub, f.workspaceId);
+    expect(exported.aggregates[0]).toMatchObject({ up: 1, down: 0, positiveRate: 1, confusions: { "pertinent->pertinent": 1 } });
+    expect(exported.byModel[0]).toMatchObject({ model: f.ai.model, positiveRate: 1 });
+    expect(exported.byPrompt[0]).toMatchObject({ promptSha256: f.ai.promptSha256, positiveRate: 1 });
   });
   it("should reject missing reclassification with HTTP 400", async () => {
     const f = await setup();
