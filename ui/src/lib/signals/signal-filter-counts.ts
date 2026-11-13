@@ -33,7 +33,7 @@ import {
 } from "@radar/domain";
 import type { GraphSignalNode } from "./graph-signal-detail-client.js";
 import type { CityMapEntry } from "$lib/maps/maps-data.js";
-import { classementKey, DEFAULT_CLASSEMENT_FILTER, SIGNAL_CLASSES, type ClassementEntry, type ClassementFilter, type SignalClass } from "./signal-classement.js";
+import { DEFAULT_CLASSEMENT_FILTER, SIGNAL_CLASSES, type ClassementFilter, type SignalClass } from "./signal-classement.js";
 
 export type FiltreCounts = VivierFiltreCounts;
 
@@ -62,27 +62,14 @@ export interface FiltrePerimeterInput {
   live: { slug: string; nodes: readonly GraphSignalNode[] } | null;
 }
 
-/** Relevance is one facet: count every class independently of its checkboxes. */
-export function classementCountsForPerimeter(input: Omit<FiltrePerimeterInput, "classement" | "live"> & {
-  live: { slug: string; nodes: readonly GraphSignalNode[]; classement: ReadonlyMap<string, ClassementEntry> } | null;
-}): Record<SignalClass, number> | null {
+/** Relevance uses full server cubes: selected-city detail omits archived targets. */
+export function classementCountsForPerimeter(input: Omit<FiltrePerimeterInput, "classement" | "live">): Record<SignalClass, number> | null {
   const counts: Record<SignalClass, number> = { pertinent: 0, a_surveiller: 0, non_classe: 0, ecarte: 0 };
   for (const entry of input.entries) {
-    if (input.live && entry.municipality.slug === input.live.slug) continue;
     if (entry.vivierV2Counts === null && !entry.filtreCube) continue;
     if (!entry.filtreCubesByClassement) return null;
     for (const classe of SIGNAL_CLASSES) {
       counts[classe] += displayedVivierFiltreCount(entry.filtreCubesByClassement[classe], input.axes, input.exclusions);
-    }
-  }
-  const live = input.live;
-  if (live) {
-    for (const classe of SIGNAL_CLASSES) {
-      const nodes = live.nodes.filter((node) =>
-        (live.classement.get(classementKey(node.type, node.id, node.citySlug))?.classe ?? "non_classe") === classe);
-      const cube = filtreCubeOfNodes(nodes);
-      if (cube === null) return null;
-      counts[classe] += displayedVivierFiltreCount(cube, input.axes, input.exclusions);
     }
   }
   return counts;
