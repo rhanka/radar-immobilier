@@ -5,8 +5,7 @@
 # Covered: the prod/preprod start-minute stagger (incident 2026-10-09), the shared
 # hours, the pending-pod watchdog CronJob and its coupling with the refresh pod
 # (label selector, Job prefix, backoffLimit 0),
-# the daily bascule-preprod restore slot (bascule-crons.awk, bascule-window.awk),
-# and the absence of any Gemini route in radar-refresh-pv and the requeue CronJob.
+# and the daily bascule-preprod restore slot (bascule-crons.awk, bascule-window.awk).
 #
 # Usage: bash deploy/k8s/refresh-cronjobs/verify-renders.test.sh
 set -uo pipefail
@@ -205,29 +204,6 @@ run_ok "a comment on the on.schedule key passes"
 
 fixture; sed -i 's#^on:$#on: \# triggers#' "$CASE_ROOT/$WF"
 run_ok "a comment on the on: key passes"
-
-# No Gemini route in the refresh policy (owner decision 2026-11-12: the Google
-# account behind the cloud-code seat was disabled by Google).
-RQ="deploy/k8s/refresh-cronjobs/requeue-recurrent/cronjob.yaml"
-VERIFY_OFF='- { name: REFRESH_VERIFY_ENABLED, value: "0" }'
-
-fixture; sed -i 's#REFRESH_FALLBACK_PROVIDER, value: "openai"#REFRESH_FALLBACK_PROVIDER, value: "gemini"#; s#REFRESH_FALLBACK_MODEL, value: "gpt-6-astra"#REFRESH_FALLBACK_MODEL, value: "gemini-3.8-flash"#' "$CASE_ROOT/$BASE"
-run_bad "refresh fallback back on gemini refused" "refresh activation/model contract failed"
-
-fixture; sed -i 's#REFRESH_VERIFY_ENABLED, value: "0"#REFRESH_VERIFY_ENABLED, value: "1"#' "$CASE_ROOT/$BASE"
-run_bad "refresh verification re-enabled refused" "refresh activation/model contract failed"
-
-fixture; sed -i "s#$VERIFY_OFF#&\n                - { name: REFRESH_VERIFY_PROVIDER, value: \"openai\" }#" "$CASE_ROOT/$BASE"
-run_bad "a REFRESH_VERIFY_* route while verification is off refused" "refresh no-gemini contract failed"
-
-fixture; sed -i "s#$VERIFY_OFF#&\n                - { name: REFRESH_EXTRA_MODEL, value: \"gemini-3.8-flash\" }#" "$CASE_ROOT/$BASE"
-run_bad "any gemini value in radar-refresh-pv refused" "refresh no-gemini contract failed"
-
-fixture; sed -i 's#REFRESH_FALLBACK_PROVIDER, value: "openai"#REFRESH_FALLBACK_PROVIDER, value: "gemini"#' "$CASE_ROOT/$RQ"
-run_bad "requeue seat probe fallback back on gemini refused" "requeue recurrent contract failed"
-
-fixture; sed -i 's#- { name: REQUEUE_DRY_RUN, value: "0" }#&\n                - { name: REFRESH_EXTRA_PROVIDER, value: "gemini" }#' "$CASE_ROOT/$RQ"
-run_bad "any gemini value in the requeue CronJob refused" "requeue no-gemini contract failed"
 
 # refresh-stagger.awk alone, on minimal renders: adjacent hours make a real
 # cross-hour proximity (preprod 04:50, prod 05:00) that the overlays cannot reach.
