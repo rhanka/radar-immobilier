@@ -33,8 +33,8 @@ describeDb("human classification feedback PostgreSQL", () => {
     await writeClassAnnotation(f.db, f.ai);
     await writeClassAnnotation(f.db, { ...f.ai, promptSha256: "c".repeat(64) });
     expect((await f.db.execute(sql`SELECT * FROM signal_class_annotation_history`)).rows).toHaveLength(2);
-    await expect(f.db.execute(sql`UPDATE signal_class_annotation_history SET reason='changed'`)).rejects.toThrow(/append-only/);
-    await expect(f.db.execute(sql`DELETE FROM signal_class_annotation_history`)).rejects.toThrow(/append-only/);
+    await expect(f.pool.query("UPDATE signal_class_annotation_history SET reason='changed'")).rejects.toThrow(/append-only/);
+    await expect(f.pool.query("DELETE FROM signal_class_annotation_history")).rejects.toThrow(/append-only/);
   });
   it("should freeze positives, increment revisions, retain provenance and replay once", async () => {
     const f = await setup();
@@ -47,7 +47,7 @@ describeDb("human classification feedback PostgreSQL", () => {
     expect((await readScopedPersonalHeads(f.db, f.contributor.sub, f.workspaceId, f.target.citySlug))[0]).toMatchObject({ state: "active", basket: "pertinent" });
     expect((await readProjectionScope(f.db, f.contributor.sub, f.workspaceId, f.target.citySlug, "signal")).personalRevision).toBe(before.personalRevision + 1);
     expect(await writeClassAnnotation(f.db, { ...f.ai, promptSha256: "c".repeat(64) })).toBe("manual");
-    await expect(f.db.execute(sql`DELETE FROM signal_class_feedback`)).rejects.toThrow(/append-only/);
+    await expect(f.pool.query("DELETE FROM signal_class_feedback")).rejects.toThrow(/append-only/);
     expect(await readClassFeedback(f.db, f.moderator.sub, f.workspaceId)).toHaveLength(0);
     expect((await exportClassFeedback(f.db, f.contributor.sub, f.workspaceId)).aggregates[0]).toMatchObject({ up: 1, down: 0, positiveRate: 1, confusions: { "pertinent->pertinent": 1 } });
   });
@@ -77,7 +77,7 @@ describeDb("human classification feedback PostgreSQL", () => {
     const f = await setup();
     await f.db.execute(sql`CREATE FUNCTION synthetic_feedback_failure() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'synthetic failure'; END $$`);
     await f.db.execute(sql`CREATE TRIGGER synthetic_failure BEFORE INSERT ON signal_class_feedback FOR EACH ROW EXECUTE FUNCTION synthetic_feedback_failure()`);
-    await expect(f.submit()).rejects.toThrow(/synthetic failure/);
+    await expect(f.submit()).rejects.toMatchObject({ cause: { message: "synthetic failure" } });
     expect((await f.db.execute(sql`SELECT * FROM facet_events`)).rows).toHaveLength(0);
     expect((await f.db.execute(sql`SELECT * FROM facet_heads`)).rows).toHaveLength(0);
   });
