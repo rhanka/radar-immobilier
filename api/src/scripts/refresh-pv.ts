@@ -41,7 +41,8 @@ import {
 } from "../services/graph/refresh-mesh.js";
 import { createRefreshModelPolicy, type RefreshModel } from "../services/graph/refresh-model-policy.js";
 import { loadRefreshProfileContext } from "../services/graph/refresh-profile.js";
-import { loadSinglePassPrompt, singlePassEnabled, singlePassPrimary } from "../services/graph/refresh-single-pass.js";
+import { loadSinglePassPrompt } from "../services/graph/refresh-single-pass.js";
+import { refreshClassifyConfig, refreshClassifyMode } from "../services/graph/refresh-classify-config.js";
 import { DEFAULT_REFRESH_DOCUMENT_TIMEOUT_MS, DEFAULT_REFRESH_MAX_DOCUMENT_BYTES, runPvRefresh,
   type RefreshAcquire } from "../services/graph/refresh-run.js";
 import { assessRefreshSweepHealth, parseRefreshTarget,
@@ -124,7 +125,10 @@ async function seedSavedInput(store: S3ObjectStore, city: string): Promise<Refre
 }
 
 async function main(): Promise<void> {
-  const singlePassPrompt = singlePassEnabled(process.env.REFRESH_SINGLE_PASS) ? await loadSinglePassPrompt() : undefined;
+  const classifyMode = refreshClassifyMode();
+  const classifyConfig = classifyMode !== "off" ? refreshClassifyConfig() : undefined;
+  const classifyPrompt = classifyMode !== "off" ? await loadSinglePassPrompt() : undefined;
+  const singlePassPrompt = classifyMode === "single-pass" ? classifyPrompt : undefined;
   const target = parseRefreshTarget(process.argv.slice(2));
   const city = target.citySlug;
   if (!target.all && !city) throw new Error("Usage: refresh-pv.ts --all | <city-slug>");
@@ -133,8 +137,8 @@ async function main(): Promise<void> {
   const store = getScrapeObjectStore(config);
   const { db, pool } = createDb(config);
   const timeoutMs = positive("REFRESH_TIMEOUT_MS", 900_000, 3_600_000);
-  const primary = singlePassPrompt ? singlePassPrimary() : selectedModel("REFRESH");
-  const fallback = selectedModel("REFRESH_FALLBACK");
+  const primary = singlePassPrompt ? classifyConfig!.primary : selectedModel("REFRESH");
+  const fallback = singlePassPrompt ? classifyConfig!.fallback : selectedModel("REFRESH_FALLBACK");
   const verifyEnabled = process.env.REFRESH_VERIFY_ENABLED ?? "0";
   if (verifyEnabled !== "0" && verifyEnabled !== "1") throw new Error("REFRESH_VERIFY_ENABLED must be 0 or 1");
   const verification = verifyEnabled === "1" && !singlePassPrompt ? selectedModel("REFRESH_VERIFY") : undefined;
@@ -222,6 +226,14 @@ async function main(): Promise<void> {
   // a second, independent guard. Without either, the `aborted` branch of the
   // sweep was dead code and the pod died in the middle of a document.
   const controller = new AbortController();
+  const classification = classifyMode === "two-step" ? {
+    ...classifyConfig!, prompt: classifyPrompt!,
+    models: createRefreshModelPolicy({ primary: classifyConfig!.primary, fallback: classifyConfig!.fallback,
+      primaryQualityAttempts: 1, timeoutMs, signal: controller.signal, forceFallback: false,
+      createClient: (model, signal) => createRefreshMesh({ ...common,
+        provider: model.provider, model: model.model,
+        reasoning: { effort: model.effort as "low" }, signal }).textClient }),
+  } : undefined;
   const stop = (reason: string) => () => {
     if (!controller.signal.aborted) {
       logger.warn({ reason }, "refresh-pv: stopping");
@@ -236,6 +248,7 @@ async function main(): Promise<void> {
     onSetAside?: (document: RecueilSetAsideDocument) => void) =>
     runPvRefresh({ cycleId, citySlug, store, db, profileContext,
       ...(singlePassPrompt ? { singlePassPrompt } : {}),
+      ...(classification ? { classification } : {}),
       documentModels,
       // What the radar does NOT read, one line per document, every pass that
       // meets it: the PO's view of deferred-oversize and interrupted-repeatedly

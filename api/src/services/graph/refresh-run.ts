@@ -30,6 +30,7 @@ import { canonicalHash } from "./replay/canonical-json.js";
 import { extractionToV23Graph } from "./refresh-v23.js";
 import { attachSinglePassAnnotations, type SinglePassPrompt } from "./refresh-single-pass.js";
 import { writeClassAnnotation, type AiClassAnnotation } from "./class-annotations.js";
+import { classifyPublishedRefresh, type RefreshClassification } from "./refresh-classify.js";
 import { completeRefreshChunk, matchProjectedRefreshState, matchPublishedRefreshState, openRefreshState,
   readCompletedRefreshChunk, readRefreshStates, recordRefreshModel, reserveRefreshChunk, writeRefreshCandidate,
   writeRefreshStageReceipt, type RefreshStage, type RefreshStateHandle } from "./refresh-state.js";
@@ -243,6 +244,7 @@ export interface RunPvRefreshOptions {
   readonly profileContext: RefreshProfileContext;
   readonly textClient?: TextJsonGenerationClient;
   readonly singlePassPrompt?: SinglePassPrompt;
+  readonly classification?: RefreshClassification;
   readonly documentModels?: RefreshDocumentModels;
   readonly onModelReceipt?: (docSha: string, chunkId: string, receipt: RefreshModelReceipt) => void;
   readonly extractPdf: (bytes: Uint8Array, sourceUrl: string) => Promise<string>;
@@ -337,6 +339,11 @@ async function publishSnapshot(options: RunPvRefreshOptions, initial: RefreshSta
       "Refresh aborted after projection");
     handle = await completeStage(options.store, handle, "projected", snapshotHash, now);
   }, { resume, now });
+  if (options.classification) await classifyPublishedRefresh({ classification: options.classification,
+    db: options.db, store: options.store, handle, citySlug: options.citySlug,
+    pipelineRunId: options.cycleId ?? backupId, now: now(),
+    ...(options.signal ? { signal: options.signal } : {}),
+    ...(options.onNote ? { onNote: options.onNote } : {}) });
   return { citySlug: options.citySlug, candidateHash: snapshotHash, stateKey: handle.key };
 }
 

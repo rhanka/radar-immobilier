@@ -29,7 +29,7 @@
 - [x] Lot 0: read mandatory rules and harness using-harness, brainstorm, test and review; confirm clean branch and scope.
 - [x] Lot 1a: explicit mode parser and independent classification configuration.
 - [x] Lot 1b: share bounded reannotation execution and changed-input filtering; isolate selection and classification failures.
-- [ ] Lot 2: wire classification after durable document publication; isolate failures.
+- [x] Lot 2: wire separate models after durable publication/projection; select acts from completed chunks, including projection resumes; isolate failures.
 - [ ] Lot 3: enforce off in CronJob renders and mutation guards; document activation and rollback.
 - [ ] Lot 4: test mode compatibility, byte-identical detection, new/changed acts, provenance, manual precedence, bounded work and failures.
 - [ ] Lot 5: typecheck, lint, targeted test-api including PostgreSQL, test-refresh-renders; down -v.
