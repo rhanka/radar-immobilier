@@ -28,7 +28,7 @@ import { extractRefreshProfile, refreshSourceDocumentDate, type RefreshProfileCh
   type RefreshProfileContext } from "./refresh-profile.js";
 import { canonicalHash } from "./replay/canonical-json.js";
 import { extractionToV23Graph } from "./refresh-v23.js";
-import type { SinglePassPrompt } from "./refresh-single-pass.js";
+import { attachSinglePassAnnotations, type SinglePassPrompt } from "./refresh-single-pass.js";
 import { writeClassAnnotation, type AiClassAnnotation } from "./class-annotations.js";
 import { completeRefreshChunk, matchProjectedRefreshState, matchPublishedRefreshState, openRefreshState,
   readCompletedRefreshChunk, readRefreshStates, recordRefreshModel, reserveRefreshChunk, writeRefreshCandidate,
@@ -325,9 +325,12 @@ async function publishSnapshot(options: RunPvRefreshOptions, initial: RefreshSta
     if (options.singlePassPrompt) {
       for (const node of target.snapshot.nodes) {
         const annotation = node.properties?.["classAnnotation"] as AiClassAnnotation | undefined;
-        if (annotation?.source === "ai") await writeClassAnnotation(options.db, {
-          ...annotation, citySlug: options.citySlug, nodeType: node.type, nodeId: node.id,
-        });
+        if (annotation?.source === "ai") {
+          if (!node.type) throw new Error("Annotated graph node has no type");
+          await writeClassAnnotation(options.db, {
+            ...annotation, citySlug: options.citySlug, nodeType: node.type, nodeId: node.id,
+          });
+        }
       }
     }
     if (options.signal?.aborted) await failProjection("aborted-after-projection",
@@ -517,16 +520,7 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
           const model = receipts.filter((receipt) => receipt.status === "completed"
             && receipt.transition !== "verification").at(-1)?.modelUsed;
           if (!model) throw new Error("Single-pass annotation requires an accepted model receipt");
-          for (const annotation of result.annotations ?? []) {
-            const node = result.extraction.nodes.find((item) => item.id === annotation.nodeId)!;
-            const properties = (node["properties"] ?? {}) as Record<string, unknown>;
-            const inputSha256 = canonicalHash(node).slice(7);
-            node["properties"] = { ...properties, classAnnotation: {
-              ...annotation, source: "ai", model: model.model, effort: model.effort,
-              promptId: options.singlePassPrompt.id, promptSha256: options.singlePassPrompt.sha256,
-              pipelineRunId: cycleId, inputSha256,
-            } };
-          }
+          attachSinglePassAnnotations(result, { model, prompt: options.singlePassPrompt, pipelineRunId: cycleId });
         }
         handle = await completeRefreshChunk(options.store, handle, chunk.id, result);
         profiled.push(result);
