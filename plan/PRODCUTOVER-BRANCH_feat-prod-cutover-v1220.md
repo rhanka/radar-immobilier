@@ -15,6 +15,7 @@
 - [x] Allowed Paths : deploy/prod-cutover/**, docs/runbooks/prod-cutover-v1220.md, ce plan.
 - [x] Forbidden Paths : Makefile, docker-compose*.yml, rules/**, AGENTS.md, CLAUDE.md, GEMINI.md, autres plans.
 - [x] Conditional Paths : aucun changement cluster, SQL applicatif ou workflow.
+- [x] PRODCUTOVER-EX1 : correction owner du point 4. `deploy/cutover/atomic-restore.sh` accepte la conservation des propriétaires. Défaut historique conservé. Repli : retirer cette option.
 
 ## Feedback Loop
 - [x] clarification : instruction owner prime pour français et absence de trailers.
@@ -31,6 +32,7 @@
 ## Plan / Todo (lot-based)
 - [x] Revue #1100, points 1–2 : fenêtre opérateur sous radar-change-lock cutover. Capture avant drain. Déploiement privé, réouverture sur GO séparé. CD après recette.
 - [ ] Revue #1100 : gardes, empreintes 6H, reçu copie et rollback complet. Validation et publication.
+- [x] GO lié aux octets du roster et du plan. Empreintes dans les reçus. Garde de propriété avant backup, DDL, grants et rollback.
 - [x] Lot 0 : règles, dossier PREPA-PROD complet, contrat 6H et CD.
 - [x] Lot 1 : cibles autonomes et précontrôles sans écriture prod.
 - [x] Lot 2 : sauvegarde, restauration, migrations mesurées et hook 6H préparés.

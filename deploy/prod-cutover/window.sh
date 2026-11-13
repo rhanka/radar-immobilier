@@ -32,7 +32,12 @@ trap 'exit 143' TERM
 cluster_preflight
 if [[ $1 == window-start ]]; then
   validate_release "${RELEASE:-}"
-  lock_acquire cutover
+  if [[ -n ${RUN:-} ]]; then
+    lock_read; record_read
+    jq -e '.kind=="cutover" and .manualV1220==true and .checkpoints.close==null
+      and .checkpoints["manual-inventory"]==null' "$WORK/record.json" >/dev/null || fail 'Capture déjà terminée'
+    lock_resume
+  else lock_acquire cutover; fi
   jq '.manualV1220=true|.environment="prod"' "$WORK/record.json" > "$WORK/next.json"
   mv "$WORK/next.json" "$WORK/record.json"; record_save
   # Capture the previous release and consumers while they are still Ready.
@@ -56,6 +61,7 @@ case $1 in
     mv "$WORK/next.json" "$WORK/record.json"; record_save;;
   backup|migrate|transition|rollback)
     jq -e '.checkpoints.close=="completed" and .checkpoints["manual-deploy"]==null' "$WORK/record.json" >/dev/null || fail 'Drain requis ; services arrêtés'
+    verify_closed || fail 'Consommateurs encore actifs'
     ENV=execution-prod node deploy/prod-cutover/cli.cjs "$1";;
   window-deploy)
     ENV=execution-prod node deploy/prod-cutover/cli.cjs verify
