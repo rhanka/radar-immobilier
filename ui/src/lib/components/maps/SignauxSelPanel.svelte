@@ -1287,10 +1287,6 @@
                       onApply={(nextClass, reasonCode) => onApplyClassement(node, nextClass, reasonCode)}
                     />
                   </span>
-                  {#if node.signalAnnotations && node.annotationsWorkspaceId && node.citySlug}
-                    <SignalMcpNotes annotations={node.signalAnnotations} workspaceId={node.annotationsWorkspaceId}
-                      target={{ citySlug: node.citySlug, type: node.type, id: node.id }} />
-                  {/if}
                   {#if cardClassementError}
                     <span class="sel-entity-classement-error">
                       <button
@@ -1306,6 +1302,13 @@
                     </span>
                   {/if}
                   </div>
+                  {#if node.signalAnnotations && node.annotationsWorkspaceId && node.citySlug}
+                    <SignalMcpNotes annotations={node.signalAnnotations} workspaceId={node.annotationsWorkspaceId}
+                      target={{ citySlug: node.citySlug, type: node.type, id: node.id }} />
+                  {/if}
+                  {#if node.signalAnnotations?.current?.source === "mcp" && !hasManualClass}
+                    <p class="classement-error-detail">{node.signalAnnotations.current.reason}</p>
+                  {/if}
                   {#if node.classAnnotation?.source === "ai" && !hasManualClass && node.classAnnotation.reason}
                     <p class="classement-error-detail">{node.classAnnotation.reason}</p>
                   {/if}
