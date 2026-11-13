@@ -13,7 +13,7 @@ CREATE TABLE signal_mcp_events (
   city_slug text NOT NULL, node_type text NOT NULL CHECK (node_type IN ('Signal','DesignationEvent')), node_id text NOT NULL,
   kind text NOT NULL CHECK (kind IN ('class','feedback','note')),
   source text NOT NULL CHECK (source IN ('mcp','manual')),
-  model text, client_id text, validation text NOT NULL CHECK (validation IN ('auto','human')),
+  model text, client_id text, oauth_sub text NOT NULL, validation text NOT NULL CHECK (validation IN ('auto','human')),
   classe text CHECK (classe IN ('pertinent','a_surveiller','ecarte','non_classe')),
   reason_code text, reason text, text text CHECK (length(text) BETWEEN 1 AND 2000),
   verdict text CHECK (verdict IN ('up','down')),
@@ -43,7 +43,7 @@ CREATE TRIGGER signal_mcp_audit_no_truncate BEFORE TRUNCATE ON signal_mcp_audit
 -- SECURITY INVOKER throughout. The caller supplies verified identity, never tool arguments.
 CREATE FUNCTION signal_mcp_read(p_sub text, p_ref jsonb) RETURNS jsonb LANGUAGE plpgsql AS $$
 DECLARE actor uuid; wid uuid := (p_ref->>'workspaceId')::uuid; events jsonb; ai jsonb; manual jsonb;
-  current_class jsonb; history jsonb; version text; notes jsonb; feedback jsonb;
+  current_class jsonb; history jsonb; version text; notes jsonb; feedback jsonb; ui_feedback jsonb; graph_version text;
 BEGIN
   SELECT id INTO actor FROM account_users WHERE sub=p_sub AND status='approved';
   IF actor IS NULL OR NOT EXISTS (SELECT 1 FROM workspace_memberships
@@ -52,6 +52,8 @@ BEGIN
   END IF;
   IF NOT EXISTS (SELECT 1 FROM graph_nodes WHERE city_slug=p_ref->>'citySlug'
     AND type=p_ref->>'type' AND id=p_ref->>'id') THEN RETURN jsonb_build_object('error','signal_not_found'); END IF;
+  SELECT md5(jsonb_build_array(label,props,source_ref)::text) INTO graph_version FROM graph_nodes
+    WHERE city_slug=p_ref->>'citySlug' AND type=p_ref->>'type' AND id=p_ref->>'id';
   SELECT coalesce(jsonb_agg(to_jsonb(e) ORDER BY e.created_at DESC,e.id DESC),'[]') INTO events
     FROM signal_mcp_events e WHERE workspace_id=wid AND city_slug=p_ref->>'citySlug'
       AND node_type=p_ref->>'type' AND node_id=p_ref->>'id' AND (scope='workspace' OR actor_id=actor);
@@ -77,10 +79,19 @@ BEGIN
   SELECT coalesce(jsonb_agg(to_jsonb(h) ORDER BY h.created_at DESC,h.id DESC),'[]') INTO history
     FROM (SELECT * FROM signal_class_annotation_history WHERE city_slug=p_ref->>'citySlug'
       AND node_type=p_ref->>'type' AND node_id=p_ref->>'id' ORDER BY created_at DESC,id DESC LIMIT 20) h;
-  version := md5(jsonb_build_array(events,ai,manual)::text);
+  SELECT coalesce(jsonb_agg(to_jsonb(f) ORDER BY f.created_at DESC,f.id DESC),'[]') INTO ui_feedback
+    FROM signal_class_feedback f WHERE workspace_id=wid AND city_slug=p_ref->>'citySlug'
+      AND node_type=p_ref->>'type' AND node_id=p_ref->>'id' AND (scope='workspace' OR actor_id=actor);
+  version := md5(jsonb_build_array(events,ai,manual,graph_version)::text);
+  IF current_class IS NOT NULL THEN current_class := current_class || jsonb_build_object(
+    'reasonCode',current_class->'reason_code','mcpClientId',current_class->'client_id',
+    'user',current_class->'oauth_sub','promptId',current_class->'prompt_id',
+    'promptSha256',current_class->'prompt_sha256','pipelineRunId',current_class->'pipeline_run_id',
+    'createdAt',current_class->'created_at','updatedAt',coalesce(current_class->'updated_at',current_class->'created_at'),
+    'validation',coalesce(current_class->>'validation',CASE WHEN current_class->>'source'='ai' THEN 'auto' ELSE 'human' END)); END IF;
   RETURN jsonb_build_object('version',version,'current',current_class,'ai',ai,
     'ambiguous',coalesce(current_class->>'classe'='non_classe',true),'history',history,
-    'mcpHistory',events,'feedback',feedback,'notes',notes);
+    'mcpHistory',events,'feedback',feedback || ui_feedback,'notes',notes);
 END $$;
 --> statement-breakpoint
 CREATE FUNCTION signal_mcp_result(p_sub text,p_client text,p_model text,p_tool text,p_hash text,p_result jsonb)
@@ -103,6 +114,7 @@ BEGIN
     RETURN signal_mcp_result(p_sub,p_client,model_name,p_tool,p_hash,jsonb_build_object('error','rate_limited'));
   END IF;
   PERFORM pg_advisory_xact_lock(hashtextextended(array_to_json(ARRAY['workspace',wid::text])::text,0));
+  PERFORM pg_advisory_xact_lock(hashtext('graph-city:' || (ref->>'citySlug')));
   PERFORM pg_advisory_xact_lock(hashtextextended(array_to_json(ARRAY['class-annotation',
     ref->>'citySlug',ref->>'type',ref->>'id'])::text,0));
   SELECT id INTO actor FROM account_users WHERE sub=p_sub AND status='approved' FOR SHARE;
@@ -143,6 +155,8 @@ BEGIN
           OR coalesce(why,'')='' OR length(why)>2000 THEN RAISE EXCEPTION 'invalid_classification'; END IF;
         IF next_class='non_classe' THEN
           IF p_validation<>'human' THEN RAISE EXCEPTION 'human_confirmation_required'; END IF;
+          IF NOT EXISTS (SELECT 1 FROM facet_reason_codes WHERE profile_id='immo-steve-2026-09'
+            AND facet_reason_codes.code=signal_mcp_write.code) THEN RAISE EXCEPTION 'invalid_reason_code'; END IF;
         ELSIF NOT (p_tool='confirm_classification' AND p_body->>'verdict'='up') AND NOT EXISTS (
           SELECT 1 FROM facet_reason_codes WHERE profile_id='immo-steve-2026-09' AND facet_reason_codes.code=signal_mcp_write.code
             AND verdict=CASE next_class WHEN 'ecarte' THEN 'non_pertinent' ELSE next_class END) THEN
@@ -154,9 +168,9 @@ BEGIN
         END IF;
       END IF;
       INSERT INTO signal_mcp_events(workspace_id,actor_id,scope,city_slug,node_type,node_id,kind,source,
-        model,client_id,validation,classe,reason_code,reason,text,verdict,previous_version)
+        model,client_id,oauth_sub,validation,classe,reason_code,reason,text,verdict,previous_version)
         VALUES(wid,actor,ref->>'scope',ref->>'citySlug',ref->>'type',ref->>'id',kind_name,p_source,
-          model_name,p_client,p_validation,next_class,code,why,note,p_body->>'verdict',p_version) RETURNING id INTO event_id;
+          model_name,p_client,p_sub,p_validation,next_class,code,why,note,p_body->>'verdict',p_version) RETURNING id INTO event_id;
       IF ref->>'scope'='personal' THEN
         INSERT INTO personal_projection_revisions(workspace_id,owner_id,city_slug,mode,revision)
           VALUES(wid,actor,ref->>'citySlug','signal',1) ON CONFLICT(workspace_id,owner_id,city_slug,mode)

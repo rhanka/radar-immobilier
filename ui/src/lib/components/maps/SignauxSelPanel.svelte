@@ -1234,9 +1234,11 @@
                     on:click={() => toggleEntity(key)}
                   >
                     <span class="sel-entity-label">{node.label}</span>
+                    {#if node.classAnnotation?.source === "ai" || node.signalAnnotations?.current?.source !== "mcp" || hasManualClass}
                     <span class="signal-stage-badge" title={node.classAnnotation?.source === "ai" && !hasManualClass ? node.classAnnotation.reason : undefined}>
                       {classAnnotationLabel(node, hasManualClass)}
                     </span>
+                    {/if}
                     {#if node.signalAnnotations?.current?.source === "mcp" && !hasManualClass}
                       <span class="signal-stage-badge" title={node.signalAnnotations.current.reason}>
                         {mcpBadge(node.signalAnnotations.current)}
