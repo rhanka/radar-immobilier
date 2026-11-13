@@ -145,7 +145,15 @@ node tools/bench-v11/full/audit-muse-surface.mjs tools/bench-v11/full/arms/muse-
 node tools/bench-v11/full/score-ember-sensitivity.mjs xhigh sacre-coeur-2026-05-11   # -> full/scores-ember-xhigh-sensitivity.json
 ```
 
-### Cascade CP+ réelle (complément v12)
+### Cascade CP+ réelle (mise de côté)
+
+Décision de l'owner du 13 novembre 2026 : CP+ xhigh, CP+ low et leur
+rejeu Astra sont mis de côté. Le rapport v12 ne les inclut plus.
+Le générateur ne lit plus leurs scores, même s'ils sont présents.
+Les scripts, scores et données brutes sont conservés. Les commandes
+d'exécution ci-dessous sont une archive ; elles ne font pas partie de la
+régénération du rapport v12. Les cibles `report` et `pdf` produisent le
+rapport à 42 lignes, avec Muse Ember 1.0 xhigh et max.
 
 CP+ rejoue GPT-6 Astra medium, puis fait relire chaque sortie acceptée par
 Muse Spark 1.3 xhigh. Le filtre CP reste inchangé. Le scoreur refuse un
@@ -207,7 +215,7 @@ CP+ juge 852 actes et en retire 143. Équivalents API : 0,44027 et
 100 invocations abouties. L'usage des trois tentatives coupées est
 `missing source`. L'audit des 103 flux n'observe aucun outil ni tour
 supplémentaire. La CLI déclare 47 skills chargées. Les outils restent
-disponibles. Voir la section « CP+ mesurée » du dossier v12.
+disponibles. Ces résultats sont archivés hors du dossier v12.
 
 Les jetons réels, décisions, reçus et
 surface d'accès sont conservés sous `full/arms/`. Le coût siège reste
