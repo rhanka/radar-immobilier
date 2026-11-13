@@ -13,6 +13,18 @@ for (const arm of ['astra-medium', 'opus-5.5-medium']) {
   out[arm] = counts;
 }
 console.log(JSON.stringify({ at: new Date().toISOString(), arms: out }));
+const arbDir = `${home}/arbitration`;
+if (fs.existsSync(arbDir)) {
+  const outcomes = {}, tally = { attempts: 0, completed: 0 };
+  for (const name of fs.readdirSync(arbDir)) {
+    if (name.includes('.attempt-')) { tally.attempts++; continue; }
+    if (name.includes('.intent-') || name === 'run-summary.json') continue;
+    const r = load(`${arbDir}/${name.replace(/\.(json|sealed)$/, '')}`, name.endsWith('.sealed'));
+    tally.completed++;
+    outcomes[r.status] = (outcomes[r.status] ?? 0) + 1;
+  }
+  console.log(JSON.stringify({ arbitration: { ...tally, outcomes } }));
+}
 const journal = `${home}/annotation/calls.jsonl`;
 if (fs.existsSync(journal)) {
   const calls = fs.readFileSync(journal, 'utf8').trim().split('\n').filter(Boolean).map(JSON.parse);
