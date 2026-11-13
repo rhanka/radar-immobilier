@@ -15,14 +15,20 @@ function prepare() {
   if (r.hash(r.safeFile(planFile)) !== proof.roster.planSha256 || r.hash(r.safeFile(rosterFile)) !== proof.roster.sha256
     || r.hash(r.safeFile(file(proof.archive.file))) !== proof.archive.sha256) r.fail('preparation_fingerprint_mismatch');
   if (!r.env.OWNER?.trim()) r.fail('rehearsal_attestation_owner_required');
-  if (!r.fs.existsSync(file('approval.json'))) write('approval.json', JSON.stringify({
+  if (r.fs.existsSync(file('approval.json'))) {
+    const previous = r.json(file('approval.json'));
+    if (previous.environment !== 'rehearsal' || previous.productionAuthorized !== false) r.fail('local_attestation_only');
+  }
+  const approvalBytes = JSON.stringify({
     environment: 'rehearsal', productionAuthorized: false, owner: r.env.OWNER, sha: r.SHA,
     expiresAt: new Date(Date.now() + 86400000).toISOString(),
     planSha256: proof.roster.planSha256, rosterSha256: proof.roster.sha256,
-  }, null, 2) + '\n');
-  const approval = r.json(file('approval.json'));
-  if (approval.environment !== 'rehearsal' || approval.productionAuthorized !== false) r.fail('local_attestation_only');
+  }, null, 2) + '\n';
+  r.fs.writeFileSync(file('approval.json.partial'), approvalBytes, { mode: 0o600 });
+  r.fs.renameSync(file('approval.json.partial'), file('approval.json'));
   r.approvedPlan();
+  const output = file(`rehearsal-${r.crypto.randomUUID()}`);
+  r.fs.writeFileSync(file('active-copy.json'), JSON.stringify({ output }), { mode: 0o600 });
   if (!r.fs.existsSync(file('auth.json'))) {
     const secret = () => r.crypto.randomBytes(36).toString('hex');
     write('auth.json', JSON.stringify({ database: r.fs.readFileSync(r.safeFile(file('local-password')), 'utf8').trim(),
