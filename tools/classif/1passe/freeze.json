@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "llmCalls": 172,
+  "llmCalls": 200,
   "files": {
     "PREREG.md": "f13cacd2aea4f1b6d661da3710f9ea934dad078faac39bf1933420acc157e675",
     "seed.json": "53b163c08429e7305d370657b203437e338350c869c3b14322aefb31889d1edc",
@@ -24,7 +24,7 @@
     "matching.test.mjs": "e7b786ad6dbbf3f439eb650f45ca4040f4e76007593913052116330deb7bd1c4",
     "reconcile.mjs": "c99753313178adb4366d02ced7d418b0339329079421dcdbb0e5698c0b855f64",
     "arbitrate.mjs": "0f9c945a9970aa8f46e15f582e16bb253a6a4dabe164b6c65d3a08bef537b034",
-    "finalize.mjs": "5fdd103ce213a9f0a3da5ca5a61a9b529a4f9e2bea371b3d1557ea0947fd02e3",
+    "finalize.mjs": "22068c2a591d4a30fc8d58c2f92aec7ba6fadac709e9047666109b4b1319b63d",
     "custody.mjs": "fc1211e15af9d8db12f6efefb579a3c11868d2a9bedb0db067b1261c0b442aa5",
     "claude-quota.mjs": "a660f1527575f4f4bc323bd864edab789869fe52a4b6a882dd27495fbeb06573",
     "verify.mjs": "ced7b60e3b00c0f0e0ef894faae45c5f4f21b9abd68be149b8109db906b42bb8"
