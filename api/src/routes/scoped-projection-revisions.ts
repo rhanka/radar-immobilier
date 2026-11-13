@@ -119,7 +119,7 @@ export function scopedProjectionRevisionsRoute(deps: ScopedProjectionRevisionsDe
           selection: await readScopedPersonalHeads(deps.db, session.sub,
             c.req.param("workspaceId"), params.data.citySlug),
           signals: await getSignalNodesForCity(deps.db, params.data.citySlug),
-          feedback: await readClassFeedback(deps.db, session.sub, c.req.param("workspaceId"), params.data.citySlug),
+          feedback: await readCurrentClassFeedback(deps.db, session.sub, c.req.param("workspaceId"), params.data.citySlug),
         }));
       const heads = coherent.payload.archive.map((row) => ({
         target: row.target,
@@ -201,4 +201,4 @@ export function scopedProjectionRevisionsRoute(deps: ScopedProjectionRevisionsDe
   });
   return app;
 }
-import { readClassFeedback } from "../services/graph/class-feedback-reader.js";
+import { readCurrentClassFeedback } from "../services/graph/class-feedback-reader.js";
