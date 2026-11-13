@@ -43,10 +43,10 @@
 - [ ] Étape 1 : deux annotations indépendantes sur les 100 PV.
   - [x] Reprise : 33 départs, 17 réponses, 16 interruptions sans rejeu. Quota Codex : 27 %.
   - [x] Rapprochement : preuves exactes, étapes et cibles compatibles, un à un ; tests ciblés réussis.
-  - [ ] Budget : 200 lectures ; réserve de 40 reprises de quota tracées.
-  - [ ] Quota codex avant, toutes les 10 min, après ; arrêt à 90 %.
-  - [ ] 429 : attente puis reprise. 401/403/disabled/terms : arrêt du bras.
-  - [ ] Accord : kappa, matrice et accord par classe, omissions incluses.
+  - [x] Budget : 200 départs ; 184 réponses et 16 interruptions sans rejeu. Aucune reprise de quota.
+  - [x] Quota codex avant, toutes les 10 min, après : 27 %, 29 %, 31 %. Seuil de 90 % respecté.
+  - [x] Aucun 429 ou refus pendant l’annotation. Quota Claude après : 62 % ; avant non mesuré.
+  - [x] Accord : kappa 0,613265 ; accord brut 90,9763 %, validé 8,2840 %. 620 désaccords D3.
   - [ ] Arbitrage : désaccords seuls, Argon high via agy, concurrence 1, arrêt au premier refus.
   - [ ] Budget arbitrage : 776 appels maximum. Échec : à montrer.
   - [ ] Échantillon owner : 20 arbitrages au plus, mise au point seule.
