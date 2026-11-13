@@ -39,7 +39,7 @@ L’owner doit fournir ou faire autoriser :
 1. Une archive custom récente de `radar` et son SHA-256 indépendant. Provenance prod et heure du snapshot requises. Ou une autorisation future de dump RO.
 2. Un accès réseau explicite à la DB et le rôle RO existant. CONNECT, USAGE des schémas, SELECT des tables, séquences et journal ; aucune capacité DML/DDL, superuser, réplication ou bypass RLS. Vérifier les grants hérités. Les credentials restent injectés par l’opérateur.
 3. Une instance PostgreSQL 16/PostGIS jetable locale. Base `radar_cutover_<identifiant>`, hôte 127.0.0.1, localhost ou ::1. Aucun port partagé avec UAT. Rôle propriétaire des objets restaurés et accès à `pg_control_system()` pour l’identité physique.
-4. L’image API candidate déjà présente dans Docker. Le runner interdit le pull implicite. Référencer `RELEASE=<chemin absolu du manifeste épinglé>`.
+4. L’image API candidate déjà présente dans Docker. `image-check` constate son absence locale ; le runner interdit le pull implicite. Référencer `RELEASE=<chemin absolu du manifeste épinglé>`. Le hook réel reste non vérifié tant que ce prérequis manque.
 5. Un plan 6H approuvé, reprenant des comptes réellement présents et approuvés dans la copie prod. Aucun sujet préprod substitué. Voir `../cutover/plan.example.json`.
 6. Une preuve réelle de terminaison des processus de restauration/migration de la copie. Ne pas inventer de preuve prod. `EVIDENCE` contient run UUID, release SHA complet, instances et completedAt ISO de moins de 24 h.
 7. UI/API/MCP candidats locaux pointant vers cette même copie. Refresh et sortie réseau vers la prod désactivés. `SMOKE_URL=http://127.0.0.1:<port>` doit servir ces services. Un compte de recette local autorisé et les documents nécessaires sont requis.
