@@ -31,6 +31,7 @@
 - [x] Tests dédiés ENV=test-prod-cutover. Ports réservés API 18821, UI 15321, Maildev 11121.
 
 ## Plan / Todo (lot-based)
+- [x] Contrat hook strict conservé. Sonde PostgreSQL locale terminée pour la preuve initiale. Régressions des preuves Docker et des doublons ConfigMap.
 - [x] Raccordements prod préparés : références Secret obligatoires, contrôle de continuité du curseur, ingress statique API. Snapshot et rollback des ConfigMaps et env. Aucune application prod.
 - [x] Preuves locales : inventaire Docker réel, consommateurs terminés, identité de la copie, même UUID avant et après recette. Refus si un conteneur ou hook tourne encore. Doublons ConfigMap refusés.
 - [x] Merge des six commits prep. Gardes B1/B2 : manifeste historique indépendant, SHA court/complet, digests, verrou, stamp et runs CD. Tests de refus et reprise historique ajoutés.

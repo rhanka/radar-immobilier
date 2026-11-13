@@ -4,6 +4,21 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const os = require('node:os');
 const r = require('./runtime.cjs');
+test('refuse deux ConfigMaps du même nom avant toute validation du plan', async () => {
+  const dir = r.fs.mkdtempSync(r.path.join(os.tmpdir(), 'cutover-duplicate-'));
+  const original = { destination: r.destination, mutationGuard: r.mutationGuard, configuration: process.env.CONFIGURATION };
+  try {
+    r.destination = r.mutationGuard = () => {};
+    process.env.CONFIGURATION = r.path.join(dir, 'configuration.json');
+    const item = { kind: 'ConfigMap', metadata: { namespace: 'radar-immobilier', name: 'radar-cutover-6h' } };
+    r.fs.writeFileSync(process.env.CONFIGURATION, JSON.stringify({ kind: 'List', items: [item, item] }));
+    await assert.rejects(require('./cli.cjs').main('configuration-check'), /configuration_duplicate/);
+  } finally {
+    r.destination = original.destination; r.mutationGuard = original.mutationGuard;
+    if (original.configuration === undefined) delete process.env.CONFIGURATION; else process.env.CONFIGURATION = original.configuration;
+    r.fs.rmSync(dir, { recursive: true });
+  }
+});
 test('GO lié aux octets exacts du plan et du roster, avant grants et hook', () => {
   const dir = r.fs.mkdtempSync(r.path.join(os.tmpdir(), 'cutover-binding-'));
   const prior = { ...process.env };

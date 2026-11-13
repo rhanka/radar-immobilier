@@ -11,6 +11,7 @@ function stoppedSnapshot() {
     && c.Config.Labels['com.docker.compose.service'] === 'postgres');
   if (db.length !== 1 || !db[0].State.Running) r.fail('local_copy_database_required');
   const consumers = containers.filter(c => c.Id !== db[0].Id);
+  if (!consumers.length) r.fail('local_baseline_proof_required');
   if (consumers.some(c => c.State.Running || c.State.Restarting || c.State.Paused)) r.fail('local_consumers_not_terminated');
   if (r.run('docker', ['ps', '-q', '--filter', 'name=immo-6h-']).trim()) r.fail('local_hook_not_terminated');
   return { network: NETWORK, databaseContainer: db[0].Id,
