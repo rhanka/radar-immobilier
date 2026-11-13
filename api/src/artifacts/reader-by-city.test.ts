@@ -33,7 +33,9 @@ describe("signals.by-city.v1 service wiring", () => {
 
 describe("signals.by-city.v1 Filtre cube", () => {
   it("should carry the Filtre cube counters to the artifact reader", async () => {
-    const withCube = { ...city, filtreCube: { "11100": 2, "11010": 1 } };
+    const withCube = { ...city, filtreCube: { "11100": 2, "11010": 1 },
+      filtreCubesByClassement: { pertinent: { "11100": 2 }, a_surveiller: {},
+        non_classe: { "11010": 1 }, ecarte: {} } };
     vi.mocked(readScopedByCity).mockResolvedValue({ totalCount: 0, cities: [withCube] } as never);
     const read = createBasketReadOperation({ db: {} as never, store: {} as never });
     const body = await read("signals.by-city.v1", { workspaceId: WORKSPACE },

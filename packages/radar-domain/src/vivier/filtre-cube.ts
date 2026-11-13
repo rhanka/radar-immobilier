@@ -33,6 +33,15 @@ export const vivierFiltreCubeSchema = z.record(
 /** Cell key (`zripd` flags) -> signal count. Absent cells are 0. */
 export type VivierFiltreCube = Record<string, number>;
 
+/** Additive by-city dimension; the original five-flag cube stays unchanged. */
+export const vivierFiltreCubesByClassementSchema = z.object({
+  pertinent: vivierFiltreCubeSchema,
+  a_surveiller: vivierFiltreCubeSchema,
+  non_classe: vivierFiltreCubeSchema,
+  ecarte: vivierFiltreCubeSchema,
+}).strict();
+export type VivierFiltreCubesByClassement = z.infer<typeof vivierFiltreCubesByClassementSchema>;
+
 /** The three combinable B axes (all checked by default). */
 export interface VivierFiltreAxes {
   z: boolean;

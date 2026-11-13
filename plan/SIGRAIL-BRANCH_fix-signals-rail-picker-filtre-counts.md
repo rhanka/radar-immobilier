@@ -34,6 +34,11 @@ Each criterion counts the signals that pass every OTHER active criterion (period
   - `plan/NN-BRANCH_*.md` (other branches)
 - **Conditional Paths**: none.
 
+## Review correction scope
+- [x] Owner-authorized API extension: `api/src/services/facets/scoped-by-city.ts` and `api/tests/integration/base-api-by-city.spec.ts`. Add viewer-scoped Pertinence cubes without changing existing counters or parameters. Rollback: remove the optional dimension and its consumer.
+- [x] Add optional `filtreCubesByClassement` per city, preserving the existing `filtreCube` and scoped visibility; verify viewer isolation through HTTP.
+- [ ] Apply Pertinence to every bulk cube and verify all categories unchecked, with and without selection.
+
 ## Feedback Loop
 - [x] attention: the jsdom suites have no Popover API, so the DS never sets `popover` there; the picker regression test installs a minimal model (show, and hide on removal) to observe the browser rule.
 - [x] attention: the by-city artifact reader schema is strict; `filtreCube` is added there (optional) so the artifact transport does not answer 502.

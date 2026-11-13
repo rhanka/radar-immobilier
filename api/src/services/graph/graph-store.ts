@@ -29,7 +29,7 @@ import {
   classifyVivierSignal,
   type VivierSignalInput,
 } from "./vivier-v2.js";
-import { filterDiscardedSignals, type DiscardedSignalKey } from "./discarded-signals.js";
+import { discardedSignalKey, filterDiscardedSignals, type DiscardedSignalKey } from "./discarded-signals.js";
 import { bumpGraphSourceRevision } from "../facets/projection-revisions.js";
 
 export {
@@ -2259,12 +2259,14 @@ export interface CitySignalCounts {
    * the Filtre dropdown counts for any Filtre state.
    */
   filtreCube: VivierFiltreCube;
+  filtreCubesByClassement?: import("@radar/domain").VivierFiltreCubesByClassement;
 }
 
 /** Aggregate one projection in both rails. Pure so A/B parity is testable. */
 export function aggregateGraphSignalProjectionRows(
   rows: readonly GraphSignalProjectionRow[],
   dateRange?: GraphSignalDateRange,
+  classement?: ReadonlyMap<DiscardedSignalKey, keyof import("@radar/domain").VivierFiltreCubesByClassement>,
 ): CitySignalCounts[] {
   function emptySubsetCounts(): Record<SubsetKey, number> {
     const out = {} as Record<SubsetKey, number>;
@@ -2277,6 +2279,7 @@ export function aggregateGraphSignalProjectionRows(
     subsetCounts: Record<SubsetKey, number>;
     classifications: VivierV2[];
     filtreCube: VivierFiltreCube;
+    filtreCubesByClassement: import("@radar/domain").VivierFiltreCubesByClassement;
     legacySignals: VivierSignalInput[];
     bPrimeEligibleSignals: VivierSignalInput[];
   }>();
@@ -2305,6 +2308,7 @@ export function aggregateGraphSignalProjectionRows(
         subsetCounts: emptySubsetCounts(),
         classifications: [],
         filtreCube: {},
+        filtreCubesByClassement: { pertinent: {}, a_surveiller: {}, non_classe: {}, ecarte: {} },
         legacySignals: [],
         bPrimeEligibleSignals: [],
       });
@@ -2325,6 +2329,10 @@ export function aggregateGraphSignalProjectionRows(
     };
     if (!hiddenInB) entry.classifications.push(classification);
     addToVivierFiltreCube(entry.filtreCube, displayNode);
+    if (classement) {
+      const classe = classement.get(discardedSignalKey(row.citySlug, row.type, row.id)) ?? "non_classe";
+      addToVivierFiltreCube(entry.filtreCubesByClassement[classe], displayNode);
+    }
 
     // Legacy A (z|m|p) is derived from the full projection. B′ only gates
     // the new residential axis `r`; it must not rewrite legacy membership.
@@ -2371,6 +2379,7 @@ export function aggregateGraphSignalProjectionRows(
       subsetCounts: data.subsetCounts,
       vivierV2Counts: countVivierClassifications(data.classifications),
       filtreCube: data.filtreCube,
+      ...(classement ? { filtreCubesByClassement: data.filtreCubesByClassement } : {}),
     };
   });
 }
@@ -2378,6 +2387,7 @@ export function aggregateGraphSignalProjectionRows(
 export interface ListCitiesWithSignalNodesOptions {
   /** Native discard keys for this viewer; applied before aggregation. */
   discarded?: ReadonlySet<DiscardedSignalKey>;
+  classement?: ReadonlyMap<DiscardedSignalKey, keyof import("@radar/domain").VivierFiltreCubesByClassement>;
 }
 
 /** SQL window predicate on the materialized dates (#872); JS re-checks. */
@@ -2425,7 +2435,7 @@ export async function listCitiesWithSignalNodes(
   const kept = options.discarded !== undefined
     ? filterDiscardedSignals(rows, options.discarded)
     : rows;
-  return aggregateGraphSignalProjectionRows(kept, dateRange);
+  return aggregateGraphSignalProjectionRows(kept, dateRange, options.classement);
 }
 
 /**
