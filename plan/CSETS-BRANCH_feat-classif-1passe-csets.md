@@ -27,6 +27,8 @@
 
 ## Plan / Todo (lot-based)
 - [x] Lot 0: identify series 7, reference D used by C, immutable prompt and production composition.
-- [ ] Lot 1: freeze protocol, capture prompts, execute tuning modes with quota guard.
+- [x] Lot 1: freeze protocol, capture prompts, execute tuning modes with quota guard.
 - [ ] Lot 2: execute blind modes through sealed executor; publish aggregates only.
 - [ ] Lot 3: verify metrics, publish report, push and open draft PR.
+- [x] Four synthetic metric/pairing tests and syntax checks pass; 242/242 native validations and exact request comparisons pass.
+- [x] Pairing regression corrected offline: native stages are flat, as in bench-v11; no model rerun.
