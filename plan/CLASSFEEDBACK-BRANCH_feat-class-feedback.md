@@ -21,6 +21,6 @@
 - [x] Lot 1 — Additive migration, append-only history and feedback.
 - [x] Lot 2 — Atomic authorized feedback API and scoped evaluation export.
 - [x] CLASSFEEDBACK-EX1: scoped-projection-revisions.ts carries private human badges with the coherent snapshot. Revert this enrichment to roll back.
-- [ ] Lot 3 — DS feedback controls, required reclassification and dated private badge.
+- [x] Lot 3 — DS feedback controls, required reclassification and dated private badge.
 - [ ] Lot 4 — Unit, PostgreSQL and click E2E coverage; typecheck, lint, test-api, test-ui.
 - [ ] Lot 5 — Peer review, fresh base check, push and stacked PR.

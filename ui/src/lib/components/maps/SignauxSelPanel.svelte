@@ -95,6 +95,8 @@
     type ZoneMillesimeFilter,
   } from "$lib/maps/zone-millesime-filter.js";
   import SignalClassementMenu from "$lib/components/maps/SignalClassementMenu.svelte";
+  import SignalClassFeedback from "$lib/components/maps/SignalClassFeedback.svelte";
+  import type { FeedbackChoice } from "$lib/signals/class-feedback-client.js";
   import { classAnnotationLabel } from "$lib/signals/class-annotation-label.js";
   import {
     classementKey,
@@ -135,6 +137,7 @@
    * masqués par la plage de dates / les filtres).
    */
   export let unfilteredSignalCount = 0;
+  export let onClassFeedback: (node: GraphSignalNode, choice: FeedbackChoice) => Promise<boolean> = async () => false;
   export let detailLoading = false;
   export let detailError: string | null = null;
   // Waiters PAR COUCHE : zones et lots ont chacun leur propre état
@@ -1255,6 +1258,13 @@
                       </span>
                     {/if}
                   </button>
+                  {#if node.classAnnotation?.source === "ai" && !hasManualClass && !node.classFeedback}
+                    <div class="signal-feedback-control">
+                      <SignalClassFeedback classe={node.classAnnotation.classe} reasonCodes={classementReasonCodes}
+                        disabled={classementInFlight.has(cardClassementKey)} restoreBlockedReason={classementEntry.restoreBlockedReason}
+                        onSubmit={(choice) => onClassFeedback(node, choice)} />
+                    </div>
+                  {/if}
                   <span class="sel-entity-classement">
                     <SignalClassementMenu
                       classe={classementMap.get(classementKey(node.type, node.id, node.citySlug))?.classe ?? EMPTY_CLASSEMENT_ENTRY.classe}
