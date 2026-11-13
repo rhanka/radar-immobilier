@@ -29,7 +29,7 @@ import {
   classifyVivierSignal,
   type VivierSignalInput,
 } from "./vivier-v2.js";
-import { discardedSignalKey, filterDiscardedSignals, type DiscardedSignalKey } from "./discarded-signals.js";
+import { discardedSignalKey, type DiscardedSignalKey } from "./discarded-signals.js";
 import { bumpGraphSourceRevision } from "../facets/projection-revisions.js";
 
 export {
@@ -2259,6 +2259,7 @@ export interface CitySignalCounts {
    * the Filtre dropdown counts for any Filtre state.
    */
   filtreCube: VivierFiltreCube;
+  /** Full date-scoped population, including archives; visible counters above exclude them. */
   filtreCubesByClassement?: import("@radar/domain").VivierFiltreCubesByClassement;
 }
 
@@ -2267,6 +2268,7 @@ export function aggregateGraphSignalProjectionRows(
   rows: readonly GraphSignalProjectionRow[],
   dateRange?: GraphSignalDateRange,
   classement?: ReadonlyMap<DiscardedSignalKey, keyof import("@radar/domain").VivierFiltreCubesByClassement>,
+  discarded?: ReadonlySet<DiscardedSignalKey>,
 ): CitySignalCounts[] {
   function emptySubsetCounts(): Record<SubsetKey, number> {
     const out = {} as Record<SubsetKey, number>;
@@ -2287,6 +2289,10 @@ export function aggregateGraphSignalProjectionRows(
   for (const row of rows) {
     if (!row.citySlug) continue;
     if (!matchesDocumentDateWindow(row.props, dateRange)) continue;
+    const key = discardedSignalKey(row.citySlug, row.type, row.id);
+    // Legacy reads must not create cities from discarded-only populations.
+    // Class-aware reads still need those rows for archive relevance facets.
+    if (!classement && discarded?.has(key)) continue;
     // One vivier_v2 classification per row, shared by the B display
     // exclusions, the Filtre cube and the vivier counts (what computeVivierV2
     // would recompute from the same row).
@@ -2314,6 +2320,12 @@ export function aggregateGraphSignalProjectionRows(
       });
     }
     const entry = byCity.get(row.citySlug)!;
+    // Relevance facets cover every class, including targets absent from detail.
+    if (classement) {
+      const classe = classement.get(key) ?? "non_classe";
+      addToVivierFiltreCube(entry.filtreCubesByClassement[classe], displayNode);
+    }
+    if (discarded?.has(key)) continue;
     entry.signalCount += 1;
     const signal: VivierSignalInput = {
       id: row.id,
@@ -2329,10 +2341,6 @@ export function aggregateGraphSignalProjectionRows(
     };
     if (!hiddenInB) entry.classifications.push(classification);
     addToVivierFiltreCube(entry.filtreCube, displayNode);
-    if (classement) {
-      const classe = classement.get(discardedSignalKey(row.citySlug, row.type, row.id)) ?? "non_classe";
-      addToVivierFiltreCube(entry.filtreCubesByClassement[classe], displayNode);
-    }
 
     // Legacy A (z|m|p) is derived from the full projection. B′ only gates
     // the new residential axis `r`; it must not rewrite legacy membership.
@@ -2385,7 +2393,7 @@ export function aggregateGraphSignalProjectionRows(
 }
 
 export interface ListCitiesWithSignalNodesOptions {
-  /** Native discard keys for this viewer; applied before aggregation. */
+  /** Native discard keys; excluded from visible counters, retained in class cubes. */
   discarded?: ReadonlySet<DiscardedSignalKey>;
   classement?: ReadonlyMap<DiscardedSignalKey, keyof import("@radar/domain").VivierFiltreCubesByClassement>;
 }
@@ -2430,12 +2438,7 @@ export async function listCitiesWithSignalNodes(
       ),
     );
 
-  // `filterDiscardedSignals` already short-circuits on an empty set, so the
-  // size guard lives in that single fast path instead of being repeated here.
-  const kept = options.discarded !== undefined
-    ? filterDiscardedSignals(rows, options.discarded)
-    : rows;
-  return aggregateGraphSignalProjectionRows(kept, dateRange, options.classement);
+  return aggregateGraphSignalProjectionRows(rows, dateRange, options.classement, options.discarded);
 }
 
 /**

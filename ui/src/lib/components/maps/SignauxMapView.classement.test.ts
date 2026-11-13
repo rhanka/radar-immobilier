@@ -190,6 +190,11 @@ describe("SignauxMapView classement behaviour", () => {
 
   it("filter change → counts updated: unchecking Précoce recomputes Pertinence and Filtre pills", async () => {
     includeLate = true;
+    vi.mocked(fetchGraphSignalsByCity).mockResolvedValue({ ok: true, totalCount: 3, cities: [{
+      citySlug: CITY_SLUG, signalCount: 3, subsetCounts: {},
+      filtreCube: { "11100": 2, "11000": 1 },
+      filtreCubesByClassement: { pertinent: {}, a_surveiller: {}, non_classe: { "11100": 2, "11000": 1 }, ecarte: {} },
+    }] });
     // Authoritative snapshot with every Filtre axis/exclusion checked, so
     // Précoce really filters (a bare `filter.period=all` link unchecks all).
     window.history.replaceState({}, "", `/geo/city/${CITY_SLUG}?mode=signal&filter.period=all&filter.zonage=1&filter.residentiel=1&filter.precoce=1&filter.excludePiia=1&filter.excludeDerogations=1`);

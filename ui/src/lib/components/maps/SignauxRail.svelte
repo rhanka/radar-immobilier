@@ -145,7 +145,7 @@
 
   /** Classement filter (spec 2026-11-08): checked by default except Écarté. */
   export let classementFilter: ClassementFilter = { ...DEFAULT_CLASSEMENT_FILTER };
-  export let classementCounts: Record<SignalClass, number> = {
+  export let classementCounts: Record<SignalClass, number> | null = {
     pertinent: 0, a_surveiller: 0, non_classe: 0, ecarte: 0,
   };
   export let onClassementFilterChange: (next: ClassementFilter) => void = () => {};
@@ -217,13 +217,15 @@
     }
   }
 
-  // The DS resolves presets when the user opens/selects them. Refresh the
-  // upper bound then, rather than pinning a long-lived rail to its mount time.
+  // Refresh the upper bound before opening, then keep it stable while open.
+  // Updating max on option pointerdown re-registers the DS preset rows before
+  // their click; DS 0.37.2 then loses entries and cannot resolve the selection.
   let timeRangeMax = Date.now();
   function refreshTimeRangeMax(event: Event): void {
-    if (!(event.target instanceof Element) || !event.target.closest(".st-timeRangePicker")) {
-      return;
-    }
+    if (!(event.target instanceof Element)) return;
+    const trigger = event.target.closest(".signals-time-range-picker .st-timeRangePicker__trigger");
+    if (!trigger || trigger.getAttribute("aria-expanded") !== "false") return;
+    if (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ") return;
     timeRangeMax = Date.now();
   }
 
@@ -475,9 +477,11 @@
                   onchange={(event) => toggleClassement(classe, event.currentTarget.checked)}
                 />
               </span>
+              {#if classementCounts !== null}
               <span>
                 <Badge tone={classementCounts[classe] > 0 ? "warning" : "neutral"} aria-label="{classementCounts[classe]} signaux">{classementCounts[classe]}</Badge>
               </span>
+              {/if}
             </div>
           {/each}
         </div>
