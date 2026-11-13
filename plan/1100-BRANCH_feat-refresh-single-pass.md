@@ -38,6 +38,7 @@
   - [x] Additive schema, human precedence, API fields, UI class and badge.
 - [x] **Lot 3 — Recent reannotation**
   - [x] Dry-run default, apply, stable identities, failure recovery, report, preprod make target.
+  - [x] Review correction: explicit AI-only purge with optional run/prompt filters; dry-run default, shared writer lock and JSON report.
 - [x] **Lot 4 — Verification and delivery**
   - [x] Typecheck, lint, 150 scoped API tests, 7 PostgreSQL tests, 1,905 UI tests, 55 render checks; stack cleanup uses down -v.
   - [x] Self-inspection, push, PR #1099 to main with design, activation, rollback and risks. Independent h2a review unavailable (recorded in spec). No merge or live activation.
