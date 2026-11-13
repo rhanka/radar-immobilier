@@ -31,6 +31,7 @@
 - [x] Tests dédiés ENV=test-prod-cutover. Ports réservés API 18821, UI 15321, Maildev 11121.
 
 ## Plan / Todo (lot-based)
+- [x] Stack recette rendue et validée : API/UI/MCP candidats par digest, S3 mock épinglé, TLS local, comptes et rôles séparés. Ports loopback et réseau interne.
 - [x] IdP de recette isolé : roster fermé, mot de passe local, PKCE, nonce, code unique, refresh rotatif et échange MCP borné au sujet.
 - [x] Contrat hook strict conservé. Sonde PostgreSQL locale terminée pour la preuve initiale. Régressions des preuves Docker et des doublons ConfigMap.
 - [x] Raccordements prod préparés : références Secret obligatoires, contrôle de continuité du curseur, ingress statique API. Snapshot et rollback des ConfigMaps et env. Aucune application prod.
