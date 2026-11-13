@@ -65,7 +65,7 @@ Fix #760 P1 while preserving #1090 period selection and perimeter counters. P2 a
 ## Evidence
 - [x] Shared archive blocker reproduced on 87d8e7b6: API regression 2 failures; CDP regression 3 failures and personal restoration passes. Logs: tmp/shared-red-{api,browser}.log.
 - [x] Shared archive correction: role refusal, independent scope restoration and default-list reload persistence.
-- [ ] Reusable browser fixture and standalone PostgreSQL route regression committed.
+- [x] Reusable browser fixture and standalone PostgreSQL route regression committed.
 - [ ] Existing period suite uses the shared fixture.
 - [ ] Real-click PostgreSQL browser regression and final delivery committed.
 - [x] API red: scoped-projection-revisions-db returns no archived card with showDiscarded=1. Unit red: Filtre returns 12 instead of 13. Logs: tmp/red-api.log, tmp/red-unit.log.
