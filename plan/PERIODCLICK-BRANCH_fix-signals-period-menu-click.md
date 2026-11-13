@@ -20,6 +20,7 @@ Restore real mouse selection in the signal period picker after PR #1084. Count P
   - `api/src/services/facets/scoped-by-city.ts`
   - `api/src/services/graph/graph-store{,.test}.ts`
   - `api/tests/integration/base-api-by-city.spec.ts`
+  - `docs/spec/SPEC_BASE_API.md`
   - `ui/src/lib/signals/signal-filter-counts{,.test}.ts`
   - `ui/e2e-qa/signals-period-click.harness.spec.ts`
   - `ui/e2e-qa/signals-period-perimeter.spec.ts`
@@ -33,6 +34,7 @@ Restore real mouse selection in the signal period picker after PR #1084. Count P
   - None
 
 ## Feedback Loop
+- [x] Owner authorizes second review pass: Filtre must match the list; archives stay absent even with Écarté checked. Preserve the full Pertinence archive count and document the API cubes.
 - [x] Owner authorizes #1090 review blocker: retain archived relevance across city/zone selections, compatible API class cubes and regression coverage.
 - [x] Owner authorizes the correction, real mouse regression test and PR.
 - [x] Owner adds perimeter Pertinence counters to the same PR; reuse the city cubes and relevance dimension.
@@ -45,6 +47,11 @@ Restore real mouse selection in the signal period picker after PR #1084. Count P
 - [x] Local reproduction uses the real rail and DS in an isolated UI harness.
 
 ## Plan / Todo (lot-based)
+- [x] **Lot 3 — Second review pass**
+  - [x] Establish archive-free list semantics from coherent-city filtering and real clicks (6 cards → 6 with Écarté → 0 with only Écarté).
+  - [x] Reproduce 12 → 13 → 12 on head 8cd024524, then exclude archive cubes from Filtre only.
+  - [x] Add unit and city/zone click regressions; clarify that API class cubes include archives.
+  - [x] Run requested gates and remove isolated stacks with down -v; close all fresh CDP tabs.
 - [x] **Lot 0 — Baseline and evidence**
   - [x] Read project rules and harness debug/test skills.
   - [x] Verify branch equals `origin/main` before implementation.
@@ -62,6 +69,12 @@ Restore real mouse selection in the signal period picker after PR #1084. Count P
   - [x] Remove isolated stack and volumes (`down -v --remove-orphans`, no remaining project containers).
 
 ## Evidence
+- [x] Second pass rule: archived targets never enter coherent-city signals (`scoped-projection-revisions.ts:129-139`); the UI relevance lens does not request archived nodes. Filtre therefore excludes `ecarte` cubes, while Pertinence retains them.
+- [x] Identical regression on 8cd024524: unit expects 12 but gets 13 for z/r/p. Browser soft assertions reproduce 12 → 13 → 12, continue through Delson and H-01, and fail only on the three no-selection counts after checking Écarté. List semantics test already passes on that head.
+- [x] Second pass green: typecheck 0 errors / 8 warnings; lint 0 errors / 1 warning; test-ui 145 files / 1894 tests passed, 10 todo. API 167 tests passed across graph-store, base-api-by-city and scoped-projection-revisions-db on isolated PostGIS port 5539.
+- [x] Full-view CDP suite: 5 passed, including unchanged archived Pertinence, all period presets, Filtre city/zone invariance and list visibility. API responses are mocked in the browser fixture; real API contracts are covered separately by the PostGIS tests.
+- [x] Second pass commands use `make -f tmp/perimeter.mk {typecheck,lint,test-ui,test-api,run} ENV=test-period-perimeter`; API adds `API_ARGS=src/routes/scoped-projection-revisions-db.test.ts` before ENV. Browser run uses `QA_CDP_URL=http://127.0.0.1:9333 npx playwright test --config playwright.period.config.ts` in the container.
+- [x] Evidence: `tmp/runtime/tmp/pass2-{red-unit,red-final-e2e,green-e2e}.log`, `tmp/pass2-{typecheck,lint,test-ui}.log`. All tracked UI/API/package sources match the tested runtime. No lane-origin browser tab or lane container remains after db-down/down (both down -v).
 - [x] Review regression against pre-correction sources: selected-city archive pill is 0 instead of 1; API archive cube is empty instead of one signal. Corrected identical tests pass.
 - [x] Final gates: typecheck passes (8 warnings), lint passes (1 warning), test-ui passes (145 files / 1893 tests, 10 todo), targeted API passes (164 tests, real PostGIS).
 - [x] Final CDP 9333: full-view 3 passed (city then zone, axes, unbounded period, exact API calendar bounds); rail harness 2 passed (all presets and renewed max after closure). Every fresh tab closed by fixture cleanup.
