@@ -33,4 +33,4 @@
 - [x] Lot 1: import production extraction; freeze source and request fingerprints before calls.
 - [x] Lot 2: run 100 documents, concurrency 10, quota guard and sealed blind responses.
 - [x] Lot 3: score with frozen matcher; publish Wilson bounds, tuning misses and baseline comparison.
-- [ ] Lot 4: validate aggregates, commit, push and open draft PR; no merge.
+- [x] Lot 4: validate aggregates, commit, push and open draft PR #1103; no merge.
