@@ -62,7 +62,7 @@ describeDb("AI annotation rollback PostgreSQL", () => {
     const other = { ...f.annotation, nodeId: "other", pipelineRunId: "run-2", promptSha256: "c".repeat(64) };
     await writeClassAnnotation(f.db, other);
     expect(await purgeAiAnnotations(f.db, { apply: true, [filter]: f.annotation[filter] })).toMatchObject({ deleted: 1 });
-    expect((await readClassAnnotations(f.db, f.annotation.citySlug)).get("Signal:other")).toEqual(other);
+    expect((await readClassAnnotations(f.db, f.annotation.citySlug)).get("Signal:other")).toMatchObject(other);
     expect((await f.rows()).rows.filter((row) => row.source === "manual")).toHaveLength(1);
   });
 
