@@ -793,6 +793,12 @@ document-date-recovery-preprod: ## Run the documentary-date recovery Job in prep
 	  [ "$${succeeded:-0}" = "1" ] || { echo "[document-date-recovery] job failed"; exit 1; }
 
 .PHONY: deploy-db-migrate-k8s
+REANNOTATION_MODE ?= dry-run
+.PHONY: reannotate-signals-preprod
+reannotate-signals-preprod: ## Reclassify recent signals in preprod (REANNOTATION_MODE=dry-run|apply)
+	@test "$(ENV)" = preprod || { echo 'Requires ENV=preprod'; exit 1; }
+	@REANNOTATION_MODE="$(REANNOTATION_MODE)" KUBECTL="$(KUBECTL)" bash tools/make/reannotate-signals-preprod.sh
+
 deploy-db-migrate-k8s: ## Run the one-shot DB migrator Job in the live namespace
 	@if [ "$(K8S_DEPLOY_CONFIRM)" != "1" ] || [ -z "$$KUBECONFIG" ]; then \
 	  echo "[deploy-db-migrate-k8s] refused: set KUBECONFIG and K8S_DEPLOY_CONFIRM=1"; \
