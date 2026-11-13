@@ -154,6 +154,9 @@ const argonRow = {
 // primary tariff dev.meta.ai/models/muse-ember/ read 2026-11-13:
 // <=200k context 0.10 in / 0.004 cached / 0.50 out ; >200k 0.30 / 0.012 / 1.50.
 const EMBER_DIR = V12 ? (process.env.BENCH_EMBER_DIR ?? "tools/bench-v11") : null;
+const cpPlusPath = V12 ? `${EMBER_DIR}/full/scores-cp-plus.json` : null;
+const CP_PLUS = cpPlusPath && existsSync(cpPlusPath) ? JSON.parse(await readFile(cpPlusPath, "utf8")).arm : null;
+const { cpPlusRows, cpPlusSection } = await import("./cp-plus-report.mjs");
 const EMBER_PRICE = { threshold: 200_000, lo: { i: 0.10, c: 0.004, o: 0.50 }, hi: { i: 0.30, c: 0.012, o: 1.50 } };
 const emberDocUsd = (u, withReasoning) => {
   const t = (u.inputTokens > EMBER_PRICE.threshold) ? EMBER_PRICE.hi : EMBER_PRICE.lo;
@@ -199,6 +202,7 @@ const MODEL_NAMES = [
   ["Mistral Small 4", "Mistral Small 4", "mistral-small-2603"],
 ];
 const CASCADES = {
+  "CP+": ["CP+ (GPT-6 Astra medium → Muse Spark 1.3 xhigh)", "CP+ : GPT-6 Astra → Muse Spark 1.3", "medium → xhigh"],
   "CP actuel (astra-medium → gemini low)": ["CP actuel (GPT-6 Astra medium → Gemini 3.8 Flash low)", "CP actuel : GPT-6 Astra → Gemini 3.8 Flash", "medium → low"],
   "CP-low (astra-low → gemini low)": ["CP-low (GPT-6 Astra low → Gemini 3.8 Flash low)", "CP-low : GPT-6 Astra → Gemini 3.8 Flash", "low → low"],
   // v10 policies: C2 = 2 essais Gemini puis Astra (#719) ; C3 = 3 essais Gemini puis Astra.
@@ -643,9 +647,11 @@ if (EMBER.length) {
   // given under both billing hypotheses for reasoning tokens (Meta's page does
   // not say): only the Muse rows with separate reasoning counts change.
   const isCascade = (row) => /^(CP|C2$|C3$)/.test(row.label);
+  const bestCandidates = [...ALL, ...(CP_PLUS ? cpPlusRows(CP_PLUS) : [])];
   const pick = (rows, score) => rows.filter((row) => score(row) !== null && Number.isFinite(score(row)))
     .sort((a, b) => (score(b) - score(a)) || (b.f1 - a.f1))[0];
   const apiWithReasoning = (row) => {
+    if (row.label === "CP+") return CP_PLUS.usdApiEquivWithExtraReasoning;
     const e = EMBER.find((x) => x.row.label === row.label);
     if (e) return e.apiR;
     if (row.label === wonderRow.label) return wonderApiBurnWithReasoning;
@@ -653,16 +659,16 @@ if (EMBER.length) {
   };
   const ratioApi = (row) => (row.api > 0 && row.f1 > 0 ? row.f1 / row.api : null);
   const ratioApiR = (row) => { const a = apiWithReasoning(row); return a > 0 && row.f1 > 0 ? row.f1 / a : null; };
-  const winA = pick(ALL, ratioApi), winB = pick(ALL, ratioApiR);
-  const runnerUp = (score, w) => pick(ALL.filter((row) => row !== w), score);
+  const winA = pick(bestCandidates, ratioApi), winB = pick(bestCandidates, ratioApiR);
+  const runnerUp = (score, w) => pick(bestCandidates.filter((row) => row !== w), score);
   const hypTxt = (w, score, other, rival) => `${(score(w)).toFixed(1)} F1 par USD/doc ; second : ${fullName(other.label)} ${(score(other)).toFixed(1)}${rival && rival !== w && rival !== other ? ` ; ${fullName(rival.label)} (gagnant de l'autre hypothèse) : ${(score(rival)).toFixed(1)}` : ""}`;
   const bestRows = [
-    ["Meilleur F1 strict (toutes lignes)", pick(ALL, (row) => row.f1), (row) => `F1 ${fmt(row.f1)}`],
-    ["Meilleur rappel strict", pick(ALL, (row) => row.r), (row) => `R ${fmt(row.r)}`],
-    ["Meilleur bras seul (hors cascade), F1 strict", pick(ALL.filter((row) => !isCascade(row)), (row) => row.f1), (row) => `F1 ${fmt(row.f1)}`],
-    ["Meilleur rapport F1 / coût API — hypothèse A : raisonnement non facturé", winA, (row) => hypTxt(row, ratioApi, runnerUp(ratioApi, row), winB)],
+    ["Meilleur F1 strict (toutes lignes)", pick(bestCandidates, (row) => row.f1), (row) => `F1 ${fmt(row.f1)}`],
+    ["Meilleur rappel strict", pick(bestCandidates, (row) => row.r), (row) => `R ${fmt(row.r)}`],
+    ["Meilleur bras seul (hors cascade), F1 strict", pick(bestCandidates.filter((row) => !isCascade(row)), (row) => row.f1), (row) => `F1 ${fmt(row.f1)}`],
+    ["Meilleur rapport F1 / coût API — hypothèse A : sortie rapportée, raisonnement probablement inclus", winA, (row) => hypTxt(row, ratioApi, runnerUp(ratioApi, row), winB)],
     ["Meilleur rapport F1 / coût API — hypothèse B : raisonnement facturé en sortie", winB, (row) => `${hypTxt(row, ratioApiR, runnerUp(ratioApiR, row), winA)} (coût API retenu : ${fmtUsd(apiWithReasoning(row))})`],
-    ["Meilleur rapport F1 / coût — siège (lignes avec siège attribuable)", pick(ALL, (row) => (row.seat > 0 && row.f1 > 0 ? row.f1 / row.seat : null)), (row) => `${(row.f1 / row.seat).toFixed(1)} F1 par USD/doc`],
+    ["Meilleur rapport F1 / coût — siège (lignes avec siège attribuable)", pick(bestCandidates, (row) => (row.seat > 0 && row.f1 > 0 ? row.f1 / row.seat : null)), (row) => `${(row.f1 / row.seat).toFixed(1)} F1 par USD/doc`],
   ];
   const cell = (v, d = 3) => (v === null || v === undefined ? "N-A (aucune sortie acceptée)" : fmt(v, d));
   const usd = (v) => (v === null || v === undefined ? "missing source" : fmtUsd(v));
@@ -678,6 +684,17 @@ if (EMBER.length) {
     "",
   ].join("\n");
   insertBefore("## 1. Résumé exécutif", bestMd);
+  if (CP_PLUS) {
+    md = md.replace(`Calculé depuis les ${ALL.length} lignes du tableau global (§3)`,
+      `Calculé depuis les ${ALL.length} lignes du tableau global (§3), le rejeu Astra et CP+ mesurée`);
+    insertBefore("## 4.", cpPlusSection(CP_PLUS));
+    insertAfter("- surface d'accès de la CLI Muse déclarée", "- cascade CP+ mesurée : GPT-6 Astra medium rejoué, puis Muse Spark 1.3 xhigh en relecteur ; résultats et quotas dans la section « CP+ mesurée ». ");
+    md = md.replace("Le **combo CP actuel** reste en tête en F1", "Sur les 42 lignes historiques, le **combo CP actuel** reste en tête en F1");
+    md = md.replace("Aucun modèle seul n'égale le combo CP", "Sur les 42 lignes historiques, aucun modèle seul n'égale le combo CP");
+  }
+  md = md.replaceAll("Hypothèse A (convention du tableau global) : raisonnement non facturé",
+    "Hypothèse A (convention du tableau global) : sortie rapportée, raisonnement probablement inclus");
+  md = md.replaceAll("convention A : raisonnement non facturé", "convention A : sortie rapportée, raisonnement probablement inclus");
   // v10-style charts
   const { chartsV12 } = await import(new URL("./charts-v12.mjs", import.meta.url));
   V12_CHARTS = chartsV12(ALL.map((row) => ({ label: row.label, name: fullName(row.label), accepted: row.accepted, p: row.p, r: row.r,
@@ -703,6 +720,7 @@ if (EMBER.length) {
     `Graphiques v12 générés en Node par \`tools/bench-v11/charts-v12.mjs\` (règle zéro Python), dans le style du v10 (v101b, Matplotlib) : couleur = fournisseur, forme = modèle, pointillé = progression d'effort d'un même modèle (off → minimal → low → medium → high → xhigh → max), étoile = cascade, libellé posé à côté de chaque point avec des traits de rappel courts, courbes de même F1 en gris clair. Noms complets des modèles avec version ; C2 et C3 sont distingués par leur politique de reprise (2 ou 3 essais Gemini avant le repli Astra). Le graphique F1-coût reprend la lecture v10 : équivalent API en plein, siège en creux, reliés pour un même bras (convention A : raisonnement non facturé). Lignes avec point API seul (siège \`missing source\`, ${apiOnly.length}) : ${apiOnly.join(", ")}. Lignes absentes du graphique F1-coût, faute d'équivalent API publié (${noApi.length}) : ${noApi.join(", ")}. Bras v12 (Muse Ember 1.0 xhigh et max) : contour noir épais et libellé gras « v12 ». Contrôle automatique des libellés : ${ck.prLabelOverlaps} chevauchement(s) sur précision-rappel, ${ck.f1CostLabelOverlaps} sur F1-coût ; rendus vérifiés à l'œil.`,
     "");
   md = ls.join("\n");
+  md = md.replaceAll("convention A : raisonnement non facturé", "convention A : sortie rapportée, raisonnement probablement inclus");
 }
 
 // ================= Emission =================
