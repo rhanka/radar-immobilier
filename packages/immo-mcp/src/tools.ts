@@ -19,6 +19,7 @@ import { TOOL_HANDLERS, type ToolTextResult } from "./tool-handlers.js";
 import { installNormalizedListHandler } from "./zod4-list-handler.js";
 import { isSignalWrite, SIGNAL_WRITE_ANNOTATIONS, SIGNAL_TOOL_DEFINITIONS } from "./signal-contract.js";
 import type { SignalRuntime } from "./signal-store.js";
+import { auditSignalResult, signalAttempt } from "./signal-audit.js";
 
 export interface ToolContext {
   signals?: SignalRuntime;
@@ -63,8 +64,12 @@ export async function invokeTool(name: string, args: Record<string, unknown>, sn
         try {
           if (!isSignalWrite(def.name)) assertScope(snapshot.auth, def.scope);
           auditToolCall(snapshot.auth, def.name, hashInput(args), correlationId);
-          return await handler(args as Record<string, unknown>, snapshot);
+          const outcome = await handler(args as Record<string, unknown>, snapshot);
+          const attempt = signalAttempt(name, args);
+          auditSignalResult(snapshot, attempt, outcome.isError ? String(JSON.parse(outcome.content[0]!.text).error ?? "refused") : "written");
+          return outcome;
         } catch (err) {
+          auditSignalResult(snapshot, signalAttempt(name, args), "failed");
           if (err instanceof RadarSignalReadError) {
             const payload = {
               ...err.toPublicPayload(def.name, correlationId),
