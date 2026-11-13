@@ -54,9 +54,11 @@ for (const scenario of ['personal', 'workspace', 'both', 'refused', 'changed', '
     connection.page.on('requestfailed', request => diagnostics.push(`${request.method()} ${new URL(request.url()).pathname}: ${request.failure()?.errorText}`));
     try {
       const page = connection.page;
+      page.setDefaultTimeout(1800);
       await page.setViewportSize({ width: 1440, height: 1000 });
       await page.bringToFront();
-      await openPerimeter(page, 'http://127.0.0.1:5407');
+      // Install mocks before booting once with the real workspace and DB routes.
+      await openPerimeter(page, 'http://127.0.0.1:5407', false);
       await page.route('**/api/v1/workspaces', route => route.fulfill({ json: { ok: true, workspaces: [{ workspace: {
         id: f.workspaceId, slug: 'qa', label: 'QA' }, moderateArchive: kind !== 'refused', manageMembers: true }] } }));
       const writes: { path: string; status: number }[] = [];
@@ -163,7 +165,8 @@ for (const scenario of ['personal', 'workspace', 'both', 'refused', 'changed', '
       await page.getByTestId('signals-bucket-head').click();
       await browserExpect(card.getByRole('button', { name: 'Classement : Non classé', exact: true })).toBeVisible({ timeout: 1800 });
     } catch (error) {
-      console.log('BROWSER_FAILURE', scenario, JSON.stringify({ diagnostics, body: await connection.page.locator('body').innerText() }));
+      console.log('BROWSER_FAILURE', scenario, JSON.stringify({ diagnostics,
+        body: await connection.page.locator('body').innerText().catch(() => '<unavailable>') }));
       throw error;
     } finally { await connection.close(); }
   });
