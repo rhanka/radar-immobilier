@@ -799,6 +799,11 @@ reannotate-signals-preprod: ## Reclassify recent signals in preprod (REANNOTATIO
 	@test "$(ENV)" = preprod || { echo 'Requires ENV=preprod'; exit 1; }
 	@REANNOTATION_MODE="$(REANNOTATION_MODE)" KUBECTL="$(KUBECTL)" bash tools/make/reannotate-signals-preprod.sh
 
+.PHONY: test-refresh-renders
+test-refresh-renders: ## Validate refresh defaults and render mutation guards without a cluster
+	@bash -n tools/make/reannotate-signals-preprod.sh
+	@bash deploy/k8s/refresh-cronjobs/verify-renders.test.sh
+
 deploy-db-migrate-k8s: ## Run the one-shot DB migrator Job in the live namespace
 	@if [ "$(K8S_DEPLOY_CONFIRM)" != "1" ] || [ -z "$$KUBECONFIG" ]; then \
 	  echo "[deploy-db-migrate-k8s] refused: set KUBECONFIG and K8S_DEPLOY_CONFIRM=1"; \
