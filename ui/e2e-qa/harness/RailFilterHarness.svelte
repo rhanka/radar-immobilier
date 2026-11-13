@@ -11,9 +11,11 @@
    *    initialSubsetKey APRÈS le 1er rendu → les cases doivent se resynchroniser.
    */
   import SignauxRail from "../../src/lib/components/maps/SignauxRail.svelte";
+  import { defaultSignalTimeRange } from "../../src/lib/signals/signal-date-filter";
 
   let initialSubsetKey = "vivier-v2";
   let emitted: string[] = [];
+  let timeRange = defaultSignalTimeRange();
 
   function onFilterChange(key: string): void {
     emitted = [...emitted, key];
@@ -33,6 +35,8 @@
   <span id="emit-count">{emitted.length}</span>
   <span id="emitted-log">{emitted.join(",")}</span>
   <span id="current-initial">{initialSubsetKey}</span>
+  <span id="current-period">{timeRange.relative}</span>
 
-  <SignauxRail {initialSubsetKey} {onFilterChange} />
+  <SignauxRail {initialSubsetKey} {onFilterChange} {timeRange}
+    onTimeRangeChange={(next) => { timeRange = next; }} />
 </div>
