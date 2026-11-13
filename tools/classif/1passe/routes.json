@@ -1,22 +1,23 @@
 {
   "source": "tools/classif/run-seat.mjs, base ee15d3744a9998ca6627e57240309ad9411c9ea3",
-  "globalConcurrency": 2,
-  "perAccountConcurrency": 1,
-  "minLaunchIntervalMs": 30000,
-  "batchMaxCalls": 5,
-  "automaticRetry": false,
-  "stopGlobalAtFirst": ["401", "403", "429", "account_refusal", "quota_exhausted"],
-  "codexQuotaPausePercent": 85,
+  "globalConcurrency": 16,
+  "perAccountConcurrency": 8,
+  "arbitrationConcurrency": 1,
+  "minLaunchIntervalMs": 0,
+  "automaticRetry": "quota seulement, 60s puis 300s, réserve de 40",
+  "stopArmAtFirst": ["401", "403", "disabled", "terms", "account_refusal"],
+  "codexQuotaPausePercent": 90,
+  "codexQuotaCheckIntervalMs": 600000,
   "routes": [
     {"id":"astra-low","model":"gpt-6-astra","effort":"low","transport":"codex exec, siège ChatGPT, stdin, JSONL","concurrency":1},
-    {"id":"astra-medium","model":"gpt-6-astra","effort":"medium","transport":"codex exec, siège ChatGPT, stdin, JSONL","concurrency":1},
+    {"id":"astra-medium","model":"gpt-6-astra","effort":"medium","transport":"codex exec, siège ChatGPT, stdin, JSONL","concurrency":8},
     {"id":"sol-6.1-medium","model":"gpt-6.1-sol","effort":"medium","transport":"codex exec, siège ChatGPT, stdin, JSONL","concurrency":1},
-    {"id":"opus-5.5-medium","model":"claude-opus-5-5","effort":"medium","transport":"claude -p, siège, stdin, JSON","concurrency":1},
+    {"id":"opus-5.5-medium","model":"claude-opus-5-5","effort":"medium","transport":"claude -p, siège, stdin, JSON","concurrency":8},
     {"id":"gemini-4-argon-high","model":"gemini-4-argon-high","effort":"high","transport":"agy --print=, siège, stdin stream-json, slash désactivé","concurrency":1}
   ],
   "codexArgs": ["exec","-m","<model>","-c","model_reasoning_effort=<effort>","-s","read-only","--skip-git-repo-check","--json","-o","<isolated-dir>/last-message.md","-"],
-  "claudeArgs": ["-p","--model","claude-opus-5-5","--effort","medium","--output-format","json","--tools","","--setting-sources","project","--no-session-persistence","--system-prompt","You are a careful annotator. Follow the user instructions exactly and answer only in the requested format.","--strict-mcp-config","--mcp-config","{\"mcpServers\":{}}"],
+  "claudeArgs": ["-p","--model","claude-opus-5-5","--effort","medium","--output-format","json","--tools","","--setting-sources","project","--no-session-persistence","--safe-mode","--disable-slash-commands","--max-turns","1","--system-prompt","You are a careful annotator. Follow the user instructions exactly and answer only in the requested format.","--strict-mcp-config","--mcp-config","{\"mcpServers\":{}}"],
   "agyArgs": ["--model","gemini-4-argon-high","--input-format","stream-json","--output-format","stream-json","--disable-slash-commands","--print="],
   "agyStdin": {"event":"user","message":{"role":"user","content":"<prompt>"}},
-  "isolation": "répertoire vide, environnement filtré, outils et MCP désactivés selon le CLI ; aucun fallback de compte"
+  "isolation": "cwd vide hors dépôt, environnement filtré ; codex home isolé sous ~/.codex/1passe-seat-astra-medium ; skills/plugins/MCP désactivés ; toute utilisation d’outil invalide la réponse ; aucun fallback"
 }

@@ -1,19 +1,24 @@
 {
-  "version": 1,
+  "version": 2,
   "llmCalls": 0,
   "files": {
-    "PREREG.md": "f5575a9cb768ddf13e49d19b9319570adce1c63ffa4d2a5451915d4d1f1786c7",
+    "PREREG.md": "624dd786df17b2968cbef3fb77fe44570af92e6622efeb7c22fd8be48420e0c0",
     "seed.json": "53b163c08429e7305d370657b203437e338350c869c3b14322aefb31889d1edc",
     "split.json": "bdf8830324267f214c318830d13c9e531449bbc43ea18b1b4a7ae36d9177b2d6",
-    "routes.json": "eb1e1f66eba6aad5923b050987e41cfbfffcd13f576c33cfb1be959fcf272e71",
+    "routes.json": "a4e20c93a8776ec4ae2d23c2a86df9834a0ca7b836bde1f861dc005a85c89c75",
     "annotation.json": "5ae07b45ec5a9e4d79ccb264cf8ab042f22de76a7550a591cb84790ff778f7eb",
-    "singlepass.json": "b492cc1ab5c58ef96ae85661a2a4c0565b7331a63c80b481a9ed9324e9b50346",
+    "singlepass.json": "5b1a836e42406dbca55adf0e28f8418cebbb382eac1937d8c558d92c0d601f49",
     "annotation-prompt.md": "a1b314efe38f7c3859c87dad558c792b140023e0b99cbc4365cac47e256dd203",
     "arbitration-prompt.md": "466e0eb1640a0d4e5d7e2c064e977a16729c2baf0b438993dab9a42493633ff6",
     "singlepass-prompt.md": "2692cc25820f0a26cb8fe5004db267e7ea84c24a317da7f939f5b220e0d61dc4",
-    "README.md": "4beccca1ca0a050809098fbc5741b283246a060cff2f719d302e979c0e3b8035",
+    "README.md": "dd5699616c61e5ab7db0dde27bddc051e62eef6a00dc542e163cb4e95d9be795",
     "prepare.mjs": "f387e445d9eda8370b8a593e91d4bad1f385c08b1148900bebb3143e6b030050",
-    "check.mjs": "d4a34e5769c3b9d5f7b25ab31fd34f1cbe627eeecf378fba2778389e7f76cf7e",
-    "step0.mk": "0c93fb8460bcdfc9a18e5702e173835875fc488b31153516d0a2ff5152f2cb04"
+    "check.mjs": "1c86fee599d56a14e83bec3b2719d86726d3afe79c493d6883e4be2e110c5387",
+    "step0.mk": "0c93fb8460bcdfc9a18e5702e173835875fc488b31153516d0a2ff5152f2cb04",
+    "ops.mk": "62c8e4c46421eb6f19bcc7049db7db3a5cc8d220953619f625146e60827887d7",
+    "quota.mjs": "e3ee15838e09d871ada18dac05fe5b3f82541490d47d8f4fcc200afd2ae19360",
+    "inspect.mjs": "b6b6ae6489718a37e0da987366de411659b6fde80d5208ccd5efee59ffc4a2d3",
+    "context.mjs": "a4554a957f1bef6d7eea225df7d9cfe257b465bca439fc2123e5ce0eb0084ffd",
+    "annotate.mjs": "cda40f862bb48f3e92664a0f4d058ee793a4cce0a15a69232d17286fd06857e8"
   }
 }
