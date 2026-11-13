@@ -11,7 +11,8 @@ const dir = `${armDir}/jsonl`;
 const files = (await readdir(dir)).filter((f) => f.endsWith(".jsonl")).sort();
 const docs = [];
 for (const f of files) {
-  const doc = f.replace(/\.jsonl$/, "").split("--").slice(1).join("--");
+  const stem = f.replace(/\.jsonl$/, "");
+  const doc = stem.includes("--") ? stem.split("--").slice(1).join("--") : stem;
   const lines = (await readFile(`${dir}/${f}`, "utf8")).split("\n").filter(Boolean);
   const taskKinds = {};
   const tools = [];
