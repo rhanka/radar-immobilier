@@ -832,6 +832,7 @@ export const facetReasonCodes = pgTable("facet_reason_codes", {
 // signal rows keep every lot column null.
 export const facetEvents = pgTable("facet_events", {
   id: uuid("id").primaryKey().defaultRandom(),
+  classFeedbackId: uuid("class_feedback_id"),
   scope: text("scope").notNull().default("personal"),
   ownerId: uuid("owner_id").references(() => accountUsers.id),
   actorId: uuid("actor_id").notNull().references(() => accountUsers.id),
