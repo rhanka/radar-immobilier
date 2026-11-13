@@ -4,7 +4,7 @@
 Fix #760 P1 while preserving #1090 period selection and perimeter counters. P2 and P3 are outside implementation scope.
 
 ## Scope / Guardrails
-- Base: fix/signals-period-menu-click at 564971d24; rebase on origin/main after #1090 merges.
+- Base: origin/main at a54f05eaa, including merged #1090 and #1094.
 - Worktree: tmp/ecarte-review. No environment files or Python. No merge or commit trailers.
 - Isolated runtime: test-ecarte, UI 5407, PostGIS 5547, S3 mock 9147. No API or Maildev host listeners.
 - CDP: 127.0.0.1:9333 only, disposable tabs closed in finally. Real Playwright mouse clicks.
@@ -18,6 +18,8 @@ Fix #760 P1 while preserving #1090 period selection and perimeter counters. P2 a
   - `ui/src/lib/components/maps/SignauxMapView.svelte`
   - `ui/src/lib/components/maps/SignauxRail.svelte`
   - `ui/e2e-qa/signals-period-perimeter.spec.ts`
+  - `ui/e2e-qa/signals-relevance-fixtures.ts`
+  - `ui/e2e-qa/signals-relevance.harness.spec.ts`
   - `docs/spec/SPEC_BASE_API.md`
   - `plan/ECARTE-BRANCH_fix-signals-ecarte-review.md`
 - **Forbidden Paths (must not change in this branch)**:
@@ -69,6 +71,14 @@ Fix #760 P1 while preserving #1090 period selection and perimeter counters. P2 a
   - [x] Push and open PR referencing #760, listing P3 without implementing them.
 
 ## Evidence
+- [x] Final rebased gates pass: typecheck (0 errors, 8 Svelte warnings), lint (0 errors, 1 warning), full UI suite (1,900 passing, 10 todo; 145 files passing, one skipped), 300 targeted API/PostgreSQL tests across 25 files. Logs: tmp/rebased-{final-typecheck,final-lint,test-ui,api,graph-store}.log.
+- [x] All 18 real-click CDP scenarios pass after rebase: 7 period/perimeter/global-relevance cases (16.7 s) and 11 actual Hono/PostgreSQL archive cases (36.85 s). Includes six periods, class removal, pertinent-only total, map membership, checked archives, personal/shared/both restores, role refusal, late fingerprint 409, shared/selection head conflicts, lost 502/network responses, default-list return and F5 persistence. Logs: tmp/rebased-final-e2e.log, tmp/rebased-browser-stable.log.
+- [x] Browser diagnostics: earlier runs exposed Vite HMR during a click and ERR_NETWORK_CHANGED during imports; one timeout's diagnostic also masked its original error. Register fixtures before one app boot, bound actions to 1,800 ms and preserve the original error. Final runs execute sequentially without source edits or concurrent quality jobs; no timeout was increased.
+- [x] Both isolated stacks removed with down -v; the dedicated test browser was closed. No environment file, Python, merge or commit trailer. Manual scope/diff checks pass; independent peer consensus is unavailable (tmp/resume-review.md).
+- [x] Rebase on a54f05eaa: resolved the rail conflict by retaining #1094's shared count cache for membership, sort, badges and totals. Removed the duplicate countedEntries path from #1092.
+- [x] Semantic merge: displayedSignalCountForCity now includes every checked class, including archives, for both rail and map; older cubes without a class dimension remain unavailable when archives are requested. Preserve global #1094 unit cases and adjust archive expectations.
+- [x] SignauxMapView merged without textual conflict: retain #1094's cartographic filter and count cache, plus #1092's showDiscarded reads and detail reload when visibility changes.
+- [x] Preserve both #1094 browser scenarios; make archive fixtures honor date bounds and showDiscarded. Verify checked archives enter totals, cities and map, while unchecked archives stay excluded.
 - [x] Resumed correction validation before rebase: typecheck, lint and full test-ui pass; 74 targeted API/PostgreSQL tests pass on a fresh database; 11 real-click PostgreSQL archive scenarios and 5 period/perimeter scenarios pass through CDP 9333. Logs: tmp/resume-*.log.
 - [x] Second correction: reproduced both independent failures on fff272af5. Log: tmp/atomic-red-review.log (2 failed, 1 passed).
 - [x] Atomic server operation uses the existing in-transaction personal and workspace writers, including the final selection. Six PostgreSQL tests are red on fff272af5 and green with the new route. Logs: tmp/atomic-{red-api,green-api-initial}.log.

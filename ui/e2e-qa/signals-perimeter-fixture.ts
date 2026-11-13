@@ -1,7 +1,7 @@
 import { expect, type Page } from '@playwright/test';
 import { mockAuthenticated } from './_helpers';
 const classes = ['pertinent', 'a_surveiller', 'non_classe', 'ecarte'] as const;
-export async function openPerimeter(page: Page, baseURL: string): Promise<void> {
+export async function openPerimeter(page: Page, baseURL: string, navigate = true): Promise<void> {
   let restored = false;
   await page.clock.setFixedTime(new Date("2026-03-31T16:00:00Z"));
   await mockAuthenticated(page);
@@ -73,6 +73,7 @@ export async function openPerimeter(page: Page, baseURL: string): Promise<void> 
     }] },
   } }));
   await page.route("**/api/geo/collections/qc-zonage-delson/items**", (route) => route.fulfill({ status: 404, json: {} }));
+  if (!navigate) return;
   await page.goto(`${baseURL}/geo/region/quebec?mode=signal&filter.period=7d&filter.zonage=1&filter.residentiel=1&filter.precoce=1&filter.excludePiia=1&filter.excludeDerogations=1`);
   await expect(page.locator("button.rail-city-row")).toHaveCount(2);
 }

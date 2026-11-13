@@ -37,8 +37,12 @@ export function aggregate(city: typeof cities[number], params: URLSearchParams) 
   }));
   const filtreCube = {};
   const filtreCubesByClassement: VivierFiltreCubesByClassement = {
-    pertinent: {}, a_surveiller: {}, non_classe: {}, ecarte: { "11100": 1 },
+    pertinent: {}, a_surveiller: {}, non_classe: {}, ecarte: {},
   };
+  const archived = archivedNode(city);
+  if (matchesDocumentDateWindow(archived.props, {
+    dateFrom: params.get("dateFrom") ?? undefined, dateTo: params.get("dateTo") ?? undefined,
+  })) addToVivierFiltreCube(filtreCubesByClassement.ecarte, { ...archived, classification: archived.classification! });
   nodes.forEach((node, i) => {
     const record = { ...node, classification: node.classification! };
     addToVivierFiltreCube(filtreCube, record);
@@ -52,8 +56,15 @@ export function aggregate(city: typeof cities[number], params: URLSearchParams) 
     filtreCube, filtreCubesByClassement };
 }
 
-export function detail(city: typeof cities[number]) {
-  return { ok: true, token: "fixture", signals: nodesFor(city), heads: [],
+function archivedNode(city: typeof cities[number]): GraphSignalNode {
+  return { ...nodesFor(city)[0]!, id: `${city.slug}-archived`, label: `${city.name} archived` };
+}
+
+export function detail(city: typeof cities[number], showDiscarded = false) {
+  const archived = archivedNode(city);
+  return { ok: true, token: "fixture", signals: [...nodesFor(city), ...(showDiscarded ? [archived] : [])],
+    heads: [{ target: { citySlug: city.slug, type: archived.type, id: archived.id }, effectiveDiscarded: true,
+      workspace: null, personal: { id: `${city.slug}-archive-head`, state: "active", reasonCode: "N-NON-RES" } }],
     counts: { total: city.classes.length, hidden: 0, visible: city.classes.length, selected: 0 },
     selection: nodesFor(city).flatMap((node, i) => (city.classes[i] ?? "pertinent") === "non_classe" ? [] : [{
       target: { citySlug: city.slug, type: "Signal", id: node.id },
