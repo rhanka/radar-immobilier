@@ -1,6 +1,6 @@
 // Contrôle d’intégrité hors ligne. Aucun appel de siège, aucune ouverture de l’aveugle.
 import assert from 'node:assert/strict';
-import { readFileSync, writeFileSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, statSync, existsSync } from 'node:fs';
 import { sha256, MAGIC } from '../lib/refc1.mjs';
 import { ROUTES } from '../run-seat.mjs';
 
@@ -75,7 +75,9 @@ const files = ['PREREG.md', 'seed.json', 'split.json', 'routes.json', 'annotatio
   'README.md', 'prepare.mjs', 'check.mjs', 'step0.mk', 'ops.mk', 'quota.mjs', 'inspect.mjs', 'context.mjs', 'annotate.mjs'];
 const hashes = Object.fromEntries(files.map((f) => [f, sha256(readFileSync(`${dir}/${f}`))]));
 if (process.argv.includes('--freeze')) {
-  writeFileSync(`${dir}/freeze.json`, `${JSON.stringify({ version: 2, llmCalls: 0, files: hashes }, null, 2)}\n`);
+  const journal = '/private/annotation/calls.jsonl';
+  const llmCalls = existsSync(journal) ? readFileSync(journal, 'utf8').trim().split('\n').filter(Boolean).length : 0;
+  writeFileSync(`${dir}/freeze.json`, `${JSON.stringify({ version: 3, llmCalls, files: hashes }, null, 2)}\n`);
 } else assert.deepEqual(json(`${dir}/freeze.json`).files, hashes);
 console.log(JSON.stringify({ status: 'contrôles hors ligne réussis', llmCalls: 0,
   supports: split.summary, futureCallsCap: 1276, cStratification: 'en attente' }));
