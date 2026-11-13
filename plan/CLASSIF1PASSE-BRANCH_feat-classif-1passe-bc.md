@@ -34,5 +34,6 @@
 - [x] Sous-lot : syntaxe, tirage reproductible, pack et sceau vérifiés hors ligne ; zéro appel.
 - [ ] Écarts : stratification C exacte, supports P∪S et dispatcher B+C encore requis.
 - [ ] Lot 2 : contrôles hors ligne, push et PR draft vers main.
+- [x] Documentation de lancement et gel des empreintes livrés. Écarts laissés visibles pour i-cond.
 - [ ] Hors étape 0 : confirmations owner, annotations, exécution et évaluation.
 - [ ] Hors demande : fusion.
