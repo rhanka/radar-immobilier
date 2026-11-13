@@ -40,11 +40,16 @@ Persist relevance with the existing period URL mechanism. Make exclusions consis
   - [x] Confirm clean branch, fetch base and rebase after #1092 merged.
   - [x] Inspect shared residential-project evidence and cube contract.
 - [ ] **Lot 1 — Regression and correction**
-  - [ ] Reproduce local URL and exclusion behavior before edits.
-  - [ ] Capture failing real-click tests, then apply the smallest evidenced fix.
+  - [x] Reproduce local URL and exclusion behavior before edits.
+  - [x] Capture failing real-click tests, then apply the smallest evidenced fix.
   - [ ] Verify reload, reopened links, history and selected city/zone.
   - [ ] Verify exact exclusion deltas, faceting and map membership without heavy calls.
 - [ ] **Lot 2 — Gates and delivery**
   - [ ] Run typecheck, lint, test-ui and combined existing/new browser regressions.
   - [ ] Review scope and diff; clean isolated stacks with down -v.
   - [ ] Commit without trailers, push and open PR to main. Do not merge.
+
+## Evidence
+- [x] Baseline existing seven CDP regressions pass. New three cases fail: unchanged relevance URL; two avoidable aggregate reads in each exclusion scenario. Logs: tmp/red-e2e.log.
+- [x] On merged #1092, exclusions already remove the correct signals: 8 to 6 to 4 globally; 4 to 3 to 2 per city and selected detail. Keep the proven residential PIIA. Do not invent a second business rule.
+- [x] Initial correction passes all three CDP cases and 19 router unit tests. Exclusions use existing cubes with zero aggregate reads. Logs: tmp/green-e2e-initial.log, tmp/green-unit.log. Screenshots: test-results/signals-url-exclusions-*/{before,excluded-0,excluded-1}.png.

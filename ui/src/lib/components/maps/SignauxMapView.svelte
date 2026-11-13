@@ -185,6 +185,7 @@
   import { classementCountsForPerimeter, displayedSignalCountForCity, filtreCountsForPerimeter } from "$lib/signals/signal-filter-counts.js";
   import {
     buildClassementMap,
+    DEFAULT_CLASSEMENT_FILTER,
     classementKey,
     filterNodesByClassement,
   } from "$lib/signals/signal-classement.js";
@@ -287,9 +288,9 @@
   // Classement (spec 2026-11-08): heads of the coherent read + Steve codes.
   let detailSelectionHeads: import("$lib/signals/graph-signal-detail-client.js").CoherentSelectionHead[] = [];
   let detailArchiveHeads: import("$lib/signals/graph-signal-detail-client.js").CoherentArchiveHead[] = [];
-  let classementFilter: import("$lib/signals/signal-classement.js").ClassementFilter = {
-    pertinent: true, a_surveiller: true, non_classe: true, ecarte: false,
-  };
+  let classementFilter = geoRoute
+    ? readGeoFilters(geoRoute.state.filters).classement ?? { ...DEFAULT_CLASSEMENT_FILTER }
+    : { ...DEFAULT_CLASSEMENT_FILTER };
   let classementReasonCodes: import("$lib/signals/signal-classement.js").ReasonCodeEntry[] = [];
   let classementReasonWorkspace: string | null = null;
   let classementOverrides = new Map<string, import("$lib/signals/signal-classement.js").ClassementEntry>();
@@ -633,8 +634,8 @@
   let activeSubsetKey: string = geoRoute ? subsetFromGeoFilters(geoRoute.state.filters) : FILTER_DEFAULT;
 
   /**
-   * Exclusions d'AFFICHAGE de la vue B. Elles ne touchent ni la classification
-   * serveur ni les compteurs : elles ne font que masquer.
+   * Display exclusions use the same predicates for detail and city cubes.
+   * They never change the server classification.
    */
   let vivierBExclusions: VivierBExclusions = initialFilters?.exclusions ?? { ...DEFAULT_VIVIER_B_EXCLUSIONS };
   let timeRange: SignalTimeRange = initialFilters?.timeRange ?? defaultSignalTimeRange();
@@ -704,7 +705,6 @@
     vivierBExclusions = next;
     syncFilterRoute();
     reconcileToVisibleNodes();
-    void load();
     updateGeoLayers();
   }
 
@@ -725,6 +725,7 @@
   function currentGeoFilters(): Record<string, string[]> {
     return writeGeoFilters({
       axes: bAxesFromVivierKey(activeSubsetKey), exclusions: vivierBExclusions,
+      classement: classementFilter,
       timeRange, dateBasis, lots: lotDataFilter, zoneKinds: zoneKindFilter, zoneMillesime: zoneMillesimeFilter, lotsEnabled,
       cptaqEnabled, citySearch, zoneSearch, lotSearch,
     });
@@ -953,6 +954,7 @@
   ): void {
     const visibilityChanged = next.ecarte !== classementFilter.ecarte;
     classementFilter = next;
+    syncFilterRoute();
     if (visibilityChanged && selectedCity) void loadDetailForCity(selectedCity.municipality.slug);
   }
   async function handleApplyClassement(
@@ -2119,9 +2121,12 @@
       timeRange = filters.timeRange;
       dateRange = dateRangeFromSignalTimeRange(timeRange);
     }
-    // Bulk counters also depend on the date basis and the B display exclusions.
-    const dateChanged = periodChanged || dateBasis !== filters.dateBasis
-      || JSON.stringify(vivierBExclusions) !== JSON.stringify(filters.exclusions);
+    // Exclusions are evaluated locally from the already loaded city cubes.
+    const dateChanged = periodChanged || dateBasis !== filters.dateBasis;
+    const nextClassement = filters.classement ?? { ...DEFAULT_CLASSEMENT_FILTER };
+    const archiveVisibilityChanged = classementFilter.ecarte !== nextClassement.ecarte;
+    classementFilter = nextClassement;
+    if (archiveVisibilityChanged && selectedCity) void loadDetailForCity(selectedCity.municipality.slug);
     dateBasis = filters.dateBasis;
     vivierBExclusions = filters.exclusions;
     lotDataFilter = filters.lots;
