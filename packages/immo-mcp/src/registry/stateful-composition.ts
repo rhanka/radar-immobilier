@@ -11,6 +11,7 @@ import { artifactRefusal, artifactScopeDenied, assertArtifactBinding, type Artif
 import { ARTIFACT_STRICT, ARTIFACT_PART1 } from "@radar/artifacts-host";
 import { deferArtifactPrecondition } from "./artifact-transport-modules.js";
 import { isSignalWrite, SIGNAL_WRITE_ANNOTATIONS } from "../signal-contract.js";
+import { auditSignalResult } from "../signal-audit.js";
 
 // GeoJSON may contain 2,000 features; budgets must not impose a smaller semantic limit.
 export const IMMO_WIRE_LIMITS = Object.freeze({
@@ -104,6 +105,8 @@ export async function composeStatefulImmo(
       return invokeTool(tool, args, snapshot);
     },
     formatRefusal(tool, refusal, context) {
+      const snapshot = getInvocationContext();
+      if (snapshot) auditSignalResult(snapshot, snapshot.signalAttempt, `refused:${refusal.kind}`);
       // Artifact tools share one typed scope refusal with the binding check.
       if (refusal.kind === "scope" && artifacts?.tools.some((entry) => entry.name === tool)) {
         const denied = artifactScopeDenied(tool);
