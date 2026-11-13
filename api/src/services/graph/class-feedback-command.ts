@@ -10,7 +10,9 @@ export const classFeedbackCommand = z.object({
   verdict: z.enum(["up", "down"]),
   annotation: z.object({ source: z.literal("ai"), model: z.string().min(1),
     promptSha256: z.string().regex(/^[a-f0-9]{64}$/), pipelineRunId: z.string().min(1),
-    classe, updatedAt: z.string().min(1) }).strict(),
+    classe, updatedAt: z.string().max(64)
+      .regex(/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}(?::?\d{2})?)$/)
+      .refine((value) => Number.isFinite(Date.parse(value))) }).strict(),
   nextClass: classe.optional(), reasonCode: z.string().min(1).max(128).optional(),
   comment: z.string().trim().max(2000).optional(),
   selectionHeads: z.object({ pertinent: head, a_surveiller: head }).strict(),

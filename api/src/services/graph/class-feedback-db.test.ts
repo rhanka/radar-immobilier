@@ -29,6 +29,16 @@ async function setup() {
 }
 
 describeDb("human classification feedback PostgreSQL", () => {
+  it("should compare the exact PostgreSQL timestamp and history version", async () => {
+    const f = await setup();
+    await f.db.execute(sql`UPDATE signal_class_annotations SET updated_at='2026-11-13T12:00:00.123456Z'`);
+    await expect(f.submit({ ...f.command, annotation: { ...f.command.annotation,
+      updatedAt: "2026-11-13T12:00:00.123457Z" } })).rejects.toThrow("annotation_version_conflict");
+    await f.submit({ ...f.command, annotation: { ...f.command.annotation, updatedAt: "2026-11-13T12:00:00.123456Z" } });
+    const history = await f.db.execute(sql`SELECT h.created_at::text AS date FROM signal_class_feedback f
+      JOIN signal_class_annotation_history h ON h.id=f.annotation_id`);
+    expect(history.rows[0]!.date).toContain("12:00:00.123456");
+  });
   it("should preserve immutable AI versions and skip duplicate reannotation", async () => {
     const f = await setup();
     await writeClassAnnotation(f.db, f.ai);

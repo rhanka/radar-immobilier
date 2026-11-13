@@ -37,12 +37,12 @@ export async function writeClassFeedback(db: Database, sub: string, workspaceId:
     // Match the AI writer's table-before-row order. Exclude AI replacement until commit.
     await tx.execute(sql`LOCK TABLE facet_events IN ROW EXCLUSIVE MODE`);
     const { target, annotation } = command;
-    const rows = await tx.execute(sql`SELECT * FROM signal_class_annotations
+    const rows = await tx.execute(sql`SELECT *,updated_at=${annotation.updatedAt}::timestamptz AS current_version FROM signal_class_annotations
       WHERE city_slug=${target.citySlug} AND node_type=${target.type} AND node_id=${target.id} FOR UPDATE`);
     const ai = rows.rows[0];
     if (!ai || ai.source !== "ai" || ai.model !== annotation.model || ai.prompt_sha256 !== annotation.promptSha256
       || ai.pipeline_run_id !== annotation.pipelineRunId || ai.classe !== annotation.classe
-      || new Date(String(ai.updated_at)).getTime() !== new Date(annotation.updatedAt).getTime()) {
+      || ai.current_version !== true) {
       throw new FacetError(409, "annotation_version_conflict");
     }
     const next = command.verdict === "up" ? annotation.classe : command.nextClass!;
@@ -88,6 +88,8 @@ export async function writeClassFeedback(db: Database, sub: string, workspaceId:
     const history = await tx.execute(sql`SELECT id FROM signal_class_annotation_history
       WHERE city_slug=${target.citySlug} AND node_type=${target.type} AND node_id=${target.id}
         AND model=${ai.model} AND prompt_sha256=${ai.prompt_sha256} AND pipeline_run_id=${ai.pipeline_run_id}
+        AND classe=${ai.classe} AND reason=${ai.reason} AND effort=${ai.effort} AND prompt_id=${ai.prompt_id}
+        AND input_sha256=${ai.input_sha256} AND created_at=${annotation.updatedAt}::timestamptz
       ORDER BY created_at DESC,id DESC LIMIT 1`);
     const reason = command.verdict === "up" ? `validé : ${ai.reason}` : command.reasonCode!;
     await tx.execute(sql`INSERT INTO signal_class_feedback
