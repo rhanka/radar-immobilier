@@ -36,7 +36,7 @@ BEGIN
     GRANT USAGE ON SCHEMA public TO ${IMMO_MCP_SIGNAL_WRITER_ROLE};
     GRANT SELECT (id,sub,status), UPDATE (created_at) ON account_users TO ${IMMO_MCP_SIGNAL_WRITER_ROLE};
     GRANT SELECT (workspace_id,account_id,status,moderate_archive) ON workspace_memberships TO ${IMMO_MCP_SIGNAL_WRITER_ROLE};
-    GRANT SELECT (city_slug,type,id) ON graph_nodes TO ${IMMO_MCP_SIGNAL_WRITER_ROLE};
+    GRANT SELECT (city_slug,type,id,label,props,source_ref) ON graph_nodes TO ${IMMO_MCP_SIGNAL_WRITER_ROLE};
     GRANT SELECT ON facet_events,facet_event_bindings,facet_streams,facet_activation_state,
       facet_reason_codes,signal_class_annotations,signal_class_annotation_history,signal_class_feedback
       TO ${IMMO_MCP_SIGNAL_WRITER_ROLE};

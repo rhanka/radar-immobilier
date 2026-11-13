@@ -30,6 +30,7 @@ services:
       POSTGRES_PASSWORD: synthetic-only
       POSTGRES_DB: radar
       MCP_SIGNAL_DB_TEST: '1'
+      LOT_MIGRATION_DB_TEST: '1'
       DOTENV_CONFIG_PATH: /dev/null
       npm_config_cache: /cache
 volumes:
