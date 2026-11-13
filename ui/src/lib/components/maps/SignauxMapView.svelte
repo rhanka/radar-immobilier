@@ -916,15 +916,11 @@
   $: classementBaseMap = buildClassementMap(detailSelectionHeads, detailArchiveHeads);
   $: classementMap = new Map([...classementBaseMap, ...classementOverrides]);
   $: classementFilteredNodes = filterNodesByClassement(filteredDetailNodes, classementMap, classementFilter);
-  // Same perimeter and period as Filtre; ignore the Pertinence checkboxes.
+  // Full class cubes include archived targets that coherent-city never serves.
   $: classementCountsValue = loadError !== null ? null : classementCountsForPerimeter({
     entries: allEntries,
     axes: bAxesFromVivierKey(activeSubsetKey),
     exclusions: vivierBExclusions,
-    live: selectedCity && !detailLoading && detailProjection.available
-      ? { slug: selectedCity.municipality.slug,
-          nodes: filterNodesByDocumentDate(detailNodes, dateRange, dateBasis), classement: classementMap }
-      : null,
   });
   // Filtre counts (owner 2026-11-13): over the WHOLE displayed perimeter,
   // with or without a selection — every city's cubes scoped by Pertinence, the
