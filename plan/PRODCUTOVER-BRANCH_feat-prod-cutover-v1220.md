@@ -33,8 +33,9 @@
 - [x] Lot 1 : cibles autonomes et précontrôles sans écriture prod.
 - [x] Lot 2 : sauvegarde, restauration, migrations mesurées et hook 6H préparés.
 - [x] Lot 3 : six tests des refus et test PostgreSQL natif de reprise transactionnelle.
-- [ ] Lot 4 : runbook, prérequis, décisions owner, PR draft.
+- [x] Lot 4 : runbook, prérequis, décisions owner, PR draft #1100 vers main.
 - [ ] Lot 5 : revue complémentaire harness. Aucun GO implicite.
 - [x] Runbook, prérequis et décisions rédigés. Syntaxes CJS/Bash et tests ciblés passent.
 - [x] Revue formelle selection-failed documentée : MCP h2a et métadonnées auteur manquants.
 - [x] Image API candidate absente localement ; aucun pull ni hook réel lancé.
+- [x] Branche publiée, aucune fusion ni aucun tag. Répétition réelle et GO restent à venir.
