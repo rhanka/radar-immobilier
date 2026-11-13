@@ -2,6 +2,16 @@
 
 Owner request: 2026-11-13. No prompt optimization or feedback to an optimizer.
 
+Owner continuation, 13 November: retain detection B and measure classification
+only (study mode B). Do not rerun mode A. Run v1 blind, then published v2 tuning
+and blind with separate caches. V2 is frozen at
+`34df2dd7da379699ed8cefcc1dac07010f5618519fbdd7eb9c33d3d77e0ddc50`,
+commit `6c7cc36c0165253c11e89f41edfe67108dbbd0f9` in refresh-v2.
+The original tuning v1 observation remains unchanged. D4 and scoring stay frozen.
+The owner authorizes make to load the root environment file, without displaying
+the key or sending it to a model. Public publication covers code and aggregates
+only. Blind per-unit artifacts remain encrypted in the private directory.
+
 The C study's series 7 uses the reference named D by its implementation.
 There are 252 tuning units and 252 blind units. Units include existing signals
 and whole captured PVs. Preserve this inventory; do not call every PV an act.

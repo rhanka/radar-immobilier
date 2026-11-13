@@ -1,5 +1,5 @@
 import {readFileSync,readdirSync,writeFileSync} from 'node:fs';
-import {load,home,json,sourceText,hash} from './inputs.mjs';
+import {load,home,json,sourceText,hash,modes} from './inputs.mjs';
 import {parseJsonObject} from '../run-seat.mjs';
 import {metrics,annotation,shown} from './metrics.mjs';
 import {seal,unseal,keyFromEnv} from '../lib/refc1.mjs';
@@ -7,10 +7,10 @@ import {pairAct} from './matching.mjs';
 const half=process.argv[2]??'tuning',blind=half==='blind';
 const key=blind?keyFromEnv('CLASSIF_BLIND_KEY'):null;
 const refs=load(half),dir=`${home}/${half}`;
-const validationBytes=readFileSync(`${dir}/native-validation.${blind?'sealed':'json'}`);
-const validation=new Map(JSON.parse(blind?unseal(key,validationBytes):validationBytes.toString()).map(x=>[x.file,x]));
+const validationBytes=modes.includes('A')?readFileSync(`${dir}/native-validation.${blind?'sealed':'json'}`):null;
+const validation=new Map(validationBytes?JSON.parse(blind?unseal(key,validationBytes):validationBytes.toString()).map(x=>[x.file,x]):[]);
 const results={},misses=[];
-for(const mode of ['A','B']){
+for(const mode of modes){
  const scored=[];let extractions=0,unpaired=0;
  for(const {item,ref} of refs){
   const file=`${mode}-${hash(item.itemId).slice(0,24)}.${blind?'sealed':'json'}`;
