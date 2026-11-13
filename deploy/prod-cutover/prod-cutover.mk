@@ -54,7 +54,7 @@ commit:
 	@test -n "$$MSG"
 	@git -C "$(ROOT)" -c core.hooksPath=/dev/null commit -m "$$MSG"
 pr-body:
-	@cd "$(ROOT)" && gh pr edit 1100 --body-file docs/runbooks/prod-cutover-v1220.md
+	@cd "$(ROOT)" && gh api --method PATCH repos/rhanka/radar-immobilier/pulls/1100 -F body=@docs/runbooks/prod-cutover-v1220.md --jq .html_url
 pr-comment:
 	@test -n "$$COMMENT_FILE"
 	@cd "$(ROOT)" && gh pr comment 1100 --body-file "$$COMMENT_FILE"

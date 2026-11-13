@@ -39,6 +39,7 @@
 - [x] Le contrôle des propriétaires de schémas révèle le défaut public omis du dump PostgreSQL 16. Reset corrigé avec pg_database_owner dans la voie conservant les propriétaires.
 - [x] Runbook et plan CD réécrits. Tag après recette et réouverture. Préconditions de copie, propriétaires et GO exact documentés.
 - [x] Validation finale : neuf gardes ; deux scénarios contrôleur ; ESLint ; intégration PostgreSQL 16/PostGIS. DDL synthétique 2,775 s. Deux rollbacks complets, ACL de schémas et tables, propriétaires et refus du rôle candidat vérifiés. Stacks supprimées avec down -v.
+- [x] Publication : ancien gh pr edit refusé par le champ projectCards retiré de GitHub. Cible pr-body passée à gh api REST, avec le même fichier de runbook.
 - [x] Lot 0 : règles, dossier PREPA-PROD complet, contrat 6H et CD.
 - [x] Lot 1 : cibles autonomes et précontrôles sans écriture prod.
 - [x] Lot 2 : sauvegarde, restauration, migrations mesurées et hook 6H préparés.
