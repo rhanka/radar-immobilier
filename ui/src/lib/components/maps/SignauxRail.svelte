@@ -31,7 +31,6 @@
   import {
     B_SUBSET_KEY,
     bAxesFromVivierKey,
-    countForVivierCity,
     DEFAULT_B_AXES,
     keyForVivierB,
     type BAxes,
@@ -59,6 +58,7 @@
   import RailCityList from "$lib/components/maps/RailCityList.svelte";
   import type { RailCityItem } from "$lib/maps/rail-city-items.js";
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
+  import { displayedSignalCountForCity } from "$lib/signals/signal-filter-counts.js";
 
   // ── Props ──────────────────────────────────────────────────────────────────
   /** Toutes les entrées villes (avec signalCount6m et subsetCounts). */
@@ -271,6 +271,8 @@
 
   /** Clé LIVE composée des trois axes de B (zonage/résidentiel/précoce). */
   $: activeKey = keyForVivierB(bAxes);
+  $: cityCounts = new Map(entries.map((entry) => [entry.municipality.slug,
+    displayedSignalCountForCity(entry, activeKey, classementFilter, exclusions)]));
 
   /** Coche/décoche un axe de B (zonage/résidentiel/précoce) : recompose et propage. */
   function toggleBAxis(patch: Partial<BAxes>): void {
@@ -280,23 +282,22 @@
 
   // ── Compteur actif par ville = compte bulk de la clé LIVE ──────────────────
   /**
-   * Compte BULK serveur d'une ville pour la clé LIVE donnée (`null` seulement
-   * si les données sont indisponibles → badge « n/d »).
+   * Server cube count after period, Pertinence, axes and exclusions.
+   * Unknown counts remain unavailable rather than displaying an unfiltered total.
    *
    * C'est le SEUL compte admis pour l'APPARTENANCE et le TRI de la liste : il
-   * ne varie ni pendant un fetch détail ni avec les lentilles client (axes,
-   * exclusions B), donc une ligne — sélectionnée ou non — ne
+   * ne varie pas pendant un fetch détail, donc une ligne ne
    * saute jamais de position et n'est jamais éjectée par la coupe au plafond
    * (régression #378 : le compte live de la ville sélectionnée participait au
    * tri → re-tri en bas + coupe au plafond dès la fin du fetch).
    */
   function bulkCountFor(
     entry: CityMapEntry,
-    key: string,
+    counts: ReadonlyMap<string, number | null>,
     unavailable: boolean,
   ): number | null {
     if (unavailable) return null;
-    return countForVivierCity(entry, key);
+    return counts.get(entry.municipality.slug) ?? null;
   }
 
   /**
@@ -320,7 +321,7 @@
    */
   function countFor(
     entry: CityMapEntry,
-    key: string,
+    counts: ReadonlyMap<string, number | null>,
     unavailable: boolean,
     liveCount: number | null,
     liveSlug: string | null,
@@ -329,24 +330,20 @@
     if (liveCount !== null && liveSlug !== null && entry.municipality.slug === liveSlug) {
       return liveCount;
     }
-    return countForVivierCity(entry, key);
+    return bulkCountFor(entry, counts, unavailable);
   }
 
   // ── Liste de villes (la recherche vit dans RailCityList — liste complète) ──
-  // #5 — garder la ville sélectionnée même si son compte pour le filtre actif
-  // est 0 (elle reste visible/désélectionnable dans le rail).
+  // The list contains only cities with signals left after every active filter.
+  // Selection remains available in the right panel when its city drops out.
   // #378 — appartenance et TRI par compte BULK uniquement : le compte live de
   // la ville sélectionnée ne participe JAMAIS à l'ordre (sinon sa ligne saute
   // ou disparaît à la fin du fetch détail).
   $: sortedEntries = entries
-    .filter((e) => {
-      const isSelected =
-        selectedSlug !== null && e.municipality.slug === selectedSlug;
-      return (bulkCountFor(e, activeKey, dataUnavailable) ?? 0) > 0 || isSelected;
-    })
+    .filter((e) => (bulkCountFor(e, cityCounts, dataUnavailable) ?? 0) > 0)
     .sort((a, b) =>
-      (bulkCountFor(b, activeKey, dataUnavailable) ?? -1) -
-      (bulkCountFor(a, activeKey, dataUnavailable) ?? -1)
+      (bulkCountFor(b, cityCounts, dataUnavailable) ?? -1) -
+      (bulkCountFor(a, cityCounts, dataUnavailable) ?? -1)
     );
 
   /**
@@ -358,12 +355,12 @@
    */
   function toRailItem(
     entry: CityMapEntry,
-    key: string,
+    counts: ReadonlyMap<string, number | null>,
     unavailable: boolean,
     liveCount: number | null,
     liveSlug: string | null,
   ): RailCityItem {
-    const activeCount = countFor(entry, key, unavailable, liveCount, liveSlug);
+    const activeCount = countFor(entry, counts, unavailable, liveCount, liveSlug);
     return {
       slug: entry.municipality.slug,
       name: entry.municipality.name,
@@ -383,7 +380,7 @@
   }
 
   $: railItems = sortedEntries.map((entry) =>
-    toRailItem(entry, activeKey, dataUnavailable, selectedCityLiveCount, selectedSlug)
+    toRailItem(entry, cityCounts, dataUnavailable, selectedCityLiveCount, selectedSlug)
   );
 
   function handleSelectSlug(slug: string): void {
@@ -393,7 +390,7 @@
 
   // ── Compteurs globaux (réactifs : référencent activeKey directement) ──────
   function totalFor(
-    key: string,
+    cityCounts: ReadonlyMap<string, number | null>,
     currentEntries: CityMapEntry[],
     unavailable: boolean,
     liveCount: number | null,
@@ -401,18 +398,18 @@
   ): number | null {
     if (unavailable) return null;
     const counts = currentEntries.map((entry) =>
-      countFor(entry, key, unavailable, liveCount, liveSlug)
+      countFor(entry, cityCounts, unavailable, liveCount, liveSlug)
     );
     return counts.some((count) => count === null)
       ? null
       : (counts as number[]).reduce((sum, count) => sum + count, 0);
   }
 
-  $: totalSignals = totalFor(activeKey, entries, dataUnavailable, selectedCityLiveCount, selectedSlug);
+  $: totalSignals = totalFor(cityCounts, entries, dataUnavailable, selectedCityLiveCount, selectedSlug);
   $: citiesWithSignals = totalSignals === null
     ? null
     : entries.filter(
-        (e) => (countFor(e, activeKey, dataUnavailable, selectedCityLiveCount, selectedSlug) ?? 0) > 0,
+        (e) => (countFor(e, cityCounts, dataUnavailable, selectedCityLiveCount, selectedSlug) ?? 0) > 0,
       ).length;
 </script>
 

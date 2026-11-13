@@ -40,6 +40,9 @@ const harnessInput = qaHarness
       "rail-filter": fileURLToPath(
         new URL("./e2e-qa/harness/rail-filter.html", import.meta.url),
       ),
+      "signals-relevance": fileURLToPath(
+        new URL("./e2e-qa/harness/signals-relevance.html", import.meta.url),
+      ),
       "precoce-b-persistence": fileURLToPath(
         new URL("./e2e-qa/harness/precoce-b-persistence.html", import.meta.url),
       ),
