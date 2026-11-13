@@ -24,7 +24,9 @@ for (const ref of references()) {
       answerSha256: received ? sha256(fs.readFileSync(`${home}/responses/${part.key}.${suffix}`)) : null });
   }
   const matches = pair(units, acts, d.text), b = baseline(d), bm = pair(units, b.acts, d.text);
-  const neutral = pair(ref.expected.neutral ?? [], acts.filter((a) => ![...matches.values()].some((v) => v.id === a.id)), d.text);
+  const neutralUnits = (ref.expected.neutral ?? []).map((n) => ({ id: `${d.id}#neutral-${n.item}`,
+    variants: (n.options ?? []).map((o) => o.unit).filter(Boolean) }));
+  const neutral = pair(neutralUnits, acts.filter((a) => ![...matches.values()].some((v) => v.id === a.id)), d.text);
   inventories.push({ blind: d.blind, predictions: acts.length, neutralMatched: neutral.size,
     baselineMissing: b.missing ?? false, baselineUsage: b.usage ?? null, baselineSha256: b.sha256 ?? null });
   for (const u of units) {
