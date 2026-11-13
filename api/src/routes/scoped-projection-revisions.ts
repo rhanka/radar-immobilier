@@ -103,8 +103,10 @@ export function scopedProjectionRevisionsRoute(deps: ScopedProjectionRevisionsDe
     }
   });
   app.get("/api/v1/workspaces/:workspaceId/signal-facets/coherent-city", async (c) => {
-    const params = z.object({ citySlug: city, mode, view: z.enum(["full", "card"]).optional() }).safeParse({
+    const params = z.object({ citySlug: city, mode, view: z.enum(["full", "card"]).optional(),
+      showDiscarded: flag.optional() }).safeParse({
       citySlug: c.req.query("citySlug"), mode: c.req.query("mode"), view: c.req.query("view") || undefined,
+      showDiscarded: c.req.query("showDiscarded"),
     });
     if (!params.success) return c.json({ error: "invalid_scoped_identity" }, 400);
     const session = c.get("session" as never) as { sub: string };
@@ -132,7 +134,8 @@ export function scopedProjectionRevisionsRoute(deps: ScopedProjectionRevisionsDe
       // like the 6B contract, so the snapshot supports a follow-up command,
       // plus the server card fields derived from that same stored node
       // (classification, evidence) so the UI never reclassifies.
-      const visibleNodes = coherent.payload.signals.filter((node) => !hiddenKeys.has(key(node)));
+      const visibleNodes = params.data.showDiscarded === "1" ? coherent.payload.signals
+        : coherent.payload.signals.filter((node) => !hiddenKeys.has(key(node)));
       const cardView = params.data.view === "card";
       const cards = cardView
         ? await buildScopedSignalCardViews(deps, visibleNodes, params.data.citySlug)
