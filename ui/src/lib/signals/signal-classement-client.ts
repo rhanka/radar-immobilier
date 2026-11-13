@@ -3,7 +3,7 @@
  * - GET  /api/v1/workspaces/:ws/signal-facets/reason-codes (facet_reason_codes, profile immo-steve-2026-09)
  * - POST /api/v1/workspaces/:ws/signal-facets/personal/{select,deselect,discard,restore}
  * - POST /api/v1/workspaces/:ws/signal-facets/workspace/{restore,discard} (moderators)
- * Same services as the artifact basket bridge (reader-baskets.ts). No new endpoint.
+ * - POST personal/reclassify restores archives and applies selection atomically.
  */
 import {
   DEFAULT_REQUEST_TIMEOUT_MS,
@@ -12,11 +12,14 @@ import {
 } from "$lib/net/fetch-with-timeout.js";
 import {
   GraphSignalsHttpError,
+  fetchGraphSignalDetail,
   scopedSignalFacetsPath,
   type SignalScope,
 } from "./graph-signal-detail-client.js";
 import {
   validateClassementChoice,
+  buildClassementMap,
+  classementKey,
   type ClassementEntry,
   type ReasonCodeEntry,
   type SignalClass,
@@ -38,12 +41,11 @@ function newCommandKey(): string {
 /** Returns the new head event id (`event.id`), or null for a no-op. */
 async function postCommand(
   scope: SignalScope,
-  action: "select" | "deselect" | "discard" | "restore",
+  action: "select" | "deselect" | "discard",
   body: Record<string, unknown>,
-  archiveScope: "personal" | "workspace" = "personal",
 ): Promise<string | null> {
   const res = await fetchJsonWithTimeout<unknown>(
-    scopedSignalFacetsPath(scope, `${archiveScope}/${action}`),
+    scopedSignalFacetsPath(scope, `personal/${action}`),
     {
       timeoutMs: DEFAULT_REQUEST_TIMEOUT_MS,
       init: {
@@ -62,6 +64,9 @@ async function postCommand(
 
 /** Visible (French) message for a failed classement write. */
 export function classementWriteErrorMessage(error: unknown): string {
+  if (error instanceof Error && error.message === "classement_result_uncertain") {
+    return "Résultat du classement à vérifier. Rechargez les données pour connaître son état.";
+  }
   if (error instanceof GraphSignalsHttpError) {
     if (error.code === "target_version_conflict") return "Classement non enregistré : le signal a changé depuis l'affichage (conflit d'empreinte). Données rechargées.";
     if (error.status === 409) return "Classement non enregistré : conflit avec un classement plus récent (409). Données rechargées.";
@@ -95,6 +100,44 @@ export interface ApplyClassementArgs {
   nextClass: SignalClass;
   reasonCode?: string | null;
   catalog?: readonly ReasonCodeEntry[];
+}
+
+async function restoreAtomically(scope: SignalScope, args: ApplyClassementArgs): Promise<void> {
+  const key = newCommandKey();
+  const body = JSON.stringify({
+    target: args.target, displayedFingerprint: args.displayedFingerprint,
+    archives: Object.fromEntries(args.current.archiveRestores.map((head) => [head.scope, head.id])),
+    selectionHeads: {
+      pertinent: args.current.pertinentExpectedHeadId ?? args.current.pertinentHeadId,
+      a_surveiller: args.current.aSurveillerExpectedHeadId ?? args.current.aSurveillerHeadId,
+    },
+    nextClass: args.nextClass, ...(args.reasonCode ? { reasonCode: args.reasonCode } : {}),
+  });
+  let uncertain = false;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetchJsonWithTimeout<unknown>(scopedSignalFacetsPath(scope, "personal/reclassify"), {
+        timeoutMs: DEFAULT_REQUEST_TIMEOUT_MS,
+        init: { method: "POST", headers: { "content-type": "application/json", "Idempotency-Key": key }, body },
+      });
+      if (res.ok) return;
+      throw new GraphSignalsHttpError(`classement reclassify: ${res.status}`, res.status, readJsonErrorCode(res.json));
+    } catch (error) {
+      const definitive = error instanceof GraphSignalsHttpError && error.status < 500;
+      if (definitive && !uncertain) throw error;
+      uncertain = true;
+      if (definitive) break;
+    }
+  }
+  // A proxy can lose every reply after commit. Read real state before reporting uncertainty.
+  try {
+    const state = await fetchGraphSignalDetail(scope, args.target.citySlug, { showDiscarded: true });
+    const actual = buildClassementMap(state.selection ?? [], state.heads)
+      .get(classementKey(args.target.type, args.target.id, args.target.citySlug));
+    if (actual && !actual.discarded && actual.classe === args.nextClass
+      && actual.reasonCode === (args.reasonCode ?? null)) return;
+  } catch { /* Leave the result uncertain when reconciliation is unavailable. */ }
+  throw new Error("classement_result_uncertain");
 }
 
 export async function applyClassement(scope: SignalScope, args: ApplyClassementArgs): Promise<void> {
@@ -139,6 +182,11 @@ export async function applyClassement(scope: SignalScope, args: ApplyClassementA
     return;
   }
 
+  if (current.archiveRestores.length > 0) {
+    await restoreAtomically(scope, args);
+    return;
+  }
+
   // F4: multi-POST sequences are not atomic server-side. Track each
   // completed step's compensating command; on a mid-sequence failure, run
   // them in reverse (with the head ids the completed steps produced) so
@@ -147,19 +195,6 @@ export async function applyClassement(scope: SignalScope, args: ApplyClassementA
   const reasonFor = (basket: "pertinent" | "a_surveiller"): string | null =>
     current.classe === basket ? current.reasonCode : null;
   try {
-    for (const archive of current.archiveRestores) {
-      const restoredHead = await postCommand(scope, "restore", {
-        target, expectedHeadId: archive.id, displayedFingerprint,
-      }, archive.scope);
-      undo.push(async () => {
-        if (!archive.reasonCode) throw new Error("rollback_reason_missing");
-        await postCommand(scope, "discard", {
-          target, reasonCode: archive.reasonCode,
-          expectedHeadId: restoredHead ?? archive.id, displayedFingerprint,
-        }, archive.scope);
-      });
-    }
-
     if (nextClass === "non_classe") {
       for (const basket of activeBaskets) {
         const newHead = await postCommand(scope, "deselect", {
