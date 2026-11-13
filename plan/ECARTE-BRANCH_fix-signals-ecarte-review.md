@@ -6,7 +6,7 @@ Fix #760 P1 while preserving #1090 period selection and perimeter counters. P2 a
 ## Scope / Guardrails
 - Base: fix/signals-period-menu-click at 564971d24; rebase on origin/main after #1090 merges.
 - Worktree: tmp/ecarte-review. No environment files or Python. No merge or commit trailers.
-- Isolated runtime: test-ecarte, UI 5407, PostGIS 5547. No API or Maildev host listeners.
+- Isolated runtime: test-ecarte, UI 5407, PostGIS 5547, S3 mock 9147. No API or Maildev host listeners.
 - CDP: 127.0.0.1:9333 only, disposable tabs closed in finally. Real Playwright mouse clicks.
 - Make-only execution through tmp/lane.mk, avoiding the root Makefile environment include. Always down -v.
 
@@ -69,6 +69,7 @@ Fix #760 P1 while preserving #1090 period selection and perimeter counters. P2 a
   - [x] Push and open PR referencing #760, listing P3 without implementing them.
 
 ## Evidence
+- [x] Resumed correction validation before rebase: typecheck, lint and full test-ui pass; 74 targeted API/PostgreSQL tests pass on a fresh database; 11 real-click PostgreSQL archive scenarios and 5 period/perimeter scenarios pass through CDP 9333. Logs: tmp/resume-*.log.
 - [x] Second correction: reproduced both independent failures on fff272af5. Log: tmp/atomic-red-review.log (2 failed, 1 passed).
 - [x] Atomic server operation uses the existing in-transaction personal and workspace writers, including the final selection. Six PostgreSQL tests are red on fff272af5 and green with the new route. Logs: tmp/atomic-{red-api,green-api-initial}.log.
 - [x] Archive restoration now sends one idempotent command, retries uncertain transport with the same payload/key, then reconciles real server state if both replies are lost. No client archive compensation remains. A status awaiting verification never announces a definite failure.
