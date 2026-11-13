@@ -48,6 +48,7 @@ describeDb("single-pass extraction to PostgreSQL annotation", () => {
         originalKey: chunk.originalKey, sourceUrl: chunk.sourceUrl,
         pages: [{ page: oracle.page, text: oracle.excerpt }], chunks: [chunk] }] });
     const node = graph.nodes[0]!;
+    if (!node.type) throw new Error("Expected a typed extracted node");
     const annotation = node.properties!["classAnnotation"] as AiClassAnnotation;
     expect(await writeClassAnnotation(db, { ...annotation, citySlug: "synthetic-city",
       nodeType: node.type, nodeId: node.id })).toBe("written");
