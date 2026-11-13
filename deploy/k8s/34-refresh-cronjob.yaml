@@ -41,10 +41,10 @@
 #
 # Pourquoi quatre passages et pas un : ce n'est pas une question de quota. Au
 # volume attendu (quelques documents par jour), aucune fenêtre de session de
-# siège n'est approchée — 17 documents valent 42 min d'Astra low (p50 147,8 s),
-# le repli en vigueur. Quatre passages servent à VIDER la file
+# siège n'est approchée — 17 documents valent 4,3 min de Gemini low (p50 15,3 s)
+# ou 42 min d'Astra low (p50 147,8 s). Quatre passages servent à VIDER la file
 # par ville : une ville qui publie plusieurs documents, ou un document refusé en
-# qualité, est traité ou tranché dans la journée au
+# qualité (~15 % sous repli Gemini), est traité ou tranché dans la journée au
 # lieu de la semaine. Le nombre de passages est borné par la DURÉE d'un passage,
 # pas par les sièges : passages/jour ≤ 24 h / (durée mesurée × 1,25). Seule
 # durée disponible : 2 h 41 pour une acquisition 528 villes, mesurée sur
@@ -194,21 +194,18 @@ spec:
                 - { name: REFRESH_MODEL, value: "gpt-6-astra" }
                 - { name: REFRESH_REASONING_EFFORT, value: "medium" }
                 - { name: REFRESH_PRIMARY_QUALITY_ATTEMPTS, value: "2" }
-                # No Gemini route (owner decision 2026-11-12): the Google account
-                # behind the cloud-code seat was disabled by Google. The fallback
-                # is the primary model at low effort, and the Gemini verification
-                # pass is off; REFRESH_VERIFY_* routes are therefore not set.
-                # `verify-renders` refuses any `gemini` in this CronJob.
-                - { name: REFRESH_FALLBACK_PROVIDER, value: "openai" }
-                - { name: REFRESH_FALLBACK_MODEL, value: "gpt-6-astra" }
+                - { name: REFRESH_FALLBACK_PROVIDER, value: "gemini" }
+                - { name: REFRESH_FALLBACK_MODEL, value: "gemini-3.8-flash" }
                 - { name: REFRESH_FALLBACK_REASONING_EFFORT, value: "low" }
-                - { name: REFRESH_VERIFY_ENABLED, value: "0" }
+                - { name: REFRESH_VERIFY_ENABLED, value: "1" }
+                - { name: REFRESH_VERIFY_PROVIDER, value: "gemini" }
+                - { name: REFRESH_VERIFY_MODEL, value: "gemini-3.8-flash" }
+                - { name: REFRESH_VERIFY_REASONING_EFFORT, value: "low" }
                 - { name: REFRESH_FORCE_FALLBACK, value: "0" }
                 - { name: REFRESH_MAXIMUM_ATTEMPTS, value: "1" }
                 - { name: REFRESH_TIMEOUT_MS, value: "900000" }
                 - { name: REFRESH_BUDGET_LIMIT, value: "20000" }
-                # Output ceiling passed to the mesh. Pinned mesh 0.19.2 omits it
-                # on Codex, so it has no effect while every route is openai.
+                # Gemini output ceiling. Pinned mesh 0.19.2 omits this on Codex.
                 - { name: REFRESH_MAX_OUTPUT_TOKENS, value: "32768" }
                 # Plafond d'ÉCRITURES CAS nouvelles par ville et par passage. Un
                 # document déjà collecté ne le consomme pas, mais RECUEIL CESSE
