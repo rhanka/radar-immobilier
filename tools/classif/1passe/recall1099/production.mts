@@ -21,6 +21,30 @@ const context = loadRefreshProfileContext({ root: '/workspace', profilePath: '/w
 const docs = documents().sort((a, b) => a.id.localeCompare(b.id));
 const requests: any[] = [], proofs: any[] = [];
 const mode = process.argv[2];
+if (mode !== 'prepare') {
+  const frozen = json(`${dir}/freeze.json`);
+  for (const [path, expected] of Object.entries(frozen.sourceHashes)) {
+    assert.equal(hash(fs.readFileSync(`/workspace/${path}`)), expected, `production source changed: ${path}`);
+  }
+  write(`${dir}/runtime-proof.json`, {
+    engram: JSON.parse(fs.readFileSync('/workspace/node_modules/@sentropic/engram/package.json', 'utf8')).version,
+    node: process.version, promptSha256: prompt.sha256, sourceHashesVerified: true });
+}
+let v9: any;
+let v9Context: any;
+if (mode === 'validate' || mode === 'preflight') {
+  fs.mkdirSync(`${runtime}/v9`, { recursive: true });
+  const frozen = fs.readFileSync('/bench/t1/frozen-refresh-profile.ts', 'utf8');
+  fs.writeFileSync(`${runtime}/v9/profile.ts`, frozen.replace('"@sentropic/graphify"',
+    '"/bench/sandbox/node_modules/@sentropic/graphify/dist/index.js"') + '\nexport { validatedExtraction, physicalPageTexts };\n');
+  fs.copyFileSync('/bench/t1/frozen-refresh-corpus.ts', `${runtime}/v9/refresh-corpus.ts`);
+  v9 = await import(`${runtime}/v9/profile.ts`);
+  v9Context = v9.loadRefreshProfileContext({ root: '/bench', profilePath: '/bench/t1/frozen-ontology-profile.yaml', unregisteredOnly: true });
+  write(`${dir}/v9-proof.json`, { moduleSha256: hash(frozen), corpusSha256: hash(fs.readFileSync('/bench/t1/frozen-refresh-corpus.ts')),
+    graphifyVersion: JSON.parse(fs.readFileSync('/bench/sandbox/node_modules/@sentropic/graphify/package.json', 'utf8')).version,
+    method: 'export-only validator instrumentation; dependency resolved to frozen graphify; accepted native graph, without annotations or declared version' });
+}
+if (mode === 'preflight') { console.log(JSON.stringify({ v9Ready: true, nativeContract: REFRESH_PROFILE_CONTRACT_VERSION })); process.exit(0); }
 for (const d of docs) {
   const pages = d.text.split('\f');
   if (pages.at(-1) === '') pages.pop();
@@ -47,7 +71,10 @@ for (const d of docs) {
             fs.writeFileSync(input.outputPath, result.text);
             return { status: 'completed', outputPath: input.outputPath };
           } } });
-      save(`${home}/validated/${key}`, { accepted: true, result: accepted[0] }, d.blind);
+      let v9Accepted = true, v9Error = null;
+      try { v9.validatedExtraction(JSON.stringify(accepted[0].extraction), chunk, v9Context, v9.physicalPageTexts(chunk)); }
+      catch (error) { v9Accepted = false; v9Error = String(error); }
+      save(`${home}/validated/${key}`, { accepted: v9Accepted, nativeAccepted: true, v9Accepted, v9Error, result: accepted[0] }, d.blind);
     } catch (error) {
       if (mode === 'validate') save(`${home}/validated/${key}`, { accepted: false,
         error: String(error), result: null }, d.blind);
