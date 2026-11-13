@@ -30,8 +30,8 @@
 
 ## Plan / Todo (lot-based)
 - [x] Lot 0 : règles, dossier PREPA-PROD complet, contrat 6H et CD.
-- [ ] Lot 1 : cibles autonomes et précontrôles sans écriture prod.
-- [ ] Lot 2 : sauvegarde, restauration, migrations mesurées et hook 6H.
-- [ ] Lot 3 : tests des refus et reprise transactionnelle.
+- [x] Lot 1 : cibles autonomes et précontrôles sans écriture prod.
+- [x] Lot 2 : sauvegarde, restauration, migrations mesurées et hook 6H préparés.
+- [x] Lot 3 : six tests des refus et test PostgreSQL natif de reprise transactionnelle.
 - [ ] Lot 4 : runbook, prérequis, décisions owner, PR draft.
 - [ ] Lot 5 : revue complémentaire harness. Aucun GO implicite.
