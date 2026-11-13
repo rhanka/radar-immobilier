@@ -9,7 +9,7 @@ export function metric(found, n) {
 // Each edge uses the inherited, frozen compatibility and evidence test unchanged.
 export function pair(units, groups, text) {
   const edges = units.map((b) => groups.flatMap((g, i) => {
-    const v = (g.variants ?? [g]).find((a) => matchActs([b], [a], text).has(b.id));
+    const v = (g.variants ?? [g]).find((a) => (b.variants ?? [b]).some((unit) => matchActs([{ ...unit, id: b.id }], [a], text).has(b.id)));
     return v ? [{ i, v }] : [];
   }));
   const owners = new Map();

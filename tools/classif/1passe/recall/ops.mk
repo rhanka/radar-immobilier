@@ -6,12 +6,18 @@ quota:
 	node tools/classif/1passe/recall/quota.mjs
 status:
 	node tools/classif/1passe/recall/status.mjs
+verify:
+	node tools/classif/1passe/recall/verify.mjs
 run:
 	node tools/classif/1passe/recall/run.mjs
 score:
 	node tools/classif/1passe/recall/score.mjs
 score-c:
 	node tools/classif/1passe/recall/score-c.mjs
+historical:
+	node tools/classif/1passe/recall/historical.mjs
+tuning-audit:
+	node tools/classif/1passe/recall/tuning-audit.mjs
 check:
 	@for f in tools/classif/1passe/recall/*.mjs; do node --check "$$f" || exit; done
 test:
