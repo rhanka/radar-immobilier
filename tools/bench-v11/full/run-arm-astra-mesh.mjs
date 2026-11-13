@@ -5,7 +5,7 @@
 //   reasoning.effort, responseFormat json-object, pas de plafond de sortie (Codex le refuse), délai 480 s.
 // Siège seulement : refuse de tourner si une clé API est présente. Le quota de siège n'est jamais un refus :
 // attente 300 s et reprise (12 au plus). Quota hebdomadaire codex lu sur wham/usage (champs de quota
-// seulement, jamais de jeton) avant chaque document ; arrêt à STOP_CODEX_PCT (défaut 90).
+// seulement, jamais de jeton) tous les 10 documents terminés ; arrêt à STOP_CODEX_PCT (défaut 90).
 // Usage : BENCH_MESH_DIR=<dossier contenant node_modules/@sentropic/llm-mesh> \
 //   BENCHMARK_OWNER_SCOPE=<portée> node full/run-arm-astra-mesh.mjs [effort=medium] [concurrence=2]
 // Sorties : full/arms/astra-<effort>-rejeu/{raw,usage}/<effort>--<doc>.*, meta.jsonl, codex-quota.jsonl.
