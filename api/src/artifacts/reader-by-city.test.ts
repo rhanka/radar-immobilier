@@ -30,3 +30,24 @@ describe("signals.by-city.v1 service wiring", () => {
       { dateRange: { excludePiia: true }, showDiscarded: false }]);
   });
 });
+
+describe("signals.by-city.v1 Filtre cube", () => {
+  it("should carry the Filtre cube counters to the artifact reader", async () => {
+    const withCube = { ...city, filtreCube: { "11100": 2, "11010": 1 } };
+    vi.mocked(readScopedByCity).mockResolvedValue({ totalCount: 0, cities: [withCube] } as never);
+    const read = createBasketReadOperation({ db: {} as never, store: {} as never });
+    const body = await read("signals.by-city.v1", { workspaceId: WORKSPACE },
+      { readerSub: "reader-alice" } as ApiReaderContext);
+    expect(validateReaderResponse("signals.by-city.v1", body, "reader-alice"))
+      .toEqual({ ok: true, totalCount: 0, cities: [withCube] });
+  });
+
+  it("should refuse a cube cell that is not a five-flag key", async () => {
+    vi.mocked(readScopedByCity).mockResolvedValue(
+      { totalCount: 0, cities: [{ ...city, filtreCube: { "sig-1": 1 } }] } as never);
+    const read = createBasketReadOperation({ db: {} as never, store: {} as never });
+    const body = await read("signals.by-city.v1", { workspaceId: WORKSPACE },
+      { readerSub: "reader-alice" } as ApiReaderContext);
+    expect(() => validateReaderResponse("signals.by-city.v1", body, "reader-alice")).toThrow();
+  });
+});
