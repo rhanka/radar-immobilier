@@ -157,7 +157,6 @@
   import {
     B_SUBSET_KEY,
     clearVivierCityTransientState,
-    countForVivierCity,
     bAxesFromVivierKey,
     modeFromSubsetKey,
     projectNodesForVivierKey,
@@ -183,7 +182,7 @@
     type SignalTimeRange,
   } from "$lib/signals/signal-date-filter.js";
   import { rankVivierBNodes } from "$lib/signals/vivier-b-ranking.js";
-  import { classementCountsForPerimeter, filtreCountsForPerimeter } from "$lib/signals/signal-filter-counts.js";
+  import { classementCountsForPerimeter, displayedSignalCountForCity, filtreCountsForPerimeter } from "$lib/signals/signal-filter-counts.js";
   import {
     buildClassementMap,
     classementKey,
@@ -848,13 +847,18 @@
 
   // ── Données réactives ──────────────────────────────────────────────────────
   $: allEntries = buildCityMapEntries(graphItems);
+  $: citySignalCounts = new Map(allEntries.map((entry) => [entry.municipality.slug,
+    displayedSignalCountForCity(entry, activeSubsetKey, classementFilter, vivierBExclusions)]));
+  $: visibleCitySlugs = allEntries
+    .filter((entry) => (citySignalCounts.get(entry.municipality.slug) ?? 0) > 0)
+    .map((entry) => entry.municipality.slug);
   $: geoEngineLayers = GEO3D_ENGINE_ENABLED ? ([
     {
       id: "radar-immo/signaux/municipalities",
       kind: "points",
       data: {
         type: "FeatureCollection",
-        features: allEntries.map((entry) => ({
+        features: allEntries.filter((entry) => visibleCitySlugs.includes(entry.municipality.slug)).map((entry) => ({
           type: "Feature",
           geometry: {
             type: "Point",
@@ -862,7 +866,7 @@
           },
           properties: {
             citySlug: entry.municipality.slug,
-            signalCount: countForVivierCity(entry, activeSubsetKey),
+            signalCount: citySignalCounts.get(entry.municipality.slug),
           },
         })),
       },
@@ -1164,7 +1168,7 @@
 
   /**
    * Expression MapLibre "match" pour colorier les polygones par citySlug
-   * selon le compte actif exact (subsetCounts[subsetKey]). Les dépendances
+   * from the exact city cube count after every active signal filter. Dependencies
    * sont passées en PARAMÈTRES (pas lues en variable libre) pour que Svelte
    * suive correctement le recalcul réactif de la prop choroplèthe.
    *
@@ -1173,11 +1177,11 @@
    */
   function buildFillColorExpression(
     entries: CityMapEntry[],
-    subsetKey: string,
+    counts: ReadonlyMap<string, number | null>,
   ): ExpressionSpecification {
     const expr: unknown[] = ["match", ["get", "citySlug"]];
     for (const e of entries) {
-      const count = countForVivierCity(e, subsetKey);
+      const count = counts.get(e.municipality.slug) ?? 0;
       expr.push(e.municipality.slug, signalCountColor(count));
     }
     expr.push("#e2e8f0"); // fallback pour villes sans data
@@ -1210,10 +1214,10 @@
    * Expressions choroplèthe passées EN PROPS au socle. Les dépendances sont
    * référencées ici afin que Svelte recalcule la peinture exactement quand
    * l'ancien `updateFillColors()` impératif était déclenché : la COULEUR ne
-   * dépend que de (allEntries, activeSubsetKey), l'OPACITÉ porte seule la
+   * depends on the city cubes and signal filters; opacity alone carries
    * sélection (selectedCity, selectionState).
    */
-  $: fillColorExpression = buildFillColorExpression(allEntries, activeSubsetKey);
+  $: fillColorExpression = buildFillColorExpression(allEntries, citySignalCounts);
   $: fillOpacityExpression = buildFillOpacityExpression(
     allEntries,
     selectedCity?.municipality.slug ?? null,
@@ -2752,6 +2756,7 @@
     onBasemapModeChange={setBasemap}
     {fillColorExpression}
     {fillOpacityExpression}
+    {visibleCitySlugs}
     {showLotLabels}
     {showZoneLabels}
     activeCitySlug={selectedCity?.municipality.slug ?? null}
