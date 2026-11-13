@@ -31,6 +31,7 @@
 - [x] Tests dédiés ENV=test-prod-cutover. Ports réservés API 18821, UI 15321, Maildev 11121.
 
 ## Plan / Todo (lot-based)
+- [x] Preuves locales : inventaire Docker réel, consommateurs terminés, identité de la copie, même UUID avant et après recette. Refus si un conteneur ou hook tourne encore. Doublons ConfigMap refusés.
 - [x] Merge des six commits prep. Gardes B1/B2 : manifeste historique indépendant, SHA court/complet, digests, verrou, stamp et runs CD. Tests de refus et reprise historique ajoutés.
 - [x] Validation préparation : dix tests, deux scénarios contrôleur et ESLint réussis. Rendu et Compose validés sans lancement. Catalogue custom lisible. Modes privés et arrêt du port-forward contrôlés. Stack lint supprimée avec down -v.
 - [x] D1–D4 intégrées au runbook et aux prérequis. RPO PV regénérable acceptée, créneau au plus tôt après répétition. Lint renderer : global inutilisé retiré.

@@ -5,7 +5,7 @@ const backup = require('./backup.cjs');
 const migrations = require('./migrate.cjs');
 async function smoke() {
   const base = r.env.ENV === 'prod' ? 'https://immo.sent-tech.ca' : r.env.SMOKE_URL;
-  if (!base || (r.env.ENV !== 'prod' && !/^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(base)))
+  if (!base || (r.env.ENV !== 'prod' && !/^(http:\/\/(127\.0\.0\.1|localhost):\d+|https:\/\/recette\.localhost:15321)$/.test(base)))
     r.fail('explicit_local_smoke_url_required');
   const started = Date.now();
   for (const [url, status, check] of [
@@ -33,6 +33,7 @@ async function main(operation = process.argv[2]) {
       if (!Array.isArray(items) || !items.length || items.some(x =>
         x.kind !== 'ConfigMap' || x.metadata?.namespace !== 'radar-immobilier'
         || !['radar-api', 'immo-mcp-config', 'radar-mcp-receiver', 'radar-cutover-6h'].includes(x.metadata.name))) r.fail('configuration_scope_mismatch');
+      if (new Set(items.map(x => x.metadata.name)).size !== items.length) r.fail('configuration_duplicate');
       const plan = items.find(x => x.metadata.name === 'radar-cutover-6h');
       if (!plan || r.crypto.createHash('sha256').update(plan.data?.['plan.json'] || '').digest('hex')
         !== r.approvedPlan().planSha256) r.fail('configuration_plan_mismatch');
