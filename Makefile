@@ -799,6 +799,12 @@ reannotate-signals-preprod: ## Reclassify recent signals in preprod (REANNOTATIO
 	@test "$(ENV)" = preprod || { echo 'Requires ENV=preprod'; exit 1; }
 	@REANNOTATION_MODE="$(REANNOTATION_MODE)" KUBECTL="$(KUBECTL)" bash tools/make/reannotate-signals-preprod.sh
 
+PURGE_MODE ?= dry-run
+.PHONY: purge-ai-annotations-preprod
+purge-ai-annotations-preprod: ## Purge AI overlays only (PURGE_MODE=dry-run|apply, optional PIPELINE_RUN_ID / PROMPT_SHA256)
+	@test "$(ENV)" = preprod || { echo 'Requires ENV=preprod'; exit 1; }
+	@PURGE_AI_ANNOTATIONS=1 REANNOTATION_MODE="$(PURGE_MODE)" PIPELINE_RUN_ID="$(PIPELINE_RUN_ID)" PROMPT_SHA256="$(PROMPT_SHA256)" KUBECTL="$(KUBECTL)" bash tools/make/reannotate-signals-preprod.sh
+
 .PHONY: test-refresh-renders
 test-refresh-renders: ## Validate refresh defaults and render mutation guards without a cluster
 	@bash -n tools/make/reannotate-signals-preprod.sh
