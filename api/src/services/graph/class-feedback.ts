@@ -46,6 +46,8 @@ export async function writeClassFeedback(db: Database, sub: string, workspaceId:
       throw new FacetError(409, "annotation_version_conflict");
     }
     const next = command.verdict === "up" ? annotation.classe : command.nextClass!;
+    const id = randomUUID();
+    const validation = command.verdict === "up" ? { validatedAiFeedbackId: id } : {};
     let reasonCode = command.reasonCode;
     if (command.verdict === "down") {
       const codes = await tx.execute(sql`SELECT code FROM facet_reason_codes WHERE profile_id=${FACET_PROFILE}
@@ -56,11 +58,11 @@ export async function writeClassFeedback(db: Database, sub: string, workspaceId:
     }
     const base = { target, displayedFingerprint: command.displayedFingerprint };
     const personal = (part: Parameters<typeof writeScopedPersonalFacetInTx>[3]) =>
-      writeScopedPersonalFacetInTx(tx, sub, workspaceId, part, { validatedAi: command.verdict === "up" });
+      writeScopedPersonalFacetInTx(tx, sub, workspaceId, part, validation);
     let event: Awaited<ReturnType<typeof writeScopedPersonalFacetInTx>>;
     if (command.scope === "workspace") {
       event = await writeWorkspaceArchiveFacetInTx(tx, sub, workspaceId, { ...base, action: "discard",
-        reasonCode, expectedHeadId: command.archives.workspace, commandKey: randomUUID() }, { validatedAi: command.verdict === "up" });
+        reasonCode, expectedHeadId: command.archives.workspace, commandKey: randomUUID() }, validation);
     } else {
       if (command.archives.workspace && next !== "ecarte") {
         await writeWorkspaceArchiveFacetInTx(tx, sub, workspaceId, { ...base, action: "restore",
@@ -87,7 +89,6 @@ export async function writeClassFeedback(db: Database, sub: string, workspaceId:
       WHERE city_slug=${target.citySlug} AND node_type=${target.type} AND node_id=${target.id}
         AND model=${ai.model} AND prompt_sha256=${ai.prompt_sha256} AND pipeline_run_id=${ai.pipeline_run_id}
       ORDER BY created_at DESC,id DESC LIMIT 1`);
-    const id = randomUUID();
     const reason = command.verdict === "up" ? `validé : ${ai.reason}` : command.reasonCode!;
     await tx.execute(sql`INSERT INTO signal_class_feedback
       (id,city_slug,node_type,node_id,workspace_id,actor_id,scope,command_key,command_digest,verdict,
