@@ -99,7 +99,7 @@ describeDb("human classification feedback PostgreSQL", () => {
       classe: "ecarte", updatedAt: ai.updatedAt! } }, f.moderator.sub);
     const feedback = await readClassFeedback(f.db, f.contributor.sub, f.workspaceId);
     expect(feedback[0]).toMatchObject({ verdict: "up", humanClass: "ecarte", reasonCode: null });
-    await purgeAiAnnotations(f.db, { apply: true });
+    await purgeAiAnnotations(f.db, { apply: true, pipelineRunId: f.ai.pipelineRunId });
     expect((await f.db.execute(sql`SELECT * FROM signal_class_annotation_history`)).rows).toHaveLength(2);
     expect(await readClassFeedback(f.db, f.contributor.sub, f.workspaceId)).toHaveLength(1);
   });
