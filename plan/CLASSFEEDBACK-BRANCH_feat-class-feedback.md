@@ -18,7 +18,7 @@
 - [x] Two independent design reviews: private feedback badges must stay scoped; reuse InTx writers, never client compensation; validate stale AI provenance under lock.
 
 ## Plan / Todo (lot-based)
-- [ ] Lot 1 — Additive migration, append-only history and feedback.
+- [x] Lot 1 — Additive migration, append-only history and feedback.
 - [ ] Lot 2 — Atomic authorized feedback API and scoped evaluation export.
 - [ ] Lot 3 — DS feedback controls, required reclassification and dated private badge.
 - [ ] Lot 4 — Unit, PostgreSQL and click E2E coverage; typecheck, lint, test-api, test-ui.
