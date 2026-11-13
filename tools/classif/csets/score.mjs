@@ -8,7 +8,8 @@ const {pairOneToOne}=await import(pathToFileURL(`${refresh}/tools/bench-v11/harn
 const half=process.argv[2]??'tuning',blind=half==='blind';
 const key=blind?keyFromEnv('CLASSIF_BLIND_KEY'):null;
 const refs=load(half),dir=`${home}/${half}`;
-const validation=new Map(json(`${dir}/native-validation.json`).map(x=>[x.file,x]));
+const validationBytes=readFileSync(`${dir}/native-validation.${blind?'sealed':'json'}`);
+const validation=new Map(JSON.parse(blind?unseal(key,validationBytes):validationBytes.toString()).map(x=>[x.file,x]));
 const results={},misses=[];
 for(const mode of ['A','B']){
  const scored=[];let extractions=0,unpaired=0;
@@ -23,7 +24,7 @@ for(const mode of ['A','B']){
    const a=failed?null:annotation(out);
    r.pred=a?.classe??null;r.predCode=a?.reasonCode??null;r.invalid=!a;r.detected=Boolean(a);
   }else{
-   const checked=validation.get(file);
+   const checked=c.request?validation.get(file):{digest:c.digest,valid:false};
    if(!checked||checked.digest!==c.digest) throw new Error('Missing native validation for a completed response');
    r.invalid=failed||!checked.valid;
    const acts=r.invalid?[]:(out?.nodes??[]).filter(n=>['Signal','DesignationEvent'].includes(n.node_type));
