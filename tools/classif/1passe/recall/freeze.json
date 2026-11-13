@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "at": "2026-11-13T22:39:54.803Z",
+  "productionRef": "b4ecde642f4ebce8d712ed180a630f8a6417f2c5",
+  "productionPromptSha256": "8957bcaa146b3b83ee89000fccec3c6f393c7b801b320a158d58d2631fa3a205",
+  "p0Sha256": "a60713366128ae4348a45a7323d0b0984cef87ca6cb33eda15073c045235b016",
+  "promptSha256": "7f7e6fe0bb35d5682ca38a4b65e93483077bbc93e03eca13cabd8c50c799372f",
+  "extensionSha256": "7a6efc78c83a8a35f71f0d54d97ea8be6e60f256fd76ee3c88744d782a829a0f",
+  "model": "gpt-6-astra",
+  "effort": "low",
+  "concurrency": 10,
+  "callsCap": 100,
+  "quotaStop": 90,
+  "quotaCheckMs": 600000,
+  "population": 676,
+  "matching": "1passe/matching.mjs frozen inherited matcher; one-to-one; exact evidence",
+  "metrics": [
+    "detection/B",
+    "visible/B",
+    "P_union_S/B"
+  ],
+  "wilson": "two-sided 95% lower bound, z=1.959963984540054",
+  "blind": "one shot; REFC1; aggregate only; no optimizer",
+  "delta": "Full PV instead of PDF chunk; flat detection acts instead of graph nodes/annotations; same classification body."
+}
