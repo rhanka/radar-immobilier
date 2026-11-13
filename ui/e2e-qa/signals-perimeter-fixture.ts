@@ -44,13 +44,14 @@ export async function openPerimeter(page: Page, baseURL: string): Promise<void> 
         exclusion_reason: null, provenance: { extrait: "" }, confiance: 1 },
     })));
   const archived = { ...signals[0], id: "de_2026_0129", label: "PPCMOI 2026-0129 boulevard Laurette-Théorêt" };
-  await page.route("**/signal-facets/personal/restore", async (route) => {
+  await page.route("**/signal-facets/personal/reclassify", async (route) => {
     expect(route.request().postDataJSON()).toMatchObject({
       target: { citySlug: "delson", type: "Signal", id: archived.id },
-      expectedHeadId: "archive-head", displayedFingerprint: "qa-fingerprint",
+      archives: { personal: "archive-head" }, displayedFingerprint: "qa-fingerprint",
+      selectionHeads: { pertinent: null, a_surveiller: null }, nextClass: "non_classe",
     });
     restored = true;
-    await route.fulfill({ json: { ok: true, event: { id: "restored-head" } } });
+    await route.fulfill({ json: { ok: true } });
   });
   await page.route("**/signal-facets/coherent-city**", (route) => route.fulfill({ json: {
     ok: true, token: `qa-revision-${restored}`, signals: restored || new URL(route.request().url()).searchParams.get("showDiscarded") === "1"

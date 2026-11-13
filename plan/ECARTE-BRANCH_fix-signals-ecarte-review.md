@@ -72,6 +72,7 @@ Fix #760 P1 while preserving #1090 period selection and perimeter counters. P2 a
 - [x] Second correction: reproduced both independent failures on fff272af5. Log: tmp/atomic-red-review.log (2 failed, 1 passed).
 - [x] Atomic server operation uses the existing in-transaction personal and workspace writers, including the final selection. Six PostgreSQL tests are red on fff272af5 and green with the new route. Logs: tmp/atomic-{red-api,green-api-initial}.log.
 - [x] Archive restoration now sends one idempotent command, retries uncertain transport with the same payload/key, then reconciles real server state if both replies are lost. No client archive compensation remains. A status awaiting verification never announces a definite failure.
+- [x] The PostgreSQL regression checks rollback of archive heads and revision tokens after shared-head or selection failure, fingerprint conflicts, receipt replay after refresh, changed-payload rejection, moderation and browser-session guards. The period fixture now speaks the atomic command; all five #1090/perimeter browser scenarios pass.
 - [x] Shared archive blocker reproduced on 87d8e7b6: API regression 2 failures; CDP regression 3 failures and personal restoration passes. Logs: tmp/shared-red-{api,browser}.log.
 - [x] Shared archive correction: role refusal, independent scope restoration and default-list reload persistence.
 - [x] Reusable browser fixture and standalone PostgreSQL route regression committed.
