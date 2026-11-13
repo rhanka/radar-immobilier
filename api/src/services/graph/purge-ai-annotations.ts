@@ -6,6 +6,8 @@ export interface PurgeAiAnnotationsOptions {
   apply?: boolean;
   pipelineRunId?: string;
   promptSha256?: string;
+  /** Explicit intent for a purge of every AI annotation, across runs and prompts. */
+  all?: boolean;
 }
 
 export function parsePurgeAiAnnotationsArgs(args: readonly string[]): PurgeAiAnnotationsOptions {
@@ -17,6 +19,9 @@ export function parsePurgeAiAnnotationsArgs(args: readonly string[]): PurgeAiAnn
       if (modeSeen) throw new Error("Specify only one purge mode");
       modeSeen = true;
       options.apply = arg === "--apply";
+    } else if (arg === "--all") {
+      if (options.all) throw new Error("Invalid --all");
+      options.all = true;
     } else if (arg === "--pipeline-run-id" || arg === "--prompt-sha256") {
       const key = arg === "--pipeline-run-id" ? "pipelineRunId" : "promptSha256";
       const value = args[++index];
@@ -27,11 +32,27 @@ export function parsePurgeAiAnnotationsArgs(args: readonly string[]): PurgeAiAnn
       options[key] = value;
     } else throw new Error(`Unknown purge argument: ${arg}`);
   }
+  validatePurgeOptions(options);
   return options;
+}
+
+function validatePurgeOptions(options: PurgeAiAnnotationsOptions): void {
+  if (options.pipelineRunId !== undefined && !/^[A-Za-z0-9._:-]{1,200}$/u.test(options.pipelineRunId)) {
+    throw new Error("Invalid pipeline run id");
+  }
+  if (options.promptSha256 !== undefined && !/^[a-f0-9]{64}$/u.test(options.promptSha256)) {
+    throw new Error("Invalid prompt SHA-256");
+  }
+  const filtered = options.pipelineRunId !== undefined || options.promptSha256 !== undefined;
+  if (options.all && filtered) throw new Error("--all cannot be combined with a filter");
+  if (options.apply && !options.all && !filtered) {
+    throw new Error("An applied purge needs --pipeline-run-id, --prompt-sha256 or an explicit --all");
+  }
 }
 
 /** Delete only the AI overlay. Graph properties and human history remain byte-for-byte intact. */
 export async function purgeAiAnnotations(db: Database, options: PurgeAiAnnotationsOptions = {}) {
+  validatePurgeOptions(options);
   return db.transaction(async (tx) => {
     const where = sql`source = 'ai'
       ${options.pipelineRunId === undefined ? sql`` : sql`AND pipeline_run_id = ${options.pipelineRunId}`}
