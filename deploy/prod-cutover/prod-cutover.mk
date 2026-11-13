@@ -15,6 +15,8 @@ export RUN CUTOVER_LOCK_RUN CUTOVER_LOCK_EXECUTOR ROSTER
 export CONFIGURATION
 export COMMENT_FILE
 export ROOT
+render:
+	@cd "$(ROOT)" && node deploy/prod-cutover/render.cjs
 .PHONY: help prerequisites precheck backup restore-test migrate transition verify smoke rehearsal rollback k8s-plan cd-plan test integration down check image-check publish commit lint
 help:
 	@echo 'Préparation : prerequisites precheck k8s-plan cd-plan. Exécution future : backup restore-test migrate transition verify smoke rehearsal rollback.'

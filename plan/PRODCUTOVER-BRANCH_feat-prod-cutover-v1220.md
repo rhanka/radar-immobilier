@@ -31,6 +31,7 @@
 - [x] Tests dédiés ENV=test-prod-cutover. Ports réservés API 18821, UI 15321, Maildev 11121.
 
 ## Plan / Todo (lot-based)
+- [x] D3 : rendu prod API/MCP et receiver. Statiques general, git off, edge/qualifications/redrive live fermés. Test du rendu et conservation des octets du plan.
 - [x] D2/D4 : extraction préprod privée 0600, plan 6H et roster. Cibles autonomes de dump RO et de pull par digest. Répétition non lancée.
 - [x] Revue #1100, points 1–2 : fenêtre opérateur sous radar-change-lock cutover. Capture avant drain. Déploiement privé, réouverture sur GO séparé. CD après recette.
 - [x] Revue #1100 : gardes, empreintes 6H, reçu copie et rollback complet. Validation locale réussie.
