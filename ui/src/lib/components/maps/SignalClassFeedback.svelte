@@ -22,7 +22,7 @@
   }
 </script>
 
-<span class="feedback-actions">
+<div class="feedback-control"><span class="feedback-actions">
   <IconButton size="sm" variant="ghost" aria-label="Valider l’annotation IA" title="Valider l’annotation IA"
     {disabled} onclick={() => void submit({ verdict: "up" })}><ThumbsUp size={15} /></IconButton>
   <IconButton size="sm" variant="ghost" aria-label="Corriger l’annotation IA" title="Corriger l’annotation IA"
@@ -48,9 +48,12 @@
     </span>
   </form>
 {/if}
+</div>
 
 <style>
   .feedback-actions { display: inline-flex; }
+  .feedback-control { position: relative; }
+  .feedback-form { position: absolute; top: 100%; right: 0; width: min(320px, 85vw); z-index: 50; box-shadow: var(--st-shadow-floating); }
   .feedback-form { display: grid; gap: var(--st-spacing-2, 0.5rem); padding: var(--st-spacing-3, 0.75rem); background: var(--st-semantic-surface-raised); color: var(--st-semantic-text-primary); border: 1px solid var(--st-semantic-border-subtle); border-radius: var(--st-radius-md, 0.375rem); }
   .feedback-form label { display: grid; }
   textarea { color: var(--st-semantic-text-primary); background: var(--st-semantic-surface-raised); border: 1px solid var(--st-semantic-border-subtle); }
