@@ -282,12 +282,11 @@
 
   // ── Compteur actif par ville = compte bulk de la clé LIVE ──────────────────
   /**
-   * Compte BULK serveur d'une ville pour la clé LIVE donnée (`null` seulement
-   * si les données sont indisponibles → badge « n/d »).
+   * Server cube count after period, Pertinence, axes and exclusions.
+   * Unknown counts remain unavailable rather than displaying an unfiltered total.
    *
    * C'est le SEUL compte admis pour l'APPARTENANCE et le TRI de la liste : il
-   * ne varie ni pendant un fetch détail ni avec les lentilles client (axes,
-   * exclusions B), donc une ligne — sélectionnée ou non — ne
+   * ne varie pas pendant un fetch détail, donc une ligne ne
    * saute jamais de position et n'est jamais éjectée par la coupe au plafond
    * (régression #378 : le compte live de la ville sélectionnée participait au
    * tri → re-tri en bas + coupe au plafond dès la fin du fetch).
@@ -335,8 +334,8 @@
   }
 
   // ── Liste de villes (la recherche vit dans RailCityList — liste complète) ──
-  // #5 — garder la ville sélectionnée même si son compte pour le filtre actif
-  // est 0 (elle reste visible/désélectionnable dans le rail).
+  // The list contains only cities with signals left after every active filter.
+  // Selection remains available in the right panel when its city drops out.
   // #378 — appartenance et TRI par compte BULK uniquement : le compte live de
   // la ville sélectionnée ne participe JAMAIS à l'ordre (sinon sa ligne saute
   // ou disparaît à la fin du fetch détail).
