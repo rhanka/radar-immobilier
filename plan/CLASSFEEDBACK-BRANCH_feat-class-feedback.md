@@ -1,7 +1,7 @@
 # Feature: Human feedback on AI classification
 
 ## Objective
-- [ ] Deliver D1–D7: durable provenance, atomic human feedback and evaluation export.
+- [x] Deliver D1–D7: durable provenance, atomic human feedback and evaluation export.
 
 ## Scope / Guardrails
 - [x] Stacked on feat/refresh-single-pass; PR targets that branch; no merge.
@@ -29,4 +29,4 @@
 - [x] PostgreSQL I/O diagnosis: pg_stat_activity showed DataFileImmediateSync; fsync disabled only in disposable test-class-feedback to remove filesystem stalls. No timeout was increased. All 25 scoped API tests pass with one worker.
 - [x] Lot 3 — DS feedback controls, required reclassification and dated private badge.
 - [x] Lot 4 — Typecheck and lint pass; 29 scoped API tests, 1,914 UI tests and 12 real-stack E2E tests pass. Exact timestamp and live refresh snapshot regressions are covered. Test stacks use down -v.
-- [ ] Lot 5 — Peer review, fresh base check, push and stacked PR.
+- [x] Lot 5 — Design peer findings reconciled; code-review selection failure recorded; refreshed base checked; PR #1104 published toward feat/refresh-single-pass. No merge. Both test projects removed with down -v.
