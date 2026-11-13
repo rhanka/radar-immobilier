@@ -11,6 +11,7 @@ for part in release cluster inventory close jobs render stages reopen smoke prep
   source "tools/make/cutover-$part.sh"
 done
 source deploy/prod-cutover/window-guards.sh
+source deploy/prod-cutover/prod-bindings.sh
 cutover_config
 WORK=$(mktemp -d)
 OWNED=0
@@ -51,6 +52,7 @@ if [[ $1 == window-start ]]; then
   mv "$WORK/next.json" "$WORK/record.json"; record_save
   # Inventory the live release before installing the candidate's 6H ConfigMap.
   inventory
+  manual_configuration_snapshot
   jq -e '.consumers|length>0' "$WORK/record.json" >/dev/null || fail 'Consommateurs initiaux requis'
   save_release "$RELEASE"
   checkpoint manual-inventory completed
@@ -77,6 +79,7 @@ case $1 in
     ENV=execution-prod node deploy/prod-cutover/cli.cjs "$1";;
   window-deploy)
     ENV=execution-prod node deploy/prod-cutover/cli.cjs verify
+    manual_bindings candidate
     restart_services
     private_smoke
     checkpoint manual-deploy completed;;
@@ -84,6 +87,8 @@ case $1 in
     ENV=execution-prod node deploy/prod-cutover/cli.cjs rollback-verify
     jq '.release=.previousRelease' "$WORK/record.json" > "$WORK/next.json"
     mv "$WORK/next.json" "$WORK/record.json"; record_save
+    manual_restore_configmaps
+    manual_bindings previous
     restart_services; private_smoke
     checkpoint manual-deploy completed;;
   window-reopen)

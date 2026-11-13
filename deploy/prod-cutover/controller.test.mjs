@@ -5,6 +5,8 @@ import { spawnSync } from 'node:child_process';
 import { writeFileSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fixture } from '../../tools/make/cutover-fixture.mjs';
+import { Buffer } from 'node:buffer';
+import wiring from './prod-bindings.cjs';
 
 for (const [publicFailure, short] of [[false, false], [true, false], [false, true]]) test(`fenêtre fermée : capture, verrou, rollout privé, GO ; échec public=${publicFailure}, SHA court=${short}`, () => {
   const f = fixture({ url: 'https://immo.sent-tech.ca' });
@@ -21,11 +23,21 @@ exec '${node}' "$@"
   const persist = state => writeFileSync(join(f.dir, 'state.json'), JSON.stringify(state));
   const record = () => JSON.parse(f.state().objects.find(o => o.metadata.name === 'radar-change-lock').data.record);
   const run = (action, id) => spawnSync('make', ['-s', '-f', 'deploy/prod-cutover/prod-cutover.mk',
-    action, `RELEASE=${f.dir}/release.json`, `PREVIOUS_RELEASE=${f.dir}/previous.json`, `CONFIGURATION=${f.dir}/configuration.json`, ...(id ? [`RUN=${id}`] : []), 'ENV=execution-prod'],
+    action, `RELEASE=${f.dir}/release.json`, `PREVIOUS_RELEASE=${f.dir}/previous.json`, `CURSOR_REFERENCE=${f.dir}/cursor`, `CONFIGURATION=${f.dir}/configuration.json`, ...(id ? [`RUN=${id}`] : []), 'ENV=execution-prod'],
   { env: f.env, encoding: 'utf8', timeout: 30000 });
   const success = result => assert.equal(result.status, 0, result.stdout + result.stderr);
   try {
     const state = f.state();
+    for (const binding of Object.values(wiring.bindings).flatMap(b => b.env)) {
+      const ref = binding.valueFrom?.secretKeyRef;
+      if (!ref) continue;
+      let secret = state.objects.find(o => o.metadata.name === ref.name);
+      if (!secret) { secret = { kind: 'Secret', metadata: { name: ref.name }, data: {} }; state.objects.push(secret); }
+      secret.data[ref.key] ||= Buffer.from('synthetic-value').toString('base64');
+    }
+    const cursor = Buffer.alloc(32, 7).toString('base64');
+    writeFileSync(join(f.dir, 'cursor'), cursor);
+    state.objects.find(o => o.metadata.name === 'radar-classification-cursor-prod').data.CLASSIFICATION_CURSOR_SECRET = Buffer.from(cursor).toString('base64');
     writeFileSync(join(f.dir, 'previous.json'), JSON.stringify({ ...f.release, dataMigration: null }));
     if (short) state.release.apiServedSha = state.release.gitSha.slice(0, 7);
     writeFileSync(join(f.dir, 'bin/gh'), '#!/bin/sh\nprintf \'[{"workflow_runs":[]}]\\n\'\n', { mode: 0o755 });
@@ -62,6 +74,15 @@ exec '${node}' "$@"
     assert.ok(JSON.stringify(f.state().objects.find(o => o.kind === 'Ingress')).includes('base-maintenance-'));
     const afterDrain = f.calls().length;
     success(run(short ? 'window-rollback-services' : 'window-deploy', captured.run));
+    const deployed = f.state();
+    if (short) {
+      assert.deepEqual(deployed.objects.find(o => o.kind === 'ConfigMap' && o.metadata.name === 'radar-api').data,
+        { GEO_DOCUMENTS_REPOINT: 'old' });
+      assert.equal(deployed.objects.find(o => o.kind === 'Deployment' && o.metadata.name === 'radar-api').spec.template.spec.containers[0].env, undefined);
+    } else {
+      const env = deployed.objects.find(o => o.kind === 'Deployment' && o.metadata.name === 'radar-api').spec.template.spec.containers[0].env;
+      assert.equal(env.find(e => e.name === 'CLASSIFICATION_CURSOR_SECRET').valueFrom.secretKeyRef.name, 'radar-classification-cursor-prod');
+    }
     assert.ok(!f.calls().slice(afterDrain).some(c => c[0] === 'curl' && c.some(a => a === 'https://immo.sent-tech.ca/health')));
     assert.ok(record(), 'verrou conservé après rollout et smoke privé');
     assert.equal(f.state().objects.find(o => o.metadata.name === 'radar-refresh-pv').spec.suspend, true);
