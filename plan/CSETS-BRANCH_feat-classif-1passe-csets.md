@@ -18,6 +18,7 @@
 
 ## Feedback Loop
 - [ ] Blind execution awaits the conductor's key-injection mechanism; no plaintext-label bypass.
+- [ ] Push and draft PR await explicit public-publication approval: automatic review rejected publication to the public ADMIN-accessible GitHub repository.
 
 ## Orchestration Mode (AI-selected)
 - [x] Mono-branch, no integration or merge.
@@ -30,5 +31,6 @@
 - [x] Lot 1: freeze protocol, capture prompts, execute tuning modes with quota guard.
 - [ ] Lot 2: execute blind modes through sealed executor; publish aggregates only.
 - [ ] Lot 3: verify metrics, publish report, push and open draft PR.
+- [x] Tuning aggregates, matrices, baseline comparison and five-line production verdict committed locally.
 - [x] Four synthetic metric/pairing tests and syntax checks pass; 242/242 native validations and exact request comparisons pass.
 - [x] Pairing regression corrected offline: native stages are flat, as in bench-v11; no model rerun.
