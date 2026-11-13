@@ -33,3 +33,5 @@ custody:
 	node tools/classif/1passe/custody.mjs
 quota-claude:
 	node tools/classif/1passe/claude-quota.mjs
+verify:
+	node tools/classif/1passe/verify.mjs

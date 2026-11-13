@@ -21,7 +21,13 @@ export function save(file, value, blind) {
   return { plainSha256: sha256(JSON.stringify(value)) };
 }
 export function load(file, blind) {
-  return blind ? JSON.parse(unseal(key, fs.readFileSync(`${file}.sealed`)).toString()) : json(`${file}.json`);
+  if (!blind) return json(`${file}.json`);
+  assert.equal(env.CLASSIF_ROLE, 'test-executor');
+  const bytes = fs.readFileSync(`${file}.sealed`);
+  fs.appendFileSync(`${home}/blind/access-log.jsonl`, `${JSON.stringify({ at: new Date().toISOString(),
+    action: 'open-C-artifact', actor: env.CLASSIF_ACTOR, role: env.CLASSIF_ROLE,
+    artifact: file.slice(home.length + 1), sealedSha256: sha256(bytes) })}\n`, { mode: 0o600 });
+  return JSON.parse(unseal(key, bytes).toString());
 }
 export function context() {
   const manifest = json(`${home}/source/manifest.json`);
