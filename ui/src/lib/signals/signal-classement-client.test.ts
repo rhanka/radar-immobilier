@@ -47,6 +47,22 @@ const entry = (patch: Partial<ClassementEntry>): ClassementEntry => ({
 afterEach(() => vi.unstubAllGlobals());
 
 describe("signal classement client — acceptance criteria", () => {
+  it("should persist a human Non classé override of an AI class without human heads", async () => {
+    const { calls } = stubFetchOk();
+    await applyClassement(SCOPE, { target: TARGET, displayedFingerprint: FINGERPRINT,
+      current: { ...NON_CLASSE, annotationSource: "ai", classe: "pertinent" }, nextClass: "non_classe" });
+    expect(posts(calls)).toHaveLength(1);
+    expect(posts(calls)[0]?.url).toContain("/personal/deselect");
+    expect(posts(calls)[0]?.body).toMatchObject({ basket: "pertinent", expectedHeadId: null });
+  });
+
+  it("should persist explicit human confirmation of the existing AI class", async () => {
+    const { calls } = stubFetchOk();
+    await applyClassement(SCOPE, { target: TARGET, displayedFingerprint: FINGERPRINT,
+      current: { ...NON_CLASSE, annotationSource: "ai", classe: "pertinent" }, nextClass: "pertinent" });
+    expect(posts(calls)).toHaveLength(1);
+    expect(posts(calls)[0]?.url).toContain("/personal/select");
+  });
   it("criterion 5: classification is persisted through the existing basket API endpoints only", async () => {
     const { calls } = stubFetchOk();
     await fetchReasonCodes(SCOPE);
