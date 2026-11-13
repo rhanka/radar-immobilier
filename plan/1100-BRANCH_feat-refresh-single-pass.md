@@ -20,6 +20,7 @@
 - [x] BR1100-EX3: imported P0 prompt may exceed atomic line budget; preserve source bytes except product role naming and extraction output contract.
 - [x] Design review: provenance peer identified table-level human write fencing; reannotation peer identified distinction between absent and historic manual annotations. Accepted both.
 - [x] Legacy refresh contract is v10 on origin/main; preserve current validator rather than downgrading to v9.
+- [x] Resume: update the secondary-read UI fixture's annotation port to preserve its no-annotation population checks.
 
 ## Orchestration Mode (AI-selected)
 - [x] Mono-branch with disjoint paths: refresh wiring, annotation persistence/UI, reannotation runner.

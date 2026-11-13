@@ -1,4 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
+vi.mock("../../../../../api/src/services/graph/class-annotations.js", () => ({
+  readClassAnnotations: vi.fn(async () => new Map()),
+}));
 import { graphSignalsRoute, type GraphSignalsDeps } from "../../../../../api/src/routes/graph-signals.js";
 import { getSignalNodesForCity } from "../../../../../api/src/services/graph/graph-store.js";
 import { discardedSignalKey, EMPTY_DISCARDED_KEYS } from "../../../../../api/src/services/graph/discarded-signals.js";
