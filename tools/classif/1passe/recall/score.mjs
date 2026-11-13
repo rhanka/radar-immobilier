@@ -18,7 +18,9 @@ for (const ref of references()) {
   const valid = Array.isArray(parsed?.acts);
   const acts = valid ? parsed.acts.filter((a) => a && typeof a === 'object').map((a) => ({ ...a, class: predictionClass(a, codes) })) : [];
   const matches = pair(units, acts, d.text), b = baseline(d), bm = pair(units, b.acts, d.text);
-  const neutral = pair(ref.expected.neutral ?? [], acts.filter((a) => ![...matches.values()].includes(a)), d.text);
+  const neutralUnits = (ref.expected.neutral ?? []).map((n) => ({ id: `${d.id}#neutral-${n.item}`,
+    variants: (n.options ?? []).map((o) => o.unit).filter(Boolean) }));
+  const neutral = pair(neutralUnits, acts.filter((a) => ![...matches.values()].includes(a)), d.text);
   receipts.push({ document: d.id, blind: d.blind, valid, usage: r?.usage ?? null, latencyMs: r?.latencyMs ?? null,
     toolEvents: r?.toolEvents ?? 0, baselineMissing: b.missing ?? false, baselineUsage: b.usage ?? null,
     baselineSha256: b.sha256 ?? null, answerSha256: exists ? sha256(fs.readFileSync(`${file}.${d.blind ? 'sealed' : 'json'}`)) : null });
@@ -74,5 +76,5 @@ const summary = { at: new Date().toISOString(), promptSha256: freeze.promptSha25
   run: fs.existsSync(`${home}/run-summary.json`) ? json(`${home}/run-summary.json`) : null,
   baselineArtifactsSha256: sha256(JSON.stringify(receipts.map((r) => [r.document, r.baselineSha256]))),
   note: 'All three denominators are B. P∪S/B is not recall against C. No D3 reference used.' };
-write(`${dir}/results.json`, summary);
+write(`${dir}/results.json`, JSON.stringify(summary) + '\n');
 console.log(JSON.stringify(summary));
