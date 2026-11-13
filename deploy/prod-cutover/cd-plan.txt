@@ -1,28 +1,22 @@
 PLAN UNIQUEMENT. Aucun tag ni workflow lancé par cette cible.
 
-1. Immo : 44 empreintes + hook 6H ouvert, backup final restauré en test.
-2. k8s : verrou orphelin résolu par operator.mk status/resume, hors de cette lane.
-   Installer le câblage prod approuvé : curseur, roster 6H, rôles et références MCP.
-   Préserver les drapeaux artefacts fermés. Ne pas copier l’overlay préprod.
-3. Owner : GO consigné, fenêtre et rollback disponibles. Vérifier v1.2.20 absent.
-4. Owner/CD : créer puis pousser v1.2.20 sur b7724bdd9015a4f26319897bf240baaf9ee636ae.
-   Ne pas taguer la branche de procédure. Ne pas reconstruire les images.
-5. CD existant : build-push-images.yml, promote-prod.
-   Télécharger release.json immuable du build main 43506353942.
-   Vérifier gitSha et API/UI par digest, dataMigration=6h.
-   prepare ENV=prod vérifie la base déjà migrée, puis run ENV=prod.
-   Ces commandes font des écritures cluster et des sauvegardes : exécution future par k8s/CD.
-6. Vérifier images API, UI, MCP (image API), refresh, watchdog et CronJobs présents.
-   Les CronJobs absents ne sont pas créés par le changement d’image.
-7. Porte served-sha : UI b7724bd, API SHA complet. Exiger DB et stockage OK.
-   Smoke technique puis recette authentifiée. Garder les écrivains suspendus tant que NO-GO.
-8. Échec après DDL : routes fermées, immo restaure toute la DB depuis backup final.
-   k8s : Rollback release pour API/UI, digests capturés pour MCP/CronJobs.
-   Le rollback cutover operator.mk peut restaurer tout l’inventaire d’images du run.
-   Aucune de ces voies ne restaure seule les données prod.
-
-ATTENTION : le tag candidat utilise le code b7724bd, pas cette branche.
-La procédure doit être disponible dans un checkout opérateur distinct et revue avant GO.
-Le promote rouvre ses routes et restaure ses suspensions inventoriées.
-k8s doit maintenir une fermeture externe et les suspensions originales de la fenêtre
-jusqu’au GO de recette. Ne pas laisser le tag réarmer les écrivains par surprise.
+1. Ne pas lancer promote-prod pendant le drain, les DDL ou 6H.
+   prepare/run exigent des consommateurs. run exige API Ready et URL publiques.
+   Son budget peut rouvrir automatiquement. Il ne pilote pas cette fenêtre.
+2. window-start capture ancienne release et inventaire avant fermeture.
+   Chaque acte reprend radar-change-lock, type cutover, avec le RUN original.
+   Aucun nouveau verrou. Aucune expiration. CAS et preuve de fin existants.
+3. window-close ; backup final ; restauration de contrôle ; GO ; migrate ; transition.
+   Le GO porte planSha256 et rosterSha256. Les reçus gardent ces empreintes.
+4. window-deploy réutilise restart_services et private_smoke.
+   Digests épinglés du build 43506353942. Aucune reconstruction.
+   Routes fermées. Schedules suspendus. Verrou conservé.
+5. Recette privée. GO distinct. window-reopen restaure routes et schedules.
+   Smoke public avant libération du verrou. Aucun blocage externe permanent.
+6. Après acceptation et réouverture : GO tag v1.2.20 au SHA
+   b7724bdd9015a4f26319897bf240baaf9ee636ae. Ne pas taguer cette branche.
+   promote-prod fait prepare puis run sur une API candidate Ready.
+   La base est déjà migrée. Le manifeste immuable porte dataMigration=6h.
+7. Reprise vers le schéma 13 : backup final de la fenêtre manuelle.
+   Drain ; rollback DB ; window-rollback-services ; recette privée ; GO réouverture.
+   Ne pas cumuler avec le rollback du CD.
