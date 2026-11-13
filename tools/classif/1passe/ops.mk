@@ -23,3 +23,13 @@ arbitrate:
 	node tools/classif/1passe/arbitrate.mjs
 surface-agy:
 	agy --help
+push:
+	git push origin HEAD
+pr-view:
+	gh pr view 1097 --json url,isDraft,headRefName,baseRefName,title
+pr-update:
+	gh pr edit 1097 --title feat/classif-1passe-bc --body-file tools/classif/1passe/PR.md
+custody:
+	node tools/classif/1passe/custody.mjs
+quota-claude:
+	node tools/classif/1passe/claude-quota.mjs
