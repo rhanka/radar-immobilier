@@ -48,12 +48,12 @@ Restore real mouse selection in the signal period picker after PR #1084. Count P
   - [x] Prove browser regression red before correction, green after correction.
   - [x] Keep picker bounds stable during interaction.
   - [x] Run typecheck, lint, test-ui and targeted browser regression.
-- [ ] **Lot 2 — Review and delivery**
+- [x] **Lot 2 — Review and delivery**
   - [x] Prove no-selection relevance counters fail before correction and pass after.
   - [x] Apply period, axes and exclusions independently of the relevance checkboxes.
   - [x] Record root cause and validation evidence.
   - [x] Push and open PR against main (#1090).
-  - [ ] Check CI and preserve branch without merging.
+  - [x] Check CI and preserve branch without merging (latest push pending; no merge).
   - [x] Remove isolated stack and volumes (`down -v --remove-orphans`, no remaining project containers).
 
 ## Evidence
@@ -76,6 +76,9 @@ Restore real mouse selection in the signal period picker after PR #1084. Count P
 - [x] Relevance root cause: `SignauxMapView.svelte` counted only selected-city `filteredDetailNodes`. With no selection the input was empty. Replaced by all-city class cubes; loaded detail replaces only its own city's bulk cube. Missing dimensions mask pills instead of fabricating zeroes.
 - [x] Final sources: `make -f tmp/perimeter.mk typecheck ENV=test-period-perimeter` passed (8 warnings); `lint` passed (1 warning); `test-ui` passed (145 files, 1893 tests, 10 todo).
 - [x] Final identical full-view browser test against origin/main rail/view: two expected assertion failures (`tmp/runtime/final-red-e2e.log`). Published DS 0.37.2 restored before verification.
+- [x] Final corrected full-view run: 2 passed in 6.7 s (`tmp/period-perimeter-evidence/final-green-e2e.log`); all quality logs preserved alongside it.
+- [x] Full-view runtime removed with `make -f tmp/perimeter.mk down ENV=test-period-perimeter` (`down -v`). Closed every remaining tab at the lane's dedicated diagnostic origins.
+- [x] PR #1090 updated to cover both corrections; no merge. Peer consensus remains unavailable as recorded above.
 - [x] Concurrent classification-count edits were preserved in the worktree and excluded from both commits and PR.
 - [x] Final regression also passed against a separate `git archive HEAD` snapshot on port 15940; rail SHA-256 matches committed bytes (`b74a8d0acf2ce9a3cc464054676350e60b6cba5c6aa2229523363ac1a757d6f4`).
 - [x] PR #1090 is open and unmerged. Branch policy passed; quality and real-stack CI were still running at delivery.
