@@ -82,3 +82,93 @@ BEGIN
     'ambiguous',coalesce(current_class->>'classe'='non_classe',true),'history',history,
     'mcpHistory',events,'feedback',feedback,'notes',notes);
 END $$;
+--> statement-breakpoint
+CREATE FUNCTION signal_mcp_result(p_sub text,p_client text,p_model text,p_tool text,p_hash text,p_result jsonb)
+RETURNS jsonb LANGUAGE plpgsql AS $$
+BEGIN
+  INSERT INTO signal_mcp_audit(sub,client_id,model,tool,input_hash,result)
+    VALUES(p_sub,p_client,p_model,p_tool,p_hash,coalesce(p_result->>'error','written'));
+  RETURN p_result;
+END $$;
+--> statement-breakpoint
+CREATE FUNCTION signal_mcp_write(p_sub text,p_client text,p_tool text,p_body jsonb,p_validation text,
+  p_version text,p_hash text,p_source text DEFAULT 'mcp') RETURNS jsonb LANGUAGE plpgsql AS $$
+DECLARE ref jsonb := p_body->'signalRef'; wid uuid := (ref->>'workspaceId')::uuid;
+  actor uuid; state jsonb; next_class text; code text := p_body->>'reasonCode';
+  why text := btrim(p_body->>'reason'); model_name text := btrim(p_body->>'model');
+  note text; event_id uuid; kind_name text; result jsonb;
+BEGIN
+  PERFORM pg_advisory_xact_lock(hashtextextended('signal-mcp-rate:' || p_sub,0));
+  IF (SELECT count(*) FROM signal_mcp_audit WHERE sub=p_sub AND created_at>clock_timestamp()-interval '1 minute') >= 30 THEN
+    RETURN signal_mcp_result(p_sub,p_client,model_name,p_tool,p_hash,jsonb_build_object('error','rate_limited'));
+  END IF;
+  PERFORM pg_advisory_xact_lock(hashtextextended(array_to_json(ARRAY['workspace',wid::text])::text,0));
+  PERFORM pg_advisory_xact_lock(hashtextextended(array_to_json(ARRAY['class-annotation',
+    ref->>'citySlug',ref->>'type',ref->>'id'])::text,0));
+  SELECT id INTO actor FROM account_users WHERE sub=p_sub AND status='approved' FOR SHARE;
+  state := signal_mcp_read(p_sub,ref);
+  BEGIN
+    IF state ? 'error' THEN result := state;
+    ELSIF p_source NOT IN ('mcp','manual') OR p_validation NOT IN ('auto','human')
+      OR (p_source='manual' AND p_tool<>'annotate_signal') OR ref->>'scope' NOT IN ('personal','workspace') THEN
+      result := jsonb_build_object('error','invalid_signal_command');
+    ELSIF p_source='mcp' AND (coalesce(model_name,'')='' OR coalesce(p_client,'')='') THEN
+      result := jsonb_build_object('error','model_and_client_required');
+    ELSIF p_version IS DISTINCT FROM state->>'version' THEN result := jsonb_build_object('error','annotation_version_conflict');
+    ELSIF NOT EXISTS (SELECT 1 FROM facet_activation_state WHERE workspace_id=wid
+      AND writer_epoch='scoped' AND NOT maintenance_barrier) THEN
+      result := jsonb_build_object('error','scoped_epoch_required');
+    ELSIF ref->>'scope'='workspace' AND NOT EXISTS (SELECT 1 FROM workspace_memberships
+      WHERE workspace_id=wid AND account_id=actor AND status='active' AND moderate_archive) THEN
+      result := jsonb_build_object('error','workspace_capability_required');
+    ELSE
+      kind_name := CASE p_tool WHEN 'classify_signal' THEN 'class'
+        WHEN 'confirm_classification' THEN 'feedback' WHEN 'annotate_signal' THEN 'note' END;
+      next_class := CASE WHEN p_tool='confirm_classification' AND p_body->>'verdict'='up'
+        THEN state->'current'->>'classe' ELSE coalesce(p_body->>'newClasse',p_body->>'classe') END;
+      IF kind_name='note' THEN
+        note := btrim(regexp_replace(regexp_replace(p_body->>'text','<[^>]*>','','g'),'[[:cntrl:]]','','g'));
+        IF length(p_body->>'text')>2000 OR coalesce(note,'')='' THEN RAISE EXCEPTION 'invalid_note'; END IF;
+      ELSE
+        IF p_tool='confirm_classification' THEN
+          IF p_validation<>'human' THEN RAISE EXCEPTION 'human_confirmation_required'; END IF;
+          IF p_body->>'verdict' NOT IN ('up','down') THEN RAISE EXCEPTION 'invalid_verdict'; END IF;
+          IF p_body->>'verdict'='down' AND (next_class IS NULL OR next_class='non_classe'
+            OR next_class=state->'current'->>'classe' OR code IS NULL) THEN RAISE EXCEPTION 'reclassification_required'; END IF;
+          IF p_body->>'verdict'='up' THEN
+            code := state->'current'->>'reason_code'; why := 'Validated: ' || coalesce(state->'current'->>'reason','');
+          END IF;
+        END IF;
+        IF next_class IS NULL OR next_class NOT IN ('pertinent','a_surveiller','ecarte','non_classe')
+          OR coalesce(why,'')='' OR length(why)>2000 THEN RAISE EXCEPTION 'invalid_classification'; END IF;
+        IF next_class='non_classe' THEN
+          IF p_validation<>'human' THEN RAISE EXCEPTION 'human_confirmation_required'; END IF;
+        ELSIF NOT (p_tool='confirm_classification' AND p_body->>'verdict'='up') AND NOT EXISTS (
+          SELECT 1 FROM facet_reason_codes WHERE profile_id='immo-steve-2026-09' AND facet_reason_codes.code=signal_mcp_write.code
+            AND verdict=CASE next_class WHEN 'ecarte' THEN 'non_pertinent' ELSE next_class END) THEN
+          RAISE EXCEPTION 'invalid_reason_code';
+        END IF;
+        IF ref->>'scope'='workspace' AND next_class<>'ecarte' THEN RAISE EXCEPTION 'workspace_archive_only'; END IF;
+        IF state->'current'->>'source'='manual' OR (p_validation='auto' AND state->'current'->>'validation'='human') THEN
+          RAISE EXCEPTION 'classification_priority_conflict';
+        END IF;
+      END IF;
+      INSERT INTO signal_mcp_events(workspace_id,actor_id,scope,city_slug,node_type,node_id,kind,source,
+        model,client_id,validation,classe,reason_code,reason,text,verdict,previous_version)
+        VALUES(wid,actor,ref->>'scope',ref->>'citySlug',ref->>'type',ref->>'id',kind_name,p_source,
+          model_name,p_client,p_validation,next_class,code,why,note,p_body->>'verdict',p_version) RETURNING id INTO event_id;
+      IF ref->>'scope'='personal' THEN
+        INSERT INTO personal_projection_revisions(workspace_id,owner_id,city_slug,mode,revision)
+          VALUES(wid,actor,ref->>'citySlug','signal',1) ON CONFLICT(workspace_id,owner_id,city_slug,mode)
+          DO UPDATE SET revision=personal_projection_revisions.revision+1,updated_at=now();
+      ELSE
+        INSERT INTO workspace_projection_revisions(workspace_id,city_slug,mode,revision)
+          VALUES(wid,ref->>'citySlug','signal',1) ON CONFLICT(workspace_id,city_slug,mode)
+          DO UPDATE SET revision=workspace_projection_revisions.revision+1,updated_at=now();
+      END IF;
+      result := jsonb_build_object('id',event_id,'validation',p_validation);
+    END IF;
+  EXCEPTION WHEN raise_exception THEN result := jsonb_build_object('error',SQLERRM);
+  END;
+  RETURN signal_mcp_result(p_sub,p_client,model_name,p_tool,p_hash,result);
+END $$;
