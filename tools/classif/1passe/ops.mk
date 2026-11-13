@@ -39,7 +39,7 @@ push:
 pr-view:
 	gh pr view 1097 --json url,isDraft,headRefName,baseRefName,title
 pr-update:
-	gh pr edit 1097 --title feat/classif-1passe-bc --body-file tools/classif/1passe/PR.md
+	gh api --method PATCH repos/rhanka/radar-immobilier/pulls/1097 -f title=feat/classif-1passe-bc -F body=@tools/classif/1passe/PR.md --jq .html_url
 custody:
 	node tools/classif/1passe/custody.mjs
 quota-claude:

@@ -9,7 +9,7 @@ Les sorties sauvegardées ont été recalculées. Seuls les appels document inte
 | Accords de code / support | 8,28 % | 29,59 % |
 | Désaccords D3 | 620 | 476 |
 
-Après : accord de classe 92,58 %, kappa 0,770636 sur les 229 paires valides. L’ancien calcul incluait les états techniques : accord 90,98 %, kappa 0,613265. Ces dénominateurs diffèrent. Les tableaux comparables figurent dans [CORRECTION.md](tools/classif/1passe/CORRECTION.md).
+Après : accord de classe 92,58 %, kappa 0,770636 sur les 229 paires valides. L’ancien calcul incluait les états techniques : accord 90,98 %, kappa 0,613265. Ces dénominateurs diffèrent. Les tableaux comparables figurent dans [CORRECTION.md](https://github.com/rhanka/radar-immobilier/blob/feat/classif-1passe-bc/tools/classif/1passe/CORRECTION.md).
 
 Seize reprises : onze en mise au point et cinq en aveugle. Seize JSON valides. Concurrence 10. Quota Codex 43 → 45 %. Les 97 fichiers D3 sont conservés. Onze réponses D3 restent réutilisables avec le même prompt. Il reste 465 arbitrages potentiels : 249 en mise au point et 216 en aveugle. Estimation : 465 premiers appels, jusqu’à 505 avec le budget de reprises restant. Aucun lancé.
 
