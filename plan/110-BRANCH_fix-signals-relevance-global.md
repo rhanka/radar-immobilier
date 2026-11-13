@@ -40,7 +40,7 @@ Apply Pertinence consistently to the signal header, city list, map and selected 
   - [x] Read project rules and harness debug/test skills.
   - [x] Confirm origin/main baseline 0742dae with #1090.
 - [ ] **Lot 1 — Regression and correction**
-  - [ ] Prove browser regression red on the baseline.
+  - [x] Prove browser regression red on the baseline: expected 5/3, got 8/4 without selection and 7/4 with Delson (CDP native checkbox clicks).
   - [ ] Share cube-based counts across rail and map.
   - [ ] Verify period, axes, exclusions and selection with real clicks.
 - [ ] **Lot 2 — Gates and delivery**
