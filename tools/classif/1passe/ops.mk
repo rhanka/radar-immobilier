@@ -17,6 +17,10 @@ status:
 	node tools/classif/1passe/status.mjs $(ARGS)
 reconcile:
 	node tools/classif/1passe/reconcile.mjs
+correction-freeze:
+	node tools/classif/1passe/correction-freeze.mjs
+resume-interrupted:
+	node tools/classif/1passe/resume-interrupted.mjs
 test:
 	node --test tools/classif/1passe/matching.test.mjs
 arbitrate:

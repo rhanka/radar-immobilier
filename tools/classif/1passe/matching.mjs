@@ -1,8 +1,13 @@
 // Shared offline matcher. Ambiguous graph edges are reported, never assigned.
 export const norm = (s) => String(s ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+let cachedText, cachedPages, cachedQuotes;
 export function quotePages(quote, text) {
+  if (cachedText !== text) {
+    cachedText = text; cachedPages = text.split('\f').map(norm); cachedQuotes = new Map();
+  }
   const q = norm(quote);
-  return q ? text.split('\f').flatMap((p, i) => norm(p).includes(q) ? [i + 1] : []) : [];
+  if (!cachedQuotes.has(q)) cachedQuotes.set(q, q ? cachedPages.flatMap((p, i) => p.includes(q) ? [i + 1] : []) : []);
+  return cachedQuotes.get(q);
 }
 export function overlap(a, b) {
   const x = norm(a), y = norm(b);

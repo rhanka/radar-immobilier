@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
 import { sha256, sealToFile, unseal } from '../lib/refc1.mjs';
 import { openBlindSet } from '../lib/blind.mjs';
 export const dir = 'tools/classif/1passe';
@@ -16,7 +17,14 @@ export function writePrivate(file, data) {
 }
 export function save(file, value, blind) {
   fs.mkdirSync(path.dirname(file), { recursive: true, mode: 0o700 });
-  if (blind) return sealToFile(key, Buffer.from(JSON.stringify(value)), `${file}.sealed`);
+  if (blind) {
+    const temporary = `${file}.${randomUUID()}.sealed`;
+    try {
+      const receipt = sealToFile(key, Buffer.from(JSON.stringify(value)), temporary);
+      fs.renameSync(temporary, `${file}.sealed`);
+      return receipt;
+    } finally { fs.rmSync(temporary, { force: true }); }
+  }
   writePrivate(`${file}.json`, value);
   return { plainSha256: sha256(JSON.stringify(value)) };
 }
