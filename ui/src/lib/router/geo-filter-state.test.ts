@@ -2,8 +2,23 @@ import { describe, expect, it } from "vitest";
 import { buildGeoQuery, parseGeoQuery } from "./geo-route.js";
 import { readGeoFilters, writeGeoFilters, subsetFromGeoFilters, sameTimeRange, unrestrictedGeoFilters } from "./geo-filter-state.js";
 import { keyForVivierB } from "$lib/signals/vivier-view-mode.js";
+import { DEFAULT_CLASSEMENT_FILTER, SIGNAL_CLASSES, type ClassementFilter } from "$lib/signals/signal-classement.js";
 
 describe("shareable geographic restrictions", () => {
+  it("should round-trip every relevance selection without duplicate parameters", () => {
+    for (let mask = 0; mask < 16; mask++) {
+      const classement = Object.fromEntries(SIGNAL_CLASSES.map((classe, index) =>
+        [classe, Boolean(mask & (1 << index))])) as ClassementFilter;
+      const state = { ...readGeoFilters({ period: ["7d"], excludePiia: ["1"] }), classement };
+      const query = buildGeoQuery({ filters: writeGeoFilters(state) });
+      expect(readGeoFilters(parseGeoQuery(query).filters).classement).toEqual(classement);
+      expect(new URLSearchParams(query).getAll("filter.classement").length).toBeLessThanOrEqual(1);
+      expect(writeGeoFilters(readGeoFilters(parseGeoQuery(query).filters))).toEqual(writeGeoFilters(state));
+    }
+    expect(readGeoFilters({ period: ["all"] }).classement).toEqual(DEFAULT_CLASSEMENT_FILTER);
+    expect(readGeoFilters({}).classement).toEqual(DEFAULT_CLASSEMENT_FILTER);
+  });
+
   it("should restore every business filter and fixed period across browsers", () => {
     const filters = {
       zonage: ["1"], residentiel: ["1"], precoce: ["1"],
