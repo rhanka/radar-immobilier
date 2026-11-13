@@ -41,6 +41,7 @@ import {
 } from "../services/graph/refresh-mesh.js";
 import { createRefreshModelPolicy, type RefreshModel } from "../services/graph/refresh-model-policy.js";
 import { loadRefreshProfileContext } from "../services/graph/refresh-profile.js";
+import { loadSinglePassPrompt, singlePassEnabled } from "../services/graph/refresh-single-pass.js";
 import { DEFAULT_REFRESH_DOCUMENT_TIMEOUT_MS, DEFAULT_REFRESH_MAX_DOCUMENT_BYTES, runPvRefresh,
   type RefreshAcquire } from "../services/graph/refresh-run.js";
 import { assessRefreshSweepHealth, parseRefreshTarget,
@@ -123,6 +124,7 @@ async function seedSavedInput(store: S3ObjectStore, city: string): Promise<Refre
 }
 
 async function main(): Promise<void> {
+  const singlePassPrompt = singlePassEnabled(process.env.REFRESH_SINGLE_PASS) ? await loadSinglePassPrompt() : undefined;
   const target = parseRefreshTarget(process.argv.slice(2));
   const city = target.citySlug;
   if (!target.all && !city) throw new Error("Usage: refresh-pv.ts --all | <city-slug>");
@@ -135,7 +137,7 @@ async function main(): Promise<void> {
   const fallback = selectedModel("REFRESH_FALLBACK");
   const verifyEnabled = process.env.REFRESH_VERIFY_ENABLED ?? "0";
   if (verifyEnabled !== "0" && verifyEnabled !== "1") throw new Error("REFRESH_VERIFY_ENABLED must be 0 or 1");
-  const verification = verifyEnabled === "1" ? selectedModel("REFRESH_VERIFY") : undefined;
+  const verification = verifyEnabled === "1" && !singlePassPrompt ? selectedModel("REFRESH_VERIFY") : undefined;
   // The explicit policy owns bounded quality retries; Graphify gets one route attempt.
   const maximumAttempts = positive("REFRESH_MAXIMUM_ATTEMPTS", 1, 1);
   const primaryQualityAttempts = positive("REFRESH_PRIMARY_QUALITY_ATTEMPTS", 2, 10);
@@ -233,6 +235,7 @@ async function main(): Promise<void> {
   const refreshCity = (citySlug: string, mode: { extract: boolean } = { extract: true },
     onSetAside?: (document: RecueilSetAsideDocument) => void) =>
     runPvRefresh({ cycleId, citySlug, store, db, profileContext,
+      ...(singlePassPrompt ? { singlePassPrompt } : {}),
       documentModels,
       // What the radar does NOT read, one line per document, every pass that
       // meets it: the PO's view of deferred-oversize and interrupted-repeatedly
@@ -251,7 +254,7 @@ async function main(): Promise<void> {
       extractPdf: async (bytes, url) => pdfToTextViaPoppler(url)(bytes, 30_000),
       profileHash: profileContext.profile.profile_hash,
       registryHash: canonicalHash(profileContext.registryExtraction), packageVersion: "0.18.0",
-      modelPolicy: documentModels.policy,
+      modelPolicy: singlePassPrompt ? `${documentModels.policy}:single-pass:${singlePassPrompt.sha256}` : documentModels.policy,
       maximumAttempts,
       // The whole-list sweep takes a city's existing corpus as covered on its
       // first visit; a targeted single-city run does not, because the operator
