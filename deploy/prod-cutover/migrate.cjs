@@ -1,0 +1,86 @@
+const r = require('./runtime.cjs');
+function migrationSql(entry, expected) {
+  const pairs = expected.map(e => `('${e.hash}',${e.when}::bigint)`).join(',');
+  const text = r.fs.readFileSync(entry.file, 'utf8');
+  // This release has no non-transactional DDL. Reject future incompatible input.
+  if (/\bCONCURRENTLY\b|^\s*(COMMIT|ROLLBACK)\s*;/im.test(text)) r.fail('non_transactional_ddl_requires_review');
+  return `BEGIN;
+SET LOCAL lock_timeout='5s';
+SET LOCAL statement_timeout='300s';
+SELECT pg_advisory_xact_lock(hashtextextended('immo-prod-cutover-v1220',0));
+DO $guard$ BEGIN
+IF EXISTS (SELECT hash,created_at FROM drizzle.__drizzle_migrations
+  EXCEPT SELECT * FROM (VALUES ${pairs}) AS expected(hash,created_at))
+OR EXISTS (SELECT * FROM (VALUES ${pairs}) AS expected(hash,created_at)
+  EXCEPT SELECT hash,created_at FROM drizzle.__drizzle_migrations)
+OR (SELECT count(*) FROM drizzle.__drizzle_migrations) <> ${expected.length}
+THEN RAISE EXCEPTION 'migration_prefix_changed'; END IF;
+END $guard$;
+${text.replaceAll('--> statement-breakpoint', '')}
+INSERT INTO drizzle.__drizzle_migrations(hash,created_at) VALUES ('${entry.hash}',${entry.when});
+COMMIT;`;
+}
+function migrate() {
+  r.destination();
+  const proof = r.evidence();
+  const entries = r.journal();
+  let count = r.prefix(r.rows(), entries);
+  if (r.env.ENV === 'execution-prod') {
+    const b = r.receipt('backup');
+    if (r.receipt('restore').sha256 !== b.sha256 || b.run !== proof.run || b.drain !== proof.completedAt)
+      r.fail('tested_final_backup_required');
+  } else if (!r.receipt('restore').sha256) r.fail('restored_production_copy_required');
+  const measured = [];
+  const start = Date.now();
+  for (; count < entries.length; count++) {
+    const e = entries[count];
+    const at = Date.now();
+    r.save('migration-current', { tag: e.tag, hash: e.hash, status: 'started', at: new Date().toISOString() });
+    try { r.sql(migrationSql(e, entries.slice(0, count)), { timeout: 540000 }); }
+    catch (error) {
+      r.save('migration-failed', { tag: e.tag, durationMs: Date.now() - at,
+        outcome: 'indéterminé : vérifier le journal avant reprise', code: error.message });
+      throw error;
+    }
+    const result = { tag: e.tag, hash: e.hash, durationMs: Date.now() - at, status: 'committed' };
+    measured.push(result);
+    r.fs.appendFileSync(r.path.join(r.output(), 'migration-times.jsonl'), `${JSON.stringify(result)}\n`, { mode: 0o600 });
+  }
+  if (r.prefix(r.rows()) !== 44) r.fail('migration_verification_failed');
+  const result = { sha: r.SHA, migrations: 44, applied: measured, durationMs: Date.now() - start };
+  r.save('migrations', result);
+  return result;
+}
+function hook(operation) {
+  r.destination();
+  if (r.prefix(r.rows()) !== 44) r.fail('44_migrations_required');
+  const image = r.pinnedImage();
+  const proof = r.evidence();
+  const plan = r.json(r.env.PLAN || r.fail('approved_6h_plan_required'));
+  const name = `immo-6h-${proof.run}`;
+  const begin = Date.now();
+  const variables = { ...r.env, CUTOVER_PLAN: JSON.stringify(plan), CUTOVER_EVIDENCE: JSON.stringify(proof),
+    CUTOVER_OPERATION: operation, PGOPTIONS: '-c lock_timeout=5000 -c statement_timeout=300000' };
+  const names = ['PGHOST', 'PGPORT', 'PGUSER', 'PGDATABASE', 'PGPASSWORD', 'PGOPTIONS', 'PGPASSFILE',
+    'CUTOVER_PLAN', 'CUTOVER_EVIDENCE', 'CUTOVER_OPERATION'];
+  const args = ['run', '--pull=never', '--rm', '--name', name, '--network=host',
+    '--user', `${process.getuid()}:${process.getgid()}`, '--read-only', '--tmpfs', '/tmp',
+    '--cap-drop=ALL', '--security-opt=no-new-privileges',
+    '--mount', `type=bind,src=${r.ROOT}/deploy/prod-cutover/hook.cjs,dst=/run-cutover.cjs,readonly`];
+  if (r.env.PGPASSFILE) args.push('--mount', `type=bind,src=${r.env.PGPASSFILE},dst=${r.env.PGPASSFILE},readonly`);
+  for (const name of names) args.push('-e', name);
+  args.push('--entrypoint', 'node', image, '/run-cutover.cjs');
+  let verdict;
+  try { verdict = JSON.parse(r.run('docker', args, { timeout: 540000, env: variables }).trim()); }
+  finally {
+    // A killed Docker client must never leave the hook running in the daemon.
+    try { r.run('docker', ['rm', '-f', name], { timeout: 15000 }); } catch { /* already removed */ }
+  }
+  if (!verdict.ok || (operation === 'transition' && (verdict.status !== 'open-success'
+    || verdict.epoch !== 'scoped' || verdict.sealedUnresolved !== 0 || verdict.maintenanceBarrier !== false)))
+    r.fail('hook_verdict_refused');
+  const result = { ...verdict, sha: r.SHA, run: proof.run, durationMs: Date.now() - begin };
+  r.save(operation, result);
+  return result;
+}
+module.exports = { migrationSql, migrate, hook };
