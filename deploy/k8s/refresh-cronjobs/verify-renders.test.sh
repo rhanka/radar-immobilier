@@ -42,6 +42,12 @@ DOG="deploy/k8s/34-refresh-pending-watchdog.yaml"
 
 fixture; run_ok "released overlays pass"
 
+fixture; sed -i '/REFRESH_SINGLE_PASS/d' "$CASE_ROOT/$BASE"
+run_bad "single-pass flag missing" "refresh activation/model contract failed"
+
+fixture; sed -i '/REFRESH_SINGLE_PASS/s/value: "0"/value: "1"/' "$CASE_ROOT/$BASE"
+run_bad "single-pass enabled by default" "refresh activation/model contract failed"
+
 P='s#value: "0 0,6,12,18 \* \* \*"#value: "%s"#'
 pre_sched() { sed -i "$(printf "$P" "$1")" "$CASE_ROOT/$PRE"; }
 
