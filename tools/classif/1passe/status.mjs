@@ -21,5 +21,6 @@ if (fs.existsSync(journal)) {
 }
 if (process.argv.includes('--tuning-shape')) {
   const rows = fs.readFileSync(`${home}/tuning.jsonl`, 'utf8').trim().split('\n').map(JSON.parse);
+  console.log(JSON.stringify({ rowKeys: Object.keys(rows[0]), id: rows[0].id, itemId: rows[0].itemId, documentId: rows[0].documentId }));
   console.log(JSON.stringify(rows.find((r) => r.expected.units.length)?.expected.units[0]));
 }
