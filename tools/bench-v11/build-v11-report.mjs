@@ -154,11 +154,6 @@ const argonRow = {
 // primary tariff dev.meta.ai/models/muse-ember/ read 2026-11-13:
 // <=200k context 0.10 in / 0.004 cached / 0.50 out ; >200k 0.30 / 0.012 / 1.50.
 const EMBER_DIR = V12 ? (process.env.BENCH_EMBER_DIR ?? "tools/bench-v11") : null;
-const cpPlusPath = V12 ? `${EMBER_DIR}/full/scores-cp-plus.json` : null;
-const CP_PLUS = cpPlusPath && existsSync(cpPlusPath) ? JSON.parse(await readFile(cpPlusPath, "utf8")).arm : null;
-const cpLowPath = V12 ? `${EMBER_DIR}/full/scores-cp-plus-low.json` : null;
-const CP_LOW = cpLowPath && existsSync(cpLowPath) ? JSON.parse(await readFile(cpLowPath, "utf8")).arm : null;
-const { cpPlusRows, cpPlusSection } = await import("./cp-plus-report.mjs");
 const EMBER_PRICE = { threshold: 200_000, lo: { i: 0.10, c: 0.004, o: 0.50 }, hi: { i: 0.30, c: 0.012, o: 1.50 } };
 const emberDocUsd = (u, withReasoning) => {
   const t = (u.inputTokens > EMBER_PRICE.threshold) ? EMBER_PRICE.hi : EMBER_PRICE.lo;
@@ -204,8 +199,6 @@ const MODEL_NAMES = [
   ["Mistral Small 4", "Mistral Small 4", "mistral-small-2603"],
 ];
 const CASCADES = {
-  "CP+ low": ["CP+ low (GPT-6 Astra medium → Muse Spark 1.3 low)", "CP+ low : GPT-6 Astra → Muse Spark 1.3", "medium → low"],
-  "CP+": ["CP+ (GPT-6 Astra medium → Muse Spark 1.3 xhigh)", "CP+ : GPT-6 Astra → Muse Spark 1.3", "medium → xhigh"],
   "CP actuel (astra-medium → gemini low)": ["CP actuel (GPT-6 Astra medium → Gemini 3.8 Flash low)", "CP actuel : GPT-6 Astra → Gemini 3.8 Flash", "medium → low"],
   "CP-low (astra-low → gemini low)": ["CP-low (GPT-6 Astra low → Gemini 3.8 Flash low)", "CP-low : GPT-6 Astra → Gemini 3.8 Flash", "low → low"],
   // v10 policies: C2 = 2 essais Gemini puis Astra (#719) ; C3 = 3 essais Gemini puis Astra.
@@ -650,12 +643,10 @@ if (EMBER.length) {
   // given under both billing hypotheses for reasoning tokens (Meta's page does
   // not say): only the Muse rows with separate reasoning counts change.
   const isCascade = (row) => /^(CP|C2$|C3$)/.test(row.label);
-  const bestCandidates = [...ALL, ...(CP_PLUS ? cpPlusRows(CP_PLUS, CP_LOW) : [])];
+  const bestCandidates = ALL;
   const pick = (rows, score) => rows.filter((row) => score(row) !== null && Number.isFinite(score(row)))
     .sort((a, b) => (score(b) - score(a)) || (b.f1 - a.f1))[0];
   const apiWithReasoning = (row) => {
-    if (row.label === "CP+") return CP_PLUS.usdApiEquivWithExtraReasoning;
-    if (row.label === "CP+ low") return CP_LOW.usdApiEquivWithExtraReasoning;
     const e = EMBER.find((x) => x.row.label === row.label);
     if (e) return e.apiR;
     if (row.label === wonderRow.label) return wonderApiBurnWithReasoning;
@@ -688,14 +679,6 @@ if (EMBER.length) {
     "",
   ].join("\n");
   insertBefore("## 1. Résumé exécutif", bestMd);
-  if (CP_PLUS) {
-    md = md.replace(`Calculé depuis les ${ALL.length} lignes du tableau global (§3)`,
-      `Calculé depuis les ${ALL.length} lignes du tableau global (§3), le rejeu Astra et CP+ mesurée`);
-    insertBefore("## 4.", cpPlusSection(CP_PLUS, CP_LOW));
-    insertAfter("- surface d'accès de la CLI Muse déclarée", "- cascade CP+ mesurée : GPT-6 Astra medium rejoué, puis Muse Spark 1.3 xhigh en relecteur ; résultats et quotas dans la section « CP+ mesurée ».");
-    md = md.replace("Le **combo CP actuel** reste en tête en F1", "Sur les 42 lignes historiques, le **combo CP actuel** reste en tête en F1");
-    md = md.replace("Aucun modèle seul n'égale le combo CP", "Sur les 42 lignes historiques, aucun modèle seul n'égale le combo CP");
-  }
   md = md.replaceAll("Hypothèse A (convention du tableau global) : raisonnement non facturé",
     "Hypothèse A (convention du tableau global) : sortie rapportée, raisonnement probablement inclus");
   md = md.replaceAll("convention A : raisonnement non facturé", "convention A : sortie rapportée, raisonnement probablement inclus");
@@ -703,7 +686,7 @@ if (EMBER.length) {
   const { chartsV12 } = await import(new URL("./charts-v12.mjs", import.meta.url));
   const plotRows = [...bestCandidates].sort((a, b) => (b.r - a.r) || (b.f1 - a.f1));
   V12_CHARTS = chartsV12(plotRows.map((row) => ({ label: row.label, name: fullName(row.label), accepted: row.accepted, p: row.p, r: row.r,
-    f1: row.f1, api: row.api, seat: row.seat, isV12: row.label.startsWith("Muse Ember") || row.label.startsWith("CP+") || /rejeu v12/.test(row.label) })));
+    f1: row.f1, api: row.api, seat: row.seat, isV12: row.label.startsWith("Muse Ember") })));
   const shortName = (row) => fullName(row.label)?.replace(/\s*\((siège|API|siège AGY|Cloud Code)\)$/, "") ?? row.label;
   const noApi = plotRows.filter((row) => !(row.api > 0)).map(shortName);
   const apiOnly = plotRows.filter((row) => row.api > 0 && !(row.seat > 0)).map(shortName);
@@ -725,8 +708,6 @@ if (EMBER.length) {
     `Graphiques v12 générés en Node par \`tools/bench-v11/charts-v12.mjs\` (règle zéro Python), dans le style du v10 (v101b, Matplotlib) : couleur = fournisseur, forme = modèle, pointillé = progression d'effort d'un même modèle (off → minimal → low → medium → high → xhigh → max), étoile = cascade, libellé posé à côté de chaque point avec des traits de rappel courts, courbes de même F1 en gris clair. Noms complets des modèles avec version ; C2 et C3 sont distingués par leur politique de reprise (2 ou 3 essais Gemini avant le repli Astra). Le graphique F1-coût reprend la lecture v10 : équivalent API en plein, siège en creux, reliés pour un même bras (convention A : raisonnement non facturé). Lignes avec point API seul (siège \`missing source\`, ${apiOnly.length}) : ${apiOnly.join(", ")}. Lignes absentes du graphique F1-coût, faute d'équivalent API publié (${noApi.length}) : ${noApi.join(", ")}. Bras v12 (Muse Ember 1.0 xhigh et max) : contour noir épais et libellé gras « v12 ». Contrôle automatique des libellés : ${ck.prLabelOverlaps} chevauchement(s) sur précision-rappel, ${ck.f1CostLabelOverlaps} sur F1-coût ; rendus vérifiés à l'œil.`,
     "");
   md = ls.join("\n");
-  if (CP_PLUS) md = md.replace("Bras v12 (Muse Ember 1.0 xhigh et max)",
-    "Les graphiques ajoutent le rejeu Astra et CP+ aux 42 mesures historiques. Bras v12 (Muse Ember 1.0 xhigh et max, Astra medium rejoué et CP+)");
   md = md.replaceAll("convention A : raisonnement non facturé", "convention A : sortie rapportée, raisonnement probablement inclus");
 }
 
