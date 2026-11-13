@@ -29,20 +29,21 @@ Chaque cible d’exécution a un plafond externe de 3 600 secondes. Arrêt puis 
 Les reçus lient SHA, empreinte et identité physique de base. Conserver OUTPUT dans un répertoire privé hors Git.
 Les erreurs n’affichent ni SQL, ni ligne métier, ni secret. Les entrées JSON refusent les fichiers .env et les liens symboliques.
 
-## Répétition sur copie : prérequis manquants
+## Répétition sur copie : état après décisions owner
 
-La répétition prod **n’a pas eu lieu**. Aucun dump prod n’a été lancé.
-Le rôle `radar_db_ro_prod` existe. Ses identifiants n’ont pas été lus. Aucun canal de connexion RO utilisable par cette lane n’a été attesté.
-L’hôte possède Node, Docker, s5cmd et kubectl. Il ne possède ni psql, ni pg_dump, ni pg_restore dans PATH.
-Fournir un runtime opérateur avec les clients natifs PostgreSQL 16, sans installer de rôle prod par cette lane.
+La répétition prod **n’a pas eu lieu**. Le dump préliminaire RO autorisé est prêt.
+Voir le [dossier de préparation](PREPARATION.md), les empreintes et les commandes exactes.
+Le rôle `radar_db_ro_prod` a servi au dump via port-forward. Aucune écriture prod.
+Les clients PostgreSQL 16 sont préparés dans des wrappers Docker privés.
+Le runtime local recrée les rôles de l’archive et les deux rôles MCP, sans identifiants prod.
 
-L’owner doit fournir ou faire autoriser :
+État des prérequis :
 
-1. Une archive custom récente de `radar` et son SHA-256 indépendant. Provenance prod et heure du snapshot requises. Ou une autorisation future de dump RO.
-2. Un accès réseau explicite à la DB et le rôle RO existant. CONNECT, USAGE des schémas, SELECT des tables, séquences et journal ; aucune capacité DML/DDL, superuser, réplication ou bypass RLS. Vérifier les grants hérités. Les credentials restent injectés par l’opérateur.
-3. Une instance PostgreSQL 16/PostGIS jetable locale. Base `radar_cutover_<identifiant>`, hôte 127.0.0.1, localhost ou ::1. Aucun port partagé avec UAT. Tous les rôles propriétaires et destinataires de l’archive doivent préexister. Le rôle opérateur doit pouvoir restaurer propriétaires et ACL. Accès à `pg_control_system()` requis.
-4. L’image API candidate déjà présente dans Docker. `image-check` constate son absence locale ; le runner interdit le pull implicite. Référencer `RELEASE=<chemin absolu du manifeste épinglé>`. Le hook réel reste non vérifié tant que ce prérequis manque.
-5. Un plan 6H approuvé. Les comptes doivent être présents et approuvés dans la copie. PLAN pointe vers ce JSON. ROSTER pointe vers le tableau JSON exact de ses accounts. APPROVAL contient owner, sha, expiresAt, planSha256 et rosterSha256. Ces empreintes SHA-256 portent sur les octets des fichiers. Toute modification, même de format, exige un nouveau GO. Voir `../cutover/plan.example.json`.
+1. Archive custom `radar` prête en privé. Double SHA-256 identique. Provenance et durée dans preparation-proof.json. La restauration reste à faire.
+2. Accès RO attesté. Grants hérités sans écriture vérifiés. Aucun rôle créé en prod. Port-forward terminé et mot de passe temporaire supprimé.
+3. PostgreSQL 16.4/PostGIS 3.4.3 local épinglé. Base `radar_cutover_owner_20261113`, hôte 127.0.0.1, port 25433. copy-up crée l’instance et les rôles. Non lancé ici.
+4. Images API/UI candidates présentes par digest. Manifeste comparé au run 43506353942. Aucun rebuild. `image-check` réussit. Le hook réel reste non exécuté.
+5. Roster et plan privés extraits de préprod selon D2. Six comptes aussi approuvés en prod. APPROVAL reste à fournir avec owner, sha, expiresAt, planSha256 et rosterSha256. Ces empreintes portent sur les octets exacts. Toute modification exige une nouvelle attestation.
 6. Une preuve réelle de terminaison des processus de restauration/migration de la copie. Ne pas inventer de preuve prod. `EVIDENCE` contient run UUID, release SHA complet, instances et completedAt ISO de moins de 24 h.
 7. UI/API/MCP candidats locaux pointant vers cette même copie. Refresh et sortie réseau vers la prod désactivés. `SMOKE_URL=http://127.0.0.1:<port>` doit servir ces services. Un compte de recette local autorisé et les documents nécessaires sont requis.
 
@@ -82,7 +83,8 @@ La fenêtre conserve le verrou entre les commandes. Une promotion concurrente do
 Pour la réouverture, l’attestation porte aussi reopen=true et run=<RUN>.
 La capture précède le drain. Les variables PLAN, ROSTER, RELEASE et APPROVAL restent explicites.
 Le [runbook](../../docs/runbooks/prod-cutover-v1220.md) fixe l’ordre. Il diffère le tag après recette et réouverture.
-CONFIGURATION est un JSON ConfigMap radar-cutover-6h, ou une List incluant aussi radar-api.
+CONFIGURATION est un JSON ConfigMap radar-cutover-6h, ou une List incluant radar-api, immo-mcp-config et radar-mcp-receiver.
+La cible render produit cette List depuis PLAN et prod-settings.json. Elle n’applique rien.
 Le namespace est radar-immobilier. Le texte de plan.json doit avoir exactement l’empreinte du PLAN approuvé.
 window-configure reprend le même verrou avant application. Les rôles et références Secret sont des prérequis provisionnés séparément.
 
@@ -98,7 +100,7 @@ Restaurer cette archive finale en test. Copier son reçu restore.json dans le do
 Après échec partiel d’upload, `backup` reprend le même dump, lié au même drain. Ne pas changer de contexte dans le même OUTPUT.
 Après rollback, ne pas appliquer les grants du candidat au schéma 13. Restaurer les ACL de l’archive, puis faire vérifier les accès de v1.2.19.
 
-## Comptes, espaces et accès à ratifier
+## Comptes, espaces et accès décidés par D2/D3
 
 Le hook **ne crée aucun compte**. Chaque sujet OIDC doit préexister, avec status=approved dans account_users.
 Un plan contient un espace unique. Toutes les destinations doivent égaler workspaceSlug.
@@ -107,15 +109,15 @@ Le hook crée l’espace et ses appartenances actives si nécessaire. Il rattach
 
 | Élément | Attendu ou décision owner |
 | --- | --- |
-| `agence-chaperon-immobilier` | Slug du plan exemple. Confirmer sa création et son libellé en prod. Aucun espace prod n’a été créé ici. |
-| Comptes utilisateurs | Fournir chaque sujet OIDC prod et son espace. Aucun roster prod n’est encore approuvé. |
-| Gestionnaires | Désigner au moins l’acteur avec manageMembers. Ne pas attribuer ce droit à tous par défaut. |
-| Modérateurs | Désigner moderateArchive. Ce droit permet la reprise des archives partagées. |
+| `agence-chaperon-immobilier` | Espace observé en préprod. Libellé conservé. Aucun espace prod créé ici. |
+| Comptes utilisateurs | Six comptes, roster privé. Les six sujets sont aussi approuvés en prod. D2 conserve les droits préprod. |
+| Gestionnaires | Un gestionnaire observé. Il est l’acteur du plan. |
+| Modérateurs | Un modérateur observé. Ce droit permet la reprise des archives partagées. |
 | Autres membres | Appartenance active pour les lectures et opérations personnelles. Ne pas ouvrir les capacités lots 6K par effet de bord. |
 | Curseur classement | k8s fournit CLASSIFICATION_CURSOR_KEY_ID et référence CLASSIFICATION_CURSOR_SECRET stable, ≥32 octets décodés. Valeurs jamais affichées. Le hook ne crée pas ces clés. |
 | MCP connecté | Créer hors de cette lane les rôles SQL restreints approuvés. immo-mcp-account-reader fournit la référence IMMO_MCP_ACCOUNT_DATABASE_URL ; IMMO_MCP_DATABASE_NAME correspond à radar. Scopes immo:read et immo:search selon opération. Membership active requise ; plusieurs espaces exigent un sélecteur explicite. |
-| Receiver strict | Décider séparément MCP_SIGNAL_SEARCH_ENABLED, STRICT_RECEIVER_* et l’identité workload. Ne pas activer le répertoire des personnes en prod. |
-| Artefacts | Maintenir fermés sauf décision distincte. Le train applicatif ne vaut pas ouverture générale. |
+| Receiver strict | D2 reprend search activé et strict non armé. Identité workload conservée. Répertoire des personnes fermé. Prérequis IdP et rôles prod à câbler. |
+| Artefacts | D3 : statiques general sur API/MCP. Git off, edge 0, qualification/invitations/redrive false. Secrets, bucket et reader prod requis avant ouverture. |
 | Tri Chaperon | #1080 interdit la prod. Aucun script de reprise appelé. Une reprise exige une nouvelle décision, une nouvelle procédure et une revue séparée. |
 
 ## Limites de revue
