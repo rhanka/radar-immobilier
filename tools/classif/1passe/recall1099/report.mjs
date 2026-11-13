@@ -5,6 +5,13 @@ import { dir, home, json, write } from './context.mjs';
 import { sha256 } from '../../lib/refc1.mjs';
 const r = json(`${dir}/results.json`), h = json(`${dir}/historical.json`);
 const audit = json(`${dir}/tuning-audit.json`), verification = json(`${dir}/verification.json`);
+const adjacentHistoricalPath = '/home/antoinefa/src/radar-immobilier/tmp/classif-1passe-recall/tools/classif/1passe/recall/historical.json';
+const adjacentHistorical = fs.existsSync(adjacentHistoricalPath) ? json(adjacentHistoricalPath) : null;
+if (adjacentHistorical) {
+  assert.equal(h.scorerSha256, adjacentHistorical.scorerSha256);
+  write(`${dir}/historical-comparison.json`, JSON.stringify({ artifactSha256: sha256(fs.readFileSync(adjacentHistoricalPath)),
+    scorerSha256: h.scorerSha256, halves: adjacentHistorical.halves }) + '\n');
+}
 const production = '/home/antoinefa/src/radar-immobilier/tmp/refresh-single-pass';
 const ref = execFileSync('git', ['-C', production, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 for (const [p, expected] of Object.entries(r.freeze.sourceHashes)) {
@@ -36,15 +43,20 @@ for (const half of Object.keys(names)) {
 }
 lines.push('', 'La variante lit le PV entier et rend des actes plats. Elle ne contient pas le prompt de détection B.',
   'Les deux lanes utilisent Astra low. Cette comparaison est descriptive ; aucun test de supériorité n’est revendiqué.', '',
+  `${r.halves.total.detection.found - r.halves.total.visible.found} actes B détectés sont ensuite classés Écarté. Cela ne prouve pas autant d’erreurs selon C.`,
+  'Le rappel visible est faible sur B. Ce support contient aussi des actes qui peuvent être exclus selon C.', '',
   '## Diagnostic secondaire avec le scoreur historique B', '',
   'Scoreur importé sans changement. Il normalise les espaces et peut créditer plusieurs actes par groupe.',
   'Il ne remplace pas l’appariement strict. Les étapes natives restent inchangées.', '',
-  '| Moitié | PR #1099 : retrouvés ; rappel ; Wilson bas | B : retrouvés ; rappel ; Wilson bas |', '|---|---:|---:|');
+  '| Moitié | PR #1099 : retrouvés ; rappel ; Wilson bas | B : retrouvés ; rappel ; Wilson bas | Variante : retrouvés ; rappel ; Wilson bas |', '|---|---:|---:|---:|');
 for (const half of Object.keys(names)) {
   const a = h.halves[half].detection, b = h.halves[half].baseline;
-  lines.push(`| ${names[half]} | ${a.found}/${a.support} ; ${pct(a.recall)} ; ${pct(a.wilsonLower95)} | ${b.found}/${b.support} ; ${pct(b.recall)} ; ${pct(b.wilsonLower95)} |`);
+  const v = adjacentHistorical?.halves[half].detection;
+  lines.push(`| ${names[half]} | ${a.found}/${a.support} ; ${pct(a.recall)} ; ${pct(a.wilsonLower95)} | ${b.found}/${b.support} ; ${pct(b.recall)} ; ${pct(b.wilsonLower95)} | ${v ? `${v.found}/${v.support} ; ${pct(v.recall)} ; ${pct(v.wilsonLower95)}` : 'inconnu'} |`);
 }
 lines.push('', 'Le témoin historique reproduit 336/676. Les critères des deux apparieurs ne sont pas interchangeables.', '',
+  'La conservation de la détection B n’est pas démontrée. Le diagnostic historique se dégrade surtout en aveugle.', '',
+  'La comparaison avec la variante s’inverse selon l’apparieur. Aucune supériorité globale ne peut être conclue.', '',
   '## Identité du prompt et surface', '',
   `Code importé depuis le worktree de la PR #1099. Contenu vérifié contre le commit ${ref}.`,
   '`extractRefreshProfile` compose P0, le prompt de détection B et `singlePassSchema(schemaFor(...))`.',
@@ -81,6 +93,7 @@ lines.push('', `Durée : ${r.run.durationSeconds.toFixed(3)} s, soit ${(r.run.du
   `Quota hebdomadaire partagé : ${q[0]} % avant ; ${q.at(-1)} % après ; seuil 90 %. Arrêt : ${r.run.stopped ?? 'aucun'}.`,
   'Le quota est vérifié au départ, toutes les dix minutes, à réception des appels et à la fin.',
   'Le cache est inclus dans l’entrée. La télémétrie CLI est conservée. Aucun tarif API n’est attribué au siège Pro.',
+  `Télémétrie de jetons disponible pour ${r.halves.total.tokens.measured}/100 réponses.`,
   'Le coût de classification séparée du témoin B manque. Son coût complet ne peut donc pas être comparé.',
   'Le delta du quota partagé inclut les autres usages du compte.', '',
   '## Manqués de mise au point', '',
