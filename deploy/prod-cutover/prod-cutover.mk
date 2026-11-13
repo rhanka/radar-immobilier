@@ -14,6 +14,7 @@ export SMOKE_URL
 export RUN CUTOVER_LOCK_RUN CUTOVER_LOCK_EXECUTOR ROSTER
 export CONFIGURATION
 export PREVIOUS_RELEASE
+export CURSOR_REFERENCE
 export COMMENT_FILE
 export ROOT
 render:
@@ -46,7 +47,7 @@ check:
 	@git -C "$(ROOT)" status --short --branch
 image-check:
 	@docker image inspect --format '{{.Id}}' ghcr.io/rhanka/radar-api@sha256:13664562840c200858355e525d292e5df5dfa2c0569a73b564f698bbccbb8a27
-	@timeout --kill-after=5s 20s docker run --rm --pull=never --network none --entrypoint node ghcr.io/rhanka/radar-api@sha256:13664562840c200858355e525d292e5df5dfa2c0569a73b564f698bbccbb8a27 -e 'Promise.all([import("/workspace/api/dist/scripts/database-cutover.js"),import("/workspace/node_modules/pg/lib/index.js"),import("/workspace/node_modules/drizzle-orm/node-postgres/index.js")]).then(([h])=>{if(typeof h.migrateDatabaseCutover!=="function")process.exit(1)})'
+	@timeout --kill-after=5s 20s docker run --rm --pull=never --network none -e DOTENV_CONFIG_PATH=/dev/null --entrypoint node ghcr.io/rhanka/radar-api@sha256:13664562840c200858355e525d292e5df5dfa2c0569a73b564f698bbccbb8a27 -e 'Promise.all([import("/workspace/api/dist/scripts/database-cutover.js"),import("/workspace/node_modules/pg/lib/index.js"),import("/workspace/node_modules/drizzle-orm/node-postgres/index.js")]).then(([h])=>process.exit(typeof h.migrateDatabaseCutover==="function"?0:1))'
 publish:
 	@test "$(ENV)" = test-prod-cutover
 	@case "$$(git -C "$(ROOT)" branch --show-current)" in feat/prod-cutover-v1220|feat/prod-cutover-v1220-prep) ;; *) exit 1;; esac
