@@ -28,12 +28,29 @@ async function main(operation = process.argv[2]) {
     case 'migrate': result = migrations.migrate(); break;
     case 'transition': result = migrations.hook('transition'); break;
     case 'verify': {
+      const startedVerify = Date.now();
       r.destination();
       if (r.prefix(r.rows()) !== 44) r.fail('44_migrations_required');
       const t = r.receipt('transition');
       if (t.sha !== r.SHA || t.status !== 'open-success') r.fail('transition_receipt_required');
-      // Re-enter the idempotent hook: it verifies current rights, attachments and epoch.
-      result = migrations.hook('transition');
+      if (!r.sameIdentity(t.destination, r.identity())) r.fail('transition_database_mismatch');
+      const plan = r.json(r.env.PLAN || r.fail('approved_6h_plan_required'));
+      const literal = s => `'${String(s).replaceAll("'", "''")}'`;
+      const state = r.sql(`BEGIN READ ONLY; SELECT count(*) FROM facet_activation_state s
+        JOIN workspaces w ON w.id=s.workspace_id WHERE w.slug=${literal(plan.workspaceSlug)}
+        AND s.writer_epoch='scoped' AND NOT s.maintenance_barrier; COMMIT;`);
+      if (state !== '1') r.fail('scoped_workspace_not_open');
+      for (const account of plan.accounts) {
+        const active = r.sql(`BEGIN READ ONLY; SELECT count(*) FROM account_users a
+          JOIN workspace_memberships m ON m.account_id=a.id JOIN workspaces w ON w.id=m.workspace_id
+          JOIN facet_stream_attachments f ON f.account_id=a.id AND f.workspace_id=w.id
+          WHERE a.sub=${literal(account.sub)} AND a.status='approved' AND w.slug=${literal(plan.workspaceSlug)}
+          AND m.status='active' AND m.revoked_at IS NULL AND f.status='attached'
+          AND m.moderate_archive=${account.moderateArchive === true} AND m.manage_members=${account.manageMembers === true}; COMMIT;`);
+        if (active !== '1') r.fail('account_membership_mismatch');
+      }
+      result = { ok: true, migrations: 44, epoch: 'scoped', maintenanceBarrier: false,
+        accounts: plan.accounts.length, durationMs: Date.now() - startedVerify };
       break;
     }
     case 'rollback': result = backup.rollback(); break;
@@ -42,6 +59,7 @@ async function main(operation = process.argv[2]) {
       if (r.env.ENV !== 'rehearsal') r.fail('rehearsal_environment_required');
       result = { restore: backup.restoreTest(), migrations: migrations.migrate(),
         transition: migrations.hook('transition'), smoke: await smoke() };
+      await main('verify');
       r.save('rehearsal', result);
       break;
     default: r.fail('unknown_operation');
