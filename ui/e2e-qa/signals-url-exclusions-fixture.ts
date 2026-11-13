@@ -5,7 +5,7 @@ export const EXCLUSION_LABELS = ["Exclure PIIA sans projet résidentiel", "Exclu
 export const RAIL_URL = "/geo/region/quebec?mode=signal&filter.period=7d&filter.zonage=1&filter.residentiel=1&filter.precoce=1";
 
 /** Two equal cities: one zoning signal, two PIIAs (one proven), one derogation. */
-export async function openExclusions(page: Page, baseURL: string): Promise<void> {
+export async function openExclusions(page: Page, baseURL: string, navigate = true): Promise<void> {
   await openPerimeter(page, baseURL, false);
   const nodes = ["rezonage", "piia", "piia", "derogation"].map((instrument, index) => ({
     id: `signal-${index}`, type: "Signal", citySlug: "delson", label: `Case ${index} ${instrument}`,
@@ -34,6 +34,8 @@ export async function openExclusions(page: Page, baseURL: string): Promise<void>
         non_classe: { "11100": 1, "11101": 1 }, ecarte: {} },
     })),
   } }));
-  await page.goto(`${baseURL}${RAIL_URL}`);
-  await expect(page.locator("button.rail-city-row")).toHaveCount(2);
+  if (navigate) {
+    await page.goto(`${baseURL}${RAIL_URL}`);
+    await expect(page.locator("button.rail-city-row")).toHaveCount(2);
+  }
 }
