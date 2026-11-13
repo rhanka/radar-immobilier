@@ -9,10 +9,13 @@ import { listCitiesWithSignalNodes } from "../../src/services/graph/graph-store.
 import { fixture } from "../../src/services/facets/scope-db-fixture.js";
 import { describeDb, workspaceSignal } from "../../src/services/facets/workspace-archive-fixture.js";
 import { httpFixture } from "./base-api-http-fixture.js";
+import type { VivierFiltreCubesByClassement } from "@radar/domain";
+import { eq } from "drizzle-orm";
+import { targetFingerprint } from "../../src/services/facets/target.js";
 
 type ByCity = { ok: boolean; totalCount: number;
   cities: Array<{ citySlug: string; signalCount: number; subsetCounts: Record<string, number>;
-    vivierV2Counts: unknown }> };
+    vivierV2Counts: unknown; filtreCubesByClassement: VivierFiltreCubesByClassement }> };
 
 function countFor(body: ByCity, citySlug: string): number {
   return body.cities.find((city) => city.citySlug === citySlug)?.signalCount ?? 0;
@@ -30,15 +33,45 @@ describeDb("base-api scoped by-city aggregate", () => {
     expect(all.headers.get("cache-control")).toBe("private, no-store");
     const body = await all.json() as ByCity;
     const legacy = await listCitiesWithSignalNodes(f.data.db);
-    expect(body.cities).toEqual(legacy);
+    expect(body.cities.map(({ filtreCubesByClassement: _, ...city }) => city)).toEqual(legacy);
     expect(body.totalCount).toBe(legacy.reduce((sum, city) => sum + city.signalCount, 0));
     expect(countFor(body, "synthetic-city")).toBe(2);
     expect(countFor(body, "synthetic-other")).toBe(1);
 
     const windowed = await (await f.request(f.path(
       "by-city?dateFrom=2026-01-01&dateTo=2026-12-31&excludePiia=1&excludeDerogations=1"))).json() as ByCity;
-    expect(windowed.cities).toEqual(await listCitiesWithSignalNodes(f.data.db, {
+    expect(windowed.cities.map(({ filtreCubesByClassement: _, ...city }) => city)).toEqual(await listCitiesWithSignalNodes(f.data.db, {
       dateFrom: "2026-01-01", dateTo: "2026-12-31", excludePiia: true, excludeDerogations: true }));
+  });
+
+  it("splits Filtre cubes by the viewer's Pertinence without changing legacy counters", async () => {
+    const f = await httpFixture();
+    const second = await workspaceSignal(f.data, "Second synthetic signal");
+    for (const signal of [f.signal, second]) {
+      const [node] = await f.data.db.update(graphNodes).set({ props: {
+        properties: { category: "zonage", etape: "avis_motion", description: "Projet résidentiel de quatre logements" },
+      } }).where(eq(graphNodes.id, signal.target.id)).returning();
+      signal.fingerprint = targetFingerprint(node!);
+    }
+    const select = (target: typeof f.signal, basket: string) => f.command("personal", "select", {
+      target: target.target, displayedFingerprint: target.fingerprint, expectedHeadId: null, basket,
+    });
+    expect((await select(f.signal, "pertinent")).status).toBe(200);
+    expect((await select(second, "a_surveiller")).status).toBe(200);
+    const cubesFor = async (sub?: string) => {
+      const body = await (await f.request(f.path("by-city"), sub)).json() as ByCity;
+      expect(countFor(body, "synthetic-city")).toBe(2);
+      return body.cities.find((city) => city.citySlug === "synthetic-city")!.filtreCubesByClassement;
+    };
+    const count = (cube: Record<string, number>) => Object.values(cube).reduce((n, c) => n + c, 0);
+    const own = await cubesFor();
+    expect(count(own.pertinent)).toBe(1);
+    expect(count(own.a_surveiller)).toBe(1);
+    expect(count(own.non_classe)).toBe(0);
+    const other = await cubesFor(f.data.moderator.sub);
+    expect(count(other.pertinent)).toBe(0);
+    expect(count(other.a_surveiller)).toBe(0);
+    expect(count(other.non_classe)).toBe(2);
   });
 
   it("hides effectively discarded targets for the viewer and counts them with showDiscarded=1", async () => {
