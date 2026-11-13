@@ -105,7 +105,7 @@ END $$;
 CREATE FUNCTION signal_mcp_write(p_sub text,p_client text,p_tool text,p_body jsonb,p_validation text,
   p_version text,p_hash text,p_source text DEFAULT 'mcp') RETURNS jsonb LANGUAGE plpgsql AS $$
 DECLARE ref jsonb := p_body->'signalRef'; wid uuid := (ref->>'workspaceId')::uuid;
-  actor uuid; state jsonb; next_class text; code text := p_body->>'reasonCode';
+  actor uuid; state jsonb; next_class text; v_code text := p_body->>'reasonCode';
   why text := btrim(p_body->>'reason'); model_name text := btrim(p_body->>'model');
   note text; event_id uuid; kind_name text; result jsonb;
 BEGIN
@@ -146,9 +146,9 @@ BEGIN
           IF p_validation<>'human' THEN RAISE EXCEPTION 'human_confirmation_required'; END IF;
           IF p_body->>'verdict' NOT IN ('up','down') THEN RAISE EXCEPTION 'invalid_verdict'; END IF;
           IF p_body->>'verdict'='down' AND (next_class IS NULL OR next_class='non_classe'
-            OR next_class=state->'current'->>'classe' OR code IS NULL) THEN RAISE EXCEPTION 'reclassification_required'; END IF;
+            OR next_class=state->'current'->>'classe' OR v_code IS NULL) THEN RAISE EXCEPTION 'reclassification_required'; END IF;
           IF p_body->>'verdict'='up' THEN
-            code := state->'current'->>'reason_code'; why := 'Validated: ' || coalesce(state->'current'->>'reason','');
+            v_code := state->'current'->>'reason_code'; why := 'Validated: ' || coalesce(state->'current'->>'reason','');
           END IF;
         END IF;
         IF next_class IS NULL OR next_class NOT IN ('pertinent','a_surveiller','ecarte','non_classe')
@@ -156,9 +156,9 @@ BEGIN
         IF next_class='non_classe' THEN
           IF p_validation<>'human' THEN RAISE EXCEPTION 'human_confirmation_required'; END IF;
           IF NOT EXISTS (SELECT 1 FROM facet_reason_codes WHERE profile_id='immo-steve-2026-09'
-            AND facet_reason_codes.code=signal_mcp_write.code) THEN RAISE EXCEPTION 'invalid_reason_code'; END IF;
+            AND facet_reason_codes.code=v_code) THEN RAISE EXCEPTION 'invalid_reason_code'; END IF;
         ELSIF NOT (p_tool='confirm_classification' AND p_body->>'verdict'='up') AND NOT EXISTS (
-          SELECT 1 FROM facet_reason_codes WHERE profile_id='immo-steve-2026-09' AND facet_reason_codes.code=signal_mcp_write.code
+          SELECT 1 FROM facet_reason_codes WHERE profile_id='immo-steve-2026-09' AND facet_reason_codes.code=v_code
             AND verdict=CASE next_class WHEN 'ecarte' THEN 'non_pertinent' ELSE next_class END) THEN
           RAISE EXCEPTION 'invalid_reason_code';
         END IF;
@@ -170,7 +170,7 @@ BEGIN
       INSERT INTO signal_mcp_events(workspace_id,actor_id,scope,city_slug,node_type,node_id,kind,source,
         model,client_id,oauth_sub,validation,classe,reason_code,reason,text,verdict,previous_version)
         VALUES(wid,actor,ref->>'scope',ref->>'citySlug',ref->>'type',ref->>'id',kind_name,p_source,
-          model_name,p_client,p_sub,p_validation,next_class,code,why,note,p_body->>'verdict',p_version) RETURNING id INTO event_id;
+          model_name,p_client,p_sub,p_validation,next_class,v_code,why,note,p_body->>'verdict',p_version) RETURNING id INTO event_id;
       IF ref->>'scope'='personal' THEN
         INSERT INTO personal_projection_revisions(workspace_id,owner_id,city_slug,mode,revision)
           VALUES(wid,actor,ref->>'citySlug','signal',1) ON CONFLICT(workspace_id,owner_id,city_slug,mode)
