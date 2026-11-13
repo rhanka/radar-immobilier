@@ -183,3 +183,20 @@ Leurs actes B absents passent en désaccord, puis à l’arbitre selon D3.
 Le quota hebdomadaire Codex est à 27 % au contrôle de reprise.
 La durée publiée distinguera le temps écoulé et la pause entre les deux lanes.
 Le gel version 3 conserve les compteurs de départs déjà engagés.
+
+## Exécution du rapprochement et de D3
+
+Le support final reste les 676 actes B de D1. Les inventaires supplémentaires sont
+conservés à part, sans ajout automatique. Leur existence n’est pas une présence validée.
+Le rapprochement est prudent : numéro cible compatible, étape compatible et preuve.
+Une citation exacte partagée ou un numéro cible et un objet corroborés sont requis.
+Les appariements incertains restent des omissions et passent à D3.
+Une citation de vote doit être exacte, contiguë et sur la page annoncée.
+Un code invalide, une ambiguïté ou un motif invalide donne Non classé pour ce vote.
+Deux votes valides de même code suffisent. Tout autre cas passe à l’arbitre.
+Le kappa conventionnel utilise quatre classes. Deux omissions occupent sa diagonale
+Non classé. L’accord validé est donc publié séparément : ces omissions restent des désaccords D3.
+L’arbitre reçoit les avis anonymes et l’acte, sans provenance ni verdict de B.
+Sa CLI agy n’expose pas de drapeau de suppression globale des outils ou de plafond
+de tours. Slash et skills sont désactivés. Tout événement d’outil invalide sa réponse.
+Cette limite est déclarée. La concurrence reste fixée à un.

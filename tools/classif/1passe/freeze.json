@@ -1,8 +1,8 @@
 {
   "version": 3,
-  "llmCalls": 33,
+  "llmCalls": 111,
   "files": {
-    "PREREG.md": "46aeaba773e925d72822461f5db511b2774179dc4fcc2c6282b2f53417ed0578",
+    "PREREG.md": "f13cacd2aea4f1b6d661da3710f9ea934dad078faac39bf1933420acc157e675",
     "seed.json": "53b163c08429e7305d370657b203437e338350c869c3b14322aefb31889d1edc",
     "split.json": "bdf8830324267f214c318830d13c9e531449bbc43ea18b1b4a7ae36d9177b2d6",
     "routes.json": "a4e20c93a8776ec4ae2d23c2a86df9834a0ca7b836bde1f861dc005a85c89c75",
@@ -15,7 +15,7 @@
     "prepare.mjs": "f387e445d9eda8370b8a593e91d4bad1f385c08b1148900bebb3143e6b030050",
     "check.mjs": "59c35ec86b607364e2b2e99d5462a67a6a9249f5bf47559a5f3f71aaf1d40ad2",
     "step0.mk": "0c93fb8460bcdfc9a18e5702e173835875fc488b31153516d0a2ff5152f2cb04",
-    "ops.mk": "433bdb06e4604882e0937d01a97dc46cacbabb4e979777175e92ad1b6b276502",
+    "ops.mk": "d26e44a5d74060d000181f8c9fe2720f65a91f70ea715c762fb466269636778f",
     "quota.mjs": "e3ee15838e09d871ada18dac05fe5b3f82541490d47d8f4fcc200afd2ae19360",
     "inspect.mjs": "b6b6ae6489718a37e0da987366de411659b6fde80d5208ccd5efee59ffc4a2d3",
     "context.mjs": "a4554a957f1bef6d7eea225df7d9cfe257b465bca439fc2123e5ce0eb0084ffd",

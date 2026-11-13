@@ -42,6 +42,7 @@
   - [x] Porte : empreintes, 100 textes complets, pack, budget et quota vérifiés. Codex : 26 %.
 - [ ] Étape 1 : deux annotations indépendantes sur les 100 PV.
   - [x] Reprise : 33 départs, 17 réponses, 16 interruptions sans rejeu. Quota Codex : 27 %.
+  - [x] Rapprochement : preuves exactes, étapes et cibles compatibles, un à un ; tests ciblés réussis.
   - [ ] Budget : 200 lectures ; réserve de 40 reprises de quota tracées.
   - [ ] Quota codex avant, toutes les 10 min, après ; arrêt à 90 %.
   - [ ] 429 : attente puis reprise. 401/403/disabled/terms : arrêt du bras.
