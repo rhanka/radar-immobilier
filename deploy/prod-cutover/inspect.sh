@@ -19,7 +19,7 @@ case ${1:-} in
     "${k[@]}" get configmap radar-change-lock --ignore-not-found -o name
     "${k[@]}" get deployments radar-api radar-ui radar-immo-mcp -o custom-columns='NAME:.metadata.name,UID:.metadata.uid,IMAGE:.spec.template.spec.containers[*].image,READY:.status.readyReplicas'
     "${k[@]}" get cronjobs -o custom-columns='NAME:.metadata.name,UID:.metadata.uid,SUSPEND:.spec.suspend,IMAGE:.spec.jobTemplate.spec.template.spec.containers[*].image'
-    pod=$("${k[@]}" get pods -l app=radar-postgres -o jsonpath='{.items[0].metadata.name}')
+    pod=$("${k[@]}" get pods -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | awk '/^radar-postgres-/{print; exit}')
     [[ -n $pod ]]
     "${k[@]}" exec "$pod" -- sh -c 'PGOPTIONS="-c default_transaction_read_only=on -c statement_timeout=15000 -c lock_timeout=3000" psql -X -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1 -Atc "SELECT current_database(),pg_database_size(current_database()); SELECT hash,created_at FROM drizzle.__drizzle_migrations ORDER BY id; SELECT rolname,rolcanlogin,rolsuper,rolcreatedb,rolcreaterole,rolreplication FROM pg_roles WHERE rolname IN ('"'"'radar_db_ro_prod'"'"','"'"'immo_mcp_account_reader'"'"','"'"'immo_mcp_artifact_writer'"'"');"'
     "${k[@]}" exec "$pod" -- df -Pk /var/lib/postgresql/data
