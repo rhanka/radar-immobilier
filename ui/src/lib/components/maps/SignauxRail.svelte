@@ -31,7 +31,6 @@
   import {
     B_SUBSET_KEY,
     bAxesFromVivierKey,
-    countForVivierCity,
     DEFAULT_B_AXES,
     keyForVivierB,
     type BAxes,
@@ -59,6 +58,7 @@
   import RailCityList from "$lib/components/maps/RailCityList.svelte";
   import type { RailCityItem } from "$lib/maps/rail-city-items.js";
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
+  import { displayedSignalCountForCity } from "$lib/signals/signal-filter-counts.js";
 
   // ── Props ──────────────────────────────────────────────────────────────────
   /** Toutes les entrées villes (avec signalCount6m et subsetCounts). */
@@ -271,6 +271,8 @@
 
   /** Clé LIVE composée des trois axes de B (zonage/résidentiel/précoce). */
   $: activeKey = keyForVivierB(bAxes);
+  $: cityCounts = new Map(entries.map((entry) => [entry.municipality.slug,
+    displayedSignalCountForCity(entry, activeKey, classementFilter, exclusions)]));
 
   /** Coche/décoche un axe de B (zonage/résidentiel/précoce) : recompose et propage. */
   function toggleBAxis(patch: Partial<BAxes>): void {
@@ -292,11 +294,11 @@
    */
   function bulkCountFor(
     entry: CityMapEntry,
-    key: string,
+    counts: ReadonlyMap<string, number | null>,
     unavailable: boolean,
   ): number | null {
     if (unavailable) return null;
-    return countForVivierCity(entry, key);
+    return counts.get(entry.municipality.slug) ?? null;
   }
 
   /**
@@ -320,7 +322,7 @@
    */
   function countFor(
     entry: CityMapEntry,
-    key: string,
+    counts: ReadonlyMap<string, number | null>,
     unavailable: boolean,
     liveCount: number | null,
     liveSlug: string | null,
@@ -329,7 +331,7 @@
     if (liveCount !== null && liveSlug !== null && entry.municipality.slug === liveSlug) {
       return liveCount;
     }
-    return countForVivierCity(entry, key);
+    return bulkCountFor(entry, counts, unavailable);
   }
 
   // ── Liste de villes (la recherche vit dans RailCityList — liste complète) ──
@@ -339,14 +341,10 @@
   // la ville sélectionnée ne participe JAMAIS à l'ordre (sinon sa ligne saute
   // ou disparaît à la fin du fetch détail).
   $: sortedEntries = entries
-    .filter((e) => {
-      const isSelected =
-        selectedSlug !== null && e.municipality.slug === selectedSlug;
-      return (bulkCountFor(e, activeKey, dataUnavailable) ?? 0) > 0 || isSelected;
-    })
+    .filter((e) => (bulkCountFor(e, cityCounts, dataUnavailable) ?? 0) > 0)
     .sort((a, b) =>
-      (bulkCountFor(b, activeKey, dataUnavailable) ?? -1) -
-      (bulkCountFor(a, activeKey, dataUnavailable) ?? -1)
+      (bulkCountFor(b, cityCounts, dataUnavailable) ?? -1) -
+      (bulkCountFor(a, cityCounts, dataUnavailable) ?? -1)
     );
 
   /**
@@ -358,12 +356,12 @@
    */
   function toRailItem(
     entry: CityMapEntry,
-    key: string,
+    counts: ReadonlyMap<string, number | null>,
     unavailable: boolean,
     liveCount: number | null,
     liveSlug: string | null,
   ): RailCityItem {
-    const activeCount = countFor(entry, key, unavailable, liveCount, liveSlug);
+    const activeCount = countFor(entry, counts, unavailable, liveCount, liveSlug);
     return {
       slug: entry.municipality.slug,
       name: entry.municipality.name,
@@ -383,7 +381,7 @@
   }
 
   $: railItems = sortedEntries.map((entry) =>
-    toRailItem(entry, activeKey, dataUnavailable, selectedCityLiveCount, selectedSlug)
+    toRailItem(entry, cityCounts, dataUnavailable, selectedCityLiveCount, selectedSlug)
   );
 
   function handleSelectSlug(slug: string): void {
@@ -393,7 +391,7 @@
 
   // ── Compteurs globaux (réactifs : référencent activeKey directement) ──────
   function totalFor(
-    key: string,
+    cityCounts: ReadonlyMap<string, number | null>,
     currentEntries: CityMapEntry[],
     unavailable: boolean,
     liveCount: number | null,
@@ -401,18 +399,18 @@
   ): number | null {
     if (unavailable) return null;
     const counts = currentEntries.map((entry) =>
-      countFor(entry, key, unavailable, liveCount, liveSlug)
+      countFor(entry, cityCounts, unavailable, liveCount, liveSlug)
     );
     return counts.some((count) => count === null)
       ? null
       : (counts as number[]).reduce((sum, count) => sum + count, 0);
   }
 
-  $: totalSignals = totalFor(activeKey, entries, dataUnavailable, selectedCityLiveCount, selectedSlug);
+  $: totalSignals = totalFor(cityCounts, entries, dataUnavailable, selectedCityLiveCount, selectedSlug);
   $: citiesWithSignals = totalSignals === null
     ? null
     : entries.filter(
-        (e) => (countFor(e, activeKey, dataUnavailable, selectedCityLiveCount, selectedSlug) ?? 0) > 0,
+        (e) => (countFor(e, cityCounts, dataUnavailable, selectedCityLiveCount, selectedSlug) ?? 0) > 0,
       ).length;
 </script>
 
