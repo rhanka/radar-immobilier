@@ -16,6 +16,8 @@ const EFFORTS = ["off", "minimal", "low", "medium", "high", "xhigh", "max"];
 const FONT = "font-family:'DejaVu Sans','Bitstream Vera Sans',sans-serif";
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const n1 = (v) => Number(v.toFixed(1));
+// v12 marker in a label: inside an existing trailing parenthetical, else appended.
+const withV12 = (s) => (/\)$/.test(s) ? s.replace(/\)$/, ", v12)") : `${s} (v12)`);
 
 // ---- model / provider / shape identification (v10 shapes kept) ----
 // circle: Astra, Opus 5, Gemini 3.8, Mistral, Muse 1.3
@@ -25,8 +27,8 @@ const n1 = (v) => Number(v.toFixed(1));
 const MODELS = [
   { re: /^CP actuel/, model: "CP", provider: "Cascades", shape: "star" },
   { re: /^CP-low/, model: "CP-low", provider: "Cascades", shape: "star" },
-  { re: /^C2$/, model: "C2", provider: "Cascades", shape: "star" },
-  { re: /^C3$/, model: "C3", provider: "Cascades", shape: "star" },
+  { re: /^C2$/, model: "C2", tag: "C2 · 2× Gemini → Astra", provider: "Cascades", shape: "star" },
+  { re: /^C3$/, model: "C3", tag: "C3 · 3× Gemini → Astra", provider: "Cascades", shape: "star" },
   { re: /^Astra /, model: "Astra", provider: "OpenAI", shape: "circle" },
   { re: /^Sol /, model: "Sol", provider: "OpenAI", shape: "square" },
   { re: /^Luna /, model: "Luna", provider: "OpenAI", shape: "triangle" },
@@ -48,7 +50,7 @@ export function identify(label) {
   const bare = label.replace(/\s*\(.*\)\s*$/, "");
   const effort = m.provider === "Cascades" ? null : bare.split(" ").at(-1);
   if (effort !== null && !EFFORTS.includes(effort)) throw new Error(`unknown effort in: ${label}`);
-  const short = m.provider === "Cascades" ? m.model : `${bare}${/coupé/.test(label) ? " (coupé)" : ""}`;
+  const short = m.provider === "Cascades" ? (m.tag ?? m.model) : `${bare}${/coupé/.test(label) ? " (coupé)" : ""}`;
   return { ...m, effort, short, color: PROVIDER_COLORS[m.provider] };
 }
 
@@ -235,11 +237,11 @@ function precisionRecall(rows) {
   s += el.svg;
   const drawOrder = [...pts].sort((a, b) => (a.id.shape === "star" ? 0 : 1) - (b.id.shape === "star" ? 0 : 1));
   for (const r of drawOrder) s += marker(r.id.shape, X(r), Y(r), r.id.shape === "star" ? 14 : 12, r.id.color, { hollow: false, v12: r.isV12 });
-  const labels = placeLabels(pts.map((r) => ({ x: X(r), y: Y(r), text: r.isV12 ? `${r.id.short} (v12)` : r.id.short, color: r.id.color,
+  const labels = placeLabels(pts.map((r) => ({ x: X(r), y: Y(r), text: r.isV12 ? withV12(r.id.short) : r.id.short, color: r.id.color,
     bold: r.isV12, rad: 7, prio: r.isV12 ? 2 : (r.id.provider === "Cascades" ? 1 : 0) })), { x1: ml + 2, y1: mt + 2, x2: ml + iw - 2, y2: mt + ih - 2 }, 12, el.segs);
   s += labels.map((l) => l.svg).join("");
   s += legendBlock(ml, mt + ih + 76, [
-    { text: "Contour noir épais et libellé gras « (v12) » : nouveaux bras v12 (Muse Ember 1.0 xhigh et max). Courbes grises : même F1. Base : oracle 676, 43 non résolus neutres." },
+    { text: "Contour noir épais et libellé gras « v12 » : nouveaux bras v12 (Muse Ember 1.0 xhigh et max). Courbes grises : même F1. Base : oracle 676, 43 non résolus neutres." },
     { text: "Sonnet 4.6 high : aucune précision calculable (0 accepté), non placé.", color: "#555555" },
   ]);
   return { svg: s + "</svg>", labels };
@@ -268,7 +270,7 @@ function f1Cost(rows) {
     s += marker(r.id.shape, Xv(r.api), Y(r.f1), r.id.shape === "star" ? 17 : 12, r.id.color, { hollow: false, v12: r.isV12 });
   }
   const frame = { x1: ml + 2, y1: mt + 2, x2: ml + iw - 2, y2: mt + ih - 2 };
-  const pointsForLabels = pts.map((r) => ({ x: Xv(r.api), y: Y(r.f1), text: r.isV12 ? `${r.id.short} (v12)` : r.id.short, color: r.id.color,
+  const pointsForLabels = pts.map((r) => ({ x: Xv(r.api), y: Y(r.f1), text: r.isV12 ? withV12(r.id.short) : r.id.short, color: r.id.color,
     bold: r.isV12, rad: 7, prio: r.isV12 ? 2 : (r.id.provider === "Cascades" ? 1 : 0) }));
   // seat markers are obstacles (rad only, no text)
   const seatObstacles = pts.filter((r) => r.seat).map((r) => ({ x: Xv(r.seat), y: Y(r.f1), text: "", color: r.id.color, bold: false, rad: 6, prio: -1 }));
@@ -276,8 +278,8 @@ function f1Cost(rows) {
   s += labels.map((l) => l.svg).join("");
   const missing = rows.filter((r) => !(r.api > 0)).map((r) => r.id.short).join(", ");
   s += legendBlock(ml, mt + ih + 76, [
-    { text: "Plein = équivalent API (jetons réels × tarif public) ; creux = siège projeté ou mesuré ; trait fin horizontal = même bras, siège → API. Sans siège attribuable : point API seul." },
-    { text: "Contour noir épais et libellé gras « (v12) » : Muse Ember 1.0 xhigh et max (siège missing source, jamais estimé). CP : GPT-6 Astra medium puis filtre Gemini 3.8 Flash low, coûts cumulés." },
+    { text: "Plein = équivalent API (jetons réels × tarif public ; raisonnement Muse non facturé, hypothèse A) ; creux = siège projeté ou mesuré ; trait fin horizontal = même bras, siège → API. Sans siège attribuable : point API seul." },
+    { text: "Contour noir épais et libellé gras « v12 » : Muse Ember 1.0 xhigh et max (siège missing source, jamais estimé). CP : GPT-6 Astra medium puis filtre Gemini 3.8 Flash low, coûts cumulés." },
     { text: `Sans équivalent API publié, non placés : ${missing}.` },
   ]);
   return { svg: s + "</svg>", labels };
@@ -295,14 +297,14 @@ function bars(rows, { title, value, max, fmtRight, dot }) {
   }
   rows.forEach((r, i) => {
     const y = mt + i * rowH, v = value(r);
-    s += `<text x="${ml - 24}" y="${n1(y + rowH * 0.72)}" font-size="11" text-anchor="end" fill="${r.isV12 ? "#000000" : "#222222"}"${r.isV12 ? ' font-weight="bold"' : ""} style="${FONT}">${esc(r.isV12 ? `${r.name ?? r.label} (v12)` : (r.name ?? r.label))}</text>`;
+    s += `<text x="${ml - 24}" y="${n1(y + rowH * 0.72)}" font-size="11" text-anchor="end" fill="${r.isV12 ? "#000000" : "#222222"}"${r.isV12 ? ' font-weight="bold"' : ""} style="${FONT}">${esc(r.isV12 ? withV12(r.name ?? r.label) : (r.name ?? r.label))}</text>`;
     s += marker(r.id.shape, ml - 12, y + rowH / 2, r.id.shape === "star" ? 12 : 9, r.id.color, { hollow: false, v12: r.isV12 });
     s += `<rect x="${ml}" y="${n1(y + 2)}" width="${n1(Math.max(0, X(v) - ml))}" height="${rowH - 4}" fill="${r.id.color}" fill-opacity="${r.isV12 ? 1 : 0.78}"${r.isV12 ? ' stroke="#000000" stroke-width="1.6"' : ""}/>`;
     if (dot) s += `<circle cx="${n1(X(dot(r)))}" cy="${n1(y + rowH / 2)}" r="3" fill="#111111"/>`;
     s += `<text x="${n1(dot ? ml + iw + 8 : X(v) + 5)}" y="${n1(y + rowH * 0.72)}" font-size="10.5" style="${FONT}">${esc(fmtRight(r))}</text>`;
   });
   s += `<path d="M${ml} ${mt} L${ml} ${mt + ih}" stroke="#000" stroke-width="1"/>`;
-  s += legendBlock(40, mt + ih + 44, [{ text: "Barre à contour noir et libellé gras « (v12) » : nouveaux bras v12 (Muse Ember 1.0 xhigh et max)." }])
+  s += legendBlock(40, mt + ih + 44, [{ text: "Barre à contour noir et libellé gras « v12 » : nouveaux bras v12 (Muse Ember 1.0 xhigh et max)." }])
     .replace(/Couleur = fournisseur · forme = modèle · pointillé = progression d’effort · étoile = cascade/, "Couleur = fournisseur · forme = modèle · étoile = cascade");
   return s + "</svg>";
 }
