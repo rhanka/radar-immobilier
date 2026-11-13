@@ -183,7 +183,7 @@
     type SignalTimeRange,
   } from "$lib/signals/signal-date-filter.js";
   import { rankVivierBNodes } from "$lib/signals/vivier-b-ranking.js";
-  import { filtreCountsFor } from "$lib/signals/signal-filter-counts.js";
+  import { filtreCountsForPerimeter } from "$lib/signals/signal-filter-counts.js";
   import {
     buildClassementMap,
     classementCounts,
@@ -921,15 +921,27 @@
   // exclusions), i.e. over `filteredDetailNodes`, NOT the raw detail nodes —
   // recomputed reactively whenever period/Filtre changes.
   $: classementCountsValue = classementCountsFor(filteredDetailNodes, detailArchiveHeads, classementMap);
-  // Filtre counts (owner 2026-11-09): within period + Pertinence scope —
-  // date lens then Pertinence lens on the raw detail, before any Filtre
-  // axis/exclusion. Each axis/exclusion is counted independently.
+  // Filtre counts (owner 2026-11-13): over the WHOLE displayed perimeter,
+  // with or without a selection — the by-city Filtre cube of every city, the
+  // selected city's cube being rebuilt from its loaded detail (period +
+  // Pertinence lens on the raw detail, before any Filtre criterion) under the
+  // same condition as its live header count. Faceted: each criterion follows
+  // the other active criteria (see signal-filter-counts.ts).
   $: filtreScopedNodes = filterNodesByClassement(
     filterNodesByDocumentDate(detailNodes, dateRange, dateBasis),
     classementMap,
     classementFilter,
   );
-  $: filtreCountsValue = filtreCountsFor(filtreScopedNodes);
+  $: filtreCountsValue = loadError !== null
+    ? null
+    : filtreCountsForPerimeter({
+      entries: allEntries,
+      axes: bAxesFromVivierKey(activeSubsetKey),
+      exclusions: vivierBExclusions,
+      live: selectedCity && !detailLoading && detailProjection.available
+        ? { slug: selectedCity.municipality.slug, nodes: filtreScopedNodes }
+        : null,
+    });
   function classementCountsFor(
     nodes: GraphSignalNode[],
     archiveHeads: import("$lib/signals/graph-signal-detail-client.js").CoherentArchiveHead[],

@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { filtreCountsFor } from "./signal-filter-counts.js";
+import { filtreCountsForPerimeter, filtreCubeOfNodes } from "./signal-filter-counts.js";
 import type { GraphSignalNode } from "./graph-signal-detail-client.js";
+import { buildCityMapEntries } from "$lib/maps/maps-data.js";
+
+const ALL_AXES = { z: true, r: true, p: true };
+const BOTH = { piiaSansProjetResidentiel: true, derogationsMineures: true };
 
 function node(
   id: string,
@@ -21,40 +25,57 @@ function node(
   };
 }
 
-describe("filtreCountsFor — Filtre dropdown counts (period + Pertinence scope)", () => {
-  it("counts each axis and each exclusion over the given scoped nodes", () => {
-    const counts = filtreCountsFor([
-      node("precoce-zonage-res", {}),
-      node("tardif-zonage-res", { etape: "adoption" }),
-      node("piia-sans-projet", { instrument: "piia", etape: "adoption" }),
-      node("derog", { instrument: "derogation", etape: "adoption" }),
-      node("hors-zonage", { zonage: { valeur: "non", source: "test", confiance: 1 }, etape: "adoption" }),
-    ]);
-    // B universe = exclusion_reason null (all five). Zonage oui: 4 (hors-zonage exclu).
-    // Résidentiel éligible: rezonage/piia/derog/hors-zonage oui = 5? piia residentiel oui -> eligible.
-    // Précoce (avis_motion): seul le premier. PIIA sans projet: 1. Dérogations: 1.
-    expect(counts).not.toBeNull();
-    expect(counts!.z).toBe(4);
-    expect(counts!.p).toBe(1);
-    expect(counts!.piia).toBe(1);
-    expect(counts!.derog).toBe(1);
-  });
+const [A, B, C] = buildCityMapEntries([]).slice(0, 3).map((entry) => entry.municipality);
+const entry = (municipality: typeof A, filtreCube: Record<string, number> | null, served = true) => ({
+  municipality: municipality!,
+  vivierV2Counts: served ? ({} as never) : null,
+  filtreCube,
+});
 
-  it("excludes server-excluded nodes from the B universe", () => {
-    const counts = filtreCountsFor([
-      node("ok", {}),
+describe("filtreCubeOfNodes — selected city cube from its loaded detail", () => {
+  it("should key each B node and leave server-excluded nodes out", () => {
+    expect(filtreCubeOfNodes([
+      node("precoce", {}),
+      node("tardif", { etape: "adoption" }),
+      node("piia", { instrument: "piia", etape: "adoption" }),
+      node("derog", { instrument: "derogation" }),
       node("exclu", { exclusion_reason: "hors_zonage" }),
-    ]);
-    expect(counts).toEqual({ z: 1, r: 1, p: 1, piia: 0, derog: 0 });
+    ])).toEqual({ "11100": 1, "11000": 1, "11010": 1, "11101": 1 });
   });
 
-  it("returns null when a node has no usable classification (no partial count)", () => {
+  it("should return null when a node has no usable classification (no partial count)", () => {
     const bare = node("bare", {});
     delete bare.classification;
-    expect(filtreCountsFor([bare])).toBeNull();
+    expect(filtreCubeOfNodes([bare])).toBeNull();
+  });
+});
+
+describe("filtreCountsForPerimeter — Filtre dropdown counts over the displayed perimeter", () => {
+  it("should count every city when no city is selected", () => {
+    const counts = filtreCountsForPerimeter({
+      entries: [entry(A, { "11100": 2, "11101": 1 }), entry(B, { "11100": 1, "11110": 2 }), entry(C, null, false)],
+      axes: ALL_AXES, exclusions: BOTH, live: null,
+    });
+    expect(counts).toEqual({ z: 3, r: 3, p: 3, piia: 2, derog: 1 });
   });
 
-  it("empty scope gives zeroes, not null", () => {
-    expect(filtreCountsFor([])).toEqual({ z: 0, r: 0, p: 0, piia: 0, derog: 0 });
+  it("should replace the selected city's bulk cube by its loaded detail", () => {
+    const counts = filtreCountsForPerimeter({
+      entries: [entry(A, { "11100": 9 }), entry(B, { "11100": 1 })],
+      axes: ALL_AXES, exclusions: BOTH,
+      // Pertinence left one early node in A's scoped detail.
+      live: { slug: A!.slug, nodes: [node("kept", {})] },
+    });
+    expect(counts).toEqual({ z: 2, r: 2, p: 2, piia: 0, derog: 0 });
+  });
+
+  it("should give zeroes for an empty perimeter, not null", () => {
+    expect(filtreCountsForPerimeter({ entries: [entry(A, null, false)], axes: ALL_AXES, exclusions: BOTH, live: null }))
+      .toEqual({ z: 0, r: 0, p: 0, piia: 0, derog: 0 });
+  });
+
+  it("should return null when a served city carries no cube (older server)", () => {
+    expect(filtreCountsForPerimeter({ entries: [entry(A, null)], axes: ALL_AXES, exclusions: BOTH, live: null }))
+      .toBeNull();
   });
 });
