@@ -161,3 +161,41 @@ test("should count relevance across cities without selection and ignore its own 
   await expect(rows.nth(0).locator(".st-badge")).toHaveText("6", { timeout: 1800 });
   await expect(rows.nth(2).locator(".st-badge")).toHaveText("14", { timeout: 1800 });
 });
+
+test("should keep Filtre at 12 when checking archives then selecting a city and zone", async ({ page, baseURL }) => {
+  await openPerimeter(page, baseURL!);
+  const assertFiltre = async () => {
+    await page.getByTestId("filtre-trigger").click();
+    const badges = page.getByTestId("filtre-panel").locator(".classement-row .st-badge");
+    for (let index = 0; index < 3; index++) await expect.soft(badges.nth(index)).toHaveText("12");
+    await page.getByTestId("filtre-trigger").click();
+  };
+  await assertFiltre();
+  await page.getByTestId("classement-filter-trigger").click();
+  await page.getByRole("checkbox", { name: "Écarté", exact: true }).check();
+  await page.getByTestId("classement-filter-trigger").click();
+  await assertFiltre();
+  const detail = page.waitForResponse((response) => response.url().includes("/coherent-city"));
+  await page.locator("button.rail-city-row", { hasText: "Delson" }).click();
+  await detail;
+  await expect(page.getByRole("button", { name: "Ville", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await assertFiltre();
+  await page.getByTestId("zones-bucket-head").click();
+  await page.locator(".sel-entity-head", { hasText: "H-01" }).click();
+  await expect(page.getByRole("button", { name: "Zone", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await assertFiltre();
+});
+
+test("should show no archived cards when only Écarté is checked", async ({ page, baseURL }) => {
+  await openPerimeter(page, baseURL!);
+  await page.locator("button.rail-city-row", { hasText: "Delson" }).click();
+  await page.getByTestId("signals-bucket-head").click();
+  await expect(page.locator("[data-signal-node]")).toHaveCount(6);
+  await page.getByTestId("classement-filter-trigger").click();
+  await page.getByRole("checkbox", { name: "Écarté", exact: true }).check();
+  await expect(page.locator("[data-signal-node]")).toHaveCount(6);
+  for (const name of ["Pertinent", "À surveiller", "Non classé"]) {
+    await page.getByRole("checkbox", { name, exact: true }).uncheck();
+  }
+  await expect(page.locator("[data-signal-node]")).toHaveCount(0);
+});
