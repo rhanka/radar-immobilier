@@ -5,9 +5,16 @@ const { spawnSync } = require('node:child_process');
 const SHA = 'b7724bdd9015a4f26319897bf240baaf9ee636ae';
 const ROOT = path.resolve(__dirname, '../..');
 const fail = code => { throw new Error(code); };
-const json = file => JSON.parse(fs.readFileSync(file, 'utf8'));
+function safeFile(file) {
+  if (typeof file !== 'string' || /(^|\/)\.env[^/]*(\/|$)/.test(file)
+    || fs.lstatSync(file).isSymbolicLink() || !fs.statSync(file).isFile()
+    || /(^|\/)\.env[^/]*(\/|$)/.test(fs.realpathSync(file))) fail('unsafe_input_path');
+  return file;
+}
+const json = file => JSON.parse(fs.readFileSync(safeFile(file), 'utf8'));
 const hash = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const env = process.env;
+process.umask(0o077);
 function run(bin, args, options = {}) {
   const result = spawnSync(bin, args, { encoding: 'utf8', timeout: 60000,
     maxBuffer: 32 * 1024 * 1024, env: { ...env, PGCONNECT_TIMEOUT: '5',
@@ -46,6 +53,9 @@ function save(name, value) {
 }
 function receipt(name) { return json(path.join(output(), `${name}.json`)); }
 function journal() {
+  const candidate = run('git', ['show', `${SHA}:api/drizzle/meta/_journal.json`]);
+  if (candidate !== fs.readFileSync(path.join(ROOT, 'api/drizzle/meta/_journal.json'), 'utf8'))
+    fail('candidate_journal_changed');
   const entries = json(path.join(ROOT, 'api/drizzle/meta/_journal.json')).entries;
   if (entries.length !== 44) fail('candidate_journal_changed');
   return entries.map(e => ({ ...e, file: path.join(ROOT, `api/drizzle/${e.tag}.sql`),
@@ -56,6 +66,12 @@ function journal() {
       return e;
     });
 }
+function identity() {
+  return { host: env.PGHOST, port: Number(env.PGPORT || 5432), database: env.PGDATABASE,
+    system: sql('SELECT system_identifier FROM pg_control_system();'),
+    oid: sql('SELECT oid FROM pg_database WHERE datname=current_database();') };
+}
+function sameIdentity(a, b) { return JSON.stringify(a) === JSON.stringify(b); }
 function prefix(rows, entries = journal()) {
   if (rows.length < 13 || rows.length > 44 || new Set(rows.map(r => r.hash)).size !== rows.length)
     fail('migration_count_or_duplicates');
@@ -82,7 +98,9 @@ function pinnedImage() {
     || !/^ghcr\.io\/rhanka\/radar-api@sha256:[a-f0-9]{64}$/.test(r.apiImage)
     || !/^ghcr\.io\/rhanka\/radar-ui@sha256:[a-f0-9]{64}$/.test(r.uiImage)
     || r.apiServedSha !== SHA || r.uiServedSha !== SHA.slice(0, 7)) fail('release_manifest_mismatch');
+  const pinned = json(path.join(__dirname, 'release.json'));
+  if (JSON.stringify(r) !== JSON.stringify(pinned)) fail('candidate_images_mismatch');
   return r.apiImage;
 }
 module.exports = { fs, path, crypto, SHA, ROOT, env, fail, json, hash, run, sql,
-  destination, output, save, receipt, journal, prefix, rows, evidence, pinnedImage };
+  destination, output, save, receipt, journal, prefix, rows, evidence, pinnedImage, identity, sameIdentity, safeFile };

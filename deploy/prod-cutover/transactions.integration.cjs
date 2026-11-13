@@ -9,7 +9,11 @@ test('31 migrations natives, reprise sans DDL et annulation réelle sur erreur',
     r.sql(`BEGIN; ${r.fs.readFileSync(e.file, 'utf8').replaceAll('--> statement-breakpoint', '')}
       INSERT INTO drizzle.__drizzle_migrations(hash,created_at) VALUES ('${e.hash}',${e.when}); COMMIT;`);
   }
-  r.save('restore', { sha256: 'synthetic-test-only' });
+  const archive = r.path.join(r.output(), 'synthetic-test.dump');
+  r.fs.writeFileSync(archive, 'synthetic-test-only');
+  process.env.ARCHIVE = archive;
+  process.env.RESTORE_SHA256 = r.hash(archive);
+  r.save('restore', { sha256: r.hash(archive), destination: r.identity() });
   const proof = r.path.join(r.output(), 'evidence.json');
   r.fs.writeFileSync(proof, JSON.stringify({ run: r.crypto.randomUUID(), release: r.SHA,
     instances: ['synthetic-integration-bootstrap-terminated'], completedAt: new Date().toISOString() }));

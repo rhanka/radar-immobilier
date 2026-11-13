@@ -19,6 +19,7 @@ function backup() {
     PGUSER: env.SOURCE_PGUSER, PGDATABASE: env.SOURCE_PGDATABASE,
     PGPASSFILE: env.SOURCE_PGPASSFILE, PGSERVICE: '', PGSERVICEFILE: '',
     PGOPTIONS: '-c default_transaction_read_only=on -c statement_timeout=840000 -c lock_timeout=5000' };
+  delete source.PGPASSWORD;
   if (!source.PGHOST || !source.PGPORT || !source.PGPASSFILE
     || source.PGDATABASE !== 'radar' || source.PGUSER !== 'radar_db_ro_prod') fail('explicit_existing_ro_source_required');
   if (env.ENV !== 'execution-prod') fail('production_dump_requires_separate_owner_execution');
@@ -34,7 +35,8 @@ function backup() {
   const record = path.join(r.output(), 'backup.json');
   if (fs.existsSync(record)) {
     const prior = receipt('backup');
-    if (prior.sha256 !== hash(file) || prior.run !== proof.run || prior.drain !== proof.completedAt)
+    if (prior.sha256 !== hash(file) || prior.run !== proof.run || prior.drain !== proof.completedAt
+      || !r.sameIdentity(prior.destination, r.identity()))
       fail('backup_receipt_conflict');
     return prior;
   }
@@ -43,7 +45,8 @@ function backup() {
   const bytes = Number(sql('SELECT pg_database_size(current_database());', { env: source }));
   const disk = fs.statfsSync(path.dirname(file));
   if (disk.bavail * disk.bsize < bytes * 4) fail('backup_disk_headroom_required');
-  run('pg_dump', ['--format=custom', '--no-owner', '--no-privileges', '--lock-wait-timeout=5s',
+  // Keep ACLs in the archive for rollback. Disposable restore ignores them.
+  run('pg_dump', ['--format=custom', '--no-owner', '--lock-wait-timeout=5s',
     `--file=${file}.partial`], { env: source, timeout: 840000 });
   fs.renameSync(`${file}.partial`, file);
   fs.chmodSync(file, 0o600);
@@ -57,7 +60,7 @@ function backup() {
   fs.writeFileSync(`${file}.sha256`, `${sha256}\n`, { mode: 0o600 });
   s3(['cp', `${file}.sha256`, `${uri}.sha256`]);
   const result = { sha256, uri, run: proof.run, drain: proof.completedAt,
-    databaseBytes: bytes, durationMs: Date.now() - begin, sha: r.SHA };
+    databaseBytes: bytes, destination: r.identity(), durationMs: Date.now() - begin, sha: r.SHA };
   save('backup', result);
   return result;
 }
@@ -68,8 +71,9 @@ function restoreTest() {
   const exists = fs.existsSync(path.join(r.output(), 'restore.json'));
   if (exists) {
     const old = receipt('restore');
-    if (old.sha256 !== hash(file) || old.database !== env.PGDATABASE || r.prefix(r.rows()) !== 13)
+    if (old.sha256 !== hash(file) || !r.sameIdentity(old.destination, r.identity()))
       fail('restore_already_used_or_conflicting');
+    r.prefix(r.rows()); // Same copy may have progressed from 13 to 44. Never restore over it.
     return old;
   }
   if (Number(sql("SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname NOT IN ('pg_catalog','information_schema') AND n.nspname !~ '^pg_toast' AND c.relkind IN ('r','p');")))
@@ -78,7 +82,7 @@ function restoreTest() {
   run('pg_restore', ['--no-owner', '--no-privileges', '--exit-on-error', '--single-transaction',
     `--dbname=${env.PGDATABASE}`, file], { timeout: 1800000 });
   if (r.prefix(r.rows()) !== 13) fail('restore_expected_13_migrations');
-  const result = { sha256: hash(file), database: env.PGDATABASE, durationMs: Date.now() - begin };
+  const result = { sha256: hash(file), destination: r.identity(), durationMs: Date.now() - begin };
   save('restore', result);
   return result;
 }
@@ -87,12 +91,19 @@ function rollback() {
   const proof = r.evidence();
   const file = checkedArchive();
   const b = receipt('backup');
-  if (b.sha256 !== hash(file) || b.sha !== r.SHA) fail('rollback_backup_mismatch');
+  if (b.sha256 !== hash(file) || b.sha !== r.SHA || b.run !== proof.run
+    || !r.sameIdentity(b.destination, r.identity())) fail('rollback_backup_mismatch');
   const begin = Date.now();
   run('bash', [path.join(r.ROOT, 'deploy/cutover/atomic-restore.sh')], { timeout: 1800000,
     env: { ...env, PGCONNECT_TIMEOUT: '5', PGOPTIONS: '-c lock_timeout=5000 -c statement_timeout=1500000',
       RESTORE_DUMP: file, EXPECTED_DATABASE: env.PGDATABASE, TARGET_DB: '', LIVE_DB: '',
       EXPECTED_TOC_ENTRIES: '', RESTORE_ASSERT_DB: '1', DUMP_DATABASE: 'radar' } });
+  // Replay only original ACLs. Candidate service grants cannot run on schema 13.
+  const aclList = path.join(r.output(), 'rollback-acl.list');
+  const toc = run('pg_restore', ['--list', file]);
+  fs.writeFileSync(aclList, toc.split('\n').filter(line => /^\d+;.*\s(?:DEFAULT )?ACL\s/.test(line)).join('\n') + '\n', { mode: 0o600 });
+  run('pg_restore', ['--no-owner', '--exit-on-error', '--single-transaction',
+    '--use-list', aclList, `--dbname=${env.PGDATABASE}`, file], { timeout: 60000 });
   if (r.prefix(r.rows()) !== 13) fail('rollback_schema_mismatch');
   const result = { ok: true, sha256: b.sha256, run: proof.run, durationMs: Date.now() - begin,
     images: 'Rollback release + MCP/CronJobs par k8s, routes encore fermées' };
