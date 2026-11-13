@@ -24,6 +24,7 @@
 - [x] CLASSFEEDBACK-EX2: trusted InTx writer option accepts a positive AI archive without fabricating a catalog reason. Public manual commands still require their reason. Revert option and caller together.
 - [x] CLASSFEEDBACK-EX3: annotate the existing real-stack synthetic seed for true feedback clicks; retain the same signal population. Revert seed additions to roll back.
 - [x] Rebased on purge guard 80249515b from feat/refresh-single-pass. The audit-retention test uses an explicit run filter.
+- [x] CLASSFEEDBACK-EX4: schema.ts and scoped-transition.ts add a deferred feedback link on manual events. SQL archive constraints now accept a linked AI validation without an invented catalog reason. The FK requires that feedback to commit in the same transaction. Rollback: revert caller and keep additive columns.
 - [x] Lot 3 — DS feedback controls, required reclassification and dated private badge.
 - [ ] Lot 4 — Unit, PostgreSQL and click E2E coverage; typecheck, lint, test-api, test-ui.
 - [ ] Lot 5 — Peer review, fresh base check, push and stacked PR.
