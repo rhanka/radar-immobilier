@@ -72,7 +72,8 @@ assert.equal(routes.codexQuotaPausePercent, 90);
 assert.equal(annotation.callsCap + annotation.arbitration.callsCap + singlepass.tuningCallsCap + singlepass.blind.callsCap, 1276);
 const files = ['PREREG.md', 'seed.json', 'split.json', 'routes.json', 'annotation.json', 'singlepass.json',
   'annotation-prompt.md', 'arbitration-prompt.md', 'singlepass-prompt.md',
-  'README.md', 'prepare.mjs', 'check.mjs', 'step0.mk', 'ops.mk', 'quota.mjs', 'inspect.mjs', 'context.mjs', 'annotate.mjs'];
+  'README.md', 'prepare.mjs', 'check.mjs', 'step0.mk', 'ops.mk', 'quota.mjs', 'inspect.mjs', 'context.mjs', 'annotate.mjs',
+  'matching.mjs', 'matching.test.mjs', 'reconcile.mjs', 'arbitrate.mjs', 'finalize.mjs', 'custody.mjs', 'claude-quota.mjs'];
 const hashes = Object.fromEntries(files.map((f) => [f, sha256(readFileSync(`${dir}/${f}`))]));
 if (process.argv.includes('--freeze')) {
   const journal = '/private/annotation/calls.jsonl';
