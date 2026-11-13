@@ -1,6 +1,8 @@
 import { mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { takeSinglePassAnnotations, validateSinglePassCoverage,
+  type SinglePassAnnotation, type SinglePassPrompt } from "./refresh-single-pass.js";
 import { DocumentDateSchema, extractIsoFromLabel, type DocumentDate } from "@radar/sources";
 
 import {
@@ -43,10 +45,12 @@ export interface ExtractRefreshProfileOptions {
   readonly context: RefreshProfileContext;
   readonly maxOutputTokens: number;
   readonly outputDir?: string;
+  readonly singlePassPrompt?: SinglePassPrompt;
 }
 export interface RefreshProfileChunk {
   readonly chunk: RefreshCorpusChunk;
   readonly extraction: Extraction;
+  readonly annotations?: readonly SinglePassAnnotation[];
 }
 export const REFRESH_PROFILE_CONTRACT_VERSION = "immo-pv-extraction-v10";
 // Entity citation excerpts are bounded by truncation, in Unicode code points rather than UTF-16 units.
@@ -372,7 +376,7 @@ export function refreshSourceDocumentDate(extraction: Extraction, chunk: Refresh
 }
 
 function validatedExtraction(text: string, chunk: RefreshCorpusChunk, context: RefreshProfileContext,
-  pageTexts: ReadonlyMap<number, string>): Extraction {
+  pageTexts: ReadonlyMap<number, string>, singlePass?: { annotations: SinglePassAnnotation[] }): Extraction {
   let parsed: unknown;
   try {
     parsed = parseStrictJsonResponse(text);
@@ -382,6 +386,7 @@ function validatedExtraction(text: string, chunk: RefreshCorpusChunk, context: R
     }
     throw error;
   }
+  if (singlePass) singlePass.annotations = takeSinglePassAnnotations(parsed);
   validateDeclaredContractVersion(parsed, chunk);
   parsed = normalizeEntityCitations(parsed, chunk);
   const baseErrors = validateExtraction(parsed);
@@ -399,6 +404,7 @@ function validatedExtraction(text: string, chunk: RefreshCorpusChunk, context: R
   if (!profileResult.valid) throw new Error(`Invalid profile extraction for chunk ${chunk.id}: ${profileResult.issues
     .filter((issue) => issue.severity === "error").map((issue) => issue.code).join(", ")}`);
   validateProvenance(parsed as Extraction, chunk, pageTexts);
+  if (singlePass) validateSinglePassCoverage(parsed as Extraction, singlePass.annotations);
   return dropUnprovenSourceDates(parsed as Extraction, chunk);
 }
 export async function extractRefreshProfile(
@@ -419,10 +425,11 @@ export async function extractRefreshProfile(
   try {
     for (const { chunk, pageTexts } of prepared) {
       let accepted: Extraction | undefined;
+      const singlePass = options.singlePassPrompt ? { annotations: [] as SinglePassAnnotation[] } : undefined;
       const outputPath = join(outputDir, `${chunk.id}.json`);
       const generation = await options.textClient.generateJson({
         schema: schemaFor(chunk, options.context),
-        prompt: `${chunk.documentHeader ? `The document date is missing upstream. In THIS existing native graph extraction response,
+        prompt: `${options.singlePassPrompt ? `${options.singlePassPrompt.text}\n\n` : ""}${chunk.documentHeader ? `The document date is missing upstream. In THIS existing native graph extraction response,
 identify the actual document as a Source node, even when no Signal/DesignationEvent is found.
 Use id ${chunk.documentSourceId ?? `source-${chunk.docSha}`} and properties.docSha ${chunk.docSha},
 properties.rawRef ${chunk.originalKey}; its identity never depends on its date.
@@ -462,13 +469,13 @@ If no supported fact is grounded in the PDF, return empty nodes, edges, and evid
           filePath: chunk.originalKey, fileType: "document", text: chunk.text,
         })}`,
         outputPath, maxOutputTokens: options.maxOutputTokens,
-        validateResponse(text) { accepted = validatedExtraction(text, chunk, options.context, pageTexts); },
+        validateResponse(text) { accepted = validatedExtraction(text, chunk, options.context, pageTexts, singlePass); },
       });
       if (generation.status !== "completed" || generation.outputPath !== outputPath || !accepted) {
         throw new Error(`Required chunk ${chunk.id} was not completed`);
       }
-      const persisted = validatedExtraction(await readFile(outputPath, "utf8"), chunk, options.context, pageTexts);
-      results.push({ chunk, extraction: persisted });
+      const persisted = validatedExtraction(await readFile(outputPath, "utf8"), chunk, options.context, pageTexts, singlePass);
+      results.push({ chunk, extraction: persisted, ...(singlePass ? { annotations: singlePass.annotations } : {}) });
     }
     return results;
   } finally {
