@@ -10,5 +10,8 @@ maplibregl.Map.prototype.addLayer = function (...args) {
   (window as unknown as { relevanceMap: maplibregl.Map }).relevanceMap = this;
   return addLayer.apply(this, args);
 };
-await workspaceContext.load("relevance-fixture");
-mount(SignauxMapView, { target: document.getElementById("harness-root")! });
+async function bootstrap(): Promise<void> {
+  await workspaceContext.load("relevance-fixture");
+  mount(SignauxMapView, { target: document.getElementById("harness-root")! });
+}
+void bootstrap();
