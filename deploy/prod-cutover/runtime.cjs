@@ -49,7 +49,12 @@ function journal() {
   const entries = json(path.join(ROOT, 'api/drizzle/meta/_journal.json')).entries;
   if (entries.length !== 44) fail('candidate_journal_changed');
   return entries.map(e => ({ ...e, file: path.join(ROOT, `api/drizzle/${e.tag}.sql`),
-    hash: hash(path.join(ROOT, `api/drizzle/${e.tag}.sql`)) }));
+    hash: hash(path.join(ROOT, `api/drizzle/${e.tag}.sql`)) })).map(e => {
+      const original = run('git', ['show', `${SHA}:api/drizzle/${e.tag}.sql`]);
+      if (crypto.createHash('sha256').update(original).digest('hex') !== e.hash)
+        fail('candidate_sql_changed');
+      return e;
+    });
 }
 function prefix(rows, entries = journal()) {
   if (rows.length < 13 || rows.length > 44 || new Set(rows.map(r => r.hash)).size !== rows.length)
