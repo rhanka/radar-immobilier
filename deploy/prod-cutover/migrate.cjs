@@ -29,7 +29,12 @@ function migrate() {
     const b = r.receipt('backup');
     if (r.receipt('restore').sha256 !== b.sha256 || b.run !== proof.run || b.drain !== proof.completedAt)
       r.fail('tested_final_backup_required');
-  } else if (!r.receipt('restore').sha256) r.fail('restored_production_copy_required');
+  } else {
+    const restored = r.receipt('restore');
+    if (!r.env.ARCHIVE || restored.sha256 !== r.hash(r.safeFile(r.env.ARCHIVE))
+      || r.env.RESTORE_SHA256 !== restored.sha256 || !r.sameIdentity(restored.destination, r.identity()))
+      r.fail('restored_production_copy_required');
+  }
   const measured = [];
   const start = Date.now();
   for (; count < entries.length; count++) {
@@ -47,7 +52,7 @@ function migrate() {
     r.fs.appendFileSync(r.path.join(r.output(), 'migration-times.jsonl'), `${JSON.stringify(result)}\n`, { mode: 0o600 });
   }
   if (r.prefix(r.rows()) !== 44) r.fail('migration_verification_failed');
-  const result = { sha: r.SHA, migrations: 44, applied: measured, durationMs: Date.now() - start };
+  const result = { sha: r.SHA, destination: r.identity(), migrations: 44, applied: measured, durationMs: Date.now() - start };
   r.save('migrations', result);
   return result;
 }
@@ -56,6 +61,8 @@ function hook(operation) {
   if (r.prefix(r.rows()) !== 44) r.fail('44_migrations_required');
   const image = r.pinnedImage();
   const proof = r.evidence();
+  const m = r.receipt('migrations');
+  if (m.sha !== r.SHA || !r.sameIdentity(m.destination, r.identity())) r.fail('migration_receipt_mismatch');
   const plan = r.json(r.env.PLAN || r.fail('approved_6h_plan_required'));
   const name = `immo-6h-${proof.run}`;
   const begin = Date.now();
@@ -70,8 +77,9 @@ function hook(operation) {
   if (r.env.PGPASSFILE) args.push('--mount', `type=bind,src=${r.env.PGPASSFILE},dst=${r.env.PGPASSFILE},readonly`);
   for (const name of names) args.push('-e', name);
   args.push('--entrypoint', 'node', image, '/run-cutover.cjs');
+  if (!variables.PGPASSWORD) r.fail('hook_password_injected_by_operator_required');
   let verdict;
-  try { verdict = JSON.parse(r.run('docker', args, { timeout: 540000, env: variables }).trim()); }
+  try { verdict = JSON.parse(r.run('docker', args, { timeout: 550000, env: variables }).trim()); }
   finally {
     // A killed Docker client must never leave the hook running in the daemon.
     try { r.run('docker', ['rm', '-f', name], { timeout: 15000 }); } catch { /* already removed */ }
@@ -79,7 +87,7 @@ function hook(operation) {
   if (!verdict.ok || (operation === 'transition' && (verdict.status !== 'open-success'
     || verdict.epoch !== 'scoped' || verdict.sealedUnresolved !== 0 || verdict.maintenanceBarrier !== false)))
     r.fail('hook_verdict_refused');
-  const result = { ...verdict, sha: r.SHA, run: proof.run, durationMs: Date.now() - begin };
+  const result = { ...verdict, sha: r.SHA, run: proof.run, destination: r.identity(), durationMs: Date.now() - begin };
   r.save(operation, result);
   return result;
 }

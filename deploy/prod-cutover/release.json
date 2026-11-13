@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "gitSha": "b7724bdd9015a4f26319897bf240baaf9ee636ae",
+  "apiImage": "ghcr.io/rhanka/radar-api@sha256:13664562840c200858355e525d292e5df5dfa2c0569a73b564f698bbccbb8a27",
+  "uiImage": "ghcr.io/rhanka/radar-ui@sha256:97f859147ae29cd10aa575d13abfcbb2215b393bf49f0e1d0b3cfe9c4dccb544",
+  "apiServedSha": "b7724bdd9015a4f26319897bf240baaf9ee636ae",
+  "uiServedSha": "b7724bd",
+  "dataMigration": "6h"
+}
