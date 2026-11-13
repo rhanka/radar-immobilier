@@ -1,0 +1,203 @@
+{
+ "kind": "l4-dev",
+ "series": "4",
+ "createdAt": "2026-11-06T07:08:39.980Z",
+ "promptSha256": "29a7370c149b9cd2cebfe65fa76db9138f604df32f04765a13b67ee1c471daae",
+ "routes": [
+  "opus-5.5-low",
+  "opus-5.5-medium",
+  "mistral-large-4-medium",
+  "glm-5.3-low"
+ ],
+ "deferred": [
+  "gemini-4-argon-low",
+  "gemini-4-argon-medium",
+  "muse-spark-1.3-low",
+  "muse-spark-1.3-medium"
+ ],
+ "tuningItems": 252,
+ "aggregates": {
+  "opus-5.5-low": {
+   "scored": 252,
+   "refShown": 95,
+   "predShown": 178,
+   "recall": 1,
+   "recallLB": 0.968957988132045,
+   "precision": 0.5337078651685393,
+   "precisionLB": 0.4693226640147905,
+   "indeterminate": {
+    "recall": false,
+    "precision": false
+   },
+   "failures": 0,
+   "withUnresolved": {
+    "scored": 252,
+    "refShown": 95,
+    "predShown": 178,
+    "recall": 1,
+    "recallLB": 0.968957988132045,
+    "precision": 0.5337078651685393,
+    "precisionLB": 0.4693226640147905,
+    "indeterminate": {
+     "recall": false,
+     "precision": false
+    }
+   },
+   "verdict": "fail",
+   "costUsd": 46.993379999999995,
+   "items": 252
+  },
+  "opus-5.5-medium": {
+   "scored": 252,
+   "refShown": 95,
+   "predShown": 176,
+   "recall": 1,
+   "recallLB": 0.968957988132045,
+   "precision": 0.5397727272727273,
+   "precisionLB": 0.47498582364076336,
+   "indeterminate": {
+    "recall": false,
+    "precision": false
+   },
+   "failures": 0,
+   "withUnresolved": {
+    "scored": 252,
+    "refShown": 95,
+    "predShown": 176,
+    "recall": 1,
+    "recallLB": 0.968957988132045,
+    "precision": 0.5397727272727273,
+    "precisionLB": 0.47498582364076336,
+    "indeterminate": {
+     "recall": false,
+     "precision": false
+    }
+   },
+   "verdict": "fail",
+   "costUsd": 4.246246199999999,
+   "items": 252
+  },
+  "mistral-large-4-medium": {
+   "scored": 252,
+   "refShown": 95,
+   "predShown": 171,
+   "recall": 1,
+   "recallLB": 0.968957988132045,
+   "precision": 0.5555555555555556,
+   "precisionLB": 0.48977030842062175,
+   "indeterminate": {
+    "recall": false,
+    "precision": false
+   },
+   "failures": 4,
+   "withUnresolved": {
+    "scored": 252,
+    "refShown": 95,
+    "predShown": 171,
+    "recall": 1,
+    "recallLB": 0.968957988132045,
+    "precision": 0.5555555555555556,
+    "precisionLB": 0.48977030842062175,
+    "indeterminate": {
+     "recall": false,
+     "precision": false
+    }
+   },
+   "verdict": "fail",
+   "costUsd": 0,
+   "items": 252
+  },
+  "glm-5.3-low": {
+   "scored": 252,
+   "refShown": 95,
+   "predShown": 169,
+   "recall": 1,
+   "recallLB": 0.968957988132045,
+   "precision": 0.5443786982248521,
+   "precisionLB": 0.47819639583598894,
+   "indeterminate": {
+    "recall": false,
+    "precision": false
+   },
+   "failures": 4,
+   "withUnresolved": {
+    "scored": 252,
+    "refShown": 95,
+    "predShown": 169,
+    "recall": 1,
+    "recallLB": 0.968957988132045,
+    "precision": 0.5443786982248521,
+    "precisionLB": 0.47819639583598894,
+    "indeterminate": {
+     "recall": false,
+     "precision": false
+    }
+   },
+   "verdict": "fail",
+   "costUsd": 7.961231,
+   "items": 252
+  }
+ },
+ "recallNonRegression": {
+  "baselineSeries": 0,
+  "half": "tuning",
+  "metric": "recall",
+  "tolerance": 0,
+  "rule": "a route whose recall point estimate is below the baseline recall of the same route fails, whatever its precision",
+  "routes": {
+   "opus-5.5-low": {
+    "baselineSeries": 0,
+    "baselineRecall": 1,
+    "recall": 1,
+    "delta": 0,
+    "tolerance": 0,
+    "misses": 0,
+    "regressed": false
+   },
+   "opus-5.5-medium": {
+    "baselineSeries": 0,
+    "baselineRecall": 1,
+    "recall": 1,
+    "delta": 0,
+    "tolerance": 0,
+    "misses": 0,
+    "regressed": false
+   },
+   "mistral-large-4-medium": {
+    "baselineSeries": 0,
+    "baselineRecall": 0.9578947368421052,
+    "recall": 1,
+    "delta": 0.04210526315789476,
+    "tolerance": 0,
+    "misses": 0,
+    "regressed": false
+   },
+   "glm-5.3-low": {
+    "baselineSeries": 0,
+    "baselineRecall": 0.9368421052631579,
+    "recall": 1,
+    "delta": 0.06315789473684208,
+    "tolerance": 0,
+    "misses": 0,
+    "regressed": false
+   }
+  }
+ },
+ "selection": {
+  "order": [
+   "mistral-large-4-medium",
+   "glm-5.3-low",
+   "opus-5.5-medium",
+   "opus-5.5-low"
+  ],
+  "best": null,
+  "excluded": [
+   "mistral-large-4-medium",
+   "glm-5.3-low",
+   "opus-5.5-medium",
+   "opus-5.5-low"
+  ],
+  "criterion": "M.3 lexicographic (tuning half only, failing routes excluded)"
+ },
+ "trackNote": "per-item tuning outputs stay private (optimiser input); this manifest carries metrics only"
+}

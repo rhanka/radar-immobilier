@@ -1,0 +1,109 @@
+{
+ "lot": "L0",
+ "kind": "route-probe",
+ "createdAt": "2026-10-31T09:33:44.259Z",
+ "calls": 4,
+ "ok": 4,
+ "results": [
+  {
+   "label": "muse-wonder-max",
+   "family": "Muse Wonder",
+   "model": "muse-wonder-1.0",
+   "effort": "max",
+   "route": "muse exec --prompt-file, preset empty, no web tools, no session log",
+   "item": "signal",
+   "promptSha256": "d4fa756054d8b35a4a0b3e9431d1c90bcbda22f98aa8497134cc1615cc4e8a50",
+   "exitCode": 0,
+   "latencyMs": 7531,
+   "jsonValid": true,
+   "invalidReason": null,
+   "answer": {
+    "verdict": "pertinent",
+    "code": "P-USAGE-MULTI",
+    "ambiguous": false,
+    "citation": "Avis de motion est donné qu'à une séance subséquente sera adopté le règlement 9999-01 modifiant le règlement de zonage afin de permettre les habitations multifamiliales de 6 logements dans la zone H-999."
+   },
+   "usage": null,
+   "costUsd": null,
+   "effectiveModel": null,
+   "outcome": null,
+   "textTail": null,
+   "stderrTail": null
+  },
+  {
+   "label": "muse-wonder-max",
+   "family": "Muse Wonder",
+   "model": "muse-wonder-1.0",
+   "effort": "max",
+   "route": "muse exec --prompt-file, preset empty, no web tools, no session log",
+   "item": "pv",
+   "promptSha256": "0c215d3d5e1225333c2a458590c0c03c8590bccc5b55b096bbcacc2670a0e297",
+   "exitCode": 0,
+   "latencyMs": 13756,
+   "jsonValid": true,
+   "invalidReason": null,
+   "answer": {
+    "verdict": "pertinent",
+    "code": "P-USAGE-MULTI",
+    "ambiguous": false,
+    "citation": "autoriser les habitations multifamiliales jusqu'à 6 logements dans la zone H-999"
+   },
+   "usage": null,
+   "costUsd": null,
+   "effectiveModel": null,
+   "outcome": null,
+   "textTail": null,
+   "stderrTail": null
+  },
+  {
+   "label": "muse-spark-1.3-medium",
+   "family": "Muse 1.3",
+   "model": "muse-spark-1.3",
+   "effort": "medium",
+   "route": "muse exec --prompt-file, preset empty, no web tools, no session log",
+   "item": "signal",
+   "promptSha256": "d4fa756054d8b35a4a0b3e9431d1c90bcbda22f98aa8497134cc1615cc4e8a50",
+   "exitCode": 0,
+   "latencyMs": 9973,
+   "jsonValid": true,
+   "invalidReason": null,
+   "answer": {
+    "verdict": "pertinent",
+    "code": "P-USAGE-MULTI",
+    "ambiguous": false,
+    "citation": "Avis de motion est donné qu'à une séance subséquente sera adopté le règlement 9999-01 modifiant le règlement de zonage afin de permettre les habitations multifamiliales de 6 logements dans la zone H-999."
+   },
+   "usage": null,
+   "costUsd": null,
+   "effectiveModel": null,
+   "outcome": null,
+   "textTail": null,
+   "stderrTail": null
+  },
+  {
+   "label": "muse-spark-1.3-medium",
+   "family": "Muse 1.3",
+   "model": "muse-spark-1.3",
+   "effort": "medium",
+   "route": "muse exec --prompt-file, preset empty, no web tools, no session log",
+   "item": "pv",
+   "promptSha256": "0c215d3d5e1225333c2a458590c0c03c8590bccc5b55b096bbcacc2670a0e297",
+   "exitCode": 0,
+   "latencyMs": 7863,
+   "jsonValid": true,
+   "invalidReason": null,
+   "answer": {
+    "verdict": "pertinent",
+    "code": "P-USAGE-MULTI",
+    "ambiguous": false,
+    "citation": "Avis de motion et dépôt du projet de règlement 9999-01 modifiant le règlement de zonage afin d'autoriser les habitations multifamiliales jusqu'à 6 logements dans la zone H-999."
+   },
+   "usage": null,
+   "costUsd": null,
+   "effectiveModel": null,
+   "outcome": null,
+   "textTail": null,
+   "stderrTail": null
+  }
+ ]
+}

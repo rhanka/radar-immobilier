@@ -1,0 +1,14 @@
+# Engram project for the Steve classification profile. The corpus is NOT in the repository: the
+# classification tooling copies this folder into a private run workspace ($CLASSIF_HOME) and writes
+# one corpus/<itemId>.md per item there (frozen immo input; dev-truth runs may add external/ files).
+version: 1
+profile:
+  path: profile.yaml
+inputs:
+  corpus:
+    - corpus
+  registries:
+    - registries/reason_codes.csv
+    - registries/verdicts.csv
+dataprep:
+  citation_minimum: page
