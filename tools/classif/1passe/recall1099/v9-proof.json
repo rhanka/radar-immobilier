@@ -1,0 +1,6 @@
+{
+  "moduleSha256": "65e06be3e4df82cf9e6452b8bde96557e2433c305b7a73be2c5fe8e8d6383fac",
+  "corpusSha256": "1e884005c1fc8fd43d1577440bb5b897e58f7d6ef057deb2a2080effbbdaaac4",
+  "graphifyVersion": "0.18.0",
+  "method": "export-only validator instrumentation; dependency resolved to frozen graphify; accepted native graph, without annotations or declared version"
+}
