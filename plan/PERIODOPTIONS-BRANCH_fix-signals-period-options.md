@@ -54,7 +54,7 @@ Restore real mouse selection of every signal period preset after PR #1084.
   - [x] `make -f tmp/check.mk e2e ENV=test-period-options`: pass; fresh CDP 9333 tab closed in finally.
   - [x] First isolated UI run lacked documentation fixtures; restore the source copy and rerun the full suite successfully. No test assertions changed.
   - [x] Evidence retained in this worktree's ignored `tmp/evidence/`; standalone Make runner avoids all environment-file includes.
-- [ ] **Lot 2 — Delivery**
+- [x] **Lot 2 — Delivery**
   - [x] Record root cause and results.
-  - [ ] Push and open PR against main; preserve branch without merging.
-  - [ ] Close tabs and destroy isolated runtime with volumes.
+  - [x] Push and open PR #1091 against main; preserve branch without merging.
+  - [x] Close tabs and destroy isolated runtime with `make -f tmp/check.mk down ENV=test-period-options` (`down -v`); confirm no remaining project container.
