@@ -51,6 +51,11 @@ CREATE TABLE signal_class_feedback (
 );
 CREATE INDEX signal_class_feedback_scope_idx ON signal_class_feedback(workspace_id,city_slug,actor_id);
 --> statement-breakpoint
+ALTER TABLE facet_events ADD COLUMN class_feedback_id uuid REFERENCES signal_class_feedback(id) DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE facet_events DROP CONSTRAINT chk_facet_events_archive_reason;
+ALTER TABLE facet_events ADD CONSTRAINT chk_facet_events_archive_reason
+  CHECK (facet <> 'archive' OR state <> 'active' OR reason_code IS NOT NULL OR class_feedback_id IS NOT NULL);
+--> statement-breakpoint
 CREATE FUNCTION reject_class_feedback_mutation() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN RAISE EXCEPTION 'Class annotation audit rows are append-only'; END $$;
 CREATE TRIGGER signal_class_history_immutable BEFORE UPDATE OR DELETE ON signal_class_annotation_history
