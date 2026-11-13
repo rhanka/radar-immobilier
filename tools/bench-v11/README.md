@@ -48,10 +48,11 @@ aucun chemin absolu d'une machine n'est requis.
   harnais : `@sentropic/graphify@0.18.0` (prompts et validation).
   `sandbox/node_modules/` n'est pas versionné (voir étape 0).
 - `full/` — scripts de la chaîne complète (ci-dessous).
-- `build-v11-report.mjs` — générateur du dossier v11 (tableaux, graphiques
+- `build-v11-report.mjs` — générateur des dossiers v11 et v12 (`BENCH_REPORT=v12` pour le v12 ; tableaux, graphiques
   SVG, HTML ; PDF via Chromium headless). Les graphiques v10 venaient de
   Matplotlib ; ils sont régénérés en Node dans le même style (règle zéro
-  Python du dépôt).
+  Python du dépôt). `charts-v12.mjs` : graphiques v12 au style v10
+  (couleur = fournisseur, forme = modèle, pointillé = effort, étoile = cascade).
 
 ## Chaîne complète depuis le manifeste seul
 
@@ -154,14 +155,33 @@ Le premier argument du générateur est le dossier de preuves contenant
 et `full/burn-{argon,wonder}-usage10/` (le clone d'exécution pour le
 passage publié ; un `BENCH_DIR` de travail pour une ré-exécution).
 
-Lignes Muse Ember : ajoutées seulement si `BENCH_EMBER_DIR` pointe vers un
-dossier contenant `full/scores-ember-{xhigh,max}.json`, par exemple
-`BENCH_EMBER_DIR=tools/bench-v11 node tools/bench-v11/build-v11-report.mjs tmp/bench-wonder docs/reports/benchmark-v11-2026-11-09`.
-Sans cette variable, le générateur produit le dossier du 2026-11-09 à l'octet
-près (vérifié). Les insertions Ember sont ancrées : aucune phrase publiée
-n'est réécrite, hors quatre lignes : décompte du tableau (40 → 42 lignes),
-puis lecture §3, latences §5 et graphiques §7 complétées en fin de ligne. Chromium en snap n'écrit pas dans un dossier
-caché (`.claude/`, `.cache-tmp/`) : copier le HTML et `assets/2026-11/` sous
+### 7 bis. Dossier v12 (v11 + Muse Ember xhigh/max, graphiques style v10)
+
+```bash
+BENCH_REPORT=v12 node tools/bench-v11/build-v11-report.mjs tmp/bench-wonder
+# -> docs/reports/benchmark-v12-2026-11-13.{md,html}
+#    + docs/reports/assets/2026-11/benchmark-v12-{precision-rappel,f1-cost,acceptation,rappel}.svg
+```
+
+Le mode v12 lit en plus `full/scores-ember-{xhigh,max}.json` sous
+`BENCH_EMBER_DIR` (défaut `tools/bench-v11`) et échoue s'ils manquent. Sans
+`BENCH_REPORT=v12`, le générateur produit le dossier v11 du 2026-11-09 à
+l'octet près (vérifié) : le v11 publié reste intact. Le v12 reprend le texte
+v11 avec des insertions ancrées (aucune valeur v11 modifiée ; seuls les rangs
+positionnels sont recalculés sur 42 lignes), les noms complets des modèles
+avec version dans les tableaux et les graphiques, et un tableau « Meilleurs
+bras » calculé depuis les données.
+
+Graphiques v12 : `charts-v12.mjs`, style du v10 (v101b) régénéré en Node :
+couleur = fournisseur, forme = modèle, pointillé = progression d'effort
+(off → minimal → low → medium → high → xhigh → max), étoile = cascade,
+libellé posé à côté de chaque point avec traits de rappel courts (placement
+glouton qui évite libellés, points et lignes), courbes de même F1 en gris
+clair. Le générateur affiche le nombre de chevauchements de libellés
+(`chartCheck`, attendu 0) ; vérifier aussi le rendu à l'œil.
+
+Chromium en snap n'écrit pas dans un dossier caché (`.claude/`,
+`.cache-tmp/`) : copier le HTML et `assets/2026-11/` sous
 `~/snap/chromium/common/` pour l'impression PDF.
 
 Scripts auxiliaires de reconstruction (hors chaîne principale) :
