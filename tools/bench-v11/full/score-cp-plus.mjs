@@ -9,6 +9,8 @@ const { scoreSource } = await import(`${DIR}/full/score-676.mjs`);
 const manifest = JSON.parse(await readFile(`${DIR}/harness/manifest-v101b.json`, "utf8"));
 const astraDir = `${DIR}/full/arms/astra-medium-rejeu`;
 const cpDir = `${DIR}/full/arms/cp-plus-muse13-xhigh`;
+const { actsOf, applyDecisions } = await import(`${DIR}/harness/precision-cascade.mjs`);
+const { documentPages } = await import(`${DIR}/harness/oracle-v3-lib.mjs`);
 const json = async (path) => JSON.parse(await readFile(path, "utf8"));
 const jsonl = async (path) => (await readFile(path, "utf8")).split("\n").filter(Boolean).map(JSON.parse);
 const documents = manifest.documents;
@@ -67,6 +69,11 @@ await writeFile(`${DIR}/full/scores-astra-rejeu.json`, JSON.stringify({ arm: sou
 console.log(JSON.stringify(source));
 if (process.argv.includes("--source-only")) process.exit(0);
 const decisions = [];
+const cpMeta = await jsonl(`${cpDir}/meta.jsonl`);
+const validReviews = cpMeta.filter((row) => row.exit === 0 && !row.event);
+if (validReviews.length !== accepted.size || new Set(validReviews.map((row) => row.doc)).size !== accepted.size
+  || validReviews.some((row) => !accepted.has(row.doc)))
+  throw new Error("CP+ must have exactly one valid review per accepted document in meta.jsonl");
 for (const id of accepted) {
   if (!existsSync(`${cpDir}/decisions/${id}.json`)) throw new Error(`Incomplete CP+ review: ${id}`);
   if (!existsSync(`${cpDir}/validated/xhigh--${id}.output.json`)) throw new Error(`Missing filtered output: ${id}`);
@@ -75,6 +82,14 @@ for (const id of accepted) {
   if (decision.sourceOutputSha256 !== sha(JSON.stringify(output))
     || decision.promptSha256 !== "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68")
     throw new Error(`Cascade source or filter drift: ${id}`);
+  const recorded = validReviews.find((row) => row.doc === id);
+  if (decision.documentId !== id || decision.receipt?.exit !== 0
+    || decision.receipt.startedAt !== recorded.startedAt || decision.receipt.usage.model !== "muse-spark-1.3")
+    throw new Error(`Invalid review receipt: ${id}`);
+  const pages = documentPages(await readFile(`${DIR}/full/corpus/text/${id}.txt`, "utf8"));
+  const { filtered, log } = applyDecisions(output, actsOf(output), decision.decisions, pages);
+  if (JSON.stringify(filtered) !== JSON.stringify(await json(`${cpDir}/validated/xhigh--${id}.output.json`))
+    || JSON.stringify(log) !== JSON.stringify(decision.filter)) throw new Error(`Filtered output drift: ${id}`);
   decisions.push(decision);
 }
 const usages = [];
@@ -87,13 +102,17 @@ for (const file of (await readdir(usageDir)).filter((name) => name.endsWith(".js
 }
 const summary = await json(`${cpDir}/_summary.json`);
 if (summary.stopped || summary.failed) throw new Error("CP+ stopped or failed; do not publish a complete score");
-const cpMeta = await jsonl(`${cpDir}/meta.jsonl`);
 const reviewConcurrency = maximumOverlap(cpMeta);
 if (reviewConcurrency > 4) throw new Error(`CP+ concurrency exceeds four: ${reviewConcurrency}`);
 const firstStart = cpMeta.find((row) => row.event === "START");
 summary.weeklyBefore = firstStart?.weeklyUsedPercent ?? summary.weeklyBefore;
 summary.startedAt = firstStart?.at ?? null;
 summary.quotaEvents = cpMeta.filter((row) => row.event === "QUOTA").length;
+summary.validReviews = validReviews.length;
+summary.duplicateValidReviews = validReviews.length - new Set(validReviews.map((row) => row.doc)).size;
+summary.completedBeforeStarts = cpMeta.flatMap((row, index) => row.event === "START"
+  ? [cpMeta.slice(0, index).filter((item) => item.exit === 0 && !item.event).length] : []);
+summary.interruptedAttempts = cpMeta.filter((row) => row.event === "QUOTA-STOP").length;
 const cp = await scoreSource("CP+ (GPT-6 Astra medium → Muse Spark 1.3 xhigh)", "precision-cascade", resolve(cpDir, "xhigh"));
 if (cp.strict.tp + cp.strict.fn !== 676) throw new Error("Expected oracle 676 for CP+");
 // Primary Meta page https://dev.meta.ai/models/muse-spark/, read 2026-11-13.
