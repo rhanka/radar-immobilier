@@ -39,15 +39,15 @@ Persist relevance with the existing period URL mechanism. Make exclusions consis
   - [x] Read project rules and harness-debug then harness-test.
   - [x] Confirm clean branch, fetch base and rebase after #1092 merged.
   - [x] Inspect shared residential-project evidence and cube contract.
-- [ ] **Lot 1 — Regression and correction**
+- [x] **Lot 1 — Regression and correction**
   - [x] Reproduce local URL and exclusion behavior before edits.
   - [x] Capture failing real-click tests, then apply the smallest evidenced fix.
   - [x] Verify reload, reopened links, history and selected city/zone.
   - [x] Verify exact exclusion deltas, faceting and map membership without heavy calls.
-- [ ] **Lot 2 — Gates and delivery**
+- [x] **Lot 2 — Gates and delivery**
   - [x] Run typecheck, lint, test-ui and combined existing/new browser regressions.
-  - [ ] Review scope and diff; clean isolated stacks with down -v.
-  - [ ] Commit without trailers, push and open PR to main. Do not merge.
+  - [x] Review scope and diff; clean isolated stacks with down -v.
+  - [x] Commit without trailers, push and open PR to main. Do not merge.
 
 ## Evidence
 - [x] Baseline existing seven CDP regressions pass. New three cases fail: unchanged relevance URL; two avoidable aggregate reads in each exclusion scenario. Logs: tmp/red-e2e.log.
@@ -56,3 +56,6 @@ Persist relevance with the existing period URL mechanism. Make exclusions consis
 - [x] Full gates: typecheck 0 errors / 8 Svelte warnings, lint 0 errors / 1 warning, test-ui 1,901 passing / 10 todo. Initial typecheck failed because copied dependencies lacked packages/immo-mcp/node_modules; copying that nested dependency tree resolved it without code changes.
 - [x] All 11 combined real-click cases pass, including six periods, relevance, discarded restoration, reload/reopened link and history plus city/zone combinations. Four additional actual MapLibre cases pass: each exclusion removes its polygons and city rows with/without selection. Logs: tmp/combined-e2e.log, tmp/map-e2e.log.
 - [x] Scope and branch harness gates pass. Independent consensus unavailable: author exact model/effort not exposed; no h2a_run MCP tool. Record selection-failed in tmp/review.md; do not claim peer consensus.
+- [x] Final combined run passes all 15 CDP scenarios (43.9 s), with screenshots and before/after URLs. Exclusions trigger zero by-city or coherent-city reads. Log: tmp/final-e2e.log.
+- [x] Stack removed with down -v; docker ps shows no remaining containers. PR #1096 opened to main, unmerged: https://github.com/rhanka/radar-immobilier/pull/1096.
+- [ ] Preprod authenticated reproduction remains pending. Real Se connecter click reaches passkey/Google login; no authorized session was supplied. Deployed health SHA: a54f05eaaad1d7dbf69679f94fac12d8bec7b252. Evidence: tmp/preprod-proof.log, tmp/preprod-{entry,login}.png. Do not claim a deployed exclusion root cause from local fixtures.
