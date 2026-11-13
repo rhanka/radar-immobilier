@@ -922,7 +922,7 @@
   // recomputed reactively whenever period/Filtre changes.
   $: classementCountsValue = classementCountsFor(filteredDetailNodes, detailArchiveHeads, classementMap);
   // Filtre counts (owner 2026-11-13): over the WHOLE displayed perimeter,
-  // with or without a selection — the by-city Filtre cube of every city, the
+  // with or without a selection — every city's cubes scoped by Pertinence, the
   // selected city's cube being rebuilt from its loaded detail (period +
   // Pertinence lens on the raw detail, before any Filtre criterion) under the
   // same condition as its live header count. Faceted: each criterion follows
@@ -936,6 +936,7 @@
     ? null
     : filtreCountsForPerimeter({
       entries: allEntries,
+      classement: classementFilter,
       axes: bAxesFromVivierKey(activeSubsetKey),
       exclusions: vivierBExclusions,
       live: selectedCity && !detailLoading && detailProjection.available
