@@ -590,7 +590,7 @@ export interface GraphSignalDetailResponse {
   token: string;
   /** Legacy A authority derived server-side from the same served nodes. */
   legacyProjection: LegacyZmpProjection | null;
-  /** Visible nodes: effectively discarded targets are never served here. */
+  /** Served nodes, including discarded targets only when explicitly requested. */
   nodes: GraphSignalNode[];
   /** Archive heads of the city as served (the read-only UI ignores them). */
   heads: CoherentArchiveHead[];
@@ -598,6 +598,7 @@ export interface GraphSignalDetailResponse {
 }
 
 export interface FetchGraphSignalDetailOptions {
+  showDiscarded?: boolean;
   /** `card` = thin projection without S3 enrichment; absent = full (default). */
   view?: "card" | "full";
   /**
@@ -686,6 +687,7 @@ export async function fetchGraphSignalDetail(
   opts: FetchGraphSignalDetailOptions = {},
 ): Promise<GraphSignalDetailResponse> {
   const query = new URLSearchParams({ citySlug, mode: "signal", ...(opts.view ? { view: opts.view } : {}) });
+  if (opts.showDiscarded) query.set("showDiscarded", "1");
   const label = `coherent-city/${citySlug}`;
   const body = await readScoped<Record<string, unknown>>(
     scopedSignalFacetsPath(scope, `coherent-city?${query.toString()}`), label, opts);
