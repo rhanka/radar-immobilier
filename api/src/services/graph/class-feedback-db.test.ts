@@ -10,6 +10,7 @@ import { writeClassAnnotation, readClassAnnotations, type AiClassAnnotation } fr
 import { writeClassFeedback } from "./class-feedback.js";
 import { readClassFeedback, exportClassFeedback } from "./class-feedback-reader.js";
 import type { ClassFeedbackCommand } from "./class-feedback-command.js";
+import { purgeAiAnnotations } from "./purge-ai-annotations.js";
 
 async function setup() {
   const f = await workspaceFixture();
@@ -89,5 +90,17 @@ describeDb("human classification feedback PostgreSQL", () => {
     await writeClassAnnotation(f.db, { ...f.ai, promptSha256: "c".repeat(64) });
     await expect(f.submit()).rejects.toThrow("annotation_version_conflict");
     expect((await f.db.execute(sql`SELECT * FROM signal_class_feedback`)).rows).toHaveLength(0);
+  });
+  it("should validate an AI archive without fabricating a reason and preserve audit through purge", async () => {
+    const f = await setup();
+    await writeClassAnnotation(f.db, { ...f.ai, classe: "ecarte", inputSha256: "c".repeat(64) });
+    const ai = (await readClassAnnotations(f.db, f.target.citySlug)).get(`Signal:${f.target.id}`)!;
+    await f.submit({ ...f.command, scope: "workspace", annotation: { ...f.command.annotation,
+      classe: "ecarte", updatedAt: ai.updatedAt! } }, f.moderator.sub);
+    const feedback = await readClassFeedback(f.db, f.contributor.sub, f.workspaceId);
+    expect(feedback[0]).toMatchObject({ verdict: "up", humanClass: "ecarte", reasonCode: null });
+    await purgeAiAnnotations(f.db, { apply: true });
+    expect((await f.db.execute(sql`SELECT * FROM signal_class_annotation_history`)).rows).toHaveLength(2);
+    expect(await readClassFeedback(f.db, f.contributor.sub, f.workspaceId)).toHaveLength(1);
   });
 });
