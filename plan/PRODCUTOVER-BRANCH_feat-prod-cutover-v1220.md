@@ -31,6 +31,7 @@
 - [x] Tests dédiés ENV=test-prod-cutover. Ports réservés API 18821, UI 15321, Maildev 11121.
 
 ## Plan / Todo (lot-based)
+- [x] Répétition en une commande : attestation locale liée aux empreintes, restore, DDL, double 6H, vérification, services et smoke local. Échec : nettoyage down -v. Recette manuelle avant double rollback.
 - [x] Stockage de recette : buckets locaux, CORS borné et import privé de documents par empreinte. Aucun téléchargement de services prod.
 - [x] Stack recette rendue et validée : API/UI/MCP candidats par digest, S3 mock épinglé, TLS local, comptes et rôles séparés. Ports loopback et réseau interne.
 - [x] IdP de recette isolé : roster fermé, mot de passe local, PKCE, nonce, code unique, refresh rotatif et échange MCP borné au sujet.
