@@ -53,7 +53,13 @@ export async function runReannotation(options: {
   fallback: RefreshModel; pipelineRunId: string; now: Date; apply?: boolean;
   classify(signal: ReannotationSignal): Promise<ReannotationDecision>;
   signal?: AbortSignal;
+  concurrency?: number;
+  changedInputOnly?: boolean;
 }): Promise<ReannotationReport> {
+  const concurrency = options.concurrency ?? 1;
+  if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 16) {
+    throw new Error("Reannotation concurrency must be an integer from 1 to 16");
+  }
   const since = new Date(options.now.getTime() - 30 * 86_400_000);
   const report: ReannotationReport = { mode: options.apply ? "apply" : "dry-run",
     pipelineRunId: options.pipelineRunId, since: since.toISOString(), candidates: 0,
@@ -61,7 +67,10 @@ export async function runReannotation(options: {
     classes: { pertinent: 0, a_surveiller: 0, ecarte: 0 }, failures: [] };
   const signals = await options.repository.list(since);
   report.candidates = signals.length;
-  for (const signal of signals) {
+  let next = 0;
+  async function worker() {
+  while (next < signals.length) {
+    const signal = signals[next++]!;
     options.signal?.throwIfAborted();
     try {
       const annotation = await options.repository.annotation(signal);
@@ -70,8 +79,10 @@ export async function runReannotation(options: {
       // A prior fallback result is valid for the same configured model pair.
       const currentModel = [options.primary, options.fallback].some((model) =>
         model.model === annotation?.model && model.effort === annotation?.effort);
-      if (currentModel && annotation?.promptSha256 === options.prompt.sha256
-        && annotation.inputSha256 === inputSha256) { report.skippedUnchanged++; continue; }
+      if (annotation?.inputSha256 === inputSha256 && (options.changedInputOnly
+        || (currentModel && annotation.promptSha256 === options.prompt.sha256))) {
+        report.skippedUnchanged++; continue;
+      }
       const decision = await options.classify(signal);
       report.classified++;
       report.classes[decision.classe]++;
@@ -89,6 +100,10 @@ export async function runReannotation(options: {
       report.failures.push({ citySlug: signal.citySlug, nodeType: signal.type, nodeId: signal.id, code });
     }
   }
+  }
+  // Drain every worker before returning or propagating cancellation to the CLI.
+  const workers = await Promise.allSettled(Array.from({ length: Math.min(concurrency, signals.length) }, worker));
+  for (const result of workers) if (result.status === "rejected") throw result.reason;
   return report;
 }
 
