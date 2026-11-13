@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync} from 'node:fs';
 import {home,json,hash} from './inputs.mjs';
+import {shown} from './metrics.mjs';
 const publicDir='docs/spec/reports/classif-csets';
 const summary=json(`${publicDir}/aggregates.json`);
 const versions={v1:'8957bcaa146b3b83ee89000fccec3c6f393c7b801b320a158d58d2631fa3a205',
@@ -28,6 +29,12 @@ for(const version of ['v1','v2']) for(const half of ['tuning','blind']){
 assert.ok(records.every(r=>r.execution.toolEvents===0));
 summary.blind={B:records.find(r=>r.version==='v1'&&r.half==='blind').metrics};
 summary.classificationOnly={versions,records};
+const oldTuning=json(`${home}/tuning/scored-B.json`),newTuning=new Map(json(`${home}/v2/tuning/scored-B.json`).map(r=>[r.itemId,r]));
+const oldMisses=oldTuning.filter(r=>shown(r.ref)&&!shown(r.pred));
+const transition={originalMisses:oldMisses.length,recovered:oldMisses.filter(r=>shown(newTuning.get(r.itemId)?.pred)).length,
+ retained:oldMisses.filter(r=>!shown(newTuning.get(r.itemId)?.pred)).length,
+ introduced:oldTuning.filter(r=>shown(r.ref)&&shown(r.pred)&&!shown(newTuning.get(r.itemId)?.pred)).length};
+summary.classificationOnly.tuningMissesTransition=transition;
 const pct=x=>x===null?'—':`${(100*x).toFixed(2)} %`;
 const interval=x=>`[${pct(x.low)} ; ${pct(x.high)}]`;
 const label=h=>h==='tuning'?'Mise au point':'Aveugle';
@@ -44,6 +51,8 @@ ${records.map(r=>{const m=r.metrics;return `| ${label(r.half)} | ${r.version} | 
 
 D4 exige zéro manqué P ∪ S. Verdict v1 : **${verdict('v1')}**. Verdict v2 : **${verdict('v2')}**.
 La comparaison v2 porte sur les agrégats. Aucun rapprochement par unité aveugle ne sort de l’exécuteur.
+Sur les ${transition.originalMisses} manqués v1 de mise au point, la v2 en récupère ${transition.recovered} et en conserve ${transition.retained}.
+Elle introduit ${transition.introduced} nouveau manqué sur les références P ∪ S auparavant affichées.
 
 ## Comparaison avec P0 seul
 

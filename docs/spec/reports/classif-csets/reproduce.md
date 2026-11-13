@@ -1,55 +1,47 @@
-# Reproduction and blind handoff
+# Reproduction et relais aveugle
 
-Run only in `tmp/classif-1passe-csets`, branch `feat/classif-1passe-csets`.
-Every target below uses the standalone Make entry point. It loads no environment
-file. `CLASSIF_HOME` defaults to this lane's private directory.
+Worktree : `tmp/classif-1passe-csets`. Branche : `feat/classif-1passe-csets`.
+Le 13 novembre, l’owner autorise le chargement du `.env` par make.
+La cible utilise `node --env-file`. Elle n’affiche ni le fichier ni la clé.
+Le transport supprime la clé de l’environnement transmis au modèle.
 
-Initial preparation:
+V1 conserve le cache historique. V2 utilise son propre sous-répertoire privé.
+Les prompts sont figés par SHA-256. Le mode par défaut est B seul.
+Ne pas ouvrir les fichiers par unité. Ne publier que les agrégats.
 
-```sh
-make -f tools/classif/csets.mk csets-deps ENV=test-csets
-make -f tools/classif/csets.mk csets-capture ENV=test-csets
-make -f tools/classif/csets.mk csets-script SCRIPT=tools/classif/csets/quota.mjs ENV=test-csets
-```
-
-The captured composition is imported from the PR #1099 worktree. Its source
-hashes are in `manifest.json`. This is a read-only import, not a prompt fork.
-For tuning, run `run.mjs tuning`, `validation-prep.mjs tuning`, the
-`csets-validate` target, `score.mjs tuning`, then `report.mjs`, each through
-`csets-script SCRIPT=tools/classif/csets/<file> ARGS=tuning` when applicable.
-
-Blind execution requires an already injected `CLASSIF_BLIND_KEY` and the
-executor role. Neither is available in this session. Do not obtain the key from
-an environment file. Do not use the plaintext reference-d file as a blind bypass.
-Responsible dependency owner: i-cond.
-Acceptance: 252 blind units evaluated in each mode, encrypted per-unit caches,
-native validation and exact-request checks, aggregate metrics only published.
-
-With the key injected by the conductor:
+V1 aveugle :
 
 ```sh
 make -f tools/classif/csets.mk csets-script SCRIPT=tools/classif/csets/quota.mjs ENV=test-csets
-make -f tools/classif/csets.mk csets-script SCRIPT=tools/classif/csets/inventory.mjs ARGS=blind CLASSIF_ROLE=test-executor ENV=test-csets
 make -f tools/classif/csets.mk csets-script SCRIPT=tools/classif/csets/run.mjs ARGS=blind CLASSIF_ROLE=test-executor ENV=test-csets
-make -f tools/classif/csets.mk csets-script SCRIPT=tools/classif/csets/validation-prep.mjs ARGS=blind CLASSIF_ROLE=test-executor ENV=test-csets
-make -f tools/classif/csets.mk csets-validate HALF=blind ENV=test-csets
 make -f tools/classif/csets.mk csets-script SCRIPT=tools/classif/csets/score.mjs ARGS=blind CLASSIF_ROLE=test-executor ENV=test-csets
 ```
 
-Then replace the pending blind rows in the report using the resulting
-`blind-aggregates.json`. The current `report.mjs` intentionally publishes the
-completed tuning stage and a pending blind stage; it must be extended for the
-final two-set report. No per-unit blind data may enter that extension.
-
-Verification:
+V2 : exécuter la séquence pour `tuning`, puis pour `blind`.
+Remplacer `<half>` par la valeur choisie.
 
 ```sh
-make -f tools/classif/csets.mk csets-test ENV=test-csets
-make -f tools/classif/classif.mk classif-check ENV=test-csets
+make -f tools/classif/csets.mk csets-script SCRIPT=tools/classif/csets/quota.mjs CSETS_VERSION=v2 ENV=test-csets
+make -f tools/classif/csets.mk csets-script SCRIPT=tools/classif/csets/run.mjs ARGS=<half> CSETS_VERSION=v2 CLASSIF_ROLE=test-executor ENV=test-csets
+make -f tools/classif/csets.mk csets-script SCRIPT=tools/classif/csets/score.mjs ARGS=<half> CSETS_VERSION=v2 CLASSIF_ROLE=test-executor ENV=test-csets
 ```
 
-The four synthetic tests cover strict missing predictions, Wilson bounds,
-annotation consistency, and flat versus nested native stages. Pairing imports
-bench-v11's `pairOneToOne`; source-site and stage rules are fixed by the protocol.
-An additional stage-tolerant diagnostic follows bench-v11 R5. It is not the
-primary metric and does not recover a primary miss.
+Concurrence fixe : 10. Arrêt des nouveaux appels à 90 % du quota.
+Les appels en cours se terminent. Une reprise conserve les caches identiques.
+Ne pas relancer une réponse selon sa classe. Ne pas exécuter d’optimiseur.
+La validation native du graphe concerne uniquement l’ancien mode A.
+Le mode B valide la classe, le code et la justification de l’annotation.
+
+Publication et vérification :
+
+```sh
+make -f tools/classif/csets.mk csets-script SCRIPT=tools/classif/csets/classification-report.mjs ENV=test-csets
+make -f tools/classif/csets.mk csets-test ENV=test-csets
+make -f tools/classif/classif.mk classif-check ENV=test-csets
+make -f tools/classif/csets.mk csets-script SCRIPT=tools/classif/csets/verify.mjs ENV=test-csets
+```
+
+Le générateur historique `report.mjs` décrit l’ancienne étude A/B.
+Le rapport courant est produit par `classification-report.mjs`.
+L’acceptation exige 252 unités par nouvelle mesure, une matrice de somme 252,
+aucun outil, les intervalles de Wilson et un verdict D4 à zéro manqué.
