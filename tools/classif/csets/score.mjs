@@ -26,6 +26,7 @@ for(const mode of ['A','B']){
   }else{
    const checked=c.request?validation.get(file):{digest:c.digest,valid:false};
    if(!checked||checked.digest!==c.digest) throw new Error('Missing native validation for a completed response');
+   if(checked.compositionMatches===false) throw new Error('Production composition differs from measured request');
    r.invalid=failed||!checked.valid;
    const acts=r.invalid?[]:(out?.nodes??[]).filter(n=>['Signal','DesignationEvent'].includes(n.node_type));
    extractions+=acts.length;
