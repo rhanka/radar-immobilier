@@ -1,0 +1,1058 @@
+{
+ "arm": {
+  "label": "GPT-6 Astra medium (rejeu v12)",
+  "accepted": 100,
+  "strict": {
+   "tp": 336,
+   "fp": 523,
+   "fn": 340,
+   "precision": 0.3911525029103609,
+   "recall": 0.4970414201183432,
+   "f1": 0.43778501628664496
+  },
+  "failureClasses": {},
+  "maxConcurrency": 4,
+  "usdApiEquivPerDoc": 0.4402664,
+  "usdSeatPerDoc": null,
+  "tokens": {
+   "n": 100,
+   "input": 1511249,
+   "output": 578283
+  },
+  "quota": {
+   "before": {
+    "at": "2026-11-13T03:06:30.962Z",
+    "tag": "avant",
+    "httpStatus": 200,
+    "planType": "pro",
+    "limitReached": false,
+    "weeklyUsedPercent": 67,
+    "windows": {
+     "primary_window": {
+      "used_percent": 67,
+      "limit_window_seconds": 604800,
+      "reset_at": 1795045483
+     }
+    }
+   },
+   "after": {
+    "at": "2026-11-13T03:56:26.884Z",
+    "tag": "après",
+    "httpStatus": 200,
+    "planType": "pro",
+    "limitReached": false,
+    "weeklyUsedPercent": 79,
+    "windows": {
+     "primary_window": {
+      "used_percent": 79,
+      "limit_window_seconds": 604800,
+      "reset_at": 1795045483
+     }
+    }
+   },
+   "events": 0
+  }
+ },
+ "cases": [
+  {
+   "documentId": "saint-polycarpe-2026-01-19",
+   "tp": 0,
+   "fp": 6,
+   "fn": 2,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "saint-lin-laurentides-2026-06-09",
+   "tp": 6,
+   "fp": 9,
+   "fn": 13,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "amherst-2026-06-08",
+   "tp": 1,
+   "fp": 2,
+   "fn": 0,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "ayers-cliff-2026-03-02",
+   "tp": 3,
+   "fp": 1,
+   "fn": 0,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "saint-roch-de-lachigan-2026-05-11",
+   "tp": 2,
+   "fp": 5,
+   "fn": 1,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "saint-charles-de-bourget-2026-05-04",
+   "tp": 2,
+   "fp": 2,
+   "fn": 1,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "saint-henri-2026-03-02",
+   "tp": 1,
+   "fp": 3,
+   "fn": 2,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "stratford-2026-04-20",
+   "tp": 3,
+   "fp": 7,
+   "fn": 2,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "coteau-du-lac-2026-02-10",
+   "tp": 4,
+   "fp": 5,
+   "fn": 2,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "abercorn-2026-03-30",
+   "tp": 0,
+   "fp": 2,
+   "fn": 0,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "grenville-sur-la-rouge-2026-04-14",
+   "tp": 4,
+   "fp": 2,
+   "fn": 3,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "saint-damien-2026-06-16",
+   "tp": 3,
+   "fp": 0,
+   "fn": 2,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "chibougamau-2026-05-16",
+   "tp": 4,
+   "fp": 0,
+   "fn": 0,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "val-racine-2026-06-09",
+   "tp": 4,
+   "fp": 2,
+   "fn": 1,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "aumond-2026-01-14",
+   "tp": 0,
+   "fp": 3,
+   "fn": 0,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "val-dor-2026-06-01",
+   "tp": 3,
+   "fp": 4,
+   "fn": 1,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "lac-tremblant-nord-2026-05-09",
+   "tp": 5,
+   "fp": 0,
+   "fn": 0,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "candiac-2026-06-15",
+   "tp": 0,
+   "fp": 2,
+   "fn": 1,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "ogden-2026-03-09",
+   "tp": 5,
+   "fp": 3,
+   "fn": 3,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "lislet-2026-04-07",
+   "tp": 4,
+   "fp": 4,
+   "fn": 2,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "dollard-des-ormeaux-2026-02-10",
+   "tp": 0,
+   "fp": 5,
+   "fn": 6,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "pincourt-2026-01-20",
+   "tp": 0,
+   "fp": 9,
+   "fn": 5,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "arundel-2026-07-31",
+   "tp": 1,
+   "fp": 4,
+   "fn": 2,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "bolton-est-2026-01-12",
+   "tp": 6,
+   "fp": 2,
+   "fn": 0,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "danville-2026-01-15",
+   "tp": 0,
+   "fp": 3,
+   "fn": 0,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "mcmasterville-2026-02-02",
+   "tp": 2,
+   "fp": 4,
+   "fn": 4,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "chesterville-2026-03-02",
+   "tp": 2,
+   "fp": 3,
+   "fn": 1,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "lac-du-cerf-2026-04-11",
+   "tp": 0,
+   "fp": 2,
+   "fn": 0,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "acton-vale-2026-03-16",
+   "tp": 2,
+   "fp": 2,
+   "fn": 1,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "saint-constant-2026-01-20",
+   "tp": 1,
+   "fp": 3,
+   "fn": 0,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "sainte-brigide-diberville-2026-06-01",
+   "tp": 1,
+   "fp": 5,
+   "fn": 2,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "waterville-2026-04-07",
+   "tp": 5,
+   "fp": 2,
+   "fn": 0,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "lyster-2026-02-02",
+   "tp": 0,
+   "fp": 4,
+   "fn": 3,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "roxton-2026-04-07",
+   "tp": 1,
+   "fp": 4,
+   "fn": 0,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "les-coteaux-2026-03-16",
+   "tp": 6,
+   "fp": 4,
+   "fn": 2,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "saint-felix-de-kingsey-2026-04-07",
+   "tp": 2,
+   "fp": 4,
+   "fn": 1,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "daveluyville-2026-05-04",
+   "tp": 1,
+   "fp": 7,
+   "fn": 3,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "lorraine-2026-01-13",
+   "tp": 4,
+   "fp": 2,
+   "fn": 0,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "beaupre-2026-03-02",
+   "tp": 0,
+   "fp": 6,
+   "fn": 5,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "saint-stanislas--des-chenaux-2026-04-07",
+   "tp": 3,
+   "fp": 5,
+   "fn": 3,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "saint-bernard-de-michaudville-2026-04-01",
+   "tp": 0,
+   "fp": 4,
+   "fn": 0,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "sainte-francoise--becancour-2026-05-04",
+   "tp": 5,
+   "fp": 5,
+   "fn": 0,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "tadoussac-2026-01-13",
+   "tp": 3,
+   "fp": 6,
+   "fn": 7,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "blue-sea-2026-02-03",
+   "tp": 0,
+   "fp": 3,
+   "fn": 0,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "saint-sylvere-2026-04-07",
+   "tp": 2,
+   "fp": 7,
+   "fn": 3,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "parisville-2026-05-05",
+   "tp": 0,
+   "fp": 5,
+   "fn": 2,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "lac-saint-paul-2026-05-11",
+   "tp": 0,
+   "fp": 8,
+   "fn": 4,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "dosquet-2026-01-13",
+   "tp": 0,
+   "fp": 6,
+   "fn": 3,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "barnston-ouest-2026-05-04",
+   "tp": 4,
+   "fp": 7,
+   "fn": 4,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "bedford--brome-missisquoi-2026-06-02",
+   "tp": 3,
+   "fp": 10,
+   "fn": 9,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "notre-dame-de-lourdes--joliette-2026-04-13",
+   "tp": 4,
+   "fp": 2,
+   "fn": 1,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "wentworth-nord-2026-01-21",
+   "tp": 4,
+   "fp": 7,
+   "fn": 2,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "saint-just-de-bretenieres-2026-02-02",
+   "tp": 0,
+   "fp": 4,
+   "fn": 0,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "sainte-clotilde-2026-04-20",
+   "tp": 1,
+   "fp": 10,
+   "fn": 9,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "saint-zephirin-de-courval-2026-03-02",
+   "tp": 0,
+   "fp": 4,
+   "fn": 2,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "eastman-2026-06-01",
+   "tp": 10,
+   "fp": 5,
+   "fn": 19,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "warden-2026-04-08",
+   "tp": 1,
+   "fp": 7,
+   "fn": 5,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "bowman-2026-05-12",
+   "tp": 2,
+   "fp": 1,
+   "fn": 0,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "lavenir-2026-05-04",
+   "tp": 1,
+   "fp": 2,
+   "fn": 0,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "richelieu-2026-02-03",
+   "tp": 5,
+   "fp": 2,
+   "fn": 0,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "stoneham-et-tewkesbury-2026-06-08",
+   "tp": 9,
+   "fp": 9,
+   "fn": 2,
+   "accepted": true,
+   "neutralized": 1,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "saint-tite-des-caps-2026-02-02",
+   "tp": 5,
+   "fp": 2,
+   "fn": 1,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "cookshire-eaton-2026-04-07",
+   "tp": 3,
+   "fp": 4,
+   "fn": 3,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "sainte-angele-de-monnoir-2026-01-13",
+   "tp": 2,
+   "fp": 4,
+   "fn": 1,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "mont-saint-hilaire-2026-04-13",
+   "tp": 3,
+   "fp": 9,
+   "fn": 23,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "cowansville-2026-05-05",
+   "tp": 23,
+   "fp": 8,
+   "fn": 9,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "brossard-2026-04-28",
+   "tp": 2,
+   "fp": 5,
+   "fn": 27,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "contrecoeur-2026-04-14",
+   "tp": 6,
+   "fp": 3,
+   "fn": 2,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "frontenac-2026-03-10",
+   "tp": 1,
+   "fp": 12,
+   "fn": 9,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "hatley-2026-04-07",
+   "tp": 2,
+   "fp": 3,
+   "fn": 4,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "beloeil-2026-03-23",
+   "tp": 19,
+   "fp": 11,
+   "fn": 6,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "la-peche-2026-06-01",
+   "tp": 2,
+   "fp": 11,
+   "fn": 6,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "sainte-sophie-2026-06-02",
+   "tp": 3,
+   "fp": 13,
+   "fn": 9,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "sainte-barbe-2026-05-05",
+   "tp": 4,
+   "fp": 8,
+   "fn": 3,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "sainte-martine-2026-03-17",
+   "tp": 3,
+   "fp": 8,
+   "fn": 6,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "rosemere-2026-04-13",
+   "tp": 7,
+   "fp": 14,
+   "fn": 2,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "orford-2026-03-02",
+   "tp": 3,
+   "fp": 1,
+   "fn": 3,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "berthier-sur-mer-2026-03-24",
+   "tp": 3,
+   "fp": 4,
+   "fn": 1,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "gracefield-2026-04-14",
+   "tp": 0,
+   "fp": 3,
+   "fn": 2,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "sainte-catherine-de-la-jacques-cartier-2026-03-02",
+   "tp": 3,
+   "fp": 11,
+   "fn": 6,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "sacre-coeur-2026-05-11",
+   "tp": 7,
+   "fp": 5,
+   "fn": 1,
+   "accepted": true,
+   "neutralized": 1,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "potton-2026-01-05",
+   "tp": 3,
+   "fp": 4,
+   "fn": 1,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "notre-dame-du-rosaire-2026-03-02",
+   "tp": 1,
+   "fp": 4,
+   "fn": 4,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "pierreville-2026-03-10",
+   "tp": 1,
+   "fp": 4,
+   "fn": 1,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "sainte-croix-2026-05-05",
+   "tp": 3,
+   "fp": 8,
+   "fn": 3,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "lac-etchemin-2026-02-03",
+   "tp": 2,
+   "fp": 4,
+   "fn": 0,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "sainte-genevieve-de-batiscan-2026-04-07",
+   "tp": 2,
+   "fp": 4,
+   "fn": 2,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "stanstead-est-2026-04-13",
+   "tp": 1,
+   "fp": 13,
+   "fn": 5,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "brownsburg-chatham-2026-03-10",
+   "tp": 12,
+   "fp": 21,
+   "fn": 17,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "sainte-thecle-2026-03-09",
+   "tp": 7,
+   "fp": 12,
+   "fn": 13,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "carignan-2026-03-04",
+   "tp": 14,
+   "fp": 12,
+   "fn": 3,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "saint-odilon-de-cranbourne-2026-01-12",
+   "tp": 2,
+   "fp": 7,
+   "fn": 0,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "lac-brome-2026-04-07",
+   "tp": 6,
+   "fp": 1,
+   "fn": 0,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "sainte-christine-2026-04-07",
+   "tp": 0,
+   "fp": 3,
+   "fn": 1,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "boisbriand-2026-05-05",
+   "tp": 4,
+   "fp": 7,
+   "fn": 2,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "lac-des-seize-iles-2026-09-agenda",
+   "tp": 4,
+   "fp": 3,
+   "fn": 0,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "saint-etienne-de-bolton-2026-08-04",
+   "tp": 14,
+   "fp": 1,
+   "fn": 3,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "valcourt-2026-06-01-agenda",
+   "tp": 5,
+   "fp": 3,
+   "fn": 1,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "saint-barthelemy-2026-09-08",
+   "tp": 2,
+   "fp": 8,
+   "fn": 6,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  },
+  {
+   "documentId": "waterloo-2026-08-18",
+   "tp": 7,
+   "fp": 9,
+   "fn": 8,
+   "accepted": true,
+   "neutralized": 0,
+   "softOnly": 0,
+   "softIds": []
+  }
+ ]
+}
