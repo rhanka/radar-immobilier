@@ -30,6 +30,7 @@
 - [x] Lot 0 — Baseline and constraints: read protocol, confirm branch, rebase onto origin/main, verify all 100 frozen prompts.
 - [ ] Lot 1 — Capture real Astra replay, quotas, v9 validation, strict oracle-676 score.
   - [x] Freeze replay transport to llm-mesh 0.19.3; record prompt hashes, real usage and Codex quota.
+  - [x] Require exactly 676 expected units in both strict scores.
 - [ ] Lot 2 — Capture real Muse precision decisions, quotas, access surface, strict score and costs.
   - [x] Verify 99 archived CP messages byte for byte; retain the frozen filter; prepare strict scoring and surface audit.
   - [x] Preserve every reviewer attempt and audit all captured streams; prepare separate replay and CP+ chart markers.
