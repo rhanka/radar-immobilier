@@ -464,7 +464,7 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
   if (prior) {
     const resumed = baselineJson as Graphify34Snapshot;
     if (canonicalHash(resumed) !== baselineHash) throw new Error("Published refresh state no longer matches canonical bytes");
-    return { ...await publishSnapshot(options, prior, resumed, readAnchor, now), cycleId,
+    return { ...await publishSnapshot({ ...options, cycleId }, prior, resumed, readAnchor, now), cycleId,
       inputHash: selected.inputHash, documentSha: selected.sha, candidates: candidates.length,
       status: "published" as const };
   }
@@ -558,7 +558,7 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
   const { snapshot } = enrichGraphify34Snapshot(candidate, options.citySlug);
   const snapshotHash = canonicalHash(snapshot);
   handle = await completeStage(options.store, handle, "enriched", snapshotHash, now);
-  return { ...await publishSnapshot(options, handle, snapshot, readAnchor, now),
+  return { ...await publishSnapshot({ ...options, cycleId }, handle, snapshot, readAnchor, now),
     cycleId, inputHash: corpus.inputHash, documentSha: selected.sha,
     candidates: candidates.length, status: "published" as const };
   }
