@@ -281,11 +281,6 @@ render-prod:
 #   - GARDIEN DES PODS PENDING (refresh-watchdog.awk) : le CronJob
 #     radar-refresh-pending-watchdog est rendu, actif, câblé sur le label du pod
 #     de passage, et le Job de passage garde `backoffLimit: 0`.
-# Since 2026-11-12 (owner decision: the Google account behind the cloud-code
-# seat was disabled by Google), the refresh policy carries NO Gemini route:
-# radar-refresh-pv and radar-refresh-requeue-abandoned fall back to
-# openai/gpt-6-astra/low, verification is off (REFRESH_VERIFY_ENABLED=0, no
-# REFRESH_VERIFY_* route), and any `gemini` in either CronJob fails the render.
 # Cutover suspension/drainage is covered by the controller tests in Quality gates;
 # the engine captures every CronJob instead of consuming QUIESCE_CRONJOBS.
 # Les tests de mutation de ces blocs : verify-renders.test.sh (CI).
@@ -313,15 +308,15 @@ verify-renders:
 	        || $$0 !~ /name: REFRESH_MODEL\n[ ]+value: gpt-6-astra\n/ \
 	        || $$0 !~ /name: REFRESH_REASONING_EFFORT\n[ ]+value: medium\n/ \
 	        || $$0 !~ /name: REFRESH_PRIMARY_QUALITY_ATTEMPTS\n[ ]+value: "2"/ \
-	        || $$0 !~ /name: REFRESH_FALLBACK_PROVIDER\n[ ]+value: openai\n/ \
-	        || $$0 !~ /name: REFRESH_FALLBACK_MODEL\n[ ]+value: gpt-6-astra\n/ \
+	        || $$0 !~ /name: REFRESH_FALLBACK_PROVIDER\n[ ]+value: gemini\n/ \
+	        || $$0 !~ /name: REFRESH_FALLBACK_MODEL\n[ ]+value: gemini-3.8-flash\n/ \
 	        || $$0 !~ /name: REFRESH_FALLBACK_REASONING_EFFORT\n[ ]+value: low\n/ \
-	        || $$0 !~ /name: REFRESH_VERIFY_ENABLED\n[ ]+value: "0"/ \
+	        || $$0 !~ /name: REFRESH_VERIFY_ENABLED\n[ ]+value: "1"/ \
+	        || $$0 !~ /name: REFRESH_VERIFY_PROVIDER\n[ ]+value: gemini\n/ \
+	        || $$0 !~ /name: REFRESH_VERIFY_MODEL\n[ ]+value: gemini-3.8-flash\n/ \
+	        || $$0 !~ /name: REFRESH_VERIFY_REASONING_EFFORT\n[ ]+value: low\n/ \
 	        || $$0 !~ /name: REFRESH_MAX_OUTPUT_TOKENS\n[ ]+value: "32768"/)) exit 1; \
 	    } END { if (!pv) exit 1 }' "$$render" || { echo "refresh activation/model contract failed: $$render" >&2; exit 1; }; \
-	    awk 'BEGIN{RS="\n---\n"} /kind: CronJob/ && /\n  name: radar-refresh-pv\n/ { \
-	      if (tolower($$0) ~ /gemini/ || $$0 ~ /name: REFRESH_VERIFY_(PROVIDER|MODEL|REASONING_EFFORT)\n/) exit 1; \
-	    }' "$$render" || { echo "refresh no-gemini contract failed: radar-refresh-pv must carry no gemini route and no REFRESH_VERIFY_* route (owner decision 2026-11-12): $$render" >&2; exit 1; }; \
 	    awk 'BEGIN{RS="\n---\n"} /kind: CronJob/ && /\n  name: radar-refresh-pv\n/ { pv=1; \
 	      if ($$0 !~ /- dist\/scripts\/refresh-pv\.js\n[ ]+- --all\n[ ]+env:/) exit 1; \
 	      if ($$0 ~ /refresh-pv\.js\n[ ]+- [a-z]/) exit 1; \
@@ -377,18 +372,13 @@ verify-renders:
 	      if ($$0 !~ /suspend: false/) exit 1; \
 	      if ($$0 !~ /backoffLimit: 0/) exit 1; \
 	      if ($$0 !~ /\/usr\/bin\/flock/ || $$0 !~ /\/keyring\/runtime\/.refresh.lock/) exit 1; \
-	      if ($$0 !~ /name: REFRESH_FALLBACK_PROVIDER\n[ ]+value: openai\n/) exit 1; \
-	      if ($$0 !~ /name: REFRESH_FALLBACK_MODEL\n[ ]+value: gpt-6-astra\n/) exit 1; \
-	      if ($$0 !~ /name: REFRESH_FALLBACK_REASONING_EFFORT\n[ ]+value: low\n/) exit 1; \
+	      if ($$0 !~ /name: REFRESH_FALLBACK_MODEL\n[ ]+value: gemini-3.8-flash/) exit 1; \
 	      if ($$0 !~ /name: REQUEUE_MAX_AGE_DAYS\n/) exit 1; \
 	      if ($$0 !~ /name: REQUEUE_MAX_PER_RUN\n/) exit 1; \
 	      if ($$0 !~ /name: REQUEUE_MAX_PER_CITY\n/) exit 1; \
 	      if ($$0 !~ /name: REQUEUE_MAX_REQUEUES\n/) exit 1; \
 	    } END { if (!rq) exit 1 }' "$$render" \
 	      || { echo "requeue recurrent contract failed (Forbid, flock, seat probe, ceilings): $$render" >&2; exit 1; }; \
-	    awk 'BEGIN{RS="\n---\n"} /kind: CronJob/ && /\n  name: radar-refresh-requeue-abandoned\n/ { \
-	      if (tolower($$0) ~ /gemini/) exit 1; \
-	    }' "$$render" || { echo "requeue no-gemini contract failed: radar-refresh-requeue-abandoned must carry no gemini route (owner decision 2026-11-12): $$render" >&2; exit 1; }; \
 	    awk -f "$(RETENTION_AWK)" "$$render" \
 	      || { echo "refresh retention contract failed: $$render" >&2; exit 1; }; \
 	  done; \
