@@ -42,4 +42,7 @@ Each criterion counts the signals that pass every OTHER active criterion (period
 - [x] **Lot 0 — Reproduction**: preprod via CDP 9333 (SHA served `a45c45e` = main); local QA harness on `a45c45e`, `d4642bb`, `791955a`.
 - [x] **Lot 1 — Picker**: drop the portal action, keep the DS panel in place; scoped width rule; tests (fail before, pass after).
 - [x] **Lot 2 — Filtre counts**: domain Filtre cube, served per city by the by-city aggregate (one classification per row), client faceted counts over the whole perimeter, live cube for the selected city; tests (fail before, pass after) and API parity test.
-- [ ] **Lot 3 — Gates and delivery**: `make typecheck`, `make lint`, `make test-ui`; PR to `main`; preprod check after deploy.
+- [ ] **Lot 3 — Gates and delivery**
+  - [x] `make typecheck`, `make lint`, `make test-ui` (`ENV=test-sigpicker`); scoped `make test-api` (`ENV=test-sigpicker-api`, then `down -v`).
+  - [x] PR #1084 to `main` (no merge).
+  - [ ] CI green; preprod check after deploy (picker unfolds; Filtre counts without selection).
