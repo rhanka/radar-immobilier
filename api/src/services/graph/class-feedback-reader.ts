@@ -32,7 +32,21 @@ export async function exportClassFeedback(db: Database, sub: string, workspaceId
     group.positiveRate = group.up / (group.up + group.down);
     groups.set(key, group);
   }
-  return { version: 1, visibility: "own-personal-and-workspace", rows, aggregates: [...groups.values()] };
+  const aggregates = [...groups.values()];
+  const rollup = (dimension: "model" | "promptSha256") => {
+    const totals = new Map<string, { up: number; down: number; positiveRate: number; confusions: Record<string, number> }>();
+    for (const group of aggregates) {
+      const key = group[dimension];
+      const total = totals.get(key) ?? { up: 0, down: 0, positiveRate: 0, confusions: {} };
+      total.up += group.up; total.down += group.down;
+      total.positiveRate = total.up / (total.up + total.down);
+      for (const [pair, count] of Object.entries(group.confusions)) total.confusions[pair] = (total.confusions[pair] ?? 0) + count;
+      totals.set(key, total);
+    }
+    return [...totals].map(([key, total]) => ({ [dimension]: key, ...total }));
+  };
+  return { version: 1, visibility: "own-personal-and-workspace", rows, aggregates,
+    byModel: rollup("model"), byPrompt: rollup("promptSha256") };
 }
 
 /** A later manual edit replaces the feedback badge as well as the class. */
