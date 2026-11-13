@@ -9,11 +9,12 @@
 - [x] Test stack test-class-feedback: API 8895, UI 5395, Maildev 1195, PostgreSQL 5595, S3 9195, Obscura 9295, SMTP 1095. ENV last; down -v after use.
 
 ## Branch Scope Boundaries (MANDATORY)
-- [x] Allowed: api/drizzle/0046*, api/drizzle/meta/_journal.json, api/src/services/graph/class-annotations*, api/src/services/graph/class-feedback*, api/src/routes/class-feedback*, api/src/app.ts, api/src/services/facets/scoped-signal-cards.ts, UI signal classification/card files, UI e2e feedback files, docs/spec/SPEC_EVOL_CLASS_FEEDBACK.md, this plan.
+- [x] Allowed: api/drizzle/0047*, api/drizzle/meta/_journal.json, api/src/services/graph/class-annotations*, api/src/services/graph/class-feedback*, api/src/routes/class-feedback*, api/src/app.ts, api/src/services/facets/scoped-signal-cards.ts, UI signal classification/card files, UI e2e feedback files, docs/spec/SPEC_EVOL_CLASS_FEEDBACK.md, this plan.
 - [x] Forbidden: rules/**, entrypoint instructions, other branch plans, unrelated code, deployment.
 - [x] Conditional: existing annotation tests and transport fixtures when additive dates require updated assertions.
 
 ## Feedback Loop
+- [x] PR #1104 correction: reserve feedback migration 0047, idx 46, timestamp 1793000000017 after v2's 0046 (idx 45, timestamp 1793000000016). No 0046 snapshot exists: this repository uses hand-authored migrations after snapshots 0000/0001.
 - [x] D1–D7 accepted from i-cond. Shared classification capabilities remain those of the existing writers: personal selections and moderator workspace archives.
 - [x] Two independent design reviews: private feedback badges must stay scoped; reuse InTx writers, never client compensation; validate stale AI provenance under lock.
 
