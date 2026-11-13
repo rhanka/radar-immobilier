@@ -68,25 +68,23 @@ export async function runReannotation(options: {
   const signals = await options.repository.list(since);
   report.candidates = signals.length;
   let next = 0;
-  async function worker() {
-  while (next < signals.length) {
-    const signal = signals[next++]!;
+  async function classifyOne(signal: ReannotationSignal) {
     options.signal?.throwIfAborted();
     try {
       const annotation = await options.repository.annotation(signal);
-      if (annotation?.source === "manual") { report.skippedManual++; continue; }
+      if (annotation?.source === "manual") { report.skippedManual++; return; }
       const inputSha256 = reannotationInputSha256(signal);
       // A prior fallback result is valid for the same configured model pair.
       const currentModel = [options.primary, options.fallback].some((model) =>
         model.model === annotation?.model && model.effort === annotation?.effort);
       if (annotation?.inputSha256 === inputSha256 && (options.changedInputOnly
         || (currentModel && annotation.promptSha256 === options.prompt.sha256))) {
-        report.skippedUnchanged++; continue;
+        report.skippedUnchanged++; return;
       }
       const decision = await options.classify(signal);
       report.classified++;
       report.classes[decision.classe]++;
-      if (!options.apply) continue;
+      if (!options.apply) return;
       const result = await options.repository.write({ ...decision, citySlug: signal.citySlug,
         nodeId: signal.id, nodeType: signal.type, source: "ai", promptId: options.prompt.id,
         promptSha256: options.prompt.sha256, inputSha256, pipelineRunId: options.pipelineRunId });
@@ -100,6 +98,8 @@ export async function runReannotation(options: {
       report.failures.push({ citySlug: signal.citySlug, nodeType: signal.type, nodeId: signal.id, code });
     }
   }
+  async function worker() {
+    while (next < signals.length) await classifyOne(signals[next++]!);
   }
   // Drain every worker before returning or propagating cancellation to the CLI.
   const workers = await Promise.allSettled(Array.from({ length: Math.min(concurrency, signals.length) }, worker));
