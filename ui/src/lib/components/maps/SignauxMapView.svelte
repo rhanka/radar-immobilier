@@ -183,10 +183,9 @@
     type SignalTimeRange,
   } from "$lib/signals/signal-date-filter.js";
   import { rankVivierBNodes } from "$lib/signals/vivier-b-ranking.js";
-  import { filtreCountsForPerimeter } from "$lib/signals/signal-filter-counts.js";
+  import { classementCountsForPerimeter, filtreCountsForPerimeter } from "$lib/signals/signal-filter-counts.js";
   import {
     buildClassementMap,
-    classementCounts,
     classementKey,
     filterNodesByClassement,
   } from "$lib/signals/signal-classement.js";
@@ -917,10 +916,16 @@
   $: classementBaseMap = buildClassementMap(detailSelectionHeads, detailArchiveHeads);
   $: classementMap = new Map([...classementBaseMap, ...classementOverrides]);
   $: classementFilteredNodes = filterNodesByClassement(filteredDetailNodes, classementMap, classementFilter);
-  // Pertinence counts (owner 2026-11-09): AFTER period + Filtre (axes +
-  // exclusions), i.e. over `filteredDetailNodes`, NOT the raw detail nodes —
-  // recomputed reactively whenever period/Filtre changes.
-  $: classementCountsValue = classementCountsFor(filteredDetailNodes, detailArchiveHeads, classementMap);
+  // Same perimeter and period as Filtre; ignore the Pertinence checkboxes.
+  $: classementCountsValue = loadError !== null ? null : classementCountsForPerimeter({
+    entries: allEntries,
+    axes: bAxesFromVivierKey(activeSubsetKey),
+    exclusions: vivierBExclusions,
+    live: selectedCity && !detailLoading && detailProjection.available
+      ? { slug: selectedCity.municipality.slug,
+          nodes: filterNodesByDocumentDate(detailNodes, dateRange, dateBasis), classement: classementMap }
+      : null,
+  });
   // Filtre counts (owner 2026-11-13): over the WHOLE displayed perimeter,
   // with or without a selection — every city's cubes scoped by Pertinence, the
   // selected city's cube being rebuilt from its loaded detail (period +
@@ -943,22 +948,6 @@
         ? { slug: selectedCity.municipality.slug, nodes: filtreScopedNodes }
         : null,
     });
-  function classementCountsFor(
-    nodes: GraphSignalNode[],
-    archiveHeads: import("$lib/signals/graph-signal-detail-client.js").CoherentArchiveHead[],
-    map: Map<string, import("$lib/signals/signal-classement.js").ClassementEntry>,
-  ): Record<import("$lib/signals/signal-classement.js").SignalClass, number> {
-    const classes: import("$lib/signals/signal-classement.js").SignalClass[] = nodes.map(
-      (node) => map.get(classementKey(node.type, node.id, node.citySlug))?.classe ?? "non_classe",
-    );
-    const visibleKeys = new Set(nodes.map((node) => classementKey(node.type, node.id, node.citySlug)));
-    for (const head of archiveHeads) {
-      if (head.effectiveDiscarded && !visibleKeys.has(classementKey(head.target.type, head.target.id, head.target.citySlug))) {
-        classes.push("ecarte");
-      }
-    }
-    return classementCounts(classes);
-  }
   function handleClassementFilterChange(
     next: import("$lib/signals/signal-classement.js").ClassementFilter,
   ): void {
