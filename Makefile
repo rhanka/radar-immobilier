@@ -1,6 +1,8 @@
 SHELL := /bin/bash
 
+ifneq ($(SKIP_DOTENV),1)
 -include .env
+endif
 -include deploy/ci/object-storage-prod.mk
 
 # ── Environment / project ─────────────────────────────────────────────
