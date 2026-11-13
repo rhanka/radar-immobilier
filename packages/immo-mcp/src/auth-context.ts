@@ -10,6 +10,7 @@ import { createHash } from "node:crypto";
 export interface ImmoMcpAuthContext {
   sub: string;
   userId?: string;
+  clientId?: string;
   tenantId: string;
   orgId?: string;
   roles: string[];
@@ -31,6 +32,7 @@ export interface ImmoMcpAuthContext {
 export const IMMO_SCOPES = {
   read: "immo:read",
   search: "immo:search",
+  signalsWrite: "immo:signals:write",
   documentsRead: "immo:documents:read",
   notesWrite: "immo:notes:write",
   decisionsPropose: "immo:decisions:propose",

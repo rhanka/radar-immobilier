@@ -10,6 +10,7 @@ import { AccountBindingUnavailable } from "../account-binding.js";
 import { artifactRefusal, artifactScopeDenied, assertArtifactBinding, type ArtifactMcpBinding } from "./artifact-provider.js";
 import { ARTIFACT_STRICT, ARTIFACT_PART1 } from "@radar/artifacts-host";
 import { deferArtifactPrecondition } from "./artifact-transport-modules.js";
+import { isSignalWrite, SIGNAL_WRITE_ANNOTATIONS } from "../signal-contract.js";
 
 // GeoJSON may contain 2,000 features; budgets must not impose a smaller semantic limit.
 export const IMMO_WIRE_LIMITS = Object.freeze({
@@ -22,7 +23,7 @@ export const ARTIFACT_WIRE_LIMITS = Object.freeze({ ...IMMO_WIRE_LIMITS,
 export const IMMO_WIRE_TOOLS: readonly Tool[] = ALL_TOOL_DEFINITIONS.map((def) => {
   const schema = normalizeToolJsonSchema(def.name, convertInputShape(def.inputSchema));
   return { name: def.name, title: def.title, description: def.description,
-    annotations: IMMO_READ_ANNOTATIONS,
+    annotations: isSignalWrite(def.name) ? SIGNAL_WRITE_ANNOTATIONS : IMMO_READ_ANNOTATIONS,
     inputSchema: schema as Tool["inputSchema"], execution: { taskSupport: "forbidden" } };
 });
 const manifest: RegistryDefinition["manifest"] = {
@@ -30,7 +31,8 @@ const manifest: RegistryDefinition["manifest"] = {
   tools: IMMO_WIRE_TOOLS.map((tool, index) => ({
     kind: "tool", name: tool.name, description: tool.description!, inputSchema: tool.inputSchema,
     outputSchema: {}, requiredScopes: [ALL_TOOL_DEFINITIONS[index]!.scope], requiredClaims: [],
-    redactionClass: "moderate", mutability: "read-only", mutatesExternalSystem: false,
+    redactionClass: "moderate", mutability: isSignalWrite(tool.name) ? "write" : "read-only",
+    mutatesExternalSystem: isSignalWrite(tool.name),
     idempotency: { required: false }, gates: {
       requiresElicitation: false, requiresHumanConfirmation: false, requiresPrincipalGate: true,
     },
