@@ -62,12 +62,13 @@ const halves = Object.fromEntries(['tuning', 'blind', 'total'].map((half) => {
     predictionClasses: Object.fromEntries(['P', 'S', 'N', 'Non classé'].map((c) => [c, inv.reduce((n, r) => n + r.classes[c], 0)])),
     tokens: cost(rec, 'usage'), baselineDetectionTokens: cost(rec, 'baselineUsage'), baselineClassificationTokens: 'missing source' }];
 }));
-save(`${home}/score-tuning-${Date.now()}`, rows.filter((r) => !r.blind), false);
-save(`${home}/score-blind-${Date.now()}`, rows.filter((r) => r.blind), true);
+const stamp = Date.now(), privateScores = { tuning: `score-tuning-${stamp}`, blind: `score-blind-${stamp}` };
+save(`${home}/${privateScores.tuning}`, rows.filter((r) => !r.blind), false);
+save(`${home}/${privateScores.blind}`, rows.filter((r) => r.blind), true);
 write(`${home}/misses-tuning.json`, missLines);
 write(`${home}/MISSES-TUNING.md`, '# Manqués de mise au point\n\nCauses probables automatiques. Aucun cas aveugle.\n\n'
   + missLines.map((m) => `- **${m.document} — ${m.id}** : ${m.act} (${m.stage}, p. ${m.page}). Détection manquée : ${m.detectionMiss ? 'oui' : 'non'} ; visible manqué : ${m.visibleMiss ? 'oui' : 'non'} ; P∪S manqué : oui. ${m.probableCause}`).join('\n') + '\n');
-const summary = { at: new Date().toISOString(), promptSha256: freeze.promptSha256, halves,
+const summary = { at: new Date().toISOString(), promptSha256: freeze.promptSha256, halves, privateScores,
   matcherSha256: sha256(fs.readFileSync('tools/classif/1passe/matching.mjs')),
   scorerSha256: sha256(fs.readFileSync(import.meta.filename)),
   run: fs.existsSync(`${home}/run-summary.json`) ? json(`${home}/run-summary.json`) : null,
