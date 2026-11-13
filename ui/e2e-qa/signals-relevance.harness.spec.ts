@@ -38,7 +38,8 @@ for (const selected of [false, true]) {
       }
       if (url.pathname.endsWith("/coherent-city")) {
         detailReads++;
-        return route.fulfill({ json: detail(cities.find((city) => city.slug === url.searchParams.get("citySlug"))!) });
+        return route.fulfill({ json: detail(cities.find((city) => city.slug === url.searchParams.get("citySlug"))!,
+          url.searchParams.get("showDiscarded") === "1") });
       }
       return route.fulfill({ json: { ok: false, absent: true, featureCollection: { type: "FeatureCollection", features: [] } } });
     });
@@ -93,14 +94,24 @@ for (const selected of [false, true]) {
     if (selected) await expect(page.locator("[data-signal-node]")).toHaveCount(1);
     expect([aggregateReads, detailReads]).toEqual(initialReads);
     await page.getByRole("checkbox", { name: "Écarté", exact: true }).click();
+    await expect(header).toHaveText("7 signaux · 4 villes");
+    await expect(page.locator(".rail-city-row")).toHaveCount(4);
+    if (selected) await expect(page.locator("[data-signal-node]")).toHaveCount(2);
+    await expect.poll(() => page.evaluate(() => {
+      const map = (window as unknown as { relevanceMap: import("maplibre-gl").Map }).relevanceMap;
+      return map.getFilter("cities-fill")?.[2];
+    })).toEqual(["literal", expect.arrayContaining(cities.map(city => city.slug))]);
+    await page.getByRole("checkbox", { name: "Écarté", exact: true }).click();
     await expect(header).toHaveText("3 signaux · 2 villes");
+    await page.getByRole("checkbox", { name: "Écarté", exact: true }).click();
+    await expect(header).toHaveText("7 signaux · 4 villes");
     await page.getByTestId("classement-filter-trigger").click();
     await page.getByTestId("filtre-trigger").click();
     await page.getByRole("checkbox", { name: "Précoce", exact: true }).click();
-    await expect(header).toHaveText("4 signaux · 2 villes");
+    await expect(header).toHaveText("8 signaux · 4 villes");
     await page.getByRole("checkbox", { name: "Exclure dérogations mineures", exact: true }).click();
-    await expect(header).toHaveText("5 signaux · 2 villes");
-    if (selected) await expect(page.locator("[data-signal-node]")).toHaveCount(3);
+    await expect(header).toHaveText("9 signaux · 4 villes");
+    if (selected) await expect(page.locator("[data-signal-node]")).toHaveCount(4);
     await page.getByRole("button", { name: /^Période des signaux/ }).click();
     await page.getByRole("option", { name: "Dernière semaine", exact: true }).click();
     await expect(header).toHaveText("0 signaux · 0 villes");

@@ -60,7 +60,6 @@
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
   import { displayedSignalCountForCity } from "$lib/signals/signal-filter-counts.js";
 
-
   // ── Props ──────────────────────────────────────────────────────────────────
   /** Toutes les entrées villes (avec signalCount6m et subsetCounts). */
   export let entries: CityMapEntry[] = [];
