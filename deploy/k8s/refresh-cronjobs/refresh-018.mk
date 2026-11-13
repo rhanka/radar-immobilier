@@ -307,7 +307,7 @@ verify-renders:
 	      if (($$0 !~ /name: REFRESH_PROVIDER\n[ ]+value: openai\n/ \
 	        || $$0 !~ /name: REFRESH_MODEL\n[ ]+value: gpt-6-astra\n/ \
 	        || $$0 !~ /name: REFRESH_SINGLE_PASS\n[ ]+value: "0"/ \
-	        || $$0 !~ /name: REFRESH_CLASSIFY_MODE\n[ ]+value: off\n/ \
+	        || $$0 !~ /name: REFRESH_CLASSIFY_MODE\n[ ]+value: "off"\n/ \
 	        || $$0 !~ /name: REFRESH_CLASSIFY_PROVIDER\n[ ]+value: openai\n/ \
 	        || $$0 !~ /name: REFRESH_CLASSIFY_MODEL\n[ ]+value: gpt-6-astra\n/ \
 	        || $$0 !~ /name: REFRESH_CLASSIFY_REASONING_EFFORT\n[ ]+value: low\n/ \
