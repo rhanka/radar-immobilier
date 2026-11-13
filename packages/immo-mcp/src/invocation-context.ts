@@ -2,6 +2,7 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import type { ImmoMcpAuthContext } from "./auth-context.js";
 import type { DataSourceCallContext, ImmoDataSource } from "./data-source.js";
 import type { RawDataSource } from "./raw-data.js";
+import type { SignalRuntime } from "./signal-store.js";
 
 /**
  * Prepared authorized egress for a single tool invocation.
@@ -21,6 +22,7 @@ export interface AuthorizedEgress {
 
 /** Seeds captured once at request entry (verified claims + shared seams). */
 export interface InvocationSeeds {
+  readonly signals?: SignalRuntime;
   readonly auth: ImmoMcpAuthContext;
   readonly data: ImmoDataSource;
   readonly raw: RawDataSource;
@@ -33,6 +35,7 @@ export interface InvocationSeeds {
  * `data`/`raw` stay shared stateless seams; identity travels in `auth`/`egress`.
  */
 export interface InvocationContext {
+  readonly signals?: SignalRuntime;
   readonly auth: InvocationAuth;
   readonly data: ImmoDataSource;
   readonly raw: RawDataSource;
@@ -64,7 +67,8 @@ export function captureInvocationContext(seeds: InvocationSeeds): InvocationCont
     scopes: Object.freeze([...seeds.auth.scopes]),
     sub: seeds.auth.sub,
   });
-  return Object.freeze({ auth, data: seeds.data, raw: seeds.raw, egress: snapshot });
+  return Object.freeze({ auth, data: seeds.data, raw: seeds.raw, egress: snapshot,
+    ...(seeds.signals ? { signals: seeds.signals } : {}) });
 }
 
 /**
