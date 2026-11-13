@@ -1,3 +1,5 @@
+/* global require, process */
+/* eslint-disable @typescript-eslint/no-require-imports */
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const r = require('./runtime.cjs');

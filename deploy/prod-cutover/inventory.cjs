@@ -1,3 +1,5 @@
+/* global require, process */
+/* eslint-disable @typescript-eslint/no-require-imports */
 const r = require('./runtime.cjs');
 try {
   const data = JSON.parse(r.fs.readFileSync(0, 'utf8'));

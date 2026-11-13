@@ -1,3 +1,5 @@
+/* global require, module, process */
+/* eslint-disable @typescript-eslint/no-require-imports */
 const r = require('./runtime.cjs');
 function migrationSql(entry, expected) {
   const pairs = expected.map(e => `('${e.hash}',${e.when}::bigint)`).join(',');

@@ -39,3 +39,4 @@
 - [x] Revue formelle selection-failed documentée : MCP h2a et métadonnées auteur manquants.
 - [x] Image API candidate absente localement ; aucun pull ni hook réel lancé.
 - [x] Branche publiée, aucune fusion ni aucun tag. Répétition réelle et GO restent à venir.
+- [x] Lint ciblé réussi dans le conteneur de tests Node. Nettoyage down -v effectué.

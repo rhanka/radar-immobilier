@@ -1,3 +1,5 @@
+/* global require, module, process, __dirname */
+/* eslint-disable @typescript-eslint/no-require-imports */
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');

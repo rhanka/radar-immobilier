@@ -12,7 +12,7 @@ export BACKUP_URI BACKUP_ENDPOINT RESTORE_SHA256
 export CUTOVER_API_IMAGE CUTOVER_ALLOW_PROD
 export SMOKE_URL
 export ROOT
-.PHONY: help prerequisites precheck backup restore-test migrate transition verify smoke rehearsal rollback k8s-plan cd-plan test integration down check image-check publish commit
+.PHONY: help prerequisites precheck backup restore-test migrate transition verify smoke rehearsal rollback k8s-plan cd-plan test integration down check image-check publish commit lint
 help:
 	@echo 'Préparation : prerequisites precheck k8s-plan cd-plan. Exécution future : backup restore-test migrate transition verify smoke rehearsal rollback.'
 prerequisites precheck k8s-plan cd-plan:
@@ -22,6 +22,9 @@ backup restore-test migrate transition verify smoke rehearsal rollback:
 test:
 	@test "$(ENV)" = test-prod-cutover
 	@cd "$(ROOT)" && timeout 90s node --test deploy/prod-cutover/*.test.cjs
+lint:
+	@test "$(ENV)" = test-prod-cutover
+	@cd "$(ROOT)" && timeout --kill-after=10s 180s bash deploy/prod-cutover/lint.sh
 integration:
 	@test "$(ENV)" = test-prod-cutover
 	@cd "$(ROOT)" && timeout --kill-after=10s 300s bash deploy/prod-cutover/integration.sh
@@ -29,7 +32,7 @@ down:
 	@test "$(ENV)" = test-prod-cutover
 	@docker compose --env-file /dev/null -p radar-test-prod-cutover -f "$(ROOT)/deploy/prod-cutover/test.compose.yml" down -v --remove-orphans
 check:
-	@cd "$(ROOT)" && bash -n deploy/prod-cutover/inspect.sh deploy/prod-cutover/integration.sh
+	@cd "$(ROOT)" && bash -n deploy/prod-cutover/inspect.sh deploy/prod-cutover/integration.sh deploy/prod-cutover/lint.sh
 	@cd "$(ROOT)" && for file in deploy/prod-cutover/*.cjs; do node --check "$$file"; done
 	@git -C "$(ROOT)" diff --check
 	@git -C "$(ROOT)" status --short --branch
