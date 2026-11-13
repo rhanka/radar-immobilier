@@ -40,8 +40,11 @@ for (const doc of referenceRows()) {
     return matched;
   });
   for (const unit of units) {
-    const votes = matches.map((m) => m.get(unit.id) ?? { valid: false, class: null,
-      status: m.collisions.some((c) => c.id === unit.id) ? 'collision' : m.absence, issues: ['missing_annotation'] });
+    const votes = matches.map((m) => {
+      const status = m.collisions.some((c) => c.id === unit.id) ? 'collision' : m.absence;
+      return m.get(unit.id) ?? { valid: false, class: null, status,
+        issues: [status === 'collision' ? 'matching_collision' : status === 'interrompu' ? 'execution_interrupted' : 'missing_annotation'] };
+    });
     rows.push({ id: unit.id, document: id, blind, unit, votes,
       disputed: votes.some((v) => !v.valid) || votes[0].code !== votes[1].code,
       finalClass: votes.every((v) => v.valid) && votes[0].code === votes[1].code ? votes[0].class : null });
