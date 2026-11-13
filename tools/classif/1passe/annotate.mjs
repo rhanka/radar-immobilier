@@ -4,14 +4,38 @@ import { spawn } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
 import { callSeat, ROUTES, parseJsonObject } from '../run-seat.mjs';
 import { sha256 } from '../lib/refc1.mjs';
-import { dir, home, split, context, save, writePrivate } from './context.mjs';
+import { dir, home, split, context, save, load, writePrivate } from './context.mjs';
 import { readQuota, seatHome } from './quota.mjs';
-const ctx = context(), started = new Date().toISOString();
+const ctx = context(), resumed = new Date().toISOString();
 const promptBase = fs.readFileSync(`${dir}/annotation-prompt.md`, 'utf8');
 const arms = ['astra-medium', 'opus-5.5-medium'];
 const states = Object.fromEntries(arms.map((a) => [a, { calls: 0, completed: 0, stopped: null, children: new Set(), pauseUntil: 0 }]));
-let retries = 0, quotaPromise;
-const quotas = [];
+fs.mkdirSync(`${home}/annotation`, { recursive: true, mode: 0o700 });
+const journal = `${home}/annotation/calls.jsonl`;
+const prior = fs.existsSync(journal) ? fs.readFileSync(journal, 'utf8').trim().split('\n').filter(Boolean).map(JSON.parse) : [];
+const started = prior[0]?.at ?? resumed;
+let retries = prior.filter((r) => r.attempt > 0).length, quotaPromise;
+const quotas = fs.existsSync(`${home}/annotation/quotas.json`) ? JSON.parse(fs.readFileSync(`${home}/annotation/quotas.json`, 'utf8')) : [];
+// Un appel interrompu reste facturé au budget. Aucun rejeu de sa réponse absente.
+for (const intent of prior) {
+  const file = `${home}/annotation/${intent.arm}/${intent.document}`;
+  const ext = intent.blind ? 'sealed' : 'json';
+  if (!fs.existsSync(`${file}.${ext}`)) {
+    const attemptFile = `${file}.attempt-${intent.attempt}`;
+    const r = fs.existsSync(`${attemptFile}.${ext}`) ? load(attemptFile, intent.blind) : null;
+    if (!r?.limited) save(file, { ...intent, finishedAt: resumed, valid: false, acts: [], error: 'execution_interrupted' }, intent.blind);
+  }
+}
+for (const arm of arms) {
+  states[arm].calls = prior.filter((r) => r.arm === arm).length;
+  for (const d of ctx.manifest.documents) {
+    const blind = split.blind.includes(d.id), file = `${home}/annotation/${arm}/${d.id}`;
+    if (fs.existsSync(`${file}.${blind ? 'sealed' : 'json'}`)) {
+      states[arm].completed++;
+      if (load(file, blind).error === 'refus_compte') states[arm].stopped = 'refus_compte';
+    }
+  }
+}
 async function quota() {
   quotaPromise ??= readQuota().then((q) => { quotas.push(q); writePrivate(`${home}/annotation/quotas.json`, quotas); return q; }).finally(() => { quotaPromise = null; });
   const q = await quotaPromise;
@@ -41,11 +65,12 @@ async function run(arm) {
     while (!s.stopped && next < docs.length) {
       const d = docs[next++], blind = split.blind.includes(d.id);
       const file = `${home}/annotation/${arm}/${d.id}`;
-      if (fs.existsSync(`${file}.${blind ? 'sealed' : 'json'}`)) throw new Error('refus de rejouer une annotation');
+      if (fs.existsSync(`${file}.${blind ? 'sealed' : 'json'}`)) continue;
       const prompt = `${promptBase}\n\n${ctx.pack}\n\nDOCUMENT INTÉGRAL\n${ctx.texts.get(d.id)}`;
       for (let attempt = 0; attempt < 3 && !s.stopped; attempt++) {
         while (Date.now() < s.pauseUntil && !s.stopped) await delay(Math.min(1000, s.pauseUntil - Date.now()));
         if (s.stopped) break;
+        if (Object.values(states).reduce((n, x) => n + x.calls, 0) >= 240) { stop(arm, 'budget'); break; }
         s.calls++;
         const intent = { at: new Date().toISOString(), arm, document: d.id, attempt, promptSha256: sha256(prompt), blind };
         fs.appendFileSync(`${home}/annotation/calls.jsonl`, `${JSON.stringify(intent)}\n`, { mode: 0o600 });

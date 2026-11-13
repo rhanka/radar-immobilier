@@ -13,3 +13,5 @@ finalize:
 	node tools/classif/1passe/finalize.mjs
 inspect:
 	node tools/classif/1passe/inspect.mjs
+status:
+	node tools/classif/1passe/status.mjs $(ARGS)

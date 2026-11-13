@@ -173,3 +173,13 @@ Le tirage humain est déterministe par SHA-256 de graine|identifiant, replis pri
 | Audit humain | 20 arbitrages de mise au point au plus ; aucun aveugle | Acté le 13/11 |
 | Audit aveugle | Agrégats seulement ; aucun retour aux optimiseurs | Acté le 13/11 |
 | Stratification | Affectation B actuelle conservée ; supports C encore inconnus | Arbitrage owner requis |
+
+## Reprise après interruption
+
+Le journal initial contient 33 départs : 17 réponses reçues et 16 appels interrompus.
+Les réponses reçues sont conservées. Les 16 absences restent des échecs techniques.
+Aucun de ces appels n’est rejoué. Ils comptent dans les 200 lectures prévues.
+Leurs actes B absents passent en désaccord, puis à l’arbitre selon D3.
+Le quota hebdomadaire Codex est à 27 % au contrôle de reprise.
+La durée publiée distinguera le temps écoulé et la pause entre les deux lanes.
+Le gel version 3 conserve les compteurs de départs déjà engagés.
