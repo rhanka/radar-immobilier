@@ -1254,6 +1254,7 @@
                     <SignalClassementMenu
                       classe={classementMap.get(classementKey(node.type, node.id, node.citySlug))?.classe ?? EMPTY_CLASSEMENT_ENTRY.classe}
                       reasonCodes={classementReasonCodes}
+                      restoreBlockedReason={classementEntry.restoreBlockedReason}
                       disabled={classementInFlight.has(classementKey(node.type, node.id, node.citySlug))}
                       onApply={(nextClass, reasonCode) => onApplyClassement(node, nextClass, reasonCode)}
                     />

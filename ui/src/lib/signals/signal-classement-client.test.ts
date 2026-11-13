@@ -11,6 +11,7 @@ const NON_CLASSE: ClassementEntry = {
   pertinentHeadId: null, aSurveillerHeadId: null,
   pertinentExpectedHeadId: null, aSurveillerExpectedHeadId: null,
   archiveHeadId: null, discarded: false,
+  archiveRestores: [], restoreBlockedReason: null,
 };
 
 type Call = { url: string; method: string; body: unknown; key: string | null };
@@ -35,7 +36,13 @@ function stubFetchOk(fail?: (call: Call, index: number) => { status: number; err
   return { calls };
 }
 const posts = (calls: Call[]) => calls.filter((c) => c.method === "POST");
-const entry = (patch: Partial<ClassementEntry>): ClassementEntry => ({ ...NON_CLASSE, ...patch });
+const entry = (patch: Partial<ClassementEntry>): ClassementEntry => ({
+  ...NON_CLASSE,
+  ...(patch.discarded && patch.archiveHeadId ? { archiveRestores: [{
+    scope: "personal" as const, id: patch.archiveHeadId, reasonCode: patch.reasonCode ?? null,
+  }] } : {}),
+  ...patch,
+});
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -162,6 +169,32 @@ describe("signal classement client — acceptance criteria", () => {
     })).rejects.toMatchObject({ status: 422, code: "invalid_reason_code" });
     expect(posts(calls).map((c) => c.url.split("/").pop())).toEqual(["restore", "select", "discard"]);
     expect(posts(calls)[2]?.body).toMatchObject({ reasonCode: "N-NON-RES" });
+  });
+
+  it("should compensate each restored scope with its own head and reason", async () => {
+    const { calls } = stubFetchOk((call) =>
+      call.url.endsWith("/select") ? { status: 409, error: "facet_head_conflict" } : null);
+    await expect(applyClassement(SCOPE, {
+      target: TARGET, displayedFingerprint: FINGERPRINT, nextClass: "pertinent",
+      current: entry({ classe: "ecarte", discarded: true, archiveRestores: [
+        { scope: "personal", id: "private", reasonCode: "N-NON-RES" },
+        { scope: "workspace", id: "shared", reasonCode: "N-AUTRE" },
+      ] }),
+    })).rejects.toMatchObject({ status: 409 });
+    expect(posts(calls).map((call) => call.url.split("/signal-facets/")[1])).toEqual([
+      "personal/restore", "workspace/restore", "personal/select", "workspace/discard", "personal/discard",
+    ]);
+    expect(posts(calls)[3]?.body).toMatchObject({ expectedHeadId: "evt-2", reasonCode: "N-AUTRE" });
+    expect(posts(calls)[4]?.body).toMatchObject({ expectedHeadId: "evt-1", reasonCode: "N-NON-RES" });
+  });
+
+  it("should refuse shared restoration before any write when moderation is missing", async () => {
+    const { calls } = stubFetchOk();
+    await expect(applyClassement(SCOPE, {
+      target: TARGET, displayedFingerprint: FINGERPRINT, nextClass: "non_classe",
+      current: entry({ classe: "ecarte", discarded: true, restoreBlockedReason: "Moderator required" }),
+    })).rejects.toThrow("workspace_capability_required");
+    expect(calls).toHaveLength(0);
   });
 
   it("surfaces 409, 422 and fingerprint-conflict errors with status and code", async () => {
