@@ -7,6 +7,7 @@ import { createRefreshModelPolicy, type RefreshModel } from "../services/graph/r
 import { createReannotationRepository } from "../services/graph/reannotate-repository.js";
 import { createReannotationClassifier, parseReannotationArgs, runReannotation } from "../services/graph/reannotate-signals.js";
 import { loadSinglePassPrompt, singlePassPrimary } from "../services/graph/refresh-single-pass.js";
+import { parsePurgeAiAnnotationsArgs, purgeAiAnnotations } from "../services/graph/purge-ai-annotations.js";
 
 function required(name: string): string {
   const value = process.env[name]?.trim();
@@ -24,6 +25,13 @@ function selectedModel(prefix: string): RefreshModel {
 }
 
 async function main(): Promise<void> {
+  if (process.argv[2] === "--purge-ai-annotations") {
+    const options = parsePurgeAiAnnotationsArgs(process.argv.slice(3));
+    const { db, pool } = createDb(loadConfig());
+    try { console.log(JSON.stringify(await purgeAiAnnotations(db, options))); }
+    finally { await pool.end(); }
+    return;
+  }
   const { apply } = parseReannotationArgs(process.argv.slice(2));
   const primary = singlePassPrimary();
   const fallback = selectedModel("REFRESH_FALLBACK");
