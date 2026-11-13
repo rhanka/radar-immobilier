@@ -19,9 +19,16 @@ export function singlePassPrimary(env: NodeJS.ProcessEnv = process.env): Refresh
 }
 
 export interface SinglePassPrompt { readonly id: string; readonly sha256: string; readonly text: string }
-const classes = ["pertinent", "a_surveiller", "non_classe", "ecarte"] as const;
-const classSchema = z.object({ classe: z.enum(classes), reason: z.string().trim().min(1).max(1000),
-  reasonCode: z.string().regex(/^(?:[PSN]-[A-Z-]+|V2-PRECEDENT|UNCLASSIFIED)$/) });
+export const singlePassClasses = ["pertinent", "a_surveiller", "ecarte"] as const;
+export const singlePassReasonCodes = [
+  "P-VILLE-TERRITOIRE", "P-NOUV-ZONE", "P-PERIM-URB", "P-DENSITE", "P-USAGE-MULTI",
+  "P-TYPO-INTERM", "P-PROJ-INTEGRE", "P-NORMES", "S-MANDAT-AMONT", "S-PLANIFIE",
+  "S-PORTEE-FLOUE", "S-CONTRAINTE", "S-RESTRICTIF", "S-INFO-MANQUANTE", "S-PPCMOI-SERIE",
+  "S-PREEMPTION", "N-ACCESSOIRE", "N-RETIRE", "N-FORME", "N-ODJ-SEUL", "N-NON-RES",
+  "N-ADMIN", "N-RESTRICTIF", "N-UNIFAM", "N-DOUBLON", "N-HORS-TERR", "N-FAUX-POSITIF", "V2-PRECEDENT",
+] as const;
+const classSchema = z.object({ classe: z.enum(singlePassClasses), reason: z.string().trim().min(1).max(1000),
+  reasonCode: z.enum(singlePassReasonCodes), ambiguous: z.boolean() });
 export type SinglePassClass = z.infer<typeof classSchema>;
 export interface SinglePassAnnotation extends SinglePassClass { readonly nodeId: string }
 
@@ -29,8 +36,9 @@ export function singlePassSchema(nativeSchema: string): string {
   const schema = JSON.parse(nativeSchema) as { required: string[]; annotations?: unknown };
   return JSON.stringify({ ...schema, required: [...schema.required, "annotations"], annotations: {
     type: "array", description: "Exactly one class annotation per Signal or DesignationEvent node", items: {
-      type: "object", required: ["nodeId", "classe", "reason", "reasonCode"], properties: {
-        nodeId: { type: "string" }, classe: { enum: classes }, reason: { type: "string" }, reasonCode: { type: "string" },
+      type: "object", required: ["nodeId", "classe", "reason", "reasonCode", "ambiguous"], properties: {
+        nodeId: { type: "string" }, classe: { enum: singlePassClasses }, reason: { type: "string" },
+        reasonCode: { enum: singlePassReasonCodes }, ambiguous: { type: "boolean" },
       },
     },
   } });
@@ -57,7 +65,7 @@ export function parseSinglePassClass(value: unknown): SinglePassClass {
   const result = classSchema.parse(value);
   const expected = result.reasonCode.startsWith("P-") ? "pertinent"
     : result.reasonCode.startsWith("S-") ? "a_surveiller"
-      : result.reasonCode === "UNCLASSIFIED" ? "non_classe" : "ecarte";
+      : "ecarte";
   if (result.classe !== expected) throw new Error("Single-pass class and reason code disagree");
   return result;
 }
