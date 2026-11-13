@@ -50,6 +50,14 @@ BEGIN
     WHERE workspace_id=wid AND account_id=actor AND status='active') THEN
     RETURN jsonb_build_object('error','workspace_membership_required');
   END IF;
+  IF NOT EXISTS (SELECT 1 FROM facet_activation_state WHERE workspace_id=wid
+    AND writer_epoch='scoped' AND NOT maintenance_barrier) THEN
+    RETURN jsonb_build_object('error','scoped_epoch_required');
+  END IF;
+  IF EXISTS (SELECT 1 FROM facet_events e LEFT JOIN facet_event_bindings b ON b.event_id=e.id
+    WHERE e.owner_id=actor AND b.event_id IS NULL) THEN
+    RETURN jsonb_build_object('error','personal_history_unresolved');
+  END IF;
   IF NOT EXISTS (SELECT 1 FROM graph_nodes WHERE city_slug=p_ref->>'citySlug'
     AND type=p_ref->>'type' AND id=p_ref->>'id') THEN RETURN jsonb_build_object('error','signal_not_found'); END IF;
   SELECT md5(jsonb_build_array(label,props,source_ref)::text) INTO graph_version FROM graph_nodes
