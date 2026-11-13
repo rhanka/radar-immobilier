@@ -40,13 +40,16 @@ else
 fi
 echo "[restore] toc_entries=$toc archive verified"
 reset_schemas() {
+  local public_owner=''
+  # PostgreSQL 16 omits the unchanged default public schema from pg_dump.
+  [[ ${RESTORE_KEEP_OWNER:-0} != 1 ]] || public_owner=' AUTHORIZATION pg_database_owner'
   printf '%s\n' \
     'DO $reset$ DECLARE s name; BEGIN' \
     "  FOR s IN SELECT nspname FROM pg_namespace WHERE nspname <> 'information_schema' AND nspname !~ '^pg_' LOOP" \
     "    EXECUTE format('DROP SCHEMA %I CASCADE', s);" \
     '  END LOOP;' \
     'END $reset$;' \
-    'CREATE SCHEMA public;' \
+    "CREATE SCHEMA public${public_owner};" \
     'GRANT USAGE ON SCHEMA public TO PUBLIC;'
 }
 if [ -n "$TARGET_DB" ]; then
