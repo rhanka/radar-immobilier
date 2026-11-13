@@ -48,10 +48,11 @@ aucun chemin absolu d'une machine n'est requis.
   harnais : `@sentropic/graphify@0.18.0` (prompts et validation).
   `sandbox/node_modules/` n'est pas versionné (voir étape 0).
 - `full/` — scripts de la chaîne complète (ci-dessous).
-- `build-v11-report.mjs` — générateur du dossier v11 (tableaux, graphiques
+- `build-v11-report.mjs` — générateur des dossiers v11 et v12 (`BENCH_REPORT=v12` pour le v12 ; tableaux, graphiques
   SVG, HTML ; PDF via Chromium headless). Les graphiques v10 venaient de
   Matplotlib ; ils sont régénérés en Node dans le même style (règle zéro
-  Python du dépôt).
+  Python du dépôt). `charts-v12.mjs` : graphiques v12 au style v10
+  (couleur = fournisseur, forme = modèle, pointillé = effort, étoile = cascade).
 
 ## Chaîne complète depuis le manifeste seul
 
@@ -95,6 +96,27 @@ node tools/bench-v11/full/run-arm-argon-retry.mjs    # reprises séquentielles d
 bash tools/bench-v11/full/run-arm-wonder-c10.sh      # Muse Wonder low, concurrence 10
 ```
 
+Bras Muse Ember (mise à jour du 2026-11-12) : `muse-ember-1.0`, efforts
+`xhigh` puis `max`, concurrence 4, `--contributor-mode off` et `--json` sur le
+bras complet (jetons réels par document ; texte terminal extrait vers `raw/`).
+`MUSE_CWD` fixe le répertoire de travail de la CLI (défaut : dossier vide
+`${TMPDIR:-/tmp}/muse-ember-run`, hors de tout dépôt). Garde hebdomadaire :
+le runner lit `muse usage --json` avant chaque document et s'arrête à
+`STOP_WEEKLY_PCT` (défaut 85) ; le chien de garde relit toutes les 10 minutes
+et coupe les processus du runner au même seuil : il ne tue que l'arbre de
+processus du groupe du runner (y compris les enfants `timeout`, qui ont leur
+propre groupe), jamais d'autre session `muse`. Depuis le 2026-11-13, après les
+passages publiés, le runner refuse aussi un `MUSE_CWD` non vide. Surface
+d'accès : aucun outil n'est restreint (voir dossier v12 §2) ; un outil `bash`
+de la CLI écrit dans `/tmp` de l'hôte, d'où un risque de collision entre
+documents concurrents.
+
+```bash
+bash tools/bench-v11/full/run-arm-ember.sh xhigh 4     # -> full/arms/muse-ember-xhigh/{raw,jsonl,usage}/
+bash tools/bench-v11/full/run-arm-ember.sh max 4       # -> full/arms/muse-ember-max/...
+bash tools/bench-v11/full/watch-muse-weekly.sh <pgid-du-runner> 600 85   # -> full/muse-weekly-log.jsonl
+```
+
 Chaque ligne `meta.jsonl` enregistre `promptSha256` (sha256 du prompt
 réellement envoyé) et `startedAt`. Surface d'accès AGY : voir le dossier
 v11 §2 (cwd, 60 outils actifs, aucun appel d'outil observé).
@@ -104,6 +126,8 @@ v11 §2 (cwd, 60 outils actifs, aucun appel d'outil observé).
 ```bash
 node tools/bench-v11/full/validate-outputs.mjs tools/bench-v11/full/arms/gemini-argon-low
 node tools/bench-v11/full/validate-outputs.mjs tools/bench-v11/full/arms/muse-wonder-low
+node tools/bench-v11/full/validate-outputs.mjs tools/bench-v11/full/arms/muse-ember-xhigh
+node tools/bench-v11/full/validate-outputs.mjs tools/bench-v11/full/arms/muse-ember-max
 # -> <armDir>/validated/*.output.json + *.receipt.json
 ```
 
@@ -112,6 +136,13 @@ node tools/bench-v11/full/validate-outputs.mjs tools/bench-v11/full/arms/muse-wo
 ```bash
 node tools/bench-v11/full/score-argon.mjs    # -> full/scores-argon.json
 node tools/bench-v11/full/score-wonder.mjs   # -> full/scores-wonder.json
+node tools/bench-v11/full/score-ember.mjs xhigh   # -> full/scores-ember-xhigh.json (jetons réels inclus)
+node tools/bench-v11/full/score-ember.mjs max     # -> full/scores-ember-max.json
+# Surface d'accès de la CLI Muse (appels d'outil, tours, skills), sans appel modèle :
+node tools/bench-v11/full/audit-muse-surface.mjs tools/bench-v11/full/arms/muse-ember-xhigh   # -> <armDir>/surface.json
+node tools/bench-v11/full/audit-muse-surface.mjs tools/bench-v11/full/arms/muse-ember-max
+# Sensibilité (score publié inchangé) : documents avec appel d'outil comptés refusés
+node tools/bench-v11/full/score-ember-sensitivity.mjs xhigh sacre-coeur-2026-05-11   # -> full/scores-ember-xhigh-sensitivity.json
 ```
 
 ### 6. Burns (échantillon fixe de 10 documents, capture d'usage)
@@ -134,6 +165,35 @@ Le premier argument du générateur est le dossier de preuves contenant
 `full/scores-{argon,wonder}.json`, `full/arms/gemini-argon-low/meta.jsonl`
 et `full/burn-{argon,wonder}-usage10/` (le clone d'exécution pour le
 passage publié ; un `BENCH_DIR` de travail pour une ré-exécution).
+
+### 7 bis. Dossier v12 (v11 + Muse Ember xhigh/max, graphiques style v10)
+
+```bash
+BENCH_REPORT=v12 node tools/bench-v11/build-v11-report.mjs tmp/bench-wonder
+# -> docs/reports/benchmark-v12-2026-11-13.{md,html}
+#    + docs/reports/assets/2026-11/benchmark-v12-{precision-rappel,f1-cost,acceptation,rappel}.svg
+```
+
+Le mode v12 lit en plus `full/scores-ember-{xhigh,max}.json` sous
+`BENCH_EMBER_DIR` (défaut `tools/bench-v11`) et échoue s'ils manquent. Sans
+`BENCH_REPORT=v12`, le générateur produit le dossier v11 du 2026-11-09 à
+l'octet près (vérifié) : le v11 publié reste intact. Le v12 reprend le texte
+v11 avec des insertions ancrées (aucune valeur v11 modifiée ; seuls les rangs
+positionnels sont recalculés sur 42 lignes), les noms complets des modèles
+avec version dans les tableaux et les graphiques, et un tableau « Meilleurs
+bras » calculé depuis les données.
+
+Graphiques v12 : `charts-v12.mjs`, style du v10 (v101b) régénéré en Node :
+couleur = fournisseur, forme = modèle, pointillé = progression d'effort
+(off → minimal → low → medium → high → xhigh → max), étoile = cascade,
+libellé posé à côté de chaque point avec traits de rappel courts (placement
+glouton qui évite libellés, points et lignes), courbes de même F1 en gris
+clair. Le générateur affiche le nombre de chevauchements de libellés
+(`chartCheck`, attendu 0) ; vérifier aussi le rendu à l'œil.
+
+Chromium en snap n'écrit pas dans un dossier caché (`.claude/`,
+`.cache-tmp/`) : copier le HTML et `assets/2026-11/` sous
+`~/snap/chromium/common/` pour l'impression PDF.
 
 Scripts auxiliaires de reconstruction (hors chaîne principale) :
 `full/build-oracle-676.mjs` (reconstruit `full/oracle-676/` depuis
