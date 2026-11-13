@@ -13,6 +13,7 @@ test('a multi-citation group covers only one B act; distinct stages do not merge
   const matched = pair([unit, { ...unit, id: 'b2' }], [{ id: 'g', variants: [a, a] }], quote);
   assert.equal(matched.size, 1);
   assert.equal(pair([unit], [{ ...a, stage: 'avis de motion' }], quote).size, 0);
+  assert.equal(pair([{ id: 'neutral-a07', variants: [unit, unit] }], [a, a], quote).size, 1);
 });
 test('ambiguity preserves a valid production class; inconsistent class stays visible', () => {
   const codes = new Map([['N-FORME', 'N']]);
