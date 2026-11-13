@@ -7,14 +7,20 @@ const files=['api/src/services/graph/refresh-profile.ts','api/src/services/graph
  'radar/ontology/ontology-profile.yaml','package-lock.json'];
 const tuning=json('tools/classif/l4/manifests/series-7-dev.json').aggregates['astra-low'];
 const blind=json('/home/antoinefa/.local/share/radar-classif/blind/series-7-astra-low.json');
-const baseline=s=>({...s,recallWilson95:wilson(s.refShown,s.refShown),
+const baseline=s=>({units:s.scored,refShown:s.refShown,predShown:s.predShown,recall:s.recall,precision:s.precision,
+ historicalRecallLowerBound:s.recallLB,historicalPrecisionLowerBound:s.precisionLB,failures:s.failures,
+ recallWilson95:wilson(s.refShown,s.refShown),
  precisionWilson95:wilson(s.refShown,s.predShown),misses:0});
 const manifest={kind:'single-pass-csets',promptSha256:json(`${refresh}/radar/prompts/refresh-single-pass.json`).sha256,
  compositionSha256:hash(readFileSync(`${home}/composition.json`)),
  refreshHead:execFileSync('git',['-C',refresh,'rev-parse','HEAD'],{encoding:'utf8'}).trim(),
  sourceHashes:Object.fromEntries(files.map(f=>[f,hash(readFileSync(`${refresh}/${f}`))])),
- referenceManifest:json('tools/classif/l3/manifests/reference-d.json'),
- series7:json('tools/classif/l4/manifests/series-7.json'),
+ referenceManifest:{path:'tools/classif/l3/manifests/reference-d.json',
+ sha256:hash(readFileSync('tools/classif/l3/manifests/reference-d.json')),
+ hashes:json('tools/classif/l3/manifests/reference-d.json').hashes},
+ series7:{path:'tools/classif/l4/manifests/series-7.json',
+ sha256:hash(readFileSync('tools/classif/l4/manifests/series-7.json')),
+ halves:json('tools/classif/l4/manifests/series-7.json').halves},
  baseline:{tuning:baseline(tuning),blind:baseline({...blind.stats,failures:blind.failures})},
  surface:{model:'gpt-6-astra',effort:'low',transport:'codex ChatGPT',concurrency:10,
  weeklyQuotaStop:90,web:false,acceptedToolEvents:0,emptyCwd:true,laneSeatHome:'/tmp/radar-csets-seats'},
