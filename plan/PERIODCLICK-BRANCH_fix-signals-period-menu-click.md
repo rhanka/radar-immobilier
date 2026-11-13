@@ -1,7 +1,7 @@
-# Feature: Clickable signal period options
+# Feature: Clickable signal periods and perimeter relevance facets
 
 ## Objective
-Restore real mouse selection in the signal period picker after PR #1084.
+Restore real mouse selection in the signal period picker after PR #1084. Count Pertinence over the displayed perimeter with or without selection.
 
 ## Scope / Guardrails
 - Make-only execution. No environment files, Python, or Kubernetes access.
@@ -14,7 +14,10 @@ Restore real mouse selection in the signal period picker after PR #1084.
 ## Branch Scope Boundaries (MANDATORY)
 - **Allowed Paths (implementation scope)**:
   - `ui/src/lib/components/maps/SignauxRail.svelte`
+  - `ui/src/lib/components/maps/SignauxMapView.svelte`
+  - `ui/src/lib/signals/signal-filter-counts{,.test}.ts`
   - `ui/e2e-qa/signals-period-click.harness.spec.ts`
+  - `ui/e2e-qa/signals-period-perimeter.spec.ts`
   - `ui/e2e-qa/harness/RailFilterHarness.svelte`
   - `plan/PERIODCLICK-BRANCH_fix-signals-period-menu-click.md`
 - **Forbidden Paths (must not change in this branch)**:
@@ -26,6 +29,7 @@ Restore real mouse selection in the signal period picker after PR #1084.
 
 ## Feedback Loop
 - [x] Owner authorizes the correction, real mouse regression test and PR.
+- [x] Owner adds perimeter Pertinence counters to the same PR; reuse the city cubes and relevance dimension.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single dedicated branch; no delegated implementation.
@@ -44,10 +48,12 @@ Restore real mouse selection in the signal period picker after PR #1084.
   - [x] Keep picker bounds stable during interaction.
   - [x] Run typecheck, lint, test-ui and targeted browser regression.
 - [ ] **Lot 2 — Review and delivery**
+  - [ ] Prove no-selection relevance counters fail before correction and pass after.
+  - [ ] Apply period, axes and exclusions independently of the relevance checkboxes.
   - [x] Record root cause and validation evidence.
-  - [ ] Push and open PR against main.
+  - [x] Push and open PR against main (#1090).
   - [ ] Check CI and preserve branch without merging.
-  - [ ] Remove isolated stack and volumes.
+  - [x] Remove isolated stack and volumes (`down -v --remove-orphans`, no remaining project containers).
 
 ## Evidence
 - [x] Chrome 157 CDP at port 9333; real mousePressed/mouseReleased on served preprod and local UI.
@@ -64,3 +70,6 @@ Restore real mouse selection in the signal period picker after PR #1084.
 - [x] Browser command inside isolated container: `SIGNALS_PERIOD_CDP=1 npx playwright test --config period.config.ts`; standalone config serves the harness at port 15938 without launching a browser.
 - [x] Raw evidence preserved under ignored `tmp/period-evidence/`. Standalone Make runner loads no environment files and uses compose `--env-file /dev/null`.
 - [x] Consensus review unavailable: no h2a_run MCP tool or exact author model/effort metadata. Selection failure recorded in `tmp/period-evidence/review.md`; no peer consensus claimed.
+- [x] Concurrent classification-count edits were preserved in the worktree and excluded from both commits and PR.
+- [x] Final regression also passed against a separate `git archive HEAD` snapshot on port 15940; rail SHA-256 matches committed bytes (`b74a8d0acf2ce9a3cc464054676350e60b6cba5c6aa2229523363ac1a757d6f4`).
+- [x] PR #1090 is open and unmerged. Branch policy passed; quality and real-stack CI were still running at delivery.
