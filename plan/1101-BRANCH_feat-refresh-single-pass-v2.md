@@ -17,6 +17,7 @@
 ## Feedback Loop
 - [x] BR1101-EX1: immutable v1 copy requires a single new prompt file over 150 lines. Impact: versioned prompt only. Rollback: remove v2 and restore manifest.
 - [x] Owner decisions dated 2026-11-13 fix the design; implementation needs no new product decision.
+- [x] Review selection-failed: exact author model/effort and h2a_run MCP are unavailable. Local diff inspected; no peer consensus claimed. Local dossier: tmp/review-refresh-v2.md, code target 5823a1b2df84252a81e59a93d28bd90030b86d29. Conductor owns independent review before merge.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch, sequential implementation; no cherry-pick.
@@ -30,5 +31,5 @@
 - [x] Lot 2: Restrict AI schema/validator to registered classes/codes; preserve ambiguity through reannotation contract without running it.
 - [x] Lot 3: Add ambiguity persistence and badge; retain human precedence. No separate annotation history table exists; graph properties retain the flag.
 - [x] Lot 4: Validator, fallback, terminal failure, PostgreSQL persistence and badge tests. Eight API suites: 83 passed, including eight PostgreSQL tests; LOT_MIGRATION_DB_TEST=1 explicitly enabled.
-- [ ] Lot 5: Typecheck, lint, targeted API/PostgreSQL/UI; remove test stack with volumes.
+- [x] Lot 5: Typecheck and lint passed. Eight targeted API suites: 83 passed, including eight PostgreSQL tests. Badge suite: eight passed. Test stack removed with make clean (compose down -v).
 - [ ] Lot 6: Review diff, push and open PR against feat/refresh-single-pass; no merge.
