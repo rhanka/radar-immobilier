@@ -1,0 +1,28 @@
+PLAN UNIQUEMENT. Aucun tag ni workflow lancé par cette cible.
+
+1. Immo : 44 empreintes + hook 6H ouvert, backup final restauré en test.
+2. k8s : verrou orphelin résolu par operator.mk status/resume, hors de cette lane.
+   Installer le câblage prod approuvé : curseur, roster 6H, rôles et références MCP.
+   Préserver les drapeaux artefacts fermés. Ne pas copier l’overlay préprod.
+3. Owner : GO consigné, fenêtre et rollback disponibles. Vérifier v1.2.20 absent.
+4. Owner/CD : créer puis pousser v1.2.20 sur b7724bdd9015a4f26319897bf240baaf9ee636ae.
+   Ne pas taguer la branche de procédure. Ne pas reconstruire les images.
+5. CD existant : build-push-images.yml, promote-prod.
+   Télécharger release.json immuable du build main 43506353942.
+   Vérifier gitSha et API/UI par digest, dataMigration=6h.
+   prepare ENV=prod vérifie la base déjà migrée, puis run ENV=prod.
+   Ces commandes font des écritures cluster et des sauvegardes : exécution future par k8s/CD.
+6. Vérifier images API, UI, MCP (image API), refresh, watchdog et CronJobs présents.
+   Les CronJobs absents ne sont pas créés par le changement d’image.
+7. Porte served-sha : UI b7724bd, API SHA complet. Exiger DB et stockage OK.
+   Smoke technique puis recette authentifiée. Garder les écrivains suspendus tant que NO-GO.
+8. Échec après DDL : routes fermées, immo restaure toute la DB depuis backup final.
+   k8s : Rollback release pour API/UI, digests capturés pour MCP/CronJobs.
+   Le rollback cutover operator.mk peut restaurer tout l’inventaire d’images du run.
+   Aucune de ces voies ne restaure seule les données prod.
+
+ATTENTION : le tag candidat utilise le code b7724bd, pas cette branche.
+La procédure doit être disponible dans un checkout opérateur distinct et revue avant GO.
+Le promote rouvre ses routes et restaure ses suspensions inventoriées.
+k8s doit maintenir une fermeture externe et les suspensions originales de la fenêtre
+jusqu’au GO de recette. Ne pas laisser le tag réarmer les écrivains par surprise.
