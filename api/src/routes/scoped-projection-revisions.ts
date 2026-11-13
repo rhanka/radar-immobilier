@@ -119,6 +119,7 @@ export function scopedProjectionRevisionsRoute(deps: ScopedProjectionRevisionsDe
           selection: await readScopedPersonalHeads(deps.db, session.sub,
             c.req.param("workspaceId"), params.data.citySlug),
           signals: await getSignalNodesForCity(deps.db, params.data.citySlug),
+          feedback: await readClassFeedback(deps.db, session.sub, c.req.param("workspaceId"), params.data.citySlug),
         }));
       const heads = coherent.payload.archive.map((row) => ({
         target: row.target,
@@ -145,6 +146,7 @@ export function scopedProjectionRevisionsRoute(deps: ScopedProjectionRevisionsDe
         id: node.id, type: node.type, citySlug: node.citySlug, label: node.label,
         props: cardView ? cards[index]!.props : node.props, sourceRef: node.sourceRef,
         facetFingerprint: targetFingerprint(node),
+        classFeedback: coherent.payload.feedback.find((row) => row.nodeType === node.type && row.nodeId === node.id),
       }));
       const legacyProjection = scopedLegacyProjection(cards);
       const total = coherent.payload.signals.length;
@@ -199,3 +201,4 @@ export function scopedProjectionRevisionsRoute(deps: ScopedProjectionRevisionsDe
   });
   return app;
 }
+import { readClassFeedback } from "../services/graph/class-feedback-reader.js";
