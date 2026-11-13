@@ -20,7 +20,7 @@ import { eq, or, sql, inArray, notInArray, and, isNotNull } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { graphNodes, graphEdges } from "../../db/schema.js";
 import { QC_MUNICIPALITIES } from "@radar/sources";
-import { classifyBPrime, deriveRegulatoryStatus, isHiddenByVivierBExclusions, matchesDocumentDateWindow, resultCivilDates, type DocumentDateWindow, type RegulatoryStageKindT } from "@radar/domain";
+import { addToVivierFiltreCube, classifyBPrime, countVivierClassifications, deriveRegulatoryStatus, isHiddenByVivierBExclusions, matchesDocumentDateWindow, resultCivilDates, type DocumentDateWindow, type RegulatoryStageKindT, type VivierFiltreCube, type VivierV2 } from "@radar/domain";
 import {
   computeLegacySubsetCounts,
   computeVivierV2,
@@ -2251,6 +2251,14 @@ export interface CitySignalCounts {
   signalCount: number;
   subsetCounts: Record<SubsetKey, number>;
   vivierV2Counts: ReturnType<typeof computeVivierV2>["counts"];
+  /**
+   * B Filtre cube (`@radar/domain` filtre-cube): count per combination of the
+   * Zonage / Résidentiel / Précoce axes and the PIIA / dérogation exclusions,
+   * over the date-scoped, non-discarded B universe. It never depends on the
+   * `excludePiia` / `excludeDerogations` query flags, so the client can derive
+   * the Filtre dropdown counts for any Filtre state.
+   */
+  filtreCube: VivierFiltreCube;
 }
 
 /** Aggregate one projection in both rails. Pure so A/B parity is testable. */
@@ -2267,7 +2275,8 @@ export function aggregateGraphSignalProjectionRows(
   const byCity = new Map<string, {
     signalCount: number;
     subsetCounts: Record<SubsetKey, number>;
-    signals: VivierSignalInput[];
+    classifications: VivierV2[];
+    filtreCube: VivierFiltreCube;
     legacySignals: VivierSignalInput[];
     bPrimeEligibleSignals: VivierSignalInput[];
   }>();
@@ -2275,13 +2284,17 @@ export function aggregateGraphSignalProjectionRows(
   for (const row of rows) {
     if (!row.citySlug) continue;
     if (!matchesDocumentDateWindow(row.props, dateRange)) continue;
+    // One vivier_v2 classification per row, shared by the B display
+    // exclusions, the Filtre cube and the vivier counts (what computeVivierV2
+    // would recompute from the same row).
+    const classification = classifyGraphNodeVivierV2({ ...row, category: row.category ?? null,
+      description: row.description ?? null, etapeAnnote: row.etapeAnnote ?? null });
+    const displayNode = { label: row.label, description: row.description ?? null,
+      props: (row.props ?? {}) as Record<string, unknown>, classification };
     // B display exclusions only gate the B (vivier_v2) path, exactly like the
     // client detail; legacy A counts keep the full date-scoped projection.
     const hiddenInB = (dateRange?.excludePiia || dateRange?.excludeDerogations)
-      ? isHiddenByVivierBExclusions({ label: row.label, description: row.description ?? null,
-        props: (row.props ?? {}) as Record<string, unknown>,
-        classification: classifyGraphNodeVivierV2({ ...row, category: row.category ?? null,
-          description: row.description ?? null, etapeAnnote: row.etapeAnnote ?? null }) }, {
+      ? isHiddenByVivierBExclusions(displayNode, {
         piiaSansProjetResidentiel: dateRange.excludePiia === true,
         derogationsMineures: dateRange.excludeDerogations === true,
       })
@@ -2290,7 +2303,8 @@ export function aggregateGraphSignalProjectionRows(
       byCity.set(row.citySlug, {
         signalCount: 0,
         subsetCounts: emptySubsetCounts(),
-        signals: [],
+        classifications: [],
+        filtreCube: {},
         legacySignals: [],
         bPrimeEligibleSignals: [],
       });
@@ -2309,7 +2323,8 @@ export function aggregateGraphSignalProjectionRows(
       props: row.props,
       sourceRef: row.sourceRef,
     };
-    if (!hiddenInB) entry.signals.push(signal);
+    if (!hiddenInB) entry.classifications.push(classification);
+    addToVivierFiltreCube(entry.filtreCube, displayNode);
 
     // Legacy A (z|m|p) is derived from the full projection. B′ only gates
     // the new residential axis `r`; it must not rewrite legacy membership.
@@ -2350,12 +2365,12 @@ export function aggregateGraphSignalProjectionRows(
       }
     }
 
-    const v2 = computeVivierV2(data.signals);
     return {
       citySlug,
       signalCount: data.signalCount,
       subsetCounts: data.subsetCounts,
-      vivierV2Counts: v2.counts,
+      vivierV2Counts: countVivierClassifications(data.classifications),
+      filtreCube: data.filtreCube,
     };
   });
 }
