@@ -145,7 +145,7 @@
 
   /** Classement filter (spec 2026-11-08): checked by default except Écarté. */
   export let classementFilter: ClassementFilter = { ...DEFAULT_CLASSEMENT_FILTER };
-  export let classementCounts: Record<SignalClass, number> = {
+  export let classementCounts: Record<SignalClass, number> | null = {
     pertinent: 0, a_surveiller: 0, non_classe: 0, ecarte: 0,
   };
   export let onClassementFilterChange: (next: ClassementFilter) => void = () => {};
@@ -477,9 +477,11 @@
                   onchange={(event) => toggleClassement(classe, event.currentTarget.checked)}
                 />
               </span>
+              {#if classementCounts !== null}
               <span>
                 <Badge tone={classementCounts[classe] > 0 ? "warning" : "neutral"} aria-label="{classementCounts[classe]} signaux">{classementCounts[classe]}</Badge>
               </span>
+              {/if}
             </div>
           {/each}
         </div>
