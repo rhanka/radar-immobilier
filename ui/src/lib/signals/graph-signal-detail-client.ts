@@ -514,6 +514,8 @@ export function extractSignalEvidence(node: GraphSignalNode): SignalEvidence {
 }
 
 export interface GraphSignalNode {
+  signalAnnotations?: import("./signal-mcp-client.js").SignalAnnotations;
+  annotationsWorkspaceId?: string;
   classFeedback?: { verdict: "up" | "down"; createdAt: string; reason: string; eventId: string };
   classAnnotation?: {
     source: "ai" | "manual";
