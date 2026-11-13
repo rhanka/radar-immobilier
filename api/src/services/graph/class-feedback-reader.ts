@@ -9,8 +9,9 @@ export async function readClassFeedback(db: Database, sub: string, workspaceId: 
   const result = await db.execute(sql`SELECT f.id,f.node_type AS "nodeType",f.node_id AS "nodeId",
     f.city_slug AS "citySlug", f.verdict,f.human_class AS "humanClass",f.reason,f.reason_code AS "reasonCode",
     f.created_at::text AS "createdAt",f.model,f.prompt_sha256 AS "promptSha256",
-    f.judged_class AS "judgedClass",f.event_id AS "eventId"
-    FROM signal_class_feedback f
+    f.judged_class AS "judgedClass",f.event_id AS "eventId",f.source,f.pipeline_run_id AS "pipelineRunId",
+    f.annotation_id AS "annotationId",h.effort,h.prompt_id AS "promptId"
+    FROM signal_class_feedback f JOIN signal_class_annotation_history h ON h.id=f.annotation_id
     WHERE f.workspace_id=${workspaceId} AND (f.scope='workspace' OR f.actor_id=${actor})
       ${citySlug ? sql`AND f.city_slug=${citySlug}` : sql``}
     ORDER BY f.created_at DESC,f.id DESC`);
