@@ -35,5 +35,6 @@
 - [ ] Lot 4: test mode compatibility, byte-identical detection, new/changed acts, provenance, manual precedence, bounded work and failures.
   - [x] Configuration and shared service tests added; PostgreSQL pipeline fixture prepared.
   - [x] Full pipeline PostgreSQL tests added: byte parity, classification failures, manual thumbs-up, changed input, projection resume.
+  - [x] Selection, evidence-read and cancellation isolation tested without changing detection state.
 - [ ] Lot 5: typecheck, lint, targeted test-api including PostgreSQL, test-refresh-renders; down -v.
 - [ ] Lot 6: inspect final diff, push, PR against feat/refresh-single-pass-v2; report PR, files, tests and activation commands; no merge.
