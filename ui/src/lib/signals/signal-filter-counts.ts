@@ -6,7 +6,8 @@
  *
  * Source = the Filtre cube (`@radar/domain` filtre-cube):
  *  - every city: the cubes served by the by-city aggregate (period, archive
- *    visibility), merged only for the checked Pertinence classes;
+ *    visibility), merged only for the checked visible Pertinence classes;
+ *    archives remain absent from the list even when Écarté is checked;
  *  - the selected city, once its detail is loaded: the cube rebuilt from that
  *    detail scoped by period + Pertinence, exactly like the header swaps in
  *    the selected city's live count.
@@ -78,7 +79,7 @@ export function classementCountsForPerimeter(input: Omit<FiltrePerimeterInput, "
 export function filtreCountsForPerimeter(input: FiltrePerimeterInput): FiltreCounts | null {
   const cubes: VivierFiltreCube[] = [];
   const filter = input.classement ?? DEFAULT_CLASSEMENT_FILTER;
-  if (!SIGNAL_CLASSES.some((classe) => filter[classe])) {
+  if (!SIGNAL_CLASSES.some((classe) => classe !== "ecarte" && filter[classe])) {
     return facetedVivierFiltreCounts({}, input.axes, input.exclusions);
   }
   for (const entry of input.entries) {
@@ -87,7 +88,8 @@ export function filtreCountsForPerimeter(input: FiltrePerimeterInput): FiltreCou
     const cube = entry.filtreCube ?? null;
     if (entry.vivierV2Counts === null && cube === null) continue;
     if (entry.filtreCubesByClassement) {
-      cubes.push(...SIGNAL_CLASSES.filter((classe) => filter[classe])
+      // Class cubes include archives for Pertinence; coherent-city/list omit them.
+      cubes.push(...SIGNAL_CLASSES.filter((classe) => classe !== "ecarte" && filter[classe])
         .map((classe) => entry.filtreCubesByClassement![classe]));
     } else {
       // Older API: its visible cube is exact only with every visible class on.
