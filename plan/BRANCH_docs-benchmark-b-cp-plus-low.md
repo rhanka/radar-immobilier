@@ -26,3 +26,5 @@
 - [x] Lot 2 — Add the measured row, regenerate v12 Markdown/HTML/PDF, four SVGs and SHA256SUMS. Verify 42 historical rows byte for byte, all Astra/xhigh input hashes, zero chart-label overlaps, syntax and diff checks. Focus untouched.
 - [x] Lot 3 — Commit selectively, push, open PR #1086 to main. No merge. PR #1085 remains open; rebase onto main after its integration.
 - [x] Lot 4 — Rebase onto the PR #1085 lint fix; retain script globals, refresh the low runner checksum, and verify lint and all artifact hashes without model calls.
+- [x] Lot 5 — Fix the review blocker: pass effort and quota threshold through cp-plus.mk, select the audit arm, document low reproduction and receipt quota metadata, recalculate both arms offline, and refresh hashes. No model call or upstream branch change.
+- [x] Lot 5 validation — make -n selects low/100/eight and default xhigh/85/four. Both audit/score runs pass with --network none. Low P/R/F1 0.463/0.496/0.479; xhigh 0.467/0.494/0.480. Only receipt quota metadata (84/85) is added to the xhigh score JSON; arm data and low/Astra score files are unchanged.

@@ -173,6 +173,23 @@ make -f tools/bench-v11/cp-plus.mk pdf ENV=test-benchmark-b
 make -f tools/bench-v11/cp-plus.mk checksums ENV=test-benchmark-b
 ```
 
+CP+ low reuses the existing Astra replay. Its separate arm is
+`full/arms/cp-plus-muse13-low`; xhigh remains the default arm, with a quota
+stop threshold of 85% and concurrency four. To reproduce low (this runs
+the reviewer for any missing decisions):
+
+```bash
+make -f tools/bench-v11/cp-plus.mk filter audit score MUSE_EFFORT=low STOP_WEEKLY_PCT=100 CONCURRENCY=8 ENV=test-benchmark-b-low
+```
+
+`STOP_WEEKLY_PCT=100` disables the quota guard, even if the counter is
+unavailable. To recalculate from captured data without a model call, run
+only `audit score`, with `MUSE_EFFORT=low` or `MUSE_EFFORT=xhigh`.
+The score summary fields `firstReceiptWeekly` and `lastReceiptWeekly`
+record the weekly quota percentage from the first and last valid review
+receipts in log order. An unavailable value is `null`. These fields are
+metadata and do not affect precision, recall, or F1.
+
 Muse est lu avant chaque document et toutes les 10 minutes. À 85 %, le
 runner coupe aussi ses appels en cours. Un quota illisible arrête le bras.
 Le quota ne devient jamais un refus. Pour la mesure CP+ du 13 novembre,
