@@ -10,6 +10,7 @@ case "$mode" in
     npm run test --workspace=packages/immo-mcp -- ${scope:-src/signal-tools.test.ts}
     npm run test --workspace=api -- tests/integration/signal-mcp-client.spec.ts ;;
   test-ui) npm run test --workspace=ui -- ${scope:-src/lib/components/maps/SignalMcpNotes.test.ts} ;;
+  test-ui-e2e) bash tools/make/mcp-signal-write-browser.sh ;;
   verify)
     for gate in typecheck lint test-api test-mcp test-ui; do bash "$0" "$gate"; done ;;
   *) echo "Unknown gate: $mode"; exit 2 ;;
