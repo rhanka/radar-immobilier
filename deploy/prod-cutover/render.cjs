@@ -1,4 +1,4 @@
-/* global require, module, process */
+/* global require, module */
 /* eslint-disable @typescript-eslint/no-require-imports */
 const r = require('./runtime.cjs');
 const settings = require('./prod-settings.json');
