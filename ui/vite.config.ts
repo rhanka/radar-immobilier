@@ -1,6 +1,7 @@
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vite";
+import { lucideDeepImports } from "./vite-plugins/lucide-deep-imports";
 
 const base = process.env.GITHUB_PAGES === "true" ? "/radar-immobilier/" : "/";
 const apiProxyTarget = process.env.API_PROXY_TARGET ?? "http://localhost:3000";
@@ -74,7 +75,9 @@ export default defineConfig({
   base,
   ...(artifactBasemapDefault
     ? { define: { "import.meta.env.VITE_BASEMAP_TILE_URL": JSON.stringify(artifactBasemapDefault) } } : {}),
-  plugins: [svelte()],
+  // Build only: per-icon @lucide/svelte imports (app + design system) keep the
+  // ~7 000-module icon barrel out of the module graph.
+  plugins: [svelte(), lucideDeepImports()],
   resolve: {
     conditions: ["browser", "svelte", "module", "import", "default"],
     alias: [
