@@ -2,6 +2,8 @@
 // Refuse incomplete campaigns: quota or infrastructure gaps are never refusals.
 import { readFile, writeFile, readdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
+import { createHash } from "node:crypto";
+const sha = (text) => createHash("sha256").update(text).digest("hex");
 const DIR = process.env.BENCH_DIR ?? new URL("..", import.meta.url).pathname.replace(/\/$/, "");
 const { scoreSource } = await import(`${DIR}/full/score-676.mjs`);
 const manifest = JSON.parse(await readFile(`${DIR}/harness/manifest-v101b.json`, "utf8"));
@@ -24,6 +26,13 @@ const astraUsage = [];
 const accepted = new Set();
 const failureClasses = {};
 for (const { id } of documents) {
+  const user = await readFile(`${DIR}/full/prompts/${id}.user.txt`, "utf8");
+  const boundary = user.indexOf("\n\n");
+  const frozen = manifest.promptFreeze.documents.find((document) => document.id === id);
+  const recorded = completed.find((row) => row.doc === id);
+  if (sha(user.slice(8, boundary)) !== frozen.schemaSha256 || sha(user.slice(boundary + 2)) !== frozen.promptSha256
+    || recorded.userSha256 !== sha(user) || recorded.promptSha256 !== sha(`${manifest.promptFreeze.systemPrompt}\n\n${user}`)
+    || recorded.modelId !== "gpt-6-astra") throw new Error(`Frozen prompt or model drift: ${id}`);
   if (!existsSync(`${astraDir}/usage/medium--${id}.json`)) throw new Error(`Incomplete Astra transport: ${id}`);
   const receipt = await json(`${astraDir}/validated/medium--${id}.receipt.json`);
   if (receipt.validation.accepted) accepted.add(id);
@@ -56,7 +65,12 @@ const decisions = [];
 for (const id of accepted) {
   if (!existsSync(`${cpDir}/decisions/${id}.json`)) throw new Error(`Incomplete CP+ review: ${id}`);
   if (!existsSync(`${cpDir}/validated/xhigh--${id}.output.json`)) throw new Error(`Missing filtered output: ${id}`);
-  decisions.push(await json(`${cpDir}/decisions/${id}.json`));
+  const decision = await json(`${cpDir}/decisions/${id}.json`);
+  const output = await json(`${astraDir}/validated/medium--${id}.output.json`);
+  if (decision.sourceOutputSha256 !== sha(JSON.stringify(output))
+    || decision.promptSha256 !== "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68")
+    throw new Error(`Cascade source or filter drift: ${id}`);
+  decisions.push(decision);
 }
 const usages = [];
 const usageDir = existsSync(`${cpDir}/usage/attempts`) ? `${cpDir}/usage/attempts` : `${cpDir}/usage`;
@@ -68,6 +82,11 @@ for (const file of (await readdir(usageDir)).filter((name) => name.endsWith(".js
 }
 const summary = await json(`${cpDir}/_summary.json`);
 if (summary.stopped || summary.failed) throw new Error("CP+ stopped or failed; do not publish a complete score");
+const cpMeta = await jsonl(`${cpDir}/meta.jsonl`);
+const firstStart = cpMeta.find((row) => row.event === "START");
+summary.weeklyBefore = firstStart?.weeklyUsedPercent ?? summary.weeklyBefore;
+summary.startedAt = firstStart?.at ?? null;
+summary.quotaEvents = cpMeta.filter((row) => row.event === "QUOTA").length;
 const cp = await scoreSource("CP+ (GPT-6 Astra medium → Muse Spark 1.3 xhigh)", "precision-cascade", resolve(cpDir, "xhigh"));
 // Primary Meta page https://dev.meta.ai/models/muse-spark/, read 2026-11-13.
 // A uses reported output; B adds reasoning separately. Real usage includes CLI context.
