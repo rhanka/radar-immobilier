@@ -40,6 +40,7 @@
 - [x] Correction : citations normalisées, page physique ancrée, ambiguïté séparée et affectations forcées seules.
 - [x] Recalcul hors ligne : état initial archivé, détails aveugles scellés, nouveaux désaccords et réutilisation D3 par empreinte du prompt.
 - [x] Reprise ciblée : dispatcher dédié, prompts identiques, journal durable, concurrence totale 10 et quota Codex à 90 %.
+- [x] Tests : exemples de l’analyse, seuil de recouvrement, folios, ambiguïté, numéros, états absents et unicité globale des groupes de rappel.
 - [ ] Recalcul avant/après, reprise ciblée des interruptions, rapport et PR draft. D3 suspendu par i-cond à 17 h 57.
 - [x] Étape 0 : pré-enregistrement, graine, 100 PV, 50/50, pack et manifestes livrés.
 - [x] Étape 0bis : plan sédimenté, décisions et surface CLI gelées avant appel.

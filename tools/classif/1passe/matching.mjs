@@ -56,7 +56,8 @@ function compatible(b, a, text) {
   return exact;
 }
 export function matchActs(units, acts, text) {
-  const edges = units.map((b) => acts.flatMap((a, i) => compatible(b, a, text) ? [i] : []));
+  const candidate = (b, g) => (g.variants ?? [g]).find((a) => (b.variants ?? [b]).some((u) => compatible(u, a, text)));
+  const edges = units.map((b) => acts.flatMap((a, i) => candidate(b, a) ? [i] : []));
   function assignment(excludedU = -1, excludedA = -1) {
     const owner = new Map();
     function augment(u, seen) {
@@ -71,7 +72,7 @@ export function matchActs(units, acts, text) {
     return owner;
   }
   const owner = assignment(), result = new Map();
-  for (const [a, u] of owner) if (assignment(u, a).size < owner.size) result.set(units[u].id, acts[a]);
+  for (const [a, u] of owner) if (assignment(u, a).size < owner.size) result.set(units[u].id, candidate(units[u], acts[a]));
   result.collisions = units.flatMap((b, u) => edges[u].length && !result.has(b.id) ? [{ id: b.id, candidates: edges[u] }] : []);
   return result;
 }
