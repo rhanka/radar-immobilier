@@ -4,11 +4,13 @@ import { fileURLToPath } from "node:url";
 import { loadOntologyProfile, registryRecordsToExtraction,
   type TextJsonGenerationClient } from "@sentropic/engram";
 import { expect, it } from "vitest";
+import { sql } from "drizzle-orm";
 import { database, describeDb } from "../facets/scope-db-fixture.js";
 import { readClassAnnotations, writeClassAnnotation, type AiClassAnnotation } from "./class-annotations.js";
 import { extractRefreshProfile } from "./refresh-profile.js";
 import { attachSinglePassAnnotations, loadSinglePassPrompt } from "./refresh-single-pass.js";
 import { extractionToV23Graph } from "./refresh-v23.js";
+import { upsertGraphAtomic } from "./graph-store.js";
 import type { RefreshCorpusChunk } from "./refresh-corpus.js";
 
 describeDb("single-pass extraction to PostgreSQL annotation", () => {
@@ -49,6 +51,9 @@ describeDb("single-pass extraction to PostgreSQL annotation", () => {
         pages: [{ page: oracle.page, text: oracle.excerpt }], chunks: [chunk] }] });
     const node = graph.nodes[0]!;
     if (!node.type) throw new Error("Expected a typed extracted node");
+    expect((await upsertGraphAtomic(db, "synthetic-city", graph)).aborted).toBe(false);
+    expect((await db.execute(sql`SELECT id FROM graph_nodes WHERE city_slug='synthetic-city'`)).rows)
+      .toEqual([{ id: "signal-extracted" }]);
     const annotation = node.properties!["classAnnotation"] as AiClassAnnotation;
     expect(await writeClassAnnotation(db, { ...annotation, citySlug: "synthetic-city",
       nodeType: node.type, nodeId: node.id })).toBe("written");
