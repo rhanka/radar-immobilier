@@ -107,7 +107,7 @@ export function compileComposition(
   const immoTools = providers.find((p) => p.id === IMMO_PROVIDER_ID)?.tools.map((t) => t.name) ?? [];
   const locked = new Set<string>(IMMO_TOOL_NAMES as readonly string[]);
   if (immoTools.length !== locked.size || immoTools.some((name) => !locked.has(name))) {
-    throw new RegistryError("immutable_toolset", "Immo provider must expose exactly the twelve locked tools");
+    throw new RegistryError("immutable_toolset", "Immo provider must expose exactly the declared tools");
   }
   if (hasArtifactProvider && !options?.artifact) {
     throw new RegistryError("unavailable_capability", "artifact provider requires a validated selection");
