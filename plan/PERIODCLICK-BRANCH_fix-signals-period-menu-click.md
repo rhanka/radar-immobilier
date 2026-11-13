@@ -7,7 +7,8 @@ Restore real mouse selection in the signal period picker after PR #1084. Count P
 - Make-only execution. No environment files, Python, or Kubernetes access.
 - Dedicated worktree `tmp/period-click`, based on `origin/main`.
 - CDP only at `127.0.0.1:9333`; fresh tabs closed after each run.
-- Isolated `ENV=test-period-click`, UI port 15938, API 18938, Maildev 11938.
+- Isolated period harness `ENV=test-period-click`, UI port 15938, API 18938, Maildev 11938.
+- Full-view facet campaign: `ENV=test-period-perimeter`, UI port 5399, no API/database/mail services. CDP is unchanged.
 - Synthetic UI harness; no backend or data mutation. Always tear down with `down -v`.
 - No merge. No generated commit or PR trailers.
 
@@ -49,7 +50,7 @@ Restore real mouse selection in the signal period picker after PR #1084. Count P
   - [x] Run typecheck, lint, test-ui and targeted browser regression.
 - [ ] **Lot 2 — Review and delivery**
   - [x] Prove no-selection relevance counters fail before correction and pass after.
-  - [ ] Apply period, axes and exclusions independently of the relevance checkboxes.
+  - [x] Apply period, axes and exclusions independently of the relevance checkboxes.
   - [x] Record root cause and validation evidence.
   - [x] Push and open PR against main (#1090).
   - [ ] Check CI and preserve branch without merging.
@@ -72,6 +73,9 @@ Restore real mouse selection in the signal period picker after PR #1084. Count P
 - [x] Consensus review unavailable: no h2a_run MCP tool or exact author model/effort metadata. Selection failure recorded in `tmp/period-evidence/review.md`; no peer consensus claimed.
 - [x] Whole-app browser regression on the old rail/view: period stays unchanged; Pertinent is 0 instead of 2 without selection. Both assertions fail within 1800 ms (`tmp/runtime/red-both-e2e.log`).
 - [x] Same regression with corrections: all six presets pass; relevance counts cover both cities, ignore their own checkboxes, follow the Precoce axis and refetch on an unbounded period (`tmp/runtime/final-e2e.log`, 2 passed).
+- [x] Relevance root cause: `SignauxMapView.svelte` counted only selected-city `filteredDetailNodes`. With no selection the input was empty. Replaced by all-city class cubes; loaded detail replaces only its own city's bulk cube. Missing dimensions mask pills instead of fabricating zeroes.
+- [x] Final sources: `make -f tmp/perimeter.mk typecheck ENV=test-period-perimeter` passed (8 warnings); `lint` passed (1 warning); `test-ui` passed (145 files, 1893 tests, 10 todo).
+- [x] Final identical full-view browser test against origin/main rail/view: two expected assertion failures (`tmp/runtime/final-red-e2e.log`). Published DS 0.37.2 restored before verification.
 - [x] Concurrent classification-count edits were preserved in the worktree and excluded from both commits and PR.
 - [x] Final regression also passed against a separate `git archive HEAD` snapshot on port 15940; rail SHA-256 matches committed bytes (`b74a8d0acf2ce9a3cc464054676350e60b6cba5c6aa2229523363ac1a757d6f4`).
 - [x] PR #1090 is open and unmerged. Branch policy passed; quality and real-stack CI were still running at delivery.
