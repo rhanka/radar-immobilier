@@ -48,7 +48,8 @@ lines.push('', 'Le témoin historique reproduit 336/676. Les critères des deux 
   '## Identité du prompt et surface', '',
   `Code importé depuis le worktree de la PR #1099. Contenu vérifié contre le commit ${ref}.`,
   '`extractRefreshProfile` compose P0, le prompt de détection B et `singlePassSchema(schemaFor(...))`.',
-  'Le prompt n’est ni copié dans cette lane ni modifié. Le découpeur de production est exposé par un ajout d’export privé.',
+  'Aucun fichier de prompt n’est recopié dans le code de la lane. Les entrées exactes sont conservées en privé. Le prompt reste inchangé.',
+  'Le découpeur de production est exposé par un ajout d’export privé.',
   'Les textes PDF sont vérifiés contre v101b. La date utilise l’extracteur natif d’en-tête ; aucun sidecar distant n’est fourni.',
   `Prompt P0/PR #1099 : ${r.freeze.productionPromptSha256}.`,
   `Morceau témoin : ${r.freeze.example.chunkId} (${r.freeze.example.document}).`,
@@ -91,7 +92,8 @@ lines.push('', `Durée : ${r.run.durationSeconds.toFixed(3)} s, soit ${(r.run.du
   'Aucun acte aveugle n’est publié. Aucun résultat n’est renvoyé à un optimiseur.', '',
   '## Vérifications et livraison', '',
   `100 requêtes vérifiées par empreinte ; 50 réponses aveugles REFC1 ; ${verification.sealedResidues} résidus du siège archivés sous sceau puis retirés en clair.`,
-  'Contrôles : syntaxe, sources importées, supports, arithmétique des métriques, ordre P∪S ≤ visible ≤ détection et absence de labels aveugles dans Git.',
+  'Contrôles : syntaxe, quatre tests de l’apparieur, sources importées, supports, arithmétique des métriques, ordre P∪S ≤ visible ≤ détection et absence de labels aveugles dans Git.',
+  'Revue multi-pairs indisponible : métadonnées exactes de l’auteur non attestées et aucun outil h2a exposé. Aucun consensus de revue revendiqué.',
   'Aucun .env lu. Aucune écriture dans les données B+C ou la lane voisine. Aucun appel Python.',
   'Livraison en PR draft. Aucune fusion.', '');
 write(`${dir}/REPORT.md`, lines.join('\n'));
