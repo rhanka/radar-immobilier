@@ -73,7 +73,7 @@ assert.equal(annotation.callsCap + annotation.arbitration.callsCap + singlepass.
 const files = ['PREREG.md', 'seed.json', 'split.json', 'routes.json', 'annotation.json', 'singlepass.json',
   'annotation-prompt.md', 'arbitration-prompt.md', 'singlepass-prompt.md',
   'README.md', 'prepare.mjs', 'check.mjs', 'step0.mk', 'ops.mk', 'quota.mjs', 'inspect.mjs', 'context.mjs', 'annotate.mjs',
-  'matching.mjs', 'matching.test.mjs', 'reconcile.mjs', 'arbitrate.mjs', 'finalize.mjs', 'custody.mjs', 'claude-quota.mjs'];
+  'matching.mjs', 'matching.test.mjs', 'reconcile.mjs', 'arbitrate.mjs', 'finalize.mjs', 'custody.mjs', 'claude-quota.mjs', 'verify.mjs'];
 const hashes = Object.fromEntries(files.map((f) => [f, sha256(readFileSync(`${dir}/${f}`))]));
 if (process.argv.includes('--freeze')) {
   const journal = '/private/annotation/calls.jsonl';
