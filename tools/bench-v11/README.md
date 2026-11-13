@@ -103,7 +103,13 @@ bras complet (jetons réels par document ; texte terminal extrait vers `raw/`).
 `${TMPDIR:-/tmp}/muse-ember-run`, hors de tout dépôt). Garde hebdomadaire :
 le runner lit `muse usage --json` avant chaque document et s'arrête à
 `STOP_WEEKLY_PCT` (défaut 85) ; le chien de garde relit toutes les 10 minutes
-et coupe les processus du runner au même seuil.
+et coupe les processus du runner au même seuil : il ne tue que l'arbre de
+processus du groupe du runner (y compris les enfants `timeout`, qui ont leur
+propre groupe), jamais d'autre session `muse`. Depuis le 2026-11-13, après les
+passages publiés, le runner refuse aussi un `MUSE_CWD` non vide. Surface
+d'accès : aucun outil n'est restreint (voir dossier v12 §2) ; un outil `bash`
+de la CLI écrit dans `/tmp` de l'hôte, d'où un risque de collision entre
+documents concurrents.
 
 ```bash
 bash tools/bench-v11/full/run-arm-ember.sh xhigh 4     # -> full/arms/muse-ember-xhigh/{raw,jsonl,usage}/
@@ -132,6 +138,11 @@ node tools/bench-v11/full/score-argon.mjs    # -> full/scores-argon.json
 node tools/bench-v11/full/score-wonder.mjs   # -> full/scores-wonder.json
 node tools/bench-v11/full/score-ember.mjs xhigh   # -> full/scores-ember-xhigh.json (jetons réels inclus)
 node tools/bench-v11/full/score-ember.mjs max     # -> full/scores-ember-max.json
+# Surface d'accès de la CLI Muse (appels d'outil, tours, skills), sans appel modèle :
+node tools/bench-v11/full/audit-muse-surface.mjs tools/bench-v11/full/arms/muse-ember-xhigh   # -> <armDir>/surface.json
+node tools/bench-v11/full/audit-muse-surface.mjs tools/bench-v11/full/arms/muse-ember-max
+# Sensibilité (score publié inchangé) : documents avec appel d'outil comptés refusés
+node tools/bench-v11/full/score-ember-sensitivity.mjs xhigh sacre-coeur-2026-05-11   # -> full/scores-ember-xhigh-sensitivity.json
 ```
 
 ### 6. Burns (échantillon fixe de 10 documents, capture d'usage)
