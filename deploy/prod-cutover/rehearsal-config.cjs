@@ -30,10 +30,15 @@ function compose(privateDir, auth) {
     networks: ['copy-only'], volumes: [mount('ca.crt')], read_only: true, tmpfs: ['/tmp'],
     cap_drop: ['ALL'], security_opt: ['no-new-privileges:true'] });
   const databaseUrl = (role, password) => `postgresql://${role}:${password}@postgres:5432/${common.POSTGRES_DB}`;
+  const health = (port, route) => ({ test: ['CMD', 'node', '-e',
+    `fetch('http://127.0.0.1:${port}${route}').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))`],
+  interval: '1s', timeout: '3s', retries: 30 });
   return { services: {
-    api: { ...app(['node', 'api/dist/index.js'], common), networks: { 'copy-only': { aliases: ['radar-api'] } },
-      ports: ['127.0.0.1:18821:3000'] },
-    mcp: app(['node', 'packages/immo-mcp/dist/server-http.js'], { ...common, ...settings.mcp,
+    api: { ...app(['node', 'api/dist/index.js'], common),
+      volumes: [mount('ca.crt'), `${r.ROOT}/deploy/prod-cutover:/run-controller:ro`],
+      networks: { 'copy-only': { aliases: ['radar-api'] } },
+      ports: ['127.0.0.1:18821:3000'], healthcheck: health(3000, '/livez') },
+    mcp: { ...app(['node', 'packages/immo-mcp/dist/server-http.js'], { ...common, ...settings.mcp,
       IMMO_MCP_OAUTH_ISSUER: `${base}/oidc`, IMMO_MCP_OAUTH_RESOURCE: `${base}/mcp`,
       IMMO_MCP_API_AUDIENCE: base, IMMO_MCP_EXCHANGE_TOKEN_ENDPOINT: `${base}/oidc/token`,
       IMMO_MCP_EXCHANGE_ENV: 'preprod', RADAR_API_BASE_URL: 'http://api:3000', RADAR_PUBLIC_BASE_URL: base,
@@ -42,7 +47,8 @@ function compose(privateDir, auth) {
       IMMO_MCP_ARTIFACT_DATABASE_URL: databaseUrl('immo_mcp_artifact_writer', auth.artifact),
       IMMO_MCP_DATABASE_NAME: common.POSTGRES_DB, IMMO_MCP_WORKLOAD_CLIENT_ID: 'immo-mcp-workload',
       IMMO_MCP_WORKLOAD_SUB: 'immo-mcp-workload', IMMO_MCP_WORKLOAD_CLIENT_SECRET: auth.workload }),
-    idp: { ...app(['node', '/run-idp.cjs'], {}), volumes: [mount('auth.json'), mount('roster.json'),
+    healthcheck: health(8848, '/mcp/.well-known/oauth-protected-resource') },
+    idp: { ...app(['node', '/run-idp.cjs'], {}), healthcheck: health(8080, '/.well-known/openid-configuration'), volumes: [mount('auth.json'), mount('roster.json'),
       mount('idp.key'), mount('idp.pub'), `${r.ROOT}/deploy/prod-cutover/rehearsal-idp.cjs:/run-idp.cjs:ro`] },
     ui: { image: release.uiImage, pull_policy: 'never', networks: { 'copy-only': { aliases: ['recette.localhost', 'minio.localhost'] } },
       ports: ['127.0.0.1:15321:15321', '127.0.0.1:15400:15400', '127.0.0.1:443:443'],

@@ -41,7 +41,7 @@ down:
 	@test "$(ENV)" = test-prod-cutover
 	@CUTOVER_TEST_OUTPUT=/tmp docker compose --env-file /dev/null -p radar-test-prod-cutover -f "$(ROOT)/deploy/prod-cutover/test.compose.yml" down -v --remove-orphans
 check:
-	@cd "$(ROOT)" && bash -n deploy/prod-cutover/inspect.sh deploy/prod-cutover/integration.sh deploy/prod-cutover/lint.sh deploy/prod-cutover/window.sh deploy/cutover/atomic-restore.sh
+	@cd "$(ROOT)" && bash -n deploy/prod-cutover/*.sh deploy/cutover/atomic-restore.sh
 	@cd "$(ROOT)" && for file in deploy/prod-cutover/*.cjs; do node --check "$$file"; done
 	@git -C "$(ROOT)" diff --check
 	@git -C "$(ROOT)" status --short --branch
