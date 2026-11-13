@@ -1,39 +1,43 @@
-# Immediate single-pass recall against B
+# Rappel immédiat de la passe unique contre B
 
 ## Objective
-- [ ] Measure detection, visible and P∪S recall against the corrected 676-act B oracle.
-- [x] Owner decision, 13 November: production single pass = GPT-6 Astra low + P0 extended to extraction.
+- [x] Mesurer les rappels de détection, visible et P∪S sur les 676 actes B corrigés.
+- [x] Décision owner du 13 novembre : passe unique en production = GPT-6 Astra low + P0 étendu à l’extraction.
 
 ## Scope / Guardrails
-- [x] Dedicated branch feat/classif-1passe-recall, based on feat/classif-1passe-bc; direction i-cond.
-- [x] No .env, Python, trailers or merge. No services, ports or UAT.
-- [x] Other lane worktree untouched. Private 1passe-bc strictly read-only.
-- [x] Private writes only under 1passe-recall. Blind results REFC1; aggregates only.
-- [x] 100 full PV, concurrency 10, one Astra low call per PV. No invalid-response retries.
-- [x] Weekly Codex quota before, every 10 minutes, after. Stop new launches at 90%.
-- [x] This owner-authorized immediate B measurement is separate from D3 and final C qualification.
+- [x] Branche dédiée feat/classif-1passe-recall, issue de feat/classif-1passe-bc ; direction i-cond.
+- [x] Aucun .env, Python, trailer ou fusion. Aucun service, port ou UAT.
+- [x] Autre worktree intact. Dossier privé 1passe-bc en lecture seule.
+- [x] Sorties privées sous 1passe-recall. Aveugle REFC1 ; agrégats seuls publiés.
+- [x] 100 PV entiers, concurrence 10, un appel Astra low par PV. Aucun rejeu.
+- [x] Quota Codex avant, toutes les dix minutes, après. Arrêt des départs à 90 %.
+- [x] Mesure immédiate autorisée, indépendante de D3 et de la qualification C finale.
 
 ## Branch Scope Boundaries (MANDATORY)
-- [x] Allowed Paths: tools/classif/1passe/recall/**, this plan.
-- [x] Forbidden Paths: other plans, root Makefile, rules, API, other lane worktree and private files.
-- [x] Conditional Paths: none.
+- [x] Allowed Paths: tools/classif/1passe/recall/**, ce plan.
+- [x] Forbidden Paths: autres plans, Makefile racine, règles, API, worktree et fichiers privés de l’autre lane.
+- [x] Conditional Paths: aucune.
 
 ## Feedback Loop
-- [x] BRRECALL-EX1: French report and trailer-free commits per owner. Rollback: remove lane files.
-- [x] BRRECALL-EX2: standalone make without includes or .env; native Node built-ins for seat orchestration, inherited BR1PASSE-EX3. Rollback: remove dispatcher.
-- [x] BRRECALL-EX3: immutable prompt copy may exceed 150 lines in its own commit; preserve exact classification bytes and traceability. Rollback: remove prompt copy.
-- [x] Correct support: 676, not historical 672; 372 tuning, 304 blind. Neutral 43 kept separate.
-- [x] PR #1099 prompt body reused. Output extension changes chunk/graph to whole-PV/flat detection acts.
+- [x] BRRECALL-EX1 : français et commits sans trailer, instruction owner. Retour : supprimer les fichiers de lane.
+- [x] BRRECALL-EX2 : make autonome sans include ni .env ; Node natif pour piloter les sièges, héritage BR1PASSE-EX3. Retour : supprimer le dispatcher.
+- [x] BRRECALL-EX3 : copie immuable du prompt au-delà de 150 lignes dans son propre commit, pour préserver les règles exactes. Retour : supprimer la copie.
+- [x] Support corrigé : 676, contre 672 historique ; 372 en mise au point, 304 en aveugle. 43 neutres séparés.
+- [x] Corps du prompt PR #1099 repris. Output passe du graphe par fragment aux actes plats sur PV entier.
+- [x] Limite : apparieur strict et scoreur B historique divergents. Diagnostic secondaire publié sans modifier le principal.
+- [x] Incidents de calcul corrigés : variantes des neutres sans id ; compteur de jetons input confondu avec un texte.
+- [x] Revue multi-pairs indisponible ; aucun consensus revendiqué. Voir recall/REVIEW.md.
 
 ## Orchestration Mode (AI-selected)
-- [x] One dispatcher, ten concurrent CLI calls. No optimizer, no dependence on D3.
+- [x] Un dispatcher, dix appels CLI simultanés. Aucun optimiseur ni attente de D3.
 
 ## UAT Management (in orchestration context)
-- [x] No application behavior change; no UAT.
+- [x] Aucun changement du comportement applicatif ; aucune UAT.
 
 ## Plan / Todo (lot-based)
-- [x] Freeze prompt, source comparison and metrics before calls; commits 4b9cd7958 and 806ab7041.
-- [ ] Execute 100 PV, seal blind outputs, record quotas and usage.
-- [ ] Score three recalls by half and total; Wilson lower bounds; inspect tuning misses only.
-- [ ] Compare current B arm and cost, or explicitly report missing source.
-- [ ] Document later C recalculation target; commit aggregates, push, draft PR; no merge.
+- [x] Prompt, source et métriques figés avant appels ; commits 4b9cd7958 et 806ab7041.
+- [x] 100 PV exécutés ; 100 réponses valides, 50 sceaux aveugles ; quota 32 % → 34 %, durée 357,576 s.
+- [x] Trois rappels par moitié et au total ; bornes Wilson ; détails des manqués de mise au point privés.
+- [x] Bras B rejoué sur textes identiques ; coût de classification séparée : missing source.
+- [x] Cible score-c pour le recalcul ultérieur sans appel modèle ; aucun résultat D3 attendu ou consommé.
+- [ ] Agrégats committés, branche poussée, PR draft ; aucune fusion.
