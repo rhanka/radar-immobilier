@@ -11,6 +11,12 @@ import { privateSignalResponse } from "../services/facets/private-response.js";
 
 export function classFeedbackRoute(deps: { db: Database; auth?: { enabled: boolean } }) {
   const app = new Hono();
+  app.onError((error, c) => {
+    if (error instanceof FacetError || error instanceof ScopeError || error instanceof WorkspaceError) {
+      return c.json({ error: error.message }, error.status);
+    }
+    throw error;
+  });
   const path = "/api/v1/workspaces/:workspaceId/signal-facets/class-feedback";
   app.use(`${path}*`, privateSignalResponse);
   app.use(`${path}*`, async (c, next) => {

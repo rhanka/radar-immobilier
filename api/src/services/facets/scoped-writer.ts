@@ -58,6 +58,7 @@ export async function writeScopedPersonalFacet(
 /** Shared BASE executor; the caller owns commit, rollback, and isolation. */
 export async function writeScopedPersonalFacetInTx(
   tx: ScopedTx, sub: string, workspaceId: string, command: FacetCommand,
+  options: { validatedAi?: boolean } = {},
 ) {
   if (command.expectedHeadId === undefined) {
     throw new FacetError(400, "invalid_facet_command");
@@ -134,7 +135,7 @@ export async function writeScopedPersonalFacetInTx(
       }
       throw new FacetHeadConflictError({ target: command.target, version: null, heads });
     }
-    if (command.action === "discard" && command.reasonCode === undefined) {
+    if (command.action === "discard" && command.reasonCode === undefined && !options.validatedAi) {
       throw new FacetError(422, "reason_code_required");
     }
     if (command.action === "select" && basket === null) {

@@ -33,3 +33,12 @@ export async function exportClassFeedback(db: Database, sub: string, workspaceId
   }
   return { version: 1, visibility: "own-personal-and-workspace", rows, aggregates: [...groups.values()] };
 }
+
+/** A later manual edit replaces the feedback badge as well as the class. */
+export async function readCurrentClassFeedback(db: Database, sub: string, workspaceId: string, citySlug: string) {
+  const rows = await readClassFeedback(db, sub, workspaceId, citySlug);
+  if (!rows.length) return rows;
+  const heads = await db.execute(sql`SELECT event_id FROM facet_heads WHERE event_id IN (${sql.join(rows.map((row) => sql`${row.eventId}::uuid`), sql`,`)})`);
+  const current = new Set(heads.rows.map((row) => row.event_id));
+  return rows.filter((row) => current.has(row.eventId));
+}

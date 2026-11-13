@@ -63,6 +63,7 @@ export async function writeWorkspaceArchiveFacet(
 /** Shared BASE executor; the caller owns commit, rollback, and isolation. */
 export async function writeWorkspaceArchiveFacetInTx(
   tx: WorkspaceTx, sub: string, workspaceId: string, command: WorkspaceArchiveCommand,
+  options: { validatedAi?: boolean } = {},
 ) {
   if (command.action !== "discard" && command.action !== "restore") {
     throw new FacetError(400, "invalid_facet_command");
@@ -75,7 +76,7 @@ export async function writeWorkspaceArchiveFacetInTx(
   if (command.action === "restore" && command.reasonCode !== undefined) {
     throw new FacetError(400, "invalid_facet_command");
   }
-  if (command.action === "discard" && command.reasonCode === undefined) {
+  if (command.action === "discard" && command.reasonCode === undefined && !options.validatedAi) {
     throw new FacetError(422, "reason_code_required");
   }
   if (command.expectedHeadId === undefined || command.displayedFingerprint === undefined) {

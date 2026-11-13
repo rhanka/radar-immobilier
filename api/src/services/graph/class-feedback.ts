@@ -41,20 +41,20 @@ export async function writeClassFeedback(db: Database, sub: string, workspaceId:
     }
     const next = command.verdict === "up" ? annotation.classe : command.nextClass!;
     let reasonCode = command.reasonCode;
-    if (command.verdict === "down" || next === "ecarte") {
+    if (command.verdict === "down") {
       const codes = await tx.execute(sql`SELECT code FROM facet_reason_codes WHERE profile_id=${FACET_PROFILE}
         AND verdict=${next === "ecarte" ? "non_pertinent" : next}
-        ${reasonCode ? sql`AND code=${reasonCode}` : sql``} ORDER BY code LIMIT 1`);
+        AND code=${reasonCode!} LIMIT 1`);
       if (!codes.rows[0]) throw new FacetError(400, "invalid_reclassification_reason");
       reasonCode = String(codes.rows[0].code);
     }
     const base = { target, displayedFingerprint: command.displayedFingerprint };
     const personal = (part: Parameters<typeof writeScopedPersonalFacetInTx>[3]) =>
-      writeScopedPersonalFacetInTx(tx, sub, workspaceId, part);
+      writeScopedPersonalFacetInTx(tx, sub, workspaceId, part, { validatedAi: command.verdict === "up" });
     let event: Awaited<ReturnType<typeof writeScopedPersonalFacetInTx>>;
     if (command.scope === "workspace") {
       event = await writeWorkspaceArchiveFacetInTx(tx, sub, workspaceId, { ...base, action: "discard",
-        reasonCode, expectedHeadId: command.archives.workspace, commandKey: randomUUID() });
+        reasonCode, expectedHeadId: command.archives.workspace, commandKey: randomUUID() }, { validatedAi: command.verdict === "up" });
     } else {
       if (command.archives.workspace && next !== "ecarte") {
         await writeWorkspaceArchiveFacetInTx(tx, sub, workspaceId, { ...base, action: "restore",
