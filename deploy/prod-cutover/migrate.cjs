@@ -24,12 +24,15 @@ COMMIT;`;
 }
 function migrate() {
   r.destination();
+  r.mutationGuard();
+  const { planSha256, rosterSha256 } = r.approvedPlan();
   const proof = r.evidence();
   const entries = r.journal();
   let count = r.prefix(r.rows(), entries);
   if (r.env.ENV === 'execution-prod') {
     const b = r.receipt('backup');
-    if (r.receipt('restore').sha256 !== b.sha256 || b.run !== proof.run || b.drain !== proof.completedAt)
+    if (r.receipt('restore').sha256 !== b.sha256 || b.run !== proof.run || b.drain !== proof.completedAt
+      || !r.sameIdentity(b.destination, r.identity()))
       r.fail('tested_final_backup_required');
   } else {
     const restored = r.receipt('restore');
@@ -56,18 +59,20 @@ function migrate() {
   }
   if (r.prefix(r.rows()) !== 44) r.fail('migration_verification_failed');
   const walBytes = Number(r.sql(`SELECT pg_wal_lsn_diff(pg_current_wal_lsn(),'${walStart}');`));
-  const result = { sha: r.SHA, destination: r.identity(), migrations: 44, applied: measured, walBytes, durationMs: Date.now() - start };
+  const result = { sha: r.SHA, planSha256, rosterSha256, destination: r.identity(), migrations: 44, applied: measured, walBytes, durationMs: Date.now() - start };
   r.save('migrations', result);
   return result;
 }
 function hook(operation) {
   r.destination();
+  r.mutationGuard();
+  const { plan, planSha256, rosterSha256 } = r.approvedPlan();
   if (r.prefix(r.rows()) !== 44) r.fail('44_migrations_required');
   const image = r.pinnedImage();
   const proof = r.evidence();
   const m = r.receipt('migrations');
   if (m.sha !== r.SHA || !r.sameIdentity(m.destination, r.identity())) r.fail('migration_receipt_mismatch');
-  const plan = r.json(r.env.PLAN || r.fail('approved_6h_plan_required'));
+  if (m.planSha256 !== planSha256 || m.rosterSha256 !== rosterSha256) r.fail('migration_plan_mismatch');
   const name = `immo-6h-${proof.run}`;
   const begin = Date.now();
   const variables = { ...r.env, CUTOVER_PLAN: JSON.stringify(plan), CUTOVER_EVIDENCE: JSON.stringify(proof),
@@ -91,7 +96,7 @@ function hook(operation) {
   if (!verdict.ok || (operation === 'transition' && (verdict.status !== 'open-success'
     || verdict.epoch !== 'scoped' || verdict.sealedUnresolved !== 0 || verdict.maintenanceBarrier !== false)))
     r.fail('hook_verdict_refused');
-  const result = { ...verdict, sha: r.SHA, run: proof.run, destination: r.identity(), durationMs: Date.now() - begin };
+  const result = { ...verdict, sha: r.SHA, planSha256, rosterSha256, run: proof.run, destination: r.identity(), durationMs: Date.now() - begin };
   r.save(operation, result);
   return result;
 }

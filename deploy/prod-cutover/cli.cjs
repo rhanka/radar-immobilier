@@ -25,6 +25,18 @@ async function smoke() {
 async function main(operation = process.argv[2]) {
   let result;
   switch (operation) {
+    case 'authorize': r.destination(); r.approvedPlan(); r.pinnedImage(); result = { ok: true }; break;
+    case 'reopen-authorize': {
+      r.destination(); r.mutationGuard();
+      const a = r.json(r.env.APPROVAL);
+      if (a.reopen !== true || a.run !== r.env.CUTOVER_LOCK_RUN) r.fail('reopen_go_required');
+      result = { ok: true }; break;
+    }
+    case 'rollback-verify':
+      r.destination(); r.mutationGuard();
+      if (r.prefix(r.rows()) !== 13 || r.receipt('rollback').run !== r.env.CUTOVER_LOCK_RUN)
+        r.fail('rollback_receipt_required');
+      result = { ok: true }; break;
     case 'backup': result = backup.backup(); break;
     case 'restore-test': result = backup.restoreTest(); break;
     case 'migrate': result = migrations.migrate(); break;
@@ -36,7 +48,8 @@ async function main(operation = process.argv[2]) {
       const t = r.receipt('transition');
       if (t.sha !== r.SHA || t.status !== 'open-success') r.fail('transition_receipt_required');
       if (!r.sameIdentity(t.destination, r.identity())) r.fail('transition_database_mismatch');
-      const plan = r.json(r.env.PLAN || r.fail('approved_6h_plan_required'));
+      const { plan, planSha256, rosterSha256 } = r.approvedPlan();
+      if (t.planSha256 !== planSha256 || t.rosterSha256 !== rosterSha256) r.fail('transition_plan_mismatch');
       const literal = s => `'${String(s).replaceAll("'", "''")}'`;
       const state = r.sql(`BEGIN READ ONLY; SELECT count(*) FROM facet_activation_state s
         JOIN workspaces w ON w.id=s.workspace_id WHERE w.slug=${literal(plan.workspaceSlug)}
@@ -60,8 +73,10 @@ async function main(operation = process.argv[2]) {
     case 'rehearsal':
       if (r.env.ENV !== 'rehearsal') r.fail('rehearsal_environment_required');
       result = { restore: backup.restoreTest(), migrations: migrations.migrate(),
-        transition: migrations.hook('transition'), smoke: await smoke() };
+        transition: migrations.hook('transition') };
       await main('verify');
+      result.rollback = backup.rollback();
+      result.rollbackRepeat = backup.rollback();
       r.save('rehearsal', result);
       break;
     default: r.fail('unknown_operation');
