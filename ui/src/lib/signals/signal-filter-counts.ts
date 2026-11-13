@@ -7,7 +7,7 @@
  * Source = the Filtre cube (`@radar/domain` filtre-cube):
  *  - every city: the cubes served by the by-city aggregate (period, archive
  *    visibility), merged only for the checked visible Pertinence classes;
- *    archives remain absent from the list even when Écarté is checked;
+ *    archives enter the list and counts when Écarté is checked;
  *  - the selected city, once its detail is loaded: the cube rebuilt from that
  *    detail scoped by period + Pertinence, exactly like the header swaps in
  *    the selected city's live count.
@@ -39,14 +39,14 @@ import { bAxesFromVivierKey, countForVivierCity } from "./vivier-view-mode.js";
 
 export type FiltreCounts = VivierFiltreCounts;
 
-/** Exact visible population for one city; archives remain outside the list. */
+/** Exact visible population for rail and map, including checked archives. */
 export function displayedSignalCountForCity(
   entry: CityMapEntry,
   subsetKey: string,
   classement: ClassementFilter,
   exclusions: VivierBExclusions,
 ): number | null {
-  const classes = SIGNAL_CLASSES.filter((classe) => classe !== "ecarte" && classement[classe]);
+  const classes = SIGNAL_CLASSES.filter((classe) => classement[classe]);
   if (classes.length === 0) return 0;
   const axes = bAxesFromVivierKey(subsetKey);
   if (entry.filtreCubesByClassement) {
@@ -56,7 +56,7 @@ export function displayedSignalCountForCity(
   }
   if (entry.vivierV2Counts === null && !entry.filtreCube) return 0;
   // Without a class dimension, only the complete visible population is known.
-  if (classes.length !== 3) return null;
+  if (classement.ecarte || !classement.pertinent || !classement.a_surveiller || !classement.non_classe) return null;
   return entry.filtreCube
     ? displayedVivierFiltreCount(entry.filtreCube, axes, exclusions)
     : countForVivierCity(entry, subsetKey);
@@ -87,7 +87,7 @@ export interface FiltrePerimeterInput {
   live: { slug: string; nodes: readonly GraphSignalNode[] } | null;
 }
 
-/** Relevance uses full server cubes: selected-city detail omits archived targets. */
+/** Relevance uses full server cubes independently of the selected classes. */
 export function classementCountsForPerimeter(input: Omit<FiltrePerimeterInput, "classement" | "live">): Record<SignalClass, number> | null {
   const counts: Record<SignalClass, number> = { pertinent: 0, a_surveiller: 0, non_classe: 0, ecarte: 0 };
   for (const entry of input.entries) {
@@ -103,7 +103,7 @@ export function classementCountsForPerimeter(input: Omit<FiltrePerimeterInput, "
 export function filtreCountsForPerimeter(input: FiltrePerimeterInput): FiltreCounts | null {
   const cubes: VivierFiltreCube[] = [];
   const filter = input.classement ?? DEFAULT_CLASSEMENT_FILTER;
-  if (!SIGNAL_CLASSES.some((classe) => classe !== "ecarte" && filter[classe])) {
+  if (!SIGNAL_CLASSES.some((classe) => filter[classe])) {
     return facetedVivierFiltreCounts({}, input.axes, input.exclusions);
   }
   for (const entry of input.entries) {
@@ -112,12 +112,11 @@ export function filtreCountsForPerimeter(input: FiltrePerimeterInput): FiltreCou
     const cube = entry.filtreCube ?? null;
     if (entry.vivierV2Counts === null && cube === null) continue;
     if (entry.filtreCubesByClassement) {
-      // Class cubes include archives for Pertinence; coherent-city/list omit them.
-      cubes.push(...SIGNAL_CLASSES.filter((classe) => classe !== "ecarte" && filter[classe])
+      cubes.push(...SIGNAL_CLASSES.filter((classe) => filter[classe])
         .map((classe) => entry.filtreCubesByClassement![classe]));
     } else {
       // Older API: its visible cube is exact only with every visible class on.
-      if (cube === null || !filter.pertinent || !filter.a_surveiller || !filter.non_classe) return null;
+      if (cube === null || filter.ecarte || !filter.pertinent || !filter.a_surveiller || !filter.non_classe) return null;
       cubes.push(cube);
     }
   }

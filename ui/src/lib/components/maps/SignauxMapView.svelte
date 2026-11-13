@@ -920,7 +920,7 @@
   $: classementBaseMap = buildClassementMap(detailSelectionHeads, detailArchiveHeads);
   $: classementMap = new Map([...classementBaseMap, ...classementOverrides]);
   $: classementFilteredNodes = filterNodesByClassement(filteredDetailNodes, classementMap, classementFilter);
-  // Full class cubes include archived targets that coherent-city never serves.
+  // Full class cubes retain archives regardless of the visibility checkbox.
   $: classementCountsValue = loadError !== null ? null : classementCountsForPerimeter({
     entries: allEntries,
     axes: bAxesFromVivierKey(activeSubsetKey),
@@ -951,7 +951,9 @@
   function handleClassementFilterChange(
     next: import("$lib/signals/signal-classement.js").ClassementFilter,
   ): void {
+    const visibilityChanged = next.ecarte !== classementFilter.ecarte;
     classementFilter = next;
+    if (visibilityChanged && selectedCity) void loadDetailForCity(selectedCity.municipality.slug);
   }
   async function handleApplyClassement(
     node: GraphSignalNode,
@@ -1665,6 +1667,7 @@
       const scope = { workspaceId };
       const res = await fetchGraphSignalDetail(scope, citySlug, {
         view: "card",
+        showDiscarded: classementFilter.ecarte,
         signal: lease.signal,
         timeoutMs: DEFAULT_REQUEST_TIMEOUT_MS,
       });

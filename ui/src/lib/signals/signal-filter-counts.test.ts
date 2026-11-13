@@ -44,7 +44,8 @@ describe("displayedSignalCountForCity", () => {
     expect(displayedSignalCountForCity(city, "vivier-v2|-p", filter, BOTH)).toBe(3);
     expect(displayedSignalCountForCity(city, "vivier-v2", filter,
       { ...BOTH, piiaSansProjetResidentiel: false })).toBe(6);
-    expect(displayedSignalCountForCity(city, "vivier-v2", { ...filter, ecarte: true }, BOTH)).toBe(2);
+    expect(displayedSignalCountForCity(city, "vivier-v2", { ...filter, ecarte: true }, BOTH)).toBe(10);
+    expect(displayedSignalCountForCity(city, "vivier-v2", { ...filter, pertinent: false, ecarte: true }, BOTH)).toBe(8);
     expect(displayedSignalCountForCity(city, "vivier-v2", { ...filter, pertinent: false }, BOTH)).toBe(0);
   });
   it("should return zero for an absent city and unavailable for a missing class dimension", () => {
@@ -52,6 +53,8 @@ describe("displayedSignalCountForCity", () => {
     expect(displayedSignalCountForCity(buildCityMapEntries([])[0]!, "vivier-v2", filter, BOTH)).toBe(0);
     expect(displayedSignalCountForCity({ ...city, filtreCubesByClassement: null, filtreCube: { "11100": 2 } },
       "vivier-v2", filter, BOTH)).toBeNull();
+    expect(displayedSignalCountForCity({ ...city, filtreCubesByClassement: null, filtreCube: { "11100": 2 } },
+      "vivier-v2", { ...DEFAULT_CLASSEMENT_FILTER, ecarte: true }, BOTH)).toBeNull();
   });
 });
 
@@ -100,7 +103,7 @@ describe("filtreCubeOfNodes — selected city cube from its loaded detail", () =
 });
 
 describe("filtreCountsForPerimeter — Filtre dropdown counts over the displayed perimeter", () => {
-  it("should exclude archives from Filtre with or without selected detail", () => {
+  it("should include archives in Filtre only when checked with or without selected detail", () => {
     const city = { ...entry(A, { "11100": 6 }), filtreCubesByClassement: {
       pertinent: { "11100": 1 }, a_surveiller: { "11100": 2 },
       non_classe: { "11100": 3 }, ecarte: { "11100": 1 },
@@ -111,12 +114,12 @@ describe("filtreCountsForPerimeter — Filtre dropdown counts over the displayed
     const classement = { ...DEFAULT_CLASSEMENT_FILTER, ecarte: true };
     expect(filtreCountsForPerimeter({ ...input, live: null })?.z).toBe(12);
     expect(filtreCountsForPerimeter({ ...input, classement, live: null }))
-      .toEqual({ z: 12, r: 12, p: 12, piia: 0, derog: 0 });
+      .toEqual({ z: 13, r: 13, p: 13, piia: 0, derog: 0 });
     expect(filtreCountsForPerimeter({ ...input, classement,
-      live: { slug: A!.slug, nodes: Array.from({ length: 6 }, (_, i) => node(String(i), {})) } }))
-      .toEqual({ z: 12, r: 12, p: 12, piia: 0, derog: 0 });
+      live: { slug: A!.slug, nodes: Array.from({ length: 7 }, (_, i) => node(String(i), {})) } }))
+      .toEqual({ z: 13, r: 13, p: 13, piia: 0, derog: 0 });
     expect(filtreCountsForPerimeter({ ...input, live: null,
-      classement: { pertinent: false, a_surveiller: false, non_classe: false, ecarte: true } })?.z).toBe(0);
+      classement: { pertinent: false, a_surveiller: false, non_classe: false, ecarte: true } })?.z).toBe(1);
   });
 
   it("should apply a partial Pertinence selection to every city before faceted counting", () => {

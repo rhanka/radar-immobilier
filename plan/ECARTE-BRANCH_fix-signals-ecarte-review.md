@@ -45,8 +45,8 @@ Fix #760 P1 while preserving #1090 period selection and perimeter counters. P2 a
 - [ ] **Lot 1 — Regression and correction**
   - [x] Capture red API, unit and browser regression.
   - [x] Add explicit authorized discarded-card reads and reload on relevance visibility change.
-  - [ ] Align totals and Filtre with the selected relevance classes.
-  - [ ] Confirm restore and reload persistence.
+  - [x] Align totals and Filtre with the selected relevance classes.
+  - [x] Confirm restore and reload persistence.
 - [ ] **Lot 2 — Validation and delivery**
   - [ ] Run typecheck, lint, test-ui, concerned API tests and combined browser suite.
   - [ ] Tear down every isolated stack with down -v and close disposable browser tabs.
