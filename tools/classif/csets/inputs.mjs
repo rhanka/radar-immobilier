@@ -37,8 +37,9 @@ export function request(item,mode){
  const template=json(`${home}/composition.json`);
  if(template.promptSha256!==manifest.sha256) throw new Error('Composition and prompt differ');
  const docSha=item.anchor.docSha??item.anchor.docShas?.[0]??hash(text);
- const subst=x=>x.replaceAll('a'.repeat(64),docSha).replaceAll('csets.pdf',`${item.itemId}.pdf`)
-  .replaceAll('https://example.org/csets.pdf',`https://csets.invalid/${docSha}`);
+ const subst=x=>x.replaceAll('a'.repeat(64),docSha)
+  .replaceAll('https://example.org/csets.pdf',`https://csets.invalid/${docSha}`)
+  .replaceAll('csets.pdf',`${item.itemId}.pdf`);
  // Insert source text last; literal replacement strings must preserve source dollar signs.
  const prompt=subst(template.prompt).replace('CSETS_SOURCE_TEXT',()=>text);
  return {prompt:`${prompt}\n\nJSON schema:\n${subst(template.schema)}`,schema:subst(template.schema)};
