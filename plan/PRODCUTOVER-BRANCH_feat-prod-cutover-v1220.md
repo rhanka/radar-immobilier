@@ -33,6 +33,7 @@
 - [x] Revue #1100, points 1–2 : fenêtre opérateur sous radar-change-lock cutover. Capture avant drain. Déploiement privé, réouverture sur GO séparé. CD après recette.
 - [ ] Revue #1100 : gardes, empreintes 6H, reçu copie et rollback complet. Validation et publication.
 - [x] GO lié aux octets du roster et du plan. Empreintes dans les reçus. Garde de propriété avant backup, DDL, grants et rollback.
+- [x] Copie : reçu backup.json physique, propriétaires et ACL restaurés. Intégration réelle 13 → 44 → 13. Deux rollbacks et accès legacy vérifiés sur archive synthétique.
 - [x] Lot 0 : règles, dossier PREPA-PROD complet, contrat 6H et CD.
 - [x] Lot 1 : cibles autonomes et précontrôles sans écriture prod.
 - [x] Lot 2 : sauvegarde, restauration, migrations mesurées et hook 6H préparés.
