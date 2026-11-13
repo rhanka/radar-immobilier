@@ -9,3 +9,4 @@ export * from "./signals/signal-filter-v1.js";
 export * from "./valleyfield-dossiers.js";
 export * from "./vivier/vivier-v2.js";
 export * from "./vivier/counts.js";
+export * from "./vivier/filtre-cube.js";
