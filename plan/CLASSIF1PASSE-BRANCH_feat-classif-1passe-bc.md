@@ -28,6 +28,7 @@
 ## Plan / Todo (lot-based)
 - [x] Lot 0 : règles, sources, compte réel, graine avant tirage.
 - [ ] Lot 1 : protocole, découpage REFC1 et manifestes.
+- [x] Sous-lot : 100 PV répartis 50/50. Sceau REFC1 privé. Supports B : 372/304 ; C inconnu.
 - [ ] Lot 2 : contrôles hors ligne, push et PR draft vers main.
 - [ ] Hors étape 0 : confirmations owner, annotations, exécution et évaluation.
 - [ ] Hors demande : fusion.
