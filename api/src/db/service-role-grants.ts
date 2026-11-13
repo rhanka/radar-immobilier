@@ -12,6 +12,7 @@
  */
 export const IMMO_MCP_ARTIFACT_WRITER_ROLE = "immo_mcp_artifact_writer";
 export const IMMO_MCP_ACCOUNT_READER_ROLE = "immo_mcp_account_reader";
+export const IMMO_MCP_SIGNAL_WRITER_ROLE = "immo_mcp_signal_writer";
 
 /**
  * Migrator flag for the preprod-only people lookup (owner decision 05/11).
@@ -29,6 +30,21 @@ export function isPeopleLookupEnabled(env: NodeJS.ProcessEnv = process.env): boo
 function serviceRoleGrantsSql(peopleLookup: boolean): string {
   return `DO $grants$
 BEGIN
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '${IMMO_MCP_SIGNAL_WRITER_ROLE}')
+    AND to_regclass('public.signal_mcp_events') IS NOT NULL THEN
+    EXECUTE format('GRANT CONNECT ON DATABASE %I TO ${IMMO_MCP_SIGNAL_WRITER_ROLE}', current_database());
+    GRANT USAGE ON SCHEMA public TO ${IMMO_MCP_SIGNAL_WRITER_ROLE};
+    GRANT SELECT (id,sub,status), UPDATE (created_at) ON account_users TO ${IMMO_MCP_SIGNAL_WRITER_ROLE};
+    GRANT SELECT (workspace_id,account_id,status,moderate_archive) ON workspace_memberships TO ${IMMO_MCP_SIGNAL_WRITER_ROLE};
+    GRANT SELECT (city_slug,type,id) ON graph_nodes TO ${IMMO_MCP_SIGNAL_WRITER_ROLE};
+    GRANT SELECT ON facet_events,facet_event_bindings,facet_streams,facet_activation_state,
+      facet_reason_codes,signal_class_annotations,signal_class_annotation_history,signal_class_feedback
+      TO ${IMMO_MCP_SIGNAL_WRITER_ROLE};
+    GRANT SELECT,INSERT ON signal_mcp_events,signal_mcp_audit TO ${IMMO_MCP_SIGNAL_WRITER_ROLE};
+    GRANT SELECT,INSERT ON personal_projection_revisions,workspace_projection_revisions TO ${IMMO_MCP_SIGNAL_WRITER_ROLE};
+    GRANT UPDATE (revision,updated_at) ON personal_projection_revisions,workspace_projection_revisions
+      TO ${IMMO_MCP_SIGNAL_WRITER_ROLE};
+  END IF;
   IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '${IMMO_MCP_ACCOUNT_READER_ROLE}') THEN
     EXECUTE format('GRANT CONNECT ON DATABASE %I TO ${IMMO_MCP_ACCOUNT_READER_ROLE}', current_database());
     GRANT USAGE ON SCHEMA public TO ${IMMO_MCP_ACCOUNT_READER_ROLE};

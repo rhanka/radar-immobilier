@@ -33,6 +33,7 @@
 - [ ] Lot 1: additive scoped journal, notes, audit, grants and concurrency guards.
   - [x] Scoped append-only tables and transactional write/read functions drafted.
 - [ ] Lot 2: write scope, schemas, session-bound elicitation and tools.
+  - [x] Five contracts registered; verified client identity and current-session elicitation wired.
 - [ ] Lot 3: scoped read projection, UI provenance badges and note addition.
 - [ ] Lot 4: unit, PostgreSQL, MCP client and UI tests; typecheck and lint.
 - [ ] Lot 5: final independent review, selective commits, push and PR to feat/class-feedback.
