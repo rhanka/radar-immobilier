@@ -20,6 +20,10 @@ audit:
 	node $(DIR)/tuning-audit.mjs
 verify:
 	node $(DIR)/verify.mjs
+status:
+	node $(DIR)/status.mjs
+report:
+	node $(DIR)/report.mjs
 inspect:
 	docker run --rm --network none -v radar-dev_radar-test-root-node-modules:/deps:ro -v radar-dev_radar-test-api-node-modules:/api-deps:ro node:24-bookworm-slim sh -c 'ls /deps/tsx /deps/@sentropic/engram /api-deps/@sentropic/engram /deps/@radar/sources 2>/dev/null; ls /api-deps/tsx 2>/dev/null'
 quota:
@@ -28,6 +32,8 @@ run:
 	node $(DIR)/run.mjs
 check:
 	@for f in $(DIR)/*.mjs; do node --check "$$f" || exit; done
+test:
+	node --test tools/classif/1passe/matching.test.mjs
 commit:
 	git -c core.hooksPath=/dev/null commit -m "$(MSG)"
 push:
