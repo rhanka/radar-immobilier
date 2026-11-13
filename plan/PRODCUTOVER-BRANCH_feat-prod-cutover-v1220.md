@@ -5,7 +5,7 @@
 - [ ] Faire ratifier le GO par l’owner après répétition sur copie.
 
 ## Scope / Guardrails
-- [x] Prod en lecture seule. Aucun dump, tag, migration ou acte cluster exécuté.
+- [x] Prod en lecture seule. Dump RO autorisé par D4 le 13/11. Aucun tag, migration ou écriture cluster.
 - [x] Aucun .env, secret affiché, kubeconfig par défaut ou exécution Python.
 - [x] Worktree tmp/prod-cutover, branche feat/prod-cutover-v1220 depuis origin/main.
 - [x] ENV toujours dernier. Aucune fusion. Aucun trailer de contribution.
@@ -15,6 +15,7 @@
 - [x] Allowed Paths : deploy/prod-cutover/**, docs/runbooks/prod-cutover-v1220.md, ce plan.
 - [x] Forbidden Paths : Makefile, docker-compose*.yml, rules/**, AGENTS.md, CLAUDE.md, GEMINI.md, autres plans.
 - [x] Conditional Paths : aucun changement cluster, SQL applicatif ou workflow.
+- [x] Préparation isolée sur feat/prod-cutover-v1220-prep, même point de départ que #1100. Commits ajoutés uniquement.
 - [x] PRODCUTOVER-EX1 : correction owner du point 4. `deploy/cutover/atomic-restore.sh` accepte la conservation des propriétaires. Défaut historique conservé. Repli : retirer cette option.
 
 ## Feedback Loop
@@ -30,6 +31,7 @@
 - [x] Tests dédiés ENV=test-prod-cutover. Ports réservés API 18821, UI 15321, Maildev 11121.
 
 ## Plan / Todo (lot-based)
+- [x] D2/D4 : extraction préprod privée 0600, plan 6H et roster. Cibles autonomes de dump RO et de pull par digest. Répétition non lancée.
 - [x] Revue #1100, points 1–2 : fenêtre opérateur sous radar-change-lock cutover. Capture avant drain. Déploiement privé, réouverture sur GO séparé. CD après recette.
 - [x] Revue #1100 : gardes, empreintes 6H, reçu copie et rollback complet. Validation locale réussie.
 - [x] GO lié aux octets du roster et du plan. Empreintes dans les reçus. Garde de propriété avant backup, DDL, grants et rollback.
