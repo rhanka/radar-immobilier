@@ -19,10 +19,13 @@ for(const file of ['report.md','aggregates.json','manifest.json']){
  assert.ok(!/dev-(?:sig|pv)-[a-f0-9]{12}/.test(bytes),`per-unit identity in ${file}`);
 }
 assert.equal(results.execution.measuredResponses,494);assert.equal(results.execution.toolEvents,0);
-for(const r of results.classificationOnly?.records??[]){
+assert.equal(results.classificationOnly.records.length,4);
+assert.ok(!/"(?:itemId|input|request|result|text)"\s*:/.test(readFileSync('docs/spec/reports/classif-csets/aggregates.json','utf8')));
+for(const r of results.classificationOnly.records){
  const m=r.metrics;
  assert.equal(m.units,252);assert.equal(m.matrix.rows.flat().reduce((a,b)=>a+b,0),252);
  assert.equal(m.refShown-m.trueShown,m.misses);
+ assert.equal(m.refShown,results.baseline[r.half].refShown);
  assert.equal(m.D4,m.misses===0?'pass':'fail');
  assert.equal(r.execution.toolEvents,0);assert.equal(r.execution.concurrency,10);
  if(r.half==='blind'){

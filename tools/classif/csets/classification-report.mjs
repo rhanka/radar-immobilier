@@ -40,6 +40,9 @@ const interval=x=>`[${pct(x.low)} ; ${pct(x.high)}]`;
 const label=h=>h==='tuning'?'Mise au point':'Aveugle';
 const names=['P','S','Écarté','Non classé'];
 const verdict=version=>records.filter(r=>r.version===version).every(r=>r.metrics.D4==='pass')?'réussi':'échoué';
+const fresh=records.filter(r=>!(r.version==='v1'&&r.half==='tuning'));
+const newMinutes=fresh.reduce((n,r)=>n+r.execution.durationMinutes,0);
+const elapsedMinutes=(Date.parse(fresh.at(-1).execution.ended)-Date.parse(fresh[0].execution.started))/60000;
 const report=`# Classification seule × Astra low — jeux C
 
 Décision du 13 novembre : détection B conservée, puis classification de chaque acte. La passe complète est abandonnée.
@@ -79,6 +82,8 @@ ${records.map(r=>`| ${label(r.half)} | ${r.version} | ${r.execution.weeklyQuotaS
 La durée v1 de mise au point inclut les anciens modes A et B. Les nouvelles durées portent sur B seul.
 Le run historique avait cinq tentatives initiales sans reçu, hors mesure. Il avait 494 réponses A et B mesurées.
 Chaque nouvelle mesure ajoute une sonde de quota. Réinitialisation : ${records.at(-1).execution.quotaResetUtc}.
+Les trois nouvelles mesures totalisent ${newMinutes.toFixed(2)} min d’exécution, sur une fenêtre de ${elapsedMinutes.toFixed(2)} min.
+Elles comptent ${fresh.reduce((n,r)=>n+r.execution.measuredResponses,0)} réponses B. Quota : ${fresh[0].execution.weeklyQuotaStart} % → ${fresh.at(-1).execution.weeklyQuotaEnd} %.
 
 ## Traçabilité et portée
 

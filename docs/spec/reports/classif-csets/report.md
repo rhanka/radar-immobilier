@@ -1,51 +1,35 @@
-# Prompt unique × Astra low — jeux C
+# Classification seule × Astra low — jeux C
 
-État : mise au point terminée. Aveugle en attente de la clé injectée par i-cond.
+Décision du 13 novembre : détection B conservée, puis classification de chaque acte. La passe complète est abandonnée.
+Le mode B de cette étude désigne la réannotation. Il conserve les entrées figées de C.
 
-| Jeu | Mode | Rappel de détection des signaux C | Manqués P ∪ S | Rappel P ∪ S | Wilson 95 % | Précision sur unités C |
-|---|---|---:|---:|---:|---|---:|
-| Mise au point | A | 105/191 (54.97 %) | 40/95 | 57.89 % | [47.85 % ; 67.33 %] | 74.32 % |
-| Mise au point | B | Sans objet | 3/95 | 96.84 % | [91.12 % ; 98.92 %] | 69.17 % |
-| Aveugle | A | Non mesuré | Non mesuré | — | — | — |
-| Aveugle | B | Sans objet | Non mesuré | — | — | — |
+| Jeu | Prompt | Mode | Manqués P ∪ S | Rappel | Wilson 95 % du rappel | Précision | D4 |
+|---|---|---|---:|---:|---|---:|---|
+| Mise au point | v1 | B | 3/95 | 96.84 % | [91.12 % ; 98.92 %] | 69.17 % | échoué |
+| Aveugle | v1 | B | 1/94 | 98.94 % | [94.22 % ; 99.81 %] | 73.81 % | échoué |
+| Mise au point | v2 | B | 0/95 | 100.00 % | [96.11 % ; 100.00 %] | 67.38 % | réussi |
+| Aveugle | v2 | B | 0/94 | 100.00 % | [96.07 % ; 100.00 %] | 71.76 % | réussi |
 
-A : passe complète. B : réannotation. Les 252 unités incluent 191 signaux et 61 PV. Le rappel de détection porte sur les 191 signaux identifiés. Les PV sont des unités documentaires, sans inventaire exhaustif de leurs actes.
+D4 exige zéro manqué P ∪ S. Verdict v1 : **échoué**. Verdict v2 : **réussi**.
+La comparaison v2 porte sur les agrégats. Aucun rapprochement par unité aveugle ne sort de l’exécuteur.
+Sur les 3 manqués v1 de mise au point, la v2 en récupère 3 et en conserve 0.
+Elle introduit 0 nouveau manqué sur les références P ∪ S auparavant affichées.
 
-Dix signaux n'ont aucun extrait source figé. Sept sont P ∪ S. Ils comptent comme absents en A. Sur les seules unités avec source, A a 33/88 manqués et un rappel de 62.50 %.
+## Comparaison avec P0 seul
 
-La précision porte sur les prédictions P ∪ S des unités C. Elle ne mesure pas la précision globale des actes extraits. A retourne 382 nœuds d'acte ; 63 nœuds des entrées signal restent non appariés. Ces ajouts ne sont pas présumés faux.
+| Jeu | Manqués P ∪ S | Rappel | Wilson 95 % du rappel | Précision |
+|---|---:|---:|---|---:|
+| Mise au point | 0/95 | 100.00 % | [96.11 % ; 100.00 %] | 69.34 % |
+| Aveugle | 0/94 | 100.00 % | [96.07 % ; 100.00 %] | 75.20 % |
 
-Diagnostic séparé : 166 entrées signal contiennent au moins un acte extrait. 61 actes retrouvent le même site cité avec une étape différente ou absente ; 25 sont P ∪ S. Le critère principal garde l'étape et ne récupère aucun de ces cas.
+P0 seul est le baseline Astra low de la série 7. Il a zéro manqué sur les deux jeux.
+Les bornes ci-dessus sont recalculées selon Wilson. Les bornes historiques de C étaient exactes et unilatérales.
 
-Sur les seuls signaux appariés en A : 105 unités, 0/50 manqué P ∪ S. Les deux références P ne sont pas appariées. En B, les 191 signaux ont zéro manqué sur 87 références P ∪ S ; les trois manqués sont des PV annotés « Non classé ».
+## Matrices 4×4
 
-## P0 seul × Astra low, série 7
+Lignes : référence C. Colonnes : prédiction. Les sorties absentes ou invalides comptent comme « Non classé ».
 
-| Jeu | Manqués | Rappel P ∪ S | Précision | Wilson 95 % du rappel recalculé |
-|---|---:|---:|---:|---|
-| Mise au point | 0/95 | 100.00 % | 69.34 % | [96.11 % ; 100.00 %] |
-| Aveugle | 0/94 | 100.00 % | 75.20 % | [96.07 % ; 100.00 %] |
-
-Le baseline ne mesure pas la détection. Ses bornes historiques sont des bornes exactes unilatérales de Clopper–Pearson. Elles ne sont pas présentées comme des bornes de Wilson. La référence de C porte le nom technique D. Sa provenance est consensus de modèles ou mixte.
-
-## Matrices à quatre classes
-
-Les absences et sorties invalides sont regroupées dans « Non classé ». Les compteurs d'absence et d'invalidité restent séparés dans les agrégats.
-
-### Mise au point — A
-
-Lignes : référence C. Colonnes : prédiction.
-
-| Référence | P | S | Écarté | Non classé |
-|---|---:|---:|---:|---:|
-| P | 0 | 0 | 0 | 2 |
-| S | 0 | 55 | 0 | 38 |
-| Écarté | 0 | 19 | 68 | 70 |
-| Non classé | 0 | 0 | 0 | 0 |
-
-### Mise au point — B
-
-Lignes : référence C. Colonnes : prédiction.
+### Mise au point — v1 — B
 
 | Référence | P | S | Écarté | Non classé |
 |---|---:|---:|---:|---:|
@@ -54,31 +38,58 @@ Lignes : référence C. Colonnes : prédiction.
 | Écarté | 0 | 41 | 111 | 5 |
 | Non classé | 0 | 0 | 0 | 0 |
 
-### Mise au point — A — signaux appariés seulement
-
-Lignes : référence C. Colonnes : prédiction.
+### Aveugle — v1 — B
 
 | Référence | P | S | Écarté | Non classé |
 |---|---:|---:|---:|---:|
-| P | 0 | 0 | 0 | 0 |
-| S | 0 | 50 | 0 | 0 |
-| Écarté | 0 | 13 | 42 | 0 |
+| P | 1 | 0 | 0 | 0 |
+| S | 0 | 92 | 0 | 1 |
+| Écarté | 0 | 33 | 120 | 5 |
 | Non classé | 0 | 0 | 0 | 0 |
 
-## Surface, quotas et durée
+### Mise au point — v2 — B
 
-GPT-6 Astra, low, siège Codex ChatGPT. Prompt inchangé : `8957bcaa146b3b83ee89000fccec3c6f393c7b801b320a158d58d2631fa3a205`. Composition et schéma importés de la PR #1099. Chaque requête A est revérifiée octet pour octet avec le code de production. Validation native sans reprise ni modèle de secours. Aucun outil ni web accepté.
+| Référence | P | S | Écarté | Non classé |
+|---|---:|---:|---:|---:|
+| P | 1 | 1 | 0 | 0 |
+| S | 0 | 93 | 0 | 0 |
+| Écarté | 0 | 46 | 111 | 0 |
+| Non classé | 0 | 0 | 0 | 0 |
 
-Concurrence de reprise : 10. Quota hebdomadaire : 34 % → 45 %. Arrêt des lancements à 90 %. Réinitialisation : 2026-11-20T12:05:04.000Z. Durée des mesures : 16.88 min. 494 réponses mesurées, plus un appel de quota et 5 tentatives initiales sans reçu.
+### Aveugle — v2 — B
 
-Un fichier de composition créé par Docker appartenait à root. Le refus d'accès a interrompu cinq appels B initiaux avant leur reçu. Ils ne sont pas scorés. La reprise conserve les mêmes entrées. Le pic de concurrence au démarrage interrompu n'est pas attesté. Le précontrôle de toutes les requêtes et l'exécution Docker avec l'UID local corrigent cette cause.
+| Référence | P | S | Écarté | Non classé |
+|---|---:|---:|---:|---:|
+| P | 1 | 0 | 0 | 0 |
+| S | 0 | 93 | 0 | 0 |
+| Écarté | 0 | 37 | 121 | 0 |
+| Non classé | 0 | 0 | 0 | 0 |
 
-Le jeu aveugle reste scellé. Aucun résultat par unité n'a été ouvert. Aucun optimiseur n'est alimenté. La clé n'est ni lue dans un fichier d'environnement ni recherchée ailleurs. L'inventaire et les manqués de mise au point sont privés : `/home/antoinefa/.local/share/radar-classif/1passe-csets/tuning-inventory.json` et `/home/antoinefa/.local/share/radar-classif/1passe-csets/tuning-misses.md`.
+## Quotas et durée
 
-## Conséquence pour la production — cinq lignes
+GPT-6 Astra, low, siège Codex ChatGPT. Concurrence : 10. Arrêt des nouveaux appels à 90 %.
+Aucun outil ni web accepté. Aucun modèle de secours. Aucune reprise selon la prédiction.
 
-1. La passe complète obtient 40 manqués : D4 échoué sur la mise au point.
-2. La réannotation obtient 3 manqués, tous des PV « Non classé » ; les 87 signaux P ∪ S restent affichés.
-3. P0 seul avait zéro manqué sur les deux jeux ; son avantage en aveugle reste le baseline mesuré.
-4. Les sources absentes et les extraits limitent la portée du test A ; ce résultat ne démontre pas le rappel sur des PV complets.
-5. Le prompt unique n'est pas qualifié pour la production : la mesure aveugle demandée reste à exécuter.
+| Jeu | Prompt | Quota hebdomadaire | Durée | Réponses B | Sorties invalides |
+|---|---|---|---:|---:|---:|
+| Mise au point | v1 | 34 % → 45 % | 16.88 min | 252 | 0 |
+| Aveugle | v1 | 48 % → 50 % | 3.92 min | 252 | 0 |
+| Mise au point | v2 | 50 % → 52 % | 3.37 min | 252 | 0 |
+| Aveugle | v2 | 52 % → 55 % | 3.98 min | 252 | 0 |
+
+La durée v1 de mise au point inclut les anciens modes A et B. Les nouvelles durées portent sur B seul.
+Le run historique avait cinq tentatives initiales sans reçu, hors mesure. Il avait 494 réponses A et B mesurées.
+Chaque nouvelle mesure ajoute une sonde de quota. Réinitialisation : 2026-11-20T12:05:04.000Z.
+Les trois nouvelles mesures totalisent 11.27 min d’exécution, sur une fenêtre de 11.93 min.
+Elles comptent 756 réponses B. Quota : 48 % → 55 %.
+
+## Traçabilité et portée
+
+Prompt v1 : `8957bcaa146b3b83ee89000fccec3c6f393c7b801b320a158d58d2631fa3a205` (#1099). Prompt v2 : `34df2dd7da379699ed8cefcc1dac07010f5618519fbdd7eb9c33d3d77e0ddc50` (commit 6c7cc36c0165253c11e89f41edfe67108dbbd0f9).
+Les octets des prompts sont vérifiés avant les appels. Les caches sont séparés par version.
+La cible make charge le fichier d’environnement. La clé n’est jamais affichée ni transmise au modèle.
+Les références et sorties par unité aveugle restent scellées. Seuls les agrégats sont publiés.
+
+Chaque jeu compte 252 unités. Les PV restent des unités documentaires. La précision et le rappel portent sur ces unités C.
+Cette mesure de classification ne mesure pas le rappel de la détection B conservée. La référence technique D provient du consensus de modèles ou d’une provenance mixte.
+Les anciennes mesures A restent dans les agrégats historiques. Elles ne sont pas relancées.
