@@ -34,7 +34,7 @@
 - [x] Lot 1: freeze protocol, capture prompts, execute tuning modes with quota guard.
 - [x] Lot 2: execute blind mode B through sealed executor; produce aggregates only.
 - [x] Lot 3: verify metrics and prepare the aggregate report for draft PR #1105.
-- [ ] Push final results and update draft PR #1105; no merge.
+- [x] Push final results and update draft PR #1105; no merge.
 - [x] Tuning aggregates, matrices, baseline comparison and five-line production verdict committed locally.
 - [x] Four synthetic metric/pairing tests and syntax checks pass; 242/242 native validations and exact request comparisons pass.
 - [x] Pairing regression corrected offline: native stages are flat, as in bench-v11; no model rerun.
@@ -42,3 +42,5 @@
 - [x] V1 blind mode B: 252 responses, 1/94 shown miss, D4 fail; no tool or invalid response.
 - [x] V2 tuning and blind: 252 responses each, zero misses, D4 pass; three original tuning misses recovered.
 - [x] Four tests, syntax, aggregate invariants and 504 sealed blind response caches verified; quota 48 to 55 percent.
+- [x] Replace deprecated gh PR-edit GraphQL projectCards call with REST PATCH; live update succeeds.
+- [x] Complementary review remains selection-failed; no consensus claimed. CI is running on the pushed head.
