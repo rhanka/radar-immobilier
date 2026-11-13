@@ -1,12 +1,12 @@
 // Add measured CP+ evidence without changing the 42 historical global rows.
-export function cpPlusRows(arm) {
-  return [["Astra medium (rejeu v12)", arm.source], ["CP+", arm]].map(([label, value]) => ({
+export function cpPlusRows(arm, low = null) {
+  return [["Astra medium (rejeu v12)", arm.source], ["CP+", arm], ...(low ? [["CP+ low", low]] : [])].map(([label, value]) => ({
     label, accepted: value.accepted, p: value.strict.precision, r: value.strict.recall,
     f1: value.strict.f1, api: value.usdApiEquivPerDoc, seat: null,
   }));
 }
 
-export function cpPlusSection(arm) {
+export function cpPlusSection(arm, low = null) {
   const f = (value, digits = 3) => value == null ? "missing source" : value.toFixed(digits);
   const a = arm.source;
   const surface = arm.surface;
@@ -22,6 +22,7 @@ export function cpPlusSection(arm) {
     row("GPT-6 Astra medium (rejeu v12)", a),
     "| CP publié (Astra medium → Gemini 3.8 Flash low) | 99 | 0.484 | 0.533 | 0.507 | 912 | 229 | 0.4813 | 0.0212 |",
     row("CP+ (Astra medium → Muse Spark 1.3 xhigh)", arm, arm.actsJudged, arm.actsRemoved),
+    ...(low ? [row("CP+ low (Astra medium → Muse Spark 1.3 low)", low, low.actsJudged, low.actsRemoved)] : []),
     "",
     "Le rejeu gagne en précision face à Astra medium publié, mais perd en rappel. Son F1 reste à 0,438. CP+ porte le F1 du rejeu de 0,438 à 0,480. Il reste sous le CP publié : P 0,467 contre 0,484 ; R 0,494 contre 0,533 ; F1 0,480 contre 0,507. Son équivalent API est aussi supérieur : 0,49055 contre 0,48134 USD/doc. Ces deux cascades partent de passages Astra distincts. Le tableau « Meilleurs bras » inclut les deux nouvelles mesures. Ses gagnants restent inchangés. Le v12 ne pose aucune décision.",
     "",
@@ -45,7 +46,25 @@ export function cpPlusSection(arm) {
     "",
     "**Incident et exclusion.** Un premier passage a reçu des écritures de plusieurs runners. Il contient 99 réponses distinctes. Les traces montrent 16 fenêtres de tentatives réussies qui se chevauchent, attente d’acquisition comprise. La limite globale de quatre appels ne peut pas être attestée. Ce passage est archivé sous astra-medium-rejeu-overlap-20261113 et exclu des scores et coûts du tableau. Un lancement s’est terminé avec le code 137. Les conteneurs restants ont été arrêtés ou ont terminé. Les 100 documents ont ensuite été rejoués par un seul runner verrouillé. Le scoreur vérifie un maximum de quatre tentatives simultanées sur ce nouveau passage. Codex était à 61 % au premier contrôle de la lane, puis à 67 % avant ce nouveau rejeu. Ces variations de compteur partagé ne sont pas attribuées à un coût siège.",
     "",
+    ...(low ? lowEvidence(low) : []),
     "Preuves locales : tools/bench-v11/full/arms/astra-medium-rejeu/ et cp-plus-muse13-xhigh/ ; scores-astra-rejeu.json et scores-cp-plus.json. Runners, filtre et scoreur sont versionnés dans le harnais. Les sorties brutes et reçus sont conservés localement, hors Git.",
     "",
   ].join("\n");
+}
+
+function lowEvidence(arm) {
+  const s = arm.surface;
+  const f = (v, digits = 5) => v == null ? "missing source" : v.toFixed(digits);
+  return [
+    "**CP+ low.** Les mêmes sorties du rejeu Astra medium sont réutilisées. Aucun nouvel appel Astra. Le filtre CP garde la même empreinte cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68. Le dossier xhigh reste intact. Le bras low est archivé dans tools/bench-v11/full/arms/cp-plus-muse13-low/ ; score : full/scores-cp-plus-low.json.",
+    "",
+    `Oracle strict 676 : TP ${arm.strict.tp}, FP ${arm.strict.fp}, FN ${arm.strict.fn}. ${arm.actsJudged} actes jugés, ${arm.actsRemoved} retirés. ${arm.summary.validReviews} réponses valides, ${arm.summary.duplicateValidReviews} doublon. Chaque sortie filtrée est reproduite par le scoreur depuis sa décision. Actes conservés sans décision valide : ${arm.keptNoValidDecision}. Extraits soutenus non retrouvés : ${arm.supportedUngrounded}.`,
+    "",
+    `Surface CLI low : Muse 1.4.18, muse-spark-1.3, effort low, --contributor-mode off, --json. Même conteneur et même cwd vide hors dépôt. Concurrence demandée 8, maximum mesuré ${arm.maxConcurrency}. Un seul runner, verrou runner.lock. Outils et tours non restreints ; bash natif et MCP h2a configuré. Catalogue effectif : unverified. ${s.docs} flux audités, ${s.docsWithToolCalls.length} avec outil, ${s.docsWithMoreThanOneModelResponse.length} avec plusieurs réponses modèle. Histogramme : ${JSON.stringify(s.modelResponsesHistogram)}. Skills : ${s.skillsLines.filter(Boolean).join(" ; ") || "unverified"}. Documents avec outil : ${s.docsWithToolCalls.map((d) => `${d.doc} (${Object.keys(d.toolTasks).join(", ")})`).join(" ; ") || "aucun"}. Documents à plusieurs réponses : ${s.docsWithMoreThanOneModelResponse.map((d) => `${d.doc} (${d.modelResponses})`).join(" ; ") || "aucun"}. Aucun document exclu après coup.`,
+    "",
+    `Quota low avant : ${arm.summary.weeklyBefore ?? "missing source"} ; après : ${arm.summary.weeklyAfter ?? "missing source"}. muse usage --json ne fournit aucun compteur (allowance=null, server_sent_no_usage). Le premier reçu d'appel indique ${arm.summary.firstReceiptWeekly ?? "missing source"} %, le dernier ${arm.summary.lastReceiptWeekly ?? "missing source"} %. Ces lectures ne remplacent pas les contrôles avant et après. STOP_WEEKLY_PCT=100 désactive tout seuil d'arrêt. Événements quota : ${arm.summary.quotaEvents}. Quota jamais compté comme refus ; attente puis reprise selon le runner. Compteur partagé : coût siège missing source. Incident : premier lancement arrêté avant tout appel, car le compteur était indisponible. Le mode sans seuil a ensuite été adapté et relancé.`,
+    "",
+    `Coût low sur jetons réels : entrée ${arm.tokens.input}, cache ${arm.tokens.cached}, sortie ${arm.tokens.output}, raisonnement ${arm.tokens.reasoning}. ${arm.calls} invocations avec usage. Même tarif Spark primaire que xhigh. Relecture seule : ${f(arm.reviewerApiPerCorpusDoc)} USD/doc. Cascade, extraction Astra réutilisée incluse : ${f(arm.usdApiEquivPerDoc)} USD/doc (hypothèse A). Hypothèse B, raisonnement ajouté : ${f(arm.usdApiEquivWithExtraReasoning)} USD/doc. Dénominateur : 100 documents. Aucun coût siège attribuable. Aucune décision ajoutée.`,
+    "",
+  ];
 }
