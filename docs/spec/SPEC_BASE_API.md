@@ -81,7 +81,12 @@ Moderator-only common archive, same path family as personal facets:
   carries `legacyProjection` derived from the served nodes, so the UI never
   reclassifies. `reveal` serves the same card fields on its `signal`.
 - `GET /api/v1/workspaces/:workspaceId/signal-facets/by-city?dateFrom&dateTo&dateBasis&excludePiia&excludeDerogations&showDiscarded`
-  → `{ ok, totalCount, cities: [{ citySlug, signalCount, subsetCounts, vivierV2Counts }] }`.
+  → `{ ok, totalCount, cities: [{ citySlug, signalCount, subsetCounts, vivierV2Counts, filtreCube }] }`.
+  `filtreCube` (`@radar/domain` filtre-cube) counts the date-scoped,
+  non-discarded B universe per combination of the Filtre criteria (Zonage,
+  Résidentiel, Précoce axes; PIIA and dérogation exclusions), whatever the
+  `excludePiia`/`excludeDerogations` flags: the rail derives the Filtre
+  dropdown counts from it for any Filtre state.
   Scoped successor of the retired `GET /api/graph-signals/by-city`, same
   wire shape and query parameters (`dateFrom`/`dateTo` `YYYY-MM-DD`,
   `dateBasis=document|scrap`, flags `=1`; anything else is
