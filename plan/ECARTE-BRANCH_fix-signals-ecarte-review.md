@@ -47,11 +47,11 @@ Fix #760 P1 while preserving #1090 period selection and perimeter counters. P2 a
   - [x] Add explicit authorized discarded-card reads and reload on relevance visibility change.
   - [x] Align totals and Filtre with the selected relevance classes.
   - [x] Confirm restore and reload persistence.
-- [ ] **Lot 2 — Validation and delivery**
+- [x] **Lot 2 — Validation and delivery**
   - [x] Run typecheck, lint, test-ui, concerned API tests and combined browser suite.
   - [x] Tear down every isolated stack with down -v and close disposable browser tabs.
   - [x] Check #1090 merge state; rebase when merged.
-  - [ ] Push and open PR referencing #760, listing P3 without implementing them.
+  - [x] Push and open PR referencing #760, listing P3 without implementing them.
 
 ## Evidence
 - [x] API red: scoped-projection-revisions-db returns no archived card with showDiscarded=1. Unit red: Filtre returns 12 instead of 13. Logs: tmp/red-api.log, tmp/red-unit.log.
@@ -61,3 +61,4 @@ Fix #760 P1 while preserving #1090 period selection and perimeter counters. P2 a
 - [x] Harness scope and branch checks pass. Independent consensus unavailable: exact author model/effort metadata and h2a_run MCP are unavailable; no consensus claimed (tmp/review.md).
 - [x] Rebased on 0742dae98 after #1090 merged. Final gates repeated on the rebased sources: typecheck and lint pass; UI 1895 tests; API 272 tests; browser 5 scenarios in 14.7 seconds. Logs: tmp/final-{typecheck,lint,test-ui,test-api,test-e2e}.log.
 - [x] CDP target inventory contains no tab at this lane's origin. Database and runtime teardown use down -v. Root checkout and UAT services are untouched.
+- [x] Delivery: PR #1092 targets main and remains open, with P2 excluded and all five P3 findings listed. CI queued at opening. No commit trailers, no merge.
