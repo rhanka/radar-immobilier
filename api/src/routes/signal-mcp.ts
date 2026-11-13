@@ -33,7 +33,9 @@ export function signalMcpRoute(deps: { db: Database; auth?: { enabled: boolean }
     const session = c.get("session" as never) as { sub: string };
     const saved = await addSignalNote(deps.db, session.sub, { ...parsed.data.target,
       workspaceId: c.req.param("workspaceId") }, parsed.data.text, parsed.data.version);
-    return saved.error ? c.json(saved, saved.error === "annotation_version_conflict" ? 409 : 403) : c.json(saved, 201);
+    return saved.error ? c.json(saved, saved.error === "annotation_version_conflict" ? 409 : 403)
+      : c.json({ ...saved, state: await readSignalMcp(deps.db, session.sub,
+        { ...parsed.data.target, workspaceId: c.req.param("workspaceId") }) }, 201);
   });
   return app;
 }
