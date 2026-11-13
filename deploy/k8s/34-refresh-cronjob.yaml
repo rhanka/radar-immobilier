@@ -192,6 +192,14 @@ spec:
                 - { name: NODE_OPTIONS, value: "--max-old-space-size=1024 --dns-result-order=ipv4first" }
                 - { name: REFRESH_PROVIDER, value: "openai" }
                 - { name: REFRESH_SINGLE_PASS, value: "0" }
+                - { name: REFRESH_CLASSIFY_MODE, value: "off" }
+                - { name: REFRESH_CLASSIFY_PROVIDER, value: "openai" }
+                - { name: REFRESH_CLASSIFY_MODEL, value: "gpt-6-astra" }
+                - { name: REFRESH_CLASSIFY_REASONING_EFFORT, value: "low" }
+                - { name: REFRESH_CLASSIFY_FALLBACK_PROVIDER, value: "gemini" }
+                - { name: REFRESH_CLASSIFY_FALLBACK_MODEL, value: "gemini-3.8-flash" }
+                - { name: REFRESH_CLASSIFY_FALLBACK_REASONING_EFFORT, value: "low" }
+                - { name: REFRESH_CLASSIFY_CONCURRENCY, value: "2" }
                 - { name: REFRESH_SINGLE_PASS_PROVIDER, value: "openai" }
                 - { name: REFRESH_SINGLE_PASS_MODEL, value: "gpt-6-astra" }
                 - { name: REFRESH_SINGLE_PASS_REASONING_EFFORT, value: "low" }
