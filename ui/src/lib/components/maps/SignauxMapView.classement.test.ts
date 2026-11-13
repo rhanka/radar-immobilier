@@ -8,6 +8,7 @@ import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { render, cleanup, waitFor, screen, fireEvent, within } from "@testing-library/svelte";
 import { buildCityMapEntries } from "$lib/maps/maps-data.js";
 import { parseGeoQuery, type GeoRoute } from "$lib/router/geo-route.js";
+import { countVivierClassifications } from "@radar/domain";
 
 vi.mock("$lib/components/maps/GeoCityMapBase.svelte", async () => {
   const stub = await import("./test-stubs/GeoCityMapBaseStub.svelte");
@@ -142,7 +143,13 @@ beforeEach(() => {
   vi.mocked(fetchGraphSignalDetail).mockImplementation(async () => detailResult() as never);
   vi.mocked(applyClassement).mockReset();
   vi.mocked(fetchGraphSignalsByCity).mockReset();
-  vi.mocked(fetchGraphSignalsByCity).mockImplementation(async () => ({ ok: true, totalCount: 0, cities: [] }));
+  vi.mocked(fetchGraphSignalsByCity).mockImplementation(async () => {
+    const { nodes } = detailResult();
+    return { ok: true, totalCount: nodes.length, cities: [{
+      citySlug: CITY_SLUG, signalCount: nodes.length, subsetCounts: {},
+      vivierV2Counts: countVivierClassifications(nodes.map((node) => node.classification as never)),
+    }] };
+  });
 });
 afterEach(() => {
   cleanup();

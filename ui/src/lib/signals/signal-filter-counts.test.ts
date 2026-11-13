@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { classementCountsForPerimeter, filtreCountsForPerimeter, filtreCubeOfNodes } from "./signal-filter-counts.js";
+import { classementCountsForPerimeter, displayedSignalCountForCity, filtreCountsForPerimeter, filtreCubeOfNodes } from "./signal-filter-counts.js";
 import type { GraphSignalNode } from "./graph-signal-detail-client.js";
 import { buildCityMapEntries } from "$lib/maps/maps-data.js";
 import { DEFAULT_CLASSEMENT_FILTER } from "./signal-classement.js";
@@ -31,6 +31,28 @@ const entry = (municipality: typeof A, filtreCube: Record<string, number> | null
   municipality: municipality!,
   vivierV2Counts: served ? ({} as never) : null,
   filtreCube,
+});
+
+describe("displayedSignalCountForCity", () => {
+  const city = { ...buildCityMapEntries([])[0]!, filtreCubesByClassement: {
+    pertinent: { "11100": 2, "11000": 1, "11110": 4 },
+    a_surveiller: { "11100": 3 }, non_classe: { "11100": 5 }, ecarte: { "11100": 8 },
+  } };
+  it("should combine relevance with axes and exclusions using the served city cube", () => {
+    const filter = { ...DEFAULT_CLASSEMENT_FILTER, a_surveiller: false, non_classe: false };
+    expect(displayedSignalCountForCity(city, "vivier-v2", filter, BOTH)).toBe(2);
+    expect(displayedSignalCountForCity(city, "vivier-v2|-p", filter, BOTH)).toBe(3);
+    expect(displayedSignalCountForCity(city, "vivier-v2", filter,
+      { ...BOTH, piiaSansProjetResidentiel: false })).toBe(6);
+    expect(displayedSignalCountForCity(city, "vivier-v2", { ...filter, ecarte: true }, BOTH)).toBe(2);
+    expect(displayedSignalCountForCity(city, "vivier-v2", { ...filter, pertinent: false }, BOTH)).toBe(0);
+  });
+  it("should return zero for an absent city and unavailable for a missing class dimension", () => {
+    const filter = { ...DEFAULT_CLASSEMENT_FILTER, non_classe: false };
+    expect(displayedSignalCountForCity(buildCityMapEntries([])[0]!, "vivier-v2", filter, BOTH)).toBe(0);
+    expect(displayedSignalCountForCity({ ...city, filtreCubesByClassement: null, filtreCube: { "11100": 2 } },
+      "vivier-v2", filter, BOTH)).toBeNull();
+  });
 });
 
 describe("classementCountsForPerimeter", () => {

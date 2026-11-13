@@ -165,6 +165,8 @@
   // ── Props : choroplèthe villes ─────────────────────────────────────────────
   /** Expression MapLibre `fill-color` de la couche `cities-fill` (obligatoire). */
   export let fillColorExpression: ExpressionSpecification;
+  /** Optional city population lens; null leaves other map views unrestricted. */
+  export let visibleCitySlugs: readonly string[] | null = null;
   /** Expression MapLibre `fill-opacity` de `cities-fill` (optionnelle). */
   export let fillOpacityExpression: ExpressionSpecification | number | undefined =
     undefined;
@@ -463,8 +465,14 @@
     const m = mapInstance as {
       getLayer: (id: string) => unknown;
       setPaintProperty: (layer: string, prop: string, value: unknown) => void;
+      setFilter: (layer: string, filter: unknown) => void;
     };
     if (!m.getLayer("cities-fill")) return;
+    const cityFilter = visibleCitySlugs === null ? null
+      : ["in", ["get", "citySlug"], ["literal", visibleCitySlugs]];
+    for (const layer of ["cities-fill", "cities-outline", "cities-label"]) {
+      if (m.getLayer(layer)) m.setFilter(layer, cityFilter);
+    }
     const surfaceMode = currentSurfaceMode();
     m.setPaintProperty("cities-fill", "fill-color", fillColorExpression);
     // §1/§3 — l'opacité d'aplat passe par l'invariant : 0 en satellite (l'imagerie
@@ -484,7 +492,7 @@
   }
 
   // Réapplique la peinture choroplèthe quand les expressions changent.
-  $: if (mapReady && (fillColorExpression || fillOpacityExpression)) {
+  $: if (mapReady && (fillColorExpression || fillOpacityExpression || visibleCitySlugs)) {
     applyCitiesFillPaint();
   }
 
