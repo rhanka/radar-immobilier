@@ -1,6 +1,9 @@
 ALTER TABLE facet_events ADD COLUMN IF NOT EXISTS source text NOT NULL DEFAULT 'manual'
   CHECK (source IN ('ai', 'manual'));
 --> statement-breakpoint
+CREATE INDEX IF NOT EXISTS facet_events_manual_class_target_idx
+  ON facet_events (city_slug, node_type, node_id) WHERE target_type='signal' AND source='manual';
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS signal_class_annotations (
   city_slug text NOT NULL,
   node_type text NOT NULL,
