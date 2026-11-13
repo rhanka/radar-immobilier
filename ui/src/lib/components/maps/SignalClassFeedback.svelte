@@ -10,15 +10,19 @@
   export let disabled = false;
   export let restoreBlockedReason: string | null = null;
   export let onSubmit: (choice: FeedbackChoice) => Promise<boolean> = async () => false;
+  export let onBeginCorrection: () => typeof onSubmit = () => onSubmit;
+  let correctionSubmit: typeof onSubmit | null = null;
+  let judgedClass: SignalClass = classe;
   let negative = false;
   let nextClass = "";
   let reason = "";
   let comment = "";
-  $: choices = (["pertinent", "a_surveiller", "ecarte"] as const).filter((value) => value !== classe);
+  $: choices = (["pertinent", "a_surveiller", "ecarte"] as const).filter((value) => value !== (negative ? judgedClass : classe));
   $: reasons = nextClass ? reasonCodesForClass(reasonCodes, nextClass as SignalClass) : [];
   $: if (!reasons.some((entry) => entry.code === reason)) reason = "";
   async function submit(choice: FeedbackChoice) {
-    if (await onSubmit(choice)) negative = false;
+    const send = choice.verdict === "down" ? correctionSubmit ?? onSubmit : onSubmit;
+    if (await send(choice)) negative = false;
   }
 </script>
 
@@ -26,7 +30,7 @@
   <IconButton size="sm" variant="ghost" aria-label="Valider l’annotation IA" title="Valider l’annotation IA"
     disabled={disabled || negative} onclick={() => void submit({ verdict: "up" })}><ThumbsUp size={15} /></IconButton>
   <IconButton size="sm" variant="ghost" aria-label="Corriger l’annotation IA" title="Corriger l’annotation IA"
-    disabled={disabled || negative} onclick={() => { negative = true; }}><ThumbsDown size={15} /></IconButton>
+    disabled={disabled || negative} onclick={() => { judgedClass = classe; correctionSubmit = onBeginCorrection(); negative = true; }}><ThumbsDown size={15} /></IconButton>
 </span>
 {#if negative}
   <Modal open={true} title="Reclassement obligatoire" dismissible={false}>

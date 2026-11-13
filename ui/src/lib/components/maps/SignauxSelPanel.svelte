@@ -1262,6 +1262,10 @@
                     <div class="signal-feedback-control">
                       <SignalClassFeedback classe={node.classAnnotation.classe} reasonCodes={classementReasonCodes}
                         disabled={classementInFlight.has(cardClassementKey)} restoreBlockedReason={classementEntry.restoreBlockedReason}
+                        onBeginCorrection={() => {
+                          const judgedNode = { ...node };
+                          return (choice) => onClassFeedback(judgedNode, choice);
+                        }}
                         onSubmit={(choice) => onClassFeedback(node, choice)} />
                     </div>
                   {/if}

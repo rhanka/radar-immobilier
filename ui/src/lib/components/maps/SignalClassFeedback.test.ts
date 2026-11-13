@@ -35,4 +35,17 @@ describe("required AI correction", () => {
     await fireEvent.click(button);
     expect(onSubmit).toHaveBeenCalledWith({ verdict: "up" });
   });
+  it("should retain the judged annotation callback while live data changes", async () => {
+    const original = vi.fn(async () => true);
+    const replacement = vi.fn(async () => true);
+    const view = render(SignalClassFeedback, { props: { classe: "pertinent", reasonCodes, onSubmit: original } });
+    await fireEvent.click(screen.getByRole("button", { name: "Corriger l’annotation IA" }));
+    await view.rerender({ classe: "ecarte", reasonCodes, onSubmit: replacement });
+    expect(screen.queryByRole("option", { name: "Pertinent" })).toBeNull();
+    await fireEvent.change(screen.getByLabelText("Nouvelle classe"), { target: { value: "ecarte" } });
+    await fireEvent.change(screen.getByLabelText("Motif du reclassement"), { target: { value: "N-NON-RES" } });
+    await fireEvent.submit(screen.getByRole("form"));
+    await waitFor(() => expect(original).toHaveBeenCalledTimes(1));
+    expect(replacement).not.toHaveBeenCalled();
+  });
 });
