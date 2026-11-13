@@ -116,7 +116,9 @@
     64,
     78
    ],
-   "interruptedAttempts": 3
+   "interruptedAttempts": 3,
+   "firstReceiptWeekly": 84,
+   "lastReceiptWeekly": 85
   },
   "surface": {
    "arm": "cp-plus-muse13-xhigh",
