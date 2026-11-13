@@ -24,4 +24,4 @@
 - [x] Lot 0 — Confirm upstream PR state and parameterize runner/scorer with xhigh defaults.
 - [x] Lot 1 — Complete 100 low reviews; audit CLI surface and score strict oracle 676.
 - [x] Lot 2 — Add the measured row, regenerate v12 Markdown/HTML/PDF, four SVGs and SHA256SUMS. Verify 42 historical rows byte for byte, all Astra/xhigh input hashes, zero chart-label overlaps, syntax and diff checks. Focus untouched.
-- [ ] Lot 3 — Commit selectively, push, open PR to main. Do not merge.
+- [x] Lot 3 — Commit selectively, push, open PR #1086 to main. No merge. PR #1085 remains open; rebase onto main after its integration.
