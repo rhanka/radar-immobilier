@@ -2,21 +2,27 @@ import { expect, test as base, type Page } from "@playwright/test";
 import { dedicatedCdpPage } from "./url-filters-cdp.mjs";
 
 // Attach only a fresh tab on the authorized CDP endpoint. Always close it.
-const test = base.extend<{ page: Page }>({
-  page: async ({}, use) => {
+const cdpTest = base.extend<{ page: Page }>({
+  page: async ({ baseURL }, use) => {
     const connection = await dedicatedCdpPage("http://127.0.0.1:9333");
     try {
       await connection.page.setViewportSize({ width: 1440, height: 1000 });
       await connection.page.bringToFront();
+      // A CDP page has no Playwright context baseURL; resolve harness URLs here.
+      await connection.page.goto(new URL("/e2e-qa/harness/rail-filter.html", baseURL).href);
       await use(connection.page);
     } finally {
       await connection.close();
     }
   },
 });
+// Ordinary QA/CI uses its configured browser. This lane uses CDP exclusively.
+const test = process.env.SIGNALS_PERIOD_CDP === "1" ? cdpTest : base;
 
 test("should change the signal period with real mouse clicks on every preset", async ({ page }) => {
-  await page.goto("http://127.0.0.1:15938/e2e-qa/harness/rail-filter.html");
+  if (process.env.SIGNALS_PERIOD_CDP !== "1") {
+    await page.goto("/e2e-qa/harness/rail-filter.html");
+  }
   const trigger = page.getByRole("button", { name: /^Période des signaux/ });
   for (const [label, token] of [
     ["6 derniers mois", "6mo"],
