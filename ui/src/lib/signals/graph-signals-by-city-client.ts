@@ -4,7 +4,7 @@
  * counted under the explicit workspace visibility.
  */
 
-import type { DocumentDateBasis, VivierV2Counts } from "@radar/domain";
+import type { DocumentDateBasis, VivierFiltreCube, VivierV2Counts } from "@radar/domain";
 import {
   DEFAULT_REQUEST_TIMEOUT_MS,
   fetchJsonWithTimeout,
@@ -26,6 +26,12 @@ export interface GraphSignalCityItem {
    * Absent des réponses d'un serveur antérieur au contrat vivier v2.
    */
   vivierV2Counts?: VivierV2Counts;
+  /**
+   * Cube Filtre de la vue B (même passe serveur) : compte par combinaison des
+   * critères du menu « Filtre », indépendant des drapeaux excludePiia /
+   * excludeDerogations. Absent d'un serveur antérieur à ce contrat.
+   */
+  filtreCube?: VivierFiltreCube;
   /**
    * Exact intersection counts for each subset of {z, m, p, r} flags.
    * Keys: "", "z", "m", "p", "r", "z|m", … up to "z|m|p|r" (16 keys).
