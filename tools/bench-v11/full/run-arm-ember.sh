@@ -29,6 +29,12 @@ STOP_WEEKLY_PCT="${STOP_WEEKLY_PCT:-85}"
 # any git checkout (the CLI reads rules files from its workspace root).
 RUN_CWD="${MUSE_CWD:-${TMPDIR:-/tmp}/muse-ember-run}"
 mkdir -p "$ARMDIR/raw" "$ARMDIR/jsonl" "$ARMDIR/usage" "$RUN_CWD"
+# Guard (added 2026-11-13, after the published runs, which used an empty
+# directory): refuse a non-empty CLI working directory.
+if [ -n "$(ls -A "$RUN_CWD" 2>/dev/null)" ]; then
+  echo "MUSE_CWD $RUN_CWD is not empty: refusing to run" >&2
+  exit 3
+fi
 MANIFEST="$DIR/../harness/manifest-v101b.json"
 export DIR SCRIPTS ARMDIR ARM EFFORT STOP_WEEKLY_PCT RUN_CWD
 
