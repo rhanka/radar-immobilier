@@ -30,6 +30,7 @@ import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-sta
 import { createAccountBinding } from "./account-binding.js";
 import { admissionJitInputFromClaims } from "./admission-jit.js";
 import { createArtifactBinding } from "./artifact-binding.js";
+import { createSignalBinding, type SignalQuery, type SignalRuntime } from "./signal-store.js";
 
 /**
  * REMOTE transport for the immo MCP provider: Streamable HTTP (MCP SDK) behind an
@@ -149,6 +150,8 @@ export function authContextFromMcp(
     audience: opts.audience,
   };
   const orgId = claims["org_id"];
+  const clientId = ownerClientId(mcpAuth);
+  if (clientId !== undefined) ctx.clientId = clientId;
   if (typeof orgId === "string") ctx.orgId = orgId;
   // The subject credential stays in the private exchange boundary.
   return ctx;
@@ -216,6 +219,7 @@ function isSessionOwner(owner: SessionOwner, mcpAuth: McpAuthContext): boolean {
 
 /** Test/wiring overrides — keeps the prod path env-only while letting tests inject a key source. */
 export interface ImmoHttpDeps {
+  signals?: SignalQuery;
   /** Trusted shared-service binding. No environment value can fabricate this capability. */
   artifacts?: import("./registry/artifact-provider.js").ArtifactMcpBinding;
   /** Override the data source (default = `createDataSource({})` → MockDataSource). */
@@ -246,6 +250,17 @@ export interface ImmoHttpDeps {
 export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {}): Hono {
   const data = deps.data ?? createDataSource({});
   const raw = deps.raw ?? createRawDataSource({});
+  const signalRuntime = (server: McpServer): SignalRuntime | undefined => deps.signals ? {
+    db: deps.signals,
+    async confirm(message) {
+      if (!server.server.getClientCapabilities()?.elicitation) return false;
+      const response = await server.server.elicitInput({ mode: "form", message,
+        requestedSchema: { type: "object", properties: { confirm: { type: "boolean",
+          title: "Confirm this signal change", description: "Accept the displayed change as a human decision." } },
+        required: ["confirm"] } }, { timeout: 60_000 });
+      return response.action === "accept" && response.content?.confirm === true;
+    },
+  } : undefined;
 
   const mcpAuthConfig: McpAuthConfig = {
     resource: config.resource,
@@ -398,7 +413,8 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
       entry.lastSeenAt = now;
       // Immutable capture at entry: the running handler keeps this request's
       // identity even when a concurrent request enters the same session.
-      const snapshot = captureInvocationContext({ auth, data, raw });
+      const signals = signalRuntime(entry.server);
+      const snapshot = captureInvocationContext({ auth, data, raw, ...(signals ? { signals } : {}) });
       return dispatchWithExchange(mcpAuth, auth, subjectToken, snapshot, () => entry.transport.handleRequest(request), request.signal);
     }
 
@@ -412,8 +428,9 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
     // capture identity and scopes per request; the subject bearer stays private
     // before reaching the transport (see the session branch above).
     const { mcpAuth: openAuth, auth: openAuthCtx, subjectToken: openSubject } = currentAuth(c);
-    const snapshotForOpen = captureInvocationContext({ auth: openAuthCtx, data, raw });
     const server = new McpServer({ name: IMMO_MCP_NAME, version: IMMO_MCP_VERSION });
+    const signals = signalRuntime(server);
+    const snapshotForOpen = captureInvocationContext({ auth: openAuthCtx, data, raw, ...(signals ? { signals } : {}) });
     host.retain(server.server);
     const transport = new WebStandardStreamableHTTPServerTransport({
       sessionIdGenerator: () => randomUUID(),
@@ -492,7 +509,9 @@ async function main(): Promise<void> {
   }
   const accounts = createAccountBinding(process.env);
   const artifacts = await createArtifactBinding(process.env);
+  const signals = createSignalBinding(process.env);
   const app = createImmoHttpApp(config, { data, raw, exchange, ...(accounts ? { authorize: accounts.authorize } : {}),
+    ...(signals ? { signals } : {}),
     ...(artifacts ? { artifacts: artifacts.binding } : {}) });
   const { serve } = await import("@hono/node-server");
   serve({ fetch: app.fetch, port: config.port });
