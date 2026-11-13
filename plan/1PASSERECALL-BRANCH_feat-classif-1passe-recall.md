@@ -40,4 +40,4 @@
 - [x] Trois rappels par moitié et au total ; bornes Wilson ; détails des manqués de mise au point privés.
 - [x] Bras B rejoué sur textes identiques ; coût de classification séparée : missing source.
 - [x] Cible score-c pour le recalcul ultérieur sans appel modèle ; aucun résultat D3 attendu ou consommé.
-- [ ] Agrégats committés, branche poussée, PR draft ; aucune fusion.
+- [x] Agrégats committés, branche poussée, PR draft #1101 vers feat/classif-1passe-bc ; aucune fusion.
