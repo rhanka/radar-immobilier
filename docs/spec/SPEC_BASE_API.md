@@ -46,6 +46,16 @@ Personal commands, one explicit workspace in the path:
   accepted as head-shape and recovered (never a new command); older payloads
   without either are recovered as historical only.
 - `Idempotency-Key` header: required uuid (lowercased server-side).
+- `POST /api/v1/workspaces/:workspaceId/signal-facets/personal/reclassify`
+  → `{ ok: true }`. Browser session required. Body: `target`, `displayedFingerprint`,
+  `archives: { personal?: headId, workspace?: headId }` (at least one),
+  `selectionHeads: { pertinent, a_surveiller }` (nullable head ids),
+  `nextClass: non_classe|pertinent|a_surveiller`, optional `reasonCode`.
+  Restores the requested archive scopes and applies the final selection in one
+  transaction. Workspace restoration still requires `moderateArchive`.
+  One idempotent receipt covers the full command. A retry with the same key and
+  payload recovers a committed result even after a source refresh. Any failed
+  transition rolls back all heads, receipts and projection revisions.
 - `GET /api/v1/workspaces/:workspaceId/signal-facets/personal/cities/:city`
   → `{ ok: true, heads }` via `readScopedPersonalHeads`.
 - Error mapping: `FacetHeadConflictError` → 409 + `current`;
