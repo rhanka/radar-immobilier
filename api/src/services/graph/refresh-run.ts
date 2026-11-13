@@ -324,9 +324,9 @@ async function publishSnapshot(options: RunPvRefreshOptions, initial: RefreshSta
       `Postgres projection refused: ${projected.reason ?? "regression"}`);
     if (options.singlePassPrompt) {
       for (const node of target.snapshot.nodes) {
+        if (node.type !== "Signal" && node.type !== "DesignationEvent") continue;
         const annotation = node.properties?.["classAnnotation"] as AiClassAnnotation | undefined;
         if (annotation?.source === "ai") {
-          if (!node.type) throw new Error("Annotated graph node has no type");
           await writeClassAnnotation(options.db, {
             ...annotation, citySlug: options.citySlug, nodeType: node.type, nodeId: node.id,
           });

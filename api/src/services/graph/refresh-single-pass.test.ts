@@ -6,7 +6,7 @@ import { loadOntologyProfile, registryRecordsToExtraction,
   type TextJsonGenerationClient, type TextJsonGenerationInput } from "@sentropic/engram";
 import { beforeAll, describe, expect, it } from "vitest";
 import { extractRefreshProfile, type RefreshProfileContext } from "./refresh-profile.js";
-import { loadSinglePassPrompt, parseSinglePassClass, singlePassEnabled,
+import { loadSinglePassPrompt, parseSinglePassClass, singlePassEnabled, singlePassPrimary,
   type SinglePassPrompt } from "./refresh-single-pass.js";
 import type { RefreshCorpusChunk } from "./refresh-corpus.js";
 
@@ -48,6 +48,15 @@ function body(annotations?: unknown[]) {
 }
 
 describe("single-pass refresh extraction", () => {
+  it("should default to Astra low independently of the legacy medium settings", () => {
+    expect(singlePassPrimary({ REFRESH_REASONING_EFFORT: "medium" })).toEqual({
+      provider: "openai", model: "gpt-6-astra", effort: "low",
+    });
+    expect(singlePassPrimary({ REFRESH_SINGLE_PASS_PROVIDER: "gemini",
+      REFRESH_SINGLE_PASS_MODEL: "gemini-3.8-flash", REFRESH_SINGLE_PASS_REASONING_EFFORT: "low" }))
+      .toEqual({ provider: "gemini", model: "gemini-3.8-flash", effort: "low" });
+    expect(() => singlePassPrimary({ REFRESH_SINGLE_PASS_REASONING_EFFORT: "invalid" })).toThrow();
+  });
   it("should keep flag zero byte-identical to the existing prompt and schema with no class output", async () => {
     const seen: TextJsonGenerationInput[] = [];
     const disabled = singlePassEnabled("0") ? prompt : undefined;

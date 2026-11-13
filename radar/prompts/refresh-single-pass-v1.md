@@ -5,11 +5,11 @@ category (verdict) is the registry partition of that code and is never chosen se
 Judge from the item text only. Precedence: item text > code definitions > guide. Quote the item
 text verbatim (at most 300 characters) as the citation.
 
-## Steve's criteria
+## Chaperon Immobilier's criteria
 
-# Steve's general criteria (verbatim, signed analysis of 2026-09-21)
+# Chaperon Immobilier's general criteria (verbatim, signed analysis of 2026-09-21)
 
-Source: Steve Chaperon's written analysis. Quotes only; no counts, no example rows.
+Source: Chaperon Immobilier's written analysis. Quotes only; no counts, no example rows.
 
 ## Principle: membership, not ranking
 
@@ -53,7 +53,7 @@ Not an urban-planning bylaw; no effect on the capacity to build; restrictive dir
 
 # Reason codes (28): definitions only
 
-Source: Steve's workbook, tab "Codes de motif" (unsealed from reference-c). No count, no example.
+Source: Chaperon Immobilier's workbook, tab "Codes de motif" (unsealed from reference-c). No count, no example.
 
 - `P-VILLE-TERRITOIRE` (pertinent): Changement de portée générale — tout le territoire ou une zone entière (concordance au schéma, OGAT, CPTAQ à portée collective, refonte, norme générale abrogée)
 - `P-NOUV-ZONE` (pertinent): Création ou ouverture d'une nouvelle zone résidentielle, à l'initiative de la Ville

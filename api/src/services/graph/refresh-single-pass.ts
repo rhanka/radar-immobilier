@@ -4,6 +4,19 @@ import { dirname, resolve } from "node:path";
 import { z } from "zod";
 import type { Extraction } from "@sentropic/engram";
 import { canonicalHash } from "./replay/canonical-json.js";
+import type { RefreshModel } from "./refresh-model-policy.js";
+
+/** Dedicated settings keep flag-zero model selection unchanged. */
+export function singlePassPrimary(env: NodeJS.ProcessEnv = process.env): RefreshModel {
+  const provider = env.REFRESH_SINGLE_PASS_PROVIDER ?? "openai";
+  const model = env.REFRESH_SINGLE_PASS_MODEL ?? "gpt-6-astra";
+  const effort = env.REFRESH_SINGLE_PASS_REASONING_EFFORT ?? "low";
+  if (provider !== "openai" && provider !== "gemini") throw new Error("Invalid single-pass provider");
+  if (!model.trim() || !["minimal", "low", "medium", "high", "xhigh"].includes(effort)) {
+    throw new Error("Invalid single-pass model or effort");
+  }
+  return { provider, model, effort };
+}
 
 export interface SinglePassPrompt { readonly id: string; readonly sha256: string; readonly text: string }
 const classes = ["pertinent", "a_surveiller", "non_classe", "ecarte"] as const;

@@ -6,7 +6,7 @@ import { createRefreshMesh, refreshErrorDiagnostic } from "../services/graph/ref
 import { createRefreshModelPolicy, type RefreshModel } from "../services/graph/refresh-model-policy.js";
 import { createReannotationRepository } from "../services/graph/reannotate-repository.js";
 import { createReannotationClassifier, parseReannotationArgs, runReannotation } from "../services/graph/reannotate-signals.js";
-import { loadSinglePassPrompt } from "../services/graph/refresh-single-pass.js";
+import { loadSinglePassPrompt, singlePassPrimary } from "../services/graph/refresh-single-pass.js";
 
 function required(name: string): string {
   const value = process.env[name]?.trim();
@@ -25,7 +25,7 @@ function selectedModel(prefix: string): RefreshModel {
 
 async function main(): Promise<void> {
   const { apply } = parseReannotationArgs(process.argv.slice(2));
-  const primary = selectedModel("REFRESH");
+  const primary = singlePassPrimary();
   const fallback = selectedModel("REFRESH_FALLBACK");
   const timeoutMs = Number(process.env.REFRESH_TIMEOUT_MS ?? 900_000);
   if (!Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 3_600_000) {
