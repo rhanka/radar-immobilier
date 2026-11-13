@@ -75,6 +75,7 @@ vi.mock("$lib/maps/lots-client.js", async (importOriginal) => {
 import SignauxMapView from "./SignauxMapView.svelte";
 import { fetchGraphSignalDetail, GraphSignalsHttpError } from "$lib/signals/graph-signal-detail-client.js";
 import { applyClassement } from "$lib/signals/signal-classement-client.js";
+import { fetchGraphSignalsByCity } from "$lib/signals/graph-signals-by-city-client.js";
 
 const CITY_SLUG = buildCityMapEntries([])[0]!.municipality.slug;
 const FINGERPRINT = "a".repeat(64);
@@ -140,6 +141,8 @@ beforeEach(() => {
   vi.mocked(fetchGraphSignalDetail).mockReset();
   vi.mocked(fetchGraphSignalDetail).mockImplementation(async () => detailResult() as never);
   vi.mocked(applyClassement).mockReset();
+  vi.mocked(fetchGraphSignalsByCity).mockReset();
+  vi.mocked(fetchGraphSignalsByCity).mockImplementation(async () => ({ ok: true, totalCount: 0, cities: [] }));
 });
 afterEach(() => {
   cleanup();
@@ -203,16 +206,63 @@ describe("SignauxMapView classement behaviour", () => {
     expect(pills("classement-filter-panel")).toEqual(["0", "0", "2", "0"]);
     await fireEvent.click(screen.getByTestId("classement-filter-trigger"));
 
-    // Uncheck Précoce in Filtre: Pertinence Non classé must become 3, and
-    // the Filtre Précoce pill counts the 2 early signals in scope.
+    // Faceted Filtre pills: each criterion over the signals the OTHER active
+    // criteria keep. Précoce checked: Zonage / Résidentiel read the 2 shown.
     await fireEvent.click(screen.getByTestId("filtre-trigger"));
-    expect(pills("filtre-panel")).toEqual(["3", "3", "2", "0", "0"]);
+    expect(pills("filtre-panel")).toEqual(["2", "2", "2", "0", "0"]);
+    // Uncheck Précoce: the late signal shows (3 cards), Zonage / Résidentiel
+    // follow, and Précoce keeps counting the 2 early signals.
     const precoceBox = screen.getByLabelText(/Précoce/) as HTMLInputElement;
     await fireEvent.click(precoceBox);
     await waitFor(() => expect(document.querySelectorAll("[data-signal-node]").length).toBe(3));
+    expect(pills("filtre-panel")).toEqual(["3", "3", "2", "0", "0"]);
     await fireEvent.click(screen.getByTestId("filtre-trigger"));
     await fireEvent.click(screen.getByTestId("classement-filter-trigger"));
     expect(pills("classement-filter-panel")).toEqual(["0", "0", "3", "0"]);
+  });
+
+  it("should count the Filtre pills over every displayed city when no city is selected", async () => {
+    const [cityA, cityB] = buildCityMapEntries([]).map((entry) => entry.municipality.slug);
+    const stages = (early: number, late = 0) => ({
+      avis_motion: early, projet_reglement: 0, consultation_publique: 0, second_projet: 0,
+      adoption: late, entree_vigueur: 0, inconnu: 0,
+    });
+    const empty = stages(0);
+    const counts = (early: number, late: number, excluded: number) => ({
+      qualified: early + late, residentialUnknown: excluded,
+      excludedByReason: { non_residentiel_franc: 0, piia_non_pertinent: 0, hors_zonage: 0, derogation_hors_sujet: 0 },
+      stageCounts: stages(early, late), stageCountsHorsZonage: empty,
+      stageCountsResEligible: stages(early, late), stageCountsResEligibleHorsZonage: empty,
+      total: early + late + excluded,
+    });
+    vi.mocked(fetchGraphSignalsByCity).mockImplementation(async () => ({
+      ok: true, totalCount: 7,
+      cities: [
+        // A: 2 early shown, 1 late, 1 early derogation hidden by its exclusion.
+        { citySlug: cityA!, signalCount: 4, subsetCounts: {}, vivierV2Counts: counts(2, 1, 0),
+          filtreCube: { "11100": 2, "11000": 1, "11101": 1 } },
+        // B: 1 early shown, 2 early PIIA without a residential project hidden.
+        { citySlug: cityB!, signalCount: 3, subsetCounts: {}, vivierV2Counts: counts(1, 0, 0),
+          filtreCube: { "11100": 1, "11110": 2 } },
+      ],
+    }) as never);
+    window.history.replaceState({}, "", "/geo/region/quebec?mode=signal&filter.period=all&filter.zonage=1&filter.residentiel=1&filter.precoce=1&filter.excludePiia=1&filter.excludeDerogations=1");
+    render(SignauxMapView, { props: { geoRoute: {
+      level: "region", region: "quebec", state: parseGeoQuery(window.location.search),
+    } } });
+    // Rail header « 3 signaux · 2 villes » (bulk counts, no selection).
+    await waitFor(() => expect([...document.querySelectorAll(".rail-count-strong")]
+      .map((el) => el.textContent)).toEqual(["3", "2"]));
+    expect(vi.mocked(fetchGraphSignalDetail)).not.toHaveBeenCalled();
+
+    await fireEvent.click(screen.getByTestId("filtre-trigger"));
+    const pills = () => [...screen.getByTestId("filtre-panel").querySelectorAll(".st-badge")]
+      .map((pill) => pill.textContent?.trim() ?? "");
+    // Zonage / Résidentiel / Précoce = the 3 signals shown; PIIA hides 2; dérogations hide 1.
+    expect(pills()).toEqual(["3", "3", "3", "2", "1"]);
+    // The counts follow the other active criteria: without Précoce, the late signal joins.
+    await fireEvent.click(screen.getByLabelText(/Précoce/));
+    await waitFor(() => expect(pills()).toEqual(["4", "4", "3", "2", "1"]));
   });
 
   it("a failed write marks only the concerned card with an exclamation icon, no big panel", async () => {
