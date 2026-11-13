@@ -41,5 +41,6 @@
   - [x] Review correction: explicit AI-only purge with optional run/prompt filters; dry-run default, shared writer lock and JSON report.
 - [x] **Lot 4 — Verification and delivery**
   - [x] Review correction coverage: purge dry-run, AI-only apply, filters, human history, prior visibility, idempotence, projection tokens and exact model labels.
+  - [x] Review correction gate: typecheck, lint, 38 API tests including 14 PostgreSQL tests at flag zero, 27 targeted UI tests and 55 render checks pass; no timeout increase.
   - [x] Typecheck, lint, 150 scoped API tests, 7 PostgreSQL tests, 1,905 UI tests, 55 render checks; stack cleanup uses down -v.
   - [x] Self-inspection, push, PR #1099 to main with design, activation, rollback and risks. Independent h2a review unavailable (recorded in spec). No merge or live activation.

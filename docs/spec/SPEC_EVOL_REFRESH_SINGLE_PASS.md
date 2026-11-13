@@ -29,6 +29,9 @@ selection and archive history in any workspace, blocks AI writes. A short SHARE 
 serializes the history check with human inserts. Human readers and UI always prioritize human history.
 Explicitly confirming an AI class or selecting Non classé creates human history too.
 API cards expose `classAnnotation`; UI classes, reasons, badges and city counters consume it.
+The badge displays the exact accepted model identifier, or `modèle inconnu` when absent.
+Every changed AI annotation increments the existing shared workspace projection revision for its city,
+in the same transaction. Refresh, reannotation and purge use that same counter. No-op writes do not bump it.
 
 ## Recent reannotation
 
@@ -61,9 +64,28 @@ gh workflow run bascule-refresh.yml --ref main -f RUN=true -f WAIT_COMPLETE=true
 ```
 
 Inspect the manual run's model receipts, annotations and report. Keep schedules in their current state.
-Rollback future extraction by setting `REFRESH_SINGLE_PASS=0` with the same set-env command. The existing
-Gemini verification settings then take effect again. Keep the additive migration and annotation history;
-flag rollback does not delete existing AI classes. Human overrides remain authoritative.
+Rollback has two explicit steps, per i-cond's reversible decision:
+
+1. Set `REFRESH_SINGLE_PASS=0` with the same set-env command. This restores legacy extraction and
+   verification for future refreshes. The flag governs refresh writes only. Stored AI annotations are
+   data and remain readable by cards, counters and UI. There is no flag-based read guard.
+2. If the owner wants to roll back the data, run the explicit purge. Stop any active reannotation Job
+   separately before purging. Keep the additive migration. Preserve schedule suspension states.
+
+```sh
+make purge-ai-annotations-preprod SKIP_DOTENV=1 KUBECONFIG=/path/to/dedicated-preprod.kubeconfig ENV=preprod
+make purge-ai-annotations-preprod SKIP_DOTENV=1 KUBECONFIG=/path/to/dedicated-preprod.kubeconfig PURGE_MODE=apply ENV=preprod
+```
+
+The default is dry-run. Optional `PIPELINE_RUN_ID=<run>` and `PROMPT_SHA256=<sha256>` restrict the purge.
+Both filters together use intersection. Without filters, all `source=ai` annotation rows are selected.
+The command is `reannotate-signals --purge-ai-annotations [--dry-run | --apply]
+[--pipeline-run-id <run>] [--prompt-sha256 <sha256>]`. It needs no model call or model configuration.
+The make target uses the reannotation Job template and writer lock. Its JSON report lists the selected
+annotation identities, filters, matched count and deleted count. Repeated apply is a no-op.
+Only the AI overlay is deleted. Manual annotations, human event history and underlying graph properties
+remain intact. The prior human class is therefore retained; an untouched target has no annotation after purge.
+Actual deletions bump the shared projection revision so an open UI can refetch the restored state.
 
 ## Risks and observations
 
@@ -103,3 +125,17 @@ The first UI run exposed an incomplete secondary-read DB fixture; mocking its an
 restored all three population tests without changing their assertions.
 
 Delivery: [PR #1099](https://github.com/rhanka/radar-immobilier/pull/1099), targeting `main`.
+
+## Independent review corrections — 2026-11-13
+
+The owner's reversible decision replaces B1's proposed read guard with explicit data rollback.
+Readers continue consuming stored AI annotations with `REFRESH_SINGLE_PASS=0`.
+The purge PostgreSQL tests cover dry-run without writes or revision changes, AI-only deletion,
+run/prompt filters and their intersection, exact preservation of manual rows and human history,
+restored city visibility, idempotence and projection-token invalidation.
+
+Validation: typecheck and lint passed; 38 targeted API tests passed, including 14 PostgreSQL tests
+with `LOT_MIGRATION_DB_TEST=1` and `REFRESH_SINGLE_PASS=0`. The 27 targeted UI tests and 55 render
+checks passed. A first combined run exceeded the existing database-cleanup hook deadline despite
+passing all assertions. The required suites passed with one worker and no concurrent static checks.
+No timeout was increased. Every make invocation skipped dotenv; Compose used `--env-file /dev/null`.
