@@ -21,3 +21,12 @@ csets-capture:
 csets-deps:
 	@mkdir -p $(CLASSIF_HOME)/deps
 	@docker run --rm -v /home/antoinefa/src/radar-immobilier/tmp/refresh-single-pass:/src:ro -v $(CLASSIF_HOME):/private -w /private/deps node:24-bookworm-slim sh -c 'cp /src/package.json /src/package-lock.json .; for d in api ui packages/artifacts-host packages/immo-mcp packages/radar-domain packages/radar-scoring packages/radar-sources; do mkdir -p $$d; cp /src/$$d/package.json $$d/; done; npm ci --ignore-scripts --no-audit --no-fund -w api -w packages/radar-domain -w packages/radar-sources'
+.PHONY: csets-own
+csets-own:
+	@docker run --rm -v $(CLASSIF_HOME):/private node:24-bookworm-slim chown -R $(shell id -u):$(shell id -g) /private
+.PHONY: csets-test
+csets-test:
+	@$(CLASSIF_NODE) --test tools/classif/csets/metrics.test.mjs
+.PHONY: csets-validate
+csets-validate:
+	@docker run --rm --user $(shell id -u):$(shell id -g) -v /home/antoinefa/src/radar-immobilier/tmp/refresh-single-pass:/src:ro -v $(CLASSIF_HOME):/private -v $(CURDIR):/lane:ro -w /private/deps node:24-bookworm-slim sh -c 'cp /lane/tools/classif/csets/validate.ts .; node --import ./node_modules/tsx/dist/loader.mjs validate.ts'
