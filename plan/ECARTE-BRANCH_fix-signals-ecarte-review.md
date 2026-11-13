@@ -67,7 +67,12 @@ Fix #760 P1 while preserving #1090 period selection and perimeter counters. P2 a
 - [x] Shared archive correction: role refusal, independent scope restoration and default-list reload persistence.
 - [x] Reusable browser fixture and standalone PostgreSQL route regression committed.
 - [x] Existing period suite uses the shared fixture.
-- [ ] Real-click PostgreSQL browser regression and final delivery committed.
+- [x] Real-click PostgreSQL browser regression and validation evidence committed.
+- [x] Final correction gates: typecheck (0 errors, 8 warnings), lint (0 errors, 1 warning), UI 1,897 passing tests and 10 todo, 28 concerned API tests, four real-click PostgreSQL browser scenarios, five period/perimeter scenarios. Logs: tmp/shared-{typecheck,lint,test-ui,green-api,green-browser,e2e}.log.
+- [x] Browser transport forwards facet requests into the real Hono routes and disposable PostgreSQL databases; authentication and map data are synthetic. Shared and double archives return to the default list and survive reload. Contributor options are disabled with a visible explanation; API independently refuses restoration with 403.
+- [x] No API authorization change: existing workspace/restore requires moderateArchive. Personal and workspace streams stay independent, including compensation after a later write fails.
+- [x] Runtime and database removed with down -v. Disposable CDP contexts close in finally; unrelated existing browser tabs are preserved.
+- [x] Harness branch and explicit staged-path scope checks pass. Peer selection unavailable under harness/review (unknown exact author model/effort; no h2a_run MCP); tmp/shared-review.md records selection-failed, without consensus.
 - [x] API red: scoped-projection-revisions-db returns no archived card with showDiscarded=1. Unit red: Filtre returns 12 instead of 13. Logs: tmp/red-api.log, tmp/red-unit.log.
 - [x] Identical browser suite on 564971d24 UI sources: 3 pass, 2 fail (total remains 12, archived cards remain 6 instead of 7). Fixed sources: 5 pass. Logs: tmp/red-e2e-baseline.log, tmp/green-e2e-final.log.
 - [x] Browser coverage uses Playwright clicks over the full application, synthetic stateful API responses, and disposable CDP 9333 tabs. Real PostGIS API tests independently cover visibility, authorization, fingerprints, restoration and archive scopes. This is not a live preprod write campaign.
