@@ -25,7 +25,7 @@ const withV12 = (s) => (/\)$/.test(s) ? s.replace(/\)$/, ", v12)") : `${s} (v12)
 // triangle: Luna, Sonnet 4.6, Muse Ember
 // cross: GPT-4.1, Opus 5.5 ; star: cascades (CP, CP-low, C2, C3)
 const MODELS = [
-  { re: /^CP\+$/, model: "CP+", provider: "Cascades", shape: "star" },
+  { re: /^CP\+( low)?$/, model: "CP+", provider: "Cascades", shape: "star" },
   { re: /^Astra medium \(rejeu v12\)$/, model: "Astra replay", provider: "OpenAI", shape: "circle" },
   { re: /^CP actuel/, model: "CP", provider: "Cascades", shape: "star" },
   { re: /^CP-low/, model: "CP-low", provider: "Cascades", shape: "star" },

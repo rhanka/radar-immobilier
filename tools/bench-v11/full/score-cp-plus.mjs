@@ -8,7 +8,9 @@ const DIR = process.env.BENCH_DIR ?? new URL("..", import.meta.url).pathname.rep
 const { scoreSource } = await import(`${DIR}/full/score-676.mjs`);
 const manifest = JSON.parse(await readFile(`${DIR}/harness/manifest-v101b.json`, "utf8"));
 const astraDir = `${DIR}/full/arms/astra-medium-rejeu`;
-const cpDir = `${DIR}/full/arms/cp-plus-muse13-xhigh`;
+const effort = process.env.MUSE_EFFORT ?? "xhigh";
+if (!["low", "xhigh"].includes(effort)) throw new Error(`Unsupported reviewer effort: ${effort}`);
+const cpDir = `${DIR}/full/arms/cp-plus-muse13-${effort}`;
 const { actsOf, applyDecisions } = await import(`${DIR}/harness/precision-cascade.mjs`);
 const { documentPages } = await import(`${DIR}/harness/oracle-v3-lib.mjs`);
 const json = async (path) => JSON.parse(await readFile(path, "utf8"));
@@ -76,19 +78,19 @@ if (validReviews.length !== accepted.size || new Set(validReviews.map((row) => r
   throw new Error("CP+ must have exactly one valid review per accepted document in meta.jsonl");
 for (const id of accepted) {
   if (!existsSync(`${cpDir}/decisions/${id}.json`)) throw new Error(`Incomplete CP+ review: ${id}`);
-  if (!existsSync(`${cpDir}/validated/xhigh--${id}.output.json`)) throw new Error(`Missing filtered output: ${id}`);
+  if (!existsSync(`${cpDir}/validated/${effort}--${id}.output.json`)) throw new Error(`Missing filtered output: ${id}`);
   const decision = await json(`${cpDir}/decisions/${id}.json`);
   const output = await json(`${astraDir}/validated/medium--${id}.output.json`);
   if (decision.sourceOutputSha256 !== sha(JSON.stringify(output))
     || decision.promptSha256 !== "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68")
     throw new Error(`Cascade source or filter drift: ${id}`);
   const recorded = validReviews.find((row) => row.doc === id);
-  if (decision.documentId !== id || decision.receipt?.exit !== 0
+  if (decision.documentId !== id || decision.effort !== effort || decision.model !== "muse-spark-1.3" || decision.receipt?.exit !== 0
     || decision.receipt.startedAt !== recorded.startedAt || decision.receipt.usage.model !== "muse-spark-1.3")
     throw new Error(`Invalid review receipt: ${id}`);
   const pages = documentPages(await readFile(`${DIR}/full/corpus/text/${id}.txt`, "utf8"));
   const { filtered, log } = applyDecisions(output, actsOf(output), decision.decisions, pages);
-  if (JSON.stringify(filtered) !== JSON.stringify(await json(`${cpDir}/validated/xhigh--${id}.output.json`))
+  if (JSON.stringify(filtered) !== JSON.stringify(await json(`${cpDir}/validated/${effort}--${id}.output.json`))
     || JSON.stringify(log) !== JSON.stringify(decision.filter)) throw new Error(`Filtered output drift: ${id}`);
   decisions.push(decision);
 }
@@ -103,7 +105,7 @@ for (const file of (await readdir(usageDir)).filter((name) => name.endsWith(".js
 const summary = await json(`${cpDir}/_summary.json`);
 if (summary.stopped || summary.failed) throw new Error("CP+ stopped or failed; do not publish a complete score");
 const reviewConcurrency = maximumOverlap(cpMeta);
-if (reviewConcurrency > 4) throw new Error(`CP+ concurrency exceeds four: ${reviewConcurrency}`);
+if (reviewConcurrency > (effort === "low" ? 8 : 4)) throw new Error(`CP+ concurrency exceeds its bound: ${reviewConcurrency}`);
 const firstStart = cpMeta.find((row) => row.event === "START");
 summary.weeklyBefore = firstStart?.weeklyUsedPercent ?? summary.weeklyBefore;
 summary.startedAt = firstStart?.at ?? null;
@@ -113,7 +115,9 @@ summary.duplicateValidReviews = validReviews.length - new Set(validReviews.map((
 summary.completedBeforeStarts = cpMeta.flatMap((row, index) => row.event === "START"
   ? [cpMeta.slice(0, index).filter((item) => item.exit === 0 && !item.event).length] : []);
 summary.interruptedAttempts = cpMeta.filter((row) => row.event === "QUOTA-STOP").length;
-const cp = await scoreSource("CP+ (GPT-6 Astra medium → Muse Spark 1.3 xhigh)", "precision-cascade", resolve(cpDir, "xhigh"));
+summary.firstReceiptWeekly = validReviews[0]?.weeklyUsedPercent ?? null;
+summary.lastReceiptWeekly = validReviews.at(-1)?.weeklyUsedPercent ?? null;
+const cp = await scoreSource(`CP+${effort === "low" ? " low" : ""} (GPT-6 Astra medium → Muse Spark 1.3 ${effort})`, "precision-cascade", resolve(cpDir, effort));
 if (cp.strict.tp + cp.strict.fn !== 676) throw new Error("Expected oracle 676 for CP+");
 // Primary Meta page https://dev.meta.ai/models/muse-spark/, read 2026-11-13.
 // A uses reported output; B adds reasoning separately. Real usage includes CLI context.
@@ -136,5 +140,5 @@ const arm = { label: cp.arm, accepted: cp.accepted, strict: cp.strict,
     reviewer: { input: 1.25, cached: 0.15, output: 4.25, source: "https://dev.meta.ai/models/muse-spark/; 2026-11-13; primary" },
     denominator: documents.length, astraCacheDiscount: false },
   source, summary, surface: surface.summary };
-await writeFile(`${DIR}/full/scores-cp-plus.json`, JSON.stringify({ arm, cases: cp.cases }, null, 1));
+await writeFile(`${DIR}/full/scores-cp-plus${effort === "low" ? "-low" : ""}.json`, JSON.stringify({ arm, cases: cp.cases }, null, 1));
 console.log(JSON.stringify(arm));

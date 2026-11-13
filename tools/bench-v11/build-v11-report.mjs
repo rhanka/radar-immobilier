@@ -156,6 +156,8 @@ const argonRow = {
 const EMBER_DIR = V12 ? (process.env.BENCH_EMBER_DIR ?? "tools/bench-v11") : null;
 const cpPlusPath = V12 ? `${EMBER_DIR}/full/scores-cp-plus.json` : null;
 const CP_PLUS = cpPlusPath && existsSync(cpPlusPath) ? JSON.parse(await readFile(cpPlusPath, "utf8")).arm : null;
+const cpLowPath = V12 ? `${EMBER_DIR}/full/scores-cp-plus-low.json` : null;
+const CP_LOW = cpLowPath && existsSync(cpLowPath) ? JSON.parse(await readFile(cpLowPath, "utf8")).arm : null;
 const { cpPlusRows, cpPlusSection } = await import("./cp-plus-report.mjs");
 const EMBER_PRICE = { threshold: 200_000, lo: { i: 0.10, c: 0.004, o: 0.50 }, hi: { i: 0.30, c: 0.012, o: 1.50 } };
 const emberDocUsd = (u, withReasoning) => {
@@ -202,6 +204,7 @@ const MODEL_NAMES = [
   ["Mistral Small 4", "Mistral Small 4", "mistral-small-2603"],
 ];
 const CASCADES = {
+  "CP+ low": ["CP+ low (GPT-6 Astra medium → Muse Spark 1.3 low)", "CP+ low : GPT-6 Astra → Muse Spark 1.3", "medium → low"],
   "CP+": ["CP+ (GPT-6 Astra medium → Muse Spark 1.3 xhigh)", "CP+ : GPT-6 Astra → Muse Spark 1.3", "medium → xhigh"],
   "CP actuel (astra-medium → gemini low)": ["CP actuel (GPT-6 Astra medium → Gemini 3.8 Flash low)", "CP actuel : GPT-6 Astra → Gemini 3.8 Flash", "medium → low"],
   "CP-low (astra-low → gemini low)": ["CP-low (GPT-6 Astra low → Gemini 3.8 Flash low)", "CP-low : GPT-6 Astra → Gemini 3.8 Flash", "low → low"],
@@ -647,11 +650,12 @@ if (EMBER.length) {
   // given under both billing hypotheses for reasoning tokens (Meta's page does
   // not say): only the Muse rows with separate reasoning counts change.
   const isCascade = (row) => /^(CP|C2$|C3$)/.test(row.label);
-  const bestCandidates = [...ALL, ...(CP_PLUS ? cpPlusRows(CP_PLUS) : [])];
+  const bestCandidates = [...ALL, ...(CP_PLUS ? cpPlusRows(CP_PLUS, CP_LOW) : [])];
   const pick = (rows, score) => rows.filter((row) => score(row) !== null && Number.isFinite(score(row)))
     .sort((a, b) => (score(b) - score(a)) || (b.f1 - a.f1))[0];
   const apiWithReasoning = (row) => {
     if (row.label === "CP+") return CP_PLUS.usdApiEquivWithExtraReasoning;
+    if (row.label === "CP+ low") return CP_LOW.usdApiEquivWithExtraReasoning;
     const e = EMBER.find((x) => x.row.label === row.label);
     if (e) return e.apiR;
     if (row.label === wonderRow.label) return wonderApiBurnWithReasoning;
@@ -687,7 +691,7 @@ if (EMBER.length) {
   if (CP_PLUS) {
     md = md.replace(`Calculé depuis les ${ALL.length} lignes du tableau global (§3)`,
       `Calculé depuis les ${ALL.length} lignes du tableau global (§3), le rejeu Astra et CP+ mesurée`);
-    insertBefore("## 4.", cpPlusSection(CP_PLUS));
+    insertBefore("## 4.", cpPlusSection(CP_PLUS, CP_LOW));
     insertAfter("- surface d'accès de la CLI Muse déclarée", "- cascade CP+ mesurée : GPT-6 Astra medium rejoué, puis Muse Spark 1.3 xhigh en relecteur ; résultats et quotas dans la section « CP+ mesurée ».");
     md = md.replace("Le **combo CP actuel** reste en tête en F1", "Sur les 42 lignes historiques, le **combo CP actuel** reste en tête en F1");
     md = md.replace("Aucun modèle seul n'égale le combo CP", "Sur les 42 lignes historiques, aucun modèle seul n'égale le combo CP");
@@ -699,7 +703,7 @@ if (EMBER.length) {
   const { chartsV12 } = await import(new URL("./charts-v12.mjs", import.meta.url));
   const plotRows = [...bestCandidates].sort((a, b) => (b.r - a.r) || (b.f1 - a.f1));
   V12_CHARTS = chartsV12(plotRows.map((row) => ({ label: row.label, name: fullName(row.label), accepted: row.accepted, p: row.p, r: row.r,
-    f1: row.f1, api: row.api, seat: row.seat, isV12: row.label.startsWith("Muse Ember") || row.label === "CP+" || /rejeu v12/.test(row.label) })));
+    f1: row.f1, api: row.api, seat: row.seat, isV12: row.label.startsWith("Muse Ember") || row.label.startsWith("CP+") || /rejeu v12/.test(row.label) })));
   const shortName = (row) => fullName(row.label)?.replace(/\s*\((siège|API|siège AGY|Cloud Code)\)$/, "") ?? row.label;
   const noApi = plotRows.filter((row) => !(row.api > 0)).map(shortName);
   const apiOnly = plotRows.filter((row) => row.api > 0 && !(row.seat > 0)).map(shortName);

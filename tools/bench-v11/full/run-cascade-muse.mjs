@@ -7,7 +7,9 @@
 // Usage :
 //   node full/run-cascade-muse.mjs --verify <dossier decisions de CP>   (contrôle d'identité des messages)
 //   node full/run-cascade-muse.mjs [concurrence=4]                         (relecture réelle)
+// MUSE_EFFORT=low writes a separate low arm; xhigh remains the default. Maximum concurrency: 8.
 // Garde : quota hebdomadaire Muse lu avant chaque document, arrêt à STOP_WEEKLY_PCT (défaut 85).
+// STOP_WEEKLY_PCT=100 disables the guard, including when no counter is available.
 // Quota de siège jamais compté comme refus : attente 300 s, reprise (12 au plus).
 /* global setInterval, clearInterval */
 import { createHash } from "node:crypto";
@@ -41,7 +43,9 @@ if (process.argv[2] === "--verify") {
   process.exit(ko ? 1 : 0);
 }
 
-const concurrency = Math.max(1, Math.min(4, Number(process.argv[2] ?? 4)));
+const effort = process.env.MUSE_EFFORT ?? "xhigh";
+if (!["low", "xhigh"].includes(effort)) throw new Error(`Unsupported reviewer effort: ${effort}`);
+const concurrency = Math.max(1, Math.min(8, Number(process.argv[2] ?? 4)));
 const STOP = Number(process.env.STOP_WEEKLY_PCT ?? 85);
 const RUN_CWD = process.env.MUSE_CWD ?? `${process.env.TMPDIR ?? "/tmp"}/muse-cp-plus-run`;
 await mkdir(RUN_CWD, { recursive: true });
@@ -51,7 +55,7 @@ if (existsSync(`${srcDir}/runner.lock`)) throw new Error("Wait for the Astra rep
 for (const { id } of manifest.documents) {
   if (!existsSync(`${srcDir}/validated/medium--${id}.receipt.json`)) throw new Error(`Missing Astra validation: ${id}`);
 }
-const out = `${DIR}/full/arms/cp-plus-muse13-xhigh`;
+const out = `${DIR}/full/arms/cp-plus-muse13-${effort}`;
 for (const d of ["prompts", "jsonl", "raw", "usage", "decisions", "validated"]) await mkdir(`${out}/${d}`, { recursive: true });
 const lockPath = `${out}/runner.lock`;
 closeSync(openSync(lockPath, "wx"));
@@ -67,7 +71,7 @@ let stop = false;
 const children = new Set();
 const guard = () => {
   const used = weekly();
-  if (used === null || used >= STOP) {
+  if (STOP < 100 && (used === null || used >= STOP)) {
     stop = true;
     for (const child of children) child.kill("SIGTERM");
   }
@@ -75,7 +79,7 @@ const guard = () => {
 };
 const w0 = weekly();
 await log({ event: "START", weeklyUsedPercent: w0, at: new Date().toISOString(), concurrency, cwd: RUN_CWD });
-if (w0 === null || w0 >= STOP) throw new Error(`Muse quota unavailable or at stop threshold: ${w0}`);
+if (STOP < 100 && (w0 === null || w0 >= STOP)) throw new Error(`Muse quota unavailable or at stop threshold: ${w0}`);
 const watchdog = setInterval(() => {
   const used = guard();
   void log({ event: stop ? "WATCHDOG-STOP" : "WATCHDOG", weeklyUsedPercent: used, at: new Date().toISOString() });
@@ -84,7 +88,7 @@ const watchdog = setInterval(() => {
 const runMuse = (promptFile, jsonl) => new Promise((resolve) => {
   const t0 = Date.now();
   const child = spawn("timeout", ["1200", "muse", "exec", "--provider", "meta", "--model", "muse-spark-1.3", "--contributor-mode", "off",
-    "--reasoning-effort", "xhigh", "--prompt-file", promptFile, "--json"], { cwd: RUN_CWD, stdio: ["ignore", "pipe", "pipe"] });
+    "--reasoning-effort", effort, "--prompt-file", promptFile, "--json"], { cwd: RUN_CWD, stdio: ["ignore", "pipe", "pipe"] });
   children.add(child);
   const chunks = []; const err = [];
   child.stdout.on("data", (c) => chunks.push(c)); child.stderr.on("data", (c) => err.push(c));
@@ -106,7 +110,7 @@ async function oneDoc(document) {
   const pages = await pagesOf(id);
   const acts = actsOf(source);
   const base = { documentId: id, sourceArm: "astra-medium-rejeu", promptSha256: FILTER_SHA, sourceOutputSha256: sha(JSON.stringify(source)),
-    model: "muse-spark-1.3", effort: "xhigh", transport: "muse-exec-json" };
+    model: "muse-spark-1.3", effort, transport: "muse-exec-json" };
   let decisions = []; let rawText = null; let receipt = null;
   if (acts.length === 0) summary.noActs += 1;
   else {
@@ -143,7 +147,7 @@ async function oneDoc(document) {
   }
   const { filtered, log: filterLog } = applyDecisions(source, acts, decisions, pages);
   await writeFile(`${out}/decisions/${id}.json`, `${JSON.stringify({ ...base, acts, rawText, decisions, filter: filterLog, receipt }, null, 1)}\n`);
-  await writeFile(`${out}/validated/xhigh--${id}.output.json`, JSON.stringify(filtered));
+  await writeFile(`${out}/validated/${effort}--${id}.output.json`, JSON.stringify(filtered));
   summary.done += 1;
   console.log(`done ${id} acts=${acts.length} removed=${filterLog.removed.length}`);
 }
