@@ -1266,7 +1266,7 @@
                         class="classement-error-icon"
                         data-testid="classement-error-icon"
                         title={cardClassementError}
-                        aria-label="Échec du classement — afficher le détail"
+                        aria-label="Classement — afficher le détail"
                         on:click={() => { openClassementErrorKey = openClassementErrorKey === cardClassementKey ? null : cardClassementKey; }}
                       >
                         <TriangleAlert class="h-4 w-4" aria-hidden="true" />
