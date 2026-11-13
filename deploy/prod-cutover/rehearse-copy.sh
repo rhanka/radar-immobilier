@@ -10,7 +10,11 @@ export ARCHIVE="$private/prod-20261113.dump"
 export RESTORE_SHA256=6e6648d360cf354ab80cbac8822d08de8d69f1568c6203bf151b4c230f4745df
 export PLAN="$private/plan.json" ROSTER="$private/roster.json"
 export RELEASE="$PWD/deploy/prod-cutover/release.json"
-export OUTPUT="$private/rehearsal-owner-20261113"
+if [[ -f $private/active-copy.json && ! -L $private/active-copy.json ]]; then
+  export OUTPUT
+  OUTPUT=$(jq -er .output "$private/active-copy.json")
+  [[ $(dirname "$OUTPUT") == "$private" && $(basename "$OUTPUT") =~ ^rehearsal-[a-f0-9-]{36}$ ]]
+else export OUTPUT="$private/rehearsal-not-started"; fi
 export APPROVAL="$private/approval.json" EVIDENCE="$OUTPUT/local-evidence.json"
 export NODE_EXTRA_CA_CERTS="$private/ca.crt" SMOKE_URL=https://recette.localhost:15321
 if [[ ${1:-} == local-* ]]; then
