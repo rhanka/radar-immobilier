@@ -47,6 +47,11 @@ Restore real mouse selection in the signal period picker after PR #1084. Count P
 - [x] Local reproduction uses the real rail and DS in an isolated UI harness.
 
 ## Plan / Todo (lot-based)
+- [x] **Lot 4 — CI #1090 native-discard regression**
+  - [x] Reproduce the unchanged graph-signals route test: 47 pass, all-discarded by-city fails.
+  - [x] Skip discarded rows before city creation on legacy reads; retain full class cubes on scoped reads.
+  - [x] Run graph-signals, API facets/by-city, archive-count regressions and test-ui; remove isolated stacks with down -v.
+  - [x] Prepare the trailer-free fix for push; preserve the open, unmerged PR.
 - [x] **Lot 3 — Second review pass**
   - [x] Establish archive-free list semantics from coherent-city filtering and real clicks (6 cards → 6 with Écarté → 0 with only Écarté).
   - [x] Reproduce 12 → 13 → 12 on head 8cd024524, then exclude archive cubes from Filtre only.
@@ -69,6 +74,10 @@ Restore real mouse selection in the signal period picker after PR #1084. Count P
   - [x] Remove isolated stack and volumes (`down -v --remove-orphans`, no remaining project containers).
 
 ## Evidence
+- [x] CI correction: unchanged graph-signals route suite reproduces 47 passes / 1 all-discarded failure on 4c616a4b7. Legacy aggregation now skips discarded rows before creating cities when class cubes are not requested; scoped class cubes retain archives and exclude them from visible totals.
+- [x] Final requested API campaign: 23 files / 291 tests pass, including all 48 graph-signals route tests, graph-store, integration facets, scoped facets/projection routes and by-city. Existing archive/date-window/Pertinence assertions are unchanged. Full UI: 145 files pass, 1894 tests pass, 10 todo. Changed-file ESLint and git diff --check pass.
+- [x] Extended 141-file facets campaign was not green: 873 passes, 3 test failures and 41 teardown suite failures. PostgreSQL DROP DATABASE checkpoints exceeded fixture cleanup deadlines; two migration assertions fail on missing admission_source in the historical fixture and a journal tail expecting 0024 instead of 0041. No tests changed. Requested suites rerun green on an isolated tmpfs PostGIS database after migration, without timeout changes.
+- [x] Commands: make -f tmp/perimeter.mk test-api API_ARGS='src/routes/graph-signals.test.ts tests/integration/facets src/routes/signal-facets-headers.test.ts src/routes/scoped-signal-facets-db.test.ts src/routes/scoped-lot-facets-db.test.ts src/routes/scoped-projection-revisions-db.test.ts src/services/facets/scoped-db.test.ts by-city' ENV=test-period-perimeter; test-ui with the same runner/ENV. Logs: tmp/ci1090-{red,api,api-final,ui,lint}.log. Both db-down and down ran down -v. No environment files loaded. Peer review selection unavailable: tmp/ci1090-review.md.
 - [x] Second pass rule: archived targets never enter coherent-city signals (`scoped-projection-revisions.ts:129-139`); the UI relevance lens does not request archived nodes. Filtre therefore excludes `ecarte` cubes, while Pertinence retains them.
 - [x] Identical regression on 8cd024524: unit expects 12 but gets 13 for z/r/p. Browser soft assertions reproduce 12 → 13 → 12, continue through Delson and H-01, and fail only on the three no-selection counts after checking Écarté. List semantics test already passes on that head.
 - [x] Second pass green: typecheck 0 errors / 8 warnings; lint 0 errors / 1 warning; test-ui 145 files / 1894 tests passed, 10 todo. API 167 tests passed across graph-store, base-api-by-city and scoped-projection-revisions-db on isolated PostGIS port 5539.
