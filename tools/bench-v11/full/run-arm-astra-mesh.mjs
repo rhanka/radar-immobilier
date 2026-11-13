@@ -10,8 +10,8 @@
 //   BENCHMARK_OWNER_SCOPE=<portée> node full/run-arm-astra-mesh.mjs [effort=medium] [concurrence=2]
 // Sorties : full/arms/astra-<effort>-rejeu/{raw,usage}/<effort>--<doc>.*, meta.jsonl, codex-quota.jsonl.
 import { createHash } from "node:crypto";
-import { mkdir, readFile, writeFile, appendFile } from "node:fs/promises";
-import { existsSync, writeFileSync } from "node:fs";
+import { mkdir, readFile, writeFile, appendFile, readdir } from "node:fs/promises";
+import { existsSync, openSync, closeSync, unlinkSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 
 const DIR = process.env.BENCH_DIR ?? new URL("..", import.meta.url).pathname.replace(/\/$/, "");
@@ -23,6 +23,7 @@ const concurrency = Math.max(1, Math.min(4, Number(process.argv[3] ?? 2)));
 const STOP = Number(process.env.STOP_CODEX_PCT ?? 90);
 const TIMEOUT_MS = effort === "xhigh" ? 900_000 : 480_000;
 if (!MESH || !SCOPE) throw new Error("BENCH_MESH_DIR et BENCHMARK_OWNER_SCOPE sont requis");
+if ((await readdir(process.cwd())).length) throw new Error("Astra replay requires an empty cwd outside the repository");
 for (const k of ["OPENAI_API_KEY", "ANTHROPIC_API_KEY", "MISTRAL_API_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY"]) {
   if (process.env[k]) throw new Error(`${k} doit être absent : sièges seulement`);
 }
@@ -46,6 +47,10 @@ const acquire = (affinityKey, requestId) => facade.acquire({ accountId: account.
 const armDir = `${DIR}/full/arms/astra-${effort}-rejeu`;
 await mkdir(`${armDir}/raw`, { recursive: true });
 await mkdir(`${armDir}/usage`, { recursive: true });
+const lockPath = `${armDir}/runner.lock`;
+const lock = openSync(lockPath, "wx");
+closeSync(lock);
+process.once("exit", () => { try { unlinkSync(lockPath); } catch { /* preserve original exit */ } });
 const log = (file, row) => appendFile(`${armDir}/${file}`, `${JSON.stringify(row)}\n`);
 
 // Quota hebdomadaire codex (même source que codex-weekly-usage.mjs du v10) : seuls les champs de quota sortent.
@@ -80,13 +85,6 @@ if (before.weeklyUsedPercent !== null && before.weeklyUsedPercent >= STOP) throw
 if (process.env.QUOTA_ONLY === "1") { console.log(JSON.stringify({ planType: before.planType, httpStatus: before.httpStatus, windows: before.windows })); process.exit(0); }
 
 const queue = manifest.documents.map((d) => d.id).filter((id) => !existsSync(`${armDir}/usage/${effort}--${id}.json`));
-// Second exécutant possible (owner 13/11 : paralléliser) : 4e argument « reverse » = file prise par la fin ;
-// un verrou par document (wx) évite qu'un document soit traité deux fois.
-if (process.argv[4] === "reverse") {
-  // 5e argument : index minimal du manifeste (moitié haute seulement, pour ne pas croiser le premier exécutant, qui ne pose pas de verrou).
-  const minIdx = Number(process.argv[5] ?? 0); const idx = new Map(manifest.documents.map((d, i) => [d.id, i]));
-  queue.splice(0, queue.length, ...queue.filter((id) => idx.get(id) >= minIdx).reverse());
-}
 console.log(`à faire : ${queue.length}`);
 async function runDoc(id) {
   const user = await readFile(`${DIR}/full/prompts/${id}.user.txt`, "utf8");
@@ -125,8 +123,6 @@ async function worker() {
       const q = await codexWeekly(`garde-${done}`);
       if (q.weeklyUsedPercent !== null && q.weeklyUsedPercent >= STOP) { stop = true; await log("meta.jsonl", { event: "CODEX-STOP", weeklyUsedPercent: q.weeklyUsedPercent }); break; }
     }
-    if (existsSync(`${armDir}/usage/${effort}--${id}.json`)) continue;
-    try { writeFileSync(`${armDir}/raw/.lock-${id}`, String(process.pid), { flag: "wx" }); } catch { continue; }
     await runDoc(id); done += 1;
   }
 }
