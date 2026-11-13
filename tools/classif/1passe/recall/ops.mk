@@ -10,6 +10,8 @@ run:
 	node tools/classif/1passe/recall/run.mjs
 score:
 	node tools/classif/1passe/recall/score.mjs
+score-c:
+	node tools/classif/1passe/recall/score-c.mjs
 check:
 	@for f in tools/classif/1passe/recall/*.mjs; do node --check "$$f" || exit; done
 test:
