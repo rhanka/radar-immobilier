@@ -12,7 +12,11 @@ const jsonl=f=>readFileSync(f,'utf8').trim().split('\n').map(JSON.parse);
 export function load(half){
  const corpus=new Map(jsonl(`${source}/l0/dev-items.jsonl`).map(x=>[x.itemId,x]));
  let refs;
- if(half==='tuning') refs=jsonl(`${source}/l3b/reference-d.jsonl`).filter(x=>x.half===half);
+ if(half==='tuning') {
+  const file=`${source}/l3b/reference-d.jsonl`;
+  if(hash(readFileSync(file))!==json('tools/classif/l3/manifests/reference-d.json').hashes.referenceD) throw new Error('Reference checksum mismatch');
+  refs=jsonl(file).filter(x=>x.half===half);
+ }
  else {
   privateDir(`${home}/blind`);
   if(!existsSync(`${home}/blind/blind.sealed`)) copyFileSync(`${source}/blind/blind.sealed`,`${home}/blind/blind.sealed`);
