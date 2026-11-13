@@ -57,7 +57,7 @@ export async function twoStepFixture(db: Database, mode: "off" | "two-step", fai
   });
   const notes: Array<{ note: string; detail?: Record<string, unknown> }> = [];
   const options: RunPvRefreshOptions = {
-    citySlug: "waterloo", cycleId: "two-step-run", db,
+    citySlug: "waterloo", cycleId: "00000000-0000-4000-8000-000000000001", db,
     // The canonical fixture implements the byte operations; put's return value is unused here.
     store: store as unknown as RunPvRefreshOptions["store"],
     profileContext: { profile, registries, registryExtraction: registryRecordsToExtraction(registries, profile) },
