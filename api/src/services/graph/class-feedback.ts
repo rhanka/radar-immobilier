@@ -11,6 +11,8 @@ import { scopedEpochFor } from "../facets/activation.js";
 import { readCommand } from "../facets/commands.js";
 import { writeScopedPersonalFacetInTx } from "../facets/scoped-writer.js";
 import { writeWorkspaceArchiveFacetInTx } from "../facets/workspace-writer.js";
+import { resolveStream } from "../facets/scoped-reader.js";
+import { resolveWorkspaceStream } from "../facets/workspace-streams.js";
 import { digest, FacetError } from "../facets/target.js";
 import type { ClassFeedbackCommand } from "./class-feedback-command.js";
 
@@ -43,6 +45,20 @@ export async function writeClassFeedback(db: Database, sub: string, workspaceId:
     if (!ai || ai.source !== "ai" || ai.model !== annotation.model || ai.prompt_sha256 !== annotation.promptSha256
       || ai.pipeline_run_id !== annotation.pipelineRunId || ai.classe !== annotation.classe
       || ai.current_version !== true) {
+      throw new FacetError(409, "annotation_version_conflict");
+    }
+    // The workspace lock serializes every manual writer. Compare the complete
+    // judged state, including absent and inactive heads, before any transition.
+    for (const basket of ["pertinent", "a_surveiller"] as const) {
+      const stream = await resolveStream(tx, workspaceId, actor, target, "selection", basket);
+      if (stream.headEventId !== command.selectionHeads[basket]) {
+        throw new FacetError(409, "annotation_version_conflict");
+      }
+    }
+    const personalArchive = await resolveStream(tx, workspaceId, actor, target, "archive", null);
+    const workspaceArchive = await resolveWorkspaceStream(tx, workspaceId, target);
+    if (personalArchive.headEventId !== command.archives.personal
+      || workspaceArchive.headEventId !== command.archives.workspace) {
       throw new FacetError(409, "annotation_version_conflict");
     }
     const next = command.verdict === "up" ? annotation.classe : command.nextClass!;

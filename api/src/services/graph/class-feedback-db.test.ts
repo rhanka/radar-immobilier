@@ -11,6 +11,8 @@ import { writeClassFeedback } from "./class-feedback.js";
 import { readClassFeedback, exportClassFeedback } from "./class-feedback-reader.js";
 import type { ClassFeedbackCommand } from "./class-feedback-command.js";
 import { purgeAiAnnotations } from "./purge-ai-annotations.js";
+import { writeScopedPersonalFacet } from "../facets/scoped-writer.js";
+import { writeWorkspaceArchiveFacet } from "../facets/workspace-writer.js";
 
 async function setup() {
   const f = await workspaceFixture();
@@ -29,6 +31,62 @@ async function setup() {
 }
 
 describeDb("human classification feedback PostgreSQL", () => {
+  it.each(["a_surveiller", "personal", "workspace"] as const)("should reject an unexpected %s head without feedback writes", async (scope) => {
+    const f = await setup();
+    const base = { target: f.target, displayedFingerprint: f.command.displayedFingerprint,
+      commandKey: randomUUID(), expectedHeadId: null };
+    if (scope === "a_surveiller") {
+      await writeScopedPersonalFacet(f.db, f.contributor.sub, f.workspaceId,
+        { ...base, action: "select", basket: "a_surveiller" });
+    } else {
+      const codes = await f.db.execute(sql`SELECT code FROM facet_reason_codes WHERE verdict='non_pertinent' LIMIT 1`);
+      const command = { ...base, action: "discard" as const, reasonCode: String(codes.rows[0]!.code) };
+      if (scope === "workspace") await writeWorkspaceArchiveFacet(f.db, f.moderator.sub, f.workspaceId, command);
+      else await writeScopedPersonalFacet(f.db, f.contributor.sub, f.workspaceId, command);
+    }
+    const before = await f.db.execute(sql`SELECT id FROM facet_events ORDER BY id`);
+    await expect(f.submit()).rejects.toMatchObject({ status: 409, message: "annotation_version_conflict" });
+    expect((await f.db.execute(sql`SELECT id FROM facet_events ORDER BY id`)).rows).toEqual(before.rows);
+    expect((await f.db.execute(sql`SELECT * FROM signal_class_feedback`)).rows).toHaveLength(0);
+  });
+  it("should reject a stale negative HTTP command after another tab validates", async () => {
+    const f = await setup();
+    await f.submit();
+    const before = await f.db.execute(sql`SELECT id FROM facet_events ORDER BY id`);
+    const receipts = await f.db.execute(sql`SELECT * FROM facet_commands ORDER BY command_key`);
+    const app = new Hono();
+    app.use("*", async (c, next) => { c.set("session" as never, { sub: f.contributor.sub } as never); await next(); });
+    app.route("/", classFeedbackRoute({ db: f.db, auth: { enabled: true } }));
+    const { commandKey: _key, ...body } = f.command;
+    const result = await app.request(`/api/v1/workspaces/${f.workspaceId}/signal-facets/class-feedback`, {
+      method: "POST", headers: { "content-type": "application/json", "Idempotency-Key": randomUUID() },
+      body: JSON.stringify({ ...body, verdict: "down", nextClass: "a_surveiller", reasonCode: "S-PLANIFIE" }),
+    });
+    expect(result.status).toBe(409);
+    expect(await result.json()).toEqual({ error: "annotation_version_conflict" });
+    expect((await f.db.execute(sql`SELECT id FROM facet_events ORDER BY id`)).rows).toEqual(before.rows);
+    expect((await f.db.execute(sql`SELECT * FROM facet_commands ORDER BY command_key`)).rows).toEqual(receipts.rows);
+    expect((await f.db.execute(sql`SELECT * FROM signal_class_feedback`)).rows).toHaveLength(1);
+    expect(await readScopedPersonalHeads(f.db, f.contributor.sub, f.workspaceId, f.target.citySlug))
+      .toMatchObject([{ basket: "pertinent", state: "active" }]);
+  });
+  it("should commit only one of two concurrent classifications of the same version", async () => {
+    const f = await setup();
+    const results = await Promise.allSettled([
+      f.submit(),
+      f.submit({ ...f.command, commandKey: randomUUID(), verdict: "down",
+        nextClass: "a_surveiller", reasonCode: "S-PLANIFIE" }),
+    ]);
+    expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(1);
+    expect(results.find((result) => result.status === "rejected"))
+      .toMatchObject({ reason: { status: 409, message: "annotation_version_conflict" } });
+    const feedback = (await f.db.execute(sql`SELECT human_class FROM signal_class_feedback`)).rows;
+    expect(feedback).toHaveLength(1);
+    const heads = await readScopedPersonalHeads(f.db, f.contributor.sub, f.workspaceId, f.target.citySlug);
+    expect(heads.filter((head) => head.state === "active").map((head) => head.basket))
+      .toEqual([feedback[0]!.human_class]);
+    expect((await f.db.execute(sql`SELECT * FROM facet_events`)).rows).toHaveLength(1);
+  });
   it("should compare the exact PostgreSQL timestamp and history version", async () => {
     const f = await setup();
     await f.db.execute(sql`UPDATE signal_class_annotations SET updated_at='2026-11-13T12:00:00.123456Z'`);

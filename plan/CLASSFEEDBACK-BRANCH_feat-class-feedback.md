@@ -16,6 +16,7 @@
 ## Feedback Loop
 - [x] PR #1104 correction: reserve feedback migration 0047, idx 46, timestamp 1793000000017 after v2's 0046 (idx 45, timestamp 1793000000016). No 0046 snapshot exists: this repository uses hand-authored migrations after snapshots 0000/0001.
 - [x] Add PostgreSQL migration regressions for fresh installation, incremental upgrade preserving the previous AI annotation, and idempotent replay; assert v2's 0046 precedes 0047 when present.
+- [x] Reproduce all five stale/concurrent head cases on PostgreSQL (5 failed, 8 passed before correction). Compare both selection and archive heads, including null, under the workspace lock before any transition; retain exact AI timestamp/class checks and the shared feedback/reclassification transaction.
 - [x] D1–D7 accepted from i-cond. Shared classification capabilities remain those of the existing writers: personal selections and moderator workspace archives.
 - [x] Two independent design reviews: private feedback badges must stay scoped; reuse InTx writers, never client compensation; validate stale AI provenance under lock.
 
