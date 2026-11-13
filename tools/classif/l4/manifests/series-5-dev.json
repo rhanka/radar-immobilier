@@ -1,0 +1,60 @@
+{
+ "kind": "l4-dev",
+ "series": "5",
+ "createdAt": "2026-11-12T21:09:20.118Z",
+ "promptSha256": "762e164630cd48475fd3c0bc2fe79c3fad00a913d51be391fe6df4708606f6b6",
+ "routes": [
+  "sol-6.1-low"
+ ],
+ "deferred": [],
+ "tuningItems": 252,
+ "aggregates": {
+  "sol-6.1-low": {
+   "scored": 252,
+   "refShown": 95,
+   "predShown": 157,
+   "recall": 1,
+   "recallLB": 0.968957988132045,
+   "precision": 0.6050955414012739,
+   "precisionLB": 0.5366433725551528,
+   "indeterminate": {
+    "recall": false,
+    "precision": false
+   },
+   "failures": 0,
+   "withUnresolved": {
+    "scored": 252,
+    "refShown": 95,
+    "predShown": 157,
+    "recall": 1,
+    "recallLB": 0.968957988132045,
+    "precision": 0.6050955414012739,
+    "precisionLB": 0.5366433725551528,
+    "indeterminate": {
+     "recall": false,
+     "precision": false
+    }
+   },
+   "misses": 0,
+   "verdict": "pass",
+   "costUsd": 0,
+   "items": 252
+  }
+ },
+ "method": "gepa",
+ "gepa": {
+  "verdict": "pass",
+  "missing": [],
+  "failing": [],
+  "rule": "pass only when every GEPA route has 0 miss (P/S predicted non_pertinent) and a failure share within the ceiling; precision reported, no floor"
+ },
+ "selection": {
+  "order": [
+   "sol-6.1-low"
+  ],
+  "best": "sol-6.1-low",
+  "excluded": [],
+  "criterion": "M.3 lexicographic (tuning half only, failing routes excluded)"
+ },
+ "trackNote": "per-item tuning outputs stay private (optimiser input); this manifest carries metrics only"
+}

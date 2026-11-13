@@ -1,0 +1,24 @@
+{
+  "kind": "bc-annotation-v1",
+  "adapter": "../run-seat.mjs#callSeat",
+  "iteration": ["astra-medium", "opus-5.5-medium"],
+  "independent": true,
+  "prompt": "annotation-prompt.md",
+  "unit": "acte",
+  "callUnit": "PV complet",
+  "halves": ["tuning", "blind"],
+  "callsCap": 200,
+  "pack": {
+    "criteria.md": "4d480937912986676ccc6366979116c72a0985df3cd919193162e3ccf2efd8fc",
+    "codes-definitions.md": "556c7147bd6ce01586225cd498ce42335147edca08aa61e9a6ee21ca315d6267",
+    "guide-FINAL.md": "67058e5e4e900db41f051d70dcf7f92d4a126db5a5217e9b025336857aeff311"
+  },
+  "arbitration": {
+    "iteration": ["gemini-4-argon-high"],
+    "after": "annotation terminée, deux avis anonymisés",
+    "prompt": "arbitration-prompt.md",
+    "callUnit": "acte disputé",
+    "callsCap": 776,
+    "failure": "Non classé, à montrer"
+  }
+}

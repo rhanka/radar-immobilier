@@ -1,0 +1,44 @@
+{
+  "version": 3,
+  "llmCalls": 200,
+  "files": {
+    "PREREG.md": "f13cacd2aea4f1b6d661da3710f9ea934dad078faac39bf1933420acc157e675",
+    "seed.json": "53b163c08429e7305d370657b203437e338350c869c3b14322aefb31889d1edc",
+    "split.json": "bdf8830324267f214c318830d13c9e531449bbc43ea18b1b4a7ae36d9177b2d6",
+    "routes.json": "a4e20c93a8776ec4ae2d23c2a86df9834a0ca7b836bde1f861dc005a85c89c75",
+    "annotation.json": "5ae07b45ec5a9e4d79ccb264cf8ab042f22de76a7550a591cb84790ff778f7eb",
+    "singlepass.json": "5b1a836e42406dbca55adf0e28f8418cebbb382eac1937d8c558d92c0d601f49",
+    "annotation-prompt.md": "a1b314efe38f7c3859c87dad558c792b140023e0b99cbc4365cac47e256dd203",
+    "arbitration-prompt.md": "466e0eb1640a0d4e5d7e2c064e977a16729c2baf0b438993dab9a42493633ff6",
+    "singlepass-prompt.md": "2692cc25820f0a26cb8fe5004db267e7ea84c24a317da7f939f5b220e0d61dc4",
+    "README.md": "dd5699616c61e5ab7db0dde27bddc051e62eef6a00dc542e163cb4e95d9be795",
+    "prepare.mjs": "f387e445d9eda8370b8a593e91d4bad1f385c08b1148900bebb3143e6b030050",
+    "check.mjs": "7d63fc5f7570472417f9806f811c21d7b81837ee2a15cccf5af3ed026380ed41",
+    "step0.mk": "0c93fb8460bcdfc9a18e5702e173835875fc488b31153516d0a2ff5152f2cb04",
+    "ops.mk": "632fe0f451411e536dd3ff5e34e48d48181ddae10d35df45a208870a85fb1f44",
+    "quota.mjs": "e3ee15838e09d871ada18dac05fe5b3f82541490d47d8f4fcc200afd2ae19360",
+    "inspect.mjs": "b6b6ae6489718a37e0da987366de411659b6fde80d5208ccd5efee59ffc4a2d3",
+    "context.mjs": "a8e3193eaf93f970df8a0f56a663d55466edbb091adaad523ff5d12208725e0b",
+    "annotate.mjs": "b3759ea37217bf4d35fb2d0e04037a27e8651903fe0e5afcd7415cdb22785709",
+    "matching.mjs": "af9a52f19d96bfe577a2c6c7a01b75e79dda5e88c86f5d5736acc2249059c648",
+    "matching.test.mjs": "9ecbd2dec25fea4e274a04315b36aed2d4c5f9f0d5072f2a663ad45de8eb2626",
+    "reconcile.mjs": "2cc31fa0e63c2ee0dc185f351ea61a5c2c648d0c7f4d96cab382cc4ffc060798",
+    "arbitrate.mjs": "a0667306bcb06b8f30ab537f446f991f0f3641a3b47de0a98165bffa5917d9a4",
+    "finalize.mjs": "22068c2a591d4a30fc8d58c2f92aec7ba6fadac709e9047666109b4b1319b63d",
+    "custody.mjs": "fc1211e15af9d8db12f6efefb579a3c11868d2a9bedb0db067b1261c0b442aa5",
+    "claude-quota.mjs": "a660f1527575f4f4bc323bd864edab789869fe52a4b6a882dd27495fbeb06573",
+    "verify.mjs": "ced7b60e3b00c0f0e0ef894faae45c5f4f21b9abd68be149b8109db906b42bb8"
+  },
+  "correction": {
+    "authority": "Owner request 2026-11-13; D3 stopped at 17:57 Montreal",
+    "originalFreezeSha256": "604e34f88b3e36816fce06b510a4f1a26cc8cbef2628b022141ff025010b15da",
+    "changed": [
+      "matching.mjs",
+      "matching.test.mjs",
+      "reconcile.mjs",
+      "ops.mk",
+      "context.mjs"
+    ],
+    "llmCalls": "Only interrupted annotation documents; no D3"
+  }
+}

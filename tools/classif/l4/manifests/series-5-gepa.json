@@ -1,0 +1,507 @@
+{
+ "kind": "l4-gepa",
+ "method": "gepa",
+ "series": "5",
+ "run": "s5",
+ "createdAt": "2026-11-12T21:08:06.246Z",
+ "seed": "gepa-s5",
+ "split": {
+  "feedback": 151,
+  "pareto": 101,
+  "feedbackShare": 0.6,
+  "strata": {
+   "pertinent": {
+    "total": 2,
+    "feedback": 1,
+    "pareto": 1
+   },
+   "a_surveiller": {
+    "total": 93,
+    "feedback": 56,
+    "pareto": 37
+   },
+   "non_pertinent": {
+    "total": 157,
+    "feedback": 94,
+    "pareto": 63
+   }
+  },
+  "sha256": {
+   "feedback": "3e747047c4943371c0a2e339a42edbdc786a94db762a7c435b2383cb1eb497af",
+   "pareto": "396fa278acc89653fcd8d359d06a45184413ae29102c4d552a59ebf81608f035"
+  }
+ },
+ "contextSha256": "04dce24ccbc5e9ad3b18cfb73976334332d981e0827fda56153beec3da01cab2",
+ "routes": [
+  "opus-5.5-low",
+  "sol-6.1-low"
+ ],
+ "mutator": "astra-max",
+ "reconciler": "opus-5.5-max",
+ "objective": "lexicographic: 0 miss (reference P/S predicted non_pertinent on any route, failed call = shown), then least noise (reference N predicted shown); P<->S not penalised; failed-call share per route <= 5 % (blind gate rule)",
+ "maxCalls": 7000,
+ "callsSpent": 6851,
+ "stop": "budget",
+ "iterations": {
+  "total": 16,
+  "mutation": 11,
+  "crossover": 5,
+  "admitted": 8,
+  "rejected": 8,
+  "skipped": 0
+ },
+ "population": [
+  {
+   "id": "P0",
+   "origin": "seed:P0",
+   "promptSha256": "a60713366128ae4348a45a7323d0b0984cef87ca6cb33eda15073c045235b016",
+   "pareto": {
+    "misses": 0,
+    "noise": 39,
+    "failures": 0,
+    "cases": 101
+   }
+  },
+  {
+   "id": "P1",
+   "origin": "seed:P1",
+   "promptSha256": "c8c8de654ac0d3d9eff70ebd761331672907035758af9b4210b0e3a9d6c75d37",
+   "pareto": {
+    "misses": 2,
+    "noise": 17,
+    "failures": 0,
+    "cases": 101
+   }
+  },
+  {
+   "id": "P2",
+   "origin": "seed:P2",
+   "promptSha256": "c0ba6a671141b251a3393a6884deb2aaa5b055087658b3277e0c19d468f30b2f",
+   "pareto": {
+    "misses": 2,
+    "noise": 18,
+    "failures": 0,
+    "cases": 101
+   }
+  },
+  {
+   "id": "P3",
+   "origin": "seed:P3",
+   "promptSha256": "762e164630cd48475fd3c0bc2fe79c3fad00a913d51be391fe6df4708606f6b6",
+   "pareto": {
+    "misses": 0,
+    "noise": 58,
+    "failures": 0,
+    "cases": 101
+   }
+  },
+  {
+   "id": "P4",
+   "origin": "seed:P4",
+   "promptSha256": "29a7370c149b9cd2cebfe65fa76db9138f604df32f04765a13b67ee1c471daae",
+   "pareto": {
+    "misses": 0,
+    "noise": 78,
+    "failures": 0,
+    "cases": 101
+   }
+  },
+  {
+   "id": "i0",
+   "origin": "mutation:P2",
+   "promptSha256": "74e9abd7b8a17ec0bc348654fca3aaa0ec6fbce38cbf34aca4e3af9eb6ea1128",
+   "pareto": {
+    "misses": 2,
+    "noise": 21,
+    "failures": 0,
+    "cases": 101
+   }
+  },
+  {
+   "id": "i1",
+   "origin": "mutation:P4",
+   "promptSha256": "309ad055f2effe3e880255722ff0849749e5515a1fc6b45c30b2ae415d157b39",
+   "pareto": {
+    "misses": 2,
+    "noise": 30,
+    "failures": 0,
+    "cases": 101
+   }
+  },
+  {
+   "id": "i3",
+   "origin": "mutation:P4",
+   "promptSha256": "f879ae0696ddee0089a82c6b5ada4f1ba3b1e3db749eacc2bcc503c6c088a8ba",
+   "pareto": {
+    "misses": 2,
+    "noise": 30,
+    "failures": 0,
+    "cases": 101
+   }
+  },
+  {
+   "id": "i6",
+   "origin": "mutation:i0",
+   "promptSha256": "95631f4b4a9cfab4fce5ba865b6332353fbddb9e3d1c67d94ca94ef8147c3be5",
+   "pareto": {
+    "misses": 3,
+    "noise": 20,
+    "failures": 0,
+    "cases": 101
+   }
+  },
+  {
+   "id": "i9",
+   "origin": "mutation:P2",
+   "promptSha256": "d18138f81d167bb210a7665f989d8e8dbc0ee5ad1f20709dd723d87d8c7a843c",
+   "pareto": {
+    "misses": 2,
+    "noise": 22,
+    "failures": 0,
+    "cases": 101
+   }
+  },
+  {
+   "id": "i12",
+   "origin": "mutation:i0",
+   "promptSha256": "c6090bcba5c5cf78dd5f01c1f008950367614e28a82b50a84b15be860c3ebc93",
+   "pareto": {
+    "misses": 3,
+    "noise": 18,
+    "failures": 0,
+    "cases": 101
+   }
+  },
+  {
+   "id": "i13",
+   "origin": "mutation:P4",
+   "promptSha256": "6714f0aa996735cf86b8f208f19b598667436a4f7b8c2e4f8409a2d4100753e4",
+   "pareto": {
+    "misses": 2,
+    "noise": 29,
+    "failures": 0,
+    "cases": 101
+   }
+  },
+  {
+   "id": "i15",
+   "origin": "mutation:i0",
+   "promptSha256": "4531124966116c12cd0d5dbcfff8c1c25ef87cfa9c7a7ba8e38f4465a7143a30",
+   "pareto": {
+    "misses": 2,
+    "noise": 19,
+    "failures": 0,
+    "cases": 101
+   }
+  }
+ ],
+ "front": [
+  {
+   "id": "P0",
+   "wins": 83
+  },
+  {
+   "id": "P1",
+   "wins": 96
+  },
+  {
+   "id": "P2",
+   "wins": 95
+  },
+  {
+   "id": "P3",
+   "wins": 74
+  },
+  {
+   "id": "P4",
+   "wins": 62
+  },
+  {
+   "id": "i0",
+   "wins": 92
+  },
+  {
+   "id": "i1",
+   "wins": 88
+  },
+  {
+   "id": "i3",
+   "wins": 87
+  },
+  {
+   "id": "i6",
+   "wins": 92
+  },
+  {
+   "id": "i9",
+   "wins": 93
+  },
+  {
+   "id": "i12",
+   "wins": 94
+  },
+  {
+   "id": "i13",
+   "wins": 88
+  },
+  {
+   "id": "i15",
+   "wins": 94
+  }
+ ],
+ "finalCoverage": {
+  "eligible": 3,
+  "evaluated": 2,
+  "notEvaluated": 1
+ },
+ "finalists": [
+  {
+   "id": "P0",
+   "origin": "seed:P0",
+   "promptSha256": "a60713366128ae4348a45a7323d0b0984cef87ca6cb33eda15073c045235b016",
+   "wins": 83,
+   "rank": 0,
+   "pareto": {
+    "misses": 0,
+    "noise": 39,
+    "failures": 0,
+    "cases": 101
+   },
+   "status": "evaluated",
+   "total": {
+    "misses": 1,
+    "noise": 82,
+    "failures": 0,
+    "cases": 252
+   },
+   "perRoute": {
+    "opus-5.5-low": {
+     "misses": 1,
+     "noise": 39,
+     "failures": 0,
+     "items": 252
+    },
+    "sol-6.1-low": {
+     "misses": 0,
+     "noise": 43,
+     "failures": 0,
+     "items": 252
+    }
+   }
+  },
+  {
+   "id": "P3",
+   "origin": "seed:P3",
+   "promptSha256": "762e164630cd48475fd3c0bc2fe79c3fad00a913d51be391fe6df4708606f6b6",
+   "wins": 74,
+   "rank": 1,
+   "pareto": {
+    "misses": 0,
+    "noise": 58,
+    "failures": 0,
+    "cases": 101
+   },
+   "status": "evaluated",
+   "total": {
+    "misses": 0,
+    "noise": 131,
+    "failures": 0,
+    "cases": 252
+   },
+   "perRoute": {
+    "opus-5.5-low": {
+     "misses": 0,
+     "noise": 69,
+     "failures": 0,
+     "items": 252
+    },
+    "sol-6.1-low": {
+     "misses": 0,
+     "noise": 62,
+     "failures": 0,
+     "items": 252
+    }
+   }
+  },
+  {
+   "id": "P4",
+   "origin": "seed:P4",
+   "promptSha256": "29a7370c149b9cd2cebfe65fa76db9138f604df32f04765a13b67ee1c471daae",
+   "wins": 62,
+   "rank": 2,
+   "pareto": {
+    "misses": 0,
+    "noise": 78,
+    "failures": 0,
+    "cases": 101
+   },
+   "status": "not-evaluated",
+   "reason": "budget"
+  },
+  {
+   "id": "P1",
+   "origin": "seed:P1",
+   "promptSha256": "c8c8de654ac0d3d9eff70ebd761331672907035758af9b4210b0e3a9d6c75d37",
+   "wins": 96,
+   "rank": 3,
+   "pareto": {
+    "misses": 2,
+    "noise": 17,
+    "failures": 0,
+    "cases": 101
+   },
+   "status": "excluded",
+   "reason": "misses-on-d-pareto"
+  },
+  {
+   "id": "P2",
+   "origin": "seed:P2",
+   "promptSha256": "c0ba6a671141b251a3393a6884deb2aaa5b055087658b3277e0c19d468f30b2f",
+   "wins": 95,
+   "rank": 4,
+   "pareto": {
+    "misses": 2,
+    "noise": 18,
+    "failures": 0,
+    "cases": 101
+   },
+   "status": "excluded",
+   "reason": "misses-on-d-pareto"
+  },
+  {
+   "id": "i15",
+   "origin": "mutation:i0",
+   "promptSha256": "4531124966116c12cd0d5dbcfff8c1c25ef87cfa9c7a7ba8e38f4465a7143a30",
+   "wins": 94,
+   "rank": 5,
+   "pareto": {
+    "misses": 2,
+    "noise": 19,
+    "failures": 0,
+    "cases": 101
+   },
+   "status": "excluded",
+   "reason": "misses-on-d-pareto"
+  },
+  {
+   "id": "i0",
+   "origin": "mutation:P2",
+   "promptSha256": "74e9abd7b8a17ec0bc348654fca3aaa0ec6fbce38cbf34aca4e3af9eb6ea1128",
+   "wins": 92,
+   "rank": 6,
+   "pareto": {
+    "misses": 2,
+    "noise": 21,
+    "failures": 0,
+    "cases": 101
+   },
+   "status": "excluded",
+   "reason": "misses-on-d-pareto"
+  },
+  {
+   "id": "i9",
+   "origin": "mutation:P2",
+   "promptSha256": "d18138f81d167bb210a7665f989d8e8dbc0ee5ad1f20709dd723d87d8c7a843c",
+   "wins": 93,
+   "rank": 7,
+   "pareto": {
+    "misses": 2,
+    "noise": 22,
+    "failures": 0,
+    "cases": 101
+   },
+   "status": "excluded",
+   "reason": "misses-on-d-pareto"
+  },
+  {
+   "id": "i13",
+   "origin": "mutation:P4",
+   "promptSha256": "6714f0aa996735cf86b8f208f19b598667436a4f7b8c2e4f8409a2d4100753e4",
+   "wins": 88,
+   "rank": 8,
+   "pareto": {
+    "misses": 2,
+    "noise": 29,
+    "failures": 0,
+    "cases": 101
+   },
+   "status": "excluded",
+   "reason": "misses-on-d-pareto"
+  },
+  {
+   "id": "i1",
+   "origin": "mutation:P4",
+   "promptSha256": "309ad055f2effe3e880255722ff0849749e5515a1fc6b45c30b2ae415d157b39",
+   "wins": 88,
+   "rank": 9,
+   "pareto": {
+    "misses": 2,
+    "noise": 30,
+    "failures": 0,
+    "cases": 101
+   },
+   "status": "excluded",
+   "reason": "misses-on-d-pareto"
+  },
+  {
+   "id": "i3",
+   "origin": "mutation:P4",
+   "promptSha256": "f879ae0696ddee0089a82c6b5ada4f1ba3b1e3db749eacc2bcc503c6c088a8ba",
+   "wins": 87,
+   "rank": 10,
+   "pareto": {
+    "misses": 2,
+    "noise": 30,
+    "failures": 0,
+    "cases": 101
+   },
+   "status": "excluded",
+   "reason": "misses-on-d-pareto"
+  },
+  {
+   "id": "i12",
+   "origin": "mutation:i0",
+   "promptSha256": "c6090bcba5c5cf78dd5f01c1f008950367614e28a82b50a84b15be860c3ebc93",
+   "wins": 94,
+   "rank": 11,
+   "pareto": {
+    "misses": 3,
+    "noise": 18,
+    "failures": 0,
+    "cases": 101
+   },
+   "status": "excluded",
+   "reason": "misses-on-d-pareto"
+  },
+  {
+   "id": "i6",
+   "origin": "mutation:i0",
+   "promptSha256": "95631f4b4a9cfab4fce5ba865b6332353fbddb9e3d1c67d94ca94ef8147c3be5",
+   "wins": 92,
+   "rank": 12,
+   "pareto": {
+    "misses": 3,
+    "noise": 20,
+    "failures": 0,
+    "cases": 101
+   },
+   "status": "excluded",
+   "reason": "misses-on-d-pareto"
+  }
+ ],
+ "result": {
+  "status": "selected",
+  "candidate": "P3",
+  "origin": "seed:P3",
+  "version": "P5",
+  "promptSha256": "762e164630cd48475fd3c0bc2fe79c3fad00a913d51be391fe6df4708606f6b6",
+  "total": {
+   "misses": 0,
+   "noise": 131,
+   "failures": 0,
+   "cases": 252
+  },
+  "notEvaluated": 1
+ },
+ "trackNote": "per-item tuning outputs, split ids and the iteration journal stay private in $CLASSIF_HOME/l4/gepa-<run>/; this manifest carries counts only"
+}
