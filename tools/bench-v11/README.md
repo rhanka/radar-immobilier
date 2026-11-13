@@ -145,6 +145,39 @@ node tools/bench-v11/full/audit-muse-surface.mjs tools/bench-v11/full/arms/muse-
 node tools/bench-v11/full/score-ember-sensitivity.mjs xhigh sacre-coeur-2026-05-11   # -> full/scores-ember-xhigh-sensitivity.json
 ```
 
+### Cascade CP+ réelle (complément v12)
+
+CP+ rejoue GPT-6 Astra medium, puis fait relire chaque sortie acceptée par
+Muse Spark 1.3 xhigh. Le filtre CP reste inchangé. Le scoreur refuse un
+passage incomplet, les doublons et une concurrence observée supérieure à 4.
+Un verrou global interdit deux runners sur le même bras. Ne pas effacer ce
+verrou pendant une exécution. Après une interruption, vérifier l'arrêt du
+conteneur avant de retirer un verrou résiduel.
+
+Le point d'entrée autonome ne charge ni le Makefile racine ni un fichier
+d'environnement. Node tourne en conteneur. Les processus modèle partent
+d'un dossier vide hors dépôt. Fournir `BENCH_MESH_DIR` (llm-mesh 0.19.3) et
+`BENCHMARK_OWNER_SCOPE` (portée publique du compte Codex). Le trousseau
+chiffré est copié hors dépôt par `setup`. Aucun secret n'est affiché.
+
+```bash
+make -f tools/bench-v11/cp-plus.mk setup ENV=test-benchmark-b
+make -f tools/bench-v11/cp-plus.mk freeze ENV=test-benchmark-b
+make -f tools/bench-v11/cp-plus.mk replay BENCH_MESH_DIR=<sandbox> BENCHMARK_OWNER_SCOPE=<scope> ENV=test-benchmark-b
+make -f tools/bench-v11/cp-plus.mk validate ENV=test-benchmark-b
+make -f tools/bench-v11/cp-plus.mk filter CONCURRENCY=4 ENV=test-benchmark-b
+make -f tools/bench-v11/cp-plus.mk audit ENV=test-benchmark-b
+make -f tools/bench-v11/cp-plus.mk score ENV=test-benchmark-b
+make -f tools/bench-v11/cp-plus.mk report BENCH_REFERENCE=<preuves-v11> BENCH_REPORT=v12 ENV=test-benchmark-b
+make -f tools/bench-v11/cp-plus.mk checksums ENV=test-benchmark-b
+```
+
+Muse est lu avant chaque document et toutes les 10 minutes. À 85 %, le
+runner coupe aussi ses appels en cours. Un quota illisible arrête le bras.
+Le quota ne devient jamais un refus. Les jetons réels, décisions, reçus et
+surface d'accès sont conservés sous `full/arms/`. Le coût siège reste
+`missing source` si le compteur partagé ne permet pas une attribution.
+
 ### 6. Burns (échantillon fixe de 10 documents, capture d'usage)
 
 ```bash
