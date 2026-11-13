@@ -1,0 +1,111 @@
+{
+ "kind": "single-pass-csets",
+ "promptSha256": "8957bcaa146b3b83ee89000fccec3c6f393c7b801b320a158d58d2631fa3a205",
+ "compositionSha256": "b8b7460036f3c7ec8dc8082b1ea0c6e331143fc0600fe7ca5de2ad193055adaf",
+ "refreshHead": "80249515bbe9992e29bdcac18779ee96ebcd82f8",
+ "sourceHashes": {
+  "api/src/services/graph/refresh-profile.ts": "d74488693dc2201e68e24f3943e4ec6ad3b675ca0a90c045c65ed641ad223b5a",
+  "api/src/services/graph/refresh-single-pass.ts": "9eb2dd3e4cb5035f23aaf0a013aac1c0f5853a1ec5ffa9bd77ae9bd12656485e",
+  "radar/prompts/refresh-single-pass-v1.md": "8957bcaa146b3b83ee89000fccec3c6f393c7b801b320a158d58d2631fa3a205",
+  "radar/prompts/refresh-single-pass.json": "3aa9ce4af0e6271c1331c3bb5dea7fe44e896e21d4cb2974044299cc140d7b0f",
+  "radar/ontology/ontology-profile.yaml": "37c85a34feb97c12466b48360f92c82f5278ead479c2bd9317bff5b849ce9c37",
+  "package-lock.json": "25101315cc7c4d4bc6c36997cf65050137e6c82426a0f363f740a5863bcaba53"
+ },
+ "referenceManifest": {
+  "path": "tools/classif/l3/manifests/reference-d.json",
+  "sha256": "c5ac537f4ddcd1714f318861c4678eb0303bf470efb44313f6ef7ab1d69b1df1",
+  "hashes": {
+   "referenceD": "d1f0ddc2b27fabf4c299e8e9c6b0b8c7129b0715b88c58777648c2df538bd8cd",
+   "blindPlain": "ac2dc7f7b715a03617da2b0a33a987e8129fadcdd19d2511fc843f9b7e55c1f2",
+   "blindSealed": "4b61d79d83492aa5cd7c63450614d28ae80ebc00aae6cddfd23f538b03ac74bf"
+  }
+ },
+ "series7": {
+  "path": "tools/classif/l4/manifests/series-7.json",
+  "sha256": "b33e6711ea57c557e1ee52b0f341114c26293b90080c79b56666834615ef794c",
+  "halves": {
+   "tuningSha256": "dcaf04fa8d740565b1832d55df705f6b28ac99e0f5b184c78614f2e2cd7efc86",
+   "blindSha256": "8c7f4650ba8235da9efa3cc242b3c6ab085c9a2c2afa3058556d3a3d9bd8a46c"
+  }
+ },
+ "baseline": {
+  "tuning": {
+   "units": 252,
+   "refShown": 95,
+   "predShown": 137,
+   "recall": 1,
+   "precision": 0.6934306569343066,
+   "historicalRecallLowerBound": 0.968957988132045,
+   "historicalPrecisionLowerBound": 0.6222363975820769,
+   "failures": 0,
+   "recallWilson95": {
+    "low": 0.9611351464605271,
+    "high": 1
+   },
+   "precisionWilson95": {
+    "low": 0.6118259902536992,
+    "high": 0.7644836592187231
+   },
+   "misses": 0
+  },
+  "blind": {
+   "units": 252,
+   "refShown": 94,
+   "predShown": 125,
+   "recall": 1,
+   "precision": 0.752,
+   "historicalRecallLowerBound": 0.9686329879212123,
+   "historicalPrecisionLowerBound": 0.6803126548586147,
+   "failures": 0,
+   "recallWilson95": {
+    "low": 0.9607379237084551,
+    "high": 0.9999999999999999
+   },
+   "precisionWilson95": {
+    "low": 0.6695405133205623,
+    "high": 0.8194325282504411
+   },
+   "misses": 0
+  }
+ },
+ "surface": {
+  "model": "gpt-6-astra",
+  "effort": "low",
+  "transport": "codex ChatGPT",
+  "concurrency": 10,
+  "weeklyQuotaStop": 90,
+  "web": false,
+  "acceptedToolEvents": 0,
+  "emptyCwd": true,
+  "laneSeatHome": "/tmp/radar-csets-seats"
+ },
+ "quotaStart": {
+  "at": "2026-11-13T22:46:32.547Z",
+  "code": 0,
+  "rateLimits": {
+   "primary": {
+    "used_percent": 34,
+    "window_minutes": 10080,
+    "resets_at": 1795176304
+   },
+   "plan_type": "pro",
+   "rate_limit_reached_type": null
+  },
+  "toolEvents": 0,
+  "latencyMs": 3866,
+  "usage": {
+   "input_tokens": 9171,
+   "cached_input_tokens": 7552,
+   "cache_write_input_tokens": 0,
+   "output_tokens": 9,
+   "reasoning_output_tokens": 0
+  },
+  "stderr": ""
+ },
+ "limitations": [
+  "Reference units include whole PVs, not exclusively identified acts.",
+  "Mode A signal source coverage is frozen excerpts, not complete PDFs.",
+  "C baseline uses exact one-sided Clopper-Pearson bounds; new bounds are two-sided Wilson.",
+  "Blind key must be injected by the conductor; never read environment files."
+ ]
+}
