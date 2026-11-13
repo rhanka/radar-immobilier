@@ -266,21 +266,14 @@ safety bias.
 # PV refresh precision cascade
 
 The prepared CronJob uses `openai / gpt-6-astra / medium`, with two quality attempts
-under contract v9 and `openai / gpt-6-astra / low` fallback. Transport, quota,
+under contract v9 and `gemini / gemini-3.8-flash / low` fallback. Transport, quota,
 timeout, or empty output switches immediately to fallback; persistent quality
 refusal also falls back. After three consecutive quota-failed documents, the
-circuit routes subsequent documents directly to the fallback.
-
-**No Gemini route (owner decision 2026-11-12).** The Google account behind the
-`cloud-code` seat was disabled by Google. The refresh policy therefore carries no
-Gemini route: the fallback was `gemini / gemini-3.8-flash / low` and is now the
-primary model at low effort, and verification is off (`REFRESH_VERIFY_ENABLED=0`,
-no `REFRESH_VERIFY_*` route set). `verify-renders` fails on any `gemini` in
-`radar-refresh-pv` or `radar-refresh-requeue-abandoned`.
+circuit routes subsequent documents directly to Gemini.
 
 With `REFRESH_VERIFY_ENABLED=1`, every accepted primary chunk receives one
-verification pass on the `REFRESH_VERIFY_PROVIDER`, `REFRESH_VERIFY_MODEL`,
-`REFRESH_VERIFY_REASONING_EFFORT` route. The frozen v101b instruction
+`REFRESH_VERIFY_PROVIDER=gemini`, `REFRESH_VERIFY_MODEL=gemini-3.8-flash`,
+`REFRESH_VERIFY_REASONING_EFFORT=low` verification pass. The frozen v101b instruction
 judges existing acts; code only removes eligible node groups explicitly marked
 unsupported with a non-empty reason, plus edges incident to the removed nodes.
 Other nodes and surviving edges remain unchanged.
@@ -418,8 +411,7 @@ le rattrapage ne fait rien d'autre.
   de disponibilité de compte. La sonde est donc une génération minimale
   (prompt `ping`, 16 tokens de sortie, un seul essai de route) sur la
   cascade régulière — primaire `openai/gpt-6-astra`, puis repli
-  `openai/gpt-6-astra` en effort `low` (plus de route Gemini depuis la
-  décision owner du 2026-11-12) — via le même `createRefreshMesh` que
+  `gemini/gemini-3.8-flash` — via le même `createRefreshMesh` que
   `refresh-pv`. Aucun document n'est consommé. Si aucune route ne répond,
   le run écrit une ligne JSON structurée (`decision: "skip"`, raison
   classée `quota` / `no-route` / `timeout` / `transport`) et sort en 0.
