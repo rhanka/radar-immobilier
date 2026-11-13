@@ -1,0 +1,97 @@
+{
+ "kind": "l4-dev",
+ "series": "10",
+ "createdAt": "2026-11-13T00:14:33.039Z",
+ "promptSha256": "a60713366128ae4348a45a7323d0b0984cef87ca6cb33eda15073c045235b016",
+ "routes": [
+  "muse-ember-1.0-xhigh",
+  "muse-ember-1.0-max"
+ ],
+ "deferred": [],
+ "tuningItems": 252,
+ "aggregates": {
+  "muse-ember-1.0-xhigh": {
+   "scored": 252,
+   "refShown": 95,
+   "predShown": 143,
+   "recall": 0.9894736842105263,
+   "recallLB": 0.9510378297006205,
+   "precision": 0.6573426573426573,
+   "precisionLB": 0.58652517825819,
+   "indeterminate": {
+    "recall": false,
+    "precision": false
+   },
+   "failures": 1,
+   "withUnresolved": {
+    "scored": 252,
+    "refShown": 95,
+    "predShown": 143,
+    "recall": 0.9894736842105263,
+    "recallLB": 0.9510378297006205,
+    "precision": 0.6573426573426573,
+    "precisionLB": 0.58652517825819,
+    "indeterminate": {
+     "recall": false,
+     "precision": false
+    }
+   },
+   "misses": 1,
+   "verdict": "fail",
+   "costUsd": 0,
+   "items": 252
+  },
+  "muse-ember-1.0-max": {
+   "scored": 252,
+   "refShown": 95,
+   "predShown": 137,
+   "recall": 1,
+   "recallLB": 0.968957988132045,
+   "precision": 0.6934306569343066,
+   "precisionLB": 0.6222363975820769,
+   "indeterminate": {
+    "recall": false,
+    "precision": false
+   },
+   "failures": 0,
+   "withUnresolved": {
+    "scored": 252,
+    "refShown": 95,
+    "predShown": 137,
+    "recall": 1,
+    "recallLB": 0.968957988132045,
+    "precision": 0.6934306569343066,
+    "precisionLB": 0.6222363975820769,
+    "indeterminate": {
+     "recall": false,
+     "precision": false
+    }
+   },
+   "misses": 0,
+   "verdict": "pass",
+   "costUsd": 0,
+   "items": 252
+  }
+ },
+ "method": "gepa",
+ "gepa": {
+  "verdict": "fail",
+  "missing": [],
+  "failing": [
+   "muse-ember-1.0-xhigh"
+  ],
+  "rule": "pass only when every GEPA route has 0 miss (P/S predicted non_pertinent) and a failure share within the ceiling; precision reported, no floor"
+ },
+ "selection": {
+  "order": [
+   "muse-ember-1.0-max",
+   "muse-ember-1.0-xhigh"
+  ],
+  "best": "muse-ember-1.0-max",
+  "excluded": [
+   "muse-ember-1.0-xhigh"
+  ],
+  "criterion": "M.3 lexicographic (tuning half only, failing routes excluded)"
+ },
+ "trackNote": "per-item tuning outputs stay private (optimiser input); this manifest carries metrics only"
+}
