@@ -976,6 +976,7 @@
       pertinentHeadId: null, aSurveillerHeadId: null,
       pertinentExpectedHeadId: null, aSurveillerExpectedHeadId: null,
       archiveHeadId: null, discarded: false,
+      archiveRestores: [], restoreBlockedReason: null,
     };
     classementInFlight = new Set([...classementInFlight, key]);
     const overrides = new Map(classementOverrides);

@@ -2,6 +2,7 @@
  * Classement writes/reads through the EXISTING basket API only:
  * - GET  /api/v1/workspaces/:ws/signal-facets/reason-codes (facet_reason_codes, profile immo-steve-2026-09)
  * - POST /api/v1/workspaces/:ws/signal-facets/personal/{select,deselect,discard,restore}
+ * - POST /api/v1/workspaces/:ws/signal-facets/workspace/{restore,discard} (moderators)
  * Same services as the artifact basket bridge (reader-baskets.ts). No new endpoint.
  */
 import {
@@ -39,9 +40,10 @@ async function postCommand(
   scope: SignalScope,
   action: "select" | "deselect" | "discard" | "restore",
   body: Record<string, unknown>,
+  archiveScope: "personal" | "workspace" = "personal",
 ): Promise<string | null> {
   const res = await fetchJsonWithTimeout<unknown>(
-    scopedSignalFacetsPath(scope, `personal/${action}`),
+    scopedSignalFacetsPath(scope, `${archiveScope}/${action}`),
     {
       timeoutMs: DEFAULT_REQUEST_TIMEOUT_MS,
       init: {
@@ -104,6 +106,9 @@ export async function applyClassement(scope: SignalScope, args: ApplyClassementA
   }
   if (nextClass === "ecarte" && !reasonCode) throw new Error("reason_code_required");
   if (nextClass === current.classe && reasonCode === current.reasonCode) return;
+  if (nextClass !== "ecarte" && current.restoreBlockedReason) {
+    throw new Error("workspace_capability_required");
+  }
 
   const activeBaskets: ("pertinent" | "a_surveiller")[] = [];
   if (current.pertinentHeadId) activeBaskets.push("pertinent");
@@ -142,16 +147,16 @@ export async function applyClassement(scope: SignalScope, args: ApplyClassementA
   const reasonFor = (basket: "pertinent" | "a_surveiller"): string | null =>
     current.classe === basket ? current.reasonCode : null;
   try {
-    if (current.discarded) {
+    for (const archive of current.archiveRestores) {
       const restoredHead = await postCommand(scope, "restore", {
-        target, expectedHeadId: current.archiveHeadId, displayedFingerprint,
-      });
+        target, expectedHeadId: archive.id, displayedFingerprint,
+      }, archive.scope);
       undo.push(async () => {
-        if (!current.reasonCode) throw new Error("rollback_reason_missing");
+        if (!archive.reasonCode) throw new Error("rollback_reason_missing");
         await postCommand(scope, "discard", {
-          target, reasonCode: current.reasonCode,
-          expectedHeadId: restoredHead ?? current.archiveHeadId, displayedFingerprint,
-        });
+          target, reasonCode: archive.reasonCode,
+          expectedHeadId: restoredHead ?? archive.id, displayedFingerprint,
+        }, archive.scope);
       });
     }
 

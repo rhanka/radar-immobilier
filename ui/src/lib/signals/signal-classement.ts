@@ -61,6 +61,7 @@ export interface ArchiveHeadLike {
   personal: { id: string; state: string; reasonCode: string | null } | null;
   workspace: { id: string; state: string; reasonCode: string | null } | null;
   effectiveDiscarded: boolean;
+  capabilities?: { moderateArchive: boolean };
 }
 
 export interface ClassementEntry {
@@ -78,7 +79,10 @@ export interface ClassementEntry {
    */
   pertinentExpectedHeadId: string | null;
   aSurveillerExpectedHeadId: string | null;
+  /** Personal archive stream head, including inactive heads for discard. */
   archiveHeadId: string | null;
+  archiveRestores: { scope: "personal" | "workspace"; id: string; reasonCode: string | null }[];
+  restoreBlockedReason: string | null;
   discarded: boolean;
 }
 
@@ -90,6 +94,8 @@ export const EMPTY_CLASSEMENT_ENTRY: ClassementEntry = {
   pertinentExpectedHeadId: null,
   aSurveillerExpectedHeadId: null,
   archiveHeadId: null,
+  archiveRestores: [],
+  restoreBlockedReason: null,
   discarded: false,
 };
 
@@ -112,12 +118,18 @@ export function buildClassementMap(
   };
   for (const row of archive) {
     const entry = ensure(row.target.type, row.target.id, row.target.citySlug);
-    // F9: expectedHeadId must be the EFFECTIVE head — the active archive
-    // head (personal first, else workspace), not always the personal one.
+    // Each command must compare against the head of its own scoped stream.
     const activeHead = row.personal?.state === "active"
       ? row.personal
       : row.workspace?.state === "active" ? row.workspace : null;
-    entry.archiveHeadId = activeHead?.id ?? row.personal?.id ?? row.workspace?.id ?? null;
+    entry.archiveHeadId = row.personal?.id ?? null;
+    entry.archiveRestores = (["personal", "workspace"] as const).flatMap((scope) => {
+      const head = row[scope];
+      return head?.state === "active" ? [{ scope, id: head.id, reasonCode: head.reasonCode }] : [];
+    });
+    if (row.workspace?.state === "active" && !row.capabilities?.moderateArchive) {
+      entry.restoreBlockedReason = "Archive partagée : seul un modérateur peut restaurer ce signal.";
+    }
     if (row.effectiveDiscarded) {
       entry.classe = "ecarte";
       entry.discarded = true;

@@ -12,20 +12,29 @@ Fix #760 P1 while preserving #1090 period selection and perimeter counters. P2 a
 
 ## Branch Scope Boundaries (MANDATORY)
 - **Allowed Paths (implementation scope)**:
-  - api/src/routes/scoped-projection-revisions{,-db.test}.ts
-  - ui/src/lib/signals/graph-signal-detail-client{,.test}.ts
-  - ui/src/lib/signals/signal-filter-counts{,.test}.ts
-  - ui/src/lib/components/maps/SignauxMapView.svelte
-  - ui/src/lib/components/maps/SignauxRail.svelte
-  - ui/e2e-qa/signals-period-perimeter.spec.ts
-  - docs/spec/SPEC_BASE_API.md
-  - plan/ECARTE-BRANCH_fix-signals-ecarte-review.md
+  - `api/src/routes/scoped-projection-revisions*.ts`
+  - `ui/src/lib/signals/graph-signal-detail-client*.ts`
+  - `ui/src/lib/signals/signal-filter-counts*.ts`
+  - `ui/src/lib/components/maps/SignauxMapView.svelte`
+  - `ui/src/lib/components/maps/SignauxRail.svelte`
+  - `ui/e2e-qa/signals-period-perimeter.spec.ts`
+  - `docs/spec/SPEC_BASE_API.md`
+  - `plan/ECARTE-BRANCH_fix-signals-ecarte-review.md`
 - **Forbidden Paths (must not change in this branch)**:
-  - Makefile, docker-compose*.yml, rules/**
-  - AGENTS.md, CLAUDE.md, GEMINI.md
+  - `Makefile`, `docker-compose*.yml`, `rules/**`
+  - `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`
   - Other branch plans
 - **Conditional Paths**:
-  - None
+  - BR760-EX1: owner-requested shared archive review blocker (#1092).
+  - `ui/src/lib/signals/signal-classement*.ts`
+  - `ui/src/lib/components/maps/SignalClassementMenu.svelte`
+  - `ui/src/lib/components/maps/SignalClassementMenu.test.ts`
+  - `ui/src/lib/components/maps/SignauxSelPanel.svelte`
+  - `api/tests/integration/scoped-classement-*.spec.ts`
+  - `ui/e2e-qa/signals-perimeter-fixture.ts`
+  - Rationale: retain archive scopes and existing moderation controls through card reclassification.
+  - Impact: existing restore routes only; no new authority, schema or endpoint.
+  - Rollback: revert this correction's commits; original P1 remains independently reviewable.
 
 ## Feedback Loop
 - [x] Owner replaces #1090 archive-free Filtre rule: include discarded signals when checked.
@@ -54,6 +63,11 @@ Fix #760 P1 while preserving #1090 period selection and perimeter counters. P2 a
   - [x] Push and open PR referencing #760, listing P3 without implementing them.
 
 ## Evidence
+- [x] Shared archive blocker reproduced on 87d8e7b6: API regression 2 failures; CDP regression 3 failures and personal restoration passes. Logs: tmp/shared-red-{api,browser}.log.
+- [x] Shared archive correction: role refusal, independent scope restoration and default-list reload persistence.
+- [ ] Reusable browser fixture and standalone PostgreSQL route regression committed.
+- [ ] Existing period suite uses the shared fixture.
+- [ ] Real-click PostgreSQL browser regression and final delivery committed.
 - [x] API red: scoped-projection-revisions-db returns no archived card with showDiscarded=1. Unit red: Filtre returns 12 instead of 13. Logs: tmp/red-api.log, tmp/red-unit.log.
 - [x] Identical browser suite on 564971d24 UI sources: 3 pass, 2 fail (total remains 12, archived cards remain 6 instead of 7). Fixed sources: 5 pass. Logs: tmp/red-e2e-baseline.log, tmp/green-e2e-final.log.
 - [x] Browser coverage uses Playwright clicks over the full application, synthetic stateful API responses, and disposable CDP 9333 tabs. Real PostGIS API tests independently cover visibility, authorization, fingerprints, restoration and archive scopes. This is not a live preprod write campaign.

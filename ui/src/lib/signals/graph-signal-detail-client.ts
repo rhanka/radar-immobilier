@@ -571,6 +571,7 @@ export interface CoherentArchiveHead {
   personal: { id: string; state: string; reasonCode: string | null } | null;
   workspace: { id: string; state: string; reasonCode: string | null } | null;
   effectiveDiscarded: boolean;
+  capabilities?: { moderateArchive: boolean };
 }
 
 export interface CoherentSelectionHead {
