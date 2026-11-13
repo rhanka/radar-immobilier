@@ -35,6 +35,7 @@
 - [x] GO lié aux octets du roster et du plan. Empreintes dans les reçus. Garde de propriété avant backup, DDL, grants et rollback.
 - [x] Copie : reçu backup.json physique, propriétaires et ACL restaurés. Intégration réelle 13 → 44 → 13. Deux rollbacks et accès legacy vérifiés sur archive synthétique.
 - [x] Gardes GO, propriété du verrou et configuration bornée. Refus avant grants si octets modifiés. Reprise services liée au reçu physique de rollback.
+- [x] Contrôleur : capture avant drain même sans ConfigMap 6H. Configuration et fermeture sous verrou. Promotion concurrente refusée. Smoke public en échec : routes refermées et verrou conservé.
 - [x] Lot 0 : règles, dossier PREPA-PROD complet, contrat 6H et CD.
 - [x] Lot 1 : cibles autonomes et précontrôles sans écriture prod.
 - [x] Lot 2 : sauvegarde, restauration, migrations mesurées et hook 6H préparés.

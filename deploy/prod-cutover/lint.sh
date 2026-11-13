@@ -7,4 +7,4 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 "${compose[@]}" run --rm --no-deps -T -u 0:0 --entrypoint sh api -c "chown $(id -u):$(id -g) /workspace/node_modules /workspace/api/node_modules"
-"${compose[@]}" run --rm --no-deps -T api bash -ec 'npm ci --ignore-scripts --silent && npx eslint deploy/prod-cutover/*.cjs'
+"${compose[@]}" run --rm --no-deps -T api bash -ec 'npm ci --ignore-scripts --silent && npx eslint deploy/prod-cutover/*.cjs deploy/prod-cutover/*.mjs && node --test deploy/prod-cutover/controller.test.mjs'

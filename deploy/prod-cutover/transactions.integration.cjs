@@ -8,7 +8,7 @@ const { restoreTest, rollback } = require('./backup.cjs');
 test('copie réelle : 13 → 44 → 13, reprise, données, propriétaires et ACL', () => {
   const entries = r.journal();
   const target = process.env.PGDATABASE;
-  r.sql('CREATE DATABASE radar; CREATE ROLE legacy_owner; CREATE ROLE legacy_reader;');
+  r.sql('CREATE DATABASE radar; CREATE ROLE legacy_owner; CREATE ROLE legacy_reader; CREATE ROLE candidate_reader;');
   process.env.PGDATABASE = 'radar';
   r.sql('CREATE SCHEMA drizzle; CREATE TABLE drizzle.__drizzle_migrations (id serial PRIMARY KEY, hash text NOT NULL, created_at bigint);');
   for (const e of entries.slice(0, 13)) {
@@ -22,7 +22,9 @@ test('copie réelle : 13 → 44 → 13, reprise, données, propriétaires et ACL
   const ownership = () => r.sql(`SELECT json_agg(x ORDER BY schema,name)::text FROM
     (SELECT n.nspname schema,c.relname name,pg_get_userbyid(c.relowner) owner,c.relacl::text acl
     FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
-    WHERE n.nspname IN ('public','drizzle') AND c.relkind IN ('r','S','v')) x;`);
+    WHERE n.nspname IN ('public','drizzle') AND c.relkind IN ('r','S','v')
+    UNION ALL SELECT nspname,'[schema]',pg_get_userbyid(nspowner),nspacl::text
+    FROM pg_namespace WHERE nspname IN ('public','drizzle')) x;`);
   const original = ownership();
   const archive = r.path.join(r.output(), 'synthetic-test.dump');
   r.run('pg_dump', ['--format=custom', `--file=${archive}`]);
@@ -56,12 +58,13 @@ test('copie réelle : 13 → 44 → 13, reprise, données, propriétaires et ACL
   assert.equal(r.prefix(r.rows()), 44);
   assert.throws(() => r.sql('BEGIN; CREATE TABLE cutover_rollback_probe(id int); SELECT * FROM cutover_missing_table; COMMIT;'));
   assert.equal(r.sql("SELECT to_regclass('public.cutover_rollback_probe') IS NULL;"), 't');
-  r.sql("UPDATE recovery_probe SET value='changed'; REVOKE SELECT ON recovery_probe FROM legacy_reader; ALTER TABLE recovery_probe OWNER TO radar;");
+  r.sql("UPDATE recovery_probe SET value='changed'; REVOKE SELECT ON recovery_probe FROM legacy_reader; GRANT SELECT ON recovery_probe TO candidate_reader; ALTER TABLE recovery_probe OWNER TO radar;");
   for (let attempt = 0; attempt < 2; attempt++) {
     assert.equal(rollback().ok, true);
     assert.equal(r.prefix(r.rows()), 13);
     assert.equal(ownership(), original);
     assert.equal(r.sql('SET ROLE legacy_reader; SELECT value FROM recovery_probe WHERE id=1;'), 'baseline');
+    assert.equal(r.sql("SELECT has_table_privilege('candidate_reader','recovery_probe','SELECT');"), 'f');
     assert.equal(r.sql("SELECT to_regclass('public.facet_reason_codes') IS NULL;"), 't');
   }
   process.stdout.write(`Mesure synthétique DDL : ${first.durationMs} ms. Ce n’est pas une copie prod.\n`);
