@@ -32,7 +32,7 @@
 - [x] No application behavior change; no UAT.
 
 ## Plan / Todo (lot-based)
-- [ ] Freeze prompt, source comparison and metrics before calls.
+- [x] Freeze prompt, source comparison and metrics before calls; commits 4b9cd7958 and 806ab7041.
 - [ ] Execute 100 PV, seal blind outputs, record quotas and usage.
 - [ ] Score three recalls by half and total; Wilson lower bounds; inspect tuning misses only.
 - [ ] Compare current B arm and cost, or explicitly report missing source.
