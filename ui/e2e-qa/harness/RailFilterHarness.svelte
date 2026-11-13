@@ -36,6 +36,7 @@
   <span id="emitted-log">{emitted.join(",")}</span>
   <span id="current-initial">{initialSubsetKey}</span>
   <span id="current-period">{timeRange.relative}</span>
+  <span id="current-range-end">{timeRange.to}</span>
 
   <SignauxRail {initialSubsetKey} {onFilterChange} {timeRange}
     onTimeRangeChange={(next) => { timeRange = next; }} />
