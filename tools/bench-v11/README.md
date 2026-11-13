@@ -145,6 +145,79 @@ node tools/bench-v11/full/audit-muse-surface.mjs tools/bench-v11/full/arms/muse-
 node tools/bench-v11/full/score-ember-sensitivity.mjs xhigh sacre-coeur-2026-05-11   # -> full/scores-ember-xhigh-sensitivity.json
 ```
 
+### Cascade CP+ réelle (complément v12)
+
+CP+ rejoue GPT-6 Astra medium, puis fait relire chaque sortie acceptée par
+Muse Spark 1.3 xhigh. Le filtre CP reste inchangé. Le scoreur refuse un
+passage incomplet, les doublons et une concurrence observée supérieure à 4.
+Un verrou global interdit deux runners sur le même bras. Ne pas effacer ce
+verrou pendant une exécution. Après une interruption, vérifier l'arrêt du
+conteneur avant de retirer un verrou résiduel.
+
+Le point d'entrée autonome ne charge ni le Makefile racine ni un fichier
+d'environnement. Node tourne en conteneur. Les processus modèle partent
+d'un dossier vide hors dépôt. Fournir `BENCH_MESH_DIR` (llm-mesh 0.19.3) et
+`BENCHMARK_OWNER_SCOPE` (portée publique du compte Codex). Le trousseau
+chiffré est copié hors dépôt par `setup`. Aucun secret n'est affiché.
+
+```bash
+make -f tools/bench-v11/cp-plus.mk setup ENV=test-benchmark-b
+make -f tools/bench-v11/cp-plus.mk freeze ENV=test-benchmark-b
+make -f tools/bench-v11/cp-plus.mk replay BENCH_MESH_DIR=<sandbox> BENCHMARK_OWNER_SCOPE=<scope> ENV=test-benchmark-b
+make -f tools/bench-v11/cp-plus.mk validate ENV=test-benchmark-b
+make -f tools/bench-v11/cp-plus.mk filter CONCURRENCY=4 ENV=test-benchmark-b
+make -f tools/bench-v11/cp-plus.mk audit ENV=test-benchmark-b
+make -f tools/bench-v11/cp-plus.mk score ENV=test-benchmark-b
+make -f tools/bench-v11/cp-plus.mk report BENCH_REFERENCE=<preuves-v11> BENCH_REPORT=v12 ENV=test-benchmark-b
+make -f tools/bench-v11/cp-plus.mk pdf ENV=test-benchmark-b
+make -f tools/bench-v11/cp-plus.mk checksums ENV=test-benchmark-b
+```
+
+CP+ low reuses the existing Astra replay. Its separate arm is
+`full/arms/cp-plus-muse13-low`; xhigh remains the default arm, with a quota
+stop threshold of 85% and concurrency four. To reproduce low (this runs
+the reviewer for any missing decisions):
+
+```bash
+make -f tools/bench-v11/cp-plus.mk filter audit score MUSE_EFFORT=low STOP_WEEKLY_PCT=100 CONCURRENCY=8 ENV=test-benchmark-b-low
+```
+
+`STOP_WEEKLY_PCT=100` disables the quota guard, even if the counter is
+unavailable. To recalculate from captured data without a model call, run
+only `audit score`, with `MUSE_EFFORT=low` or `MUSE_EFFORT=xhigh`.
+The score summary fields `firstReceiptWeekly` and `lastReceiptWeekly`
+record the weekly quota percentage from the first and last valid review
+receipts in log order. An unavailable value is `null`. These fields are
+metadata and do not affect precision, recall, or F1.
+
+Muse est lu avant chaque document et toutes les 10 minutes. À 85 %, le
+runner coupe aussi ses appels en cours. Un quota illisible arrête le bras.
+Le quota ne devient jamais un refus. Pour la mesure CP+ du 13 novembre,
+l'arrêt initial intervient après 64 documents. L'owner demande ensuite une
+reprise sans seuil. Une interruption à 78 documents impose une dernière
+reprise. Chaque reprise saute les décisions présentes. `meta.jsonl` atteste
+100 réponses valides distinctes, sans doublon, et trois tentatives coupées
+au premier arrêt. Muse hebdomadaire passe de 84 % à 85 %. La finalisation
+ne lance aucun nouvel appel de modèle.
+
+Résultats stricts, oracle 676 : rejeu Astra P 0,391 / R 0,497 / F1 0,438 ;
+CP+ P 0,467 / R 0,494 / F1 0,480. Les deux acceptent 100 documents.
+CP+ juge 852 actes et en retire 143. Équivalents API : 0,44027 et
+0,49055 USD/doc. Siège : `missing source`. Le coût Muse couvre les
+100 invocations abouties. L'usage des trois tentatives coupées est
+`missing source`. L'audit des 103 flux n'observe aucun outil ni tour
+supplémentaire. La CLI déclare 47 skills chargées. Les outils restent
+disponibles. Voir la section « CP+ mesurée » du dossier v12.
+
+Les jetons réels, décisions, reçus et
+surface d'accès sont conservés sous `full/arms/`. Le coût siège reste
+`missing source` si le compteur partagé ne permet pas une attribution.
+Le target `pdf` utilise le navigateur local dédié au port 9333. Il ouvre
+son propre onglet, incorpore les SVG, produit le PDF, puis ferme cet onglet.
+Le dossier v12 ne pose aucune décision. Les 42 lignes historiques restent
+inchangées. Le dossier Focus n'est pas modifié. Les deux fichiers de score
+CP+ et rejeu sont versionnés. Les sorties brutes restent locales.
+
 ### 6. Burns (échantillon fixe de 10 documents, capture d'usage)
 
 ```bash
