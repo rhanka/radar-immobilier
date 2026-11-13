@@ -42,6 +42,23 @@ DOG="deploy/k8s/34-refresh-pending-watchdog.yaml"
 
 fixture; run_ok "released overlays pass"
 
+fixture; sed -i '/REFRESH_CLASSIFY_MODE/d' "$CASE_ROOT/$BASE"
+run_bad "classification mode missing" "refresh activation/model contract failed"
+
+for mode in two-step single-pass invalid; do
+  fixture; sed -i "/REFRESH_CLASSIFY_MODE/s/value: \"off\"/value: \"$mode\"/" "$CASE_ROOT/$BASE"
+  run_bad "classification mode $mode enabled by default" "refresh activation/model contract failed"
+done
+
+fixture; sed -i '/REFRESH_CLASSIFY_REASONING_EFFORT/s/value: "low"/value: "medium"/' "$CASE_ROOT/$BASE"
+run_bad "classification must default to Astra low" "refresh activation/model contract failed"
+
+fixture; sed -i '/REFRESH_CLASSIFY_FALLBACK_MODEL/s/gemini-3.8-flash/other/' "$CASE_ROOT/$BASE"
+run_bad "classification fallback must stay Gemini Flash" "refresh activation/model contract failed"
+
+fixture; sed -i '/REFRESH_CLASSIFY_CONCURRENCY/s/value: "2"/value: "200"/' "$CASE_ROOT/$BASE"
+run_bad "classification concurrency must stay bounded" "refresh activation/model contract failed"
+
 fixture; sed -i '/REFRESH_SINGLE_PASS/d' "$CASE_ROOT/$BASE"
 run_bad "single-pass flag missing" "refresh activation/model contract failed"
 
