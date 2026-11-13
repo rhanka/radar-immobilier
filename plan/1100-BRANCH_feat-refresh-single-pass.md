@@ -30,12 +30,12 @@
 ## Plan / Todo (lot-based)
 - [x] **Lot 0 — Baseline and constraints**
   - [x] Confirm clean feat/refresh-single-pass at origin/main b7724bdd9015a4f26319897bf240baaf9ee636ae.
-- [ ] **Lot 1 — Prompt and extraction**
-  - [ ] Versioned P0 extension, pinned SHA, strict per-act class validation, flag-zero compatibility, actual model receipts.
-- [ ] **Lot 2 — Annotation persistence and presentation**
-  - [ ] Additive schema, human precedence, API fields, UI class and badge.
-- [ ] **Lot 3 — Recent reannotation**
-  - [ ] Dry-run default, apply, stable identities, failure recovery, report, preprod make target.
+- [x] **Lot 1 — Prompt and extraction**
+  - [x] Versioned P0 extension, pinned SHA, strict per-act class validation, flag-zero compatibility, actual model receipts; dedicated single-pass settings default to Astra low.
+- [x] **Lot 2 — Annotation persistence and presentation**
+  - [x] Additive schema, human precedence, API fields, UI class and badge.
+- [x] **Lot 3 — Recent reannotation**
+  - [x] Dry-run default, apply, stable identities, failure recovery, report, preprod make target.
 - [ ] **Lot 4 — Verification and delivery**
   - [ ] Typecheck, lint, scoped API unit/PostgreSQL tests, UI tests, render checks, stack cleanup.
   - [ ] Review, push, PR to main with design, activation, rollback and risks. Never merge.
