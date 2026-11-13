@@ -6,7 +6,7 @@ import { writeFileSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fixture } from '../../tools/make/cutover-fixture.mjs';
 
-for (const publicFailure of [false, true]) test(`fenêtre fermée : capture, verrou, rollout privé, GO ; échec public=${publicFailure}`, () => {
+for (const [publicFailure, short] of [[false, false], [true, false], [false, true]]) test(`fenêtre fermée : capture, verrou, rollout privé, GO ; échec public=${publicFailure}, SHA court=${short}`, () => {
   const f = fixture({ url: 'https://immo.sent-tech.ca' });
   const node = process.execPath;
   // Only the application DB/GO port is doubled. Kubernetes, lock, controller and HTTP
@@ -21,11 +21,14 @@ exec '${node}' "$@"
   const persist = state => writeFileSync(join(f.dir, 'state.json'), JSON.stringify(state));
   const record = () => JSON.parse(f.state().objects.find(o => o.metadata.name === 'radar-change-lock').data.record);
   const run = (action, id) => spawnSync('make', ['-s', '-f', 'deploy/prod-cutover/prod-cutover.mk',
-    action, `RELEASE=${f.dir}/release.json`, `CONFIGURATION=${f.dir}/configuration.json`, ...(id ? [`RUN=${id}`] : []), 'ENV=execution-prod'],
+    action, `RELEASE=${f.dir}/release.json`, `PREVIOUS_RELEASE=${f.dir}/previous.json`, `CONFIGURATION=${f.dir}/configuration.json`, ...(id ? [`RUN=${id}`] : []), 'ENV=execution-prod'],
   { env: f.env, encoding: 'utf8', timeout: 30000 });
   const success = result => assert.equal(result.status, 0, result.stdout + result.stderr);
   try {
     const state = f.state();
+    writeFileSync(join(f.dir, 'previous.json'), JSON.stringify({ ...f.release, dataMigration: null }));
+    if (short) state.release.apiServedSha = state.release.gitSha.slice(0, 7);
+    writeFileSync(join(f.dir, 'bin/gh'), '#!/bin/sh\nprintf \'[{"workflow_runs":[]}]\\n\'\n', { mode: 0o755 });
     const ingress = state.objects.find(o => o.kind === 'Ingress');
     ingress.spec.rules[0].host = 'immo.sent-tech.ca';
     ingress.spec.tls[0].hosts = ['immo.sent-tech.ca'];
@@ -38,6 +41,8 @@ exec '${node}' "$@"
     const captured = record();
     assert.equal(captured.kind, 'cutover');
     assert.ok(captured.previousRelease);
+    assert.equal(captured.previousRelease.apiServedSha, state.release.apiServedSha);
+    assert.equal(captured.previousRelease.gitSha, state.release.gitSha);
     assert.ok(captured.consumers.length > 0);
     assert.equal(captured.executor.state, 'stopped');
     assert.notEqual(f.run('prepare', [], 'prod').status, 0, 'promote-prod prepare doit refuser');
@@ -56,7 +61,7 @@ exec '${node}' "$@"
     assert.equal(f.state().objects.find(o => o.metadata.name === 'radar-api').spec.replicas, 0);
     assert.ok(JSON.stringify(f.state().objects.find(o => o.kind === 'Ingress')).includes('base-maintenance-'));
     const afterDrain = f.calls().length;
-    success(run('window-deploy', captured.run));
+    success(run(short ? 'window-rollback-services' : 'window-deploy', captured.run));
     assert.ok(!f.calls().slice(afterDrain).some(c => c[0] === 'curl' && c.some(a => a === 'https://immo.sent-tech.ca/health')));
     assert.ok(record(), 'verrou conservé après rollout et smoke privé');
     assert.equal(f.state().objects.find(o => o.metadata.name === 'radar-refresh-pv').spec.suspend, true);

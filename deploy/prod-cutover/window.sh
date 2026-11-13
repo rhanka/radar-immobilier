@@ -10,6 +10,7 @@ ENV=prod
 for part in release cluster inventory close jobs render stages reopen smoke prepared switch rbac; do
   source "tools/make/cutover-$part.sh"
 done
+source deploy/prod-cutover/window-guards.sh
 cutover_config
 WORK=$(mktemp -d)
 OWNED=0
@@ -41,10 +42,11 @@ if [[ $1 == window-start ]]; then
       and .checkpoints["manual-inventory"]==null' "$WORK/record.json" >/dev/null || fail 'Capture déjà terminée'
     lock_resume
   else lock_acquire cutover; fi
+  manual_cd_idle
   jq '.manualV1220=true|.environment="prod"' "$WORK/record.json" > "$WORK/next.json"
   mv "$WORK/next.json" "$WORK/record.json"; record_save
   # Capture the previous release and consumers while they are still Ready.
-  deployed_release
+  manual_deployed_release
   jq '.previousRelease=.release' "$WORK/record.json" > "$WORK/next.json"
   mv "$WORK/next.json" "$WORK/record.json"; record_save
   # Inventory the live release before installing the candidate's 6H ConfigMap.
