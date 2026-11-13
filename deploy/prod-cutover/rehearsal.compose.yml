@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: postgis/postgis@sha256:44126d872ac91993766c341e369c539e8196614321765d36a6f1bab0419a5fa5
+    pull_policy: never
+    environment:
+      POSTGRES_USER: radar
+      POSTGRES_DB: radar_cutover_owner_20261113
+      POSTGRES_PASSWORD_FILE: /run/local-password
+    ports: ["127.0.0.1:25433:5432"]
+    volumes:
+      - copy-data:/var/lib/postgresql/data
+      - ${HOME:?}/.local/share/radar-prod-copy/local-password:/run/local-password:ro
+      - ./rehearsal-roles.sql:/docker-entrypoint-initdb.d/roles.sql:ro
+    networks: [copy-only]
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U radar -d radar_cutover_owner_20261113]
+      interval: 1s
+      retries: 30
+networks:
+  copy-only:
+    internal: true
+volumes:
+  copy-data:
