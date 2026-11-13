@@ -37,6 +37,15 @@ async function fixture() {
 }
 
 describeDb("atomic archive restoration", () => {
+  for (const nextClass of ["pertinent", "a_surveiller"]) it(`should restore both archives and select ${nextClass} atomically`, async () => {
+    const f = await fixture();
+    expect((await f.post("personal/reclassify", { ...f.body, nextClass })).status).toBe(200);
+    const state = await f.read();
+    expect(state.heads[0]).toMatchObject({ personal: { state: "inactive" }, workspace: { state: "inactive" } });
+    expect(state.selection.filter((head: { state: string }) => head.state === "active"))
+      .toMatchObject([{ basket: nextClass }]);
+  });
+
   it("should roll back personal restoration when the workspace head conflicts", async () => {
     const f = await fixture();
     const before = await f.read();
@@ -80,7 +89,9 @@ describeDb("atomic archive restoration", () => {
     expect(replayed.token).toBe(committed.token);
     expect((await f.post("personal/reclassify", { ...f.body, nextClass: "pertinent" }, key)).status).toBe(409);
     f.actor(f.contributor.sub);
-    expect((await f.app.request(`${f.base}/coherent-city?citySlug=${f.target.citySlug}&mode=signal`)).status).toBe(200);
+    const other = await f.app.request(`${f.base}/coherent-city?citySlug=${f.target.citySlug}&mode=signal`);
+    expect(other.status).toBe(200);
+    expect((await other.json()).signals).toMatchObject([{ id: f.target.id }]);
   });
 
   it("should preserve moderation and browser-session guards before any mutation", async () => {
