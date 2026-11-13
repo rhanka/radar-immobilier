@@ -31,6 +31,7 @@ import { createAccountBinding } from "./account-binding.js";
 import { admissionJitInputFromClaims } from "./admission-jit.js";
 import { createArtifactBinding } from "./artifact-binding.js";
 import { createSignalBinding, type SignalQuery, type SignalRuntime } from "./signal-store.js";
+import { signalAttempt, type SignalAttempt } from "./signal-audit.js";
 
 /**
  * REMOTE transport for the immo MCP provider: Streamable HTTP (MCP SDK) behind an
@@ -397,6 +398,16 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
       throw error;
     }
     const sessionId = c.req.header("mcp-session-id");
+    let attempt: SignalAttempt | undefined;
+    if (request.method === "POST") {
+      const envelope = await request.clone().json().catch(() => null) as { method?: string;
+        params?: { name?: unknown; arguments?: unknown } } | null;
+      const args = envelope?.params?.arguments;
+      if (envelope?.method === "tools/call" && typeof envelope.params?.name === "string"
+        && args && typeof args === "object" && !Array.isArray(args)) {
+        attempt = signalAttempt(envelope.params.name, args as Record<string, unknown>);
+      }
+    }
 
     if (sessionId) {
       const entry = sessions.get(sessionId);
@@ -414,7 +425,8 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
       // Immutable capture at entry: the running handler keeps this request's
       // identity even when a concurrent request enters the same session.
       const signals = signalRuntime(entry.server);
-      const snapshot = captureInvocationContext({ auth, data, raw, ...(signals ? { signals } : {}) });
+      const snapshot = captureInvocationContext({ auth, data, raw, ...(signals ? { signals } : {}),
+        ...(attempt ? { signalAttempt: attempt } : {}) });
       return dispatchWithExchange(mcpAuth, auth, subjectToken, snapshot, () => entry.transport.handleRequest(request), request.signal);
     }
 
