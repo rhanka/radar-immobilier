@@ -32,7 +32,7 @@ async function main(operation = process.argv[2]) {
       const items = manifest.kind === 'List' ? manifest.items : [manifest];
       if (!Array.isArray(items) || !items.length || items.some(x =>
         x.kind !== 'ConfigMap' || x.metadata?.namespace !== 'radar-immobilier'
-        || !['radar-api', 'radar-cutover-6h'].includes(x.metadata.name))) r.fail('configuration_scope_mismatch');
+        || !['radar-api', 'immo-mcp-config', 'radar-mcp-receiver', 'radar-cutover-6h'].includes(x.metadata.name))) r.fail('configuration_scope_mismatch');
       const plan = items.find(x => x.metadata.name === 'radar-cutover-6h');
       if (!plan || r.crypto.createHash('sha256').update(plan.data?.['plan.json'] || '').digest('hex')
         !== r.approvedPlan().planSha256) r.fail('configuration_plan_mismatch');

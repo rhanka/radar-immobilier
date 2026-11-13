@@ -1,0 +1,41 @@
+{
+  "observedOn": "2026-11-13",
+  "candidate": "b7724bdd9015a4f26319897bf240baaf9ee636ae",
+  "buildRun": "43506353942",
+  "manifestArtifactId": "14077415483",
+  "manifestByteMatch": true,
+  "privateDirectory": "/home/antoinefa/.local/share/radar-prod-copy",
+  "roster": {
+    "file": "roster.json",
+    "sha256": "e3b325fd8a3107e5433e8193272785f3a6a03dc1580a60b0e86ab827abd01f1e",
+    "planFile": "plan.json",
+    "planSha256": "ece35ae34426d2bf93f70f5e074f57e539fa421d29ad24a52ce9300a54ea7afb",
+    "accounts": 6,
+    "approvedProductionMatches": 6,
+    "workspaces": 1,
+    "workspaceSlug": "agence-chaperon-immobilier",
+    "activeMemberships": 6,
+    "managers": 1,
+    "moderators": 1
+  },
+  "archive": {
+    "file": "prod-20261113.dump",
+    "sha256": "6e6648d360cf354ab80cbac8822d08de8d69f1568c6203bf151b4c230f4745df",
+    "independentSha256": "6e6648d360cf354ab80cbac8822d08de8d69f1568c6203bf151b4c230f4745df",
+    "implementations": ["sha256sum", "openssl dgst -sha256"],
+    "capturedAt": "2026-11-13T23:16:47Z",
+    "durationSeconds": 72,
+    "bytes": 283590496,
+    "sourceRole": "radar_db_ro_prod",
+    "format": "CUSTOM",
+    "database": "radar",
+    "serverVersion": "16.4",
+    "postgisVersion": "3.4.3",
+    "readOnly": true,
+    "mode": "0600"
+  },
+  "imagesPulledByDigest": true,
+  "localPostgisDigest": "sha256:44126d872ac91993766c341e369c539e8196614321765d36a6f1bab0419a5fa5",
+  "rehearsalStarted": false,
+  "productionWrites": false
+}
