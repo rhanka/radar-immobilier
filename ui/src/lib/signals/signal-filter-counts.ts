@@ -35,8 +35,32 @@ import {
 import type { GraphSignalNode } from "./graph-signal-detail-client.js";
 import type { CityMapEntry } from "$lib/maps/maps-data.js";
 import { DEFAULT_CLASSEMENT_FILTER, SIGNAL_CLASSES, type ClassementFilter, type SignalClass } from "./signal-classement.js";
+import { bAxesFromVivierKey, countForVivierCity } from "./vivier-view-mode.js";
 
 export type FiltreCounts = VivierFiltreCounts;
+
+/** Exact visible population for one city; archives remain outside the list. */
+export function displayedSignalCountForCity(
+  entry: CityMapEntry,
+  subsetKey: string,
+  classement: ClassementFilter,
+  exclusions: VivierBExclusions,
+): number | null {
+  const classes = SIGNAL_CLASSES.filter((classe) => classe !== "ecarte" && classement[classe]);
+  if (classes.length === 0) return 0;
+  const axes = bAxesFromVivierKey(subsetKey);
+  if (entry.filtreCubesByClassement) {
+    return classes.reduce((sum, classe) => sum + displayedVivierFiltreCount(
+      entry.filtreCubesByClassement![classe], axes, exclusions,
+    ), 0);
+  }
+  if (entry.vivierV2Counts === null && !entry.filtreCube) return 0;
+  // Without a class dimension, only the complete visible population is known.
+  if (classes.length !== 3) return null;
+  return entry.filtreCube
+    ? displayedVivierFiltreCount(entry.filtreCube, axes, exclusions)
+    : countForVivierCity(entry, subsetKey);
+}
 
 /** Cube of loaded detail nodes, or `null` when a node carries no classification. */
 export function filtreCubeOfNodes(nodes: readonly GraphSignalNode[]): VivierFiltreCube | null {
