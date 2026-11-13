@@ -12,7 +12,7 @@ export BACKUP_URI BACKUP_ENDPOINT RESTORE_SHA256
 export CUTOVER_API_IMAGE CUTOVER_ALLOW_PROD
 export SMOKE_URL
 export ROOT
-.PHONY: help prerequisites precheck backup restore-test migrate transition verify smoke rehearsal rollback k8s-plan cd-plan test integration down commit
+.PHONY: help prerequisites precheck backup restore-test migrate transition verify smoke rehearsal rollback k8s-plan cd-plan test integration down check image-check publish commit
 help:
 	@echo 'Préparation : prerequisites precheck k8s-plan cd-plan. Exécution future : backup restore-test migrate transition verify smoke rehearsal rollback.'
 prerequisites precheck k8s-plan cd-plan:
@@ -28,6 +28,20 @@ integration:
 down:
 	@test "$(ENV)" = test-prod-cutover
 	@docker compose --env-file /dev/null -p radar-test-prod-cutover -f "$(ROOT)/deploy/prod-cutover/test.compose.yml" down -v --remove-orphans
+check:
+	@cd "$(ROOT)" && bash -n deploy/prod-cutover/inspect.sh deploy/prod-cutover/integration.sh
+	@cd "$(ROOT)" && for file in deploy/prod-cutover/*.cjs; do node --check "$$file"; done
+	@git -C "$(ROOT)" diff --check
+	@git -C "$(ROOT)" status --short --branch
+image-check:
+	@docker image inspect --format '{{.Id}}' ghcr.io/rhanka/radar-api@sha256:13664562840c200858355e525d292e5df5dfa2c0569a73b564f698bbccbb8a27
+	@timeout --kill-after=5s 20s docker run --rm --pull=never --network none --entrypoint node ghcr.io/rhanka/radar-api@sha256:13664562840c200858355e525d292e5df5dfa2c0569a73b564f698bbccbb8a27 -e 'Promise.all([import("/workspace/api/dist/scripts/database-cutover.js"),import("/workspace/node_modules/pg/lib/index.js"),import("/workspace/node_modules/drizzle-orm/node-postgres/index.js")]).then(([h])=>{if(typeof h.migrateDatabaseCutover!=="function")process.exit(1)})'
+publish:
+	@test "$(ENV)" = test-prod-cutover
+	@test "$$(git -C "$(ROOT)" branch --show-current)" = feat/prod-cutover-v1220
+	@git -C "$(ROOT)" diff --quiet
+	@git -C "$(ROOT)" diff --cached --quiet
+	@git -C "$(ROOT)" push origin HEAD:refs/heads/feat/prod-cutover-v1220
 commit:
 	@test -n "$$MSG"
 	@git -C "$(ROOT)" -c core.hooksPath=/dev/null commit -m "$$MSG"
