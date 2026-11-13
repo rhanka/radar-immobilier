@@ -15,6 +15,7 @@
 - [x] Conditional: Makefile, api/Dockerfile, api/drizzle/**, API classification read paths and UI transport types.
 
 ## Feedback Loop
+- [x] BR1100-EX4: owner requests rollback purge service, reannotation CLI mode and preprod make target, PostgreSQL coverage, shared annotation revisions and exact model labels. Keep readers independent of the flag. Rollback: flag zero, optional explicit AI purge.
 - [x] BR1100-EX1: Makefile change authorized by owner reannotation target; add SKIP_DOTENV to honor no .env reads. Impact: opt-in skip only. Rollback: revert target/conditional.
 - [x] BR1100-EX2: additive migration plus journal and Dockerfile runtime entrypoint/assets required for deployment. Rollback: flag zero; keep additive schema.
 - [x] BR1100-EX3: imported P0 prompt may exceed atomic line budget; preserve source bytes except product role naming and extraction output contract.
