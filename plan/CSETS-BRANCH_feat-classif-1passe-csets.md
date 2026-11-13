@@ -37,3 +37,4 @@
 - [x] Tuning aggregates, matrices, baseline comparison and five-line production verdict committed locally.
 - [x] Four synthetic metric/pairing tests and syntax checks pass; 242/242 native validations and exact request comparisons pass.
 - [x] Pairing regression corrected offline: native stages are flat, as in bench-v11; no model rerun.
+- [x] Add classification-only report generation, aggregate invariants and sealed blind-cache verification.
