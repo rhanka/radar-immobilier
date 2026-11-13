@@ -20,7 +20,7 @@ import { eq, or, sql, inArray, notInArray, and, isNotNull } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { graphNodes, graphEdges } from "../../db/schema.js";
 import { QC_MUNICIPALITIES } from "@radar/sources";
-import { classifyBPrime, deriveRegulatoryStatus, isHiddenByVivierBExclusions, matchesDocumentDateWindow, resultCivilDates, type DocumentDateWindow, type RegulatoryStageKindT } from "@radar/domain";
+import { addToVivierFiltreCube, classifyBPrime, countVivierClassifications, deriveRegulatoryStatus, isHiddenByVivierBExclusions, matchesDocumentDateWindow, resultCivilDates, type DocumentDateWindow, type RegulatoryStageKindT, type VivierFiltreCube, type VivierV2 } from "@radar/domain";
 import {
   computeLegacySubsetCounts,
   computeVivierV2,
@@ -29,7 +29,7 @@ import {
   classifyVivierSignal,
   type VivierSignalInput,
 } from "./vivier-v2.js";
-import { filterDiscardedSignals, type DiscardedSignalKey } from "./discarded-signals.js";
+import { discardedSignalKey, filterDiscardedSignals, type DiscardedSignalKey } from "./discarded-signals.js";
 import { bumpGraphSourceRevision } from "../facets/projection-revisions.js";
 
 export {
@@ -2251,12 +2251,22 @@ export interface CitySignalCounts {
   signalCount: number;
   subsetCounts: Record<SubsetKey, number>;
   vivierV2Counts: ReturnType<typeof computeVivierV2>["counts"];
+  /**
+   * B Filtre cube (`@radar/domain` filtre-cube): count per combination of the
+   * Zonage / Résidentiel / Précoce axes and the PIIA / dérogation exclusions,
+   * over the date-scoped, non-discarded B universe. It never depends on the
+   * `excludePiia` / `excludeDerogations` query flags, so the client can derive
+   * the Filtre dropdown counts for any Filtre state.
+   */
+  filtreCube: VivierFiltreCube;
+  filtreCubesByClassement?: import("@radar/domain").VivierFiltreCubesByClassement;
 }
 
 /** Aggregate one projection in both rails. Pure so A/B parity is testable. */
 export function aggregateGraphSignalProjectionRows(
   rows: readonly GraphSignalProjectionRow[],
   dateRange?: GraphSignalDateRange,
+  classement?: ReadonlyMap<DiscardedSignalKey, keyof import("@radar/domain").VivierFiltreCubesByClassement>,
 ): CitySignalCounts[] {
   function emptySubsetCounts(): Record<SubsetKey, number> {
     const out = {} as Record<SubsetKey, number>;
@@ -2267,7 +2277,9 @@ export function aggregateGraphSignalProjectionRows(
   const byCity = new Map<string, {
     signalCount: number;
     subsetCounts: Record<SubsetKey, number>;
-    signals: VivierSignalInput[];
+    classifications: VivierV2[];
+    filtreCube: VivierFiltreCube;
+    filtreCubesByClassement: import("@radar/domain").VivierFiltreCubesByClassement;
     legacySignals: VivierSignalInput[];
     bPrimeEligibleSignals: VivierSignalInput[];
   }>();
@@ -2275,13 +2287,17 @@ export function aggregateGraphSignalProjectionRows(
   for (const row of rows) {
     if (!row.citySlug) continue;
     if (!matchesDocumentDateWindow(row.props, dateRange)) continue;
+    // One vivier_v2 classification per row, shared by the B display
+    // exclusions, the Filtre cube and the vivier counts (what computeVivierV2
+    // would recompute from the same row).
+    const classification = classifyGraphNodeVivierV2({ ...row, category: row.category ?? null,
+      description: row.description ?? null, etapeAnnote: row.etapeAnnote ?? null });
+    const displayNode = { label: row.label, description: row.description ?? null,
+      props: (row.props ?? {}) as Record<string, unknown>, classification };
     // B display exclusions only gate the B (vivier_v2) path, exactly like the
     // client detail; legacy A counts keep the full date-scoped projection.
     const hiddenInB = (dateRange?.excludePiia || dateRange?.excludeDerogations)
-      ? isHiddenByVivierBExclusions({ label: row.label, description: row.description ?? null,
-        props: (row.props ?? {}) as Record<string, unknown>,
-        classification: classifyGraphNodeVivierV2({ ...row, category: row.category ?? null,
-          description: row.description ?? null, etapeAnnote: row.etapeAnnote ?? null }) }, {
+      ? isHiddenByVivierBExclusions(displayNode, {
         piiaSansProjetResidentiel: dateRange.excludePiia === true,
         derogationsMineures: dateRange.excludeDerogations === true,
       })
@@ -2290,7 +2306,9 @@ export function aggregateGraphSignalProjectionRows(
       byCity.set(row.citySlug, {
         signalCount: 0,
         subsetCounts: emptySubsetCounts(),
-        signals: [],
+        classifications: [],
+        filtreCube: {},
+        filtreCubesByClassement: { pertinent: {}, a_surveiller: {}, non_classe: {}, ecarte: {} },
         legacySignals: [],
         bPrimeEligibleSignals: [],
       });
@@ -2309,7 +2327,12 @@ export function aggregateGraphSignalProjectionRows(
       props: row.props,
       sourceRef: row.sourceRef,
     };
-    if (!hiddenInB) entry.signals.push(signal);
+    if (!hiddenInB) entry.classifications.push(classification);
+    addToVivierFiltreCube(entry.filtreCube, displayNode);
+    if (classement) {
+      const classe = classement.get(discardedSignalKey(row.citySlug, row.type, row.id)) ?? "non_classe";
+      addToVivierFiltreCube(entry.filtreCubesByClassement[classe], displayNode);
+    }
 
     // Legacy A (z|m|p) is derived from the full projection. B′ only gates
     // the new residential axis `r`; it must not rewrite legacy membership.
@@ -2350,12 +2373,13 @@ export function aggregateGraphSignalProjectionRows(
       }
     }
 
-    const v2 = computeVivierV2(data.signals);
     return {
       citySlug,
       signalCount: data.signalCount,
       subsetCounts: data.subsetCounts,
-      vivierV2Counts: v2.counts,
+      vivierV2Counts: countVivierClassifications(data.classifications),
+      filtreCube: data.filtreCube,
+      ...(classement ? { filtreCubesByClassement: data.filtreCubesByClassement } : {}),
     };
   });
 }
@@ -2363,6 +2387,7 @@ export function aggregateGraphSignalProjectionRows(
 export interface ListCitiesWithSignalNodesOptions {
   /** Native discard keys for this viewer; applied before aggregation. */
   discarded?: ReadonlySet<DiscardedSignalKey>;
+  classement?: ReadonlyMap<DiscardedSignalKey, keyof import("@radar/domain").VivierFiltreCubesByClassement>;
 }
 
 /** SQL window predicate on the materialized dates (#872); JS re-checks. */
@@ -2410,7 +2435,7 @@ export async function listCitiesWithSignalNodes(
   const kept = options.discarded !== undefined
     ? filterDiscardedSignals(rows, options.discarded)
     : rows;
-  return aggregateGraphSignalProjectionRows(kept, dateRange);
+  return aggregateGraphSignalProjectionRows(kept, dateRange, options.classement);
 }
 
 /**
