@@ -688,7 +688,7 @@ if (EMBER.length) {
     md = md.replace(`Calculé depuis les ${ALL.length} lignes du tableau global (§3)`,
       `Calculé depuis les ${ALL.length} lignes du tableau global (§3), le rejeu Astra et CP+ mesurée`);
     insertBefore("## 4.", cpPlusSection(CP_PLUS));
-    insertAfter("- surface d'accès de la CLI Muse déclarée", "- cascade CP+ mesurée : GPT-6 Astra medium rejoué, puis Muse Spark 1.3 xhigh en relecteur ; résultats et quotas dans la section « CP+ mesurée ». ");
+    insertAfter("- surface d'accès de la CLI Muse déclarée", "- cascade CP+ mesurée : GPT-6 Astra medium rejoué, puis Muse Spark 1.3 xhigh en relecteur ; résultats et quotas dans la section « CP+ mesurée ».");
     md = md.replace("Le **combo CP actuel** reste en tête en F1", "Sur les 42 lignes historiques, le **combo CP actuel** reste en tête en F1");
     md = md.replace("Aucun modèle seul n'égale le combo CP", "Sur les 42 lignes historiques, aucun modèle seul n'égale le combo CP");
   }
