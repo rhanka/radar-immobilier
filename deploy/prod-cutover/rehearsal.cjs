@@ -1,0 +1,77 @@
+/* global require, process */
+/* eslint-disable @typescript-eslint/no-require-imports */
+const r = require('./runtime.cjs');
+const config = require('./rehearsal-config.cjs');
+const privateDir = r.path.join(r.env.HOME, '.local/share/radar-prod-copy');
+const file = name => r.path.join(privateDir, name);
+const write = (name, value) => r.fs.writeFileSync(file(name), value, { mode: 0o600, flag: 'wx' });
+const compose = (...args) => r.run('docker', ['compose', '--env-file', '/dev/null', '-p', 'radar-prod-copy-owner',
+  '-f', r.path.join(r.ROOT, 'deploy/prod-cutover/rehearsal.compose.yml'), '-f', file('services.json'), ...args], { timeout: 120000 });
+function prepare() {
+  if (r.run('docker', ['ps', '-q', '--filter', 'label=com.docker.compose.project=radar-prod-copy-owner']).trim())
+    r.fail('prepare_before_local_stack_required');
+  const proof = require('./preparation-proof.json');
+  const planFile = file('plan.json'); const rosterFile = file('roster.json');
+  if (r.hash(r.safeFile(planFile)) !== proof.roster.planSha256 || r.hash(r.safeFile(rosterFile)) !== proof.roster.sha256
+    || r.hash(r.safeFile(file(proof.archive.file))) !== proof.archive.sha256) r.fail('preparation_fingerprint_mismatch');
+  if (!r.env.OWNER?.trim()) r.fail('rehearsal_attestation_owner_required');
+  if (!r.fs.existsSync(file('approval.json'))) write('approval.json', JSON.stringify({
+    environment: 'rehearsal', productionAuthorized: false, owner: r.env.OWNER, sha: r.SHA,
+    expiresAt: new Date(Date.now() + 86400000).toISOString(),
+    planSha256: proof.roster.planSha256, rosterSha256: proof.roster.sha256,
+  }, null, 2) + '\n');
+  const approval = r.json(file('approval.json'));
+  if (approval.environment !== 'rehearsal' || approval.productionAuthorized !== false) r.fail('local_attestation_only');
+  r.approvedPlan();
+  if (!r.fs.existsSync(file('auth.json'))) {
+    const secret = () => r.crypto.randomBytes(36).toString('hex');
+    write('auth.json', JSON.stringify({ database: r.fs.readFileSync(r.safeFile(file('local-password')), 'utf8').trim(),
+      login: secret(), client: secret(), session: secret(), account: secret(), artifact: secret(),
+      workload: secret(), cursor: r.crypto.randomBytes(48).toString('base64'), upload: secret(),
+      grant: secret(), reader: secret(), storage: secret() }));
+  }
+  const tls = r.fs.existsSync(file('tls.key')) ? ['-key', file('tls.key')]
+    : ['-newkey', 'rsa:2048', '-nodes', '-keyout', file('tls.key')];
+  r.run('openssl', ['req', '-x509', ...tls, '-out', file('ca.crt'), '-days', '2', '-subj', '/CN=radar-rehearsal',
+    '-addext', 'subjectAltName=DNS:recette.localhost,DNS:pages.localhost,DNS:*.pages.localhost,DNS:localhost,DNS:minio.localhost']);
+  if (!r.fs.existsSync(file('idp.key'))) {
+    r.run('openssl', ['genpkey', '-algorithm', 'RSA', '-pkeyopt', 'rsa_keygen_bits:2048', '-out', file('idp.key')]);
+    r.run('openssl', ['pkey', '-in', file('idp.key'), '-pubout', '-out', file('idp.pub')]);
+  }
+  for (const [name, bytes] of Object.entries({ 'services.json': JSON.stringify(config.compose(privateDir, r.json(file('auth.json'))), null, 2),
+    'nginx.conf': config.nginx() })) {
+    r.fs.writeFileSync(file(`${name}.partial`), bytes, { mode: 0o600 });
+    r.fs.renameSync(file(`${name}.partial`), file(name));
+  }
+  compose('config', '--quiet');
+  return { ok: true, environment: 'rehearsal', productionAuthorized: false, credentialsPrinted: false };
+}
+async function main() {
+  if (r.env.ENV !== 'rehearsal') r.fail('local_rehearsal_only');
+  let result = { ok: true };
+  switch (process.argv[2]) {
+    case 'prepare': result = prepare(); break;
+    case 'evidence': result = require('./local-proof.cjs').observe(); break;
+    case 'services-up': {
+      r.destination(); r.approvedPlan();
+      if (r.prefix(r.rows()) !== 44 || r.receipt('transition').status !== 'open-success') r.fail('transition_required');
+      const auth = r.json(file('auth.json'));
+      // These roles already have the candidate grants. Passwords are local and carry no new privilege.
+      r.sql(`ALTER ROLE immo_mcp_account_reader LOGIN PASSWORD '${auth.account}';
+        ALTER ROLE immo_mcp_artifact_writer LOGIN PASSWORD '${auth.artifact}';`);
+      compose('up', '-d', '--wait', '--wait-timeout', '60', '--no-build', '--pull', 'never', 'minio', 'idp', 'api', 'mcp', 'ui');
+      compose('run', '--rm', '--no-deps', '-T', '-v', `${privateDir}:/private-input:ro`,
+        '-v', `${r.ROOT}/deploy/prod-cutover/rehearsal-storage.cjs:/run-storage.cjs:ro`,
+        '--entrypoint', 'node', 'api', '/run-storage.cjs');
+      break;
+    }
+    case 'services-stop': compose('stop', '--timeout', '30', 'ui', 'api', 'mcp', 'idp', 'minio');
+      result = require('./local-proof.cjs').observe(); break;
+    case 'config-check': compose('config', '--quiet'); break;
+    case 'smoke': compose('exec', '-T', '-e', 'ENV=rehearsal', '-e', `SMOKE_URL=${config.base}`,
+      'api', 'node', '/run-controller/cli.cjs', 'smoke'); break;
+    default: r.fail('unknown_local_operation');
+  }
+  process.stdout.write(JSON.stringify(result) + '\n');
+}
+main().catch(error => { process.stderr.write((/^[a-z0-9_]+$/.test(error.message) ? error.message : 'local_rehearsal_failed') + '\n'); process.exitCode = 1; });
