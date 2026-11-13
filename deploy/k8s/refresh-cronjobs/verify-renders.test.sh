@@ -48,6 +48,9 @@ run_bad "single-pass flag missing" "refresh activation/model contract failed"
 fixture; sed -i '/REFRESH_SINGLE_PASS/s/value: "0"/value: "1"/' "$CASE_ROOT/$BASE"
 run_bad "single-pass enabled by default" "refresh activation/model contract failed"
 
+fixture; sed -i '/REFRESH_SINGLE_PASS_REASONING_EFFORT/s/value: "low"/value: "medium"/' "$CASE_ROOT/$BASE"
+run_bad "single-pass must default to Astra low" "refresh activation/model contract failed"
+
 P='s#value: "0 0,6,12,18 \* \* \*"#value: "%s"#'
 pre_sched() { sed -i "$(printf "$P" "$1")" "$CASE_ROOT/$PRE"; }
 

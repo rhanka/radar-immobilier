@@ -41,7 +41,7 @@ import {
 } from "../services/graph/refresh-mesh.js";
 import { createRefreshModelPolicy, type RefreshModel } from "../services/graph/refresh-model-policy.js";
 import { loadRefreshProfileContext } from "../services/graph/refresh-profile.js";
-import { loadSinglePassPrompt, singlePassEnabled } from "../services/graph/refresh-single-pass.js";
+import { loadSinglePassPrompt, singlePassEnabled, singlePassPrimary } from "../services/graph/refresh-single-pass.js";
 import { DEFAULT_REFRESH_DOCUMENT_TIMEOUT_MS, DEFAULT_REFRESH_MAX_DOCUMENT_BYTES, runPvRefresh,
   type RefreshAcquire } from "../services/graph/refresh-run.js";
 import { assessRefreshSweepHealth, parseRefreshTarget,
@@ -133,7 +133,7 @@ async function main(): Promise<void> {
   const store = getScrapeObjectStore(config);
   const { db, pool } = createDb(config);
   const timeoutMs = positive("REFRESH_TIMEOUT_MS", 900_000, 3_600_000);
-  const primary = selectedModel("REFRESH");
+  const primary = singlePassPrompt ? singlePassPrimary() : selectedModel("REFRESH");
   const fallback = selectedModel("REFRESH_FALLBACK");
   const verifyEnabled = process.env.REFRESH_VERIFY_ENABLED ?? "0";
   if (verifyEnabled !== "0" && verifyEnabled !== "1") throw new Error("REFRESH_VERIFY_ENABLED must be 0 or 1");
