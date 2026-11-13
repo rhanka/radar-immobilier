@@ -4,7 +4,8 @@ import { dedicatedCdpPage } from "./url-filters-cdp.mjs";
 // Local diagnosis uses only a disposable tab on the owner's CDP endpoint.
 // The standard harness suite keeps its own configured browser and preview.
 const cdpTest = base.extend<{ page: Page }>({
-  page: async ({}, use) => {
+  page: async ({ baseURL }, use) => {
+    if (!baseURL) throw new Error("The CDP period regression requires a baseURL");
     const connection = await dedicatedCdpPage("http://127.0.0.1:9333");
     try {
       await connection.page.setViewportSize({ width: 1440, height: 1000 });
