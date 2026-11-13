@@ -100,9 +100,9 @@ describe("signal classement client — acceptance criteria", () => {
       current: entry({ classe: "ecarte", discarded: true, archiveHeadId: "arch-1", pertinentHeadId: "p1", reasonCode: "N-NON-RES" }),
       nextClass: "non_classe",
     });
-    expect(posts(calls).map((c) => c.url.split("/").pop())).toEqual(["restore", "deselect"]);
-    expect(posts(calls)[0]?.body).toMatchObject({ expectedHeadId: "arch-1" });
-    expect(posts(calls)[1]?.body).toMatchObject({ basket: "pertinent", expectedHeadId: "p1" });
+    expect(posts(calls).map((c) => c.url.split("/").pop())).toEqual(["reclassify"]);
+    expect(posts(calls)[0]?.body).toMatchObject({ archives: { personal: "arch-1" },
+      selectionHeads: { pertinent: "p1" }, nextClass: "non_classe" });
 
     calls.length = 0;
     await applyClassement(SCOPE, {
@@ -110,7 +110,7 @@ describe("signal classement client — acceptance criteria", () => {
       current: entry({ classe: "ecarte", discarded: true, archiveHeadId: "arch-1", reasonCode: "N-NON-RES" }),
       nextClass: "pertinent",
     });
-    expect(posts(calls).map((c) => c.url.split("/").pop())).toEqual(["restore", "select"]);
+    expect(posts(calls).map((c) => c.url.split("/").pop())).toEqual(["reclassify"]);
   });
 
   it("regression 409: re-classifying a deselected signal sends its inactive head id, not null", async () => {
@@ -158,22 +158,22 @@ describe("signal classement client — acceptance criteria", () => {
     expect(new Set(posts(calls).map((c) => c.key)).size).toBe(3);
   });
 
-  it("F4: a failed select after restore re-discards with the previous reason", async () => {
+  it("should send restore and selection as one command without compensation on rejection", async () => {
     const { calls } = stubFetchOk((call) =>
-      call.url.endsWith("/select") ? { status: 422, error: "invalid_reason_code" } : null);
+      call.url.endsWith("/reclassify") ? { status: 422, error: "invalid_reason_code" } : null);
     await expect(applyClassement(SCOPE, {
       target: TARGET, displayedFingerprint: FINGERPRINT,
       current: entry({ classe: "ecarte", discarded: true, archiveHeadId: "arch-1", reasonCode: "N-NON-RES" }),
       nextClass: "pertinent", reasonCode: "P-DENSITE",
       catalog: [{ code: "P-DENSITE", verdict: "pertinent" }, { code: "N-NON-RES", verdict: "non_pertinent" }],
     })).rejects.toMatchObject({ status: 422, code: "invalid_reason_code" });
-    expect(posts(calls).map((c) => c.url.split("/").pop())).toEqual(["restore", "select", "discard"]);
-    expect(posts(calls)[2]?.body).toMatchObject({ reasonCode: "N-NON-RES" });
+    expect(posts(calls).map((c) => c.url.split("/").pop())).toEqual(["reclassify"]);
+    expect(posts(calls)[0]?.body).toMatchObject({ nextClass: "pertinent", reasonCode: "P-DENSITE" });
   });
 
-  it("should compensate each restored scope with its own head and reason", async () => {
+  it("should restore both scopes atomically without compensation on conflict", async () => {
     const { calls } = stubFetchOk((call) =>
-      call.url.endsWith("/select") ? { status: 409, error: "facet_head_conflict" } : null);
+      call.url.endsWith("/reclassify") ? { status: 409, error: "facet_head_conflict" } : null);
     await expect(applyClassement(SCOPE, {
       target: TARGET, displayedFingerprint: FINGERPRINT, nextClass: "pertinent",
       current: entry({ classe: "ecarte", discarded: true, archiveRestores: [
@@ -182,10 +182,17 @@ describe("signal classement client — acceptance criteria", () => {
       ] }),
     })).rejects.toMatchObject({ status: 409 });
     expect(posts(calls).map((call) => call.url.split("/signal-facets/")[1])).toEqual([
-      "personal/restore", "workspace/restore", "personal/select", "workspace/discard", "personal/discard",
+      "personal/reclassify",
     ]);
-    expect(posts(calls)[3]?.body).toMatchObject({ expectedHeadId: "evt-2", reasonCode: "N-AUTRE" });
-    expect(posts(calls)[4]?.body).toMatchObject({ expectedHeadId: "evt-1", reasonCode: "N-NON-RES" });
+    expect(posts(calls)[0]?.body).toMatchObject({ archives: { personal: "private", workspace: "shared" }, nextClass: "pertinent" });
+  });
+
+  it("should recover an uncertain 502 with the identical command key and payload", async () => {
+    const { calls } = stubFetchOk((_call, index) => index === 0 ? { status: 502, error: "lost_response" } : null);
+    await applyClassement(SCOPE, { target: TARGET, displayedFingerprint: FINGERPRINT, nextClass: "non_classe",
+      current: entry({ classe: "ecarte", discarded: true, archiveHeadId: "arch-1" }) });
+    expect(posts(calls)).toHaveLength(2);
+    expect(posts(calls)[1]).toEqual(posts(calls)[0]);
   });
 
   it("should refuse shared restoration before any write when moderation is missing", async () => {
