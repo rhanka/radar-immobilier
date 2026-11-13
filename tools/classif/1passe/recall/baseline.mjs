@@ -5,6 +5,7 @@ import { json } from './context.mjs';
 export const bench = '/home/antoinefa/src/radar-immobilier/.claude/worktrees/agent-ae1c01a14a9859391/tools/bench-v11';
 export const arm = `${bench}/full/arms/astra-medium-rejeu`;
 export function baseline(d) {
+  assert.equal(sha256(fs.readFileSync(`${bench}/full/corpus/text/${d.id}.txt`)), d.textSha256, 'B and candidate must use identical text');
   const p = `${arm}/validated/medium--${d.id}.output.json`;
   if (!fs.existsSync(p)) return { missing: true, acts: [] };
   const receipt = json(`${arm}/validated/medium--${d.id}.receipt.json`);
