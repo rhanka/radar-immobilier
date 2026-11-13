@@ -11,7 +11,7 @@ for(const file of readdirSync(`${home}/${half}`).filter(x=>x.startsWith('A-')&&x
  if(!c.request||!c.result) continue;
  const item=byId.get(c.itemId),text=sourceText(item);
  const docSha=item.anchor.docSha??item.anchor.docShas?.[0]??hash(text);
- batch.push({file,digest:c.digest,text:c.result.text,chunk:{id:'csets',docSha,originalKey:`${item.itemId}.pdf`,
+ batch.push({file,digest:c.digest,text:c.result.text,prompt:c.request.prompt,chunk:{id:'csets',docSha,originalKey:`${item.itemId}.pdf`,
  sourceUrl:`https://csets.invalid/${docSha}`,pages:[1],text:`[PDF PAGE 1]\n${text}`}});
 }
 const bytes=Buffer.from(JSON.stringify(batch));

@@ -10,13 +10,16 @@ const bytes=readFileSync(`/private/validation-batch.${blind?'sealed':'json'}`);
 const batch=JSON.parse(blind?unseal(key,bytes):bytes.toString());
 const results=[];
 for(const row of batch){
- let valid=false,error:string|null=null;
+ let valid=false,error:string|null=null,compositionMatches=false;
  try {
   await extractRefreshProfile([row.chunk],{context,singlePassPrompt,maxOutputTokens:32000,
-   textClient:{async generateJson(request:any){request.validateResponse(row.text);valid=true;throw new Error('validated');}} as any});
+   textClient:{async generateJson(request:any){
+    compositionMatches=`${request.prompt}\n\nJSON schema:\n${request.schema}`===row.prompt;
+    request.validateResponse(row.text);valid=true;throw new Error('validated');}} as any});
  }catch(e){if(!valid) error=(e as Error).message;}
- results.push({file:row.file,digest:row.digest,valid,error});
+ results.push({file:row.file,digest:row.digest,valid,error,compositionMatches});
 }
 const resultBytes=Buffer.from(JSON.stringify(results));
 writeFileSync(`/private/${half}/native-validation.${blind?'sealed':'json'}`,blind?seal(key,resultBytes):resultBytes,{mode:0o600});
-console.log({nativeValidated:results.length,valid:results.filter(x=>x.valid).length});
+console.log({nativeValidated:results.length,valid:results.filter(x=>x.valid).length,
+ exactComposition:results.filter(x=>x.compositionMatches).length});
