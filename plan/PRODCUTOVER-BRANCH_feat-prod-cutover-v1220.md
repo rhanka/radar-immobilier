@@ -31,6 +31,7 @@
 - [x] Tests dédiés ENV=test-prod-cutover. Ports réservés API 18821, UI 15321, Maildev 11121.
 
 ## Plan / Todo (lot-based)
+- [x] Validation préparation : dix tests, deux scénarios contrôleur et ESLint réussis. Rendu et Compose validés sans lancement. Catalogue custom lisible. Modes privés et arrêt du port-forward contrôlés. Stack lint supprimée avec down -v.
 - [x] D1–D4 intégrées au runbook et aux prérequis. RPO PV regénérable acceptée, créneau au plus tôt après répétition. Lint renderer : global inutilisé retiré.
 - [x] Preuves privées prêtes : dump RO 72 s, 283590496 octets, double empreinte identique. Manifeste Actions comparé octet pour octet. Six comptes prod approuvés correspondent au roster.
 - [x] Runtime copie : clients PG16 conteneurisés, image PostGIS épinglée, rôles NOLOGIN locaux et port 25433. Commandes préparées, aucune copie restaurée ni stack démarrée.
