@@ -9,6 +9,11 @@ const node: GraphSignalNode = { id: "one", type: "Signal", citySlug: "city", lab
     promptSha256: "a".repeat(64), pipelineRunId: "run" } };
 
 describe("class annotation provenance", () => {
+  it("should display the update date and private human validation", () => {
+    expect(classAnnotationLabel({ ...node, classAnnotation: { ...node.classAnnotation!, updatedAt: "2026-11-13T17:00:00Z" } })).toContain("2026-11-13");
+    expect(classAnnotationLabel({ ...node, classFeedback: { verdict: "up", createdAt: "2026-11-13", reason: "validé", eventId: "event" } })).toBe("Validé par un humain");
+    expect(classAnnotationLabel({ ...node, classFeedback: { verdict: "down", createdAt: "2026-11-13", reason: "N-NON-RES", eventId: "event" } })).toBe("Reclassé par un humain");
+  });
   it("should identify the exact AI and prompt while prioritizing manual changes", () => {
     expect(classAnnotationLabel(node)).toBe("IA · gpt-6-astra medium · prompt v1");
     expect(classAnnotationLabel(node, true)).toBe("Manuel");
