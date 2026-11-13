@@ -21,7 +21,8 @@ Les prompts sont les fichiers voisins, suivis du pack C figé et du texte intég
 Le dispatcher du conducteur doit appliquer les plafonds et les gardes de `PREREG.md`.
 Les anciens runners L2 et L4 ne consomment pas ces nouveaux manifestes.
 Ne pas les lancer avec leurs valeurs par défaut : ils utiliseraient un autre protocole.
-Cette livraison ne fournit pas un nouvel orchestrateur d’exécution B+C.
+Le dispatcher B+C est désormais `annotate.mjs`, via `ops.mk annotate`.
+Il applique huit appels par bras, les pauses de quota et le scellement immédiat.
 
 Avant toute annotation future, le gardien doit :
 
@@ -31,10 +32,10 @@ Avant toute annotation future, le gardien doit :
 4. Donner aux annotateurs les seuls textes et le pack, sans oracle, classes ou avis antérieurs.
 5. Garder les lectures aveugles dans le rôle `test-executor`, avec le journal privé.
 
-Avant la passe unique, il faut aussi confirmer D4/D5, sceller les labels C,
+Avant la passe unique, il faut sceller les labels C,
 geler les finalistes et leurs prompts et vérifier les garde-fous du dispatcher.
-Les voies de lancement sont décrites. Elles n’ont pas été sondées ni lancées.
-Le prêt-à-exécuter complet reste conditionné au dispatcher B+C et à ces prérequis.
+Les contrôles de texte et de quota ne font aucun appel de modèle.
+Le plan actif est `plan/1PASSE-BRANCH_feat-classif-1passe-bc.md`.
 
 Le sceau se trouve hors Git :
 `/home/antoinefa/.local/share/radar-classif/1passe-bc/blind/blind.sealed`.

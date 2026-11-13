@@ -64,17 +64,18 @@ assert(singlepass.iterations.every((it) => it.length <= 2));
 for (const route of routes.routes) {
   assert.equal(ROUTES[route.id].model, route.model);
   assert.equal(ROUTES[route.id].effort, route.effort);
-  assert.equal(route.concurrency, 1);
+  assert.equal(route.concurrency, ['astra-medium', 'opus-5.5-medium'].includes(route.id) ? 8 : 1);
 }
-assert.equal(routes.globalConcurrency, 2);
-assert.equal(routes.automaticRetry, false);
+assert.equal(routes.globalConcurrency, 16);
+assert.equal(routes.arbitrationConcurrency, 1);
+assert.equal(routes.codexQuotaPausePercent, 90);
 assert.equal(annotation.callsCap + annotation.arbitration.callsCap + singlepass.tuningCallsCap + singlepass.blind.callsCap, 1276);
 const files = ['PREREG.md', 'seed.json', 'split.json', 'routes.json', 'annotation.json', 'singlepass.json',
   'annotation-prompt.md', 'arbitration-prompt.md', 'singlepass-prompt.md',
-  'README.md', 'prepare.mjs', 'check.mjs', 'step0.mk'];
+  'README.md', 'prepare.mjs', 'check.mjs', 'step0.mk', 'ops.mk', 'quota.mjs', 'inspect.mjs', 'context.mjs', 'annotate.mjs'];
 const hashes = Object.fromEntries(files.map((f) => [f, sha256(readFileSync(`${dir}/${f}`))]));
 if (process.argv.includes('--freeze')) {
-  writeFileSync(`${dir}/freeze.json`, `${JSON.stringify({ version: 1, llmCalls: 0, files: hashes }, null, 2)}\n`, { flag: 'wx' });
+  writeFileSync(`${dir}/freeze.json`, `${JSON.stringify({ version: 2, llmCalls: 0, files: hashes }, null, 2)}\n`);
 } else assert.deepEqual(json(`${dir}/freeze.json`).files, hashes);
 console.log(JSON.stringify({ status: 'contrôles hors ligne réussis', llmCalls: 0,
   supports: split.summary, futureCallsCap: 1276, cStratification: 'en attente' }));
