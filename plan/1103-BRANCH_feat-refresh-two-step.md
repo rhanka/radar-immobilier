@@ -30,7 +30,8 @@
 - [x] Lot 1a: explicit mode parser and independent classification configuration.
 - [x] Lot 1b: share bounded reannotation execution and changed-input filtering; isolate selection and classification failures.
 - [x] Lot 2: wire separate models after durable publication/projection; select acts from completed chunks, including projection resumes; isolate failures.
-- [ ] Lot 3: enforce off in CronJob renders and mutation guards; document activation and rollback.
+- [x] Lot 3a: enforce off in CronJob renders and mutation guards; retain detection B settings.
+- [ ] Lot 3b: document activation and rollback.
 - [ ] Lot 4: test mode compatibility, byte-identical detection, new/changed acts, provenance, manual precedence, bounded work and failures.
 - [ ] Lot 5: typecheck, lint, targeted test-api including PostgreSQL, test-refresh-renders; down -v.
 - [ ] Lot 6: inspect final diff, push, PR against feat/refresh-single-pass-v2; report PR, files, tests and activation commands; no merge.
