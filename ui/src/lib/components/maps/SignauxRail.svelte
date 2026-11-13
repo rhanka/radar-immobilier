@@ -217,13 +217,15 @@
     }
   }
 
-  // The DS resolves presets when the user opens/selects them. Refresh the
-  // upper bound then, rather than pinning a long-lived rail to its mount time.
+  // Refresh the upper bound before opening, then keep it stable while open.
+  // Updating max on option pointerdown re-registers the DS preset rows before
+  // their click; DS 0.37.2 then loses entries and cannot resolve the selection.
   let timeRangeMax = Date.now();
   function refreshTimeRangeMax(event: Event): void {
-    if (!(event.target instanceof Element) || !event.target.closest(".st-timeRangePicker")) {
-      return;
-    }
+    if (!(event.target instanceof Element)) return;
+    const trigger = event.target.closest(".signals-time-range-picker .st-timeRangePicker__trigger");
+    if (!trigger || trigger.getAttribute("aria-expanded") !== "false") return;
+    if (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ") return;
     timeRangeMax = Date.now();
   }
 
