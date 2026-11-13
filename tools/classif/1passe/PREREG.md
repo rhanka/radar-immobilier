@@ -50,6 +50,7 @@ Le pack privé est figé par empreintes dans `annotation.json`.
 
 Non classé est un état technique supplémentaire. Ce n’est pas un nouveau code du registre C.
 Il est montré par défaut. On ne transforme jamais son absence de preuve en exclusion.
+Un Non classé issu de D3 reste une référence « à montrer » pour le contrôle des manqués.
 Les 43 cas neutres de B gardent ce statut. Ils ne deviennent ni vrais ni faux positifs.
 Une prédiction appariée seulement à un cas neutre est exclue des dénominateurs principaux.
 Le rapport donne leur nombre, leur affichage et les extrêmes de sensibilité.
@@ -107,6 +108,8 @@ Le corpus B a déjà été utilisé. Cette séparation ne prouve pas une absence
 `TP` : acte de référence P∪S apparié un à un à une prédiction montrée.
 `FN` : acte de référence P∪S sans prédiction montrée. `FP` : prédiction montrée sans tel acte.
 Rappel P∪S = TP/(TP+FN). Précision = TP/(TP+FP), après exclusion des appariements neutres.
+Publier en plus le rappel opérationnel sur P∪S et les Non classés de D3. D4 exige aussi zéro manqué sur ce support élargi.
+Pour ces Non classés, publier la précision opérationnelle en les comptant positifs, puis la borne conservatrice en les comptant négatifs.
 Publier aussi rappel P, rappel S, doublons, échecs et nombre montré par 100 PV.
 Un échec ne disparaît pas des supports. Son repli montre les actes déjà connus.
 Il ne prouve pas l’extraction des actes inconnus : ceux-ci restent manqués si non détectés.

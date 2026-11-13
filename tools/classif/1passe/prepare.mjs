@@ -63,6 +63,7 @@ const split = {
   sources: Object.fromEntries(['consensus.json', 'unresolved.json', 'manifest.json']
     .map((f) => [f, sha256(readFileSync(`/private/source/${f}`))])),
   summary, tuning: halves.tuning, blind: halves.blind,
+  tuningDataSha256: sha256(tuning),
   tuningIdsSha256: sha256(`${halves.tuning.join('\n')}\n`),
   blindIdsSha256: sha256(`${halves.blind.join('\n')}\n`),
   blindSeal: hashes,
