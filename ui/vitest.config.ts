@@ -17,7 +17,7 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
-    include: ["src/**/*.test.ts"],
+    include: ["src/**/*.test.ts", "vite-plugins/**/*.test.ts"],
     // Components import Svelte; keep it inline so the browser condition wins.
     server: {
       deps: {
