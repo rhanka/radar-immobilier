@@ -46,6 +46,16 @@ Personal commands, one explicit workspace in the path:
   accepted as head-shape and recovered (never a new command); older payloads
   without either are recovered as historical only.
 - `Idempotency-Key` header: required uuid (lowercased server-side).
+- `POST /api/v1/workspaces/:workspaceId/signal-facets/personal/reclassify`
+  → `{ ok: true }`. Browser session required. Body: `target`, `displayedFingerprint`,
+  `archives: { personal?: headId, workspace?: headId }` (at least one),
+  `selectionHeads: { pertinent, a_surveiller }` (nullable head ids),
+  `nextClass: non_classe|pertinent|a_surveiller`, optional `reasonCode`.
+  Restores the requested archive scopes and applies the final selection in one
+  transaction. Workspace restoration still requires `moderateArchive`.
+  One idempotent receipt covers the full command. A retry with the same key and
+  payload recovers a committed result even after a source refresh. Any failed
+  transition rolls back all heads, receipts and projection revisions.
 - `GET /api/v1/workspaces/:workspaceId/signal-facets/personal/cities/:city`
   → `{ ok: true, heads }` via `readScopedPersonalHeads`.
 - Error mapping: `FacetHeadConflictError` → 409 + `current`;
@@ -69,9 +79,12 @@ Moderator-only common archive, same path family as personal facets:
 
 - `GET /api/v1/workspaces/:workspaceId/signal-facets/projection-revisions?citySlug&mode=signal`
   → `{ ok, workspaceId, citySlug, mode, token, revisions: { personal, workspace, source, sourceDigest }, membership: { revision, moderateArchive, manageMembers } }`.
-- `GET /api/v1/workspaces/:workspaceId/signal-facets/coherent-city?citySlug&mode=signal`
+- `GET /api/v1/workspaces/:workspaceId/signal-facets/coherent-city?citySlug&mode=signal&view=card|full&showDiscarded=1`
   → `{ ok, workspaceId, citySlug, mode, token, revisions, heads, selection, signals, counts: { total, hidden, visible, selected } }`.
-  Archived targets (effectiveDiscarded) are hidden from `signals`; each
+  Archived targets (effectiveDiscarded) are hidden from `signals` by default.
+  Optional `showDiscarded=1` includes them under the same authorization and
+  coherent snapshot, for both card and full views. Counts and legacy projection
+  follow the served population. Archive heads remain available for restoration. Each
   served node carries `facetFingerprint` computed exactly like the command
   `displayedFingerprint` so the snapshot supports a follow-up command.
   6H: each served node also carries the server card fields built from that
@@ -92,8 +105,8 @@ Moderator-only common archive, same path family as personal facets:
   `a_surveiller`, `non_classe` and `ecarte`, using the viewer's personal
   selections and effective archives in this workspace. The client applies
   Pertinence before faceted counting across every displayed city. Pertinence
-  counts retain the archived `ecarte` population. Filtre counts exclude it even
-  when Écarté is checked, matching the archive-free `coherent-city` list. Existing
+  counts retain the archived `ecarte` population. Filtre counts and rail totals
+  include it only when Écarté is checked, matching the requested `coherent-city` list. Existing
   counters and query parameters are unchanged.
   Scoped successor of the retired `GET /api/graph-signals/by-city`, same
   wire shape and query parameters (`dateFrom`/`dateTo` `YYYY-MM-DD`,

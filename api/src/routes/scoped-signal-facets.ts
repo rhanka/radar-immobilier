@@ -15,6 +15,7 @@ import {
 import { ScopeError } from "../services/facets/scope.js";
 import { readScopedPersonalHeads } from "../services/facets/scoped-reader.js";
 import { writeScopedPersonalFacet } from "../services/facets/scoped-writer.js";
+import { restoreClassement } from "../services/facets/restore-classement.js";
 import { privateSignalResponse } from "../services/facets/private-response.js";
 import { facetEventResponse } from "../services/facets/response.js";
 import { WorkspaceError, WorkspaceRevisionConflictError } from "../services/workspaces/types.js";
@@ -47,6 +48,13 @@ const headSchemas = {
 };
 
 const schemas = {
+  reclassify: z.object({
+    target, displayedFingerprint,
+    archives: z.object({ personal: z.string().guid().optional(), workspace: z.string().guid().optional() })
+      .strict().refine((value) => value.personal || value.workspace),
+    selectionHeads: z.object({ pertinent: expectedHeadId, a_surveiller: expectedHeadId }).strict(),
+    nextClass: z.enum(["non_classe", "pertinent", "a_surveiller"]), reasonCode,
+  }).strict(),
   select: z.object({ target, basket, reasonCode, expectedHeadId, displayedFingerprint }).strict(),
   deselect: z.object({ target, basket, expectedHeadId, displayedFingerprint }).strict(),
   discard: z.object({
@@ -77,24 +85,31 @@ export function scopedSignalFacetsRoute(deps: ScopedSignalFacetsDeps): Hono {
     }
     return next();
   });
-  for (const action of ["select", "deselect", "discard", "restore"] as const) {
+  for (const action of ["select", "deselect", "discard", "restore", "reclassify"] as const) {
     app.post(`/api/v1/workspaces/:workspaceId/signal-facets/personal/${action}`, async (c) => {
       const body = await c.req.json().catch(() => null);
       const parsed = schemas[action].safeParse(body);
       const key = z.string().guid().transform((value) => value.toLowerCase())
         .safeParse(c.req.header("Idempotency-Key"));
       if (!key.success) return c.json({ error: "invalid_facet_command" }, 400);
-      const previousHead = parsed.success ? null : headSchemas[action].safeParse(body);
+      if (action === "reclassify" && !parsed.success) return c.json({ error: "invalid_facet_command" }, 400);
+      const previousHead = parsed.success || action === "reclassify" ? null : headSchemas[action].safeParse(body);
       const historical = parsed.success ? null : previousHead!.success
-        ? previousHead : historicalSchemas[action].safeParse(body);
+        ? previousHead : action === "reclassify" ? null : historicalSchemas[action].safeParse(body);
       if (!parsed.success && !historical!.success) {
         return c.json({ error: "invalid_facet_command" }, 400);
       }
       const session = c.get("session" as never) as { sub: string };
       try {
+        if (action === "reclassify") {
+          const command = schemas.reclassify.parse(body);
+          await restoreClassement(deps.db, session.sub, c.req.param("workspaceId"),
+            { ...command, commandKey: key.data });
+          return c.json({ ok: true });
+        }
         const event = parsed.success
           ? await writeScopedPersonalFacet(deps.db, session.sub,
-            c.req.param("workspaceId"), { ...parsed.data, action, commandKey: key.data })
+            c.req.param("workspaceId"), { ...schemas[action].parse(body), action, commandKey: key.data })
           : await writeScopedPersonalFacet(deps.db, session.sub,
             c.req.param("workspaceId"), { ...historical!.data!, action, commandKey: key.data });
         return c.json({ ok: true, event: event ? facetEventResponse(event) : null });

@@ -23,6 +23,7 @@
   export let classe: SignalClass = "non_classe";
   export let reasonCodes: ReasonCodeEntry[] = [];
   export let disabled = false;
+  export let restoreBlockedReason: string | null = null;
   export let onApply: (nextClass: SignalClass, reasonCode: string | null) => void = () => {};
 
   let open = false;
@@ -79,6 +80,7 @@
     btn?.focus();
   }
   async function openSub(next: SignalClass, moveFocus = false): Promise<void> {
+    if (restoreBlockedReason && next !== "ecarte") return;
     cancelHover();
     pendingClass = next;
     await tick();
@@ -243,6 +245,7 @@
   $: reasonOptional = pendingClass === "pertinent" || pendingClass === "a_surveiller";
 
   function chooseClass(next: SignalClass): void {
+    if (restoreBlockedReason && next !== "ecarte") return;
     if (next === "non_classe") {
       cancelHover();
       open = false;
@@ -285,6 +288,7 @@
     label: CLASSEMENT_META[candidate].label,
     value: candidate,
     icon: ICONS[candidate],
+    disabled: Boolean(restoreBlockedReason && candidate !== "ecarte"),
   }));
   $: reasonItems = ([
     ...(pendingClass
@@ -373,6 +377,9 @@
   {#if open}
     <span class="classement-pop" data-testid="classement-pop" data-side={subSide} data-mode={drillDown && pendingClass ? "drill" : "cascade"} use:portalPop={pendingClass ?? "class"}>
       <span class="cascade" role="presentation" on:keydown={onCascadeKeydown}>
+        {#if restoreBlockedReason}
+          <span class="classement-empty" role="status">{restoreBlockedReason}</span>
+        {/if}
         {#if !(drillDown && pendingClass)}
           <span class="cascade-class" data-testid="classement-class-menu" bind:this={classWrapEl} role="presentation" on:mouseover={onClassHover}>
             <Menu label="Classement" items={classItems} open={true} dense onselect={onClassSelect} />
