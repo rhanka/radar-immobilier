@@ -154,7 +154,7 @@ test("should reveal a discarded card then restore it to the default list and ret
   await expect(page.locator("[data-signal-node]")).toHaveCount(1);
   await expect(card).toBeVisible();
   await card.getByRole("button", { name: "Classement : Écarté", exact: true }).click();
-  const restore = page.waitForResponse((response) => response.url().includes("/personal/restore"));
+  const restore = page.waitForResponse((response) => response.url().includes("/personal/reclassify"));
   await page.getByRole("menuitem", { name: "Non classé", exact: true }).click();
   expect((await restore).status()).toBe(200);
   await expect(card).toHaveCount(0);
