@@ -54,6 +54,16 @@ describe("fetchGraphSignalDetail — scoped coherent read", () => {
     expect(detail.nodes[0]!.facetFingerprint).toBe(FP);
   });
 
+  it("should request discarded cards only when explicitly enabled", async () => {
+    const calls = stubFetch(() => new Response(JSON.stringify(coherentBody([])), { status: 200 }));
+    await fetchGraphSignalDetail(SCOPE, "ville-synth", { view: "card", showDiscarded: true });
+    await fetchGraphSignalDetail(SCOPE, "ville-synth", { view: "card", showDiscarded: false });
+    expect(calls).toEqual([
+      `/api/v1/workspaces/${WS}/signal-facets/coherent-city?citySlug=ville-synth&mode=signal&view=card&showDiscarded=1`,
+      `/api/v1/workspaces/${WS}/signal-facets/coherent-city?citySlug=ville-synth&mode=signal&view=card`,
+    ]);
+  });
+
   it("never fabricates absent card fields", async () => {
     stubFetch(() => new Response(JSON.stringify(coherentBody([servedNode("sig-1")])), { status: 200 }));
     const [node] = (await fetchGraphSignalDetail(SCOPE, "ville-synth")).nodes;

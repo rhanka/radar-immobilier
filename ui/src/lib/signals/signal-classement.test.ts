@@ -73,16 +73,23 @@ describe("signal classement — acceptance criteria", () => {
     // the selected-city live count drops.
   });
 
-  it("F9: archiveHeadId is the effective (active) head, workspace when personal is absent", () => {
+  it("should retain separate personal write heads and scoped restoration heads", () => {
     const workspaceOnly = buildClassementMap([], [
       { target: { citySlug: "delson", type: "Signal", id: "sig-9" }, personal: null, workspace: { id: "ws-head-1", state: "active", reasonCode: "N-NON-RES" }, effectiveDiscarded: true },
     ]);
-    expect(workspaceOnly.get("delson:Signal:sig-9")?.archiveHeadId).toBe("ws-head-1");
+    expect(workspaceOnly.get("delson:Signal:sig-9")?.archiveHeadId).toBeNull();
+    expect(workspaceOnly.get("delson:Signal:sig-9")?.archiveRestores).toEqual([
+      { scope: "workspace", id: "ws-head-1", reasonCode: "N-NON-RES" },
+    ]);
+    expect(workspaceOnly.get("delson:Signal:sig-9")?.restoreBlockedReason).toContain("modérateur");
     expect(workspaceOnly.get("delson:Signal:sig-9")?.reasonCode).toBe("N-NON-RES");
     const both = buildClassementMap([], [
       { target: { citySlug: "delson", type: "Signal", id: "sig-10" }, personal: { id: "pers-1", state: "inactive", reasonCode: null }, workspace: { id: "ws-2", state: "active", reasonCode: "N-AUTRE" }, effectiveDiscarded: true },
     ]);
-    expect(both.get("delson:Signal:sig-10")?.archiveHeadId).toBe("ws-2");
+    expect(both.get("delson:Signal:sig-10")?.archiveHeadId).toBe("pers-1");
+    expect(both.get("delson:Signal:sig-10")?.archiveRestores).toEqual([
+      { scope: "workspace", id: "ws-2", reasonCode: "N-AUTRE" },
+    ]);
   });
 
   it("regression 409: inactive heads stay the expected heads of the next write", () => {
