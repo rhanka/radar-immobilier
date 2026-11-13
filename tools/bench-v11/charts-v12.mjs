@@ -25,9 +25,6 @@ const withV12 = (s) => (/\)$/.test(s) ? s.replace(/\)$/, ", v12)") : `${s} (v12)
 // triangle: Luna, Sonnet 4.6, Muse Ember
 // cross: GPT-4.1, Opus 5.5 ; star: cascades (CP, CP-low, C2, C3)
 const MODELS = [
-  { re: /^CP\+ low$/, model: "CP+ low", provider: "Cascades", shape: "star" },
-  { re: /^CP\+$/, model: "CP+", provider: "Cascades", shape: "star" },
-  { re: /^Astra medium \(rejeu v12\)$/, model: "Astra replay", provider: "OpenAI", shape: "circle" },
   { re: /^CP actuel/, model: "CP", provider: "Cascades", shape: "star" },
   { re: /^CP-low/, model: "CP-low", provider: "Cascades", shape: "star" },
   { re: /^C2$/, model: "C2", tag: "C2 · 2× Gemini → Astra", provider: "Cascades", shape: "star" },
@@ -175,7 +172,7 @@ function legendBlock(x, y, extraLines) {
   s += `<text x="${x}" y="${y + 26}" font-size="12.5" style="${FONT}">Couleur = fournisseur · forme = modèle · pointillé = progression d’effort · étoile = cascade</text>`;
   const shapes = [
     [["circle", "GPT-6 Astra / Opus 5 / Gemini 3.8 Flash / Mistral Small 4 / Muse Spark 1.3"], ["square", "GPT-5.6 Sol / Sonnet 5 / Gemini 4 Argon / Muse Wonder 1.0"]],
-    [["triangle", "GPT-5.6 Luna / Sonnet 4.6 / Muse Ember 1.0"], ["cross", "GPT-4.1 / Opus 5.5"], ["star", "cascades CP / CP+ / CP-low / C2 / C3"]]];
+    [["triangle", "GPT-5.6 Luna / Sonnet 4.6 / Muse Ember 1.0"], ["cross", "GPT-4.1 / Opus 5.5"], ["star", "cascades CP / CP-low / C2 / C3"]]];
   let sy = y + 47;
   for (const line of shapes) {
     lx = x;
@@ -282,7 +279,7 @@ function f1Cost(rows) {
   const missing = rows.filter((r) => !(r.api > 0)).map((r) => r.id.short).join(", ");
   s += legendBlock(ml, mt + ih + 76, [
     { text: "Plein = équivalent API (hypothèse A : sortie rapportée, raisonnement probablement inclus) ; creux = siège projeté ou mesuré ; trait fin horizontal = même bras, siège → API. Sans siège attribuable : point API seul." },
-    { text: "Contour noir et libellé gras « v12 » : nouveaux bras. CP et CP+ : coûts cumulés de l’extraction et du filtre. Siège non attribuable : missing source." },
+    { text: "Contour noir et libellé gras « v12 » : Muse Ember 1.0 xhigh et max. CP : coûts cumulés de l’extraction et du filtre. Siège non attribuable : missing source." },
     { text: `Sans équivalent API publié, non placés : ${missing}.` },
   ]);
   return { svg: s + "</svg>", labels };
@@ -317,7 +314,7 @@ export function chartsV12(rowsIn) {
     const id = identify(r.label);
     // chart text = full versioned model name (r.name), trailing parenthetical
     // dropped except « coupé » ; cascades keep their short tag (CP actuel, C2...).
-    if (r.name && id.provider !== "Cascades") id.short = `${r.name.replace(/\s*\(.*\)\s*$/, "")}${/coupé/.test(r.name) ? " (coupé)" : ""}${/rejeu/.test(r.label) ? " · rejeu" : ""}`;
+    if (r.name && id.provider !== "Cascades") id.short = `${r.name.replace(/\s*\(.*\)\s*$/, "")}${/coupé/.test(r.name) ? " (coupé)" : ""}`;
     return { ...r, id };
   });
   const fr = (v) => (v === null || v === undefined ? "N-A" : v.toFixed(3));
