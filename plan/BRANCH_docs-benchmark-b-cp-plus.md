@@ -39,3 +39,4 @@
 - [x] Lot 3 — Regenerate v12 dossier and SHA256SUMS; preserve published rows. No Focus or D1 update, per owner finalization instructions.
   - [x] Verify regeneration preserves all 42 published rows byte for byte; correct hypothesis A in prose, best-arms table and chart legend.
 - [x] Lot 4 — Verify artifacts, commit selectively, push, open PR #1085 to main. Rebase confirms origin/main is already the base. No merge.
+- [x] Lot 5 — Reproduce CI lint failures; declare script globals, simplify the PDF callback, and verify refreshed SHA256SUMS without model calls.

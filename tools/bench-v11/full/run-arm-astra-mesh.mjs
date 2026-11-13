@@ -9,6 +9,7 @@
 // Usage : BENCH_MESH_DIR=<dossier contenant node_modules/@sentropic/llm-mesh> \
 //   BENCHMARK_OWNER_SCOPE=<portée> node full/run-arm-astra-mesh.mjs [effort=medium] [concurrence=2]
 // Sorties : full/arms/astra-<effort>-rejeu/{raw,usage}/<effort>--<doc>.*, meta.jsonl, codex-quota.jsonl.
+/* global AbortSignal */
 import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile, appendFile, readdir } from "node:fs/promises";
 import { existsSync, openSync, closeSync, unlinkSync } from "node:fs";

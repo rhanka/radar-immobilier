@@ -9,6 +9,7 @@
 //   node full/run-cascade-muse.mjs [concurrence=4]                         (relecture réelle)
 // Garde : quota hebdomadaire Muse lu avant chaque document, arrêt à STOP_WEEKLY_PCT (défaut 85).
 // Quota de siège jamais compté comme refus : attente 300 s, reprise (12 au plus).
+/* global setInterval, clearInterval */
 import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile, appendFile, readdir } from "node:fs/promises";
 import { existsSync, openSync, closeSync, unlinkSync } from "node:fs";
