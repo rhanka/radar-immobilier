@@ -101,3 +101,5 @@ All make invocations used `SKIP_DOTENV=1`; Compose used `--env-file /dev/null`.
 The quality targets reused the prepared test dependency volumes via `COMPOSE_RUN_API_NODEPS`.
 The first UI run exposed an incomplete secondary-read DB fixture; mocking its annotation read port
 restored all three population tests without changing their assertions.
+
+Delivery: [PR #1099](https://github.com/rhanka/radar-immobilier/pull/1099), targeting `main`.
