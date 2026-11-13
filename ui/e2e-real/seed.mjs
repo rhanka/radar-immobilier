@@ -22,6 +22,7 @@ import { runPersonalAttachmentActivation } from "../../api/src/services/facets/a
 import { requireScopedEpochFor } from "../../api/src/services/facets/activation.ts";
 import { signSession } from "../../api/src/services/auth/session.ts";
 import { classifyGraphNodeVivierV2 } from "../../api/src/services/graph/graph-store.ts";
+import { writeClassAnnotation } from "../../api/src/services/graph/class-annotations.ts";
 
 const STATE_DIR = process.env.E2E_STATE_DIR ?? "/e2e-state";
 const SESSION_SECRET = process.env.E2E_SESSION_SECRET ?? "";
@@ -111,6 +112,10 @@ async function seed() {
         || classification.residentiel.valeur === "non") {
         fail(`seeded signal ${signal.id} is not qualified for the B view: ${JSON.stringify(classification)}`);
       }
+      await writeClassAnnotation(db, { citySlug: CITY, nodeType: "Signal", nodeId: signal.id,
+        classe: "pertinent", reason: "Synthetic residential density increase", source: "ai",
+        model: "gpt-6-astra", effort: "low", promptId: "p0-v1", promptSha256: "a".repeat(64),
+        pipelineRunId: "e2e-feedback", inputSha256: "b".repeat(64) });
     }
     // Geo rows read by the géo view (zones + lots with geometry).
     for (const [index, code] of ["H-901", "H-902"].entries()) {
