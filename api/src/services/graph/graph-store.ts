@@ -2289,6 +2289,10 @@ export function aggregateGraphSignalProjectionRows(
   for (const row of rows) {
     if (!row.citySlug) continue;
     if (!matchesDocumentDateWindow(row.props, dateRange)) continue;
+    const key = discardedSignalKey(row.citySlug, row.type, row.id);
+    // Legacy reads must not create cities from discarded-only populations.
+    // Class-aware reads still need those rows for archive relevance facets.
+    if (!classement && discarded?.has(key)) continue;
     // One vivier_v2 classification per row, shared by the B display
     // exclusions, the Filtre cube and the vivier counts (what computeVivierV2
     // would recompute from the same row).
@@ -2316,7 +2320,6 @@ export function aggregateGraphSignalProjectionRows(
       });
     }
     const entry = byCity.get(row.citySlug)!;
-    const key = discardedSignalKey(row.citySlug, row.type, row.id);
     // Relevance facets cover every class, including targets absent from detail.
     if (classement) {
       const classe = classement.get(key) ?? "non_classe";
