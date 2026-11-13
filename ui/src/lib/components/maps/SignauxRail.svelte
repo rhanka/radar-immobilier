@@ -227,75 +227,12 @@
     timeRangeMax = Date.now();
   }
 
-  /**
-   * The DS popover is inline, but computes document coordinates while its
-   * picker ancestor is positioned. Keep the DS control and portal its overlay
-   * out of the rail once it opens, so the overlay is no longer clipped or
-   * overlaid by the rail and every preset receives pointer events.
-   *
-   * The portal target is the DS ThemeProvider root (`[data-st-theme]`), never
-   * the bare document body: DS tokens are scoped to that root, and an overlay
-   * moved outside it loses every token (no selected tab, no range highlight).
-   */
-  function positionTimeRangePopover(node: HTMLElement): { destroy: () => void } {
-    let animationFrame: number | null = null;
-    let popover: HTMLElement | null = null;
-
-    function sync(): void {
-      const trigger = node.querySelector<HTMLButtonElement>(".st-timeRangePicker__trigger");
-      if (!trigger || !popover) return;
-
-      const triggerRect = trigger.getBoundingClientRect();
-      const popoverWidth = popover.getBoundingClientRect().width;
-      const viewportMargin = 8;
-      const gap = 4;
-      const left = Math.min(
-        Math.max(viewportMargin, triggerRect.left),
-        window.innerWidth - popoverWidth - viewportMargin,
-      );
-
-      popover.style.position = "fixed";
-      popover.style.top = `${triggerRect.bottom + gap}px`;
-      popover.style.left = `${left}px`;
-      popover.style.maxHeight = `${Math.max(
-        window.innerHeight - triggerRect.bottom - gap - viewportMargin,
-        160,
-      )}px`;
-      popover.style.maxWidth = "none";
-      popover.style.overflowX = "hidden";
-      popover.style.zIndex = "1000";
-    }
-
-    function scheduleSync(): void {
-      if (animationFrame !== null) cancelAnimationFrame(animationFrame);
-      animationFrame = requestAnimationFrame(() => {
-        animationFrame = null;
-        sync();
-      });
-    }
-
-    const observer = new MutationObserver(() => {
-      const inlinePopover = node.querySelector<HTMLElement>(".st-timeRangePicker__popover");
-      if (!inlinePopover) return;
-      popover = inlinePopover;
-      popover.classList.add("signals-time-range-picker__portal");
-      (node.closest<HTMLElement>("[data-st-theme]") ?? document.body).append(popover);
-      scheduleSync();
-    });
-    observer.observe(node, { childList: true, subtree: true });
-    window.addEventListener("scroll", scheduleSync, true);
-    window.addEventListener("resize", scheduleSync);
-
-    return {
-      destroy: () => {
-        observer.disconnect();
-        window.removeEventListener("scroll", scheduleSync, true);
-        window.removeEventListener("resize", scheduleSync);
-        if (animationFrame !== null) cancelAnimationFrame(animationFrame);
-        popover?.remove();
-      },
-    };
-  }
+  // The DS period overlay is NOT moved out of the rail. Since
+  // @sentropic/design-system-svelte 0.37, MenuPopover keeps its panel in place
+  // and lifts it into the top layer with the Popover API (`popover="manual"` +
+  // `showPopover()`): it escapes the rail clipping and keeps the theme tokens
+  // by itself. Re-parenting a shown popover removes it from the document, and
+  // the browser then hides it (`display: none`): the picker never unfolded.
 
   function setExclusion(patch: Partial<VivierBExclusions>): void {
     exclusions = { ...exclusions, ...patch };
@@ -488,7 +425,7 @@
      directement dans la section « Signaux » — plus aucun onglet. -->
 {#snippet panelB()}
   <div class="vivier-panel">
-    <div class="signals-time-range-picker-wrap" use:positionTimeRangePopover>
+    <div class="signals-time-range-picker-wrap">
       <TimeRangePicker
         class="signals-time-range-picker"
         value={timeRange}
@@ -647,6 +584,14 @@
 
   .signals-time-range-picker-wrap {
     width: 100%;
+  }
+
+  /* The DS panel has a 20rem min-width but MenuPopover caps at 18rem: let the
+     in-place overlay take the panel width instead of a horizontal scrollbar
+     (same sizing the former portal set inline). */
+  .signals-time-range-picker-wrap :global(.st-timeRangePicker__popover) {
+    max-width: none;
+    overflow-x: hidden;
   }
 
   .vivier-panel :global(.signals-time-range-picker .st-timeRangePicker__trigger) {
