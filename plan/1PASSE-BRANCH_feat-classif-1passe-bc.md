@@ -37,6 +37,8 @@
 - [x] Aucun changement UI/API. Aucune UAT.
 
 ## Plan / Todo (lot-based)
+- [x] Correction : citations normalisées, page physique ancrée, ambiguïté séparée et affectations forcées seules.
+- [ ] Recalcul avant/après, reprise ciblée des interruptions, rapport et PR draft. D3 suspendu par i-cond à 17 h 57.
 - [x] Étape 0 : pré-enregistrement, graine, 100 PV, 50/50, pack et manifestes livrés.
 - [x] Étape 0bis : plan sédimenté, décisions et surface CLI gelées avant appel.
   - [x] Porte : empreintes, 100 textes complets, pack, budget et quota vérifiés. Codex : 26 %.
