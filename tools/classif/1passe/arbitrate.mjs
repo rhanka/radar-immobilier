@@ -9,8 +9,29 @@ const base = fs.readFileSync(`${dir}/arbitration-prompt.md`, 'utf8');
 const rows = [...load(`${home}/reference/tuning-prepared`, false), ...load(`${home}/reference/blind-prepared`, true)];
 const disputes = rows.filter((r) => r.disputed).sort((a, b) => Number(a.blind) - Number(b.blind) || sha256(`${split.seed}|${a.id}`).localeCompare(sha256(`${split.seed}|${b.id}`)));
 const annotation = JSON.parse(fs.readFileSync(`${home}/annotation/run-summary.json`, 'utf8'));
-let calls = 0, retries = annotation.retries, stopped = null;
-const started = new Date().toISOString();
+const arbDir = `${home}/arbitration`;
+const existing = fs.existsSync(arbDir) ? fs.readdirSync(arbDir) : [];
+const intents = existing.filter((n) => n.includes('.intent-')).map((n) => load(`${arbDir}/${n.replace(/\.(json|sealed)$/, '')}`, n.endsWith('.sealed')));
+let calls = intents.length, retries = annotation.retries + intents.filter((r) => r.attempt > 0).length, stopped = null;
+const started = intents.map((r) => r.at).sort()[0] ?? new Date().toISOString();
+// Reprise durable : ni rejeu d’un appel coupé, ni remise à zéro du budget.
+for (const row of disputes) {
+  const file = `${arbDir}/${row.id.replaceAll('#', '_')}`;
+  const ext = row.blind ? 'sealed' : 'json';
+  if (fs.existsSync(`${file}.${ext}`)) {
+    const previous = load(file, row.blind);
+    if (previous.cause === 'refus_compte') stopped = 'refus_compte';
+    continue;
+  }
+  const prior = intents.filter((r) => r.id === row.id);
+  if (!prior.length) continue;
+  const last = prior.sort((a, b) => b.attempt - a.attempt)[0];
+  const attemptFile = `${file}.attempt-${last.attempt}`;
+  const record = fs.existsSync(`${attemptFile}.${ext}`) ? load(attemptFile, row.blind) : null;
+  if (record?.hard) stopped = 'refus_compte';
+  save(file, { id: row.id, status: 'fallback', finalClass: 'Non classé', shown: true,
+    cause: record?.hard ? 'refus_compte' : 'execution_interrupted' }, row.blind);
+}
 for (const row of disputes) {
   const file = `${home}/arbitration/${row.id.replaceAll('#', '_')}`;
   if (fs.existsSync(`${file}.${row.blind ? 'sealed' : 'json'}`)) continue;
