@@ -53,6 +53,7 @@ const resolve = (dir, effort) => async (id) => {
   return existsSync(path) ? { state: "accepted", output: await json(path) } : { state: "refused" };
 };
 const astra = await scoreSource("GPT-6 Astra medium (rejeu v12)", "codex", resolve(astraDir, "medium"));
+if (astra.strict.tp + astra.strict.fn !== 676) throw new Error("Expected oracle 676 for the Astra replay");
 const sum = (rows, key) => rows.reduce((total, row) => total + (row[key] ?? 0), 0);
 // Same full-input/full-output convention as the v10 cost calculator. No cache discount.
 const astraApi = (sum(astraUsage, "inputTokens") * 10 + sum(astraUsage, "outputTokens") * 50) / 1e6 / documents.length;
@@ -94,6 +95,7 @@ summary.weeklyBefore = firstStart?.weeklyUsedPercent ?? summary.weeklyBefore;
 summary.startedAt = firstStart?.at ?? null;
 summary.quotaEvents = cpMeta.filter((row) => row.event === "QUOTA").length;
 const cp = await scoreSource("CP+ (GPT-6 Astra medium → Muse Spark 1.3 xhigh)", "precision-cascade", resolve(cpDir, "xhigh"));
+if (cp.strict.tp + cp.strict.fn !== 676) throw new Error("Expected oracle 676 for CP+");
 // Primary Meta page https://dev.meta.ai/models/muse-spark/, read 2026-11-13.
 // A uses reported output; B adds reasoning separately. Real usage includes CLI context.
 const reviewerApi = ((sum(usages, "inputTokens") - sum(usages, "cachedTokens")) * 1.25
