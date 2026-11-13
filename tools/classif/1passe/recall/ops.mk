@@ -28,3 +28,5 @@ push:
 	git push -u origin HEAD
 pr:
 	gh pr create --draft --base feat/classif-1passe-bc --title feat/classif-1passe-recall --body-file tools/classif/1passe/recall/PR.md
+pr-status:
+	gh pr view --json url,isDraft,baseRefName,headRefName,headRefOid,statusCheckRollup
