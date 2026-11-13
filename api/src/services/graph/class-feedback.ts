@@ -1,10 +1,14 @@
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
+import { facetCommands, facetCommandContexts } from "../../db/schema.js";
 import { lockWorkspace } from "../workspaces/mutations.js";
 import { approvedAccountId, resolveWorkspaceAccess } from "../workspaces/store.js";
 import { WorkspaceError } from "../workspaces/types.js";
 import { FACET_PROFILE } from "../facets/codebook.js";
+import { requireScopedEpoch } from "../facets/scope.js";
+import { scopedEpochFor } from "../facets/activation.js";
+import { readCommand } from "../facets/commands.js";
 import { writeScopedPersonalFacetInTx } from "../facets/scoped-writer.js";
 import { writeWorkspaceArchiveFacetInTx } from "../facets/workspace-writer.js";
 import { digest, FacetError } from "../facets/target.js";
@@ -16,6 +20,7 @@ export async function writeClassFeedback(db: Database, sub: string, workspaceId:
     await lockWorkspace(tx, workspaceId);
     const actor = await approvedAccountId(tx, sub, true);
     const access = await resolveWorkspaceAccess(tx, workspaceId, sub);
+    requireScopedEpoch(await scopedEpochFor(tx, workspaceId), workspaceId);
     if (command.scope === "workspace" && !access.moderateArchive) {
       throw new WorkspaceError(403, "workspace_capability_required");
     }
@@ -28,6 +33,7 @@ export async function writeClassFeedback(db: Database, sub: string, workspaceId:
       if (previous.rows[0].command_digest !== hash) throw new FacetError(409, "idempotency_key_conflict");
       return String(previous.rows[0].id);
     }
+    if (await readCommand(tx, actor, key, hash) !== undefined) throw new FacetError(409, "idempotency_key_conflict");
     // Match the AI writer's table-before-row order. Exclude AI replacement until commit.
     await tx.execute(sql`LOCK TABLE facet_events IN ROW EXCLUSIVE MODE`);
     const { target, annotation } = command;
@@ -89,6 +95,10 @@ export async function writeClassFeedback(db: Database, sub: string, workspaceId:
       VALUES (${id},${target.citySlug},${target.type},${target.id},${workspaceId},${actor},${command.scope},${key},${hash},
         ${command.verdict},${history.rows[0]!.id},'ai',${ai.model},${ai.prompt_sha256},${ai.pipeline_run_id},${ai.classe},
         ${next},${reasonCode ?? null},${reason},${command.comment ?? null},${event.id})`);
+    await tx.insert(facetCommands).values({ ownerId: actor, commandKey: key, commandDigest: hash,
+      result: { event: null, context: { workspaceId, operation: "class-feedback-v1", feedbackId: id } } });
+    await tx.insert(facetCommandContexts).values({ ownerId: actor, commandKey: key,
+      workspaceId, status: "resolved", commandDigest: hash });
     return id;
   });
 }
