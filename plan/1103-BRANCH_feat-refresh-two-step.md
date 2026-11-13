@@ -31,7 +31,7 @@
 - [x] Lot 1b: share bounded reannotation execution and changed-input filtering; isolate selection and classification failures.
 - [x] Lot 2: wire separate models after durable publication/projection; select acts from completed chunks, including projection resumes; isolate failures.
 - [x] Lot 3a: enforce off in CronJob renders and mutation guards; retain detection B settings.
-- [ ] Lot 3b: document activation and rollback.
+- [x] Lot 3b: document activation, independent classification variables, legacy deprecation and filtered rollback.
 - [ ] Lot 4: test mode compatibility, byte-identical detection, new/changed acts, provenance, manual precedence, bounded work and failures.
   - [x] Configuration and shared service tests added; PostgreSQL pipeline fixture prepared.
   - [x] Full pipeline PostgreSQL tests added: byte parity, classification failures, manual thumbs-up, changed input, projection resume.
