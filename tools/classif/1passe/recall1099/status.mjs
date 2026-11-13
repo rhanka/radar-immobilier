@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import { home, json, load } from './context.mjs';
 const manifest = json(`${home}/request-manifest.json`);
+const starts = fs.readFileSync(`${home}/calls.jsonl`, 'utf8').trim().split('\n').map(JSON.parse);
 const tally = { started: fs.readFileSync(`${home}/calls.jsonl`, 'utf8').trim().split('\n').length,
   received: 0, checked: 0, nativeAccepted: 0, v9Accepted: 0, accepted: 0, toolEvents: 0, quotaMax: 0 };
 for (const p of manifest) {
@@ -15,4 +16,6 @@ for (const p of manifest) {
   tally.checked++; tally.nativeAccepted += Number(v.nativeAccepted ?? false);
   tally.v9Accepted += Number(v.v9Accepted ?? false); tally.accepted += Number(v.accepted);
 }
+tally.oldestPendingSeconds = Math.max(0, ...starts.filter((p) => !fs.existsSync(`${home}/responses/${p.key}.${p.blind ? 'sealed' : 'json'}`))
+  .map((p) => Math.round((Date.now() - Date.parse(p.at)) / 1000)));
 console.log(JSON.stringify(tally));
