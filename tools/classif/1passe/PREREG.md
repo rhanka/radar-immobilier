@@ -1,8 +1,8 @@
 # Pré-enregistrement B+C — étape 0 du 13 novembre 2026
 
-Conduite : i-cond. État : préparation, aucun appel de modèle autorisé ici.
-Ce texte et les manifestes doivent être committés avant tout appel futur.
-Les recommandations D4 et D5 restent soumises à l’owner.
+Conduite : i-cond. Étapes 0bis et 1 autorisées par l’owner le 13/11/2026.
+Ce texte, le plan et les manifestes sont committés avant tout appel.
+D1 à D4 sont actées. D5 est actée à titre provisoire.
 
 ## Population et compte exact
 
@@ -70,7 +70,8 @@ Son choix doit être valide et motivé par une citation. Pas de vote majoritaire
 Un arbitrage non concluant, invalide ou en échec donne Non classé, **à montrer**.
 Un refus de compte arrête tout le run avant le prochain lancement.
 Les cas restants gardent ce repli. Ils ne sont pas présentés comme des arbitrages réussis.
-L’échantillon humain est en attente de validation. Aucun envoi à Steve n’est fait ici.
+L’échantillon humain contient 20 arbitrages de mise au point, ou tous si moins de 20.
+Il ne contient aucun acte aveugle. Il est préparé pour l’owner, sans envoi externe.
 Deux IA au plus participent à une itération. L’arbitre intervient dans une phase distincte.
 
 ## Découpage et pare-feu
@@ -103,7 +104,7 @@ Les sorties aveugles restent privées et scellées. Seuls les agrégats vont à 
 Le tuning n’accède ni aux textes, ni aux votes, ni aux erreurs détaillées de l’aveugle.
 Le corpus B a déjà été utilisé. Cette séparation ne prouve pas une absence d’exposition passée.
 
-## Métriques et succès provisoire D4
+## Métriques et succès acté D4
 
 `TP` : acte de référence P∪S apparié un à un à une prédiction montrée.
 `FN` : acte de référence P∪S sans prédiction montrée. `FP` : prédiction montrée sans tel acte.
@@ -117,33 +118,58 @@ Publier les bornes exactes Clopper–Pearson unilatérales à 95 %, comme l’an
 À zéro manqué sur n positifs, la borne basse vaut `0,05^(1/n)`, donc reste inférieure à 1.
 Un support inférieur à 30 est indéterminé. Un dénominateur nul n’est jamais un score de 1.
 Les cas neutres sont exclus du résultat principal. Publier aussi les bornes extrêmes en les affectant tous dans chaque sens.
-D4 proposée : zéro manqué sur mise au point ET aveugle ; rappel ponctuel égal à 1.
+D4 actée : zéro manqué sur mise au point ET aveugle ; rappel ponctuel égal à 1.
 Parmi les bras admissibles préfigés, retenir la meilleure précision aveugle ponctuelle.
 À égalité : borne basse de précision, puis moindre coût mesuré en jetons, puis identifiant lexical.
 Aucun plancher de précision inventé. Tous les bras et les échecs restent publiés.
 L’aveugle ne peut modifier les prompts, les routes ou la prochaine itération.
 
-## Budget et points ouverts
+## Point de départ arbitré par i-cond
 
-Le plafond est en tentatives, y compris refus et sorties invalides. Aucune relance automatique.
+La série 7 fournit P0. C’est la seule route à zéro manqué dans les deux moitiés.
+P0 × Astra low atteint une précision aveugle de 0,752 dans cette étude historique.
+La série 10, Ember, est écartée : 3 et 5 manqués en aveugle.
+Ces résultats ne figurent jamais dans les prompts d’annotation.
+D5 provisoire : Astra low et medium, Sol 6.1 medium et Opus 5.5 medium.
+Deux IA au maximum participent à chaque itération de passe unique.
+
+## Budget et garde-fous amendés le 13/11
+
+Le plafond principal est en lectures, sans relance des réponses invalides.
+Les reprises de quota ont un budget séparé de 40 tentatives, au plus 2 par PV et bras.
+Elles attendent 60 puis 300 secondes, ou la remise à zéro indiquée si plus tardive.
+Un quota ne devient jamais un refus ni un vote. Aucun changement de compte.
 Étape 0 : **0**. Annotation : **200** appels, deux lectures indépendantes de chacun des 100 PV.
 Arbitrage : **776** au maximum, soit 676 actes B et réserve de 100 actes nouveaux disputés.
 Mise au point D5 : **200**, deux itérations de deux routes, 50 PV par route.
 Aveugle final : **100**, au plus deux finalistes figés, 50 PV chacun, une seule lecture.
-Total futur maximal : **1 276**. Au-delà, arrêt et amendement avant tout nouvel appel.
-Ce budget suppose un PV complet par appel. Aucun chunk, retry ou optimiseur caché.
+Total principal maximal : **1 276**, plus 40 reprises de quota, soit **1 316** tentatives.
+Au-delà, arrêt et amendement avant tout nouvel appel.
+Ce budget suppose un PV complet par appel. Aucun chunk ni optimiseur caché.
 Un PV trop long arrête le lot avant appel. Les jetons, latences et quotas sont publiés séparément.
-Concurrence globale maximale : 2. Concurrence par compte : 1. Argon : 1.
-Petits lots de 5 appels au plus. Espacement minimal de 30 secondes entre départs.
-Sur 401, 403, refus de compte, compte désactivé ou accès modèle refusé : arrêt global immédiat.
-Sur 429 ou quota épuisé : arrêt global, aucune rotation de compte ou de transport.
-Le refus 403 observé sur agy/Gemini interdit toute rafale et toute reprise automatique.
-La reprise exige un contrôle du compte par son responsable et une décision tracée d’i-cond.
+Les deux bras d’annotation tournent simultanément, à concurrence 8 chacun.
+Argon reste dans une phase distincte, à concurrence 1, jamais plus de 2.
+Lecture du quota hebdomadaire codex avant départ et toutes les 10 minutes.
+À 90 % utilisés, arrêt des nouveaux départs codex. Mesure finale publiée.
+Sur 401, 403, disabled, terms ou refus de compte : arrêt immédiat du bras concerné.
+Argon s’arrête au premier refus. Les actes restants deviennent Non classés, à montrer.
+Sur 429 ou quota : pause du compte, puis reprise après attente, sans rotation.
+Objectif de durée de l’annotation : environ 30 minutes, sans contourner ces gardes.
+Un appel reçoit un PV complet et le pack C, sans résultat candidat ni oracle B.
+Surface CLI : cwd vide hors dépôt ; MCP et skills désactivés ; aucun outil accepté.
+Claude : --tools vide, --max-turns 1, aucune persistance de session.
+Codex : configuration isolée, web désactivé, fonctions outils désactivées.
+Le CLI codex peut encore exposer unified_exec. Toute invocation invalide la réponse.
+Un seul tour demandé ; aucun tour d’outil accepté. Cette limite CLI est déclarée.
+Les réponses aveugles sont scellées REFC1 dès leur réception, avant toute publication.
+Le kappa porte sur P, S, N et Non classé. Les omissions sont des désaccords.
+L’accord par classe publie les effectifs et l’accord symétrique 2n_ii/(n_i.+n_.i).
+Le tirage humain est déterministe par SHA-256 de graine|identifiant, replis prioritaires.
 
 | Point | Proposition | État |
 |---|---|---|
-| D4 | Zéro manqué sur les deux moitiés, puis précision aveugle | À confirmer |
-| D5 | Astra low/medium, Sol 6.1 medium, Opus 5.5 medium | À confirmer, effort Opus inclus |
-| Audit humain | 20 arbitrages, ou tous si moins de 20 ; moitié tuning, moitié aveugle ; tirage par SHA ; priorité aux replis | Taille et calendrier à confirmer |
-| Audit aveugle | Owner/Steve et gardien seulement, après gel final ; aucun retour aux optimiseurs | À confirmer |
+| D4 | Zéro manqué sur les deux moitiés, puis précision aveugle | Actée le 13/11 |
+| D5 | Astra low/medium, Sol 6.1 medium, Opus 5.5 medium | Provisoire, actée le 13/11 |
+| Audit humain | 20 arbitrages de mise au point au plus ; aucun aveugle | Acté le 13/11 |
+| Audit aveugle | Agrégats seulement ; aucun retour aux optimiseurs | Acté le 13/11 |
 | Stratification | Affectation B actuelle conservée ; supports C encore inconnus | Arbitrage owner requis |
