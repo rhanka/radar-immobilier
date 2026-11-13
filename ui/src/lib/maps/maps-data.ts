@@ -12,7 +12,7 @@
  */
 
 import { prioritizedCities } from "@radar/sources/municipalities";
-import type { MunicipalityT, VivierV2Counts } from "@radar/domain";
+import type { MunicipalityT, VivierFiltreCube, VivierV2Counts } from "@radar/domain";
 import type { GraphSignalCityItem } from "$lib/signals/graph-signals-by-city-client.js";
 
 /**
@@ -41,6 +41,14 @@ export interface CityMapEntry {
    * fabriqués (une ville sans données n'est pas une ville à zéro qualifié).
    */
   vivierV2Counts: VivierV2Counts | null;
+  /**
+   * Cube Filtre de la vue B (`@radar/domain` filtre-cube) servi par l'API
+   * pour cette ville : base des compteurs du menu « Filtre ». `null` quand
+   * l'API ne le sert pas (ville absente ou serveur antérieur) — jamais un
+   * cube vide fabriqué.
+   */
+  filtreCube?: VivierFiltreCube | null;
+  filtreCubesByClassement?: import("@radar/domain").VivierFiltreCubesByClassement | null;
 }
 
 /**
@@ -68,6 +76,10 @@ export function buildCityMapEntries(
   const subsetCountsBySlug = new Map<string, Record<string, number>>(
     graphItems.map((item) => [item.citySlug, item.subsetCounts]),
   );
+  const filtreCubeBySlug = new Map<string, VivierFiltreCube | undefined>(
+    graphItems.map((item) => [item.citySlug, item.filtreCube]),
+  );
+  const classementCubesBySlug = new Map(graphItems.map((item) => [item.citySlug, item.filtreCubesByClassement]));
   const vivierV2CountsBySlug = new Map<string, VivierV2Counts | undefined>(
     graphItems.map((item) => [item.citySlug, item.vivierV2Counts]),
   );
@@ -77,6 +89,8 @@ export function buildCityMapEntries(
     signalCount6m: signalCountBySlug.get(m.slug) ?? 0,
     subsetCounts: subsetCountsBySlug.get(m.slug) ?? {},
     vivierV2Counts: vivierV2CountsBySlug.get(m.slug) ?? null,
+    filtreCube: filtreCubeBySlug.get(m.slug) ?? null,
+    filtreCubesByClassement: classementCubesBySlug.get(m.slug) ?? null,
   }));
 }
 

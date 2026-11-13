@@ -22,7 +22,7 @@ it("removes the separate « Filtrer selon » menu and never shows the word scrap
   expect(labelled.join(" ")).not.toMatch(/scrap/i);
 });
 
-/** Opens the DS period picker of the rail (its popover is portaled out of the rail). */
+/** Opens the DS period picker of the rail (its popover stays in place, in the DS top layer). */
 async function openPicker(container: HTMLElement): Promise<HTMLElement> {
   await fireEvent.click(getByRole(container, "button", { name: /Période des signaux/ }));
   return document.body;
@@ -318,7 +318,62 @@ describe("SignauxRail — vivier B (vue unique, sans onglets)", () => {
     }
   });
 
-  it("positions the opened temporal overlay from its trigger and refreshes it on scroll", async () => {
+  /**
+   * Minimal model of the browser Popover API (jsdom has none): `showPopover()`
+   * opens the element, and removing a shown popover from the document hides
+   * it, as the HTML "removing steps" do. DS MenuPopover (0.37+) relies on it to
+   * lift the period overlay into the top layer while keeping it in place.
+   */
+  function installPopoverApiModel(): { isOpen: (el: Element) => boolean; restore: () => void } {
+    const proto = HTMLElement.prototype as unknown as {
+      showPopover?: (this: HTMLElement) => void;
+      hidePopover?: (this: HTMLElement) => void;
+    };
+    const open = new WeakSet<Element>();
+    const removed = new MutationObserver((records) => {
+      for (const record of records) {
+        for (const node of record.removedNodes) {
+          if (!(node instanceof Element)) continue;
+          for (const el of [node, ...node.querySelectorAll("[popover]")]) open.delete(el);
+        }
+      }
+    });
+    removed.observe(document.body, { childList: true, subtree: true });
+    proto.showPopover = function showPopover(this: HTMLElement) { open.add(this); };
+    proto.hidePopover = function hidePopover(this: HTMLElement) { open.delete(this); };
+    return {
+      isOpen: (el) => el.isConnected && open.has(el),
+      restore: () => {
+        removed.disconnect();
+        delete proto.showPopover;
+        delete proto.hidePopover;
+      },
+    };
+  }
+
+  const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
+  it("should unfold the period overlay in place when the trigger is clicked", async () => {
+    const popoverApi = installPopoverApiModel();
+    try {
+      const { container } = renderRail();
+      await fireEvent.click(getByRole(container, "button", { name: /Période des signaux.*Dernière semaine/i }));
+      await nextFrame();
+      await nextFrame();
+
+      const popover = getByRole(document.body, "dialog", { name: "Période des signaux" });
+      // Never re-parented: a shown popover moved elsewhere is hidden by the browser.
+      expect(popover.closest(".st-timeRangePicker")).toBeInstanceOf(HTMLElement);
+      expect(container.contains(popover)).toBe(true);
+      expect(popover.getAttribute("popover")).toBe("manual");
+      expect(popoverApi.isOpen(popover)).toBe(true);
+      expect(within(popover).getByRole("option", { name: "3 derniers mois" })).toBeInstanceOf(HTMLElement);
+    } finally {
+      popoverApi.restore();
+    }
+  });
+
+  it("should position the opened period overlay from its trigger and follow scroll", async () => {
     const { container } = renderRail();
     const trigger = getByRole(container, "button", {
       name: /Période des signaux.*Dernière semaine/i,
@@ -327,14 +382,12 @@ describe("SignauxRail — vivier B (vue unique, sans onglets)", () => {
     vi.spyOn(trigger, "getBoundingClientRect").mockImplementation(
       () => new DOMRect(16, triggerTop, 400, 32),
     );
-    const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
     await fireEvent.click(trigger);
     await nextFrame();
 
     const popover = getByRole(document.body, "dialog", { name: "Période des signaux" });
-    expect(popover.parentElement).toBe(document.body);
-    expect(popover.style.position).toBe("fixed");
+    expect(container.contains(popover)).toBe(true);
     expect(popover.style.top).toBe("72px");
     expect(popover.style.left).toBe("16px");
 
@@ -345,17 +398,17 @@ describe("SignauxRail — vivier B (vue unique, sans onglets)", () => {
     expect(popover.style.top).toBe("120px");
   });
 
-  it("portals the opened temporal overlay inside the DS theme scope so its tokens apply", async () => {
+  it("should keep the opened period overlay inside the DS theme scope so its tokens apply", async () => {
     const themed = document.createElement("div");
     themed.setAttribute("data-st-theme", "sent-tech");
     document.body.append(themed);
     try {
       const { container } = render(SignauxRail, { target: themed, props: { entries: [] } });
       await fireEvent.click(getByRole(container, "button", { name: /Période des signaux.*Dernière semaine/i }));
-      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      await nextFrame();
       const popover = getByRole(document.body, "dialog", { name: "Période des signaux" });
-      expect(popover.parentElement).toBe(themed);
       expect(popover.closest("[data-st-theme]")).toBe(themed);
+      expect(popover.closest(".signals-time-range-picker-wrap")).toBeInstanceOf(HTMLElement);
     } finally {
       cleanup();
       themed.remove();

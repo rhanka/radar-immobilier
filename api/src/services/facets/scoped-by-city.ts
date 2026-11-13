@@ -23,10 +23,10 @@ import { discardedSignalKey, type DiscardedSignalKey } from "../graph/discarded-
 import { requireScopedEpochFor } from "./activation.js";
 import { ScopeError } from "./scope.js";
 
-/** Native keys of the targets effectively archived for this viewer in this workspace. */
-export async function readScopedHiddenSignalKeys(
+/** Viewer-only selections and effective archives, under the same scoped guards. */
+async function readScopedSignalClassement(
   db: Database, sub: string, workspaceId: string,
-): Promise<ReadonlySet<DiscardedSignalKey>> {
+) {
   return db.transaction(async (tx) => {
     await lockWorkspace(tx, workspaceId);
     const accountId = await approvedAccountId(tx, sub, true);
@@ -42,10 +42,22 @@ export async function readScopedHiddenSignalKeys(
       .where(and(eq(facetStreams.workspaceId, workspaceId),
         or(eq(facetStreams.scope, "workspace"), and(eq(facetStreams.scope, "personal"),
           eq(facetStreams.ownerId, accountId))),
-        eq(facetStreams.targetType, "signal"), eq(facetStreams.facet, "archive"),
-        isNull(facetStreams.basket)));
-    return new Set(rows.filter(({ event }) => event.state === "active")
-      .map(({ event }) => discardedSignalKey(event.citySlug, event.nodeType, event.nodeId)));
+        eq(facetStreams.targetType, "signal"),
+        or(and(eq(facetStreams.facet, "archive"), isNull(facetStreams.basket)),
+          and(eq(facetStreams.scope, "personal"), eq(facetStreams.facet, "selection")))));
+    const hidden = new Set<DiscardedSignalKey>();
+    const classement = new Map<DiscardedSignalKey, keyof import("@radar/domain").VivierFiltreCubesByClassement>();
+    for (const { event } of rows) {
+      if (event.state !== "active") continue;
+      const key = discardedSignalKey(event.citySlug, event.nodeType, event.nodeId);
+      if (event.facet === "archive") hidden.add(key);
+      // Same precedence as the detail: archive > pertinent > a_surveiller.
+      else if (event.basket === "pertinent" || (event.basket === "a_surveiller" && !classement.has(key))) {
+        classement.set(key, event.basket);
+      }
+    }
+    for (const key of hidden) classement.set(key, "ecarte");
+    return { hidden, classement };
   });
 }
 
@@ -63,9 +75,9 @@ export async function readScopedByCity(
   db: Database, sub: string, workspaceId: string, query: ScopedByCityQuery,
 ): Promise<ScopedByCityResult> {
   // Authorization always runs, including when every target is shown.
-  const hidden = await readScopedHiddenSignalKeys(db, sub, workspaceId);
-  const cities = !query.showDiscarded && hidden.size > 0
-    ? await listCitiesWithSignalNodes(db, query.dateRange, { discarded: hidden })
-    : await listCitiesWithSignalNodes(db, query.dateRange);
+  const { hidden, classement } = await readScopedSignalClassement(db, sub, workspaceId);
+  const cities = await listCitiesWithSignalNodes(db, query.dateRange, {
+    ...(!query.showDiscarded ? { discarded: hidden } : {}), classement,
+  });
   return { totalCount: cities.reduce((sum, city) => sum + city.signalCount, 0), cities };
 }
