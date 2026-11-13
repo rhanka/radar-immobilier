@@ -1,4 +1,4 @@
-2906f82c141ebfeacd36a7baadb7aeba932c3c222c45d69c11da3f09369c5dab  ./build-v11-report.mjs
+db1680221e1b05749a7b7d297fa67145bbdc7fd0b3746a353869cc3909d0d932  ./build-v11-report.mjs
 6072f2d85ab3056d4f1b32535757e3269251c790efb56efce9604c582a3e4674  ./full/build-oracle-676.mjs
 16c875a5bbf64f617e83864c3c7e774c43f8089ddeb1fdfec4383ab194ff3e9f  ./full/build-summary.mjs
 77a3f3c48710fd5f324c727cbeca8c72cebe9f103337c471af8652a1a595d6db  ./full/dl-corpus.mjs
@@ -32,9 +32,12 @@ a717c68fe22511cf2aaccc4988ae2ea5f3a010d5ef6344a84cf14092f54c1f82  ./harness/scor
 1b54a1de29e7c73110936db9ab138f01b8eb99a794ed71c96109a2c4c8c17ac9  ./oracle-676/README.md
 e4a1c8f8005c841183b697eb00bb3cc5474224adf964bc2c6998096d5c7a2b2b  ./oracle-676/unresolved.json
 bf540302e3075f1b2a6772d3050062aa6096e6da5f184d50549a0c2980d206b7  ./prompts-verify.json
-4cc42e989e874b5522b264bc8b00d60045c72f457b78c683ecc17aab861f4bcc  ./README.md
+e7fa52e9fa1c52f94fbbffb4370eaa90b3f92f9f3d41807aca0b39020d5a1ddb  ./README.md
 a157f2c07324c3d3207b790fc19615aa504c18cf003a1eff484a8cd4beb729ac  ./sandbox/package.json
 6305df94a71ce8bee66f6dbb51bd78ab549d63692027139eb31e4a9edf03b0f0  ./sandbox/package-lock.json
 37c85a34feb97c12466b48360f92c82f5278ead479c2bd9317bff5b849ce9c37  ./t1/frozen-ontology-profile.yaml
 1e884005c1fc8fd43d1577440bb5b897e58f7d6ef057deb2a2080effbbdaaac4  ./t1/frozen-refresh-corpus.ts
 65e06be3e4df82cf9e6452b8bde96557e2433c305b7a73be2c5fe8e8d6383fac  ./t1/frozen-refresh-profile.ts
+3fbbc96a6af8cd5b221cf219ce50ee059412da488d99131db30aa14da26036a1  ./full/run-arm-ember.sh
+20a377429be9282b93741e247a2532606e998d1ce7bcfd0564ed2ff322fe5c8f  ./full/score-ember.mjs
+94c3b92d4c6d6ac554d97398d45401315002b2230b478f431f7017bb3c7f4004  ./full/watch-muse-weekly.sh
