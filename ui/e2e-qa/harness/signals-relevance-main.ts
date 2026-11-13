@@ -1,6 +1,6 @@
 import "../../src/app.css";
 import { mount } from "svelte";
-import maplibregl from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
 import SignauxMapView from "$lib/components/maps/SignauxMapView.svelte";
 import { workspaceContext } from "$lib/signals/workspace-client.js";
 
