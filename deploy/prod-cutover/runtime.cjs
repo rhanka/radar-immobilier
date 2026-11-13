@@ -74,6 +74,35 @@ function identity() {
     oid: sql('SELECT oid FROM pg_database WHERE datname=current_database();') };
 }
 function sameIdentity(a, b) { return JSON.stringify(a) === JSON.stringify(b); }
+function approvedPlan() {
+  const planFile = safeFile(env.PLAN || fail('approved_6h_plan_required'));
+  const rosterFile = safeFile(env.ROSTER || fail('approved_6h_roster_required'));
+  const planBytes = fs.readFileSync(planFile);
+  const rosterBytes = fs.readFileSync(rosterFile);
+  const digest = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
+  const binding = { planSha256: digest(planBytes), rosterSha256: digest(rosterBytes) };
+  const a = json(env.APPROVAL || fail('owner_approval_required'));
+  if (!a.owner || a.sha !== SHA || !Number.isFinite(Date.parse(a.expiresAt))
+    || Date.parse(a.expiresAt) <= Date.now()
+    || a.planSha256 !== binding.planSha256 || a.rosterSha256 !== binding.rosterSha256)
+    fail('approved_6h_content_mismatch');
+  const plan = JSON.parse(planBytes.toString('utf8'));
+  if (JSON.stringify(plan.accounts) !== JSON.stringify(JSON.parse(rosterBytes.toString('utf8')))) fail('roster_plan_mismatch');
+  return { plan, ...binding };
+}
+function mutationGuard() {
+  if (env.ENV !== 'execution-prod') return;
+  const kube = path.join(env.HOME, '.kube/radar-prod-tenant-admin.kubeconfig');
+  const lock = JSON.parse(run('kubectl', ['--kubeconfig', kube, '--request-timeout=15s',
+    '-n', 'radar-immobilier', 'get', 'configmap', 'radar-change-lock', '-o', 'json']));
+  lockOwnership(JSON.parse(lock.data.record));
+}
+function lockOwnership(record) {
+  if (!env.CUTOVER_LOCK_RUN || !env.CUTOVER_LOCK_EXECUTOR || record.kind !== 'cutover'
+    || record.manualV1220 !== true || record.run !== env.CUTOVER_LOCK_RUN
+    || JSON.stringify(record.executor) !== JSON.stringify(JSON.parse(env.CUTOVER_LOCK_EXECUTOR))
+    || record.executor.state !== 'running') fail('change_lock_ownership_required');
+}
 function prefix(rows, entries = journal()) {
   if (rows.length < 13 || rows.length > 44 || new Set(rows.map(r => r.hash)).size !== rows.length)
     fail('migration_count_or_duplicates');
@@ -95,7 +124,7 @@ function evidence() {
   if (env.ENV === 'execution-prod') {
     const approval = json(env.APPROVAL);
     if (JSON.stringify(approval.drain) !== JSON.stringify(e) || approval.writersStopped !== true
-      || approval.lockFree !== true) fail('operator_drain_attestation_required');
+      || e.run !== env.CUTOVER_LOCK_RUN) fail('operator_drain_attestation_required');
   }
   return e;
 }
@@ -110,4 +139,5 @@ function pinnedImage() {
   return r.apiImage;
 }
 module.exports = { fs, path, crypto, SHA, ROOT, env, fail, json, hash, run, sql,
-  destination, output, save, receipt, journal, prefix, rows, evidence, pinnedImage, identity, sameIdentity, safeFile };
+  destination, output, save, receipt, journal, prefix, rows, evidence, pinnedImage, identity, sameIdentity, safeFile,
+  approvedPlan, mutationGuard, lockOwnership };
