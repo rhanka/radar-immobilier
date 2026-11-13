@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { z } from "zod";
 import type { Extraction } from "@sentropic/engram";
+import { canonicalHash } from "./replay/canonical-json.js";
 
 export interface SinglePassPrompt { readonly id: string; readonly sha256: string; readonly text: string }
 const classes = ["pertinent", "a_surveiller", "non_classe", "ecarte"] as const;
@@ -10,6 +11,17 @@ const classSchema = z.object({ classe: z.enum(classes), reason: z.string().trim(
   reasonCode: z.string().regex(/^(?:[PSN]-[A-Z-]+|V2-PRECEDENT|UNCLASSIFIED)$/) });
 export type SinglePassClass = z.infer<typeof classSchema>;
 export interface SinglePassAnnotation extends SinglePassClass { readonly nodeId: string }
+
+export function singlePassSchema(nativeSchema: string): string {
+  const schema = JSON.parse(nativeSchema) as { required: string[]; annotations?: unknown };
+  return JSON.stringify({ ...schema, required: [...schema.required, "annotations"], annotations: {
+    type: "array", description: "Exactly one class annotation per Signal or DesignationEvent node", items: {
+      type: "object", required: ["nodeId", "classe", "reason", "reasonCode"], properties: {
+        nodeId: { type: "string" }, classe: { enum: classes }, reason: { type: "string" }, reasonCode: { type: "string" },
+      },
+    },
+  } });
+}
 
 export function singlePassEnabled(value: string | undefined): boolean {
   if (value === undefined || value === "0") return false;
@@ -50,4 +62,20 @@ export function validateSinglePassCoverage(extraction: Extraction, annotations: 
   const ids = new Set(annotations.map((item) => item.nodeId));
   if (ids.size !== annotations.length || annotations.length !== acts.length
     || acts.some((node) => !ids.has(node.id))) throw new Error("Single-pass annotation coverage mismatch");
+}
+
+/** Trusted provenance comes from the accepted receipt, never from generated JSON. */
+export function attachSinglePassAnnotations(result: { extraction: Extraction; annotations?: readonly SinglePassAnnotation[] },
+  options: { model: { model: string; effort: string }; prompt: SinglePassPrompt; pipelineRunId: string }): void {
+  validateSinglePassCoverage(result.extraction, result.annotations ?? []);
+  for (const annotation of result.annotations ?? []) {
+    const node = result.extraction.nodes.find((item) => item.id === annotation.nodeId)!;
+    const properties = (node["properties"] ?? {}) as Record<string, unknown>;
+    const inputSha256 = canonicalHash(node).slice(7);
+    node["properties"] = { ...properties, classAnnotation: {
+      ...annotation, source: "ai", model: options.model.model, effort: options.model.effort,
+      promptId: options.prompt.id, promptSha256: options.prompt.sha256,
+      pipelineRunId: options.pipelineRunId, inputSha256,
+    } };
+  }
 }

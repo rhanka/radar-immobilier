@@ -1,7 +1,7 @@
 import { mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { takeSinglePassAnnotations, validateSinglePassCoverage,
+import { singlePassSchema, takeSinglePassAnnotations, validateSinglePassCoverage,
   type SinglePassAnnotation, type SinglePassPrompt } from "./refresh-single-pass.js";
 import { DocumentDateSchema, extractIsoFromLabel, type DocumentDate } from "@radar/sources";
 
@@ -428,7 +428,7 @@ export async function extractRefreshProfile(
       const singlePass = options.singlePassPrompt ? { annotations: [] as SinglePassAnnotation[] } : undefined;
       const outputPath = join(outputDir, `${chunk.id}.json`);
       const generation = await options.textClient.generateJson({
-        schema: schemaFor(chunk, options.context),
+        schema: options.singlePassPrompt ? singlePassSchema(schemaFor(chunk, options.context)) : schemaFor(chunk, options.context),
         prompt: `${options.singlePassPrompt ? `${options.singlePassPrompt.text}\n\n` : ""}${chunk.documentHeader ? `The document date is missing upstream. In THIS existing native graph extraction response,
 identify the actual document as a Source node, even when no Signal/DesignationEvent is found.
 Use id ${chunk.documentSourceId ?? `source-${chunk.docSha}`} and properties.docSha ${chunk.docSha},
