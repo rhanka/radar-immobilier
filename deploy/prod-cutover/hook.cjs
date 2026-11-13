@@ -1,3 +1,5 @@
+/* global require, process, setTimeout, clearTimeout */
+/* eslint-disable @typescript-eslint/no-require-imports */
 // Runs inside the immutable candidate API image. No dotenv or network except DB.
 async function main() {
   // Deadline survives a killed controller or Docker client.
