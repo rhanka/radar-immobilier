@@ -22,6 +22,35 @@ function fixture(initial?: ReannotationIdentity) {
 }
 
 describe("30-day signal reannotation", () => {
+  it("should skip identical input in two-step even after changing the model or prompt", async () => {
+    const f = fixture({ source: "ai", model: "old", effort: "high", promptSha256: "old",
+      inputSha256: reannotationInputSha256(signal) });
+    expect(await runReannotation({ ...f.options, changedInputOnly: true })).toMatchObject({ skippedUnchanged: 1 });
+    expect(f.classify).not.toHaveBeenCalled();
+    expect(await runReannotation(f.options)).toMatchObject({ classified: 1 });
+  });
+
+  it("should bound concurrent calls while continuing after an individual failure", async () => {
+    const f = fixture();
+    f.repository.list = async () => Array.from({ length: 7 }, (_, id) => ({ ...signal, id: String(id) }));
+    let active = 0;
+    let peak = 0;
+    f.options.classify = vi.fn(async () => {
+      active++;
+      peak = Math.max(peak, active);
+      await new Promise<void>((resolve) => setImmediate(resolve));
+      active--;
+      return decision;
+    });
+    f.options.classify.mockRejectedValueOnce(new Error("classification unavailable"));
+    const report = await runReannotation({ ...f.options, concurrency: 2, apply: true });
+    expect(peak).toBe(2);
+    expect(active).toBe(0);
+    expect(report).toMatchObject({ candidates: 7, classified: 6, written: 6 });
+    expect(report.failures).toHaveLength(1);
+    await expect(runReannotation({ ...f.options, concurrency: 0 })).rejects.toThrow("concurrency");
+  });
+
   it("defaults to dry-run and rejects ambiguous or unknown arguments", () => {
     expect(parseReannotationArgs([])).toEqual({ apply: false });
     expect(parseReannotationArgs(["--dry-run"])).toEqual({ apply: false });
