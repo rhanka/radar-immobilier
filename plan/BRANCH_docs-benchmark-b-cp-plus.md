@@ -20,7 +20,7 @@
 - [x] BRCP-EX2: owner requests French report additions and no trailers. These override repository language/footer defaults.
 - [x] Incident: overlapping replay runners could not attest the global concurrency bound. Archive excluded; restart all 100 documents under one global lock and reject overlap in scoring.
 - [x] Finalization: meta.jsonl verifies 100 unique valid reviews; restart counts 64 and 78; three quota-interrupted attempts have no attributable usage. No new model calls or peer review requested, per owner prohibition.
-- [x] BRCP-EX3: generated score JSON is committed intact despite the 150-line guideline (2,192 generated lines, two files). It preserves per-document evidence. No application impact; rollback removes these score files and regenerates the dossier.
+- [x] BRCP-EX3: generated score JSON is committed intact despite the 150-line guideline (2,194 generated lines, two files). It preserves per-document evidence. No application impact; rollback removes these score files and regenerates the dossier.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch. Sequential extraction then precision filtering. No application change.
@@ -38,4 +38,4 @@
   - [x] Preserve every reviewer attempt and audit all captured streams; prepare separate replay and CP+ chart markers.
 - [x] Lot 3 — Regenerate v12 dossier and SHA256SUMS; preserve published rows. No Focus or D1 update, per owner finalization instructions.
   - [x] Verify regeneration preserves all 42 published rows byte for byte; correct hypothesis A in prose, best-arms table and chart legend.
-- [ ] Lot 4 — Verify artifacts, commit selectively, push, open PR to main. Never merge.
+- [x] Lot 4 — Verify artifacts, commit selectively, push, open PR #1085 to main. Rebase confirms origin/main is already the base. No merge.
