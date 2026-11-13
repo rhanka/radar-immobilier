@@ -22,6 +22,7 @@
 - [x] Lot 2 — Atomic authorized feedback API and scoped evaluation export.
 - [x] CLASSFEEDBACK-EX1: scoped-projection-revisions.ts carries private human badges with the coherent snapshot. Revert this enrichment to roll back.
 - [x] CLASSFEEDBACK-EX2: trusted InTx writer option accepts a positive AI archive without fabricating a catalog reason. Public manual commands still require their reason. Revert option and caller together.
+- [x] CLASSFEEDBACK-EX3: annotate the existing real-stack synthetic seed for true feedback clicks; retain the same signal population. Revert seed additions to roll back.
 - [x] Lot 3 — DS feedback controls, required reclassification and dated private badge.
 - [ ] Lot 4 — Unit, PostgreSQL and click E2E coverage; typecheck, lint, test-api, test-ui.
 - [ ] Lot 5 — Peer review, fresh base check, push and stacked PR.
