@@ -19,7 +19,8 @@
     "src/**/*.ts",
     "src/**/*.svelte",
     "vite.config.ts",
-    "vitest.config.ts"
+    "vitest.config.ts",
+    "vite-plugins/**/*.ts"
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
