@@ -29,6 +29,6 @@
 - [x] Lot 1: Preserve v1 and publish v2 prompt and exact manifest fingerprint.
 - [x] Lot 2: Restrict AI schema/validator to registered classes/codes; preserve ambiguity through reannotation contract without running it.
 - [x] Lot 3: Add ambiguity persistence and badge; retain human precedence. No separate annotation history table exists; graph properties retain the flag.
-- [ ] Lot 4: Validator, fallback, terminal failure, PostgreSQL persistence and badge tests.
+- [x] Lot 4: Validator, fallback, terminal failure, PostgreSQL persistence and badge tests. Eight API suites: 83 passed, including eight PostgreSQL tests; LOT_MIGRATION_DB_TEST=1 explicitly enabled.
 - [ ] Lot 5: Typecheck, lint, targeted API/PostgreSQL/UI; remove test stack with volumes.
 - [ ] Lot 6: Review diff, push and open PR against feat/refresh-single-pass; no merge.
