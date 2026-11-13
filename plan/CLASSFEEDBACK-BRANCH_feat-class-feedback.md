@@ -28,5 +28,5 @@
 - [x] Review selection failure recorded in docs/spec/reviews/CLASS_FEEDBACK_REVIEW.md: exact author metadata and h2a_run tool unavailable; no code-review consensus claimed.
 - [x] PostgreSQL I/O diagnosis: pg_stat_activity showed DataFileImmediateSync; fsync disabled only in disposable test-class-feedback to remove filesystem stalls. No timeout was increased. All 25 scoped API tests pass with one worker.
 - [x] Lot 3 — DS feedback controls, required reclassification and dated private badge.
-- [ ] Lot 4 — Unit, PostgreSQL and click E2E coverage; typecheck, lint, test-api, test-ui.
+- [x] Lot 4 — Typecheck and lint pass; 29 scoped API tests, 1,914 UI tests and 12 real-stack E2E tests pass. Exact timestamp and live refresh snapshot regressions are covered. Test stacks use down -v.
 - [ ] Lot 5 — Peer review, fresh base check, push and stacked PR.
