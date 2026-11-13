@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, IconButton, Select } from "@sentropic/design-system-svelte";
+  import { Button, IconButton, Modal, Select, Textarea } from "@sentropic/design-system-svelte";
   import { ThumbsUp, ThumbsDown } from "@lucide/svelte";
   import { CLASSEMENT_META, reasonCodesForClass, type ReasonCodeEntry, type SignalClass } from "$lib/signals/signal-classement.js";
   import { reasonEntryLabel } from "$lib/signals/signal-reason-labels.js";
@@ -24,11 +24,12 @@
 
 <div class="feedback-control"><span class="feedback-actions">
   <IconButton size="sm" variant="ghost" aria-label="Valider l’annotation IA" title="Valider l’annotation IA"
-    {disabled} onclick={() => void submit({ verdict: "up" })}><ThumbsUp size={15} /></IconButton>
+    disabled={disabled || negative} onclick={() => void submit({ verdict: "up" })}><ThumbsUp size={15} /></IconButton>
   <IconButton size="sm" variant="ghost" aria-label="Corriger l’annotation IA" title="Corriger l’annotation IA"
-    {disabled} onclick={() => { negative = true; }}><ThumbsDown size={15} /></IconButton>
+    disabled={disabled || negative} onclick={() => { negative = true; }}><ThumbsDown size={15} /></IconButton>
 </span>
 {#if negative}
+  <Modal open={true} title="Reclassement obligatoire" dismissible={false}>
   <form class="feedback-form" aria-label="Reclassement obligatoire" on:submit|preventDefault={() => {
     if (nextClass && reason) void submit({ verdict: "down", nextClass: nextClass as SignalClass, reasonCode: reason, ...(comment ? { comment } : {}) });
   }}>
@@ -41,20 +42,18 @@
       <option value="" disabled>Choisir un motif</option>
       {#each reasons as entry}<option value={entry.code}>{reasonEntryLabel(entry)}</option>{/each}
     </Select>
-    <label>Commentaire facultatif<textarea bind:value={comment} maxlength={2000} disabled={disabled}></textarea></label>
+    <Textarea label="Commentaire facultatif" bind:value={comment} maxlength={2000} {disabled} />
     <span>
       <Button size="sm" type="submit" disabled={disabled || !nextClass || !reason}>Reclasser</Button>
       <Button size="sm" variant="secondary" disabled={disabled} onclick={() => { negative = false; nextClass = ""; reason = ""; comment = ""; }}>Annuler</Button>
     </span>
   </form>
+  </Modal>
 {/if}
 </div>
 
 <style>
   .feedback-actions { display: inline-flex; }
-  .feedback-control { position: relative; }
-  .feedback-form { position: absolute; top: 100%; right: 0; width: min(320px, 85vw); z-index: 50; box-shadow: var(--st-shadow-floating); }
+  .feedback-control { display: inline-flex; }
   .feedback-form { display: grid; gap: var(--st-spacing-2, 0.5rem); padding: var(--st-spacing-3, 0.75rem); background: var(--st-semantic-surface-raised); color: var(--st-semantic-text-primary); border: 1px solid var(--st-semantic-border-subtle); border-radius: var(--st-radius-md, 0.375rem); }
-  .feedback-form label { display: grid; }
-  textarea { color: var(--st-semantic-text-primary); background: var(--st-semantic-surface-raised); border: 1px solid var(--st-semantic-border-subtle); }
 </style>

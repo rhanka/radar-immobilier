@@ -6,7 +6,8 @@ ALTER TABLE signal_class_annotations ALTER COLUMN created_at SET NOT NULL;
 CREATE TABLE signal_class_annotation_history (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   city_slug text NOT NULL, node_type text NOT NULL, node_id text NOT NULL,
-  classe text NOT NULL, reason text NOT NULL, source text NOT NULL CHECK (source = 'ai'),
+  classe text NOT NULL CHECK (classe IN ('pertinent','a_surveiller','ecarte','non_classe')),
+  reason text NOT NULL, source text NOT NULL CHECK (source = 'ai'),
   model text NOT NULL, effort text NOT NULL, prompt_id text NOT NULL,
   prompt_sha256 text NOT NULL, pipeline_run_id text NOT NULL, input_sha256 text NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now()
@@ -56,3 +57,7 @@ CREATE TRIGGER signal_class_history_immutable BEFORE UPDATE OR DELETE ON signal_
   FOR EACH ROW EXECUTE FUNCTION reject_class_feedback_mutation();
 CREATE TRIGGER signal_class_feedback_immutable BEFORE UPDATE OR DELETE ON signal_class_feedback
   FOR EACH ROW EXECUTE FUNCTION reject_class_feedback_mutation();
+CREATE TRIGGER signal_class_history_no_truncate BEFORE TRUNCATE ON signal_class_annotation_history
+  FOR EACH STATEMENT EXECUTE FUNCTION reject_class_feedback_mutation();
+CREATE TRIGGER signal_class_feedback_no_truncate BEFORE TRUNCATE ON signal_class_feedback
+  FOR EACH STATEMENT EXECUTE FUNCTION reject_class_feedback_mutation();
