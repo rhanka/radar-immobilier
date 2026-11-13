@@ -1,7 +1,8 @@
 const r = require('./runtime.cjs');
 const { fs, path, env, fail, sql, run, hash, save, receipt } = r;
 function archive() {
-  if (!env.ARCHIVE || !path.isAbsolute(env.ARCHIVE)) fail('absolute_archive_required');
+  if (!env.ARCHIVE || !path.isAbsolute(env.ARCHIVE) || /(^|\/)\.env/.test(env.ARCHIVE)) fail('absolute_archive_required');
+  if (fs.existsSync(env.ARCHIVE)) r.safeFile(env.ARCHIVE);
   return env.ARCHIVE;
 }
 function checkedArchive() {
@@ -23,6 +24,8 @@ function backup() {
   if (!source.PGHOST || !source.PGPORT || !source.PGPASSFILE
     || source.PGDATABASE !== 'radar' || source.PGUSER !== 'radar_db_ro_prod') fail('explicit_existing_ro_source_required');
   if (env.ENV !== 'execution-prod') fail('production_dump_requires_separate_owner_execution');
+  if (source.PGHOST !== env.PGHOST || source.PGPORT !== (env.PGPORT || '5432')
+    || env.PGDATABASE !== 'radar') fail('backup_source_destination_mismatch');
   // Inspect capabilities, never role passwords. Refuse inherited table write privileges.
   const safe = sql(`SELECT NOT (rolsuper OR rolcreatedb OR rolcreaterole OR rolreplication OR rolbypassrls)
     AND NOT EXISTS (SELECT 1 FROM pg_tables WHERE schemaname NOT IN ('pg_catalog','information_schema')
@@ -40,15 +43,24 @@ function backup() {
       fail('backup_receipt_conflict');
     return prior;
   }
-  if (fs.existsSync(file)) fail('archive_without_receipt_requires_new_path');
+  const context = { run: proof.run, drain: proof.completedAt, destination: r.identity(), archive: file };
+  const startedFile = path.join(r.output(), 'backup-start.json');
+  if (fs.existsSync(startedFile)) {
+    if (JSON.stringify(receipt('backup-start')) !== JSON.stringify(context)) fail('backup_start_conflict');
+  } else {
+    if (fs.existsSync(file)) fail('archive_without_receipt_requires_new_path');
+    save('backup-start', context);
+  }
   const begin = Date.now();
   const bytes = Number(sql('SELECT pg_database_size(current_database());', { env: source }));
   const disk = fs.statfsSync(path.dirname(file));
   if (disk.bavail * disk.bsize < bytes * 4) fail('backup_disk_headroom_required');
   // Keep ACLs in the archive for rollback. Disposable restore ignores them.
-  run('pg_dump', ['--format=custom', '--no-owner', '--lock-wait-timeout=5s',
-    `--file=${file}.partial`], { env: source, timeout: 840000 });
-  fs.renameSync(`${file}.partial`, file);
+  if (!fs.existsSync(file)) {
+    run('pg_dump', ['--format=custom', '--no-owner', '--lock-wait-timeout=5s',
+      `--file=${file}.partial`], { env: source, timeout: 840000 });
+    fs.renameSync(`${file}.partial`, file);
+  }
   fs.chmodSync(file, 0o600);
   const sha256 = hash(file);
   const uri = `${env.BACKUP_URI}/${sha256}.dump`;

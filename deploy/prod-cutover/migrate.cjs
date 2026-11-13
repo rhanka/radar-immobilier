@@ -37,6 +37,7 @@ function migrate() {
   }
   const measured = [];
   const start = Date.now();
+  const walStart = r.sql('SELECT pg_current_wal_lsn();');
   for (; count < entries.length; count++) {
     const e = entries[count];
     const at = Date.now();
@@ -52,7 +53,8 @@ function migrate() {
     r.fs.appendFileSync(r.path.join(r.output(), 'migration-times.jsonl'), `${JSON.stringify(result)}\n`, { mode: 0o600 });
   }
   if (r.prefix(r.rows()) !== 44) r.fail('migration_verification_failed');
-  const result = { sha: r.SHA, destination: r.identity(), migrations: 44, applied: measured, durationMs: Date.now() - start };
+  const walBytes = Number(r.sql(`SELECT pg_wal_lsn_diff(pg_current_wal_lsn(),'${walStart}');`));
+  const result = { sha: r.SHA, destination: r.identity(), migrations: 44, applied: measured, walBytes, durationMs: Date.now() - start };
   r.save('migrations', result);
   return result;
 }

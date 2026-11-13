@@ -90,6 +90,11 @@ function evidence() {
   if (e.release !== SHA || !/^[0-9a-f-]{36}$/.test(e.run) || !Array.isArray(e.instances)
     || !e.instances.length || e.instances.some(i => typeof i !== 'string' || !i)
     || !Number.isFinite(age) || age < 0 || age > 86400000) fail('drain_evidence_invalid');
+  if (env.ENV === 'execution-prod') {
+    const approval = json(env.APPROVAL);
+    if (JSON.stringify(approval.drain) !== JSON.stringify(e) || approval.writersStopped !== true
+      || approval.lockFree !== true) fail('operator_drain_attestation_required');
+  }
   return e;
 }
 function pinnedImage() {
