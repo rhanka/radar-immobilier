@@ -697,11 +697,12 @@ if (EMBER.length) {
   md = md.replaceAll("convention A : raisonnement non facturé", "convention A : sortie rapportée, raisonnement probablement inclus");
   // v10-style charts
   const { chartsV12 } = await import(new URL("./charts-v12.mjs", import.meta.url));
-  V12_CHARTS = chartsV12(ALL.map((row) => ({ label: row.label, name: fullName(row.label), accepted: row.accepted, p: row.p, r: row.r,
-    f1: row.f1, api: row.api, seat: row.seat, isV12: row.label.startsWith("Muse Ember") })));
+  const plotRows = [...bestCandidates].sort((a, b) => (b.r - a.r) || (b.f1 - a.f1));
+  V12_CHARTS = chartsV12(plotRows.map((row) => ({ label: row.label, name: fullName(row.label), accepted: row.accepted, p: row.p, r: row.r,
+    f1: row.f1, api: row.api, seat: row.seat, isV12: row.label.startsWith("Muse Ember") || row.label === "CP+" || /rejeu v12/.test(row.label) })));
   const shortName = (row) => fullName(row.label)?.replace(/\s*\((siège|API|siège AGY|Cloud Code)\)$/, "") ?? row.label;
-  const noApi = ALL.filter((row) => !(row.api > 0)).map(shortName);
-  const apiOnly = ALL.filter((row) => row.api > 0 && !(row.seat > 0)).map(shortName);
+  const noApi = plotRows.filter((row) => !(row.api > 0)).map(shortName);
+  const apiOnly = plotRows.filter((row) => row.api > 0 && !(row.seat > 0)).map(shortName);
   const ls = md.split("\n");
   const s7 = ls.findIndex((l) => l.startsWith("## 7. Graphiques"));
   const s8 = ls.findIndex((l) => l.startsWith("## 8. Lecture"));
@@ -720,6 +721,8 @@ if (EMBER.length) {
     `Graphiques v12 générés en Node par \`tools/bench-v11/charts-v12.mjs\` (règle zéro Python), dans le style du v10 (v101b, Matplotlib) : couleur = fournisseur, forme = modèle, pointillé = progression d'effort d'un même modèle (off → minimal → low → medium → high → xhigh → max), étoile = cascade, libellé posé à côté de chaque point avec des traits de rappel courts, courbes de même F1 en gris clair. Noms complets des modèles avec version ; C2 et C3 sont distingués par leur politique de reprise (2 ou 3 essais Gemini avant le repli Astra). Le graphique F1-coût reprend la lecture v10 : équivalent API en plein, siège en creux, reliés pour un même bras (convention A : raisonnement non facturé). Lignes avec point API seul (siège \`missing source\`, ${apiOnly.length}) : ${apiOnly.join(", ")}. Lignes absentes du graphique F1-coût, faute d'équivalent API publié (${noApi.length}) : ${noApi.join(", ")}. Bras v12 (Muse Ember 1.0 xhigh et max) : contour noir épais et libellé gras « v12 ». Contrôle automatique des libellés : ${ck.prLabelOverlaps} chevauchement(s) sur précision-rappel, ${ck.f1CostLabelOverlaps} sur F1-coût ; rendus vérifiés à l'œil.`,
     "");
   md = ls.join("\n");
+  if (CP_PLUS) md = md.replace("Bras v12 (Muse Ember 1.0 xhigh et max)",
+    "Les graphiques ajoutent le rejeu Astra et CP+ aux 42 mesures historiques. Bras v12 (Muse Ember 1.0 xhigh et max, Astra medium rejoué et CP+)");
   md = md.replaceAll("convention A : raisonnement non facturé", "convention A : sortie rapportée, raisonnement probablement inclus");
 }
 

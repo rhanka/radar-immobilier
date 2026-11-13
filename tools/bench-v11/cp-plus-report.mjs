@@ -14,7 +14,7 @@ export function cpPlusSection(arm) {
   return [
     "## CP+ mesurée",
     "",
-    "Mesure réelle du 13 novembre 2026 UTC. GPT-6 Astra medium extrait les 100 documents. Muse Spark 1.3 xhigh relit ensuite les sorties acceptées. Le filtre CP reste inchangé. Aucun acte ne peut être ajouté. Les 42 lignes du tableau global restent intactes.",
+    "Mesure réelle du 13 novembre 2026 UTC. GPT-6 Astra medium extrait les 100 documents. Muse Spark 1.3 xhigh relit ensuite les sorties acceptées. Le filtre CP reste inchangé. Aucun acte ne peut être ajouté. Le compte « acceptés » désigne les sorties Astra passées au filtre. Les 42 lignes du tableau global restent intactes.",
     "",
     "| Bras | Acceptés /100 | P | R | F1 strict | Actes jugés | Actes retirés | Équiv. API USD/doc | USD siège/doc |",
     "|---|---|---|---|---|---|---|---|---|",
@@ -25,7 +25,7 @@ export function cpPlusSection(arm) {
     "",
     `Notation : oracle 676, 43 non résolus neutres, scoreur strict inchangé. Rejeu : TP ${a.strict.tp}, FP ${a.strict.fp}, FN ${a.strict.fn}. CP+ : TP ${arm.strict.tp}, FP ${arm.strict.fp}, FN ${arm.strict.fn}. Le gain du filtre se mesure contre le rejeu qui lui sert de source. Le bras publié reste une autre exécution.`,
     "",
-    `Relecture : ${arm.calls} appels, ${arm.actsJudged} actes jugés, ${arm.actsRemoved} retirés. Décisions absentes ou invalides : ${arm.keptNoValidDecision} actes conservés. Extraits « soutenu » non retrouvés : ${arm.supportedUngrounded} actes conservés. Ces règles sont celles de CP. Le bloc de filtre garde le SHA-256 cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68. Les 99 messages CP archivés ont été reproduits octet pour octet avant le lancement.`,
+    `Relecture : ${arm.calls} invocations CLI, ${arm.modelResponses} réponses modèle observées, ${arm.actsJudged} actes jugés, ${arm.actsRemoved} retirés. Décisions absentes ou invalides : ${arm.keptNoValidDecision} actes conservés. Extraits « soutenu » non retrouvés : ${arm.supportedUngrounded} actes conservés. Ces règles sont celles de CP. Le bloc de filtre garde le SHA-256 cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68. Les 99 messages CP archivés ont été reproduits octet pour octet avant le lancement.`,
     "",
     "**Transport et surface d’accès.** Rejeu : `CodexRuntimeClient`, llm-mesh 0.19.3, siège Codex, `gpt-6-astra`, effort medium, messages système et utilisateur gelés, format JSON objet. Aucun plafond de sortie, comme dans le bras v10/v11alpha. Le validateur v9 et la provenance sont inchangés. Le SDK reçoit un seul appel de génération par tentative. Aucun outil, skill ou tour d’agent n’est fourni. Le cwd de l’orchestrateur est vide, hors dépôt. Concurrence 4.",
     "",

@@ -118,11 +118,13 @@ async function oneDoc(document) {
       const startedAt = new Date().toISOString();
       const jsonl = `${out}/jsonl/${id}.jsonl`;
       const r = await runMuse(promptFile, jsonl);
+      await mkdir(`${out}/jsonl/attempts`, { recursive: true });
+      const archive = `${out}/jsonl/attempts/${id}.${Date.parse(startedAt)}.jsonl`;
+      await writeFile(archive, await readFile(jsonl));
+      await writeFile(`${archive}.stderr`, await readFile(`${jsonl}.stderr`));
       if (stop || r.quota) {
         await log({ doc: id, event: stop ? "QUOTA-STOP" : "QUOTA", attempt, exit: r.code, ms: r.ms, startedAt });
         if (stop || attempt > 12) { stop = true; return; }
-        await mkdir(`${out}/jsonl/attempts`, { recursive: true });
-        await writeFile(`${out}/jsonl/attempts/${id}.${attempt}.jsonl`, await readFile(jsonl));
         await new Promise((s) => setTimeout(s, 300_000)); continue;
       }
       execFileSync("node", [`${SCRIPTS}/extract-usage.mjs`, jsonl, `${out}/raw/${id}.txt`, `${out}/usage/${id}.json`], { stdio: "ignore" });

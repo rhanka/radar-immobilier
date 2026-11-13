@@ -16,11 +16,15 @@ const astraMeta = await jsonl(`${astraDir}/meta.jsonl`);
 const completed = astraMeta.filter((row) => row.exit === 0);
 if (completed.length !== documents.length || new Set(completed.map((row) => row.doc)).size !== documents.length)
   throw new Error("Astra replay must have exactly one completed response per document");
-const intervals = astraMeta.filter((row) => row.startedAt && Number.isFinite(row.ms))
-  .flatMap((row) => [[Date.parse(row.startedAt), 1], [Date.parse(row.startedAt) + row.ms, -1]])
-  .sort((a, b) => a[0] - b[0] || a[1] - b[1]);
-let active = 0; let maxConcurrency = 0;
-for (const [, delta] of intervals) { active += delta; maxConcurrency = Math.max(maxConcurrency, active); }
+const maximumOverlap = (rows) => {
+  const intervals = rows.filter((row) => row.startedAt && Number.isFinite(row.ms))
+    .flatMap((row) => [[Date.parse(row.startedAt), 1], [Date.parse(row.startedAt) + row.ms, -1]])
+    .sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  let active = 0; let maximum = 0;
+  for (const [, delta] of intervals) { active += delta; maximum = Math.max(maximum, active); }
+  return maximum;
+};
+const maxConcurrency = maximumOverlap(astraMeta);
 if (maxConcurrency > 4) throw new Error(`Astra concurrency exceeds four: ${maxConcurrency}`);
 const astraUsage = [];
 const accepted = new Set();
@@ -83,6 +87,8 @@ for (const file of (await readdir(usageDir)).filter((name) => name.endsWith(".js
 const summary = await json(`${cpDir}/_summary.json`);
 if (summary.stopped || summary.failed) throw new Error("CP+ stopped or failed; do not publish a complete score");
 const cpMeta = await jsonl(`${cpDir}/meta.jsonl`);
+const reviewConcurrency = maximumOverlap(cpMeta);
+if (reviewConcurrency > 4) throw new Error(`CP+ concurrency exceeds four: ${reviewConcurrency}`);
 const firstStart = cpMeta.find((row) => row.event === "START");
 summary.weeklyBefore = firstStart?.weeklyUsedPercent ?? summary.weeklyBefore;
 summary.startedAt = firstStart?.at ?? null;
@@ -95,11 +101,13 @@ const reviewerApi = ((sum(usages, "inputTokens") - sum(usages, "cachedTokens")) 
 const extraReasoningApi = sum(usages, "reasoningTokens") * 4.25 / 1e6 / documents.length;
 const surface = await json(`${cpDir}/surface.json`);
 const arm = { label: cp.arm, accepted: cp.accepted, strict: cp.strict,
+  maxConcurrency: reviewConcurrency,
   actsJudged: decisions.reduce((total, row) => total + row.filter.acts, 0),
   actsRemoved: decisions.reduce((total, row) => total + row.filter.removed.length, 0),
   keptNoValidDecision: decisions.reduce((total, row) => total + row.filter.keptNoValidDecision, 0),
   supportedUngrounded: decisions.reduce((total, row) => total + row.filter.supportedUngrounded, 0),
-  calls: usages.length, usdApiEquivPerDoc: astraApi + reviewerApi,
+  calls: usages.length, modelResponses: Object.entries(surface.summary.modelResponsesHistogram)
+    .reduce((total, [responses, count]) => total + Number(responses) * count, 0), usdApiEquivPerDoc: astraApi + reviewerApi,
   usdApiEquivWithExtraReasoning: astraApi + reviewerApi + extraReasoningApi,
   reviewerApiPerCorpusDoc: reviewerApi, usdSeatPerDoc: null,
   tokens: { n: usages.length, input: sum(usages, "inputTokens"), output: sum(usages, "outputTokens"), reasoning: sum(usages, "reasoningTokens"), cached: sum(usages, "cachedTokens") },
