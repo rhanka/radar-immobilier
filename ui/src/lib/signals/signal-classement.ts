@@ -65,7 +65,7 @@ export interface ArchiveHeadLike {
 }
 
 export interface ClassementEntry {
-  annotationSource?: "ai" | "manual";
+  annotationSource?: "ai" | "manual" | "mcp";
   classe: SignalClass;
   reasonCode: string | null;
   /** Active selection head id per basket (null when the basket is off). */
@@ -104,14 +104,16 @@ export const EMPTY_CLASSEMENT_ENTRY: ClassementEntry = {
 export function withAiClassement(
   map: Map<string, ClassementEntry>,
   nodes: readonly { type: string; id: string; citySlug: string | null;
+    signalAnnotations?: import("./signal-mcp-client.js").SignalAnnotations;
     classAnnotation?: { source: "ai" | "manual"; classe: SignalClass } }[],
 ): Map<string, ClassementEntry> {
   const result = new Map(map);
   for (const node of nodes) {
-    const annotation = node.classAnnotation;
+    const mcp = node.signalAnnotations?.current;
+    const annotation = mcp?.source === "mcp" && mcp.classe ? { source: "mcp" as const, classe: mcp.classe } : node.classAnnotation;
     const key = classementKey(node.type, node.id, node.citySlug);
-    if (annotation?.source !== "ai" || result.has(key)) continue;
-    result.set(key, { ...EMPTY_CLASSEMENT_ENTRY, annotationSource: "ai", classe: annotation.classe,
+    if (!annotation || (annotation.source !== "ai" && annotation.source !== "mcp") || result.has(key)) continue;
+    result.set(key, { ...EMPTY_CLASSEMENT_ENTRY, annotationSource: annotation.source, classe: annotation.classe,
       discarded: annotation.classe === "ecarte" });
   }
   return result;

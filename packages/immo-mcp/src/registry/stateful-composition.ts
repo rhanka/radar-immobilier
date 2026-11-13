@@ -31,7 +31,7 @@ const manifest: RegistryDefinition["manifest"] = {
   tools: IMMO_WIRE_TOOLS.map((tool, index) => ({
     kind: "tool", name: tool.name, description: tool.description!, inputSchema: tool.inputSchema,
     outputSchema: {}, requiredScopes: [ALL_TOOL_DEFINITIONS[index]!.scope], requiredClaims: [],
-    redactionClass: "moderate", mutability: isSignalWrite(tool.name) ? "write" : "read-only",
+    redactionClass: "moderate", mutability: isSignalWrite(tool.name) ? "append" : "read-only",
     mutatesExternalSystem: isSignalWrite(tool.name),
     idempotency: { required: false }, gates: {
       requiresElicitation: false, requiresHumanConfirmation: false, requiresPrincipalGate: true,

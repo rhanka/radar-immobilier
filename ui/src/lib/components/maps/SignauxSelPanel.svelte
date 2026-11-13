@@ -98,6 +98,8 @@
   import SignalClassFeedback from "$lib/components/maps/SignalClassFeedback.svelte";
   import type { FeedbackChoice } from "$lib/signals/class-feedback-client.js";
   import { classAnnotationLabel } from "$lib/signals/class-annotation-label.js";
+  import { mcpBadge } from "$lib/signals/signal-mcp-client.js";
+  import SignalMcpNotes from "./SignalMcpNotes.svelte";
   import {
     classementKey,
     EMPTY_CLASSEMENT_ENTRY,
@@ -1235,6 +1237,11 @@
                     <span class="signal-stage-badge" title={node.classAnnotation?.source === "ai" && !hasManualClass ? node.classAnnotation.reason : undefined}>
                       {classAnnotationLabel(node, hasManualClass)}
                     </span>
+                    {#if node.signalAnnotations?.current?.source === "mcp" && !hasManualClass}
+                      <span class="signal-stage-badge" title={node.signalAnnotations.current.reason}>
+                        {mcpBadge(node.signalAnnotations.current)}
+                      </span>
+                    {/if}
                     {#if isPiiaLie(node)}
                       <!-- PIIA porteur d'un projet résidentiel prouvé : gardé,
                            mais annoncé comme instrument indirect (confiance
@@ -1258,7 +1265,7 @@
                       </span>
                     {/if}
                   </button>
-                  {#if node.classAnnotation?.source === "ai" && !hasManualClass && !node.classFeedback}
+                  {#if node.classAnnotation?.source === "ai" && !hasManualClass && !node.classFeedback && node.signalAnnotations?.current?.source !== "mcp"}
                     <div class="signal-feedback-control">
                       <SignalClassFeedback classe={node.classAnnotation.classe} reasonCodes={classementReasonCodes}
                         disabled={classementInFlight.has(cardClassementKey)} restoreBlockedReason={classementEntry.restoreBlockedReason}
@@ -1278,6 +1285,10 @@
                       onApply={(nextClass, reasonCode) => onApplyClassement(node, nextClass, reasonCode)}
                     />
                   </span>
+                  {#if node.signalAnnotations && node.annotationsWorkspaceId && node.citySlug}
+                    <SignalMcpNotes annotations={node.signalAnnotations} workspaceId={node.annotationsWorkspaceId}
+                      target={{ citySlug: node.citySlug, type: node.type, id: node.id }} />
+                  {/if}
                   {#if cardClassementError}
                     <span class="sel-entity-classement-error">
                       <button
