@@ -38,5 +38,5 @@
 - [x] **Lot 3 — Recent reannotation**
   - [x] Dry-run default, apply, stable identities, failure recovery, report, preprod make target.
 - [ ] **Lot 4 — Verification and delivery**
-  - [ ] Typecheck, lint, scoped API unit/PostgreSQL tests, UI tests, render checks, stack cleanup.
+  - [x] Typecheck, lint, 150 scoped API tests, 7 PostgreSQL tests, 1,905 UI tests, 55 render checks; stack cleanup uses down -v.
   - [ ] Review, push, PR to main with design, activation, rollback and risks. Never merge.

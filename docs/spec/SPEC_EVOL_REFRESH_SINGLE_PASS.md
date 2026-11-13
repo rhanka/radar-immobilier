@@ -8,8 +8,9 @@ With `1`, one extraction response per chunk contains the native graph plus `anno
 class/reason for every Signal and DesignationEvent. Quality retries and Gemini fallback remain bounded
 by the existing model policy; the separate verification call is disabled in this mode.
 
-The main model remains configured through `REFRESH_PROVIDER`, `REFRESH_MODEL`,
-`REFRESH_REASONING_EFFORT`: `openai`, `gpt-6-astra`, `medium` (v12 recall 0.534).
+The single-pass main model uses `REFRESH_SINGLE_PASS_PROVIDER`, `REFRESH_SINGLE_PASS_MODEL`,
+`REFRESH_SINGLE_PASS_REASONING_EFFORT`: `openai`, `gpt-6-astra`, `low`, per the owner's 16:00 decision.
+Reannotation uses the same settings. Legacy `REFRESH_*` primary settings remain unchanged at flag zero.
 Fallback uses `REFRESH_FALLBACK_*`: `gemini`, `gemini-3.8-flash`, `low`.
 The application records the accepted receipt, including fallback, rather than trusting generated metadata.
 The baseline already uses contract v10; its native validator and PDF grounding are unchanged.
@@ -71,7 +72,32 @@ flag rollback does not delete existing AI classes. Human overrides remain author
 - The class-event SHARE lock is short but can briefly delay human writes. Reannotation processes one signal at a time.
 - First reannotation can revisit a signal produced by single-pass because extraction and stored-card identities differ;
   subsequent unchanged reannotation is a no-op. Dry-run still consumes model quota.
-- At 2026-11-13 21:23 UTC, read-only inspection found refresh and watchdog `suspend=false`, snapshot `true`,
-  and preprod API/UI at `b7724bd`. This differs from the dispatch packet; this lane made no live mutation.
 - Multi-peer h2a consensus review is unavailable: no h2a MCP launch tool is exposed and exact author metadata
   cannot be attested. No consensus verdict is claimed. Native delegated design findings were reconciled.
+
+## Resume verification — 2026-11-13
+
+The owner's 16:00 amendment is implemented: single-pass and reannotation default to Astra low,
+with P0 extraction extension v1 and Gemini 3.8 Flash low fallback. Dedicated single-pass variables
+avoid changing the primary medium configuration of the disabled path.
+Prompt SHA-256: `8957bcaa146b3b83ee89000fccec3c6f393c7b801b320a158d58d2631fa3a205`.
+
+The inherited implementation's original author model/effort cannot be established. Review selection:
+
+```yaml
+status: selection-failed
+target-ref: 9a58656bc6cac717658cee08492078634c05b80d
+observed-failure: Original author exact model/effort unavailable; no h2a_run tool exposed.
+```
+
+Self-inspection and automated checks do not constitute independent consensus review.
+No cluster mutation was performed during this resume. Current live suspension state was not rechecked.
+Deployment requires integration by the conductor: `.github/workflows/build-push-images.yml`
+restricts preprod deployment to `main`; this lane is forbidden to merge.
+
+Passed locally: `make typecheck`, `make lint`, 150 targeted API tests, 7 PostgreSQL tests
+with `LOT_MIGRATION_DB_TEST=1`, 1,905 UI tests (10 todo), and 55 offline render checks.
+All make invocations used `SKIP_DOTENV=1`; Compose used `--env-file /dev/null`.
+The quality targets reused the prepared test dependency volumes via `COMPOSE_RUN_API_NODEPS`.
+The first UI run exposed an incomplete secondary-read DB fixture; mocking its annotation read port
+restored all three population tests without changing their assertions.
