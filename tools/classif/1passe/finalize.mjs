@@ -83,11 +83,12 @@ const result = { at: new Date().toISOString(), annotation: { started: annotation
   ownerSample: { count: sample.length, blindActs: 0, resolved: sample.filter((r) => r.arbitration.status === 'resolved').length,
     sha256: sha256(fs.readFileSync(`${home}/reference/owner-sample.json`)) },
   privateArtifactCount: artifacts.length, privateTreeSha256: sha256(artifacts.sort().join('\n')),
+  residueReceiptsSha256: sha256(fs.readFileSync(`${home}/custody/residue-receipts.json`)),
   newInventory: initial.newInventory,
   incidents: ['16 appels interrompus par la lane précédente, sans rejeu.',
     'La reprise a démarré avant son commit : échec du staging Git, puis commit après escalade. Écart de séquencement déclaré.',
     'Le découpage est stratifié sur B, pas sur les classes C.',
     'Les inventaires hors B restent privés et hors du support D1.'],
   next: 'Passe unique, itération 1. Aucun lancement dans cette lane.' };
-fs.writeFileSync(`${dir}/results.json`, `${JSON.stringify(result, null, 2)}\n`);
+fs.writeFileSync(`${dir}/results.json`, `${JSON.stringify(result)}\n`);
 console.log(JSON.stringify(result));
