@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { filtreCountsForPerimeter, filtreCubeOfNodes } from "./signal-filter-counts.js";
 import type { GraphSignalNode } from "./graph-signal-detail-client.js";
 import { buildCityMapEntries } from "$lib/maps/maps-data.js";
+import { DEFAULT_CLASSEMENT_FILTER } from "./signal-classement.js";
 
 const ALL_AXES = { z: true, r: true, p: true };
 const BOTH = { piiaSansProjetResidentiel: true, derogationsMineures: true };
@@ -51,6 +52,25 @@ describe("filtreCubeOfNodes — selected city cube from its loaded detail", () =
 });
 
 describe("filtreCountsForPerimeter — Filtre dropdown counts over the displayed perimeter", () => {
+  it("should apply a partial Pertinence selection to every city before faceted counting", () => {
+    const city = { ...entry(A, { "11100": 9 }), filtreCubesByClassement: {
+      pertinent: { "11100": 2, "11110": 1 }, a_surveiller: { "11100": 3 },
+      non_classe: { "11100": 4 }, ecarte: {},
+    } };
+    const counts = filtreCountsForPerimeter({
+      entries: [city, { ...city, municipality: B! }], axes: ALL_AXES, exclusions: BOTH, live: null,
+      classement: { pertinent: true, a_surveiller: false, non_classe: false, ecarte: false },
+    });
+    expect(counts).toEqual({ z: 4, r: 4, p: 4, piia: 2, derog: 0 });
+  });
+
+  it("should return unavailable rather than unfiltered counts from an older API", () => {
+    expect(filtreCountsForPerimeter({
+      entries: [entry(A, { "11100": 9 })], axes: ALL_AXES, exclusions: BOTH, live: null,
+      classement: { ...DEFAULT_CLASSEMENT_FILTER, non_classe: false },
+    })).toBeNull();
+  });
+
   it("should count every city when no city is selected", () => {
     const counts = filtreCountsForPerimeter({
       entries: [entry(A, { "11100": 2, "11101": 1 }), entry(B, { "11100": 1, "11110": 2 }), entry(C, null, false)],

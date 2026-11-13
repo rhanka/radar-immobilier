@@ -32,6 +32,8 @@ export interface GraphSignalCityItem {
    * excludeDerogations. Absent d'un serveur antérieur à ce contrat.
    */
   filtreCube?: VivierFiltreCube;
+  /** Same cubes split by the viewer's Pertinence, within this workspace. */
+  filtreCubesByClassement?: import("@radar/domain").VivierFiltreCubesByClassement;
   /**
    * Exact intersection counts for each subset of {z, m, p, r} flags.
    * Keys: "", "z", "m", "p", "r", "z|m", … up to "z|m|p|r" (16 keys).

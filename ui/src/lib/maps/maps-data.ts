@@ -48,6 +48,7 @@ export interface CityMapEntry {
    * cube vide fabriqué.
    */
   filtreCube?: VivierFiltreCube | null;
+  filtreCubesByClassement?: import("@radar/domain").VivierFiltreCubesByClassement | null;
 }
 
 /**
@@ -78,6 +79,7 @@ export function buildCityMapEntries(
   const filtreCubeBySlug = new Map<string, VivierFiltreCube | undefined>(
     graphItems.map((item) => [item.citySlug, item.filtreCube]),
   );
+  const classementCubesBySlug = new Map(graphItems.map((item) => [item.citySlug, item.filtreCubesByClassement]));
   const vivierV2CountsBySlug = new Map<string, VivierV2Counts | undefined>(
     graphItems.map((item) => [item.citySlug, item.vivierV2Counts]),
   );
@@ -88,6 +90,7 @@ export function buildCityMapEntries(
     subsetCounts: subsetCountsBySlug.get(m.slug) ?? {},
     vivierV2Counts: vivierV2CountsBySlug.get(m.slug) ?? null,
     filtreCube: filtreCubeBySlug.get(m.slug) ?? null,
+    filtreCubesByClassement: classementCubesBySlug.get(m.slug) ?? null,
   }));
 }
 

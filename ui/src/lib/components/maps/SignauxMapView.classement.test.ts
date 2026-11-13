@@ -221,7 +221,14 @@ describe("SignauxMapView classement behaviour", () => {
     expect(pills("classement-filter-panel")).toEqual(["0", "0", "3", "0"]);
   });
 
-  it("should count the Filtre pills over every displayed city when no city is selected", async () => {
+  it.each([false, true])("should apply Pertinence to every city's Filtre pills (selection: %s)", async (selected) => {
+    includeLate = true;
+    vi.mocked(fetchGraphSignalDetail).mockImplementation(async () => ({
+      ...detailResult(), nodes: [...detailResult().nodes, {
+        ...node("derog", "Dérogation mineure — quatre logements"),
+        classification: { ...SIG1.classification, instrument: "derogation" },
+      }],
+    }) as never);
     const [cityA, cityB] = buildCityMapEntries([]).map((entry) => entry.municipality.slug);
     const stages = (early: number, late = 0) => ({
       avis_motion: early, projet_reglement: 0, consultation_publique: 0, second_projet: 0,
@@ -240,20 +247,24 @@ describe("SignauxMapView classement behaviour", () => {
       cities: [
         // A: 2 early shown, 1 late, 1 early derogation hidden by its exclusion.
         { citySlug: cityA!, signalCount: 4, subsetCounts: {}, vivierV2Counts: counts(2, 1, 0),
-          filtreCube: { "11100": 2, "11000": 1, "11101": 1 } },
+          filtreCube: { "11100": 2, "11000": 1, "11101": 1 },
+          filtreCubesByClassement: { pertinent: {}, a_surveiller: {}, ecarte: {},
+            non_classe: { "11100": 2, "11000": 1, "11101": 1 } } },
         // B: 1 early shown, 2 early PIIA without a residential project hidden.
         { citySlug: cityB!, signalCount: 3, subsetCounts: {}, vivierV2Counts: counts(1, 0, 0),
-          filtreCube: { "11100": 1, "11110": 2 } },
+          filtreCube: { "11100": 1, "11110": 2 },
+          filtreCubesByClassement: { pertinent: {}, a_surveiller: {}, ecarte: {},
+            non_classe: { "11100": 1, "11110": 2 } } },
       ],
     }) as never);
     window.history.replaceState({}, "", "/geo/region/quebec?mode=signal&filter.period=all&filter.zonage=1&filter.residentiel=1&filter.precoce=1&filter.excludePiia=1&filter.excludeDerogations=1");
-    render(SignauxMapView, { props: { geoRoute: {
+    render(SignauxMapView, { props: { geoRoute: selected ? cityRoute() : {
       level: "region", region: "quebec", state: parseGeoQuery(window.location.search),
     } } });
     // Rail header « 3 signaux · 2 villes » (bulk counts, no selection).
     await waitFor(() => expect([...document.querySelectorAll(".rail-count-strong")]
       .map((el) => el.textContent)).toEqual(["3", "2"]));
-    expect(vi.mocked(fetchGraphSignalDetail)).not.toHaveBeenCalled();
+    if (!selected) expect(vi.mocked(fetchGraphSignalDetail)).not.toHaveBeenCalled();
 
     await fireEvent.click(screen.getByTestId("filtre-trigger"));
     const pills = () => [...screen.getByTestId("filtre-panel").querySelectorAll(".st-badge")]
@@ -263,6 +274,18 @@ describe("SignauxMapView classement behaviour", () => {
     // The counts follow the other active criteria: without Précoce, the late signal joins.
     await fireEvent.click(screen.getByLabelText(/Précoce/));
     await waitFor(() => expect(pills()).toEqual(["4", "4", "3", "2", "1"]));
+    await fireEvent.click(screen.getByTestId("classement-filter-trigger"));
+    const panel = within(screen.getByTestId("classement-filter-panel"));
+    for (const box of panel.getAllByRole("checkbox")) {
+      if ((box as HTMLInputElement).checked) await fireEvent.click(box);
+    }
+    await fireEvent.click(screen.getByTestId("filtre-trigger"));
+    await waitFor(() => expect(pills()).toEqual(["0", "0", "0", "0", "0"]));
+    // A non-empty Pertinence selection must also filter the other cities.
+    await fireEvent.click(screen.getByTestId("classement-filter-trigger"));
+    await fireEvent.click(within(screen.getByTestId("classement-filter-panel")).getByLabelText(/^Pertinent/));
+    await fireEvent.click(screen.getByTestId("filtre-trigger"));
+    expect(pills()).toEqual(["0", "0", "0", "0", "0"]);
   });
 
   it("a failed write marks only the concerned card with an exclamation icon, no big panel", async () => {

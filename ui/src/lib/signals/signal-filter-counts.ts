@@ -5,8 +5,8 @@
  * with or without a selected city. Pure, no I/O.
  *
  * Source = the Filtre cube (`@radar/domain` filtre-cube):
- *  - every city: the cube served by the by-city aggregate (period, archive
- *    visibility), the same source as the rail header and city badges;
+ *  - every city: the cubes served by the by-city aggregate (period, archive
+ *    visibility), merged only for the checked Pertinence classes;
  *  - the selected city, once its detail is loaded: the cube rebuilt from that
  *    detail scoped by period + Pertinence, exactly like the header swaps in
  *    the selected city's live count.
@@ -32,6 +32,7 @@ import {
 } from "@radar/domain";
 import type { GraphSignalNode } from "./graph-signal-detail-client.js";
 import type { CityMapEntry } from "$lib/maps/maps-data.js";
+import { DEFAULT_CLASSEMENT_FILTER, SIGNAL_CLASSES, type ClassementFilter } from "./signal-classement.js";
 
 export type FiltreCounts = VivierFiltreCounts;
 
@@ -48,7 +49,8 @@ export function filtreCubeOfNodes(nodes: readonly GraphSignalNode[]): VivierFilt
 
 export interface FiltrePerimeterInput {
   /** Every city of the by-city aggregate (cities without signals included). */
-  entries: readonly Pick<CityMapEntry, "municipality" | "vivierV2Counts" | "filtreCube">[];
+  entries: readonly Pick<CityMapEntry, "municipality" | "vivierV2Counts" | "filtreCube" | "filtreCubesByClassement">[];
+  classement?: ClassementFilter;
   axes: VivierFiltreAxes;
   exclusions: VivierBExclusions;
   /**
@@ -61,13 +63,23 @@ export interface FiltrePerimeterInput {
 
 export function filtreCountsForPerimeter(input: FiltrePerimeterInput): FiltreCounts | null {
   const cubes: VivierFiltreCube[] = [];
+  const filter = input.classement ?? DEFAULT_CLASSEMENT_FILTER;
+  if (!SIGNAL_CLASSES.some((classe) => filter[classe])) {
+    return facetedVivierFiltreCounts({}, input.axes, input.exclusions);
+  }
   for (const entry of input.entries) {
     if (input.live && entry.municipality.slug === input.live.slug) continue;
     // A city absent from the aggregate has no signal in scope: nothing to add.
     const cube = entry.filtreCube ?? null;
     if (entry.vivierV2Counts === null && cube === null) continue;
-    if (cube === null) return null;
-    cubes.push(cube);
+    if (entry.filtreCubesByClassement) {
+      cubes.push(...SIGNAL_CLASSES.filter((classe) => filter[classe])
+        .map((classe) => entry.filtreCubesByClassement![classe]));
+    } else {
+      // Older API: its visible cube is exact only with every visible class on.
+      if (cube === null || !filter.pertinent || !filter.a_surveiller || !filter.non_classe) return null;
+      cubes.push(cube);
+    }
   }
   if (input.live) {
     const liveCube = filtreCubeOfNodes(input.live.nodes);
