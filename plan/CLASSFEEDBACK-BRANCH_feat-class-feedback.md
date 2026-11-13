@@ -25,6 +25,8 @@
 - [x] CLASSFEEDBACK-EX3: annotate the existing real-stack synthetic seed for true feedback clicks; retain the same signal population. Revert seed additions to roll back.
 - [x] Rebased on purge guard 80249515b from feat/refresh-single-pass. The audit-retention test uses an explicit run filter.
 - [x] CLASSFEEDBACK-EX4: schema.ts and scoped-transition.ts add a deferred feedback link on manual events. SQL archive constraints now accept a linked AI validation without an invented catalog reason. The FK requires that feedback to commit in the same transaction. Rollback: revert caller and keep additive columns.
+- [x] Review selection failure recorded in docs/spec/reviews/CLASS_FEEDBACK_REVIEW.md: exact author metadata and h2a_run tool unavailable; no code-review consensus claimed.
+- [x] PostgreSQL I/O diagnosis: pg_stat_activity showed DataFileImmediateSync; fsync disabled only in disposable test-class-feedback to remove filesystem stalls. No timeout was increased. All 25 scoped API tests pass with one worker.
 - [x] Lot 3 — DS feedback controls, required reclassification and dated private badge.
 - [ ] Lot 4 — Unit, PostgreSQL and click E2E coverage; typecheck, lint, test-api, test-ui.
 - [ ] Lot 5 — Peer review, fresh base check, push and stacked PR.
