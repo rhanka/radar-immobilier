@@ -39,7 +39,9 @@
 - [x] **Lot 3 — Recent reannotation**
   - [x] Dry-run default, apply, stable identities, failure recovery, report, preprod make target.
   - [x] Review correction: explicit AI-only purge with optional run/prompt filters; dry-run default, shared writer lock and JSON report.
+  - [x] B1: require a filter or explicit --all / PURGE_ALL=1 for apply; validate options in the service; Make regression rejects an empty run id before cluster access.
 - [x] **Lot 4 — Verification and delivery**
+  - [x] B1 gate: typecheck, lint, purge unit/PostgreSQL suites at flag zero, four Make refusal checks and 55 render checks pass; test stack removed with down -v.
   - [x] Review correction coverage: purge dry-run, AI-only apply, filters, human history, prior visibility, idempotence, projection tokens and exact model labels.
   - [x] Review correction gate: typecheck, lint, 38 API tests including 14 PostgreSQL tests at flag zero, 27 targeted UI tests and 55 render checks pass; no timeout increase.
   - [x] Typecheck, lint, 150 scoped API tests, 7 PostgreSQL tests, 1,905 UI tests, 55 render checks; stack cleanup uses down -v.

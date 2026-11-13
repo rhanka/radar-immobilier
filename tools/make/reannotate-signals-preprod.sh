@@ -12,7 +12,17 @@ args=("--$mode")
 if [[ "${PURGE_AI_ANNOTATIONS:-0}" == 1 ]]; then
   operation=purge-ai
   args=(--purge-ai-annotations "--$mode")
-  [[ -z "${PIPELINE_RUN_ID:-}" ]] || args+=(--pipeline-run-id "$PIPELINE_RUN_ID")
+  # An empty filter is never silently dropped into a global purge: global needs PURGE_ALL=1.
+  if [[ "${PURGE_ALL:-0}" == 1 ]]; then
+    [[ -z "${PIPELINE_RUN_ID:-}${PROMPT_SHA256:-}" ]] || { echo 'PURGE_ALL=1 cannot be combined with a filter' >&2; exit 1; }
+    args+=(--all)
+  elif [[ "$mode" == apply && -z "${PIPELINE_RUN_ID:-}" && -z "${PROMPT_SHA256:-}" ]]; then
+    echo 'Applied purge refused: set PIPELINE_RUN_ID or PROMPT_SHA256, or PURGE_ALL=1 for every AI annotation' >&2; exit 1
+  fi
+  if [[ -n "${PIPELINE_RUN_ID:-}" ]]; then
+    [[ "$PIPELINE_RUN_ID" =~ ^[A-Za-z0-9._:-]{1,200}$ ]] || { echo 'Invalid pipeline run id' >&2; exit 1; }
+    args+=(--pipeline-run-id "$PIPELINE_RUN_ID")
+  fi
   if [[ -n "${PROMPT_SHA256:-}" ]]; then
     [[ "$PROMPT_SHA256" =~ ^[a-f0-9]{64}$ ]] || { echo 'Invalid prompt SHA-256' >&2; exit 1; }
     args+=(--prompt-sha256 "$PROMPT_SHA256")
