@@ -19,6 +19,9 @@ cleanup() {
   trap - EXIT
   stop_forwards
   if [[ $OWNED == 1 ]]; then
+    if ((code != 0)) && jq -e '.checkpoints.reopen!=null' "$WORK/record.json" >/dev/null; then
+      (set -e; stop_schedules; reclose_best_effort) || code=1
+    fi
     jq '.executor.state="stopped"' "$WORK/record.json" > "$WORK/next.json"
     mv "$WORK/next.json" "$WORK/record.json"
     record_save || code=1
@@ -44,8 +47,10 @@ if [[ $1 == window-start ]]; then
   deployed_release
   jq '.previousRelease=.release' "$WORK/record.json" > "$WORK/next.json"
   mv "$WORK/next.json" "$WORK/record.json"; record_save
-  save_release "$RELEASE"
+  # Inventory the live release before installing the candidate's 6H ConfigMap.
   inventory
+  jq -e '.consumers|length>0' "$WORK/record.json" >/dev/null || fail 'Consommateurs initiaux requis'
+  save_release "$RELEASE"
   checkpoint manual-inventory completed
   exit
 fi
@@ -55,7 +60,12 @@ jq -e '.kind=="cutover" and .manualV1220==true and .environment=="prod"
 lock_resume
 export CUTOVER_LOCK_RUN="$RUN" CUTOVER_LOCK_EXECUTOR="$EXECUTOR"
 case $1 in
+  window-configure)
+    ENV=execution-prod node deploy/prod-cutover/cli.cjs configuration-check
+    "${k[@]}" apply -f "$CONFIGURATION" >/dev/null
+    checkpoint manual-configuration completed;;
   window-close)
+    jq -e '.checkpoints["manual-configuration"]=="completed"' "$WORK/record.json" >/dev/null || fail 'Configuration approuvée requise'
     close_once
     jq 'del(.checkpoints["manual-deploy"])' "$WORK/record.json" > "$WORK/next.json"
     mv "$WORK/next.json" "$WORK/record.json"; record_save;;
