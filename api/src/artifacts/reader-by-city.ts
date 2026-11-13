@@ -10,7 +10,7 @@
  * never reach the service — the UI never emits it.
  */
 import { z } from "zod";
-import { vivierCountsSchema } from "@radar/domain";
+import { vivierCountsSchema, vivierFiltreCubeSchema, vivierFiltreCubesByClassementSchema } from "@radar/domain";
 import { ClassificationError } from "../services/facets/classification-errors.js";
 import { WorkspaceId } from "../services/facets/classification-query.js";
 
@@ -98,6 +98,9 @@ export const byCityResponseSchema = z.object({
     signalCount: countSchema,
     subsetCounts: subsetCountsSchema,
     vivierV2Counts: vivierCountsSchema,
+    // Filtre cube: counters only (flag-combination keys), no identifier.
+    filtreCube: vivierFiltreCubeSchema.optional(),
+    filtreCubesByClassement: vivierFiltreCubesByClassementSchema.optional(),
   }).strict()),
 }).strict().superRefine((body, context) => {
   const sum = body.cities.reduce((total, city) => total + city.signalCount, 0);

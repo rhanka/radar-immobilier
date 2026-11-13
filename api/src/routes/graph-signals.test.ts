@@ -257,6 +257,7 @@ describe("GET /api/graph-signals/by-city", () => {
           stageCountsResEligibleHorsZonage: { avis_motion: 0, projet_reglement: 0, consultation_publique: 0, second_projet: 0, adoption: 0, entree_vigueur: 0, inconnu: 0 },
           total: 5,
         },
+        filtreCube: {},
       },
       {
         citySlug: "saint-constant",
@@ -277,6 +278,7 @@ describe("GET /api/graph-signals/by-city", () => {
           stageCountsResEligibleHorsZonage: { avis_motion: 0, projet_reglement: 0, consultation_publique: 0, second_projet: 0, adoption: 0, entree_vigueur: 0, inconnu: 0 },
           total: 3,
         },
+        filtreCube: {},
       },
     ]);
 
