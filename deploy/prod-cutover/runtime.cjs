@@ -119,7 +119,7 @@ function evidence() {
   const e = json(env.EVIDENCE || fail('drain_evidence_required'));
   const age = Date.now() - Date.parse(e.completedAt);
   if (e.release !== SHA || !/^[0-9a-f-]{36}$/.test(e.run) || !Array.isArray(e.instances)
-    || (!e.instances.length && !e.localTermination) || e.instances.some(i => typeof i !== 'string' || !i)
+    || !e.instances.length || e.instances.some(i => typeof i !== 'string' || !i)
     || !Number.isFinite(age) || age < 0 || age > 86400000) fail('drain_evidence_invalid');
   if (env.ENV === 'rehearsal') require('./local-proof.cjs').verify(e);
   if (env.ENV === 'execution-prod') {
