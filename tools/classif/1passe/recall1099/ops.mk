@@ -14,6 +14,12 @@ preflight:
 	$(TSRUN) $(DIR)/production.mts preflight
 score:
 	node $(DIR)/score.mjs
+historical:
+	node $(DIR)/historical.mjs
+audit:
+	node $(DIR)/tuning-audit.mjs
+verify:
+	node $(DIR)/verify.mjs
 inspect:
 	docker run --rm --network none -v radar-dev_radar-test-root-node-modules:/deps:ro -v radar-dev_radar-test-api-node-modules:/api-deps:ro node:24-bookworm-slim sh -c 'ls /deps/tsx /deps/@sentropic/engram /api-deps/@sentropic/engram /deps/@radar/sources 2>/dev/null; ls /api-deps/tsx 2>/dev/null'
 quota:
