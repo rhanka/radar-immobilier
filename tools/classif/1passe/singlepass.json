@@ -1,0 +1,24 @@
+{
+  "kind": "bc-singlepass-v1",
+  "status": "D4 et D5 à confirmer avant lancement",
+  "adapter": "../run-seat.mjs#callSeat",
+  "prompt": "singlepass-prompt.md",
+  "iterations": [
+    ["astra-low", "astra-medium"],
+    ["sol-6.1-medium", "opus-5.5-medium"]
+  ],
+  "callUnit": "PV complet",
+  "callsPerRouteTuning": 50,
+  "tuningCallsCap": 200,
+  "blind": {
+    "routes": "deux finalistes au plus, gelés avant ouverture",
+    "callsPerRoute": 50,
+    "callsCap": 100,
+    "role": "test-executor",
+    "oneShot": true,
+    "output": "privé scellé, agrégats seulement"
+  },
+  "selectionTuning": ["zéro manqué", "précision décroissante", "coût croissant", "route lexicale"],
+  "selectionFinal": ["zéro manqué des deux côtés", "précision aveugle décroissante"],
+  "pending": ["D4", "D5", "audit humain", "stratification C", "textes intégraux locaux vérifiés"]
+}

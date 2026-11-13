@@ -30,6 +30,7 @@
 - [ ] Lot 1 : protocole, découpage REFC1 et manifestes.
 - [x] Sous-lot : 100 PV répartis 50/50. Sceau REFC1 privé. Supports B : 372/304 ; C inconnu.
 - [x] Sous-lot : protocole figé, recommandations et limites explicites.
+- [x] Sous-lot : cinq routes exactes, prompts et budgets inscrits sans lancement.
 - [ ] Lot 2 : contrôles hors ligne, push et PR draft vers main.
 - [ ] Hors étape 0 : confirmations owner, annotations, exécution et évaluation.
 - [ ] Hors demande : fusion.
