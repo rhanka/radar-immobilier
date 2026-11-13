@@ -65,6 +65,7 @@ export interface ArchiveHeadLike {
 }
 
 export interface ClassementEntry {
+  annotationSource?: "ai" | "manual";
   classe: SignalClass;
   reasonCode: string | null;
   /** Active selection head id per basket (null when the basket is off). */
@@ -98,6 +99,23 @@ export const EMPTY_CLASSEMENT_ENTRY: ClassementEntry = {
   restoreBlockedReason: null,
   discarded: false,
 };
+
+/** AI classes fill untouched targets; human stream history always wins. */
+export function withAiClassement(
+  map: Map<string, ClassementEntry>,
+  nodes: readonly { type: string; id: string; citySlug: string | null;
+    classAnnotation?: { source: "ai" | "manual"; classe: SignalClass } }[],
+): Map<string, ClassementEntry> {
+  const result = new Map(map);
+  for (const node of nodes) {
+    const annotation = node.classAnnotation;
+    const key = classementKey(node.type, node.id, node.citySlug);
+    if (annotation?.source !== "ai" || result.has(key)) continue;
+    result.set(key, { ...EMPTY_CLASSEMENT_ENTRY, annotationSource: "ai", classe: annotation.classe,
+      discarded: annotation.classe === "ecarte" });
+  }
+  return result;
+}
 
 export function classementKey(type: string, id: string, citySlug?: string | null): string {
   return citySlug ? `${citySlug}:${type}:${id}` : `${type}:${id}`;

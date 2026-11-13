@@ -514,6 +514,16 @@ export function extractSignalEvidence(node: GraphSignalNode): SignalEvidence {
 }
 
 export interface GraphSignalNode {
+  classAnnotation?: {
+    source: "ai" | "manual";
+    classe: "pertinent" | "a_surveiller" | "non_classe" | "ecarte";
+    reason: string;
+    model: string | null;
+    effort: string | null;
+    promptId: string | null;
+    promptSha256: string | null;
+    pipelineRunId: string | null;
+  };
   id: string;
   type: "Signal" | "DesignationEvent" | string;
   label: string;
