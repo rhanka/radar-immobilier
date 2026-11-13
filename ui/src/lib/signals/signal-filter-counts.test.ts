@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filtreCountsForPerimeter, filtreCubeOfNodes } from "./signal-filter-counts.js";
+import { classementCountsForPerimeter, filtreCountsForPerimeter, filtreCubeOfNodes } from "./signal-filter-counts.js";
 import type { GraphSignalNode } from "./graph-signal-detail-client.js";
 import { buildCityMapEntries } from "$lib/maps/maps-data.js";
 import { DEFAULT_CLASSEMENT_FILTER } from "./signal-classement.js";
@@ -33,6 +33,32 @@ const entry = (municipality: typeof A, filtreCube: Record<string, number> | null
   filtreCube,
 });
 
+describe("classementCountsForPerimeter", () => {
+  const city = { ...entry(A, { "11100": 6 }), filtreCubesByClassement: {
+    pertinent: { "11100": 2, "11000": 1 }, a_surveiller: { "11100": 3 },
+    non_classe: { "11100": 1, "11110": 4 }, ecarte: { "11100": 5 },
+  } };
+  it("should count each class across cities with all other filters applied", () => {
+    expect(classementCountsForPerimeter({
+      entries: [city, { ...city, municipality: B! }], axes: ALL_AXES, exclusions: BOTH,
+    })).toEqual({ pertinent: 4, a_surveiller: 6, non_classe: 2, ecarte: 10 });
+    expect(classementCountsForPerimeter({
+      entries: [city], axes: { ...ALL_AXES, p: false }, exclusions: BOTH,
+    })?.pertinent).toBe(3);
+  });
+  it("should count full city cubes independently of incomplete selected detail", () => {
+    expect(classementCountsForPerimeter({
+      entries: [city, { ...city, municipality: B! }], axes: ALL_AXES, exclusions: BOTH,
+    })).toEqual({ pertinent: 4, a_surveiller: 6, non_classe: 2, ecarte: 10 });
+  });
+  it("should distinguish an empty perimeter from a missing relevance dimension", () => {
+    expect(classementCountsForPerimeter({ entries: [], axes: ALL_AXES, exclusions: BOTH }))
+      .toEqual({ pertinent: 0, a_surveiller: 0, non_classe: 0, ecarte: 0 });
+    expect(classementCountsForPerimeter({ entries: [entry(A, {})], axes: ALL_AXES, exclusions: BOTH }))
+      .toBeNull();
+  });
+});
+
 describe("filtreCubeOfNodes — selected city cube from its loaded detail", () => {
   it("should key each B node and leave server-excluded nodes out", () => {
     expect(filtreCubeOfNodes([
@@ -52,6 +78,25 @@ describe("filtreCubeOfNodes — selected city cube from its loaded detail", () =
 });
 
 describe("filtreCountsForPerimeter — Filtre dropdown counts over the displayed perimeter", () => {
+  it("should exclude archives from Filtre with or without selected detail", () => {
+    const city = { ...entry(A, { "11100": 6 }), filtreCubesByClassement: {
+      pertinent: { "11100": 1 }, a_surveiller: { "11100": 2 },
+      non_classe: { "11100": 3 }, ecarte: { "11100": 1 },
+    } };
+    const input = { entries: [city, { ...city, municipality: B!,
+      filtreCubesByClassement: { ...city.filtreCubesByClassement, ecarte: {} } }],
+      axes: ALL_AXES, exclusions: BOTH };
+    const classement = { ...DEFAULT_CLASSEMENT_FILTER, ecarte: true };
+    expect(filtreCountsForPerimeter({ ...input, live: null })?.z).toBe(12);
+    expect(filtreCountsForPerimeter({ ...input, classement, live: null }))
+      .toEqual({ z: 12, r: 12, p: 12, piia: 0, derog: 0 });
+    expect(filtreCountsForPerimeter({ ...input, classement,
+      live: { slug: A!.slug, nodes: Array.from({ length: 6 }, (_, i) => node(String(i), {})) } }))
+      .toEqual({ z: 12, r: 12, p: 12, piia: 0, derog: 0 });
+    expect(filtreCountsForPerimeter({ ...input, live: null,
+      classement: { pertinent: false, a_surveiller: false, non_classe: false, ecarte: true } })?.z).toBe(0);
+  });
+
   it("should apply a partial Pertinence selection to every city before faceted counting", () => {
     const city = { ...entry(A, { "11100": 9 }), filtreCubesByClassement: {
       pertinent: { "11100": 2, "11110": 1 }, a_surveiller: { "11100": 3 },

@@ -87,10 +87,13 @@ Moderator-only common archive, same path family as personal facets:
   Résidentiel, Précoce axes; PIIA and dérogation exclusions), whatever the
   `excludePiia`/`excludeDerogations` flags: the rail derives the Filtre
   dropdown counts from it for any Filtre state.
-  Optional `filtreCubesByClassement` splits that cube into `pertinent`,
+  Optional `filtreCubesByClassement` counts the full date-scoped population,
+  **including archives**, split into `pertinent`,
   `a_surveiller`, `non_classe` and `ecarte`, using the viewer's personal
   selections and effective archives in this workspace. The client applies
-  Pertinence before faceted counting across every displayed city. Existing
+  Pertinence before faceted counting across every displayed city. Pertinence
+  counts retain the archived `ecarte` population. Filtre counts exclude it even
+  when Écarté is checked, matching the archive-free `coherent-city` list. Existing
   counters and query parameters are unchanged.
   Scoped successor of the retired `GET /api/graph-signals/by-city`, same
   wire shape and query parameters (`dateFrom`/`dateTo` `YYYY-MM-DD`,

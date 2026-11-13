@@ -12,6 +12,7 @@
  */
 
 import { describe, it, expect } from "vitest";
+import { discardedSignalKey } from "./discarded-signals.js";
 import {
   buildNodeRow,
   buildEdgeRow,
@@ -689,6 +690,20 @@ describe("server-side signal date windows", () => {
       },
     },
     sourceRef: null,
+  });
+
+  it("should retain archive class cubes without changing visible counters", () => {
+    const rows = [datedSignal("archive", { refs: [{ publishedAt: "2026-02-10" }] }),
+      datedSignal("old-archive", { refs: [{ publishedAt: "2025-02-10" }] })];
+    const keys = rows.map((row) => discardedSignalKey(row.citySlug, row.type, row.id));
+    const classement = new Map(keys.map((key) => [key, "ecarte" as const]));
+    const [city] = aggregateGraphSignalProjectionRows(rows,
+      { dateFrom: "2026-01-01", dateTo: "2026-03-31" }, classement, new Set(keys));
+    expect(city!.signalCount).toBe(0);
+    expect(city!.vivierV2Counts.total).toBe(0);
+    expect(city!.subsetCounts[""]).toBe(0);
+    expect(city!.filtreCube).toEqual({});
+    expect(city!.filtreCubesByClassement?.ecarte).toEqual({ "11100": 1 });
   });
 
   it("filters every projection rail on persisted documentary refs, with the stage date as fallback", () => {
