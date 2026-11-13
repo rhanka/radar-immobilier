@@ -95,6 +95,21 @@ node tools/bench-v11/full/run-arm-argon-retry.mjs    # reprises séquentielles d
 bash tools/bench-v11/full/run-arm-wonder-c10.sh      # Muse Wonder low, concurrence 10
 ```
 
+Bras Muse Ember (mise à jour du 2026-11-12) : `muse-ember-1.0`, efforts
+`xhigh` puis `max`, concurrence 4, `--contributor-mode off` et `--json` sur le
+bras complet (jetons réels par document ; texte terminal extrait vers `raw/`).
+`MUSE_CWD` fixe le répertoire de travail de la CLI (défaut : dossier vide
+`${TMPDIR:-/tmp}/muse-ember-run`, hors de tout dépôt). Garde hebdomadaire :
+le runner lit `muse usage --json` avant chaque document et s'arrête à
+`STOP_WEEKLY_PCT` (défaut 85) ; le chien de garde relit toutes les 10 minutes
+et coupe les processus du runner au même seuil.
+
+```bash
+bash tools/bench-v11/full/run-arm-ember.sh xhigh 4     # -> full/arms/muse-ember-xhigh/{raw,jsonl,usage}/
+bash tools/bench-v11/full/run-arm-ember.sh max 4       # -> full/arms/muse-ember-max/...
+bash tools/bench-v11/full/watch-muse-weekly.sh <pgid-du-runner> 600 85   # -> full/muse-weekly-log.jsonl
+```
+
 Chaque ligne `meta.jsonl` enregistre `promptSha256` (sha256 du prompt
 réellement envoyé) et `startedAt`. Surface d'accès AGY : voir le dossier
 v11 §2 (cwd, 60 outils actifs, aucun appel d'outil observé).
@@ -104,6 +119,8 @@ v11 §2 (cwd, 60 outils actifs, aucun appel d'outil observé).
 ```bash
 node tools/bench-v11/full/validate-outputs.mjs tools/bench-v11/full/arms/gemini-argon-low
 node tools/bench-v11/full/validate-outputs.mjs tools/bench-v11/full/arms/muse-wonder-low
+node tools/bench-v11/full/validate-outputs.mjs tools/bench-v11/full/arms/muse-ember-xhigh
+node tools/bench-v11/full/validate-outputs.mjs tools/bench-v11/full/arms/muse-ember-max
 # -> <armDir>/validated/*.output.json + *.receipt.json
 ```
 
@@ -112,6 +129,8 @@ node tools/bench-v11/full/validate-outputs.mjs tools/bench-v11/full/arms/muse-wo
 ```bash
 node tools/bench-v11/full/score-argon.mjs    # -> full/scores-argon.json
 node tools/bench-v11/full/score-wonder.mjs   # -> full/scores-wonder.json
+node tools/bench-v11/full/score-ember.mjs xhigh   # -> full/scores-ember-xhigh.json (jetons réels inclus)
+node tools/bench-v11/full/score-ember.mjs max     # -> full/scores-ember-max.json
 ```
 
 ### 6. Burns (échantillon fixe de 10 documents, capture d'usage)
@@ -134,6 +153,16 @@ Le premier argument du générateur est le dossier de preuves contenant
 `full/scores-{argon,wonder}.json`, `full/arms/gemini-argon-low/meta.jsonl`
 et `full/burn-{argon,wonder}-usage10/` (le clone d'exécution pour le
 passage publié ; un `BENCH_DIR` de travail pour une ré-exécution).
+
+Lignes Muse Ember : ajoutées seulement si `BENCH_EMBER_DIR` pointe vers un
+dossier contenant `full/scores-ember-{xhigh,max}.json`, par exemple
+`BENCH_EMBER_DIR=tools/bench-v11 node tools/bench-v11/build-v11-report.mjs tmp/bench-wonder docs/reports/benchmark-v11-2026-11-09`.
+Sans cette variable, le générateur produit le dossier du 2026-11-09 à l'octet
+près (vérifié). Les insertions Ember sont ancrées : aucune phrase publiée
+n'est réécrite, hors quatre lignes : décompte du tableau (40 → 42 lignes),
+puis lecture §3, latences §5 et graphiques §7 complétées en fin de ligne. Chromium en snap n'écrit pas dans un dossier
+caché (`.claude/`, `.cache-tmp/`) : copier le HTML et `assets/2026-11/` sous
+`~/snap/chromium/common/` pour l'impression PDF.
 
 Scripts auxiliaires de reconstruction (hors chaîne principale) :
 `full/build-oracle-676.mjs` (reconstruit `full/oracle-676/` depuis
