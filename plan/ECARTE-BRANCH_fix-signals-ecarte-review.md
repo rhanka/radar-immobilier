@@ -25,6 +25,12 @@ Fix #760 P1 while preserving #1090 period selection and perimeter counters. P2 a
   - `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`
   - Other branch plans
 - **Conditional Paths**:
+  - BR760-EX2: owner-requested atomic restoration after independent compensation failures.
+  - `api/src/services/facets/restore-classement.ts`
+  - `api/src/routes/scoped-signal-facets.ts`
+  - Rationale: existing in-transaction writers support one all-or-nothing restore and selection command.
+  - Impact: one browser-session endpoint; existing membership, fingerprint, head and moderateArchive checks remain enforced.
+  - Rollback: revert the atomic restoration commits.
   - BR760-EX1: owner-requested shared archive review blocker (#1092).
   - `ui/src/lib/signals/signal-classement*.ts`
   - `ui/src/lib/components/maps/SignalClassementMenu.svelte`
@@ -63,6 +69,8 @@ Fix #760 P1 while preserving #1090 period selection and perimeter counters. P2 a
   - [x] Push and open PR referencing #760, listing P3 without implementing them.
 
 ## Evidence
+- [x] Second correction: reproduced both independent failures on fff272af5. Log: tmp/atomic-red-review.log (2 failed, 1 passed).
+- [x] Atomic server operation uses the existing in-transaction personal and workspace writers, including the final selection. Six PostgreSQL tests are red on fff272af5 and green with the new route. Logs: tmp/atomic-{red-api,green-api-initial}.log.
 - [x] Shared archive blocker reproduced on 87d8e7b6: API regression 2 failures; CDP regression 3 failures and personal restoration passes. Logs: tmp/shared-red-{api,browser}.log.
 - [x] Shared archive correction: role refusal, independent scope restoration and default-list reload persistence.
 - [x] Reusable browser fixture and standalone PostgreSQL route regression committed.
