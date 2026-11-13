@@ -19,12 +19,13 @@ guard.observe('astra-low',initial.rateLimits);
 let stop=null,done=0,cached=0;
 const started=new Date().toISOString();
 const log=`${home}/calls.jsonl`;
-const jobs=rows.flatMap(({item})=>['A','B'].map(mode=>({item,mode})));
+// Read and checksum every request before spawning any child. A filesystem refusal
+// must not leave half of the first worker batch running without a parent receipt.
+const jobs=rows.flatMap(({item})=>['A','B'].map(mode=>({item,mode,req:request(item,mode)})));
 let cursor=0;
 async function worker(){
  while(cursor<jobs.length&&!stop&&!guard.paused){
-  const {item,mode}=jobs[cursor++];
-  const req=request(item,mode);
+  const {item,mode,req}=jobs[cursor++];
   const digest=hash(JSON.stringify(req));
   const file=`${dir}/${mode}-${hash(item.itemId).slice(0,24)}.${blind?'sealed':'json'}`;
   if(existsSync(file)){

@@ -29,4 +29,4 @@ csets-test:
 	@$(CLASSIF_NODE) --test tools/classif/csets/metrics.test.mjs
 .PHONY: csets-validate
 csets-validate:
-	@docker run --rm --user $(shell id -u):$(shell id -g) -v /home/antoinefa/src/radar-immobilier/tmp/refresh-single-pass:/src:ro -v $(CLASSIF_HOME):/private -v $(CURDIR):/lane:ro -w /private/deps node:24-bookworm-slim sh -c 'cp /lane/tools/classif/csets/validate.ts .; node --import ./node_modules/tsx/dist/loader.mjs validate.ts'
+	@docker run --rm --user $(shell id -u):$(shell id -g) -e CLASSIF_BLIND_KEY -e CSETS_HALF=$(if $(HALF),$(HALF),tuning) -v /home/antoinefa/src/radar-immobilier/tmp/refresh-single-pass:/src:ro -v $(CLASSIF_HOME):/private -v $(CURDIR):/lane:ro -w /private/deps node:24-bookworm-slim sh -c 'cp /lane/tools/classif/csets/validate.ts .; node --import ./node_modules/tsx/dist/loader.mjs validate.ts'
