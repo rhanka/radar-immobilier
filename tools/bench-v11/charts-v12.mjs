@@ -278,7 +278,7 @@ function f1Cost(rows) {
   s += labels.map((l) => l.svg).join("");
   const missing = rows.filter((r) => !(r.api > 0)).map((r) => r.id.short).join(", ");
   s += legendBlock(ml, mt + ih + 76, [
-    { text: "Plein = équivalent API (jetons réels × tarif public ; raisonnement Muse non facturé, hypothèse A) ; creux = siège projeté ou mesuré ; trait fin horizontal = même bras, siège → API. Sans siège attribuable : point API seul." },
+    { text: "Plein = équivalent API (hypothèse A : sortie rapportée, raisonnement probablement inclus) ; creux = siège projeté ou mesuré ; trait fin horizontal = même bras, siège → API. Sans siège attribuable : point API seul." },
     { text: "Contour noir épais et libellé gras « v12 » : Muse Ember 1.0 xhigh et max (siège missing source, jamais estimé). CP : GPT-6 Astra medium puis filtre Gemini 3.8 Flash low, coûts cumulés." },
     { text: `Sans équivalent API publié, non placés : ${missing}.` },
   ]);
