@@ -43,7 +43,7 @@ describeDb("AI annotation rollback PostgreSQL", () => {
     const events = await f.db.execute(sql`SELECT * FROM facet_events`);
     const before = await f.revision();
     expect((await f.counts()).totalCount).toBe(0);
-    expect(await purgeAiAnnotations(f.db, { apply: true })).toMatchObject({ mode: "apply", matched: 1, deleted: 1 });
+    expect(await purgeAiAnnotations(f.db, { apply: true, all: true })).toMatchObject({ mode: "apply", matched: 1, deleted: 1 });
     expect((await f.rows()).rows).toEqual(manual);
     expect((await f.db.execute(sql`SELECT * FROM graph_nodes`)).rows).toEqual(nodes.rows);
     expect((await f.db.execute(sql`SELECT * FROM facet_events`)).rows).toEqual(events.rows);
@@ -52,7 +52,7 @@ describeDb("AI annotation rollback PostgreSQL", () => {
     const after = await f.revision();
     expect(after.workspaceRevision).toBe(before.workspaceRevision + 1);
     expect(after.token).not.toBe(before.token);
-    expect(await purgeAiAnnotations(f.db, { apply: true })).toMatchObject({ matched: 0, deleted: 0 });
+    expect(await purgeAiAnnotations(f.db, { apply: true, all: true })).toMatchObject({ matched: 0, deleted: 0 });
     expect(await f.revision()).toEqual(after);
     expect((await f.rows()).rows).toEqual(manual);
   });
@@ -75,7 +75,7 @@ describeDb("AI annotation rollback PostgreSQL", () => {
     const before = await readScopedPersonalHeads(f.db, f.contributor.sub, f.workspaceId, f.target.citySlug);
     expect(before).toMatchObject([{ target: f.target, basket: "pertinent", state: "active" }]);
     const events = await f.db.execute(sql`SELECT * FROM facet_events`);
-    await purgeAiAnnotations(f.db, { apply: true });
+    await purgeAiAnnotations(f.db, { apply: true, all: true });
     expect(await readScopedPersonalHeads(f.db, f.contributor.sub, f.workspaceId, f.target.citySlug)).toEqual(before);
     expect((await f.db.execute(sql`SELECT * FROM facet_events`)).rows).toEqual(events.rows);
     expect((await readClassAnnotations(f.db, f.annotation.citySlug)).get(`Signal:${f.annotation.nodeId}`)?.source).toBe("manual");
