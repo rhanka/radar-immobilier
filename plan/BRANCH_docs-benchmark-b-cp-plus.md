@@ -28,6 +28,7 @@
 ## Plan / Todo (lot-based)
 - [x] Lot 0 — Baseline and constraints: read protocol, confirm branch, rebase onto origin/main, verify all 100 frozen prompts.
 - [ ] Lot 1 — Capture real Astra replay, quotas, v9 validation, strict oracle-676 score.
+  - [x] Freeze replay transport to llm-mesh 0.19.3; record prompt hashes, real usage and Codex quota.
 - [ ] Lot 2 — Capture real Muse precision decisions, quotas, access surface, strict score and costs.
 - [ ] Lot 3 — Regenerate v12 dossier and SHA256SUMS; preserve published rows; update Focus and D1.
 - [ ] Lot 4 — Verify artifacts, commit selectively, push, open PR to main. Never merge.
