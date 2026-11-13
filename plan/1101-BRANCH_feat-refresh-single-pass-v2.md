@@ -32,4 +32,4 @@
 - [x] Lot 3: Add ambiguity persistence and badge; retain human precedence. No separate annotation history table exists; graph properties retain the flag.
 - [x] Lot 4: Validator, fallback, terminal failure, PostgreSQL persistence and badge tests. Eight API suites: 83 passed, including eight PostgreSQL tests; LOT_MIGRATION_DB_TEST=1 explicitly enabled.
 - [x] Lot 5: Typecheck and lint passed. Eight targeted API suites: 83 passed, including eight PostgreSQL tests. Badge suite: eight passed. Test stack removed with make clean (compose down -v).
-- [ ] Lot 6: Review diff, push and open PR against feat/refresh-single-pass; no merge.
+- [x] Lot 6: Local diff inspected, branch pushed, PR #1102 opened against feat/refresh-single-pass. No merge. CI running. Rebase onto main follows #1099, still open at handoff.
