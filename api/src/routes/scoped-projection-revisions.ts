@@ -23,6 +23,7 @@ import {
 } from "../services/facets/projection-revisions.js";
 import { readScopedPersonalHeads } from "../services/facets/scoped-reader.js";
 import { readScopedByCity } from "../services/facets/scoped-by-city.js";
+import { readSignalMcpCity } from "../services/graph/signal-mcp.js";
 import { readWorkspaceArchiveCity } from "../services/facets/workspace-reader.js";
 
 const workspaceId = z.string().guid();
@@ -120,6 +121,7 @@ export function scopedProjectionRevisionsRoute(deps: ScopedProjectionRevisionsDe
             c.req.param("workspaceId"), params.data.citySlug),
           signals: await getSignalNodesForCity(deps.db, params.data.citySlug),
           feedback: await readCurrentClassFeedback(deps.db, session.sub, c.req.param("workspaceId"), params.data.citySlug),
+          mcp: await readSignalMcpCity(deps.db, session.sub, c.req.param("workspaceId"), params.data.citySlug),
         }));
       const heads = coherent.payload.archive.map((row) => ({
         target: row.target,
@@ -147,6 +149,8 @@ export function scopedProjectionRevisionsRoute(deps: ScopedProjectionRevisionsDe
         props: cardView ? cards[index]!.props : node.props, sourceRef: node.sourceRef,
         facetFingerprint: targetFingerprint(node),
         classFeedback: coherent.payload.feedback.find((row) => row.nodeType === node.type && row.nodeId === node.id),
+        signalAnnotations: coherent.payload.mcp.get(key(node)),
+        annotationsWorkspaceId: c.req.param("workspaceId"),
       }));
       const legacyProjection = scopedLegacyProjection(cards);
       const total = coherent.payload.signals.length;
