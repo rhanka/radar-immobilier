@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {spawnSync} from 'node:child_process';
+import {home} from './inputs.mjs';
+const result=spawnSync('gh',['api','repos/rhanka/radar-immobilier/pulls/1105'],{encoding:'utf8'});
+assert.equal(result.status,0,'PR readback failed');
+const pr=JSON.parse(result.stdout);
+assert.equal(pr.body,readFileSync(`${home}/pr-body.md`,'utf8'));
+assert.equal(pr.draft,true);
+const head=spawnSync('git',['rev-parse','HEAD'],{encoding:'utf8'});
+assert.equal(head.status,0);assert.equal(pr.head.sha,head.stdout.trim());
+console.log({bodyMatches:true,draft:true,head:pr.head.sha});

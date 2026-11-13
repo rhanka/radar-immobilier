@@ -33,7 +33,7 @@ csets-pr:
 	@gh pr create --base feat/classif-pilot-l1l2 --head feat/classif-1passe-csets --draft --title 'feat/classif-1passe-csets' --body-file $(CLASSIF_HOME)/pr-body.md
 .PHONY: csets-pr-update
 csets-pr-update:
-	@gh pr edit 1105 --body-file $(CLASSIF_HOME)/pr-body.md
+	@gh api repos/rhanka/radar-immobilier/pulls/1105 --method PATCH -F body=@$(CLASSIF_HOME)/pr-body.md --jq .html_url
 .PHONY: csets-test
 csets-test:
 	@$(CLASSIF_NODE) --test tools/classif/csets/metrics.test.mjs
