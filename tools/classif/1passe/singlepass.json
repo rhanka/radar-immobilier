@@ -1,6 +1,7 @@
 {
   "kind": "bc-singlepass-v1",
-  "status": "D4 et D5 à confirmer avant lancement",
+  "status": "D4 actée, D5 provisoire actée le 13/11 ; lancement hors de cette lane",
+  "startingPrompt": "série 7, P0, sha256 a60713366128ae4348a45a7323d0b0984cef87ca6cb33eda15073c045235b016",
   "adapter": "../run-seat.mjs#callSeat",
   "prompt": "singlepass-prompt.md",
   "iterations": [
@@ -20,5 +21,5 @@
   },
   "selectionTuning": ["zéro manqué", "précision décroissante", "coût croissant", "route lexicale"],
   "selectionFinal": ["zéro manqué des deux côtés", "précision aveugle décroissante"],
-  "pending": ["D4", "D5", "audit humain", "stratification C", "textes intégraux locaux vérifiés"]
+  "pending": ["référence C scellée", "stratification C : écart publié"]
 }

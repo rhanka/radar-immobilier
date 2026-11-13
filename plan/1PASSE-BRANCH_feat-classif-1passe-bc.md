@@ -38,8 +38,8 @@
 
 ## Plan / Todo (lot-based)
 - [x] Étape 0 : pré-enregistrement, graine, 100 PV, 50/50, pack et manifestes livrés.
-- [ ] Étape 0bis : plan sédimenté, décisions et surface CLI gelées avant appel.
-  - [ ] Porte : empreintes, textes complets, pack, budget et quota vérifiés.
+- [x] Étape 0bis : plan sédimenté, décisions et surface CLI gelées avant appel.
+  - [x] Porte : empreintes, 100 textes complets, pack, budget et quota vérifiés. Codex : 26 %.
 - [ ] Étape 1 : deux annotations indépendantes sur les 100 PV.
   - [ ] Budget : 200 lectures ; réserve de 40 reprises de quota tracées.
   - [ ] Quota codex avant, toutes les 10 min, après ; arrêt à 90 %.
