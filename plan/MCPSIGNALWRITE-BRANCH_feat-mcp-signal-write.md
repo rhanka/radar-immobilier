@@ -14,6 +14,7 @@
 - [x] Allowed: api/src/services/graph/**, api/src/routes/**, api/src/db/service-role-grants*, api/drizzle/meta/_journal.json.
 - [x] Allowed: packages/immo-mcp/**, ui/src/lib/signals/**, ui/src/lib/components/maps/**, ui/e2e-real/**.
 - [x] Allowed: tools/make/mcp-signal-write*, docs/spec/SPEC_EVOL_MCP_SIGNAL_WRITE.md, this plan.
+- [x] Allowed: api/tests/integration/signal-mcp-client.spec.ts.
 - [x] Forbidden: root Makefile, docker-compose*.yml, rules/**, agent entrypoints, other branch plans.
 - [x] Conditional: api/drizzle/0048_signal_mcp_write.sql; deploy/overlays/preprod/patch-immo-mcp-config.yaml.
 
