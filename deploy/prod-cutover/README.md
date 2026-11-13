@@ -21,6 +21,7 @@ Les sources SQL et le journal doivent correspondre aux objets Git du SHA candida
 | `rollback` | Reset schémas + restauration atomique complète ; ACL originales séparées. | 1 800 s + ACL 60 s |
 | `k8s-plan`, `cd-plan` | Affichent les actes futurs. Aucune exécution cluster/tag/workflow. | 150 s |
 | `test`, `integration`, `down` | Gardes puis DDL natif synthétique ; nettoyage `down -v`. | 90 / 300 s |
+| `lint` | ESLint ciblé dans le runtime de tests Node, puis `down -v`. | 180 s |
 
 Chaque cible d’exécution a un plafond externe de 3 600 secondes. Arrêt puis vérification du journal si issue indéterminée.
 `migration-times.jsonl` conserve chaque durée. `migrations.json` mesure aussi le WAL global ; d’autres écritures peuvent augmenter cette valeur.

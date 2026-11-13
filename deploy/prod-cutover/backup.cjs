@@ -1,3 +1,5 @@
+/* global require, module */
+/* eslint-disable @typescript-eslint/no-require-imports */
 const r = require('./runtime.cjs');
 const { fs, path, env, fail, sql, run, hash, save, receipt } = r;
 function archive() {

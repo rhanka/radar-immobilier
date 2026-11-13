@@ -1,3 +1,5 @@
+/* global require, module, process, fetch, AbortSignal */
+/* eslint-disable @typescript-eslint/no-require-imports */
 const r = require('./runtime.cjs');
 const backup = require('./backup.cjs');
 const migrations = require('./migrate.cjs');
