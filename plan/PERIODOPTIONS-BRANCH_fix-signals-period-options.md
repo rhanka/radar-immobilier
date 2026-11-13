@@ -40,11 +40,21 @@ Restore real mouse selection of every signal period preset after PR #1084.
   - [x] Read project rules and harness debug/test skills.
   - [x] Verify hit targets, disabled state, inert, stacking and dismissal.
   - [x] Prove DS registry retains only `all` after bound invalidation.
-- [ ] **Lot 1 — Correction**
-  - [ ] Browser regression red on baseline, green on correction.
-  - [ ] Refresh max before opening; keep it stable during selection.
-  - [ ] Typecheck, lint, full UI tests and scoped browser regression.
+- [x] **Lot 1 — Correction**
+  - [x] Browser regression red on baseline, green on correction.
+  - [x] Refresh max before opening; keep it stable during selection.
+  - [x] Typecheck, lint, full UI tests and scoped browser regression.
+  - [x] Cause: `SignauxRail.svelte` refreshed `timeRangeMax` on every picker pointerdown/keydown; DS `resolvedPresets` invalidation re-registered rows before click. `SelectableList.activate` then saw only `all` in its registry.
+  - [x] Served preprod: all six centers hit their own content spans; no disabled options, no inert ancestors, pointer events auto, popover z-index 80, no premature dismissal. Native CDP mouse press/release on `6mo` kept the week label and menu open.
+  - [x] Baseline `e8f4c7f6d`: Playwright `option.click()` fails, expected `6mo`, received `7d` (1800 ms).
+  - [x] Corrected code: the same regression passes all six presets (1.8 s), including opening and closing between selections.
+  - [x] `make -f tmp/check.mk typecheck ENV=test-period-options`: pass, zero errors (8 Svelte warnings).
+  - [x] `make -f tmp/check.mk lint ENV=test-period-options`: pass, zero errors (one unrelated unused-disable warning).
+  - [x] `make -f tmp/check.mk test-ui ENV=test-period-options`: 145 files / 1890 tests pass; one skipped file, 10 todos.
+  - [x] `make -f tmp/check.mk e2e ENV=test-period-options`: pass; fresh CDP 9333 tab closed in finally.
+  - [x] First isolated UI run lacked documentation fixtures; restore the source copy and rerun the full suite successfully. No test assertions changed.
+  - [x] Evidence retained in this worktree's ignored `tmp/evidence/`; standalone Make runner avoids all environment-file includes.
 - [ ] **Lot 2 — Delivery**
-  - [ ] Record root cause and results.
+  - [x] Record root cause and results.
   - [ ] Push and open PR against main; preserve branch without merging.
   - [ ] Close tabs and destroy isolated runtime with volumes.
