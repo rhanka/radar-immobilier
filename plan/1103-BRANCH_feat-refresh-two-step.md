@@ -18,6 +18,8 @@
 - [x] Owner explicitly authorizes retaining single-pass and compatibility with REFRESH_SINGLE_PASS despite the general no-legacy rule.
 - [x] Design: keep classification out of extraction requests, graph bytes, coverage identity and detection receipts; share the reannotation writer and content hash.
 - [x] Design: limit candidates to acts in this document's extraction, query their persisted evidence, skip unchanged input and all manual history.
+- [x] Attention: final harness review selection failed (exact author model/effort and h2a_run MCP unavailable); tmp/two-step-review.md records evidence. No consensus claimed; final review belongs to i-cond.
+- [x] Attention: grouped 2-worker campaign hit PostgreSQL backend exit 2 at 23:45:51 UTC and recovery until 23:46:49; rerun sequentially without changing assertions or timeouts.
 
 ## Orchestration Mode (AI-selected)
 - [x] Mono-branch; implementation sequential, two independent read-only design lenses per harness.
@@ -32,9 +34,10 @@
 - [x] Lot 2: wire separate models after durable publication/projection; select acts from completed chunks, including projection resumes; isolate failures.
 - [x] Lot 3a: enforce off in CronJob renders and mutation guards; retain detection B settings.
 - [x] Lot 3b: document activation, independent classification variables, legacy deprecation and filtered rollback.
-- [ ] Lot 4: test mode compatibility, byte-identical detection, new/changed acts, provenance, manual precedence, bounded work and failures.
+- [x] Lot 4: test mode compatibility, byte-identical detection, new/changed acts, provenance, manual precedence, bounded work and failures.
   - [x] Configuration and shared service tests added; PostgreSQL pipeline fixture prepared.
   - [x] Full pipeline PostgreSQL tests added: byte parity, classification failures, manual thumbs-up, changed input, projection resume.
   - [x] Selection, evidence-read and cancellation isolation tested without changing detection state.
 - [ ] Lot 5: typecheck, lint, targeted test-api including PostgreSQL, test-refresh-renders; down -v.
+  - [x] Targeted test-api: 138 tests across 11 files passed with LOT_MIGRATION_DB_TEST=1 and --maxWorkers=1, including 12 real PostgreSQL tests; render mutation suite: 62 passed plus 4 purge guards.
 - [ ] Lot 6: inspect final diff, push, PR against feat/refresh-single-pass-v2; report PR, files, tests and activation commands; no merge.
