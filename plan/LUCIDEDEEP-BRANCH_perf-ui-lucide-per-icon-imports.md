@@ -51,9 +51,9 @@ Cut the UI build module graph (memory and duration on the small single-build bui
   - [x] `ui/vite-plugins/lucide-deep-imports.ts`, wired in `ui/vite.config.ts` (app build and `build:artifact`).
   - [x] Unit tests: index reader, rewrite with aliases, node_modules importers, untouched forms, unknown names, real Vite build.
   - [x] Lot gate: `make typecheck`, `make lint`, `make test-ui`, `harness verify --category static|unit`.
-- [ ] **Lot 2 — Measures and parity**
+- [x] **Lot 2 — Measures and parity**
   - [x] Before/after: modules, wall time, memory peak, dist size; phase timings and CPU profile.
   - [x] 5 key screens compared on Chrome 9333 (byte-identical screenshots).
-  - [ ] Rendering parity: `make test-e2e ENV=test-lucide-e2e`.
+  - [x] Rendering parity: `make test-e2e ENV=test-lucide-e2e` (9 passed).
 - [ ] **Lot 3 — Delivery**
-  - [ ] PR to `main` with measures and profile; CI green; no merge.
+  - [ ] PR #1082 to `main` with measures and profile; CI green; no merge.
