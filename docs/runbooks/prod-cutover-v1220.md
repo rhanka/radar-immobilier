@@ -9,14 +9,26 @@ Toutes les commandes passent par `rtk make -f deploy/prod-cutover/prod-cutover.m
 `ENV=prod` reste en lecture seule. `ENV=execution-prod` désigne une exécution future autorisée.
 Le kubeconfig est fixé à `$HOME/.kube/radar-prod-tenant-admin.kubeconfig`.
 
+## Décisions owner du 13 novembre
+
+D1 : tout le train part. La préprod devient la prod.
+D2 : comptes, espaces, capacités, gestionnaires et modérateurs identiques à la préprod actuelle.
+D3 : statiques actifs. Live désactivé. API et MCP : contrôle general, git off,
+edge 0, qualification/invitations/redrive false. Le rendu est dans prod-settings.json.
+D4 : créneau au plus tôt après répétition réussie, revue et levée des prérequis.
+RPO accepté : perte des données de PV rafraîchies lors de la restauration. Le refresh les regénère.
+Aucune durée chiffrée de perte n’a été fixée par l’owner. Ne pas en inventer.
+L’archive préliminaire RO, le roster et le plan sont prêts. La répétition reste à lancer par i-cond.
+Voir [les preuves et la commande exacte](../../deploy/prod-cutover/PREPARATION.md).
+
 ## Ordre de bascule
 
 | Ordre | Acteur | Acte et porte |
 | --- | --- | --- |
 | 1 | immo | `precheck ENV=prod`. Relever santé, SHA, verrou, 13 empreintes, taille et disque. |
-| 2 | owner | Autoriser l’archive. Ratifier comptes, droits et plan exact. Signer planSha256 et rosterSha256 dans APPROVAL. |
+| 2 | owner, i-cond | Archive RO autorisée et prise. D2 fixe comptes et droits préprod. Fournir APPROVAL liant les empreintes exactes du roster et du plan privés. |
 | 3 | immo | Sur copie : restore-test, migrate, transition, verify. Démarrer les services locaux isolés. Faire smoke et recette. Les arrêter. Prouver leur terminaison. Faire rollback deux fois. Vérifier schéma 13, données, propriétaires, ACL et accès de l’ancienne release. |
-| 4 | owner | Ratifier fenêtre, RPO et opérateur de reprise. Autoriser la prise du verrou. Aucun GO DDL implicite. |
+| 4 | owner | D4 fixe au plus tôt après répétition et accepte la perte PV regénérable. Désigner l’opérateur de reprise. Autoriser la prise du verrou. Aucun GO DDL implicite. |
 | 5 | k8s | `window-start ENV=execution-prod`. Prendre radar-change-lock, type cutover. Capturer l’ancienne release par API/UI Ready et sondes publiques. Capturer routes, réplicas, suspensions et UID avant arrêt. Conserver le RUN affiché. |
 | 6 | k8s | `window-configure RUN=<RUN> ENV=execution-prod`. Appliquer les ConfigMaps approuvées sous ce même verrou. `window-close RUN=<RUN> ENV=execution-prod`. Fermer les routes et arrêter les consommateurs. Neutraliser les contrôleurs non supportés avant la fenêtre. |
 | 7 | immo | Fournir EVIDENCE avec ce RUN et les UID terminés. `backup RUN=<RUN> ENV=execution-prod`. Sauvegarde finale après drain. SHA-256, S3 et lecture de retour. Restaurer cette archive sur une nouvelle copie. Conserver son reçu restore.json. |
@@ -70,7 +82,7 @@ Ne pas cumuler cette voie avec Rollback release ou le rollback générique du CD
 
 Premier commit DDL : un simple retour d’images ne suffit plus.
 Première réouverture : restaurer l’archive perd les nouvelles écritures.
-Une nouvelle décision owner sur le RPO est alors requise.
+La perte de données PV regénérables est acceptée par D4. Toute perte hors de ce périmètre exige une décision distincte.
 
 ## Recette et prérequis restants
 
@@ -78,14 +90,14 @@ Recette : six périodes et dates ; Pertinence globale ; total/liste/carte ; URL 
 Vérifier exclusions PIIA/dérogations, Écartés et droits de reprise.
 Vérifier MCP réel, refus anonyme et prochain refresh complet.
 Le reclassement exige un compte PO autorisé. Relever cible, latence, SHA et preuves.
-Le tri Chaperon reste interdit par #1080. Les artefacts restent fermés.
+Le tri Chaperon reste interdit par #1080. Les statiques sont actifs selon D3. Le live reste désactivé.
 
-Fournir une archive prod autorisée et récente. Joindre empreinte indépendante, provenance et heure du snapshot.
-Prévoir PostgreSQL 16/PostGIS jetable, clients PostgreSQL 16 et tous les rôles propriétaires/destinataires.
-Charger l’image API au digest épinglé. Fournir roster OIDC, plan 6H et GO exact.
+Archive prod RO prête : 283590496 octets, dump 72 s, deux empreintes identiques.
+PostgreSQL 16/PostGIS et clients conteneurisés préparés. Rôles recréés par copy-up local.
+Images API/UI téléchargées par digest. Roster OIDC et plan 6H privés prêts. Fournir GO exact.
 Fournir preuves réelles de terminaison, documents et compte de recette.
 Préparer UI/API/MCP locaux sur la copie. Neutraliser refresh et sorties prod.
-Prévoir OUTPUT privé, câblage curseur/MCP, fenêtre, RPO et opérateur de reprise.
+OUTPUT privé prévu. Câblage curseur/MCP/statique et opérateur de reprise restent requis.
 Voir [les entrées détaillées](../../deploy/prod-cutover/README.md).
 
 Tests isolés : neuf gardes, contrôleur simulé et PostgreSQL avec archive synthétique.
