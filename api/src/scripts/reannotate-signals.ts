@@ -3,25 +3,17 @@ import { EncryptedFileKeyring } from "@sentropic/llm-mesh-refresh/node";
 import { loadConfig } from "../config.js";
 import { createDb } from "../db/client.js";
 import { createRefreshMesh, refreshErrorDiagnostic } from "../services/graph/refresh-mesh.js";
-import { createRefreshModelPolicy, type RefreshModel } from "../services/graph/refresh-model-policy.js";
+import { createRefreshModelPolicy } from "../services/graph/refresh-model-policy.js";
 import { createReannotationRepository } from "../services/graph/reannotate-repository.js";
 import { createReannotationClassifier, parseReannotationArgs, runReannotation } from "../services/graph/reannotate-signals.js";
-import { loadSinglePassPrompt, singlePassPrimary } from "../services/graph/refresh-single-pass.js";
+import { loadSinglePassPrompt } from "../services/graph/refresh-single-pass.js";
+import { refreshClassifyConfig } from "../services/graph/refresh-classify-config.js";
 import { parsePurgeAiAnnotationsArgs, purgeAiAnnotations } from "../services/graph/purge-ai-annotations.js";
 
 function required(name: string): string {
   const value = process.env[name]?.trim();
   if (!value) throw new Error(`${name} is required`);
   return value;
-}
-function selectedModel(prefix: string): RefreshModel {
-  const provider = required(`${prefix}_PROVIDER`);
-  if (provider !== "openai" && provider !== "gemini") throw new Error(`${prefix}_PROVIDER is invalid`);
-  const effort = required(`${prefix}_REASONING_EFFORT`);
-  if (!["minimal", "low", "medium", "high", "xhigh"].includes(effort)) {
-    throw new Error(`${prefix}_REASONING_EFFORT is invalid`);
-  }
-  return { provider, model: required(`${prefix}_MODEL`), effort };
 }
 
 async function main(): Promise<void> {
@@ -33,8 +25,7 @@ async function main(): Promise<void> {
     return;
   }
   const { apply } = parseReannotationArgs(process.argv.slice(2));
-  const primary = singlePassPrimary();
-  const fallback = selectedModel("REFRESH_FALLBACK");
+  const { primary, fallback, concurrency } = refreshClassifyConfig();
   const timeoutMs = Number(process.env.REFRESH_TIMEOUT_MS ?? 900_000);
   if (!Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 3_600_000) {
     throw new Error("REFRESH_TIMEOUT_MS must be an integer from 1 to 3600000");
@@ -56,7 +47,7 @@ async function main(): Promise<void> {
   const { db, pool } = createDb(loadConfig());
   try {
     const report = await runReannotation({ repository: createReannotationRepository(db),
-      primary, fallback, prompt, apply, now: new Date(), pipelineRunId: randomUUID(),
+      primary, fallback, concurrency, prompt, apply, now: new Date(), pipelineRunId: randomUUID(),
       classify: createReannotationClassifier(models, prompt), signal: controller.signal });
     console.log(JSON.stringify({ kind: "signal-reannotation", ...report }));
     if (report.failures.length) process.exitCode = 1;
