@@ -1,6 +1,6 @@
 import {readFileSync,writeFileSync,existsSync} from 'node:fs';
 import {call} from './seat.mjs';
-import {load,request,home,hash,json} from './inputs.mjs';
+import {load,request,home,hash,json,modes,version} from './inputs.mjs';
 import {privateDir} from '../lib/paths.mjs';
 import {seal,unseal,keyFromEnv} from '../lib/refc1.mjs';
 import {createQuotaGuard,quotaFields} from '../lib/codex-quota.mjs';
@@ -21,7 +21,7 @@ const started=new Date().toISOString();
 const log=`${home}/calls.jsonl`;
 // Read and checksum every request before spawning any child. A filesystem refusal
 // must not leave half of the first worker batch running without a parent receipt.
-const jobs=rows.flatMap(({item})=>['A','B'].map(mode=>({item,mode,req:request(item,mode)})));
+const jobs=rows.flatMap(({item})=>modes.map(mode=>({item,mode,req:request(item,mode)})));
 let cursor=0;
 async function worker(){
  while(cursor<jobs.length&&!stop&&!guard.paused){
@@ -51,7 +51,8 @@ async function worker(){
  }
 }
 await Promise.all(Array.from({length:10},worker));
-const status={half,started,ended:new Date().toISOString(),completed:done,cached,total:jobs.length,
+const status={half,version,modes,weeklyQuotaStart:initial.rateLimits.primary.used_percent,
+ started,ended:new Date().toISOString(),completed:done,cached,total:jobs.length,
  stopped:stop??guard.paused??null,concurrency:10};
 writeFileSync(`${home}/${half}-status.json`,JSON.stringify(status,null,2),{mode:0o600});
 console.log(status);

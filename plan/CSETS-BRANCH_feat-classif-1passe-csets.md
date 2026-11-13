@@ -1,11 +1,12 @@
 # Feature: Single-pass prompt on the C study sets
 
 ## Objective
-- [ ] Measure PR #1099 unchanged on tuning and blind C reference units, Astra low.
+- [ ] Measure classification-only mode B on both C halves, prompts v1 and v2, Astra low.
 
 ## Scope / Guardrails
 - [x] Dedicated worktree and branch `feat/classif-1passe-csets` confirmed.
-- [x] No environment files, Python, production writes, merges or commit trailers.
+- [x] No Python, production writes, merges or commit trailers.
+- [x] Owner 13/11 authorizes make to load the root environment file; never display its contents or key.
 - [x] Standalone Make entry point; native orchestration follows BRCLASSIF-EX1.
 - [x] Private artifacts only in `~/.local/share/radar-classif/1passe-csets`.
 - [x] Source C files and refresh-single-pass code are read-only.
@@ -17,8 +18,10 @@
 - [x] Conditional Paths: none.
 
 ## Feedback Loop
-- [ ] Blind execution awaits the conductor's key-injection mechanism; no plaintext-label bypass.
-- [ ] Push and draft PR await explicit public-publication approval: automatic review rejected publication to the public ADMIN-accessible GitHub repository.
+- [x] Owner 13/11 authorizes blind execution via make; no plaintext-label bypass.
+- [x] Owner 13/11 authorizes publication of measurement code and aggregates; no blind per-unit data.
+- [x] Owner keeps detection B unchanged; complete-pass mode A is abandoned.
+- [x] Published v2 found at commit `6c7cc36c0165253c11e89f41edfe67108dbbd0f9`; hash pinned separately from v1.
 
 ## Orchestration Mode (AI-selected)
 - [x] Mono-branch, no integration or merge.
