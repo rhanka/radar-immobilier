@@ -15,6 +15,7 @@
 - [x] Conditional: Makefile, api/Dockerfile, api/drizzle/**, API classification read paths and UI transport types.
 
 ## Feedback Loop
+- [x] BR1100-EX5: owner requests the PR #1099 CI correction in api/tests/integration/facets-refresh.spec.ts. Expect the documented redacted manual provenance marker after an archive; retain exact payload, identity and visibility assertions. Add no-AI-write and revision stability checks. Rollback: revert this test-only correction.
 - [x] BR1100-EX4: owner requests rollback purge service, reannotation CLI mode and preprod make target, PostgreSQL coverage, shared annotation revisions and exact model labels. Keep readers independent of the flag. Rollback: flag zero, optional explicit AI purge.
 - [x] BR1100-EX1: Makefile change authorized by owner reannotation target; add SKIP_DOTENV to honor no .env reads. Impact: opt-in skip only. Rollback: revert target/conditional.
 - [x] BR1100-EX2: additive migration plus journal and Dockerfile runtime entrypoint/assets required for deployment. Rollback: flag zero; keep additive schema.
@@ -41,6 +42,7 @@
   - [x] Review correction: explicit AI-only purge with optional run/prompt filters; dry-run default, shared writer lock and JSON report.
   - [x] B1: require a filter or explicit --all / PURGE_ALL=1 for apply; validate options in the service; Make regression rejects an empty run id before cluster access.
 - [x] **Lot 4 — Verification and delivery**
+  - [x] PR #1099 CI correction: reproduced the exact facets-refresh payload mismatch; expect the documented redacted manual marker. All 51 facets/class-annotations PostgreSQL tests (14 files), typecheck and lint pass at REFRESH_SINGLE_PASS=0. Local test-only fsync/full_page_writes disabled after observing DROP DATABASE waiting on CheckpointDone; unchanged 20-second timeouts. No production code changed. Independent review unavailable: no h2a_run tool or exact author metadata.
   - [x] B1 gate: typecheck, lint, purge unit/PostgreSQL suites at flag zero, four Make refusal checks and 55 render checks pass; test stack removed with down -v.
   - [x] Review correction coverage: purge dry-run, AI-only apply, filters, human history, prior visibility, idempotence, projection tokens and exact model labels.
   - [x] Review correction gate: typecheck, lint, 38 API tests including 14 PostgreSQL tests at flag zero, 27 targeted UI tests and 55 render checks pass; no timeout increase.
