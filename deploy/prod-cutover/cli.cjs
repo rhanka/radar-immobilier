@@ -26,6 +26,18 @@ async function main(operation = process.argv[2]) {
   let result;
   switch (operation) {
     case 'authorize': r.destination(); r.approvedPlan(); r.pinnedImage(); result = { ok: true }; break;
+    case 'configuration-check': {
+      r.destination(); r.mutationGuard();
+      const manifest = r.json(r.env.CONFIGURATION || r.fail('configuration_required'));
+      const items = manifest.kind === 'List' ? manifest.items : [manifest];
+      if (!Array.isArray(items) || !items.length || items.some(x =>
+        x.kind !== 'ConfigMap' || x.metadata?.namespace !== 'radar-immobilier'
+        || !['radar-api', 'radar-cutover-6h'].includes(x.metadata.name))) r.fail('configuration_scope_mismatch');
+      const plan = items.find(x => x.metadata.name === 'radar-cutover-6h');
+      if (!plan || r.crypto.createHash('sha256').update(plan.data?.['plan.json'] || '').digest('hex')
+        !== r.approvedPlan().planSha256) r.fail('configuration_plan_mismatch');
+      result = { ok: true }; break;
+    }
     case 'reopen-authorize': {
       r.destination(); r.mutationGuard();
       const a = r.json(r.env.APPROVAL);
@@ -34,7 +46,9 @@ async function main(operation = process.argv[2]) {
     }
     case 'rollback-verify':
       r.destination(); r.mutationGuard();
-      if (r.prefix(r.rows()) !== 13 || r.receipt('rollback').run !== r.env.CUTOVER_LOCK_RUN)
+      if (r.prefix(r.rows()) !== 13 || r.receipt('rollback').run !== r.env.CUTOVER_LOCK_RUN
+        || !r.sameIdentity(r.receipt('rollback').destination, r.identity())
+        || r.receipt('rollback').sha256 !== r.receipt('backup').sha256)
         r.fail('rollback_receipt_required');
       result = { ok: true }; break;
     case 'backup': result = backup.backup(); break;
