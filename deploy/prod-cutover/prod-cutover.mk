@@ -11,6 +11,7 @@ export SOURCE_PGHOST SOURCE_PGPORT SOURCE_PGUSER SOURCE_PGDATABASE SOURCE_PGPASS
 export BACKUP_URI BACKUP_ENDPOINT RESTORE_SHA256
 export CUTOVER_API_IMAGE CUTOVER_ALLOW_PROD
 export SMOKE_URL
+export RUN CUTOVER_LOCK_RUN CUTOVER_LOCK_EXECUTOR ROSTER
 export ROOT
 .PHONY: help prerequisites precheck backup restore-test migrate transition verify smoke rehearsal rollback k8s-plan cd-plan test integration down check image-check publish commit lint
 help:
@@ -18,7 +19,9 @@ help:
 prerequisites precheck k8s-plan cd-plan:
 	@cd "$(ROOT)" && timeout --signal=TERM --kill-after=5s 150s bash deploy/prod-cutover/inspect.sh $@
 backup restore-test migrate transition verify smoke rehearsal rollback:
-	@cd "$(ROOT)" && timeout --signal=TERM --kill-after=10s 3600s node deploy/prod-cutover/cli.cjs $@
+	@cd "$(ROOT)" && if [[ "$(ENV)" == execution-prod && "$@" =~ ^(backup|migrate|transition|rollback)$$ ]]; then timeout --signal=TERM --kill-after=10s 3600s bash deploy/prod-cutover/window.sh $@; else timeout --signal=TERM --kill-after=10s 3600s node deploy/prod-cutover/cli.cjs $@; fi
+window-start window-close window-deploy window-rollback-services window-reopen:
+	@cd "$(ROOT)" && timeout --signal=TERM --kill-after=10s 1200s bash deploy/prod-cutover/window.sh $@
 test:
 	@test "$(ENV)" = test-prod-cutover
 	@cd "$(ROOT)" && timeout 90s node --test deploy/prod-cutover/*.test.cjs
