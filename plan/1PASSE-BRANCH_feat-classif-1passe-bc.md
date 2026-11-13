@@ -43,7 +43,8 @@
 - [x] Tests : exemples de l’analyse, seuil de recouvrement, folios, ambiguïté, numéros, états absents et unicité globale des groupes de rappel.
 - [x] Module partagé et adaptateur de recalcul hors ligne des lanes recall, recall1099 et csets. Sous-processus bloqués ; sources des lanes inchangées.
 - [x] Rapport reproductible : avant, correction seule, après reprise, statuts techniques et D3 restant. Budget historique et scellés conservés.
-- [ ] Recalcul avant/après, reprise ciblée des interruptions, rapport et PR draft. D3 suspendu par i-cond à 17 h 57.
+- [x] Recalcul avant/après, reprise ciblée des interruptions, rapport et support de PR draft. D3 suspendu par i-cond à 17 h 57.
+- [x] Résultat : 16 reprises valides ; quota Codex 43 → 45 % ; 476 désaccords, dont 465 D3 restants. Aucun nouvel appel D3.
 - [x] Étape 0 : pré-enregistrement, graine, 100 PV, 50/50, pack et manifestes livrés.
 - [x] Étape 0bis : plan sédimenté, décisions et surface CLI gelées avant appel.
   - [x] Porte : empreintes, 100 textes complets, pack, budget et quota vérifiés. Codex : 26 %.
