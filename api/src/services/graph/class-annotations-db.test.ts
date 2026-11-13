@@ -5,6 +5,7 @@ import { describeDb, fixture, event } from "../facets/scope-db-fixture.js";
 import { workspaceFixture, workspaceSignal } from "../facets/workspace-archive-fixture.js";
 import { writeScopedPersonalFacet } from "../facets/scoped-writer.js";
 import { readScopedByCity } from "../facets/scoped-by-city.js";
+import { readProjectionScope } from "../facets/projection-revisions.js";
 import { readClassAnnotations, writeClassAnnotation, type AiClassAnnotation } from "./class-annotations.js";
 
 const input: AiClassAnnotation = { citySlug: "synthetic-city", nodeType: "Signal", nodeId: "test-ai",
@@ -13,6 +14,22 @@ const input: AiClassAnnotation = { citySlug: "synthetic-city", nodeType: "Signal
   pipelineRunId: "run-1", inputSha256: "b".repeat(64) };
 
 describeDb("single-pass class annotations PostgreSQL", () => {
+  it("should increment the shared manual projection revision for AI changes only", async () => {
+    const f = await workspaceFixture();
+    const { target } = await workspaceSignal(f);
+    const read = (sub = f.contributor.sub) => readProjectionScope(f.db, sub, f.workspaceId, target.citySlug, "signal");
+    const before = await read();
+    const annotation = { ...input, nodeId: target.id, citySlug: target.citySlug };
+    await writeClassAnnotation(f.db, annotation);
+    const after = await read();
+    expect(after.workspaceRevision).toBe(before.workspaceRevision + 1);
+    expect(after.token).not.toBe(before.token);
+    expect((await read(f.moderator.sub)).workspaceRevision).toBe(after.workspaceRevision);
+    await writeClassAnnotation(f.db, annotation);
+    expect((await read()).token).toBe(after.token);
+    await writeClassAnnotation(f.db, { ...annotation, classe: "ecarte", promptSha256: "c".repeat(64) });
+    expect((await read()).workspaceRevision).toBe(after.workspaceRevision + 1);
+  });
   it("should include AI discarded classes in scoped city visibility and retain human precedence", async () => {
     const f = await workspaceFixture();
     const { target, fingerprint } = await workspaceSignal(f);

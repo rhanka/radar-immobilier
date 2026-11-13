@@ -1,5 +1,15 @@
 import { sql } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
+import { workspaces } from "../../db/schema.js";
+import { bumpWorkspaceRevision } from "../facets/projection-revisions.js";
+
+/** AI classes are shared by every workspace; use the manual shared revision counter. */
+export async function bumpClassAnnotationRevision(
+  tx: Parameters<Parameters<Database["transaction"]>[0]>[0], citySlug: string,
+): Promise<void> {
+  const rows = await tx.select({ id: workspaces.id }).from(workspaces).orderBy(workspaces.id);
+  for (const row of rows) await bumpWorkspaceRevision(tx, row.id, citySlug);
+}
 
 export type SignalClass = "pertinent" | "a_surveiller" | "non_classe" | "ecarte";
 export interface ClassAnnotation {
@@ -47,7 +57,10 @@ export async function writeClassAnnotation(db: Database, input: AiClassAnnotatio
          signal_class_annotations.model,signal_class_annotations.effort) IS DISTINCT FROM
         (EXCLUDED.prompt_sha256,EXCLUDED.input_sha256,EXCLUDED.model,EXCLUDED.effort)
       RETURNING node_id`);
-    if (result.rows.length) return "written";
+    if (result.rows.length) {
+      await bumpClassAnnotationRevision(tx, input.citySlug);
+      return "written";
+    }
     const current = await tx.execute(sql`SELECT source FROM signal_class_annotations
       WHERE city_slug=${input.citySlug} AND node_type=${input.nodeType} AND node_id=${input.nodeId}`);
     return current.rows[0]?.source === "manual" ? "manual" : "noop";
