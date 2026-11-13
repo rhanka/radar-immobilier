@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { mcpFinitePositiveField, mcpIntegerField, mcpString, mcpNonEmptyString, mcpBoolean, mcpBbox } from "./zod4-shapes.js";
 import { IMMO_SCOPES } from "./auth-context.js";
+import { SIGNAL_TOOL_DEFINITIONS } from "./signal-contract.js";
 import {
   RAW_GEOJSON_DEFAULT_LIMIT,
   RAW_GEOJSON_MAX_LIMIT,
@@ -245,6 +246,7 @@ export const RAW_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
 
 /** Every tool contract in registration order (domain first, raw-data second). */
 export const ALL_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
+  ...SIGNAL_TOOL_DEFINITIONS,
   ...TOOL_DEFINITIONS,
   ...RAW_TOOL_DEFINITIONS,
 ];
