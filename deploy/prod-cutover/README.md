@@ -11,17 +11,18 @@ Les sources SQL et le journal doivent correspondre aux objets Git du SHA candida
 | --- | --- | --- |
 | `prerequisites` | Liste les binaires disponibles. Aucun environnement chargé. | 150 s |
 | `precheck ENV=prod` | Lectures HTTP, cluster, SQL read-only et disque. Refuse toute porte invalide. | 150 s, requêtes 15 s |
-| `backup` | Dump custom avec ACL, sans propriétaires ; SHA-256 ; S3 ; lecture de retour. Réservé à immo. | dump 840 s, trois transferts 180 s chacun |
-| `restore-test` | Archive vérifiée vers base jetable vide. Ignore ACL/propriétaires. | 1 800 s |
+| `backup` | Dump custom avec ACL et propriétaires ; SHA-256 ; S3 ; lecture de retour. | dump 840 s, trois transferts 180 s chacun |
+| `restore-test` | Archive vérifiée vers base jetable. Rôles préexistants requis. Produit restore.json et backup.json liés à cette copie. | 1 800 s |
 | `migrate` | Préfixe exact ; 31 transactions DDL + reçu Drizzle atomique ; temps par fichier et WAL. | 5 s verrou, 300 s instruction, 540 s fichier |
 | `transition` | Migrateur candidat pour grants de service, puis hook 6H candidat. | 550 s ; garde interne 535 s |
 | `verify` | Lecture de 44 empreintes, espace scoped, barrière, comptes et appartenances. | plafond global 3 600 s |
 | `smoke` | UI, SHA UI/API, DB/S3, refus anonyme espaces/MCP, discovery OAuth. | 6 × 10 s |
-| `rehearsal` | restore-test → migrate → transition → smoke → verify, reprise liée à la même copie. | plafond global 3 600 s |
+| `rehearsal` | restore-test → migrate → transition → verify → rollback → rollback. Services locaux arrêtés. Le smoke et la recette exigent la séquence manuelle. | plafond global 3 600 s |
 | `rollback` | Reset schémas + restauration atomique complète ; ACL originales séparées. | 1 800 s + ACL 60 s |
 | `k8s-plan`, `cd-plan` | Affichent les actes futurs. Aucune exécution cluster/tag/workflow. | 150 s |
 | `test`, `integration`, `down` | Gardes puis DDL natif synthétique ; nettoyage `down -v`. | 90 / 300 s |
-| `lint` | ESLint ciblé dans le runtime de tests Node, puis `down -v`. | 180 s |
+| `lint` | ESLint et test du contrôleur dans le runtime Node, puis `down -v`. | 180 s |
+| `window-*` | Capture, fermeture, déploiement privé et réouverture séparée. Même verrou cutover. Exécution prod future uniquement. | 1 200 s par acte |
 
 Chaque cible d’exécution a un plafond externe de 3 600 secondes. Arrêt puis vérification du journal si issue indéterminée.
 `migration-times.jsonl` conserve chaque durée. `migrations.json` mesure aussi le WAL global ; d’autres écritures peuvent augmenter cette valeur.
@@ -39,9 +40,9 @@ L’owner doit fournir ou faire autoriser :
 
 1. Une archive custom récente de `radar` et son SHA-256 indépendant. Provenance prod et heure du snapshot requises. Ou une autorisation future de dump RO.
 2. Un accès réseau explicite à la DB et le rôle RO existant. CONNECT, USAGE des schémas, SELECT des tables, séquences et journal ; aucune capacité DML/DDL, superuser, réplication ou bypass RLS. Vérifier les grants hérités. Les credentials restent injectés par l’opérateur.
-3. Une instance PostgreSQL 16/PostGIS jetable locale. Base `radar_cutover_<identifiant>`, hôte 127.0.0.1, localhost ou ::1. Aucun port partagé avec UAT. Rôle propriétaire des objets restaurés et accès à `pg_control_system()` pour l’identité physique.
+3. Une instance PostgreSQL 16/PostGIS jetable locale. Base `radar_cutover_<identifiant>`, hôte 127.0.0.1, localhost ou ::1. Aucun port partagé avec UAT. Tous les rôles propriétaires et destinataires de l’archive doivent préexister. Le rôle opérateur doit pouvoir restaurer propriétaires et ACL. Accès à `pg_control_system()` requis.
 4. L’image API candidate déjà présente dans Docker. `image-check` constate son absence locale ; le runner interdit le pull implicite. Référencer `RELEASE=<chemin absolu du manifeste épinglé>`. Le hook réel reste non vérifié tant que ce prérequis manque.
-5. Un plan 6H approuvé, reprenant des comptes réellement présents et approuvés dans la copie prod. Aucun sujet préprod substitué. Voir `../cutover/plan.example.json`.
+5. Un plan 6H approuvé. Les comptes doivent être présents et approuvés dans la copie. PLAN pointe vers ce JSON. ROSTER pointe vers le tableau JSON exact de ses accounts. APPROVAL contient owner, sha, expiresAt, planSha256 et rosterSha256. Ces empreintes SHA-256 portent sur les octets des fichiers. Toute modification, même de format, exige un nouveau GO. Voir `../cutover/plan.example.json`.
 6. Une preuve réelle de terminaison des processus de restauration/migration de la copie. Ne pas inventer de preuve prod. `EVIDENCE` contient run UUID, release SHA complet, instances et completedAt ISO de moins de 24 h.
 7. UI/API/MCP candidats locaux pointant vers cette même copie. Refresh et sortie réseau vers la prod désactivés. `SMOKE_URL=http://127.0.0.1:<port>` doit servir ces services. Un compte de recette local autorisé et les documents nécessaires sont requis.
 
@@ -57,6 +58,13 @@ rtk make -f deploy/prod-cutover/prod-cutover.mk verify ENV=rehearsal
 rtk make -f deploy/prod-cutover/prod-cutover.mk smoke ENV=rehearsal
 ```
 
+Arrêter ensuite tous les services locaux de cette copie. Mettre à jour EVIDENCE avec leur terminaison.
+Garder le même RUN. Lancer deux fois `rollback ENV=rehearsal`.
+Vérifier schéma 13, données, propriétaires, ACL et accès des rôles de l’ancienne release.
+Le reçu backup.json est produit par restore-test. Ne pas copier ou fabriquer un reçu de sauvegarde prod.
+Le reçu contient SHA candidat, empreinte de l’archive, RUN, drain et identité physique de la copie.
+Le contrôle synthétique intégré répète cette restauration et ces accès avec une vraie archive custom.
+
 Les variables sont injectées dans le processus avant ces commandes. Aucun chargement de fichier d’environnement.
 Après restauration, un même reçu permet la reprise aux migrations déjà commises. Une nouvelle copie exige un nouveau OUTPUT.
 Une interruption après commit de restauration mais avant reçu est indéterminée : recréer uniquement cette base jetable, puis restaurer. Ne pas effacer une base live pour débloquer une répétition.
@@ -66,13 +74,24 @@ Ne jamais présenter les 2,649 s du test synthétique comme la mesure de cette r
 
 `ENV=prod` refuse toutes les mutations avant connexion DB. Seuls précontrôle et smoke y sont permis.
 La voie future `ENV=execution-prod` exige CUTOVER_ALLOW_PROD égal au SHA complet et APPROVAL pointant vers une attestation JSON privée.
-Cette attestation doit contenir sha, owner, expiresAt, host, port numérique et database exacts, writersStopped=true, lockFree=true et drain égal au JSON EVIDENCE.
-C’est un verrou opérateur déclaratif. Il ne remplace ni la décision owner ni la preuve k8s. Les UID drainés et les observations restent à joindre au dossier.
+Cette attestation contient sha, owner, expiresAt, host, port numérique et database exacts.
+Elle contient aussi planSha256, rosterSha256, writersStopped=true et drain égal au JSON EVIDENCE.
+Le RUN du drain égale celui de radar-change-lock. lockFree n’est plus une porte.
+Chaque opération mutatrice reprend le verrou existant par CAS. Elle vérifie son exécuteur avant écriture.
+La fenêtre conserve le verrou entre les commandes. Une promotion concurrente doit refuser.
+Pour la réouverture, l’attestation porte aussi reopen=true et run=<RUN>.
+La capture précède le drain. Les variables PLAN, ROSTER, RELEASE et APPROVAL restent explicites.
+Le [runbook](../../docs/runbooks/prod-cutover-v1220.md) fixe l’ordre. Il diffère le tag après recette et réouverture.
+CONFIGURATION est un JSON ConfigMap radar-cutover-6h, ou une List incluant aussi radar-api.
+Le namespace est radar-immobilier. Le texte de plan.json doit avoir exactement l’empreinte du PLAN approuvé.
+window-configure reprend le même verrou avant application. Les rôles et références Secret sont des prérequis provisionnés séparément.
 
 Pour `backup`, SOURCE_PGHOST/PORT désignent le même serveur que PGHOST/PORT. SOURCE_PGDATABASE=radar et SOURCE_PGUSER=radar_db_ro_prod. SOURCE_PGPASSFILE est fourni par l’opérateur. Le mot de passe destination ne peut pas être repris côté source.
 BACKUP_ENDPOINT=https://s3.bhs.io.cloud.ovh.net et BACKUP_URI=s3://sentropic-pgbackup/immo/v1220/<identifiant>. L’empreinte forme la clé de l’objet. Identité S3 injectée hors Git. Droits bucket pour immo, pas de purge ni de changement IAM dans cette lane.
 Au moins quatre fois la taille DB libre est exigée côté dump et côté volume prod au précontrôle. Mesurer séparément la réserve de la copie, les index et le WAL ; ce seuil ne garantit pas le dimensionnement.
-Le dump conserve les ACL, pas les rôles globaux. Inventorier ces rôles avant GO. La copie ignore les ACL ; le rollback les rejoue après retour au schéma 13. Un refus d’ACL maintient le NO-GO.
+Le dump conserve propriétaires et ACL, pas les rôles globaux. Inventorier ces rôles avant GO.
+La copie restaure ces mêmes droits. Le rollback conserve les propriétaires et rejoue les ACL au schéma 13.
+Un refus de restauration ou d’ACL maintient le NO-GO.
 
 Une sauvegarde préliminaire sert à la répétition. Le backup de reprise doit être repris **après le drain final**.
 Restaurer cette archive finale en test. Copier son reçu restore.json dans le dossier opérateur de la prod. `migrate` compare son empreinte au backup final et lie le drain au run.

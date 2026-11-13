@@ -1,6 +1,6 @@
 ---
 status: selection-failed
-target-ref: 1a7ab5332d2f6c3645d656624119db7d86ecb713
+target-ref: ad6bba295687094b23ed1ec873635e1f3bb44b50
 review-author:
   host: codex
   model: unknown
@@ -23,6 +23,18 @@ archive et drain, retrait du mot de passe destination côté source, umask priv�
 grants par le migrateur candidat après vérification des 44 migrations, garde de durée interne au conteneur,
 restauration complète puis ACL originales, reprise de copie déjà migrée sans l’écraser.
 
-Limites conservées : aucune répétition sur copie prod ; sauvegarde/S3/rollback complet et hook 6H réels non exécutés ; attestation de drain déclarative à joindre par k8s ;
-ACL et rôles originaux à valider sur copie ; recette authentifiée et refresh réels non exécutés.
+Correction de la revue indépendante : fenêtre opérateur sous le verrou cutover existant.
+Capture avant drain. Configuration, rollout privé et réouverture séparée sous ce même verrou.
+Le tag vient après recette et réouverture. Une promotion concurrente refuse.
+Le GO porte les empreintes exactes du roster et du plan 6H. Les reçus conservent ces empreintes.
+La copie produit son reçu backup.json. Le rollback conserve propriétaires et ACL.
+
+Tests isolés : neuf gardes et deux scénarios du contrôleur. Succès et échec du smoke public couverts.
+Intégration PostgreSQL : vraie archive synthétique, 13 → 44 → 13, reprise sans DDL et deux rollbacks.
+Données, propriétaires, ACL et accès legacy sont comparés. Les droits ajoutés au candidat sont retirés.
+Ces preuves portent sur des données synthétiques et des frontières cluster simulées.
+
+Limites conservées : aucune répétition sur copie prod. Sauvegarde/S3 et hook 6H candidats non exécutés.
+Drain réel à prouver par k8s. ACL et rôles prod à valider sur copie.
+Recette authentifiée et refresh réels non exécutés.
 La décision de production reste NO-GO jusqu’à ces preuves et à la revue requise.
