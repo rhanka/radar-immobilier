@@ -21,7 +21,7 @@
 ## Feedback Loop
 - [x] clarification : instruction owner prime pour français et absence de trailers.
 - [x] acknowledge : deux revues de conception. Backup final après drain. Comptes préexistants.
-- [ ] deferred : répétition réelle dépend d’une archive prod autorisée et du roster approuvé.
+- [ ] deferred : répétition par i-cond après revue. Archive et roster prêts ; attestation, drain local et services de recette restent requis.
 
 ## Orchestration Mode (AI-selected)
 - [x] Mono-branch. Deux lectures indépendantes de conception. Implémentation unique.
@@ -31,6 +31,7 @@
 - [x] Tests dédiés ENV=test-prod-cutover. Ports réservés API 18821, UI 15321, Maildev 11121.
 
 ## Plan / Todo (lot-based)
+- [x] D1–D4 intégrées au runbook et aux prérequis. RPO PV regénérable acceptée, créneau au plus tôt après répétition. Lint renderer : global inutilisé retiré.
 - [x] Preuves privées prêtes : dump RO 72 s, 283590496 octets, double empreinte identique. Manifeste Actions comparé octet pour octet. Six comptes prod approuvés correspondent au roster.
 - [x] Runtime copie : clients PG16 conteneurisés, image PostGIS épinglée, rôles NOLOGIN locaux et port 25433. Commandes préparées, aucune copie restaurée ni stack démarrée.
 - [x] D3 : rendu prod API/MCP et receiver. Statiques general, git off, edge/qualifications/redrive live fermés. Test du rendu et conservation des octets du plan.
