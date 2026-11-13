@@ -1,10 +1,11 @@
 // Print through the dedicated local Chrome CDP endpoint. Open and close our own tab only.
+/* global WebSocket */
 import { readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 const prefix = process.argv[2] ?? new URL("../../docs/reports/benchmark-v12-2026-11-13", import.meta.url).pathname;
 const htmlPath = resolve(`${prefix}.html`);
 let html = await readFile(htmlPath, "utf8");
-for (const match of [...html.matchAll(/src="(assets\/[^\"]+\.svg)"/g)]) {
+for (const match of [...html.matchAll(/src="(assets\/[^"]+\.svg)"/g)]) {
   const svg = await readFile(resolve(dirname(htmlPath), match[1]));
   html = html.replace(match[0], `src="data:image/svg+xml;base64,${svg.toString("base64")}"`);
 }
@@ -20,7 +21,11 @@ await new Promise((accept, reject) => { ws.onopen = accept; ws.onerror = reject;
 const send = (method, params = {}) => new Promise((accept, reject) => {
   const id = ++sequence;
   const timer = setTimeout(() => { pending.delete(id); reject(new Error(`CDP timeout: ${method}`)); }, 60_000);
-  pending.set(id, (result) => { clearTimeout(timer); result.error ? reject(new Error(result.error.message)) : accept(result.result); });
+  pending.set(id, (result) => {
+    clearTimeout(timer);
+    if (result.error) reject(new Error(result.error.message));
+    else accept(result.result);
+  });
   ws.send(JSON.stringify({ id, method, params }));
 });
 try {
