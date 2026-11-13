@@ -77,4 +77,3 @@ export async function openPerimeter(page: Page, baseURL: string, navigate = true
   await page.goto(`${baseURL}/geo/region/quebec?mode=signal&filter.period=7d&filter.zonage=1&filter.residentiel=1&filter.precoce=1&filter.excludePiia=1&filter.excludeDerogations=1`);
   await expect(page.locator("button.rail-city-row")).toHaveCount(2);
 }
-
