@@ -19,6 +19,21 @@ const cdpTest = base.extend<{ page: Page }>({
 // Ordinary QA/CI uses its configured browser. This lane uses CDP exclusively.
 const test = process.env.SIGNALS_PERIOD_CDP === "1" ? cdpTest : base;
 
+test("should renew the maximum when reopening the closed period menu", async ({ page }) => {
+  if (process.env.SIGNALS_PERIOD_CDP !== "1") await page.goto("/e2e-qa/harness/rail-filter.html");
+  const trigger = page.getByRole("button", { name: /^Période des signaux/ });
+  for (const [instant, label] of [
+    ["2026-03-31T16:00:00Z", "Dernier mois"],
+    ["2026-04-01T16:00:00Z", "Dernière semaine"],
+  ]) {
+    await page.clock.setFixedTime(new Date(instant));
+    await trigger.click();
+    await page.getByRole("option", { name: label, exact: true }).click();
+    await expect(page.locator("#current-range-end")).toHaveText(String(Date.parse(instant)));
+    await expect(trigger).toHaveAttribute("aria-expanded", "false");
+  }
+});
+
 test("should change the signal period with real mouse clicks on every preset", async ({ page }) => {
   if (process.env.SIGNALS_PERIOD_CDP !== "1") {
     await page.goto("/e2e-qa/harness/rail-filter.html");

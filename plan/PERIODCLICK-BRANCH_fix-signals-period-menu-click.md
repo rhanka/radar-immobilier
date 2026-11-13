@@ -9,7 +9,7 @@ Restore real mouse selection in the signal period picker after PR #1084. Count P
 - CDP only at `127.0.0.1:9333`; fresh tabs closed after each run.
 - Isolated period harness `ENV=test-period-click`, UI port 15938, API 18938, Maildev 11938.
 - Full-view facet campaign: `ENV=test-period-perimeter`, UI port 5399, no API/database/mail services. CDP is unchanged.
-- Synthetic UI harness; no backend or data mutation. Always tear down with `down -v`.
+- Synthetic UI harness and isolated PostGIS at port 5539 for API tests; no shared data mutation. Always tear down with `down -v`.
 - No merge. No generated commit or PR trailers.
 
 ## Branch Scope Boundaries (MANDATORY)
@@ -62,6 +62,9 @@ Restore real mouse selection in the signal period picker after PR #1084. Count P
   - [x] Remove isolated stack and volumes (`down -v --remove-orphans`, no remaining project containers).
 
 ## Evidence
+- [x] Review regression against pre-correction sources: selected-city archive pill is 0 instead of 1; API archive cube is empty instead of one signal. Corrected identical tests pass.
+- [x] Final gates: typecheck passes (8 warnings), lint passes (1 warning), test-ui passes (145 files / 1893 tests, 10 todo), targeted API passes (164 tests, real PostGIS).
+- [x] Final CDP 9333: full-view 3 passed (city then zone, axes, unbounded period, exact API calendar bounds); rail harness 2 passed (all presets and renewed max after closure). Every fresh tab closed by fixture cleanup.
 - [x] Review correction: full class cubes precede archive exclusion; visible counters retain their contract. Pertinence always reads every city cube, never incomplete coherent-city nodes.
 - [x] Red unit reproduction loses selected city's archive contribution (5 vs 10). Corrected UI unit passes. API archive/date-window coverage passes: 164 tests, including real isolated PostGIS integration.
 - [x] Chrome 157 CDP at port 9333; real mousePressed/mouseReleased on served preprod and local UI.
