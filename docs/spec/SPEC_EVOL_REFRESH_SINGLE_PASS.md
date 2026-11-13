@@ -74,13 +74,18 @@ Rollback has two explicit steps, per i-cond's reversible decision:
 
 ```sh
 make purge-ai-annotations-preprod SKIP_DOTENV=1 KUBECONFIG=/path/to/dedicated-preprod.kubeconfig ENV=preprod
-make purge-ai-annotations-preprod SKIP_DOTENV=1 KUBECONFIG=/path/to/dedicated-preprod.kubeconfig PURGE_MODE=apply ENV=preprod
+make purge-ai-annotations-preprod SKIP_DOTENV=1 KUBECONFIG=/path/to/dedicated-preprod.kubeconfig PURGE_MODE=apply PIPELINE_RUN_ID=run-id ENV=preprod
+make purge-ai-annotations-preprod SKIP_DOTENV=1 KUBECONFIG=/path/to/dedicated-preprod.kubeconfig PURGE_MODE=apply PURGE_ALL=1 ENV=preprod
 ```
 
-The default is dry-run. Optional `PIPELINE_RUN_ID=<run>` and `PROMPT_SHA256=<sha256>` restrict the purge.
-Both filters together use intersection. Without filters, all `source=ai` annotation rows are selected.
+The default is dry-run. `PIPELINE_RUN_ID=<run>` and `PROMPT_SHA256=<sha256>` restrict the purge.
+Both filters together use intersection. Apply requires a nonempty filter or explicit `PURGE_ALL=1`.
+An empty run id without another filter is refused before cluster access. `PURGE_ALL=1` cannot be combined
+with a filter. An unfiltered dry-run selects all `source=ai` rows without deleting them.
 The command is `reannotate-signals --purge-ai-annotations [--dry-run | --apply]
-[--pipeline-run-id <run>] [--prompt-sha256 <sha256>]`. It needs no model call or model configuration.
+[--all | --pipeline-run-id <run> | --prompt-sha256 <sha256>]`. Both filters may be combined; `--all`
+is exclusive. The CLI forwards `all` to the service, which independently validates the same guard.
+It needs no model call or model configuration.
 The make target uses the reannotation Job template and writer lock. Its JSON report lists the selected
 annotation identities, filters, matched count and deleted count. Repeated apply is a no-op.
 Only the AI overlay is deleted. Manual annotations, human event history and underlying graph properties

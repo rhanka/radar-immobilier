@@ -801,13 +801,14 @@ reannotate-signals-preprod: ## Reclassify recent signals in preprod (REANNOTATIO
 
 PURGE_MODE ?= dry-run
 .PHONY: purge-ai-annotations-preprod
-purge-ai-annotations-preprod: ## Purge AI overlays only (PURGE_MODE=dry-run|apply, optional PIPELINE_RUN_ID / PROMPT_SHA256)
+purge-ai-annotations-preprod: ## Purge AI overlays only (PURGE_MODE=dry-run|apply; apply needs PIPELINE_RUN_ID / PROMPT_SHA256, or PURGE_ALL=1)
 	@test "$(ENV)" = preprod || { echo 'Requires ENV=preprod'; exit 1; }
-	@PURGE_AI_ANNOTATIONS=1 REANNOTATION_MODE="$(PURGE_MODE)" PIPELINE_RUN_ID="$(PIPELINE_RUN_ID)" PROMPT_SHA256="$(PROMPT_SHA256)" KUBECTL="$(KUBECTL)" bash tools/make/reannotate-signals-preprod.sh
+	@PURGE_AI_ANNOTATIONS=1 PURGE_ALL="$(PURGE_ALL)" REANNOTATION_MODE="$(PURGE_MODE)" PIPELINE_RUN_ID="$(PIPELINE_RUN_ID)" PROMPT_SHA256="$(PROMPT_SHA256)" KUBECTL="$(KUBECTL)" bash tools/make/reannotate-signals-preprod.sh
 
 .PHONY: test-refresh-renders
 test-refresh-renders: ## Validate refresh defaults and render mutation guards without a cluster
 	@bash -n tools/make/reannotate-signals-preprod.sh
+	@bash tools/make/purge-ai-annotations-preprod.test.sh
 	@bash deploy/k8s/refresh-cronjobs/verify-renders.test.sh
 
 deploy-db-migrate-k8s: ## Run the one-shot DB migrator Job in the live namespace
