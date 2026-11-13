@@ -1,7 +1,7 @@
 # Exact PR 1099 single-pass recall against B
 
 ## Objective
-- [ ] Measure production B+C detection, visible and P∪S recall on all 100 oracle documents.
+- [x] Measure production B+C detection, visible and P∪S recall on all 100 oracle documents.
 
 ## Scope / Guardrails
 - [x] Direction i-cond; dedicated feat/classif-1passe-recall1099 worktree.
@@ -31,6 +31,6 @@
 ## Plan / Todo (lot-based)
 - [x] Lot 0: rules, source and frozen protocol inspected.
 - [x] Lot 1: import production extraction; freeze source and request fingerprints before calls.
-- [ ] Lot 2: run 100 documents, concurrency 10, quota guard and sealed blind responses.
-- [ ] Lot 3: score with frozen matcher; publish Wilson bounds, tuning misses and baseline comparison.
+- [x] Lot 2: run 100 documents, concurrency 10, quota guard and sealed blind responses.
+- [x] Lot 3: score with frozen matcher; publish Wilson bounds, tuning misses and baseline comparison.
 - [ ] Lot 4: validate aggregates, commit, push and open draft PR; no merge.
