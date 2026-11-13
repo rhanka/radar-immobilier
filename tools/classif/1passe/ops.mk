@@ -35,3 +35,6 @@ quota-claude:
 	node tools/classif/1passe/claude-quota.mjs
 verify:
 	node tools/classif/1passe/verify.mjs
+await-reference:
+	@while ! test -f /home/antoinefa/.local/share/radar-classif/1passe-bc/arbitration/run-summary.json; do sleep 10; done
+	$(MAKE) -f tools/classif/1passe/ops.mk finalize verify ENV=$(ENV)
