@@ -1,8 +1,7 @@
 /**
- * Classement writes/reads through the EXISTING basket API only:
+ * Classement reads and writes through the scoped basket API:
  * - GET  /api/v1/workspaces/:ws/signal-facets/reason-codes (facet_reason_codes, profile immo-steve-2026-09)
- * - POST /api/v1/workspaces/:ws/signal-facets/personal/{select,deselect,discard,restore}
- * - POST /api/v1/workspaces/:ws/signal-facets/workspace/{restore,discard} (moderators)
+ * - POST /api/v1/workspaces/:ws/signal-facets/personal/{select,deselect,discard}
  * - POST personal/reclassify restores archives and applies selection atomically.
  */
 import {
