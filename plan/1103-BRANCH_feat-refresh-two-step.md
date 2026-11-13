@@ -38,6 +38,7 @@
   - [x] Configuration and shared service tests added; PostgreSQL pipeline fixture prepared.
   - [x] Full pipeline PostgreSQL tests added: byte parity, classification failures, manual thumbs-up, changed input, projection resume.
   - [x] Selection, evidence-read and cancellation isolation tested without changing detection state.
-- [ ] Lot 5: typecheck, lint, targeted test-api including PostgreSQL, test-refresh-renders; down -v.
+- [x] Lot 5: typecheck, lint, targeted test-api including PostgreSQL, test-refresh-renders; down -v completed on test-refresh-two-step only.
   - [x] Targeted test-api: 138 tests across 11 files passed with LOT_MIGRATION_DB_TEST=1 and --maxWorkers=1, including 12 real PostgreSQL tests; render mutation suite: 62 passed plus 4 purge guards.
+  - [x] Workspace typecheck and lint passed; existing Svelte/ESLint warnings only. Commands use test volumes and skip ownership bootstrap after initial test-api dependency installation.
 - [ ] Lot 6: inspect final diff, push, PR against feat/refresh-single-pass-v2; report PR, files, tests and activation commands; no merge.
