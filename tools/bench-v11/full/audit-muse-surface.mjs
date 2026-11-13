@@ -4,14 +4,15 @@
 //      reminder tasks, skills line from stderr) + summary on stdout.
 // Reads only the captured JSONL/stderr; no model call.
 import { readFile, readdir, writeFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
 
 const armDir = process.argv[2];
 if (!armDir) throw new Error("usage: audit-muse-surface.mjs <armDir>");
-const dir = `${armDir}/jsonl`;
+const dir = existsSync(`${armDir}/jsonl/attempts`) ? `${armDir}/jsonl/attempts` : `${armDir}/jsonl`;
 const files = (await readdir(dir)).filter((f) => f.endsWith(".jsonl")).sort();
 const docs = [];
 for (const f of files) {
-  const stem = f.replace(/\.jsonl$/, "");
+  const stem = f.replace(/\.jsonl$/, "").replace(/\.\d{13}$/, "");
   const doc = stem.includes("--") ? stem.split("--").slice(1).join("--") : stem;
   const lines = (await readFile(`${dir}/${f}`, "utf8")).split("\n").filter(Boolean);
   const taskKinds = {};

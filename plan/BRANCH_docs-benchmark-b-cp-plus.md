@@ -32,6 +32,7 @@
   - [x] Freeze replay transport to llm-mesh 0.19.3; record prompt hashes, real usage and Codex quota.
 - [ ] Lot 2 — Capture real Muse precision decisions, quotas, access surface, strict score and costs.
   - [x] Verify 99 archived CP messages byte for byte; retain the frozen filter; prepare strict scoring and surface audit.
+  - [x] Preserve every reviewer attempt and audit all captured streams; prepare separate replay and CP+ chart markers.
 - [ ] Lot 3 — Regenerate v12 dossier and SHA256SUMS; preserve published rows; update Focus and D1.
   - [x] Verify regeneration preserves all 42 published rows byte for byte; correct hypothesis A in prose, best-arms table and chart legend.
 - [ ] Lot 4 — Verify artifacts, commit selectively, push, open PR to main. Never merge.
