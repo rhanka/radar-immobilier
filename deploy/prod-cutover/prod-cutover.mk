@@ -12,6 +12,8 @@ export BACKUP_URI BACKUP_ENDPOINT RESTORE_SHA256
 export CUTOVER_API_IMAGE CUTOVER_ALLOW_PROD
 export SMOKE_URL
 export RUN CUTOVER_LOCK_RUN CUTOVER_LOCK_EXECUTOR ROSTER
+export CONFIGURATION
+export COMMENT_FILE
 export ROOT
 .PHONY: help prerequisites precheck backup restore-test migrate transition verify smoke rehearsal rollback k8s-plan cd-plan test integration down check image-check publish commit lint
 help:
@@ -20,7 +22,7 @@ prerequisites precheck k8s-plan cd-plan:
 	@cd "$(ROOT)" && timeout --signal=TERM --kill-after=5s 150s bash deploy/prod-cutover/inspect.sh $@
 backup restore-test migrate transition verify smoke rehearsal rollback:
 	@cd "$(ROOT)" && if [[ "$(ENV)" == execution-prod && "$@" =~ ^(backup|migrate|transition|rollback)$$ ]]; then timeout --signal=TERM --kill-after=10s 3600s bash deploy/prod-cutover/window.sh $@; else timeout --signal=TERM --kill-after=10s 3600s node deploy/prod-cutover/cli.cjs $@; fi
-window-start window-close window-deploy window-rollback-services window-reopen:
+window-start window-configure window-close window-deploy window-rollback-services window-reopen:
 	@cd "$(ROOT)" && timeout --signal=TERM --kill-after=10s 1200s bash deploy/prod-cutover/window.sh $@
 test:
 	@test "$(ENV)" = test-prod-cutover
@@ -51,3 +53,10 @@ publish:
 commit:
 	@test -n "$$MSG"
 	@git -C "$(ROOT)" -c core.hooksPath=/dev/null commit -m "$$MSG"
+pr-body:
+	@cd "$(ROOT)" && gh pr edit 1100 --body-file docs/runbooks/prod-cutover-v1220.md
+pr-comment:
+	@test -n "$$COMMENT_FILE"
+	@cd "$(ROOT)" && gh pr comment 1100 --body-file "$$COMMENT_FILE"
+pr-status:
+	@cd "$(ROOT)" && gh pr checks 1100
