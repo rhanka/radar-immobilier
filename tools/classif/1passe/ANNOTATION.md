@@ -40,3 +40,8 @@ Cet écart de séquencement est déclaré. Aucun prompt d’annotation n’a cha
 
 Suivi : `make -f tools/classif/1passe/ops.mk status ENV=test-classif-1passe`.
 Les données par acte restent privées. Les actes aveugles restent scellés REFC1.
+
+Les 24 résidus temporaires ont été archivés sous REFC1, puis retirés en clair.
+Empreinte des reçus : `87363a6635f9d854fced1829bfb5f71dd6553e8deb6c7074e45943537549b861`.
+La cible `await-reference` finalise et vérifie la référence dès la fin de D3.
+Elle ne commite rien. Elle ne pousse rien. Elle conserve le travail en cas de coupure de lane.
