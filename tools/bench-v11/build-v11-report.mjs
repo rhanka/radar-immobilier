@@ -8,8 +8,14 @@
 import { readFile, writeFile, mkdir, readdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 
+// Mode v12 (BENCH_REPORT=v12): v11 rows + Muse Ember xhigh/max arms
+// (BENCH_EMBER_DIR, default tools/bench-v11) and v10-style charts
+// (charts-v12.mjs) -> docs/reports/benchmark-v12-2026-11-13.* and
+// assets/2026-11/benchmark-v12-*.svg. Without it: the v11 dossier of
+// 2026-11-09, byte for byte.
+const V12 = process.env.BENCH_REPORT === "v12";
 const TMP = process.argv[2] ?? "tmp/bench-wonder";
-const OUT = process.argv[3] ?? "docs/reports/benchmark-v11-2026-11-09";
+const OUT = process.argv[3] ?? (V12 ? "docs/reports/benchmark-v12-2026-11-13" : "docs/reports/benchmark-v11-2026-11-09");
 const ASSETS = "docs/reports/assets/2026-11";
 const fmt = (v, d = 3) => (v === null || v === undefined || Number.isNaN(v)) ? "N-A" : v.toFixed(d);
 const fmtUsd = (v) => (v === null || v === undefined) ? "missing source" : (v < 0.01 ? v.toFixed(5) : v.toFixed(4));
@@ -141,13 +147,13 @@ const argonRow = {
   api: argonApiArm, seat: argonSeatUsd20x, flag: "", isNew: true,
 };
 // ---- Muse Ember arms (update 2026-11-12, benchmark B lane) ----
-// Optional: read only when BENCH_EMBER_DIR points to a bench dir holding
-// full/scores-ember-{xhigh,max}.json (score-ember.mjs). Without it, the
+// v12 mode only: read from BENCH_EMBER_DIR (default tools/bench-v11), which
+// holds full/scores-ember-{xhigh,max}.json (score-ember.mjs). In v11 mode the
 // dossier is emitted exactly as published on 2026-11-09.
 // muse-ember-1.0 API equivalent on real arm tokens (all docs with usage),
 // primary tariff dev.meta.ai/models/muse-ember/ read 2026-11-13:
 // <=200k context 0.10 in / 0.004 cached / 0.50 out ; >200k 0.30 / 0.012 / 1.50.
-const EMBER_DIR = process.env.BENCH_EMBER_DIR ?? null;
+const EMBER_DIR = V12 ? (process.env.BENCH_EMBER_DIR ?? "tools/bench-v11") : null;
 const EMBER_PRICE = { threshold: 200_000, lo: { i: 0.10, c: 0.004, o: 0.50 }, hi: { i: 0.30, c: 0.012, o: 1.50 } };
 const emberDocUsd = (u, withReasoning) => {
   const t = (u.inputTokens > EMBER_PRICE.threshold) ? EMBER_PRICE.hi : EMBER_PRICE.lo;
@@ -171,6 +177,41 @@ if (EMBER_DIR) {
         f1: s.strict.f1, api, seat: null, flag: "", isNew: true } });
   }
 }
+if (V12 && EMBER.length !== 2) throw new Error(`v12 needs scores-ember-{xhigh,max}.json under ${EMBER_DIR}/full`);
+// v12: full versioned model names (sources: v10 report « Noms des modèles »,
+// v11alpha §1, v11 §2). [short prefix, full name, provider id]
+const MODEL_NAMES = [
+  ["Astra", "GPT-6 Astra", "gpt-6-astra"], ["Sol", "GPT-5.6 Sol", "gpt-5.6-sol"], ["Luna", "GPT-5.6 Luna", "gpt-5.6-luna"],
+  ["GPT-4.1", "GPT-4.1", "gpt-4.1"], ["Gemini Argon", "Gemini 4 Argon", "gemini-4-argon-low"], ["Gemini", "Gemini 3.8 Flash", "gemini-3.8-flash"],
+  ["Opus 5.5", "Opus 5.5", "claude-opus-5-5"], ["Opus 5", "Opus 5", "claude-opus-5"], ["Sonnet 5", "Sonnet 5", "claude-sonnet-5"],
+  ["Sonnet 4.6", "Sonnet 4.6", "claude-sonnet-4.6"], ["Muse 1.3", "Muse Spark 1.3", "muse-spark-1.3"],
+  ["Muse Wonder", "Muse Wonder 1.0", "muse-wonder-1.0"], ["Muse Ember", "Muse Ember 1.0", "muse-ember-1.0"],
+  ["Mistral Small 4", "Mistral Small 4", "mistral-small-2603"],
+];
+const CASCADES = {
+  "CP actuel (astra-medium → gemini low)": ["CP actuel (GPT-6 Astra medium → Gemini 3.8 Flash low)", "CP actuel : GPT-6 Astra → Gemini 3.8 Flash", "medium → low"],
+  "CP-low (astra-low → gemini low)": ["CP-low (GPT-6 Astra low → Gemini 3.8 Flash low)", "CP-low : GPT-6 Astra → Gemini 3.8 Flash", "low → low"],
+  C2: ["C2 (Gemini 3.8 Flash low, rejeu, repli GPT-6 Astra)", "C2 : Gemini 3.8 Flash + repli GPT-6 Astra", "low (+ repli)"],
+  C3: ["C3 (Gemini 3.8 Flash low, rejeu, repli GPT-6 Astra)", "C3 : Gemini 3.8 Flash + repli GPT-6 Astra", "low (+ repli)"],
+};
+const EFFORT_WORDS = ["off", "minimal", "low", "medium", "high", "xhigh", "max"];
+function splitLabel(label) {
+  const m = label.match(/^(.*?)\s*(\([^)]*\))?\s*$/);
+  const bare = m[1]; const paren = m[2] ? ` ${m[2]}` : "";
+  const parts = bare.split(" "); const effort = parts.at(-1);
+  if (!EFFORT_WORDS.includes(effort)) return null;
+  const base = parts.slice(0, -1).join(" ");
+  const entry = MODEL_NAMES.find(([short]) => short === base);
+  return entry ? { full: entry[1], effort, paren } : null;
+}
+function fullName(label) {
+  if (CASCADES[label]) return CASCADES[label][0];
+  const s = splitLabel(label);
+  return s ? `${s.full} ${s.effort}${s.paren}` : null;
+}
+const modelOf = (label) => (CASCADES[label] ? CASCADES[label][1] : (splitLabel(label) ? `${splitLabel(label).full}${splitLabel(label).paren}` : label));
+const effortOf = (label) => (CASCADES[label] ? CASCADES[label][2] : (splitLabel(label)?.effort ?? "N-A"));
+let V12_CHARTS = null;
 const ALL = [...OLD, wonderRow, argonRow, ...EMBER.map((e) => e.row)].sort((a, b) => (b.r - a.r) || (b.f1 - a.f1));
 const rankByRecall = new Map(ALL.map((row, i) => [row.label, i + 1]));
 
@@ -454,7 +495,7 @@ if (EMBER.length) {
     md = md.replace(from, to);
   };
   const fr = (v, d = 3) => fmt(v, d).replace(".", ",");
-  const lab = (e) => `Muse Ember ${e.effort}`;
+  const lab = (e) => `Muse Ember 1.0 ${e.effort}`;
   const rk = (e) => rankByRecall.get(e.row.label);
   const tok = (e, k) => Math.round(e.s.tokens[k] ?? 0);
   const both = EMBER.map(lab).join(" et ");
@@ -476,55 +517,131 @@ if (EMBER.length) {
   const EMBER_VERDICT_LONG = `Gemini est retiré du refresh ; la question est de savoir si Ember peut tenir le rôle de secours. À qualité égale, les mesures disent non. ${lab(best)} (P ${fr(best.s.strict.precision)}, R ${fr(best.s.strict.recall)}, F1 ${fr(best.s.strict.f1)})${other ? ` et ${lab(other)} (P ${fr(other.s.strict.precision)}, R ${fr(other.s.strict.recall)}, F1 ${fr(other.s.strict.f1)})` : ""} restent sous Gemini low (P ${fr(gem.p)}, R ${fr(gem.r)}, F1 ${fr(gem.f1)}) et sous Muse Wonder low (P ${fr(wonderRow.p)}, R ${fr(wonderRow.r)}, F1 ${fr(wonderRow.f1)}). Ils se placent au niveau des Muse 1.3 ou en dessous (${m13.map((r) => `${r.label.replace(" (siège)", "")} ${fr(r.f1)}`).join(", ")}). Le point faible est la précision : plus de faux positifs à filtrer en aval. Les points forts sont l'acceptation (${EMBER.map((e) => `${e.s.accepted}/100`).join(" et ")}, refus surtout V) et le coût : équivalent API ${EMBER.map((e) => fmtUsd(e.api)).join(" à ")} USD/doc, soit environ ${ratio(gem.api, best.api)} fois moins que Gemini low (${fmtUsd(gem.api)}) et environ ${ratio(wonderApiBurn, best.api)} fois moins que Wonder low (${fmtUsd(wonderApiBurn)}, burn). ${other ? `${lab(best)} domine ${lab(other)} sur P, R et F1, pour un équivalent API ${fmtUsd(best.api)} contre ${fmtUsd(other.api)}. ` : ""}Conclusion : ${lab(best)} est un secours plausible de dernier rang (disponibilité sur le siège Muse, coût, acceptation), pas un remplaçant de Gemini low. À qualité mesurée, Muse Wonder low reste le meilleur secours mono-modèle du siège Muse. Une cascade CP avec Ember en second étage n'a pas été mesurée : \`not covered\`.`;
 
   // En-tête
-  insertAfter("Rédaction : lane benchmark v11", `\nMise à jour du 12 novembre 2026 (lane benchmark B, exécution 2026-11-13 UTC) : ajout des bras **${both}** (\`muse-ember-1.0\`), même méthode. Aucune valeur publiée le 9 novembre n'est modifiée ; seuls les rangs positionnels sont recalculés sur ${row42} lignes.`);
+  replaceOnce("**Benchmark v11 · Rapport complet · 9 novembre 2026**<br>", "**Benchmark v12 · Rapport complet · 13 novembre 2026**");
+  replaceOnce("Rédaction : lane benchmark v11 (conductor i-cond) ; base v10 (v101b, oracle 674) et v11alpha (oracle 676, #725).",
+    "Rédaction : lane benchmark B (conductor i-cond) ; base v11 (9 novembre 2026), v10 (v101b, oracle 674) et v11alpha (oracle 676, #725).");
+  insertAfter("Rédaction : lane benchmark B", `\n**Ce qui change depuis v11** (dossier \`benchmark-v11-2026-11-09\`, laissé intact) :\n\n- deux nouveaux bras, **${both}** (\`muse-ember-1.0\`, siège Muse), mesurés selon la même méthode, pour évaluer un secours du refresh après le retrait de Gemini (exécution 2026-11-13 UTC) ;\n- les quatre graphiques reprennent le style du v10 (v101b) : couleur = fournisseur, forme = modèle, pointillé = progression d'effort, étoile = cascade, libellé à côté de chaque point ;\n- noms complets des modèles, avec version, dans les tableaux et les graphiques (correspondance en §2) ;\n- tableau « Meilleurs bras » ci-dessous, calculé depuis les données.\n\nToutes les valeurs v11 sont reprises sans modification ; seuls les rangs positionnels sont recalculés sur ${row42} lignes.`);
 
   // 1. Résumé
   insertAfter("- **Gemini Argon low** (`gemini-4-argon-low`", EMBER.map((e) =>
-    `- **${lab(e)}** (\`muse-ember-1.0\`, siège Muse, mise à jour du 12/11) : ${e.s.accepted}/100 acceptés, P ${fmt(e.s.strict.precision)}, R ${fmt(e.s.strict.recall)}, F1 strict ${fmt(e.s.strict.f1)} — rang ${rk(e)} au tri par rappel ; équivalent API ${fmtUsd(e.api)} USD/doc (jetons réels du bras, n=${e.s.tokens.n}) ; USD siège/doc \`missing source\`.`).join("\n")
+    `- **${lab(e)}** (\`muse-ember-1.0\`, siège Muse, nouveau en v12) : ${e.s.accepted}/100 acceptés, P ${fmt(e.s.strict.precision)}, R ${fmt(e.s.strict.recall)}, F1 strict ${fmt(e.s.strict.f1)} — rang ${rk(e)} au tri par rappel ; équivalent API ${fmtUsd(e.api)} USD/doc (jetons réels du bras, n=${e.s.tokens.n}) ; USD siège/doc \`missing source\`.`).join("\n")
     + `\n- **Secours du refresh sans Gemini** (demande owner du 12/11) : ${EMBER_VERDICT_SHORT}`);
 
   // 2. Protocole
-  insertAfter("- **Muse Wonder low** — ", `- **${both}** (mise à jour du 12/11) — modèle exact \`muse-ember-1.0\`, commande \`muse exec --provider meta --model muse-ember-1.0 --contributor-mode off --reasoning-effort {xhigh|max} --prompt-file <prompt gelé> --json\`, siège Muse (palier « Muse Code Max Usage »), runner versionné \`full/run-arm-ember.sh\`, notation \`full/score-ember.mjs\` (même \`scoreSource\` que Wonder). Mêmes prompts gelés : reconstruits par \`prepare-prompts.mjs\` (\`DONE ok=100 fail=0\`, \`verify.json\` identique au \`prompts-verify.json\` versionné) et 100/100 octet-identiques aux prompts du bras Wonder. Corpus : 100/100 textes vérifiés par sha256 contre le manifeste (\`dl-corpus.mjs\`, reprise), une partie téléchargée ou relue depuis les caches PDF locaux, le reste (dont les 11 URL mortes) repris du clone d'exécution Wonder \`tmp/bench-wonder\`, chaque texte revérifié contre le manifeste. Même validateur v9 + provenance, même oracle 676. **\`--contributor-mode off\`** : avec \`--preset empty\`, la CLI résout \`muse-ember-1.0\` vers la variante cachée \`muse-ember-1.0-contributor\` (refus « lack access ») ; la commande du bras, sans \`--preset\`, résout \`model_id\` \`muse-ember-1.0\` avec et sans le drapeau (vérifié le 2026-11-13) ; le drapeau est passé pour figer l'identifiant public, et \`model_id\` \`muse-ember-1.0\` est relevé sur ${EMBER.map((e) => `${e.s.tokens.n}/100`).join(" et ")} documents. Répertoire de travail de la CLI : dossier vide hors dépôt, comme \`/tmp/wonder-run\` pour Wonder (même contexte CLI : espace non approuvé, aucune règle de projet chargée). **Écarts déclarés** : concurrence **4** (Wonder : 10) ; capture \`--json\` sur **le bras complet** (Wonder : bras en texte brut, puis burn \`--json\` n=10) — le texte terminal \`run.terminal.completed\` est extrait par \`extract-usage.mjs\` vers \`raw/\` avant validation, et les jetons réels couvrent tous les documents. Événements quota : ${quotaTxt} ; garde hebdomadaire 85 % ${stopTxt}.`);
+  insertAfter("- **Muse Wonder low** — ", `- **${both}** (nouveau en v12) — modèle exact \`muse-ember-1.0\`, commande \`muse exec --provider meta --model muse-ember-1.0 --contributor-mode off --reasoning-effort {xhigh|max} --prompt-file <prompt gelé> --json\`, siège Muse (palier « Muse Code Max Usage »), runner versionné \`full/run-arm-ember.sh\`, notation \`full/score-ember.mjs\` (même \`scoreSource\` que Wonder). Mêmes prompts gelés : reconstruits par \`prepare-prompts.mjs\` (\`DONE ok=100 fail=0\`, \`verify.json\` identique au \`prompts-verify.json\` versionné) et 100/100 octet-identiques aux prompts du bras Wonder. Corpus : 100/100 textes vérifiés par sha256 contre le manifeste (\`dl-corpus.mjs\`, reprise), une partie téléchargée ou relue depuis les caches PDF locaux, le reste (dont les 11 URL mortes) repris du clone d'exécution Wonder \`tmp/bench-wonder\`, chaque texte revérifié contre le manifeste. Même validateur v9 + provenance, même oracle 676. **\`--contributor-mode off\`** : avec \`--preset empty\`, la CLI résout \`muse-ember-1.0\` vers la variante cachée \`muse-ember-1.0-contributor\` (refus « lack access ») ; la commande du bras, sans \`--preset\`, résout \`model_id\` \`muse-ember-1.0\` avec et sans le drapeau (vérifié le 2026-11-13) ; le drapeau est passé pour figer l'identifiant public, et \`model_id\` \`muse-ember-1.0\` est relevé sur ${EMBER.map((e) => `${e.s.tokens.n}/100`).join(" et ")} documents. Répertoire de travail de la CLI : dossier vide hors dépôt, comme \`/tmp/wonder-run\` pour Wonder (même contexte CLI : espace non approuvé, aucune règle de projet chargée). **Écarts déclarés** : concurrence **4** (Wonder : 10) ; capture \`--json\` sur **le bras complet** (Wonder : bras en texte brut, puis burn \`--json\` n=10) — le texte terminal \`run.terminal.completed\` est extrait par \`extract-usage.mjs\` vers \`raw/\` avant validation, et les jetons réels couvrent tous les documents. Événements quota : ${quotaTxt} ; garde hebdomadaire 85 % ${stopTxt}.`);
 
   // 3. Tableau global
   replaceOnce("40 lignes : 38 lignes v11alpha recopiées sans rescoring, plus Muse Wonder low et Gemini Argon low.",
-    `${row42} lignes : 38 lignes v11alpha recopiées sans rescoring, plus Muse Wonder low et Gemini Argon low (9 novembre), puis ${both} (mise à jour du 12 novembre).`);
-  appendToLine("Lecture : le tri par rappel met Astra medium", ` Mise à jour du 12/11 : ${EMBER.map((e) => `${lab(e)} au rang ${rk(e)} (R ${fr(e.s.strict.recall)}, F1 ${fr(e.s.strict.f1)})`).join(", ")} ; USD siège/doc \`missing source\` (compteur Muse partagé, non attribuable, §6).`);
+    `${row42} lignes : 38 lignes v11alpha recopiées sans rescoring, plus Muse Wonder low et Gemini Argon low (9 novembre), puis ${both} (nouveaux en v12).`);
+  appendToLine("Lecture : le tri par rappel met Astra medium", ` Nouveau en v12 : ${EMBER.map((e) => `${lab(e)} au rang ${rk(e)} (R ${fr(e.s.strict.recall)}, F1 ${fr(e.s.strict.f1)})`).join(", ")} ; USD siège/doc \`missing source\` (compteur Muse partagé, non attribuable, §6).`);
 
   // 4. Détail des bras siège
   insertAfter("| **Gemini Argon low** |", EMBER.map((e) =>
     `| **${lab(e)}** | 100 | ${e.s.accepted} | ${e.s.failClasses.J} · ${e.s.failClasses.V} · ${e.s.failClasses.Pr} · ${e.s.failClasses.T} | ${fmt(e.s.f1n4)} | ${fmt(e.s.p50s, 1)} ⁵ | ${fmt(e.s.p90s, 1)} ⁵ | ${tok(e, "outTokensMean")} réelle (bras) | ${fmtUsd(e.api)} ⁶ | missing source |`).join("\n"));
   insertAfter("¹ Concurrence : Wonder en concurrence 10", `\n⁵ Ember : concurrence 4, temps mur de la dernière tentative par document ; non comparable aux latences v11alpha (concurrence 1) ni à Wonder (concurrence 10). ⁶ Tarif \`muse-ember-1.0\` 0,10 / 0,004 (cache) / 0,50 USD par million de jetons (entrée / cache / sortie, contexte ≤ 200 k ; au-delà 0,30 / 0,012 / 1,50), relevé le 2026-11-13 sur la **page primaire Meta** https://dev.meta.ai/models/muse-ember/ ; formule \`[(I−C)×0,10 + C×0,004 + O×0,50]/10⁶\` par document, palier haut appliqué au-delà de 200 000 jetons d'entrée (${EMBER.map((e) => `${e.effort} : ${e.hiDocs} document(s)`).join(" ; ")}), moyenne sur les jetons réels du bras complet. Avec raisonnement facturé en sortie : ${EMBER.map((e) => `${e.effort} ${fmtUsd(e.apiR)}`).join(", ")} (la page primaire ne dit pas si le raisonnement est inclus dans la sortie).`);
-  insertAfter("Détail Wonder : ", `\nDétail Ember (mise à jour du 12/11) — ${EMBER.map((e) => `${e.effort} : entrée réelle (bras, n=${e.s.tokens.n}) ${tok(e, "inTokensMean")} / sortie réelle ${tok(e, "outTokensMean")} (raisonnement ${tok(e, "reasoningTokensMean")}, cache ${tok(e, "cachedTokensMean")}) ; F1 broad ${fmt(e.s.broad.f1)}, stage-tolerant ${fmt(e.s.stageTolerant.f1)}, soft ${fmt(e.s.soft.f1)} (TP ${e.s.strict.tp}, FP ${e.s.strict.fp}, FN ${e.s.strict.fn})`).join(". ")}.`);
+  insertAfter("Détail Wonder : ", `\nDétail Ember (nouveau en v12) — ${EMBER.map((e) => `${e.effort} : entrée réelle (bras, n=${e.s.tokens.n}) ${tok(e, "inTokensMean")} / sortie réelle ${tok(e, "outTokensMean")} (raisonnement ${tok(e, "reasoningTokensMean")}, cache ${tok(e, "cachedTokensMean")}) ; F1 broad ${fmt(e.s.broad.f1)}, stage-tolerant ${fmt(e.s.stageTolerant.f1)}, soft ${fmt(e.s.soft.f1)} (TP ${e.s.strict.tp}, FP ${e.s.strict.fp}, FN ${e.s.strict.fn})`).join(". ")}.`);
 
   // 5. Latences
-  appendToLine("Les p50/p90 des bras v10/v11alpha", ` Mise à jour du 12/11, Muse Ember en concurrence 4 (non comparable non plus) : ${EMBER.map((e) => `${e.effort} p50 ${fmt(e.s.p50s, 1)} s, p90 ${fmt(e.s.p90s, 1)} s`).join(" ; ")}.`);
+  appendToLine("Les p50/p90 des bras v10/v11alpha", ` Nouveau en v12, Muse Ember en concurrence 4 (non comparable non plus) : ${EMBER.map((e) => `${e.effort} p50 ${fmt(e.s.p50s, 1)} s, p90 ${fmt(e.s.p90s, 1)} s`).join(" ; ")}.`);
 
   // 6. Coûts
-  insertAfter("Statut des sources : aucun tarif ci-dessous", `\nException ajoutée le 12/11 : le tarif \`muse-ember-1.0\` est relevé sur la **page primaire Meta** (URL exacte dans le tableau), concordant avec deux relevés secondaires (llmgateway.io, llmreference.com).`);
+  insertAfter("Statut des sources : aucun tarif ci-dessous", `\nException ajoutée en v12 : le tarif \`muse-ember-1.0\` est relevé sur la **page primaire Meta** (URL exacte dans le tableau), concordant avec deux relevés secondaires (llmgateway.io, llmreference.com).`);
   insertAfter("| `Gemini 4 Argon` (équivalent API)","| `muse-ember-1.0` (équivalent API) | 0,10 entrée / 0,004 cache / 0,50 sortie USD par M jetons (contexte ≤ 200 k) ; 0,30 / 0,012 / 1,50 au-delà | **Page primaire Meta** : https://dev.meta.ai/models/muse-ember/ ; concordant : llmgateway.io/models/muse-ember-1.0, llmreference.com (Meta Model API) | 2026-11-13 |");
   insertBefore("### Synthèse coûts des nouveaux bras", `### Muse Ember xhigh et max (siège Muse, compteur exposé, non attribuable)\n\nPas de burn séparé : la capture \`--json\` couvre le bras complet (100 documents par effort), donc les jetons réels et le relevé \`run.usage.allowance\` existent pour chaque document. Relevés directs \`muse usage --json\` (sans tour modèle) : ${EMBER_USAGE_READINGS}. Relevés \`run.usage.allowance\` (source \`stream\`) : ${EMBER.map((e) => `${e.effort} ${allowTxt(e)}`).join(" ; ")}. Le compteur hebdomadaire est partagé avec toutes les sessions du compte : un aveugle de classification tournait sur le même siège, et d'autres sessions \`muse exec\` du compte étaient actives au lancement. La bascule observée (granularité ±1 point entier) n'est donc pas attribuable aux bras Ember : **USD siège/doc \`missing source\`** pour les deux efforts, jamais estimé.`);
   insertAfter("| Gemini Argon low | ", EMBER.map((e) =>
     `| ${lab(e)} | ${tok(e, "inTokensMean")} (bras n=${e.s.tokens.n}, CLI incluse) | ${tok(e, "outTokensMean")} (+ raisonnement ${tok(e, "reasoningTokensMean")}) | ${fmtUsd(e.api)} | missing source |`).join("\n"));
-  insertAfter("Avertissement « contexte CLI inclus »", `\nMême avertissement pour Muse Ember (mise à jour du 12/11) : les entrées incluent le contexte d'agent de la CLI Muse, non mesuré séparément ; l'équivalent API surestime donc le coût du seul prompt gelé.`);
+  insertAfter("Avertissement « contexte CLI inclus »", `\nMême avertissement pour Muse Ember (nouveau en v12) : les entrées incluent le contexte d'agent de la CLI Muse, non mesuré séparément ; l'équivalent API surestime donc le coût du seul prompt gelé.`);
 
   // 7. Graphiques
-  appendToLine("Graphiques régénérés en Node", ` Mise à jour du 12/11 : les quatre graphiques sont régénérés avec ${both} (rouge / anneau noir comme les autres nouveaux bras) ; Ember est absent du graphique F1-coût siège, faute de part attribuable.`);
+  appendToLine("Graphiques régénérés en Node", ` Nouveau en v12 : les quatre graphiques sont régénérés avec ${both} (rouge / anneau noir comme les autres nouveaux bras) ; Ember est absent du graphique F1-coût siège, faute de part attribuable.`);
 
   // 8. Lecture
-  insertAfter("- Côté coûts, les équivalents API des nouveaux bras", `- **Ember comme secours du refresh (mise à jour du 12/11)** : ${EMBER_VERDICT_LONG}`);
+  insertAfter("- Côté coûts, les équivalents API des nouveaux bras", `- **Ember comme secours du refresh (nouveau en v12)** : ${EMBER_VERDICT_LONG}`);
 
   // 9. Limites et sources
-  insertAfter("- Compteurs de siège : Muse lu", `- Muse Ember (mise à jour du 12/11) : jetons réels sur le bras complet (pas d'échantillon burn) ; concurrence 4 ; compteur hebdomadaire Muse partagé avec un aveugle de classification et d'autres sessions du compte, donc USD siège/doc \`missing source\`. Les runners versionnés \`run-arm-ember.sh\` et \`watch-muse-weekly.sh\` (lecture \`muse usage --json\` toutes les 10 minutes, arrêt à 85 %) enregistrent \`promptSha256\`, \`startedAt\`, \`model_id\` et le pourcentage hebdomadaire par document.`);
+  insertAfter("- Compteurs de siège : Muse lu", `- Muse Ember (nouveau en v12) : jetons réels sur le bras complet (pas d'échantillon burn) ; concurrence 4 ; compteur hebdomadaire Muse partagé avec un aveugle de classification et d'autres sessions du compte, donc USD siège/doc \`missing source\`. Les runners versionnés \`run-arm-ember.sh\` et \`watch-muse-weekly.sh\` (lecture \`muse usage --json\` toutes les 10 minutes, arrêt à 85 %) enregistrent \`promptSha256\`, \`startedAt\`, \`model_id\` et le pourcentage hebdomadaire par document.`);
   insertAfter("- Catalogue AGY du siège", "- **Page primaire Meta** — tarif `muse-ember-1.0` (0,10 / 0,004 / 0,50 USD par M jusqu'à 200 k de contexte ; 0,30 / 0,012 / 1,50 au-delà) : https://dev.meta.ai/models/muse-ember/, consultée le 2026-11-13 ; concordant avec llmgateway.io/models/muse-ember-1.0 et llmreference.com/model/muse-ember/meta-model-api (sorti le 2026-11-09 selon ces pages).");
+
+  // ---- v12 : noms complets, meilleurs bras, graphiques style v10 ----
+  replaceOnce("Ce dossier **v11** (sans « alpha ») intègre", "Le socle **v11** (sans « alpha ») intègre");
+  replaceOnce("Le tri du tableau global v11 est par", "Le tri du tableau global v12 est par");
+  appendToLine("- Coûts : équivalents API calculés depuis les jetons réels", " Exception v12 : le tarif `muse-ember-1.0` est relevé sur la page primaire Meta (§6) ; coût siège Muse Ember 1.0 : `missing source` (compteur partagé, non attribuable).");
+  insertAfter("- Corpus : 100 documents du manifeste v101b", `- **Noms complets des modèles (v12)** — tableaux et graphiques : ${MODEL_NAMES.map(([, full, id]) => `${full} = \`${id}\``).join(" ; ")}. Cascades : CP actuel = GPT-6 Astra medium puis vérification Gemini 3.8 Flash low ; CP-low = GPT-6 Astra low puis Gemini 3.8 Flash low ; C2 / C3 = Gemini 3.8 Flash low avec rejeu puis repli GPT-6 Astra. Sources : rapport v10 §« Noms des modèles », v11alpha §1, ce dossier §2. Le texte courant garde les noms courts (Astra = GPT-6 Astra, etc.).`);
+  // Table rows: full versioned model names.
+  md = md.split("\n").map((line) => {
+    if (!line.startsWith("|")) return line;
+    const cells = line.split("|");
+    const k = /^\s*\d+\s*$/.test(cells[1]) ? 2 : 1;
+    const raw = cells[k].trim();
+    const bold = raw.startsWith("**");
+    const flag = raw.endsWith(" ᵃ") ? " ᵃ" : "";
+    const bare = raw.replace(/ ᵃ$/, "").replace(/\*\*/g, "");
+    const full = fullName(bare);
+    if (!full) return line;
+    cells[k] = ` ${bold ? `**${full}**` : full}${flag} `;
+    return cells.join("|");
+  }).join("\n");
+  // Meilleurs bras (computed from ALL, never hard-coded).
+  const isCascade = (row) => /^(CP|C2$|C3$)/.test(row.label);
+  const pick = (rows, score) => rows.filter((row) => score(row) !== null && Number.isFinite(score(row)))
+    .sort((a, b) => (score(b) - score(a)) || (b.f1 - a.f1))[0];
+  const bestRows = [
+    ["Meilleur F1 strict (toutes lignes)", pick(ALL, (row) => row.f1), (row) => `F1 ${fmt(row.f1)}`],
+    ["Meilleur rappel strict", pick(ALL, (row) => row.r), (row) => `R ${fmt(row.r)}`],
+    ["Meilleur bras seul (hors cascade), F1 strict", pick(ALL.filter((row) => !isCascade(row)), (row) => row.f1), (row) => `F1 ${fmt(row.f1)}`],
+    ["Meilleur rapport F1 / coût — équivalent API", pick(ALL, (row) => (row.api > 0 && row.f1 > 0 ? row.f1 / row.api : null)), (row) => `${(row.f1 / row.api).toFixed(1)} F1 par USD/doc`],
+    ["Meilleur rapport F1 / coût — siège (lignes avec siège attribuable)", pick(ALL, (row) => (row.seat > 0 && row.f1 > 0 ? row.f1 / row.seat : null)), (row) => `${(row.f1 / row.seat).toFixed(1)} F1 par USD/doc`],
+  ];
+  const cell = (v, d = 3) => (v === null || v === undefined ? "N-A (aucune sortie acceptée)" : fmt(v, d));
+  const usd = (v) => (v === null || v === undefined ? "missing source" : fmtUsd(v));
+  const bestMd = [
+    "## Meilleurs bras (v12)",
+    "",
+    `Calculé depuis les ${ALL.length} lignes du tableau global (§3), oracle 676. Coûts en USD hors taxes par document ; \`missing source\` = non mesuré, jamais estimé. Le rapport F1 / coût est F1 strict divisé par le coût par document.`,
+    "",
+    "| Critère | Modèle complet | Effort | P | R | F1 strict | Équiv. API USD/doc | USD siège/doc | Valeur |",
+    "|---|---|---|---|---|---|---|---|---|",
+    ...bestRows.map(([crit, row, val]) => `| ${crit} | ${modelOf(row.label)} | ${effortOf(row.label)} | ${cell(row.p)} | ${cell(row.r)} | ${cell(row.f1)} | ${usd(row.api)} | ${usd(row.seat)} | ${val(row)} |`),
+    "",
+  ].join("\n");
+  insertBefore("## 1. Résumé exécutif", bestMd);
+  // v10-style charts
+  const { chartsV12 } = await import(new URL("./charts-v12.mjs", import.meta.url));
+  V12_CHARTS = chartsV12(ALL.map((row) => ({ label: row.label, name: fullName(row.label), accepted: row.accepted, p: row.p, r: row.r,
+    f1: row.f1, api: row.api, seat: row.seat, isV12: row.label.startsWith("Muse Ember") })));
+  const ls = md.split("\n");
+  const s7 = ls.findIndex((l) => l.startsWith("## 7. Graphiques"));
+  const s8 = ls.findIndex((l) => l.startsWith("## 8. Lecture"));
+  if (s7 < 0 || s8 < s7) throw new Error("section 7/8 anchors");
+  const ck = V12_CHARTS.check;
+  ls.splice(s7 + 1, s8 - s7 - 1,
+    "",
+    "![Précision-rappel nets, style v10 : couleur = fournisseur, forme = modèle, pointillé = progression d'effort ; bras v12 en contour noir](assets/2026-11/benchmark-v12-precision-rappel.svg)",
+    "",
+    "![F1 strict et coût par document : équivalent API plein, siège creux, même bras relié](assets/2026-11/benchmark-v12-f1-cost.svg)",
+    "",
+    "![Acceptation sur 100 documents, couleur = fournisseur, forme = modèle](assets/2026-11/benchmark-v12-acceptation.svg)",
+    "",
+    "![Rappel strict trié décroissant, F1 en point noir](assets/2026-11/benchmark-v12-rappel.svg)",
+    "",
+    `Graphiques v12 générés en Node par \`tools/bench-v11/charts-v12.mjs\` (règle zéro Python), dans le style du v10 (v101b, Matplotlib) : couleur = fournisseur, forme = modèle, pointillé = progression d'effort d'un même modèle (off → minimal → low → medium → high → xhigh → max), étoile = cascade, libellé posé à côté de chaque point avec des traits de rappel courts, courbes de même F1 en gris clair. Noms complets des modèles avec version. Le graphique F1-coût reprend la lecture v10 : équivalent API en plein, siège en creux, reliés pour un même bras ; Muse Ember 1.0, Muse Wonder 1.0 et Muse Spark 1.3 n'ont que le point API (siège \`missing source\`) ; Muse Spark 1.3 max (coupé) et Sonnet 4.6 high, sans équivalent API publié, n'y figurent pas. Bras v12 (Muse Ember 1.0 xhigh et max) : contour noir épais et libellé gras « (v12) ». Contrôle automatique des libellés : ${ck.prLabelOverlaps} chevauchement(s) sur précision-rappel, ${ck.f1CostLabelOverlaps} sur F1-coût ; rendus vérifiés à l'œil.`,
+    "");
+  md = ls.join("\n");
 }
 
 // ================= Emission =================
 await mkdir(ASSETS, { recursive: true });
-await writeFile(`${ASSETS}/benchmark-v11-precision-rappel.svg`, chartPrecisionRecall(), "utf8");
-await writeFile(`${ASSETS}/benchmark-v11-f1-cost.svg`, chartF1Cost(), "utf8");
-await writeFile(`${ASSETS}/benchmark-v11-acceptation.svg`, chartAcceptation(), "utf8");
-await writeFile(`${ASSETS}/benchmark-v11-rappel.svg`, chartRecall(), "utf8");
+if (V12) {
+  await writeFile(`${ASSETS}/benchmark-v12-precision-rappel.svg`, V12_CHARTS.precisionRecall, "utf8");
+  await writeFile(`${ASSETS}/benchmark-v12-f1-cost.svg`, V12_CHARTS.f1Cost, "utf8");
+  await writeFile(`${ASSETS}/benchmark-v12-acceptation.svg`, V12_CHARTS.acceptation, "utf8");
+  await writeFile(`${ASSETS}/benchmark-v12-rappel.svg`, V12_CHARTS.recall, "utf8");
+} else {
+  await writeFile(`${ASSETS}/benchmark-v11-precision-rappel.svg`, chartPrecisionRecall(), "utf8");
+  await writeFile(`${ASSETS}/benchmark-v11-f1-cost.svg`, chartF1Cost(), "utf8");
+  await writeFile(`${ASSETS}/benchmark-v11-acceptation.svg`, chartAcceptation(), "utf8");
+  await writeFile(`${ASSETS}/benchmark-v11-rappel.svg`, chartRecall(), "utf8");
+}
 await writeFile(`${OUT}.md`, md, "utf8");
 
 // HTML: reuse the v10 stylesheet, minimal Markdown conversion for this file.
@@ -561,10 +678,10 @@ function mdToHtml(source) {
   closeTable();
   return html + "</section>";
 }
-const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Benchmark municipal v11 - rapport complet</title><style>${css}</style></head><body>${mdToHtml(md)}</body></html>`;
+const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Benchmark municipal ${V12 ? "v12" : "v11"} - rapport complet</title><style>${css}</style></head><body>${mdToHtml(md)}</body></html>`;
 await writeFile(`${OUT}.html`, html, "utf8");
 console.log(JSON.stringify({
-  out: OUT, rows: ALL.length,
+  out: OUT, rows: ALL.length, v12: V12, chartCheck: V12_CHARTS?.check ?? null,
   wonder: { accepted: wonderScores.accepted, f1: wonderScores.strict.f1, apiBurn: wonderApiBurn },
   argon: { accepted: argonScores.accepted, f1: argonScores.strict.f1, apiArm: argonApiArm, okDocs: argonOk.length, quota: argonQuota },
 }, null, 1));
