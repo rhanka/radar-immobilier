@@ -35,3 +35,6 @@
 - [x] Lot 3 : six tests des refus et test PostgreSQL natif de reprise transactionnelle.
 - [ ] Lot 4 : runbook, prérequis, décisions owner, PR draft.
 - [ ] Lot 5 : revue complémentaire harness. Aucun GO implicite.
+- [x] Runbook, prérequis et décisions rédigés. Syntaxes CJS/Bash et tests ciblés passent.
+- [x] Revue formelle selection-failed documentée : MCP h2a et métadonnées auteur manquants.
+- [x] Image API candidate absente localement ; aucun pull ni hook réel lancé.
