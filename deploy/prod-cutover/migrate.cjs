@@ -75,7 +75,9 @@ function hook(operation) {
   if (m.planSha256 !== planSha256 || m.rosterSha256 !== rosterSha256) r.fail('migration_plan_mismatch');
   const name = `immo-6h-${proof.run}`;
   const begin = Date.now();
-  const variables = { ...r.env, CUTOVER_PLAN: JSON.stringify(plan), CUTOVER_EVIDENCE: JSON.stringify(proof),
+  // The immutable hook accepts a strict four-field contract, not the controller's local receipt.
+  const hookProof = { run: proof.run, release: proof.release, instances: proof.instances, completedAt: proof.completedAt };
+  const variables = { ...r.env, CUTOVER_PLAN: JSON.stringify(plan), CUTOVER_EVIDENCE: JSON.stringify(hookProof),
     CUTOVER_OPERATION: operation, PGOPTIONS: '-c lock_timeout=5000 -c statement_timeout=300000' };
   const names = ['PGHOST', 'PGPORT', 'PGUSER', 'PGDATABASE', 'PGPASSWORD', 'PGOPTIONS', 'PGPASSFILE',
     'CUTOVER_PLAN', 'CUTOVER_EVIDENCE', 'CUTOVER_OPERATION'];
