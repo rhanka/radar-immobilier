@@ -24,7 +24,7 @@ test("AI feedback: negative requires a different class and reason; Cancel writes
   await expect(form.getByRole("button", { name: "Reclasser" })).toBeDisabled();
   await expect(form.getByRole("option", { name: "Pertinent", exact: true })).toHaveCount(0);
   await page.keyboard.press("Escape");
-  await card.locator(".sel-entity-label").click();
+  await page.mouse.click(5, 5);
   await expect(form).toBeVisible();
   await form.getByRole("button", { name: "Annuler" }).click();
   expect(network.filter((entry) => entry.method === "POST" && entry.url.endsWith("/class-feedback"))).toHaveLength(0);
