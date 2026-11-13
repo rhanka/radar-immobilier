@@ -25,4 +25,4 @@
 - [x] Lot 3 — Verify 42 rows against #1083, absent excluded terms, checksums, chart overlaps and repository lint.
 - [x] Validation: 42 identical rows in Markdown/HTML; complete Markdown equals #1083 plus the three hypothesis A wording corrections. Excluded terms absent from Markdown, HTML, extracted PDF text and four SVGs. All 63 checksums pass. No chart label overlaps; rendered charts reviewed.
 - [x] Repository ESLint passes in a network-isolated Node 24 container with read-only CI dependencies: zero errors, one unused-disable warning in api/tests/filtrage-golden-parity.spec.ts:64. No repository configuration changed.
-- [ ] Lot 4 — Commit without trailers, push and open PR to main. Do not merge.
+- [x] Lot 4 — Prepare synchronized report artifacts and checksums for the final commit; hand off through a PR to main without merging.
