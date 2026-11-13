@@ -147,7 +147,7 @@ export async function applyClassement(scope: SignalScope, args: ApplyClassementA
     if (!check.ok) throw new Error(check.error);
   }
   if (nextClass === "ecarte" && !reasonCode) throw new Error("reason_code_required");
-  if (nextClass === current.classe && reasonCode === current.reasonCode) return;
+  if (current.annotationSource !== "ai" && nextClass === current.classe && reasonCode === current.reasonCode) return;
   if (nextClass !== "ecarte" && current.restoreBlockedReason) {
     throw new Error("workspace_capability_required");
   }
@@ -195,6 +195,11 @@ export async function applyClassement(scope: SignalScope, args: ApplyClassementA
     current.classe === basket ? current.reasonCode : null;
   try {
     if (nextClass === "non_classe") {
+      if (current.annotationSource === "ai" && activeBaskets.length === 0) {
+        await postCommand(scope, "deselect", {
+          target, basket: "pertinent", expectedHeadId: expectedHeadFor("pertinent"), displayedFingerprint,
+        });
+      }
       for (const basket of activeBaskets) {
         const newHead = await postCommand(scope, "deselect", {
           target, basket, expectedHeadId: headFor(basket), displayedFingerprint,
