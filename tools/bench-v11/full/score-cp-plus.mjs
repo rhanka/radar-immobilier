@@ -11,6 +11,15 @@ const json = async (path) => JSON.parse(await readFile(path, "utf8"));
 const jsonl = async (path) => (await readFile(path, "utf8")).split("\n").filter(Boolean).map(JSON.parse);
 const documents = manifest.documents;
 const astraMeta = await jsonl(`${astraDir}/meta.jsonl`);
+const completed = astraMeta.filter((row) => row.exit === 0);
+if (completed.length !== documents.length || new Set(completed.map((row) => row.doc)).size !== documents.length)
+  throw new Error("Astra replay must have exactly one completed response per document");
+const intervals = astraMeta.filter((row) => row.startedAt && Number.isFinite(row.ms))
+  .flatMap((row) => [[Date.parse(row.startedAt), 1], [Date.parse(row.startedAt) + row.ms, -1]])
+  .sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+let active = 0; let maxConcurrency = 0;
+for (const [, delta] of intervals) { active += delta; maxConcurrency = Math.max(maxConcurrency, active); }
+if (maxConcurrency > 4) throw new Error(`Astra concurrency exceeds four: ${maxConcurrency}`);
 const astraUsage = [];
 const accepted = new Set();
 const failureClasses = {};
@@ -36,6 +45,7 @@ const sum = (rows, key) => rows.reduce((total, row) => total + (row[key] ?? 0), 
 const astraApi = (sum(astraUsage, "inputTokens") * 10 + sum(astraUsage, "outputTokens") * 50) / 1e6 / documents.length;
 const quota = await jsonl(`${astraDir}/codex-quota.jsonl`);
 const source = { label: astra.arm, accepted: astra.accepted, strict: astra.strict, failureClasses,
+  maxConcurrency,
   usdApiEquivPerDoc: astraApi, usdSeatPerDoc: null,
   tokens: { n: astraUsage.length, input: sum(astraUsage, "inputTokens"), output: sum(astraUsage, "outputTokens") },
   quota: { before: quota[0], after: quota.at(-1), events: astraMeta.filter((row) => row.event === "QUOTA").length } };
@@ -49,8 +59,9 @@ for (const id of accepted) {
   decisions.push(await json(`${cpDir}/decisions/${id}.json`));
 }
 const usages = [];
-for (const file of (await readdir(`${cpDir}/usage`)).filter((name) => name.endsWith(".json"))) {
-  const usage = await json(`${cpDir}/usage/${file}`);
+const usageDir = existsSync(`${cpDir}/usage/attempts`) ? `${cpDir}/usage/attempts` : `${cpDir}/usage`;
+for (const file of (await readdir(usageDir)).filter((name) => name.endsWith(".json"))) {
+  const usage = await json(`${usageDir}/${file}`);
   if (!Number.isFinite(usage.inputTokens) || !Number.isFinite(usage.outputTokens)) throw new Error(`Missing Muse usage: ${file}`);
   if (usage.model !== "muse-spark-1.3") throw new Error(`Unexpected reviewer model: ${usage.model}`);
   usages.push(usage);

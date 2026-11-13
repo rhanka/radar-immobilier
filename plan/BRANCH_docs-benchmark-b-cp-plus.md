@@ -18,6 +18,7 @@
 ## Feedback Loop
 - [x] BRCP-EX1: owner explicitly designates the existing `.claude/worktrees/` worktree. No relocation. No UAT stack.
 - [x] BRCP-EX2: owner requests French report additions and no trailers. These override repository language/footer defaults.
+- [x] Incident: overlapping replay runners could not attest the global concurrency bound. Archive excluded; restart all 100 documents under one global lock and reject overlap in scoring.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch. Sequential extraction then precision filtering. No application change.

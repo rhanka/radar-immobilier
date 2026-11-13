@@ -11,7 +11,7 @@
 // Quota de siège jamais compté comme refus : attente 300 s, reprise (12 au plus).
 import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile, appendFile, readdir } from "node:fs/promises";
-import { existsSync } from "node:fs";
+import { existsSync, openSync, closeSync, unlinkSync } from "node:fs";
 import { spawn, execFileSync } from "node:child_process";
 
 const DIR = process.env.BENCH_DIR ?? new URL("..", import.meta.url).pathname.replace(/\/$/, "");
@@ -46,8 +46,15 @@ const RUN_CWD = process.env.MUSE_CWD ?? `${process.env.TMPDIR ?? "/tmp"}/muse-cp
 await mkdir(RUN_CWD, { recursive: true });
 if ((await readdir(RUN_CWD)).length) throw new Error(`MUSE_CWD ${RUN_CWD} n'est pas vide`);
 const srcDir = `${DIR}/full/arms/astra-medium-rejeu`;
+if (existsSync(`${srcDir}/runner.lock`)) throw new Error("Wait for the Astra replay to finish");
+for (const { id } of manifest.documents) {
+  if (!existsSync(`${srcDir}/validated/medium--${id}.receipt.json`)) throw new Error(`Missing Astra validation: ${id}`);
+}
 const out = `${DIR}/full/arms/cp-plus-muse13-xhigh`;
 for (const d of ["prompts", "jsonl", "raw", "usage", "decisions", "validated"]) await mkdir(`${out}/${d}`, { recursive: true });
+const lockPath = `${out}/runner.lock`;
+closeSync(openSync(lockPath, "wx"));
+process.once("exit", () => { try { unlinkSync(lockPath); } catch { /* preserve original exit */ } });
 const log = (row) => appendFile(`${out}/meta.jsonl`, `${JSON.stringify(row)}\n`);
 const weekly = () => {
   try { return JSON.parse(execFileSync("muse", ["usage", "--json"], { encoding: "utf8", timeout: 60_000 })).allowance?.weekly?.usedPercent ?? null; }
@@ -121,6 +128,8 @@ async function oneDoc(document) {
       execFileSync("node", [`${SCRIPTS}/extract-usage.mjs`, jsonl, `${out}/raw/${id}.txt`, `${out}/usage/${id}.json`], { stdio: "ignore" });
       rawText = await readFile(`${out}/raw/${id}.txt`, "utf8");
       const usage = JSON.parse(await readFile(`${out}/usage/${id}.json`, "utf8"));
+      await mkdir(`${out}/usage/attempts`, { recursive: true });
+      await writeFile(`${out}/usage/attempts/${id}.${Date.parse(startedAt)}.json`, JSON.stringify(usage));
       receipt = { transport: "muse-exec-json", exit: r.code, latencyMs: r.ms, inputSha256: sha(user), promptFileSha256: sha(`${filterPrompt}\n\n${user}`), usage, startedAt, attempt };
       await log({ doc: id, exit: r.code, ms: r.ms, attempt, acts: acts.length, bytes: Buffer.byteLength(rawText), weeklyUsedPercent: usage.allowance?.weekly?.used_percent ?? null, model: usage.model, startedAt });
       if (r.code !== 0 || !rawText.trim()) { summary.failed += 1; await writeFile(`${out}/decisions/${id}.error.json`, JSON.stringify({ ...base, receipt, error: `exit ${r.code}` }, null, 1)); return; }
