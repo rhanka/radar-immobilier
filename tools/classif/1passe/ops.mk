@@ -15,3 +15,11 @@ inspect:
 	node tools/classif/1passe/inspect.mjs
 status:
 	node tools/classif/1passe/status.mjs $(ARGS)
+reconcile:
+	node tools/classif/1passe/reconcile.mjs
+test:
+	node --test tools/classif/1passe/matching.test.mjs
+arbitrate:
+	node tools/classif/1passe/arbitrate.mjs
+surface-agy:
+	agy --help
