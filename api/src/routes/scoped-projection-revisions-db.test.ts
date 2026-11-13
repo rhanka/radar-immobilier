@@ -32,6 +32,10 @@ describeDb("6L1 projection revision HTTP contract", () => {
     const outsider = appFor(f, { sub: f.outsider.sub });
     expect((await outsider.request(tokenUrl)).status).toBe(403);
     const member = appFor(f, { sub: f.contributor.sub });
+    const shownUrl = `${base}/coherent-city?citySlug=${target.citySlug}&mode=signal&view=card&showDiscarded=1`;
+    expect((await anonymous.request(shownUrl)).status).toBe(401);
+    expect((await outsider.request(shownUrl)).status).toBe(403);
+    expect((await member.request(shownUrl.replace("showDiscarded=1", "showDiscarded=0"))).status).toBe(400);
     expect((await member.request(`${base}/projection-revisions?citySlug=bad_city&mode=signal`)).status).toBe(400);
     expect((await member.request(`${base}/projection-revisions?citySlug=${target.citySlug}&mode=lot`)).status).toBe(400);
     const tokenRes = await member.request(tokenUrl);
@@ -62,9 +66,19 @@ describeDb("6L1 projection revision HTTP contract", () => {
     expect(own.signals).toEqual([]);
     expect(own.selection).toEqual([]);
     expect(own.counts.selected).toBe(0);
+    for (const view of ["card", "full"]) {
+      const shown = await (await member.request(
+        `${base}/coherent-city?citySlug=${target.citySlug}&mode=signal&view=${view}&showDiscarded=1`,
+      )).json() as typeof freshCity;
+      expect(shown.signals).toMatchObject([{ id: target.id, facetFingerprint: fingerprint }]);
+      expect(shown.counts).toEqual({ total: 1, hidden: 0, visible: 1, selected: 0 });
+    }
     await writeScopedPersonalFacet(f.db, f.contributor.sub, f.workspaceId,
       { action: "restore", target, expectedHeadId: privateArchive!.id,
         displayedFingerprint: fingerprint, commandKey: randomUUID() });
+    const restored = await (await member.request(shownUrl.replace("&showDiscarded=1", ""))).json() as typeof freshCity;
+    expect(restored.signals).toMatchObject([{ id: target.id, facetFingerprint: fingerprint }]);
+    expect(restored.counts).toEqual({ total: 1, hidden: 0, visible: 1, selected: 0 });
     await writeWorkspaceArchiveFacet(f.db, f.moderator.sub, f.workspaceId,
       { action: "discard", target, reasonCode: "N-NON-RES", expectedHeadId: null,
         displayedFingerprint: fingerprint, commandKey: randomUUID() });
@@ -76,6 +90,10 @@ describeDb("6L1 projection revision HTTP contract", () => {
     expect(city.counts).toEqual({ total: 1, hidden: 1, visible: 0, selected: 0 });
     expect(city.heads).toHaveLength(1);
     expect(city.selection).toHaveLength(0);
+    const sharedShown = await (await member.request(
+      `${base}/coherent-city?citySlug=${target.citySlug}&mode=signal&view=card&showDiscarded=1`,
+    )).json() as typeof freshCity;
+    expect(sharedShown.signals).toMatchObject([{ id: target.id, facetFingerprint: fingerprint }]);
     await writeScopedPersonalFacet(f.db, f.contributor.sub, f.workspaceId,
       { action: "select", target, basket: "pertinent", expectedHeadId: null,
         displayedFingerprint: fingerprint, commandKey: randomUUID() });
