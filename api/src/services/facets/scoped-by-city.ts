@@ -6,7 +6,8 @@
  *
  * Visibility matches `coherent-city`: a target effectively discarded for the
  * workspace (the viewer's personal archive or the workspace archive) is not
- * counted; `showDiscarded` counts the full population. No write, no
+ * counted in visible totals; class cubes always include it for faceted counts.
+ * `showDiscarded` counts the full population in visible totals too. No write, no
  * migration, and another member's personal archive never changes the counts.
  */
 import { and, eq, isNull, or } from "drizzle-orm";

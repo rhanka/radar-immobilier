@@ -76,21 +76,37 @@ describeDb("base-api scoped by-city aggregate", () => {
 
   it("hides effectively discarded targets for the viewer and counts them with showDiscarded=1", async () => {
     const f = await httpFixture();
+    const [node] = await f.data.db.update(graphNodes).set({ effectiveDocumentDates: ["2026-02-10"], props: {
+      refs: [{ publishedAt: "2026-02-10" }],
+      properties: { category: "rezonage", etape: "avis_motion", description: "Projet résidentiel de quatre logements" },
+    } }).where(eq(graphNodes.id, f.signal.target.id)).returning();
+    f.signal.fingerprint = targetFingerprint(node!);
     await workspaceSignal(f.data, "Kept synthetic signal");
     const body = { target: f.signal.target, displayedFingerprint: f.signal.fingerprint,
       expectedHeadId: null, reasonCode: "N-NON-RES" };
     expect((await f.command("personal", "discard", body)).status).toBe(200);
     const own = await (await f.request(f.path("by-city"))).json() as ByCity;
     expect(countFor(own, "synthetic-city")).toBe(1);
+    const archiveCube = (body: ByCity) => body.cities.find((city) => city.citySlug === "synthetic-city")!
+      .filtreCubesByClassement.ecarte;
+    expect(archiveCube(own)).toEqual({ "11100": 1 });
+    const bounded = await (await f.request(f.path("by-city?dateFrom=2026-02-01&dateTo=2026-02-28"))).json() as ByCity;
+    expect(countFor(bounded, "synthetic-city")).toBe(0);
+    expect(archiveCube(bounded)).toEqual({ "11100": 1 });
+    const outside = await (await f.request(f.path("by-city?dateFrom=2026-03-01"))).json() as ByCity;
+    expect(outside.cities).toEqual([]);
     const full = await (await f.request(f.path("by-city?showDiscarded=1"))).json() as ByCity;
     expect(countFor(full, "synthetic-city")).toBe(2);
+    expect(archiveCube(full)).toEqual(archiveCube(own));
     // A personal archive never changes another member's counters.
     const other = await (await f.request(f.path("by-city"), f.data.moderator.sub)).json() as ByCity;
     expect(countFor(other, "synthetic-city")).toBe(2);
+    expect(archiveCube(other)).toEqual({});
     // The workspace archive hides the target for every member.
     expect((await f.command("workspace", "discard", body, f.data.moderator.sub)).status).toBe(200);
     const moderated = await (await f.request(f.path("by-city"), f.data.moderator.sub)).json() as ByCity;
     expect(countFor(moderated, "synthetic-city")).toBe(1);
+    expect(archiveCube(moderated)).toEqual({ "11100": 1 });
   });
 
   it("refuses a non-member and malformed queries without any counter", async () => {

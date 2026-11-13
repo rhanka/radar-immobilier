@@ -16,6 +16,10 @@ Restore real mouse selection in the signal period picker after PR #1084. Count P
 - **Allowed Paths (implementation scope)**:
   - `ui/src/lib/components/maps/SignauxRail.svelte`
   - `ui/src/lib/components/maps/SignauxMapView.svelte`
+  - `ui/src/lib/components/maps/SignauxMapView.classement.test.ts`
+  - `api/src/services/facets/scoped-by-city.ts`
+  - `api/src/services/graph/graph-store{,.test}.ts`
+  - `api/tests/integration/base-api-by-city.spec.ts`
   - `ui/src/lib/signals/signal-filter-counts{,.test}.ts`
   - `ui/e2e-qa/signals-period-click.harness.spec.ts`
   - `ui/e2e-qa/signals-period-perimeter.spec.ts`
@@ -29,6 +33,7 @@ Restore real mouse selection in the signal period picker after PR #1084. Count P
   - None
 
 ## Feedback Loop
+- [x] Owner authorizes #1090 review blocker: retain archived relevance across city/zone selections, compatible API class cubes and regression coverage.
 - [x] Owner authorizes the correction, real mouse regression test and PR.
 - [x] Owner adds perimeter Pertinence counters to the same PR; reuse the city cubes and relevance dimension.
 
@@ -57,6 +62,8 @@ Restore real mouse selection in the signal period picker after PR #1084. Count P
   - [x] Remove isolated stack and volumes (`down -v --remove-orphans`, no remaining project containers).
 
 ## Evidence
+- [x] Review correction: full class cubes precede archive exclusion; visible counters retain their contract. Pertinence always reads every city cube, never incomplete coherent-city nodes.
+- [x] Red unit reproduction loses selected city's archive contribution (5 vs 10). Corrected UI unit passes. API archive/date-window coverage passes: 164 tests, including real isolated PostGIS integration.
 - [x] Chrome 157 CDP at port 9333; real mousePressed/mouseReleased on served preprod and local UI.
 - [x] Preprod entry `/#/carte-signaux` resolves to `/geo/region/quebec?mode=signal`; authenticated existing browser context, no API mocks.
 - [x] Each preset centre hits its own content span. Pointer events are auto, no inert ancestor, popover z-index 80. All pointer/click events arrive and the panel stays open.

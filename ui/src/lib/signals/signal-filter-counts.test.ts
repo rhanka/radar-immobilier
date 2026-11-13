@@ -40,22 +40,21 @@ describe("classementCountsForPerimeter", () => {
   } };
   it("should count each class across cities with all other filters applied", () => {
     expect(classementCountsForPerimeter({
-      entries: [city, { ...city, municipality: B! }], axes: ALL_AXES, exclusions: BOTH, live: null,
+      entries: [city, { ...city, municipality: B! }], axes: ALL_AXES, exclusions: BOTH,
     })).toEqual({ pertinent: 4, a_surveiller: 6, non_classe: 2, ecarte: 10 });
     expect(classementCountsForPerimeter({
-      entries: [city], axes: { ...ALL_AXES, p: false }, exclusions: BOTH, live: null,
+      entries: [city], axes: { ...ALL_AXES, p: false }, exclusions: BOTH,
     })?.pertinent).toBe(3);
   });
-  it("should replace selected city cubes with period-scoped detail classified by the live map", () => {
+  it("should count full city cubes independently of incomplete selected detail", () => {
     expect(classementCountsForPerimeter({
       entries: [city, { ...city, municipality: B! }], axes: ALL_AXES, exclusions: BOTH,
-      live: { slug: A!.slug, nodes: [node("live", {})], classement: new Map() },
-    })).toEqual({ pertinent: 2, a_surveiller: 3, non_classe: 2, ecarte: 5 });
+    })).toEqual({ pertinent: 4, a_surveiller: 6, non_classe: 2, ecarte: 10 });
   });
   it("should distinguish an empty perimeter from a missing relevance dimension", () => {
-    expect(classementCountsForPerimeter({ entries: [], axes: ALL_AXES, exclusions: BOTH, live: null }))
+    expect(classementCountsForPerimeter({ entries: [], axes: ALL_AXES, exclusions: BOTH }))
       .toEqual({ pertinent: 0, a_surveiller: 0, non_classe: 0, ecarte: 0 });
-    expect(classementCountsForPerimeter({ entries: [entry(A, {})], axes: ALL_AXES, exclusions: BOTH, live: null }))
+    expect(classementCountsForPerimeter({ entries: [entry(A, {})], axes: ALL_AXES, exclusions: BOTH }))
       .toBeNull();
   });
 });
