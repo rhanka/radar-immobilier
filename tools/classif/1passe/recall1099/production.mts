@@ -21,6 +21,7 @@ const context = loadRefreshProfileContext({ root: '/workspace', profilePath: '/w
 const docs = documents().sort((a, b) => a.id.localeCompare(b.id));
 const requests: any[] = [], proofs: any[] = [];
 const mode = process.argv[2];
+const validating = mode === 'validate';
 if (mode !== 'prepare') {
   const frozen = json(`${dir}/freeze.json`);
   for (const [path, expected] of Object.entries(frozen.sourceHashes)) {
@@ -53,6 +54,10 @@ for (const d of docs) {
     pages: pages.map((text, i) => ({ page: i + 1, text })) });
   for (const chunk of chunks) {
     const key = `${d.id}--${chunk.id}`;
+    if (validating) {
+      const suffix = d.blind ? 'sealed' : 'json';
+      if (!fs.existsSync(`${home}/responses/${key}.${suffix}`) || fs.existsSync(`${home}/validated/${key}.${suffix}`)) continue;
+    }
     let request: any;
     let result: any;
     try {
