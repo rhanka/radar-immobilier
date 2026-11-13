@@ -2,6 +2,7 @@ import { EVAL_CATEGORIES, USAGE_GROUPS, type EvalLotFilter } from "$lib/maps/eva
 import { ZONE_KIND_GROUPS, type ZoneKindFilter } from "$lib/maps/zone-kind-filter.js";
 import { bAxesFromVivierKey, DEFAULT_B_AXES, keyForVivierB, type BAxes } from "$lib/signals/vivier-view-mode.js";
 import { DEFAULT_VIVIER_B_EXCLUSIONS, type DocumentDateBasis, type VivierBExclusions } from "@radar/domain";
+import { DEFAULT_CLASSEMENT_FILTER, SIGNAL_CLASSES, type ClassementFilter } from "$lib/signals/signal-classement.js";
 import {
   dateBasisForTimeRange,
   defaultSignalTimeRange,
@@ -31,8 +32,11 @@ import {
  *   legacy `dateBasis=scrap` spelling is still read so links shared before
  *   the rename keep working. With a relative period the key is ignored on read
  *   and never written. Document dates are the default and are never written.
+ * - relevance: `classement=<comma-separated classes|none>` in canonical order.
+ *   An absent key retains the default visible classes for existing links.
  */
 export interface GeoFilterState {
+  classement?: ClassementFilter;
   axes: BAxes;
   exclusions: VivierBExclusions;
   timeRange: SignalTimeRange;
@@ -56,6 +60,7 @@ export function unrestrictedTimeRange(): SignalTimeRange {
 /** Every control unchecked and no period bound. */
 export function unrestrictedGeoFilters(): GeoFilterState {
   return {
+    classement: { ...DEFAULT_CLASSEMENT_FILTER },
     axes: { z: false, r: false, p: false },
     exclusions: { piiaSansProjetResidentiel: false, derogationsMineures: false },
     timeRange: unrestrictedTimeRange(),
@@ -150,6 +155,9 @@ export function readGeoFilters(filters: Record<string, readonly string[]>, now =
   const minimum = Number(value("lotMinArea") ?? 0);
   const timeRange = readTimeRange(value, now);
   return {
+    // One parameter, canonical class order; `none` preserves an empty selection.
+    classement: value("classement") === undefined ? { ...DEFAULT_CLASSEMENT_FILTER }
+      : Object.fromEntries(SIGNAL_CLASSES.map(classe => [classe, value("classement")!.split(",").includes(classe)])) as ClassementFilter,
     axes: { z: value("zonage") === "1", r: value("residentiel") === "1", p: value("precoce") === "1" },
     exclusions: {
       piiaSansProjetResidentiel: value("excludePiia") === "1",
@@ -180,6 +188,9 @@ export function writeLotFilters(lots: EvalLotFilter): Record<string, string[]> {
 /** Named restrictions describe the sole residual vivier, never a selectable mode. */
 export function writeGeoFilters(state: GeoFilterState): Record<string, string[]> {
   const filters: Record<string, string[]> = {};
+  if (state.classement && SIGNAL_CLASSES.some(classe => state.classement![classe] !== DEFAULT_CLASSEMENT_FILTER[classe])) {
+    filters.classement = [SIGNAL_CLASSES.filter(classe => state.classement![classe]).join(",") || "none"];
+  }
   const flag = (key: string, enabled: boolean) => { if (enabled) filters[key] = ["1"]; };
   flag("zonage", state.axes.z);
   flag("residentiel", state.axes.r);
