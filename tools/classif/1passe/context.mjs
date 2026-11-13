@@ -21,6 +21,7 @@ export function save(file, value, blind) {
     const temporary = `${file}.${randomUUID()}.sealed`;
     try {
       const receipt = sealToFile(key, Buffer.from(JSON.stringify(value)), temporary);
+      fs.chmodSync(temporary, 0o600);
       fs.renameSync(temporary, `${file}.sealed`);
       return receipt;
     } finally { fs.rmSync(temporary, { force: true }); }

@@ -42,6 +42,7 @@
 - [x] Reprise ciblée : dispatcher dédié, prompts identiques, journal durable, concurrence totale 10 et quota Codex à 90 %.
 - [x] Tests : exemples de l’analyse, seuil de recouvrement, folios, ambiguïté, numéros, états absents et unicité globale des groupes de rappel.
 - [x] Module partagé et adaptateur de recalcul hors ligne des lanes recall, recall1099 et csets. Sous-processus bloqués ; sources des lanes inchangées.
+- [x] Rapport reproductible : avant, correction seule, après reprise, statuts techniques et D3 restant. Budget historique et scellés conservés.
 - [ ] Recalcul avant/après, reprise ciblée des interruptions, rapport et PR draft. D3 suspendu par i-cond à 17 h 57.
 - [x] Étape 0 : pré-enregistrement, graine, 100 PV, 50/50, pack et manifestes livrés.
 - [x] Étape 0bis : plan sédimenté, décisions et surface CLI gelées avant appel.

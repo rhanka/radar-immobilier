@@ -83,7 +83,14 @@ for (const half of ['tuning', 'blind']) {
 summary.before = before;
 summary.matcherSha256 = sha256(fs.readFileSync('tools/classif/1passe/matching.mjs'));
 summary.d3Remaining = Object.values(summary.halves).reduce((s, h) => s + h.d3Remaining, 0);
-summary.argonEstimate = { firstAttempts: summary.d3Remaining, upperWithTwoRetries: 3 * summary.d3Remaining, launched: 0 };
+const d3Entries = fs.readdirSync(`${home}/arbitration`);
+const priorD3Calls = d3Entries.filter((n) => /\.intent-\d+\.(json|sealed)$/.test(n)).length;
+const priorD3Retries = d3Entries.filter((n) => /\.intent-[12]\.(json|sealed)$/.test(n)).length;
+const annotationRetries = JSON.parse(fs.readFileSync(`${home}/annotation/run-summary.json`)).retries;
+const retriesRemaining = Math.max(0, 40 - annotationRetries - priorD3Retries);
+const callsRemaining = JSON.parse(fs.readFileSync('tools/classif/1passe/annotation.json')).arbitration.callsCap - priorD3Calls;
+summary.argonEstimate = { firstAttempts: summary.d3Remaining, priorD3Calls, retriesRemaining,
+  upperWithinRemainingBudget: Math.min(summary.d3Remaining + retriesRemaining, callsRemaining), launched: 0 };
 save(`${home}/reference/tuning-prepared`, rows.filter((r) => !r.blind), false);
 save(`${home}/reference/blind-prepared`, rows.filter((r) => r.blind), true);
 save(`${home}/reference/tuning-inventory`, inventory.filter((r) => !r.blind), false);
