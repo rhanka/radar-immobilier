@@ -4,5 +4,5 @@ export function classAnnotationLabel(node: GraphSignalNode, manualOverride = fal
   const annotation = node.classAnnotation;
   if (manualOverride || annotation?.source !== "ai") return "Manuel";
   const model = annotation.model?.trim() || "modèle inconnu";
-  return `IA · ${model} ${annotation.effort ?? ""} · prompt ${annotation.promptId ?? "inconnu"}`;
+  return `IA${annotation.ambiguous ? " · ambigu" : ""} · ${model} ${annotation.effort ?? ""} · prompt ${annotation.promptId ?? "inconnu"}`;
 }
