@@ -10,7 +10,7 @@ IMAGE ?= node:24-bookworm-slim
 CONCURRENCY ?= 4
 DOCKER = docker run --rm --network host --user $(shell id -u):$(shell id -g) -v $(ROOT):$(ROOT) -v $(RUN_DIR):$(RUN_DIR) -w $(RUN_DIR)/empty -e BENCH_DIR=$(BENCH_DIR)
 SCRIPT = $(BENCH_DIR)/full
-.PHONY: setup freeze replay validate filter audit score report checksums
+.PHONY: setup freeze replay validate filter audit score report pdf checksums
 setup:
 	@mkdir -p "$(RUN_DIR)/empty"
 	@test ! -e "$(KEYRING_COPY)"
@@ -30,5 +30,7 @@ score:
 	@$(DOCKER) $(IMAGE) node $(SCRIPT)/score-cp-plus.mjs
 report:
 	@$(DOCKER) -v $(BENCH_REFERENCE):$(BENCH_REFERENCE):ro -w $(ROOT) -e BENCH_REPORT=v12 $(IMAGE) node $(BENCH_DIR)/build-v11-report.mjs $(BENCH_REFERENCE)
+pdf:
+	@$(DOCKER) $(IMAGE) node $(BENCH_DIR)/print-report.mjs
 checksums:
 	@cd $(BENCH_DIR) && sha256sum -c SHA256SUMS
