@@ -169,6 +169,7 @@ make -f tools/bench-v11/cp-plus.mk filter CONCURRENCY=4 ENV=test-benchmark-b
 make -f tools/bench-v11/cp-plus.mk audit ENV=test-benchmark-b
 make -f tools/bench-v11/cp-plus.mk score ENV=test-benchmark-b
 make -f tools/bench-v11/cp-plus.mk report BENCH_REFERENCE=<preuves-v11> BENCH_REPORT=v12 ENV=test-benchmark-b
+make -f tools/bench-v11/cp-plus.mk pdf ENV=test-benchmark-b
 make -f tools/bench-v11/cp-plus.mk checksums ENV=test-benchmark-b
 ```
 
@@ -177,6 +178,8 @@ runner coupe aussi ses appels en cours. Un quota illisible arrête le bras.
 Le quota ne devient jamais un refus. Les jetons réels, décisions, reçus et
 surface d'accès sont conservés sous `full/arms/`. Le coût siège reste
 `missing source` si le compteur partagé ne permet pas une attribution.
+Le target `pdf` utilise le navigateur local dédié au port 9333. Il ouvre
+son propre onglet, incorpore les SVG, produit le PDF, puis ferme cet onglet.
 
 ### 6. Burns (échantillon fixe de 10 documents, capture d'usage)
 
