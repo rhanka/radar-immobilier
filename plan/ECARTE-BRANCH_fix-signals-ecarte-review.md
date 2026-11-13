@@ -48,9 +48,9 @@ Fix #760 P1 while preserving #1090 period selection and perimeter counters. P2 a
   - [x] Align totals and Filtre with the selected relevance classes.
   - [x] Confirm restore and reload persistence.
 - [ ] **Lot 2 — Validation and delivery**
-  - [ ] Run typecheck, lint, test-ui, concerned API tests and combined browser suite.
-  - [ ] Tear down every isolated stack with down -v and close disposable browser tabs.
-  - [ ] Check #1090 merge state; rebase when merged.
+  - [x] Run typecheck, lint, test-ui, concerned API tests and combined browser suite.
+  - [x] Tear down every isolated stack with down -v and close disposable browser tabs.
+  - [x] Check #1090 merge state; rebase when merged.
   - [ ] Push and open PR referencing #760, listing P3 without implementing them.
 
 ## Evidence
@@ -59,3 +59,5 @@ Fix #760 P1 while preserving #1090 period selection and perimeter counters. P2 a
 - [x] Browser coverage uses Playwright clicks over the full application, synthetic stateful API responses, and disposable CDP 9333 tabs. Real PostGIS API tests independently cover visibility, authorization, fingerprints, restoration and archive scopes. This is not a live preprod write campaign.
 - [x] UI: 145 files, 1895 passing tests, 10 todo. API: 19 files, 272 passing tests. Typecheck: 0 errors / 8 warnings after copying the complete isolated dependency tree. Lint: 0 errors / 1 warning.
 - [x] Harness scope and branch checks pass. Independent consensus unavailable: exact author model/effort metadata and h2a_run MCP are unavailable; no consensus claimed (tmp/review.md).
+- [x] Rebased on 0742dae98 after #1090 merged. Final gates repeated on the rebased sources: typecheck and lint pass; UI 1895 tests; API 272 tests; browser 5 scenarios in 14.7 seconds. Logs: tmp/final-{typecheck,lint,test-ui,test-api,test-e2e}.log.
+- [x] CDP target inventory contains no tab at this lane's origin. Database and runtime teardown use down -v. Root checkout and UAT services are untouched.
