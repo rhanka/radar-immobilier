@@ -21,7 +21,7 @@ async function setup() {
     classe: "pertinent", reason: "Residential density increase", source: "ai", model: "gpt-6-astra",
     effort: "low", promptId: "p0-v1", promptSha256: "a".repeat(64), pipelineRunId: "run-1", inputSha256: "b".repeat(64) };
   await writeClassAnnotation(f.db, ai);
-  const annotation = (await readClassAnnotations(f.db, target.citySlug)).get(`Signal:${target.id}`)!;
+  const annotation = (await readClassAnnotations(f.db, target.citySlug, { includeDates: true })).get(`Signal:${target.id}`)!;
   const command: ClassFeedbackCommand = { target, displayedFingerprint: fingerprint, scope: "personal", verdict: "up",
     annotation: { source: "ai", model: ai.model, classe: ai.classe, promptSha256: ai.promptSha256,
       pipelineRunId: ai.pipelineRunId, updatedAt: annotation.updatedAt! },
@@ -165,7 +165,7 @@ describeDb("human classification feedback PostgreSQL", () => {
   it("should validate an AI archive without fabricating a reason and preserve audit through purge", async () => {
     const f = await setup();
     await writeClassAnnotation(f.db, { ...f.ai, classe: "ecarte", inputSha256: "c".repeat(64) });
-    const ai = (await readClassAnnotations(f.db, f.target.citySlug)).get(`Signal:${f.target.id}`)!;
+    const ai = (await readClassAnnotations(f.db, f.target.citySlug, { includeDates: true })).get(`Signal:${f.target.id}`)!;
     await f.submit({ ...f.command, scope: "workspace", annotation: { ...f.command.annotation,
       classe: "ecarte", updatedAt: ai.updatedAt! } }, f.moderator.sub);
     const feedback = await readClassFeedback(f.db, f.contributor.sub, f.workspaceId);

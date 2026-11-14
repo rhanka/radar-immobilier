@@ -72,11 +72,14 @@ export async function writeClassAnnotation(db: Database, input: AiClassAnnotatio
   });
 }
 
-export async function readClassAnnotations(db: Database, citySlug: string): Promise<Map<string, ClassAnnotation>> {
+/** Dates are opt-in for scoped feedback; legacy public cards retain main's response shape. */
+export async function readClassAnnotations(db: Database, citySlug: string,
+  options: { includeDates?: boolean } = {}): Promise<Map<string, ClassAnnotation>> {
   const result = await db.execute(sql`SELECT city_slug AS "citySlug", node_type AS "nodeType", node_id AS "nodeId",
     classe, reason, ambiguous, source, model, effort, prompt_id AS "promptId", prompt_sha256 AS "promptSha256",
-    pipeline_run_id AS "pipelineRunId", input_sha256 AS "inputSha256",
-    created_at::text AS "createdAt", updated_at::text AS "updatedAt" FROM signal_class_annotations
+    pipeline_run_id AS "pipelineRunId", input_sha256 AS "inputSha256"
+    ${options.includeDates ? sql`, created_at::text AS "createdAt", updated_at::text AS "updatedAt"` : sql``}
+    FROM signal_class_annotations
     WHERE city_slug = ${citySlug}`);
   const annotations = new Map(result.rows.map((row) => {
     const value = row as unknown as ClassAnnotation;

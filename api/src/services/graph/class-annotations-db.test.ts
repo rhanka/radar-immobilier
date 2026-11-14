@@ -109,7 +109,7 @@ describeDb("single-pass class annotations PostgreSQL", () => {
   it("should persist exact provenance and no-op unchanged model, prompt and input", async () => {
     const f = await fixture();
     expect(await writeClassAnnotation(f.db, input)).toBe("written");
-    expect((await readClassAnnotations(f.db, input.citySlug)).get("Signal:test-ai")).toMatchObject(input);
+    expect((await readClassAnnotations(f.db, input.citySlug)).get("Signal:test-ai")).toEqual(input);
     expect(await writeClassAnnotation(f.db, { ...input, pipelineRunId: "run-2" })).toBe("noop");
     expect((await readClassAnnotations(f.db, input.citySlug)).get("Signal:test-ai")?.pipelineRunId).toBe("run-1");
     expect(await writeClassAnnotation(f.db, { ...input, ambiguous: true, promptSha256: "c".repeat(64) })).toBe("written");
