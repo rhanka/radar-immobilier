@@ -42,3 +42,5 @@
   - [x] Targeted test-api: 138 tests across 11 files passed with LOT_MIGRATION_DB_TEST=1 and --maxWorkers=1, including 12 real PostgreSQL tests; render mutation suite: 62 passed plus 4 purge guards.
   - [x] Workspace typecheck and lint passed; existing Svelte/ESLint warnings only. Commands use test volumes and skip ownership bootstrap after initial test-api dependency installation.
 - [x] Lot 6: final diff inspected; branch pushed; PR #1106 opened against feat/refresh-single-pass-v2 with design, validation, activation and rollback. No deployment or merge. CI remains pending; final review belongs to i-cond.
+- [x] Review correction: integrate #1099 head 8e4b8e2ba into v2, then merge updated v2 locally; no PR merge.
+- [x] Review correction: bound classification SQL sessions with statement/lock timeouts and destroy their dedicated connection on cancellation; bound each act and run.
