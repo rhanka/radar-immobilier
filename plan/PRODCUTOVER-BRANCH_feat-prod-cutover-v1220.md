@@ -8,7 +8,7 @@
 - [x] Prod en lecture seule. Dump RO autorisé par D4 le 13/11. Aucun tag, migration ou écriture cluster.
 - [x] Aucun .env, secret affiché, kubeconfig par défaut ou exécution Python.
 - [x] Worktree tmp/prod-cutover, branche feat/prod-cutover-v1220 depuis origin/main.
-- [x] ENV toujours dernier. Aucune fusion. Aucun trailer de contribution.
+- [x] ENV toujours dernier. Merge prep autorisé. Aucune fusion dans main. Aucun trailer de contribution.
 - [x] Opérations applicatives en Node et binaires natifs selon instruction owner.
 
 ## Branch Scope Boundaries (MANDATORY)
@@ -21,7 +21,7 @@
 ## Feedback Loop
 - [x] clarification : instruction owner prime pour français et absence de trailers.
 - [x] acknowledge : deux revues de conception. Backup final après drain. Comptes préexistants.
-- [ ] deferred : répétition par i-cond après revue. Archive et roster prêts ; attestation, drain local et services de recette restent requis.
+- [ ] deferred : répétition et recette par i-cond après revue. Archive, roster, attestation locale et services préparés. Preuves Docker produites au lancement. PV et compte Product Owner de recette à fournir.
 
 ## Orchestration Mode (AI-selected)
 - [x] Mono-branch. Deux lectures indépendantes de conception. Implémentation unique.
@@ -31,6 +31,8 @@
 - [x] Tests dédiés ENV=test-prod-cutover. Ports réservés API 18821, UI 15321, Maildev 11121.
 
 ## Plan / Todo (lot-based)
+- [x] Validation : 13 gardes, huit scénarios contrôleur/IdP, ESLint, import de l’image, Compose et intégration PostgreSQL réussis. Budgets installation/scénarios/nettoyage séparés après un nettoyage interrompu. Relance complète réussie, down -v terminé.
+- [x] Un refus CD conserve une fenêtre reprenable avec le même RUN. Le marqueur manuel est sauvé sous verrou avant la porte d’inactivité.
 - [x] Authentification de recette testée : refus hors roster et mauvais mot de passe, nonce, PKCE, code unique, rotation refresh et délégation MCP. Readiness locale et OUTPUT distinct par répétition.
 - [x] Répétition en une commande : attestation locale liée aux empreintes, restore, DDL, double 6H, vérification, services et smoke local. Échec : nettoyage down -v. Recette manuelle avant double rollback.
 - [x] Stockage de recette : buckets locaux, CORS borné et import privé de documents par empreinte. Aucun téléchargement de services prod.
