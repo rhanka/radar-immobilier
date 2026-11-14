@@ -10,7 +10,7 @@ const primary = { provider: "openai" as const, model: "gpt-6-astra", effort: "me
 const fallback = { provider: "gemini" as const, model: "gemini-3.8-flash", effort: "low" };
 const prompt = { id: "p0-v1", sha256: "a".repeat(64), text: "instructions" };
 const now = new Date("2026-11-13T12:00:00.000Z");
-const decision = { classe: "pertinent" as const, reason: "Residential units", ...primary };
+const decision = { classe: "pertinent" as const, reason: "Residential units", ambiguous: false, ...primary };
 function fixture(initial?: ReannotationIdentity) {
   let annotation = initial;
   const write = vi.fn(async (input: ReannotationWrite) => { annotation = input; return "written" as const; });
@@ -89,8 +89,8 @@ describe("30-day signal reannotation", () => {
           expect(request.prompt).toContain(prompt.text);
           expect(request.prompt).not.toContain("Previous model answer");
           const output = model.provider === "openai"
-            ? { classe: "ecarte", reason: "Invalid class for this reason", reasonCode: "P-RESIDENTIAL" }
-            : { classe: "pertinent", reason: "Residential project", reasonCode: "P-RESIDENTIAL" };
+            ? { classe: "ecarte", reason: "Invalid class for this reason", reasonCode: "P-DENSITE", ambiguous: false }
+            : { classe: "pertinent", reason: "Residential project", reasonCode: "P-DENSITE", ambiguous: false };
           await request.validateResponse?.(JSON.stringify(output));
           return { status: "completed", mode: "mesh", provider: model.provider, model: model.model, audit: {} };
         } }),
@@ -98,7 +98,7 @@ describe("30-day signal reannotation", () => {
     expect(await createReannotationClassifier(policy, prompt)({ ...signal, props: {
       ...signal.props as object, properties: { classAnnotation: { reason: "Previous model answer" } },
     } })).toEqual({ classe: "pertinent",
-      reason: "Residential project", model: fallback.model, effort: fallback.effort });
+      reason: "Residential project", ambiguous: false, model: fallback.model, effort: fallback.effort });
     expect(calls).toEqual([primary.model, fallback.model]);
   });
 });

@@ -30,7 +30,7 @@ describeDb("single-pass extraction to PostgreSQL annotation", () => {
       reglement_number: oracle.bylawNumber, citations: [{ page: oracle.page, excerpt: oracle.excerpt }] }],
       edges: [], input_tokens: 10, output_tokens: 20,
       annotations: [{ nodeId: "signal-extracted", classe: "a_surveiller",
-        reason: "Residential effect requires review", reasonCode: "S-REVIEW" }] };
+        reason: "Residential effect requires review", reasonCode: "S-PORTEE-FLOUE", ambiguous: true }] };
     const client: TextJsonGenerationClient = { mode: "mesh", provider: "test", model: "gemini-3.8-flash",
       async generateJson(input) {
         const text = JSON.stringify(body);
@@ -59,6 +59,7 @@ describeDb("single-pass extraction to PostgreSQL annotation", () => {
       nodeType: node.type, nodeId: node.id })).toBe("written");
     const stored = (await readClassAnnotations(db, "synthetic-city")).get("Signal:signal-extracted");
     expect(stored).toMatchObject({ source: "ai", classe: "a_surveiller",
+      ambiguous: true,
       reason: "Residential effect requires review", model: "gemini-3.8-flash", effort: "low",
       promptId: prompt.id, promptSha256: prompt.sha256, pipelineRunId: "refresh-fallback-run" });
     expect(stored!.inputSha256).toMatch(/^[a-f0-9]{64}$/);
