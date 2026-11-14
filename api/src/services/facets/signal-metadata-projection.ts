@@ -2,11 +2,12 @@ import { sql } from "drizzle-orm";
 import { resultCivilDates, vivierFiltreCubeKey, vivierRankTuple } from "@radar/domain";
 import type { Database } from "../../db/client.js";
 import { classifyGraphNodeVivierV2 } from "../graph/graph-store.js";
+import { graphSignalRankFreshness } from "../../routes/graph-signals.js";
 
 export const SIGNAL_METADATA_VERSION = 1;
 type Tx = Parameters<Parameters<Database["transaction"]>[0]>[0];
 export interface MetadataSourceRow {
-  id: string; type: string; label: string; props: unknown; sourceRef: string | null;
+  id: string; type: string; label: string; props: unknown; sourceRef: string | null; createdAt: Date;
 }
 
 /** Write-time only. Call under the city lock, before publishing its revision. */
@@ -30,7 +31,7 @@ export async function refreshSignalMetadata(tx: Tx, citySlug: string, rows: read
     return { id: row.id, type: row.type,
       documentDates: resultCivilDates(row.props, "document"), scrapDates: resultCivilDates(row.props, "scrap"),
       bits: vivierFiltreCubeKey({ ...row, classification }),
-      rank: vivierRankTuple({ id: row.id, classification }),
+      rank: vivierRankTuple({ id: row.id, classification, fraicheur: graphSignalRankFreshness({ ...row, citySlug }) }),
       attachments: attachments.get(row.id) ?? [] };
   });
   await tx.execute(sql`DELETE FROM signal_metadata WHERE city_slug=${citySlug}`);
