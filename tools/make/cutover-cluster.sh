@@ -2,7 +2,8 @@
 # Namespace-local atomic ownership. Nothing expires by elapsed wall clock.
 cluster_preflight() {
   local server
-  server=$(kubectl --request-timeout=15s config view --minify -o jsonpath='{.clusters[0].cluster.server}')
+  explicit_kubeconfig
+  server=$(kubectl --kubeconfig "$KUBECONFIG" --request-timeout=15s config view --minify -o jsonpath='{.clusters[0].cluster.server}')
   [[ $server == "$(jq -r .server "$CONFIG")" ]] || fail 'Cluster identity mismatch'
 }
 executor_identity() {

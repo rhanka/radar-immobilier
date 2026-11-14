@@ -1,12 +1,19 @@
 #!/usr/bin/env bash
 # Pure validation; no cluster changes and no environment-file discovery.
 cutover_config() {
+  explicit_kubeconfig
   case ${ENV:-} in preprod|prod) ;; *) fail 'ENV must be preprod or prod';; esac
   [[ -z ${NAMESPACE:-} && -z ${PREPROD_NAMESPACE:-} ]] || fail 'Namespace overrides are forbidden'
   CONFIG=deploy/cutover/config.json
   NS=$(jq -r --arg env "$ENV" '.[$env].namespace' "$CONFIG")
   URL=$(jq -r --arg env "$ENV" '.[$env].url' "$CONFIG")
   k=(cluster_request -n "$NS")
+}
+explicit_kubeconfig() {
+  [[ -n ${KUBECONFIG:-} && $KUBECONFIG == /* && $KUBECONFIG != *:* ]] || fail 'Explicit single absolute KUBECONFIG required'
+  [[ $(realpath -m -- "$KUBECONFIG") != "$(realpath -m -- "$HOME/.kube/config")" ]] || fail 'Default kubeconfig forbidden'
+  [[ $(realpath -m -- "$KUBECONFIG") != */.env* ]] || fail 'Environment file forbidden as kubeconfig'
+  export KUBECONFIG
 }
 cluster_request() {
   local remaining=15
@@ -22,7 +29,8 @@ cluster_request() {
     if [[ -n ${FAST_DEADLINE:-} ]] && ((FAST_DEADLINE-SECONDS < remaining)); then remaining=$((FAST_DEADLINE-SECONDS)); fi
     ((remaining>0)) || budget_exhausted
   fi
-  command kubectl --request-timeout="${remaining}s" "$@"
+  explicit_kubeconfig
+  command kubectl --kubeconfig "$KUBECONFIG" --request-timeout="${remaining}s" "$@"
 }
 validate_release() {
   local path
