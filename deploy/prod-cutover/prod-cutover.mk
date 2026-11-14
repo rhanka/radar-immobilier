@@ -22,6 +22,14 @@ export PREVIOUS_RELEASE
 export CURSOR_REFERENCE
 export COMMENT_FILE
 export ROOT
+export APPLY ARTIFACTS_PROD_ENV_FILE
+.PHONY: provision-prod
+provision-prod:
+	@cd "$(ROOT)" && timeout --kill-after=5s 150s node deploy/prod-cutover/provision-prod.cjs
+.PHONY: controller-test
+controller-test:
+	@test "$(ENV)" = test-prod-cutover
+	@cd "$(ROOT)" && timeout 150s node --test --test-concurrency=1 deploy/prod-cutover/*.test.mjs
 export STOP_RUN_CONTAINERS
 export CUTOVER_LINT_PROJECT
 render:
