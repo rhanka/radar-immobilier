@@ -70,6 +70,14 @@ node deploy/prod-cutover/containers.cjs guard "${RUN:-}"
 lock_resume
 export CUTOVER_LOCK_RUN="$RUN" CUTOVER_LOCK_EXECUTOR="$EXECUTOR"
 case $1 in
+  window-evidence)
+    jq -e '.checkpoints.close=="completed"' "$WORK/record.json" >/dev/null || fail 'Drain requis'
+    verify_closed || fail 'Consommateurs encore actifs'
+    node -e 'const r=require("./deploy/prod-cutover/runtime.cjs");
+      const record=r.json(process.argv[1]);
+      if(!r.env.EVIDENCE || !r.path.isAbsolute(r.env.EVIDENCE) || /(^|\/)\.env/.test(r.env.EVIDENCE)) r.fail("evidence_path_required");
+      r.fs.writeFileSync(r.env.EVIDENCE,JSON.stringify({run:record.run,release:r.SHA,
+        instances:record.consumers,completedAt:record.closedAt})+"\n",{mode:0o600});' "$WORK/record.json";;
   window-configure)
     ENV=execution-prod node deploy/prod-cutover/cli.cjs configuration-check
     "${k[@]}" apply -f "$CONFIGURATION" >/dev/null

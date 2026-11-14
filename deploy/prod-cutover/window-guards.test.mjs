@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import process from 'node:process';
 import { fixture } from '../../tools/make/cutover-fixture.mjs';
 
 function check(change, expected, resume = false) {
@@ -12,7 +13,7 @@ function check(change, expected, resume = false) {
     // The authorization port is exercised by bindings.test.cjs. No real cluster or GH access.
     writeFileSync(join(f.dir, 'bin/node'), `#!/bin/sh
 if [ "$1" = deploy/prod-cutover/cli.cjs ]; then exit 0; fi
-exec /usr/local/bin/node "$@"
+exec '${process.execPath}' "$@"
 `, { mode: 0o755 });
     writeFileSync(join(f.dir, 'bin/gh'), `#!/bin/sh
 cat "$CUTOVER_TEST_STATE/runs.json"
