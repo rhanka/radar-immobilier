@@ -47,4 +47,5 @@
 - [x] Review correction 1: MCP always auto; accepted elicitation is pending_human; SQL CHECK and client contract updated.
 - [x] Review correction 2: browser decisions linked to immutable MCP events; shared archive moderation and projection.
 - [x] Review correction 3: explicit manual Non classé and confirmation controls in the UI.
+- [x] PostgreSQL regressions cover forged human CHECK violations, linked browser decisions, Non classé, shared moderation, confirmed archive restoration and subsequent corrections.
 - [ ] Review correction 4: SQL, SDK, UI and browser regressions; dedicated CI gate; final checks and delivery.
