@@ -57,7 +57,7 @@ YAML
 compose=(docker compose --env-file /dev/null -p "radar-$ENV" -f "$run_dir/compose.yml")
 trap '"${compose[@]}" down -v --remove-orphans' EXIT
 "${compose[@]}" up -d --wait postgres
-if [[ $mode == test-ui-e2e ]]; then "${compose[@]}" up -d minio; fi
+if [[ $mode == test-api || $mode == test-ui-e2e ]]; then "${compose[@]}" up -d minio; fi
 "${compose[@]}" run --rm --no-deps -T check bash -ec '
   tar -C /source --exclude=".env*" --exclude="*/.env*" --exclude=.git --exclude=tmp --exclude=node_modules --exclude="*/node_modules" -cf - . | tar -C /workspace -xf -
   npm ci --ignore-scripts --no-audit --no-fund --prefer-offline

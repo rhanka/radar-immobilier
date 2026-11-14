@@ -1,11 +1,19 @@
 -- MCP state is scoped. The global AI annotation remains a separate input.
-ALTER TABLE signal_class_annotations DROP CONSTRAINT signal_class_annotations_source_check;
-ALTER TABLE signal_class_annotations ADD CONSTRAINT signal_class_annotations_source_check
-  CHECK (source IN ('ai','manual','mcp'));
-ALTER TABLE facet_events DROP CONSTRAINT facet_events_source_check;
-ALTER TABLE facet_events ADD CONSTRAINT facet_events_source_check CHECK (source IN ('ai','manual','mcp'));
+ALTER TABLE signal_class_annotations DROP CONSTRAINT IF EXISTS signal_class_annotations_source_check;
+ALTER TABLE facet_events DROP CONSTRAINT IF EXISTS facet_events_source_check;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid = 'signal_class_annotations'::regclass
+    AND conname = 'signal_class_annotations_source_check') THEN
+    ALTER TABLE signal_class_annotations ADD CONSTRAINT signal_class_annotations_source_check
+      CHECK (source IN ('ai','manual','mcp'));
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid = 'facet_events'::regclass
+    AND conname = 'facet_events_source_check') THEN
+    ALTER TABLE facet_events ADD CONSTRAINT facet_events_source_check CHECK (source IN ('ai','manual','mcp'));
+  END IF;
+END $$;
 --> statement-breakpoint
-CREATE TABLE signal_mcp_events (
+CREATE TABLE IF NOT EXISTS signal_mcp_events (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   workspace_id uuid NOT NULL REFERENCES workspaces(id),
   actor_id uuid NOT NULL REFERENCES account_users(id),
@@ -28,24 +36,28 @@ CREATE TABLE signal_mcp_events (
     (kind IN ('class','feedback') AND classe IS NOT NULL AND length(btrim(reason)) > 0)),
   CHECK (classe IS DISTINCT FROM 'non_classe' OR validation='human' OR pending_human)
 );
-CREATE INDEX signal_mcp_events_target_idx ON signal_mcp_events(workspace_id,city_slug,node_type,node_id,created_at DESC);
-CREATE TABLE signal_mcp_audit (
+CREATE INDEX IF NOT EXISTS signal_mcp_events_target_idx ON signal_mcp_events(workspace_id,city_slug,node_type,node_id,created_at DESC);
+CREATE TABLE IF NOT EXISTS signal_mcp_audit (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(), sub text NOT NULL, client_id text NOT NULL,
   model text, tool text NOT NULL, input_hash text NOT NULL CHECK (input_hash ~ '^[a-f0-9]{64}$'),
   result text NOT NULL, created_at timestamptz NOT NULL DEFAULT clock_timestamp()
 );
-CREATE INDEX signal_mcp_audit_rate_idx ON signal_mcp_audit(sub,created_at DESC);
+CREATE INDEX IF NOT EXISTS signal_mcp_audit_rate_idx ON signal_mcp_audit(sub,created_at DESC);
+DROP TRIGGER IF EXISTS signal_mcp_events_immutable ON signal_mcp_events;
 CREATE TRIGGER signal_mcp_events_immutable BEFORE UPDATE OR DELETE ON signal_mcp_events
   FOR EACH ROW EXECUTE FUNCTION reject_class_feedback_mutation();
+DROP TRIGGER IF EXISTS signal_mcp_events_no_truncate ON signal_mcp_events;
 CREATE TRIGGER signal_mcp_events_no_truncate BEFORE TRUNCATE ON signal_mcp_events
   FOR EACH STATEMENT EXECUTE FUNCTION reject_class_feedback_mutation();
+DROP TRIGGER IF EXISTS signal_mcp_audit_immutable ON signal_mcp_audit;
 CREATE TRIGGER signal_mcp_audit_immutable BEFORE UPDATE OR DELETE ON signal_mcp_audit
   FOR EACH ROW EXECUTE FUNCTION reject_class_feedback_mutation();
+DROP TRIGGER IF EXISTS signal_mcp_audit_no_truncate ON signal_mcp_audit;
 CREATE TRIGGER signal_mcp_audit_no_truncate BEFORE TRUNCATE ON signal_mcp_audit
   FOR EACH STATEMENT EXECUTE FUNCTION reject_class_feedback_mutation();
 --> statement-breakpoint
 -- SECURITY INVOKER throughout. The caller supplies verified identity, never tool arguments.
-CREATE FUNCTION signal_mcp_read(p_sub text, p_ref jsonb) RETURNS jsonb LANGUAGE plpgsql AS $$
+CREATE OR REPLACE FUNCTION signal_mcp_read(p_sub text, p_ref jsonb) RETURNS jsonb LANGUAGE plpgsql AS $$
 DECLARE actor uuid; wid uuid := (p_ref->>'workspaceId')::uuid; events jsonb; ai jsonb; manual jsonb;
   current_class jsonb; shared_class jsonb; history jsonb; version text; notes jsonb; feedback jsonb; ui_feedback jsonb; graph_version text;
 BEGIN
@@ -122,7 +134,7 @@ BEGIN
     'mcpHistory',events,'feedback',feedback || ui_feedback,'notes',notes);
 END $$;
 --> statement-breakpoint
-CREATE FUNCTION signal_mcp_result(p_sub text,p_client text,p_model text,p_tool text,p_hash text,p_result jsonb)
+CREATE OR REPLACE FUNCTION signal_mcp_result(p_sub text,p_client text,p_model text,p_tool text,p_hash text,p_result jsonb)
 RETURNS jsonb LANGUAGE plpgsql AS $$
 BEGIN
   INSERT INTO signal_mcp_audit(sub,client_id,model,tool,input_hash,result)
@@ -130,7 +142,7 @@ BEGIN
   RETURN p_result;
 END $$;
 --> statement-breakpoint
-CREATE FUNCTION signal_mcp_write(p_sub text,p_client text,p_tool text,p_body jsonb,p_validation text,
+CREATE OR REPLACE FUNCTION signal_mcp_write(p_sub text,p_client text,p_tool text,p_body jsonb,p_validation text,
   p_version text,p_hash text,p_source text DEFAULT 'mcp') RETURNS jsonb LANGUAGE plpgsql AS $$
 DECLARE ref jsonb := p_body->'signalRef'; wid uuid := (ref->>'workspaceId')::uuid;
   actor uuid; state jsonb; next_class text; v_code text := p_body->>'reasonCode';

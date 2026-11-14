@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { workspaceFixture, workspaceSignal } from "../facets/workspace-archive-fixture.js";
 import { writeScopedPersonalFacet } from "../facets/scoped-writer.js";
@@ -26,6 +27,23 @@ async function fixture() {
   return { ...f, target, fingerprint, ref, body, read, write };
 }
 describe.skipIf(process.env.MCP_SIGNAL_DB_TEST !== "1")("scoped MCP PostgreSQL", () => {
+  it("should replay migration 0048 without changing existing events, audit or protections", async () => {
+    const f = await fixture();
+    expect(await f.write()).toHaveProperty("id");
+    const state = await f.read();
+    const audit = await f.pool.query("SELECT * FROM signal_mcp_audit ORDER BY id");
+    const sql = readFileSync(new URL("../../../drizzle/0048_signal_mcp_write.sql", import.meta.url), "utf8");
+    for (let replay = 0; replay < 2; replay++) {
+      await f.pool.query(sql);
+      expect(await f.read()).toEqual(state);
+      expect((await f.pool.query("SELECT * FROM signal_mcp_audit ORDER BY id")).rows).toEqual(audit.rows);
+      for (const table of ["signal_mcp_events", "signal_mcp_audit"]) {
+        await expect(f.pool.query(`DELETE FROM ${table}`)).rejects.toThrow(/append-only/);
+        await expect(f.pool.query(`TRUNCATE ${table}`)).rejects.toThrow(/append-only/);
+      }
+    }
+    expect(await f.write({ ...f.body, classe: "a_surveiller", reasonCode: "S-PLANIFIE" })).toHaveProperty("id");
+  });
   it("should reject fabricated human validation in the function and table CHECK", async () => {
     const f = await fixture();
     expect(await f.write(f.body, "human")).toEqual({ error: "invalid_signal_command" });
