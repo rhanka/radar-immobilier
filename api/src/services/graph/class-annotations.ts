@@ -18,6 +18,7 @@ export interface ClassAnnotation {
   nodeId: string;
   classe: SignalClass;
   reason: string;
+  ambiguous?: boolean;
   source: "ai" | "manual";
   model: string | null;
   effort: string | null;
@@ -47,11 +48,11 @@ export async function writeClassAnnotation(db: Database, input: AiClassAnnotatio
       AND source = 'manual' LIMIT 1`);
     if (manual.rows.length) return "manual";
     const result = await tx.execute(sql`INSERT INTO signal_class_annotations
-      (city_slug,node_type,node_id,classe,reason,source,model,effort,prompt_id,prompt_sha256,pipeline_run_id,input_sha256)
-      VALUES (${input.citySlug},${input.nodeType},${input.nodeId},${input.classe},${input.reason},'ai',
+      (city_slug,node_type,node_id,classe,reason,ambiguous,source,model,effort,prompt_id,prompt_sha256,pipeline_run_id,input_sha256)
+      VALUES (${input.citySlug},${input.nodeType},${input.nodeId},${input.classe},${input.reason},${input.ambiguous ?? false},'ai',
         ${input.model},${input.effort},${input.promptId},${input.promptSha256},${input.pipelineRunId},${input.inputSha256})
       ON CONFLICT (city_slug,node_type,node_id) DO UPDATE SET classe = EXCLUDED.classe,
-        reason = EXCLUDED.reason, model = EXCLUDED.model, effort = EXCLUDED.effort,
+        reason = EXCLUDED.reason, ambiguous = EXCLUDED.ambiguous, model = EXCLUDED.model, effort = EXCLUDED.effort,
         prompt_id = EXCLUDED.prompt_id, prompt_sha256 = EXCLUDED.prompt_sha256,
         pipeline_run_id = EXCLUDED.pipeline_run_id, input_sha256 = EXCLUDED.input_sha256, updated_at = now()
       WHERE signal_class_annotations.source = 'ai' AND
@@ -71,7 +72,7 @@ export async function writeClassAnnotation(db: Database, input: AiClassAnnotatio
 
 export async function readClassAnnotations(db: Database, citySlug: string): Promise<Map<string, ClassAnnotation>> {
   const result = await db.execute(sql`SELECT city_slug AS "citySlug", node_type AS "nodeType", node_id AS "nodeId",
-    classe, reason, source, model, effort, prompt_id AS "promptId", prompt_sha256 AS "promptSha256",
+    classe, reason, ambiguous, source, model, effort, prompt_id AS "promptId", prompt_sha256 AS "promptSha256",
     pipeline_run_id AS "pipelineRunId", input_sha256 AS "inputSha256",
     created_at::text AS "createdAt", updated_at::text AS "updatedAt" FROM signal_class_annotations
     WHERE city_slug = ${citySlug}`);
@@ -82,6 +83,8 @@ export async function readClassAnnotations(db: Database, citySlug: string): Prom
   const manual = await db.execute(sql`SELECT DISTINCT node_type, node_id FROM facet_events
     WHERE target_type='signal' AND city_slug=${citySlug} AND source='manual'`);
   for (const row of manual.rows) {
+    // Facet history overrides existing annotations; it never creates one.
+    if (!annotations.has(`${row.node_type}:${row.node_id}`)) continue;
     // Do not disclose another user's class or reason through the public graph card.
     annotations.set(`${row.node_type}:${row.node_id}`, { citySlug, nodeType: String(row.node_type),
       nodeId: String(row.node_id), source: "manual", classe: "non_classe", reason: "",

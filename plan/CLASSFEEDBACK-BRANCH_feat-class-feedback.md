@@ -4,7 +4,7 @@
 - [x] Deliver D1–D7: durable provenance, atomic human feedback and evaluation export.
 
 ## Scope / Guardrails
-- [x] Stacked on feat/refresh-single-pass; PR targets that branch; no merge.
+- [x] PR #1104 retargeted to main; merge origin/main into feat/class-feedback only.
 - [x] No environment-file reads, Python, default kubeconfig or commit trailers.
 - [x] Test stack test-class-feedback: API 8895, UI 5395, Maildev 1195, PostgreSQL 5595, S3 9195, Obscura 9295, SMTP 1095. ENV last; down -v after use.
 
@@ -14,6 +14,8 @@
 - [x] Conditional: existing annotation tests and transport fixtures when additive dates require updated assertions.
 
 ## Feedback Loop
+- [x] PR #1104 main synchronization: retain stored-annotation-only projection from 8e4b8e2ba, v2 ambiguity and 0046 before 0047. Preserve feedback dates and both UI provenance tests. Do not edit 0045 or 0046.
+- [x] Root cause of facets-refresh: manual facet history fabricated a public classAnnotation without a stored annotation. Keep main's guard and byte-equality regressions unchanged; do not relax the API contract. This supersedes the fixture-alignment proposal below.
 - [x] PR #1104 replay correction: guard 0047 columns, tables, index, functions, triggers and archive constraint. Backfill only missing creation dates and history snapshots. Regression removes the journal row after an annotation update and asserts unchanged creation dates and history.
 - [x] Replay verification: migrate-idempotence (2), artifacts-migrations (6), feedback migration (2) and UI feedback/annotation labels (11) pass. Initial expanded API run: 40 assertions pass; feedback afterAll exceeds 20 s and facets-refresh expects a response without the redacted manual classAnnotation. Owner: i-cond; acceptance: align that fixture with the public privacy projection and rerun facets-refresh. No production code or timeout changed for these observations.
 - [x] PR #1104 correction: reserve feedback migration 0047, idx 46, timestamp 1793000000017 after v2's 0046 (idx 45, timestamp 1793000000016). No 0046 snapshot exists: this repository uses hand-authored migrations after snapshots 0000/0001.
