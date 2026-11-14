@@ -23,7 +23,7 @@ function fixture(initial?: ReannotationIdentity) {
 
 describe("30-day signal reannotation", () => {
   it("should skip identical input in two-step even after changing the model or prompt", async () => {
-    const f = fixture({ source: "ai", model: "old", effort: "high", promptSha256: "old",
+    const f = fixture({ source: "ai", promptId: "v2", model: "old", effort: "high", promptSha256: "old",
       inputSha256: reannotationInputSha256(signal) });
     expect(await runReannotation({ ...f.options, changedInputOnly: true })).toMatchObject({ skippedUnchanged: 1 });
     expect(f.classify).not.toHaveBeenCalled();
@@ -73,7 +73,7 @@ describe("30-day signal reannotation", () => {
     expect(result).toMatchObject({ mode: "dry-run", classified: 1, written: 0,
       classes: { pertinent: 1 }, failures: [] });
     expect(f.write).not.toHaveBeenCalled();
-    expect(f.repository.list).toHaveBeenCalledWith(new Date("2026-10-14T12:00:00.000Z"));
+    expect(f.repository.list).toHaveBeenCalledWith(new Date("2026-10-14T12:00:00.000Z"), expect.any(AbortSignal));
   });
   it("never submits manual annotations to the model", async () => {
     const f = fixture({ source: "manual" });
