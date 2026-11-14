@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import type { RefreshDocumentModels, RefreshModel } from "./refresh-model-policy.js";
+import type { RefreshDocumentModels, RefreshModel, RefreshModelReceipt } from "./refresh-model-policy.js";
 import { canonicalJson } from "./replay/canonical-json.js";
 import { parseSinglePassClass, singlePassClasses, singlePassReasonCodes } from "./refresh-single-pass.js";
 import { parseRefreshVerificationJson } from "./refresh-verification.js";
@@ -58,6 +58,7 @@ export async function runReannotation(options: {
   changedInputOnly?: boolean;
   actTimeoutMs?: number;
   runTimeoutMs?: number;
+  shouldStop?: () => boolean;
 }): Promise<ReannotationReport> {
   const concurrency = options.concurrency ?? 1;
   if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 16) {
@@ -106,7 +107,7 @@ export async function runReannotation(options: {
     }
   }
   async function worker() {
-    while (next < signals.length) await classifyOne(signals[next++]!);
+    while (next < signals.length && !options.shouldStop?.()) await classifyOne(signals[next++]!);
   }
   // Drain every worker before returning or propagating cancellation to the CLI.
   const workers = await Promise.allSettled(Array.from({ length: Math.min(concurrency, signals.length) }, worker));
@@ -115,12 +116,14 @@ export async function runReannotation(options: {
 }
 
 /** Classification reads the same versioned instructions as extraction, over stored evidence. */
-export function createReannotationClassifier(models: RefreshDocumentModels, prompt: ReannotationPrompt) {
+export function createReannotationClassifier(models: RefreshDocumentModels, prompt: ReannotationPrompt,
+  record?: (receipt: RefreshModelReceipt) => void) {
   return async (signal: ReannotationSignal, abort?: AbortSignal): Promise<ReannotationDecision> => {
     const identity = reannotationInputSha256(signal);
     const accepted: { model?: RefreshModel; decision?: ReturnType<typeof parseSinglePassClass> } = {};
     try {
       const client = models.forDocument(identity, async (receipt) => {
+        record?.(receipt);
         if (receipt.status === "completed" && receipt.modelUsed) accepted.model = receipt.modelUsed;
       }, abort);
       const result = await client.generateJson({
