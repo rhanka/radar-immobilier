@@ -38,7 +38,13 @@ window-start window-configure window-close window-deploy window-rollback-service
 test:
 	@test "$(ENV)" = test-prod-cutover
 	@cd "$(ROOT)" && timeout 90s node --test deploy/prod-cutover/*.test.cjs
-lint:
+.PHONY: lint-image
+lint-image:
+	@test "$(ENV)" = test-prod-cutover
+	@export BUILDX_CONFIG="$(HOME)/.cache/radar-prod-cutover-buildx"; mkdir -p "$$BUILDX_CONFIG"; \
+	 if ! docker image inspect radar-cutover-test:local >/dev/null 2>&1; then \
+	 timeout --kill-after=10s 600s docker build -f deploy/cutover/Dockerfile.test -t radar-cutover-test:local .; fi
+lint: lint-image
 	@test "$(ENV)" = test-prod-cutover
 	@cd "$(ROOT)" && timeout --kill-after=10s 300s bash deploy/prod-cutover/lint.sh
 lint-down:

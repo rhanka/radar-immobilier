@@ -1,8 +1,12 @@
-/* global require */
+/* global require, process */
 /* eslint-disable @typescript-eslint/no-require-imports */
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { render, contentIngress } = require('./render.cjs');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+const { spawnSync } = require('node:child_process');
 test('rend les statiques et scopes MCP avec toutes les portes live fermées', () => {
   const text = JSON.stringify({ version: 1, accounts: [{ sub: 'synthetic' }] }) + '\n';
   const result = render(text);
@@ -34,4 +38,18 @@ test('content hostname is explicit and rejects URLs or wildcard input', () => {
   assert.deepEqual(ingress.spec.tls[0].hosts, ['*.content.example.ca']);
   for (const host of ['https://pages.immo.sent-tech.ca', '*.pages.immo.sent-tech.ca', ''])
     assert.throws(() => render(text, host), /invalid_artifacts_content_host/);
+});
+test('make renders the production default when its exported hostname is empty', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cutover-render-'));
+  try {
+    const plan = path.join(dir, 'plan.json'); const output = path.join(dir, 'configuration.json');
+    fs.writeFileSync(plan, JSON.stringify({ version: 1, accounts: [{ sub: 'synthetic' }] }));
+    const result = spawnSync('make', ['--no-print-directory', '-f', 'deploy/prod-cutover/prod-cutover.mk',
+      'render', `PLAN=${plan}`, `CONFIGURATION=${output}`, 'ENV=test-prod-cutover'], {
+      encoding: 'utf8', env: { ...process.env, ARTIFACTS_CONTENT_HOST: '' } });
+    assert.equal(result.status, 0, result.stderr);
+    const manifest = JSON.parse(fs.readFileSync(output, 'utf8'));
+    assert.equal(manifest.items[0].data.ARTIFACTS_CONTENT_BASE, 'pages.immo.sent-tech.ca');
+    assert.equal(fs.statSync(output).mode & 0o777, 0o600);
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });
