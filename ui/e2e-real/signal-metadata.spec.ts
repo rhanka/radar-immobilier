@@ -1,4 +1,5 @@
-import { expect, seed, test } from "./fixtures";
+import { expect as baseExpect, seed, test } from "./fixtures";
+const expect = baseExpect.configure({ timeout: 1800 });
 
 test("metadata: period relevance filters exclusions and city keep exact counts and URLs", async ({ page, network }) => {
   await page.goto("/geo/region/quebec?mode=signal&filter.period=all&filter.zonage=1&filter.residentiel=1&filter.precoce=1&filter.excludePiia=1&filter.excludeDerogations=1");
@@ -14,7 +15,7 @@ test("metadata: period relevance filters exclusions and city keep exact counts a
   await page.getByRole("option", { name: "Dernière semaine", exact: true }).click();
   await expect(page).toHaveURL(/filter.period=7d/);
   // Seeded unknown dates are excluded from bounded periods.
-  await expect(page.getByText(/0 signaux.*0 ville/).first()).toBeVisible();
+  await expect(page.getByText("0 signaux · 0 villes", { exact: true })).toBeVisible();
   await period.click();
   await page.getByRole("option", { name: "Illimité", exact: true }).click();
   await expect.poll(() => new URL(page.url()).searchParams.get("filter.period")).toBeNull();
@@ -27,23 +28,28 @@ test("metadata: period relevance filters exclusions and city keep exact counts a
   await expect(page).toHaveURL(/filter.classement=/);
   // Relevance counters ignore the selected class set.
   await expect(relevance.locator(".classement-row").filter({ has: unclassified }).getByLabel("3 signaux")).toBeVisible();
-  await expect(page.getByText(/0 signaux.*0 ville/).first()).toBeVisible();
+  await expect(page.getByText("0 signaux · 0 villes", { exact: true })).toBeVisible();
   await unclassified.click();
   await expect(total).toBeVisible();
 
   await page.getByTestId("filtre-trigger").click();
   const filters = page.getByTestId("filtre-panel");
-  for (const label of ["Zonage", "Résidentiel", "Précoce", "Exclure PIIA sans projet résidentiel", "Exclure dérogations mineures"]) {
+  for (const [label, key] of [["Zonage", "zonage"], ["Résidentiel", "residentiel"], ["Précoce", "precoce"],
+    ["Exclure PIIA sans projet résidentiel", "excludePiia"], ["Exclure dérogations mineures", "excludeDerogations"]]) {
     const checkbox = filters.getByRole("checkbox", { name: label, exact: true });
     await checkbox.click();
+    await expect.poll(() => new URL(page.url()).searchParams.has(`filter.${key}`)).toBe(false);
     await expect(total).toBeVisible();
     await checkbox.click();
+    await expect.poll(() => new URL(page.url()).searchParams.get(`filter.${key}`)).toBe("1");
     await expect(total).toBeVisible();
   }
   await page.getByTestId("filtre-trigger").click();
   const urlBeforeCity = new URL(page.url());
   const countsBeforeCity = await total.textContent();
+  const cityResponse = page.waitForResponse((r) => r.url().includes("coherent-city") && r.status() === 200, { timeout: 1800 });
   await page.getByRole("button", { name: /Salaberry-de-Valleyfield/ }).first().click();
+  await cityResponse;
   await expect(page).toHaveURL(new RegExp(`/geo/city/${seed.city}`));
   await expect(total).toHaveText(countsBeforeCity!);
   const urlAfterCity = new URL(page.url());
