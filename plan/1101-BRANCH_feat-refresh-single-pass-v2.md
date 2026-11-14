@@ -33,3 +33,5 @@
 - [x] Lot 4: Validator, fallback, terminal failure, PostgreSQL persistence and badge tests. Eight API suites: 83 passed, including eight PostgreSQL tests; LOT_MIGRATION_DB_TEST=1 explicitly enabled.
 - [x] Lot 5: Typecheck and lint passed. Eight targeted API suites: 83 passed, including eight PostgreSQL tests. Badge suite: eight passed. Test stack removed with make clean (compose down -v).
 - [x] Lot 6: Local diff inspected, branch pushed, PR #1102 opened against feat/refresh-single-pass. No merge. CI running. Rebase onto main follows #1099, still open at handoff.
+- [x] CI repair after main merge: make 0046 replayable with ADD COLUMN IF NOT EXISTS; leave merged 0045 unchanged. Reproduced SQLSTATE 42701 in both migration suites before the fix.
+- [x] CI repair verification: migration idempotence 2/2, artifact migrations 6/6, six v2 API suites 31/31 (nine PostgreSQL tests enabled), badge suite 8/8. Sequential isolated runs; unchanged timeouts. Disk-sync stalls required fsync off only in disposable test-refresh-v2 PostgreSQL. Read-only audit of 0047/0048 reported in PR #1102.
