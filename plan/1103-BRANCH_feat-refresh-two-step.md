@@ -48,3 +48,4 @@
 - [x] Review correction: reserve calls and conservative token allowances before every model send, across detection/verification/classification; share the sweep deadline and halt extraction cleanly at exhaustion.
 - [x] Review correction: unchanged v2 inputs are skipped regardless of model/prompt changes; missing v2 annotations remain eligible. Add persisted repeated-extraction and new/changed/v1/v2 tests; retain manual preflight independently of API overlays.
 - [x] Review correction: API cards and counts ignore persisted AI overlays at off, including after prior activation; retain inherited #1099 manual payload parity tests.
+- [x] Review correction: propagate the sweep stop signal to detection too; test successful document coverage with classification stopped at the shared call cap.

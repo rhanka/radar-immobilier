@@ -6,8 +6,22 @@ import { createReannotationRepository } from "./reannotate-repository.js";
 import { reannotationInputSha256, runReannotation } from "./reannotate-signals.js";
 import { twoStepFixture } from "./refresh-two-step.fixture.js";
 import * as graphStore from "./graph-store.js";
+import { RefreshRunBudget } from "./refresh-run-budget.js";
 
 describeDb("two-step refresh with PostgreSQL", () => {
+  it("should cover the document while stopping classification at the shared detection budget", async () => {
+    const { db } = await database();
+    const budget = new RefreshRunBudget({ calls: 3, tokens: 1_000_000, durationMs: 60_000 });
+    const f = await twoStepFixture(db, "two-step", false, budget);
+    expect(await f.run()).toMatchObject({ status: "published", coverage: { covered: 1 } });
+    expect(f.detectionRequests).toHaveLength(2);
+    expect(f.classificationRequests).toHaveLength(1);
+    expect(budget).toMatchObject({ calls: 3, haltedBy: "calls" });
+    expect((await readClassAnnotations(db, "waterloo")).size).toBe(1);
+    expect(f.notes.find(({ note }) => note === "classification-completed")?.detail)
+      .toMatchObject({ written: 1, haltedBy: "calls" });
+  });
+
   it("should not reclassify an existing unchanged v2 act emitted by another extraction", async () => {
     const { db } = await database();
     const first = await twoStepFixture(db, "two-step");
