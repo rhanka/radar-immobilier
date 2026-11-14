@@ -31,6 +31,7 @@
 - [x] Tests dédiés ENV=test-prod-cutover. Ports réservés API 18821, UI 15321, Maildev 11121.
 
 ## Plan / Todo (lot-based)
+- [x] Remise au vert #1100 : chemin Node portable, contrôleurs/IdP dans le conteneur isolé, garde GetBucketCors bloquante sans mutation S3. Dry-run RO : cinq Secrets, un Certificate, un Ingress, deux rôles MCP.
 - [x] Publication finale : quatre commits après la tête initiale, runbook dans le corps #1100. Relance contrôleur : 3/8 passent ; Node conteneur absent de l’hôte et IdP local en échec. Validation complète ouverte.
 - [x] Runbook final : responsabilités infra/immo corrigées, neuf objets prévus en dry-run RO, CORS administrateur k8s, analyse prudente du rejeu 6H.
 - [ ] Validation Docker finale : deux scénarios réels sans démarrage observé ; lint interrompu pendant reconstruction. Stockage local à 97 %. Aucun GO.
