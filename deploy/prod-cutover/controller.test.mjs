@@ -41,7 +41,7 @@ exec '${node}' "$@"
     state.objects.find(o => o.metadata.name === 'radar-classification-cursor-prod').data.CLASSIFICATION_CURSOR_SECRET = Buffer.from(cursor).toString('base64');
     writeFileSync(join(f.dir, 'previous.json'), JSON.stringify({ ...f.release, dataMigration: null }));
     if (short) state.release.apiServedSha = state.release.gitSha.slice(0, 7);
-    writeFileSync(join(f.dir, 'bin/gh'), '#!/bin/sh\nprintf \'[{"workflow_runs":[]}]\\n\'\n', { mode: 0o755 });
+    writeFileSync(join(f.dir, 'bin/gh'), '#!/bin/sh\nprintf \'{"workflow_runs":[]}\\n\'\n', { mode: 0o755 });
     const ingress = state.objects.find(o => o.kind === 'Ingress');
     ingress.spec.rules[0].host = 'immo.sent-tech.ca';
     ingress.spec.tls[0].hosts = ['immo.sent-tech.ca'];
