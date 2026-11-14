@@ -515,6 +515,7 @@ export function extractSignalEvidence(node: GraphSignalNode): SignalEvidence {
 
 export interface GraphSignalNode {
   classAnnotation?: {
+    ambiguous?: boolean;
     source: "ai" | "manual";
     classe: "pertinent" | "a_surveiller" | "non_classe" | "ecarte";
     reason: string;
