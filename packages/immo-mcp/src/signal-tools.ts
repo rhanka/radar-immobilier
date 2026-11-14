@@ -37,14 +37,14 @@ export async function invokeSignalTool(name: SignalTool, input: Record<string, u
   }
   if (name === "confirm_classification" && body.verdict === "up"
     && (body.newClasse !== undefined || body.reasonCode !== undefined || body.reason !== undefined)) return audit("invalid_positive_feedback");
-  let human = false;
+  let accepted = false;
   if (name === "confirm_classification" || body.humanConfirmed === true) {
-    try { human = await ctx.signals.confirm?.(JSON.stringify({ tool: name, proposal: body, current, version: state.version })) === true; }
-    catch { human = false; }
+    try { accepted = await ctx.signals.confirm?.(JSON.stringify({ tool: name, proposal: body, current, version: state.version })) === true; }
+    catch { accepted = false; }
   }
-  if (name === "confirm_classification" && !human) return audit("human_confirmation_required");
+  if (name === "confirm_classification" && !accepted) return audit("human_confirmation_required");
   const saved = await ctx.signals.db.query("SELECT signal_mcp_write($1,$2,$3,$4::jsonb,$5,$6,$7) AS result",
-    [ctx.auth.sub, ctx.auth.clientId, name, JSON.stringify(body), human ? "human" : "auto", state.version, hash]);
+    [ctx.auth.sub, ctx.auth.clientId, name, JSON.stringify({ ...body, pendingHuman: accepted }), "auto", state.version, hash]);
   return result(saved.rows[0]?.result as Record<string, unknown>);
 }
 export const SIGNAL_TOOL_HANDLERS = Object.fromEntries(Object.keys(signalSchemas).map((name) => [name,

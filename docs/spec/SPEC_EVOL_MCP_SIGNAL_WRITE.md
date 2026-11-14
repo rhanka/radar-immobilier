@@ -16,13 +16,22 @@ It is excluded from production v1.2.20. Migration 0048 follows the reserved 0047
 ## Authority and storage
 
 OAuth supplies the user and client. Tool parameters cannot supply either identity.
-Only the server's current-session MCP elicitation can produce human validation.
+MCP writes always have `validation=auto`, enforced by a table CHECK and the SQL writer.
+Accepted elicitation additionally sets `pending_human=true`. It never proves human intervention.
+The UI badge is `MCP · <model> · à confirmer` while this flag is set.
 The proposal includes the complete input and observed version. Acceptance is rechecked against the current version and current membership in the write transaction.
 Absent, declined, cancelled or unsupported elicitation gives automatic validation; confirmation requires acceptance.
 
 The global AI table stays global. MCP classes live in a scoped append-only journal.
-UI manual history wins, then MCP human, then the latest automatic MCP/AI annotation.
-Automatic MCP never replaces UI manual history or MCP human history.
+Only the authenticated immo browser session can confirm a classification with 👍 or reclassify it.
+Confirmation requires the original authenticated actor. It appends a manual human event linked by
+`linked_event_id` to the immutable automatic MCP event. Bearer sessions cannot call this route.
+`Non classé` also appends an explicit manual event, with `classe=non_classe`.
+UI manual history wins over automatic MCP/AI. Pending MCP has the same overwrite priority as automatic MCP.
+A shared archive remains authoritative over personal classes. Both UI reads and direct personal writers
+consult MCP shared archives. Restoration requires `moderateArchive`, exactly as shared UI archives do.
+An authorized restoration appends a shared clearing event and the resulting personal class atomically.
+It increments shared and personal revisions. Personal UI archives remain effective until explicitly restored.
 Refresh and reannotation cannot mutate this journal. Reclassification retains every previous state.
 Notes use native graph targets. Existing prospect notes use different relational UUID targets and do not provide workspace isolation or append-only semantics.
 The new notes can also be added from the UI. Rendering always uses escaped text.
@@ -76,4 +85,7 @@ UI: 19 pass. The final provenance-null change was rechecked with test-api and te
 It verifies human/automatic badges, cleaned notes and persisted user notes after reload.
 The dedicated target supplies `E2E_MCP_SEEDED=1` after preparing its MCP seed.
 The generic browser suite skips this case because its shared baseline does not contain MCP state.
+The CI `MCP signals (PostgreSQL, SDK and browser)` job runs the dedicated make targets with
+`MCP_SIGNAL_DB_TEST=1` and `LOT_MIGRATION_DB_TEST=1`. The ten original SQL tests and five SDK tests
+are required there, together with the added regressions and seeded browser scenarios.
 All stacks were removed with volumes. Root UAT was untouched.
