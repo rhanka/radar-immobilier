@@ -97,6 +97,11 @@ node deploy/prod-cutover/containers.cjs guard "${RUN:-}"
 lock_resume
 export CUTOVER_LOCK_RUN="$RUN" CUTOVER_LOCK_EXECUTOR="$EXECUTOR"
 case $1 in
+  window-private-https)
+    jq -e '.checkpoints["manual-deploy"]=="completed" and .checkpoints.reopen==null' "$WORK/record.json" >/dev/null || fail 'Déploiement privé requis'
+    maintenance_probe || fail 'Routes publiques non fermées'
+    source deploy/prod-cutover/private-https.sh
+    private_https;;
   window-abort)
     jq -e '.checkpoints["manual-migrate"]==null and .postReopenRecovery!=true' "$WORK/record.json" >/dev/null || fail 'Restauration complète requise'
     close_once
