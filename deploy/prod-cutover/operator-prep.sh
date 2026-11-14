@@ -34,13 +34,14 @@ for attempt in {1..30}; do
 done
 [[ -n $(ss -H -ltn 'sport = :25432') ]] || fail port_forward_not_ready
 printf '1 OK supervisor=%s child=%s\n' "$(< "$private/prod-forward.pid")" "$(< "$private/prod-forward-child.pid")"
+[[ ${1:-} != tunnel ]] || exit 0
 for pair in radar-db-credentials:prod-admin:radar radar-db-ro-prod:prod-ro:radar_db_ro_prod; do
   IFS=: read -r secret file role <<< "$pair"
   [[ ! -L $private/$file.pgpass ]] || fail pgpass_symlink
   "${k[@]}" get secret "$secret" -o json | jq -er --arg role "$role" '
     .data | select((.POSTGRES_USER|@base64d)==$role and (.POSTGRES_DB|@base64d)=="radar") |
     (.POSTGRES_PASSWORD|@base64d) | select(length>0 and (test("[\r\n]")|not)) |
-    "127.0.0.1:25432:radar:"+$role+":"+(gsub("\\\\";"\\\\")|gsub(":";"\\:"))' > "$private/$file.pgpass.partial"
+    "127.0.0.1:25432:radar:"+$role+":"+(gsub("\\\\";"\\\\")|gsub(":";"\\:"))' > "$private/$file.pgpass.partial" 2> "$private/pgpass-extract.error"
   chmod 600 "$private/$file.pgpass.partial"
   mv "$private/$file.pgpass.partial" "$private/$file.pgpass"
   result=$(docker run --rm --pull=never --network host --user "$(id -u):$(id -g)" \
