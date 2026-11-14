@@ -14,6 +14,13 @@ describe("class annotation provenance", () => {
     expect(classAnnotationLabel({ ...node, classFeedback: { verdict: "up", createdAt: "2026-11-13", reason: "validé", eventId: "event" } })).toBe("Validé par un humain");
     expect(classAnnotationLabel({ ...node, classFeedback: { verdict: "down", createdAt: "2026-11-13", reason: "N-NON-RES", eventId: "event" } })).toBe("Reclassé par un humain");
   });
+  it("should show ambiguity only for the effective AI annotation", () => {
+    const ambiguous = { ...node, classAnnotation: { ...node.classAnnotation!, ambiguous: true } };
+    expect(classAnnotationLabel(ambiguous)).toBe("IA · ambigu · gpt-6-astra medium · prompt v1");
+    expect(classAnnotationLabel(ambiguous, true)).toBe("Manuel");
+    expect(classAnnotationLabel({ ...node, classAnnotation: { ...node.classAnnotation!, ambiguous: false } })).not.toContain("ambigu");
+    expect(withAiClassement(new Map(), [{ ...node, classAnnotation: undefined }]).size).toBe(0);
+  });
   it("should identify the exact AI and prompt while prioritizing manual changes", () => {
     expect(classAnnotationLabel(node)).toBe("IA · gpt-6-astra medium · prompt v1");
     expect(classAnnotationLabel(node, true)).toBe("Manuel");

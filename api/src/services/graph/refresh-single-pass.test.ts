@@ -6,16 +6,17 @@ import { loadOntologyProfile, registryRecordsToExtraction,
   type TextJsonGenerationClient, type TextJsonGenerationInput } from "@sentropic/engram";
 import { beforeAll, describe, expect, it } from "vitest";
 import { extractRefreshProfile, type RefreshProfileContext } from "./refresh-profile.js";
-import { loadSinglePassPrompt, parseSinglePassClass, singlePassEnabled, singlePassPrimary,
+import { loadSinglePassPrompt, parseSinglePassClass, singlePassEnabled, singlePassPrimary, singlePassReasonCodes, singlePassSchema,
   type SinglePassPrompt } from "./refresh-single-pass.js";
 import type { RefreshCorpusChunk } from "./refresh-corpus.js";
+import { createRefreshModelPolicy } from "./refresh-model-policy.js";
 
 let context: RefreshProfileContext;
 let chunk: RefreshCorpusChunk;
 let node: Record<string, unknown>;
 let prompt: SinglePassPrompt;
 const annotation = { nodeId: "signal-waterloo-26-956-2", classe: "pertinent",
-  reason: "Residential densification bylaw adopted", reasonCode: "P-DENSIFICATION" };
+  reason: "Residential densification bylaw adopted", reasonCode: "P-DENSITE", ambiguous: false };
 
 beforeAll(async () => {
   const oracle = JSON.parse(await readFile(new URL("../../../tests/fixtures/refresh-018/oracle.json", import.meta.url), "utf8"));
@@ -48,6 +49,48 @@ function body(annotations?: unknown[]) {
 }
 
 describe("single-pass refresh extraction", () => {
+  it.each([false, true])("should fall back from AI Non classé and reject a second refusal (%s)", async (rejectFallback) => {
+    const seen: TextJsonGenerationInput[] = [];
+    const calls: string[] = [];
+    const invalid = { ...annotation, classe: "non_classe", reasonCode: "UNCLASSIFIED" };
+    const policy = createRefreshModelPolicy({ primary: singlePassPrimary({}),
+      fallback: { provider: "gemini", model: "gemini-3.8-flash", effort: "low" },
+      primaryQualityAttempts: 1, forceFallback: false, timeoutMs: 1000,
+      createClient(model) {
+        calls.push(model.model);
+        return { mode: "mesh", provider: model.provider, model: model.model, async generateJson(request) {
+          seen.push(request);
+          await request.validateResponse?.(JSON.stringify(body([
+            model.provider === "openai" || rejectFallback ? invalid : annotation,
+          ])));
+          return { status: "completed", mode: "mesh", provider: model.provider, model: model.model, audit: {} };
+        } };
+      },
+    });
+    const result = extractRefreshProfile([chunk], { context, singlePassPrompt: prompt,
+      maxOutputTokens: 512, textClient: policy.forDocument(chunk.docSha, async () => {}) });
+    if (rejectFallback) await expect(result).rejects.toThrow();
+    else expect((await result)[0]?.annotations).toEqual([annotation]);
+    expect(calls).toEqual(["gpt-6-astra", "gemini-3.8-flash"]);
+  });
+  it("should require a boolean ambiguity flag and exact registered code for each AI class", () => {
+    expect(singlePassReasonCodes).toHaveLength(28);
+    expect([...prompt.text.matchAll(/^- `([^`]+)` \(/gm)].map((match) => match[1]))
+      .toEqual(singlePassReasonCodes);
+    for (const reasonCode of singlePassReasonCodes) {
+      const classe = reasonCode.startsWith("P-") ? "pertinent" : reasonCode.startsWith("S-") ? "a_surveiller" : "ecarte";
+      expect(parseSinglePassClass({ ...annotation, classe, reasonCode, ambiguous: true }).ambiguous).toBe(true);
+    }
+    for (const invalid of [{ classe: "non_classe", reasonCode: "UNCLASSIFIED" },
+      { reasonCode: "P-INVENTED" }, { reasonCode: "UNCLASSIFIED" }, { ambiguous: undefined }, { ambiguous: "true" }]) {
+      expect(() => parseSinglePassClass({ ...annotation, ...invalid })).toThrow();
+    }
+    const schema = JSON.parse(singlePassSchema('{"required":[]}')).annotations.items;
+    expect(schema.required).toContain("ambiguous");
+    expect(schema.properties.ambiguous).toEqual({ type: "boolean" });
+    expect(schema.properties.classe.enum).toEqual(["pertinent", "a_surveiller", "ecarte"]);
+    expect(schema.properties.reasonCode.enum).toEqual(singlePassReasonCodes);
+  });
   it("should default to Astra low independently of the legacy medium settings", () => {
     expect(singlePassPrimary({ REFRESH_REASONING_EFFORT: "medium" })).toEqual({
       provider: "openai", model: "gpt-6-astra", effort: "low",

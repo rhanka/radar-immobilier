@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import type { RefreshDocumentModels, RefreshModel } from "./refresh-model-policy.js";
 import { canonicalJson } from "./replay/canonical-json.js";
-import { parseSinglePassClass } from "./refresh-single-pass.js";
+import { parseSinglePassClass, singlePassClasses, singlePassReasonCodes } from "./refresh-single-pass.js";
 import { parseRefreshVerificationJson } from "./refresh-verification.js";
 
 export interface ReannotationSignal {
@@ -13,8 +13,8 @@ export interface ReannotationIdentity {
   promptSha256?: string | null; inputSha256?: string | null;
 }
 export interface ReannotationDecision {
-  classe: "pertinent" | "a_surveiller" | "non_classe" | "ecarte";
-  reason: string; model: string; effort: string;
+  classe: "pertinent" | "a_surveiller" | "ecarte";
+  reason: string; model: string; effort: string; ambiguous: boolean;
 }
 export interface ReannotationWrite extends ReannotationDecision {
   citySlug: string; nodeId: string; nodeType: string; source: "ai";
@@ -58,7 +58,7 @@ export async function runReannotation(options: {
   const report: ReannotationReport = { mode: options.apply ? "apply" : "dry-run",
     pipelineRunId: options.pipelineRunId, since: since.toISOString(), candidates: 0,
     classified: 0, written: 0, skippedManual: 0, skippedUnchanged: 0,
-    classes: { pertinent: 0, a_surveiller: 0, non_classe: 0, ecarte: 0 }, failures: [] };
+    classes: { pertinent: 0, a_surveiller: 0, ecarte: 0 }, failures: [] };
   const signals = await options.repository.list(since);
   report.candidates = signals.length;
   for (const signal of signals) {
@@ -103,17 +103,17 @@ export function createReannotationClassifier(models: RefreshDocumentModels, prom
       });
       const result = await client.generateJson({
         prompt: `${prompt.text}\n\nReclassify only this existing signal using its stored evidence. `
-          + "Do not extract or invent additional acts. Return only {classe,reason,reasonCode}.\n"
+          + "Do not extract or invent additional acts. Return only {classe,reason,reasonCode,ambiguous}.\n"
           + canonicalJson(reannotationInput(signal)),
-        schema: JSON.stringify({ type: "object", required: ["classe", "reason", "reasonCode"],
-          properties: { classe: { enum: ["pertinent", "a_surveiller", "non_classe", "ecarte"] },
-            reason: { type: "string" }, reasonCode: { type: "string" } } }),
+        schema: JSON.stringify({ type: "object", required: ["classe", "reason", "reasonCode", "ambiguous"],
+          properties: { classe: { enum: singlePassClasses }, ambiguous: { type: "boolean" },
+            reason: { type: "string" }, reasonCode: { enum: singlePassReasonCodes } } }),
         maxOutputTokens: 2048,
         validateResponse(text) { accepted.decision = parseSinglePassClass(parseRefreshVerificationJson(text)); },
       });
       if (!accepted.decision || !accepted.model || result.status !== "completed") throw new Error("Incomplete reannotation response");
       return { classe: accepted.decision.classe, reason: accepted.decision.reason,
-        model: accepted.model.model, effort: accepted.model.effort };
+        ambiguous: accepted.decision.ambiguous, model: accepted.model.model, effort: accepted.model.effort };
     } finally { models.completeDocument(identity); }
   };
 }
