@@ -52,6 +52,17 @@ async function main(operation = process.argv[2]) {
         || r.receipt('rollback').sha256 !== r.receipt('backup').sha256)
         r.fail('rollback_receipt_required');
       result = { ok: true }; break;
+    case 'abort-verify':
+      r.destination(); r.mutationGuard();
+      if (r.prefix(r.rows()) !== 13) r.fail('historical_schema_required');
+      result = { ok: true }; break;
+    case 'recover-authorize': {
+      r.destination();
+      const a = r.json(r.env.APPROVAL);
+      if (a.run !== r.env.RUN || a.rollbackAfterReopen !== true
+        || a.acceptPostReopenWriteLoss !== true) r.fail('post_reopen_loss_approval_required');
+      result = { ok: true }; break;
+    }
     case 'backup': result = backup.backup(); break;
     case 'restore-test': result = backup.restoreTest(); break;
     case 'migrate': result = migrations.migrate(); break;

@@ -69,7 +69,7 @@ prerequisites precheck k8s-plan cd-plan:
 	@cd "$(ROOT)" && timeout --signal=TERM --kill-after=5s 150s bash deploy/prod-cutover/inspect.sh $@
 backup restore-test migrate transition verify smoke rehearsal rollback:
 	@cd "$(ROOT)" && if [[ "$(ENV)" == execution-prod && "$@" =~ ^(backup|migrate|transition|rollback)$$ ]]; then timeout --signal=TERM --kill-after=10s 3600s bash deploy/prod-cutover/window.sh $@; else timeout --signal=TERM --kill-after=10s 3600s node deploy/prod-cutover/cli.cjs $@; fi
-window-start window-configure window-close window-evidence window-deploy window-rollback-services window-reopen:
+window-start window-configure window-close window-evidence window-deploy window-rollback-services window-reopen window-abort window-recover:
 	@cd "$(ROOT)" && timeout --signal=TERM --kill-after=10s 1200s bash deploy/prod-cutover/window.sh $@
 test:
 	@test "$(ENV)" = test-prod-cutover
