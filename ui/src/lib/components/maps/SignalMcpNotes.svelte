@@ -22,7 +22,7 @@
 
 <section aria-label="Notes du signal" class="signal-notes">
   {#each annotations.notes as note (note.id)}
-    <p><small>{note.source === "mcp" ? mcpBadge(note) : "Note utilisateur"}</small><br />{note.text}</p>
+    <p><small>{note.source === "mcp" ? mcpBadge(note) : "Note utilisateur"}</small><br /><span>{note.text}</span></p>
   {/each}
   <form aria-label="Ajouter une note" on:submit|preventDefault={submit}>
     <label>Note libre<textarea bind:value={text} maxlength="2000" rows="2" disabled={saving}></textarea></label>
