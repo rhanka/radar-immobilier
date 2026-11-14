@@ -54,7 +54,7 @@ import { privateSignalResponse } from "../services/facets/private-response.js";
 import { legacyFenceError, legacyFenceStatus, type LegacyRetirementState } from "../services/facets/legacy-retirement.js";
 import { targetFingerprint } from "../services/facets/target.js";
 import type { Database } from "../db/client.js";
-import { readVisibleClassAnnotations, type ClassAnnotation } from "../services/graph/class-annotations.js";
+import { readClassAnnotations, type ClassAnnotation } from "../services/graph/class-annotations.js";
 import type { ObjectStore } from "../storage/object-store.js";
 import {
   apiDocumentUrl,
@@ -993,7 +993,7 @@ export async function readGraphSignalCards(
   if (enrichment.exceeded) {
     console.warn(`[graph-signals] doc enrichment budget exceeded (city=${city}, nodes=${nodes.length}): responded with degraded doc refs`);
   }
-  const annotations = await readVisibleClassAnnotations(deps.db, city);
+  const annotations = await readClassAnnotations(deps.db, city);
   return mapped.map((card) => {
     const classAnnotation = annotations.get(`${card.type}:${card.id}`);
     return classAnnotation ? { ...card, classAnnotation } : card;
