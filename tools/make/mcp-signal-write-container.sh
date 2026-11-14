@@ -9,7 +9,7 @@ case "$mode" in
   test-mcp)
     npm run test --workspace=packages/immo-mcp -- --exclude '**/*.e2e.test.ts' $scope
     npm run test --workspace=api -- tests/integration/signal-mcp-client.spec.ts ;;
-  test-ui) npm run test --workspace=ui -- ${scope:-src/lib/components/maps/SignalMcpNotes.test.ts} ;;
+  test-ui) npm run test --workspace=ui -- ${scope:-src/lib/components/maps/SignalMcpNotes.test.ts src/lib/signals/signal-classement.test.ts src/lib/signals/class-annotation-label.test.ts} ;;
   test-ui-e2e) bash tools/make/mcp-signal-write-browser.sh ;;
   verify)
     for gate in typecheck lint test-api test-mcp test-ui; do bash "$0" "$gate"; done ;;
