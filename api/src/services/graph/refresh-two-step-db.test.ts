@@ -8,6 +8,19 @@ import { twoStepFixture } from "./refresh-two-step.fixture.js";
 import * as graphStore from "./graph-store.js";
 
 describeDb("two-step refresh with PostgreSQL", () => {
+  it("should not reclassify an existing unchanged v2 act emitted by another extraction", async () => {
+    const { db } = await database();
+    const first = await twoStepFixture(db, "two-step");
+    await first.run();
+    const second = await twoStepFixture(db, "two-step");
+    second.store.seed("graph/waterloo/latest.json", await first.store.get("graph/waterloo/latest.json"));
+    await second.run();
+    expect(second.detectionRequests).toHaveLength(2);
+    expect(second.classificationRequests).toHaveLength(0);
+    expect(second.notes.find(({ note }) => note === "classification-completed")?.detail)
+      .toMatchObject({ skippedUnchanged: 2, written: 0 });
+  });
+
   it("should classify after resuming a published document without another detection call", async () => {
     const { db } = await database();
     const f = await twoStepFixture(db, "two-step");
