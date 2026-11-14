@@ -31,6 +31,7 @@
 - [x] Tests dédiés ENV=test-prod-cutover. Ports réservés API 18821, UI 15321, Maildev 11121.
 
 ## Plan / Todo (lot-based)
+- [x] Dossier mis à jour avec décision owner vers 19 h : Tout ce soir, bascule décalée. Smoke statique HTML/public/MCP requis avant réouverture. K8s reste responsable du mint S3, des URLs DB et de DNS/TLS/Ingress.
 - [x] Copie : restauration réelle 110,847 s après base template0. Mesures et diagnostics sans lignes métier. Génération idempotente des trois clés validée sur kubectl simulé. Seize tests ciblés passent.
 - [x] Rendu statique prod : hôte paramétrable et Ingress TLS cohérent, builder absent. Cible future artifact-roles sous verrou et drain, car le migrateur ne crée pas les rôles absents. Aucun provisionnement prod exécuté.
 - [x] Prérequis artefacts prod : noms des cinq Secrets lus en préprod, cibles de génération idempotente et import S3 futur par k8s. Précheck refuse chaque Secret absent ou clé vide. Test de rendu statique, sans builder, et hôte de contenu paramétrable.
