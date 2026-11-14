@@ -167,7 +167,7 @@ function freshnessRank(value: string | Date | null | undefined): number {
   return Number.isFinite(timestamp) ? -timestamp : Number.MAX_SAFE_INTEGER;
 }
 
-function tuple(item: VivierSortable): VivierRankTuple {
+export function vivierRankTuple(item: VivierSortable): VivierRankTuple {
   const { classification } = item;
   const knownEffect = classification.effet_densifiant !== "inconnu";
   return [
@@ -200,8 +200,8 @@ function asSortable(value: VivierComparable): VivierSortable {
 }
 
 export function compareVivier(a: VivierComparable, b: VivierComparable): number {
-  const left = tuple(asSortable(a));
-  const right = tuple(asSortable(b));
+  const left = vivierRankTuple(asSortable(a));
+  const right = vivierRankTuple(asSortable(b));
   return compareTuple(left, right);
 }
 
