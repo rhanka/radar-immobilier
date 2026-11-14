@@ -255,6 +255,9 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
                 throw Object.assign(new Error("Refresh output incomplete"), { code: "REFRESH_EMPTY_OUTPUT" });
               }
             } catch (error) {
+              if (error && typeof error === "object" && "code" in error && error.code === "REFRESH_RUN_BUDGET") {
+                terminalFailure = true;
+              }
               if (responseValidated && !controller.signal.aborted) terminalFailure = true;
               failed = true; failure = error;
             }
