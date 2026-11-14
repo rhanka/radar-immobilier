@@ -37,8 +37,20 @@ Apply the migration and replay service-role grants on preprod only after the sta
 Enable the signal binding, advertise immo:signals:write and register that scope at the IdP.
 Keep the default consent selection read-only. Users must explicitly grant the new scope and reconnect.
 No production manifests or release version change is part of this branch.
+The dedicated PostgreSQL role is `immo_mcp_signal_writer`.
+Provision its connection as `IMMO_MCP_SIGNAL_DATABASE_URL`, with the same database name as the API.
+Set `IMMO_MCP_SIGNALS_WRITE_ENABLED=1` only after the migration and grants are qualified.
+Read-only OAuth tokens still cannot write with that binding enabled.
 
 ## Verification
 
 Cover missing scope, forged confirmation, accepted/declined elicitation, stale acceptance, manual and human priority, negative feedback validation, cleaned notes, audit, user rate limits and cross-workspace isolation.
 Run typecheck, lint, scoped test-api, test-mcp, test-ui and browser badge/note checks.
+
+## Review availability
+
+Design received two independent reviews, for scoped correctness and authorization.
+The installed final-review skill requires a complementary host/model pair launched through h2a MCP.
+That launch tool is absent in this session. Exact author model/effort metadata is also unavailable.
+Final peer selection status: `selection-failed`. No final consensus verdict is claimed.
+Implementation is checked through executable PostgreSQL, OAuth/SDK and browser contracts.
