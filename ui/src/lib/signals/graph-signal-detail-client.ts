@@ -514,6 +514,7 @@ export function extractSignalEvidence(node: GraphSignalNode): SignalEvidence {
 }
 
 export interface GraphSignalNode {
+  classFeedback?: { verdict: "up" | "down"; createdAt: string; reason: string; eventId: string };
   classAnnotation?: {
     ambiguous?: boolean;
     source: "ai" | "manual";
@@ -524,6 +525,8 @@ export interface GraphSignalNode {
     promptId: string | null;
     promptSha256: string | null;
     pipelineRunId: string | null;
+    createdAt?: string;
+    updatedAt?: string;
   };
   id: string;
   type: "Signal" | "DesignationEvent" | string;
