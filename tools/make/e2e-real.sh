@@ -47,4 +47,4 @@ trap 'exit 143' TERM
 "${compose[@]}" --profile e2e run --rm -T -u 0:0 --entrypoint sh e2e -c 'chown -R '"$(id -u):$(id -g)"' /workspace/node_modules /workspace/api/node_modules /workspace/ui/node_modules /workspace/packages/immo-mcp/node_modules /e2e-state'
 "${compose[@]}" --profile e2e run --rm -T e2e prepare
 "${compose[@]}" up -d api ui
-"${compose[@]}" --profile e2e run --rm -T e2e run
+"${compose[@]}" --profile e2e run --rm -T -e E2E_SPEC e2e run
