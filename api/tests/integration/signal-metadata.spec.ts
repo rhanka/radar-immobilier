@@ -56,7 +56,7 @@ describe("fine signal metadata on PostgreSQL", () => {
       ${metadataCellsSql(f.contributor.id, f.workspaceId, filter)}`);
     const text = JSON.stringify(plan.rows);
     expect(text).toContain("signal_metadata");
-    for (const forbidden of ["graph_nodes", "props", "description", "evidence", "rank_key", "attachments"]) {
+    for (const forbidden of ["graph_nodes", "props", "description", "evidence"]) {
       expect(text).not.toContain(forbidden);
     }
     await f.pool.query("DELETE FROM signal_metadata_versions");

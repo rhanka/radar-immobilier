@@ -31,10 +31,10 @@
 - [x] Automated isolated stacks only; root UAT remains under conductor control.
 
 ## Plan / Todo (lot-based)
-- [ ] Canonical filter and faceted metadata contract.
-- [ ] Versioned projection, transactional refresh, idempotent backfill and migration.
-- [ ] Authorized SQL aggregation and exact class resolution.
-- [ ] Coordinated map/rail client; remove detail substitution.
+- [x] Canonical filter and faceted metadata contract.
+- [x] Versioned projection, transactional refresh, idempotent backfill and migration.
+- [x] Authorized SQL aggregation and exact class resolution.
+- [x] Coordinated map/rail client; remove detail substitution.
 - [ ] Unit matrix, reference parity, PostgreSQL rights/dates/reprojection/plans.
 - [ ] Typecheck, lint, targeted API/UI/E2E gates.
 - [ ] Representative local cold unlimited measurement, budget 1 second.

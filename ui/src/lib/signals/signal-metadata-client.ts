@@ -1,16 +1,24 @@
-import { mergeVivierFiltreCubes, type SignalMetadataResponse } from "@radar/domain";
+import { mergeVivierFiltreCubes, type SignalMetadataResponse, type SignalMetadataFilter } from "@radar/domain";
 import { fetchJsonWithTimeout, DEFAULT_REQUEST_TIMEOUT_MS, readJsonErrorCode } from "$lib/net/fetch-with-timeout.js";
 import { GraphSignalsHttpError, scopedSignalFacetsPath, type SignalScope } from "./graph-signal-detail-client.js";
 import type { GraphSignalCityItem, GraphSignalsByCityOptions } from "./graph-signals-by-city-client.js";
 
 /** Explicitly versioned read. Unsupported servers fail visibly, without a card fallback. */
-export async function fetchSignalMetadata(scope: SignalScope, options: GraphSignalsByCityOptions = {}) {
+export async function fetchSignalMetadata(scope: SignalScope, options: GraphSignalsByCityOptions & {
+  filter?: Pick<SignalMetadataFilter, "classes" | "requireZonage" | "requireResidentielEligible" | "requirePrecoce">;
+} = {}) {
   const params = new URLSearchParams({ contract: "metadata-v2", scope: "quebec" });
   if (options.dateFrom) params.set("dateFrom", options.dateFrom);
   if (options.dateTo) params.set("dateTo", options.dateTo);
   if (options.dateBasis === "scrap") params.set("dateBasis", "scrap");
   if (options.excludePiia) params.set("excludePiia", "1");
   if (options.excludeDerogations) params.set("excludeDerogations", "1");
+  if (options.filter) {
+    params.set("classes", options.filter.classes.join(",") || "none");
+    for (const key of ["requireZonage", "requireResidentielEligible", "requirePrecoce"] as const) {
+      if (options.filter[key]) params.set(key, "1");
+    }
+  }
   const result = await fetchJsonWithTimeout<SignalMetadataResponse>(scopedSignalFacetsPath(scope, `by-city?${params}`), {
     signal: options.signal, timeoutMs: options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS,
   });
