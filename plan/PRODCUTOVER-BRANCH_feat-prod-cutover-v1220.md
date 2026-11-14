@@ -31,6 +31,8 @@
 - [x] Tests dédiés ENV=test-prod-cutover. Ports réservés API 18821, UI 15321, Maildev 11121.
 
 ## Plan / Todo (lot-based)
+- [x] Runbook final : responsabilités infra/immo corrigées, neuf objets prévus en dry-run RO, CORS administrateur k8s, analyse prudente du rejeu 6H.
+- [ ] Validation Docker finale : deux scénarios réels sans démarrage observé ; lint interrompu pendant reconstruction. Stockage local à 97 %. Aucun GO.
 - [x] APPLY préparé : import S3 privé, génération des clés, Secrets create-only, rôles sans privilèges, Certificate et Ingress. Jamais exécuté en prod.
 - [x] Provision prod : inventaire RO, précheck cluster/RBAC/DB/objets. Dry-run sans lecture de dotenv. APPLY futur séparé, création seule.
 - [x] Runbook destiné au corps de la PR actualisé : vingt gardes, trois séries de 31 DDL, double rollback, erreurs, projection et six Secrets manquants. Aucun GO prod. Copie conservée au candidat pour recette humaine.

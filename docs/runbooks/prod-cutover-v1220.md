@@ -6,7 +6,8 @@ La branche de procédure reste distincte. La préparation est intégrée par mer
 
 Toutes les commandes passent par `rtk make -f deploy/prod-cutover/prod-cutover.mk`.
 `ENV` vient toujours en dernier. Aucun `.env` chargé.
-`ENV=prod` reste en lecture seule. `ENV=execution-prod` désigne une exécution future autorisée.
+`ENV=prod` reste en lecture seule ici. `provision-prod APPLY=1` est une action future non exécutée.
+`ENV=execution-prod` désigne une bascule future autorisée.
 Le kubeconfig est fixé à `$HOME/.kube/radar-prod-tenant-admin.kubeconfig`.
 
 ## Décisions owner du 13 novembre
@@ -25,53 +26,61 @@ Voir [les preuves et la commande exacte](../../deploy/prod-cutover/PREPARATION.m
 
 ## Prérequis artefacts prod avant la fermeture
 
-Les noms de clés ci-dessous ont été lus en préprod le 13/11. Aucune valeur affichée.
-Le Secret account-reader y est utilisé. Il est donc aussi requis en prod.
-Les références API/MCP sont obligatoires dans `prod-bindings.cjs`.
-Le précheck refuse un Secret absent, une clé vide ou le TLS absent. Aucun GO implicite.
-Le contrôle RO du 13/11 refuse déjà `radar-artifacts-prod`, absent.
-Un inventaire RO du 13/11 confirme les six Secrets artefacts de ce tableau absents en prod.
+**État actualisé le 14/11.**
+k8s a fourni le bucket privé `radar-immobilier-artifacts`, préfixe `artifacts/radar-immobilier/`.
+Endpoint : `https://s3.bhs.io.cloud.ovh.net`. Région : `bhs`.
+La clé limitée est disponible dans le `.env` opérateur. Aucun `.env` lu ici.
+Champs : `ARTIFACTS_PROD_S3_ACCESS_KEY`, `ARTIFACTS_PROD_S3_SECRET_KEY`, `ARTIFACTS_PROD_S3_USER`,
+`ARTIFACTS_PROD_S3_USERID`, `ARTIFACTS_PROD_S3_ENDPOINT`, `ARTIFACTS_PROD_S3_REGION`,
+`ARTIFACTS_PROD_S3_BUCKET`, `ARTIFACTS_PROD_S3_PREFIX`.
+Put/list/get/delete dans le préfixe sont attestés. Les accès hors préfixe sont refusés.
+DNS fourni : `*.pages.immo.sent-tech.ca → 51.79.100.177`, TTL 300. Aucun DNS pour l’hôte nu.
+Rotation tous les 90 jours. Prochaine : 11/02/2027. k8s renouvelle la clé. immo actualise le Secret.
 
-| Prérequis | Objet prod et clés | Responsable |
-| --- | --- | --- |
-| S3 statique | `radar-artifacts-prod` : `ARTIFACTS_S3_ACCESS_KEY`, `ARTIFACTS_S3_SECRET_KEY` | k8s gouverne le mint et la rotation. Bucket dédié et droits bornés. |
-| Page d’upload | `radar-artifacts-upload-page-prod` : `secret` | immo génère 32 octets aléatoires, encodés en 64 caractères hexadécimaux. |
-| Reader | `radar-artifacts-reader-prod` : `ARTIFACTS_READER_GRANT_SECRET`, `ARTIFACTS_READER_SESSION_SECRET` | immo génère chaque clé sur 32 octets. Même Secret pour toutes les instances API. |
-| Writer MCP | `immo-mcp-artifact-writer` : `IMMO_MCP_ARTIFACT_DATABASE_URL` | k8s fournit l’URL privée. La cible de rôles crée `immo_mcp_artifact_writer`, absent aujourd’hui. |
-| Account reader MCP | `immo-mcp-account-reader` : `IMMO_MCP_ACCOUNT_DATABASE_URL` | k8s fournit l’URL privée. La cible de rôles crée `immo_mcp_account_reader`. |
-| Contenu HTTPS | `radar-artifact-content-prod-tls` : `tls.crt`, `tls.key` ; Ingress `radar-artifact-content` | k8s fournit DNS wildcard, certificat et Ingress avant capture de la fenêtre. |
-
-Configuration S3 : bucket `radar-immobilier-artifacts`, endpoint `https://s3.bhs.io.cloud.ovh.net`, région `bhs`.
-k8s confirme ces trois valeurs avant le rendu. Elles restent dans les ConfigMaps, sans identifiants.
-Variable de rendu : `ARTIFACTS_CONTENT_HOST=pages.immo.sent-tech.ca`, sans schéma ni wildcard.
-`render` produit les ConfigMaps. `content-ingress` produit l’Ingress, avec le même hôte wildcard et TLS.
-Chaque cible exige un `CONFIGURATION` absolu neuf. Aucun apply dans cette lane.
-
-Provisionnement **futur**, par l’acteur indiqué, après autorisation séparée :
+immo prend en charge le Certificate wildcard et l’Ingress de contenu, en miroir préprod.
+Issuer : `ClusterIssuer/letsencrypt-prod`, DNS-01. Traefik websecure vers `radar-api:http`.
+immo importe le Secret S3, génère les trois clés upload/reader et les mots de passe MCP.
+immo crée les deux rôles MCP et leurs URL internes. Le migrateur applique ensuite les grants.
+Le tenant admin possède les droits create requis. Le précheck les revérifie.
 
 ```sh
-rtk make -f deploy/prod-cutover/artifacts.mk s3-secret PROVISION_OWNER=k8s ARTIFACTS_S3_ENV_FILE=<dotenv-S3-prive> ENV=provision-prod
-rtk make -f deploy/prod-cutover/artifacts.mk generated-secrets PROVISION_OWNER=immo ENV=provision-prod
+rtk make -f deploy/prod-cutover/prod-cutover.mk provision-prod ENV=prod
+# Action future. Non exécutée pendant cette préparation.
+rtk make -f deploy/prod-cutover/prod-cutover.mk provision-prod APPLY=1 ARTIFACTS_PROD_ENV_FILE=<chemin-absolu-prive> ENV=prod
 ```
 
-Le dotenv dédié ne contient que les deux clés S3. k8s le fournit à la cible. Aucun agent ne le lit.
-La cible ne le source jamais. `kubectl create --from-env-file` ne l’affiche pas.
-Ces cibles conservent les Secrets existants. Elles ne renouvellent pas les clés à chaque appel.
-Les fichiers aléatoires temporaires sont privés puis supprimés. Aucune valeur aléatoire ne sort sur stdout.
-Ces cibles ne sont exécutées ni par la répétition ni par le précheck RO.
+Défaut : `--dry-run`. Aucun fichier privé lu. Aucun objet créé.
+APPLY lit uniquement les champs S3 attendus du fichier privé 0600. Aucun sourcing ni affichage.
+Les secrets passent en mémoire et sur stdin. Les clés existantes sont conservées.
+Un objet incomplet ou divergent bloque avant création. Une reprise conserve les créations déjà faites.
+Précheck : cluster exact, verrou libre, droits, pod DB unique, base radar, rôles restreints,
+clés existantes, URL MCP et spécifications Certificate/Ingress.
+Aucun Deployment, ConfigMap, service ou donnée applicative modifié.
 
-Rotation S3 : k8s crée un nouvel identifiant limité au bucket. Il met à jour le Secret sans afficher ses valeurs.
-Il redémarre API/MCP sous contrôle du verrou, puis valide publication et lectures statiques.
-Il révoque ensuite l’ancien identifiant. En échec, il rétablit le Secret antérieur avant révocation.
-Tracer date, responsable et identifiant de version du Secret. Ne jamais tracer les clés.
-Rotation upload/reader : même coordination. La rotation reader invalide les grants et sessions existants.
+**Dry-run prod réussi. Objets prévus :**
 
-Le migrateur candidat réapplique les grants. Il **ne crée pas** les rôles absents.
-Après fermeture et preuve de terminaison, exécuter `artifact-roles RUN=<RUN> ENV=execution-prod`.
-La cible exige le GO exact et la propriété du verrou. Elle crée des LOGIN sans privilèges administratifs.
-Les mots de passe viennent des URLs privées des Secrets, sans argument SQL ni affichage.
-Les rôles existants sont conservés. Après les 44 migrations, `transition` réapplique les grants restreints.
-La lecture des noms/courriels reste désactivée en prod. Aucun rôle n’est créé dans cette lane.
+- Secret `radar-artifacts-prod`.
+- Secret `radar-artifacts-upload-page-prod`.
+- Secret `radar-artifacts-reader-prod`.
+- Secret `immo-mcp-artifact-writer`.
+- Secret `immo-mcp-account-reader`.
+- Certificate `radar-artifact-content-prod`.
+- Ingress `radar-artifact-content`.
+- Rôle DB `immo_mcp_artifact_writer`.
+- Rôle DB `immo_mcp_account_reader`.
+
+cert-manager créera le Secret `radar-artifact-content-prod-tls`. Attendre Certificate Ready.
+Les rôles sont des LOGIN sans privilèges administratifs. Les grants candidats attendent les migrations.
+
+**CORS requis.** Le navigateur fait des PUT signés directement vers S3.
+k8s pose le CORS avec son principal administrateur OVH via `PutBucketCors`.
+Corps exact : `deploy/prod-cutover/artifacts-cors.json`. Origine prod seule, PUT/GET/HEAD,
+headers content-type/content-length, ETag exposé, cache 300 s.
+Son outil S3 sécurisé appelle `put-bucket-cors` sur le bucket indiqué, avec cet endpoint et cette région.
+Puis `get-bucket-cors` et OPTIONS depuis `https://immo.sent-tech.ca`. Refuser une origine étrangère.
+La clé limitée n’a aucun droit `PutBucketCors` attesté. Ce droit porte sur le bucket entier.
+Les accès racine sont refusés. Ne pas élargir cette clé. Le principal administrateur k8s doit agir.
+La cible immo ne modifie pas le bucket. Le CORS reste à confirmer avant ouverture.
 
 Rendu exigé sur API et MCP : `ARTIFACTS_CONTROL_MODE=general`, `IMMO_ARTIFACTS_GIT_MODE=off`,
 `IMMO_ARTIFACTS_LIVE_EDGE_ENABLED=0`, qualifications/invitations/redrive false.
@@ -173,7 +182,7 @@ La commande `copy-rehearse OWNER=i-cond ENV=rehearsal` prépare l’attestation 
 Elle prépare UI/API/MCP, IdP et S3 isolés. Refresh et sorties prod sont absents.
 La recette humaine exige encore les PV autorisés et un compte Product Owner existant.
 Le câblage prod est préparé dans prod-bindings et prod-content-ingress.json. Aucun objet prod n’est provisionné.
-K8s doit fournir les Secrets, rôles, grants, bucket et DNS/TLS. L’IdP prod doit autoriser les scopes annoncés.
+Bucket et DNS sont fournis. immo provisionne Secrets, rôles, Certificate et Ingress. k8s confirme le CORS. L’IdP prod doit autoriser les scopes annoncés.
 Le wildcard pages doit précéder la capture de fenêtre. `CURSOR_REFERENCE` désigne la clé privée conservée.
 window-deploy refuse une clé différente. L’opérateur de reprise reste à désigner.
 Voir [les entrées détaillées](../../deploy/prod-cutover/README.md).
@@ -217,6 +226,16 @@ La copie reste à `https://recette.localhost:15321`, au schéma candidat. Aucun 
 **Coupure projetée : socle de 292,984 s, soit 4 min 52,984 s, avec la remise finale.**
 Calcul : 72 + 113,569 + 50,097 + 3,897 + 0,787 + 52,547 + 0,087.
 Le rejeu 6H est exclu. La procédure prod ne l’appelle qu’une fois.
+Le rejeu final de 138,218 s contre 2,569 s mesure toute l’invocation, lancement Docker inclus.
+Les deux verdicts sont open-success. L’idempotence est validée. Une durée identique n’est pas garantie.
+Le stockage local est à 97 % et des attentes IO sont observées. Cela étaye une contention locale.
+Aucune mesure interne ne sépare SQL, lancement et IO. La cause exacte des 138 s reste non démontrée.
+Ce délai n’est donc pas une durée fonctionnelle attendue de 6H.
+En prod, c’est un risque de dépassement de fenêtre. Le scénario des maxima conserve cette mesure.
+Après interruption, ne jamais relancer ou restaurer tant qu’un hook du RUN subsiste.
+Le correctif hookfix impose étiquettes, trap et preuve de disparition. Après SIGKILL, arrêt explicite requis.
+Conserver le verrou, examiner le verdict et le journal, puis reprendre le même RUN ou décider le rollback.
+Les 4 min 53 s projetées ne garantissent pas la coupure. Les 18 min 25 s ne sont pas une borne haute.
 En combinant les maxima DDL et 6H observés séparément, ce socle atteint 18 min 24,965 s.
 Ce scénario combine des passages différents. Il ne borne pas la coupure totale fermeture → réouverture.
 Il faut ajouter drain, transfert S3 et lecture de retour, rôles, déploiement k8s,
@@ -268,3 +287,15 @@ clients interrompus, image UI manquante, UID du proxy et CORS du mock.
 Les gardes ont bloqué les preuves Docker invalides. Aucun échec DDL dans ces trois séries.
 Vingt tests ciblés et huit scénarios contrôleur/IdP passent.
 Le lint passe. Les stacks de tests ont été supprimées avec down -v.
+
+## Validation de finalisation
+
+Merge hookfix `e1dec8111` intégré par `d3866bbde`. Six conflits résolus.
+Les résultats ci-dessus décrivent la répétition précédente.
+Après merge : 24 gardes réussies et contrôle de syntaxe réussi.
+Dry-run `provision-prod` prod réussi, neuf objets prévus. Aucun APPLY exécuté.
+Deux scénarios Docker TERM/KILL échouent deux fois : hook non observé en cours d’exécution.
+Les conteneurs ont été observés en état Created. Aucun verdict de succès pour ces scénarios.
+Le lint expire pendant une reconstruction Docker, avant ESLint. Code 137. Il reste à relancer.
+Le disque local est à 97 %. La CI du nouveau SHA est à consulter dans la PR.
+La revue formelle harness reste selection-failed. Aucun GO prod implicite.
