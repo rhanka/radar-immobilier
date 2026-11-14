@@ -44,3 +44,4 @@
 - [x] Lot 6: final diff inspected; branch pushed; PR #1106 opened against feat/refresh-single-pass-v2 with design, validation, activation and rollback. No deployment or merge. CI remains pending; final review belongs to i-cond.
 - [x] Review correction: integrate #1099 head 8e4b8e2ba into v2, then merge updated v2 locally; no PR merge.
 - [x] Review correction: bound classification SQL sessions with statement/lock timeouts and destroy their dedicated connection on cancellation; bound each act and run.
+- [x] Review correction: reserve calls and conservative token allowances before every model send, across detection/verification/classification; share the sweep deadline and halt extraction cleanly at exhaustion.
