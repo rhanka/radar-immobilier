@@ -43,9 +43,9 @@ if [[ $1 == window-start ]]; then
       and .checkpoints["manual-inventory"]==null' "$WORK/record.json" >/dev/null || fail 'Capture déjà terminée'
     lock_resume
   else lock_acquire cutover; fi
-  manual_cd_idle
   jq '.manualV1220=true|.environment="prod"' "$WORK/record.json" > "$WORK/next.json"
   mv "$WORK/next.json" "$WORK/record.json"; record_save
+  manual_cd_idle
   # Capture the previous release and consumers while they are still Ready.
   manual_deployed_release
   jq '.previousRelease=.release' "$WORK/record.json" > "$WORK/next.json"

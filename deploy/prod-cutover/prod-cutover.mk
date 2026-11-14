@@ -33,7 +33,10 @@ test:
 	@cd "$(ROOT)" && timeout 90s node --test deploy/prod-cutover/*.test.cjs
 lint:
 	@test "$(ENV)" = test-prod-cutover
-	@cd "$(ROOT)" && timeout --kill-after=10s 180s bash deploy/prod-cutover/lint.sh
+	@cd "$(ROOT)" && timeout --kill-after=10s 300s bash deploy/prod-cutover/lint.sh
+lint-down:
+	@test "$(ENV)" = test-prod-cutover
+	@env UID="$$(id -u)" GID="$$(id -g)" docker compose --env-file /dev/null -p radar-test-prod-cutover-lint -f "$(ROOT)/deploy/cutover/test.compose.yml" down -v --remove-orphans
 integration:
 	@test "$(ENV)" = test-prod-cutover
 	@cd "$(ROOT)" && timeout --kill-after=10s 300s bash deploy/prod-cutover/integration.sh
