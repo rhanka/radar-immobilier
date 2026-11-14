@@ -16,6 +16,10 @@ function stoppedSnapshot() {
     || !Number.isFinite(Date.parse(c.State.FinishedAt)) || Date.parse(c.State.FinishedAt) <= 0
     || !Number.isInteger(c.State.ExitCode))) r.fail('local_consumers_not_terminated');
   if (r.run('docker', ['ps', '-q', '--filter', 'name=immo-6h-']).trim()) r.fail('local_hook_not_terminated');
+  const readers = r.run('docker', ['exec', '-e', 'PGOPTIONS=-c default_transaction_read_only=on -c statement_timeout=5000',
+    db[0].Id, 'psql', '-XqAt', '-U', 'radar', '-d', 'radar_cutover_owner_20261113', '-v', 'ON_ERROR_STOP=1',
+    '-c', "SELECT count(*) FROM pg_stat_activity WHERE application_name='radar-prod-copy-read';"]).trim();
+  if (readers !== '0') r.fail('local_readers_not_terminated');
   return { network: NETWORK, databaseContainer: db[0].Id,
     containers: consumers.map(c => ({ id: c.Id, finishedAt: c.State.FinishedAt, exitCode: c.State.ExitCode })) };
 }

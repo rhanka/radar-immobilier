@@ -31,6 +31,7 @@
 - [x] Tests dédiés ENV=test-prod-cutover. Ports réservés API 18821, UI 15321, Maildev 11121.
 
 ## Plan / Todo (lot-based)
+- [x] Remise au candidat : DDL 50,097 s ; 6H 3,897 s ; rejeu 138,218 s ; vérification RO par exec 0,787 s ; services 52,547 s ; smoke 0,087 s. Copie ouverte pour recette humaine. Vingt gardes passent. Le reader local refuse un UPDATE vide et tout autre environnement.
 - [x] Dix-huit gardes passent. Régression d’interruption : le client Docker est arrêté avant suppression du conteneur nommé. L’audit après double rollback confirme 27 propriétaires, public, lecture legacy et refus du writer candidat.
 - [x] Smoke local réussi en 0,042 s. TLS, SHA servi et CORS borné contrôlés depuis l’hôte. Huit scénarios contrôleur/IdP et lint passent. Six Secrets artefacts absents en prod, constat RO. Premier rollback complet 108,501 s.
 - [x] Deuxième passage : 31 DDL en 34,361 s ; 0041 en 0,405 s ; 0044 en 10,809 s. Double 6H open-success en 3,767 s puis 2,569 s. Client de diagnostic orphelin supprimé après contrôle exact. Date de fin invalide désormais refusée. Copie restaurée gardée en échec.

@@ -39,7 +39,7 @@ function run(bin, args, options = {}) {
 function sql(query, options = {}) {
   return run('psql', ['-X', '-qAt', '-v', 'ON_ERROR_STOP=1', '--file=-'], { input: query, ...options }).trim();
 }
-function destination() {
+function destination(query = sql) {
   if (!env.PGHOST || !env.PGUSER || !env.PGDATABASE || !/^\d+$/.test(env.PGPORT || '5432')) fail('explicit_database_required');
   if (env.PGSERVICE || env.PGSERVICEFILE) fail('implicit_service_forbidden');
   if (env.ENV === 'prod') fail('production_read_only_lane');
@@ -52,7 +52,7 @@ function destination() {
   } else if (!(env.ENV === 'rehearsal' || /^test-/.test(env.ENV || ''))
     || !['127.0.0.1', 'localhost', '::1'].includes(env.PGHOST)
     || !/^radar_cutover_[a-z0-9_]+$/.test(env.PGDATABASE)) fail('disposable_local_database_required');
-  if (sql('SELECT current_database();') !== env.PGDATABASE) fail('database_identity_mismatch');
+  if (query('SELECT current_database();') !== env.PGDATABASE) fail('database_identity_mismatch');
 }
 function output() {
   if (!env.OUTPUT || !path.isAbsolute(env.OUTPUT)) fail('absolute_output_required');
@@ -79,10 +79,10 @@ function journal() {
       return e;
     });
 }
-function identity() {
+function identity(query = sql) {
   return { host: env.PGHOST, port: Number(env.PGPORT || 5432), database: env.PGDATABASE,
-    system: sql('SELECT system_identifier FROM pg_control_system();'),
-    oid: sql('SELECT oid FROM pg_database WHERE datname=current_database();') };
+    system: query('SELECT system_identifier FROM pg_control_system();'),
+    oid: query('SELECT oid FROM pg_database WHERE datname=current_database();') };
 }
 function sameIdentity(a, b) { return JSON.stringify(a) === JSON.stringify(b); }
 function approvedPlan() {
@@ -123,8 +123,8 @@ function prefix(rows, entries = journal()) {
   }
   return rows.length;
 }
-function rows() {
-  return JSON.parse(sql("SELECT coalesce(json_agg(json_build_object('hash',hash,'created_at',created_at)), '[]'::json) FROM drizzle.__drizzle_migrations;"));
+function rows(query = sql) {
+  return JSON.parse(query("SELECT coalesce(json_agg(json_build_object('hash',hash,'created_at',created_at)), '[]'::json) FROM drizzle.__drizzle_migrations;"));
 }
 function evidence() {
   const e = json(env.EVIDENCE || fail('drain_evidence_required'));
