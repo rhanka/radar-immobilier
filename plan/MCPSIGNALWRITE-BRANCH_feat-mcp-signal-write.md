@@ -1,7 +1,7 @@
 # Feature: Scoped MCP signal classification writes
 
 ## Objective
-- [ ] Expose classification, human feedback and free notes through MCP and the signal UI.
+- [x] Expose classification, human feedback and free notes through MCP and the signal UI.
 
 ## Scope / Guardrails
 - [x] Base: feat/class-feedback (#1104). Target the preprod train; exclude production v1.2.20.
@@ -11,7 +11,7 @@
 - [x] Test environment: test-mcp-signal-write. No published ports; API 18873, UI 15873, Maildev 11873 reserved if needed.
 
 ## Branch Scope Boundaries (MANDATORY)
-- [x] Allowed: api/src/services/graph/**, api/src/routes/**, api/src/db/service-role-grants*, api/drizzle/meta/_journal.json.
+- [x] Allowed: api/src/services/graph/**, api/src/routes/**, api/src/app.ts, api/src/db/service-role-grants*, api/drizzle/meta/_journal.json.
 - [x] Allowed: packages/immo-mcp/**, ui/src/lib/signals/**, ui/src/lib/components/maps/**, ui/e2e-real/**.
 - [x] Allowed: tools/make/mcp-signal-write*, docs/spec/SPEC_EVOL_MCP_SIGNAL_WRITE.md, this plan.
 - [x] Allowed: api/tests/integration/signal-mcp-client.spec.ts.
@@ -20,23 +20,25 @@
 
 ## Feedback Loop
 - [x] MCPSIGNALWRITE-EX1: additive migration 0048; reserve 0047 for #1104 renumbering after #1102. Impact: scoped journal only. Rollback: disable the binding and scope; retain audit rows.
-- [x] MCPSIGNALWRITE-EX2: preprod scope discovery only. Explicit IdP consent remains required. Rollback: remove advertised scope.
+- [x] MCPSIGNALWRITE-EX2 unused: no preprod manifest changes. Activation/explicit IdP consent are documented for the preprod train.
+- [x] Route mounting in api/src/app.ts is necessary for UI note access. Impact: one authenticated scoped router. Rollback: remove its registration.
 - [x] Independent design reviews: security and scoped data correctness. Reconciled: global IA table cannot store personal MCP classes; native graph notes need a new scoped anchor.
 
 ## Orchestration Mode (AI-selected)
-- [x] Single branch; independent read-only design and final reviews.
+- [x] Single branch; two independent read-only design reviews. Final h2a selection failed: launch tool and exact author metadata unavailable; no consensus claimed.
 
 ## UAT Management (in orchestration context)
 - [x] Root UAT remains untouched. Automated browser checks use the isolated test stack.
 
 ## Plan / Todo (lot-based)
 - [x] Lot 0: read rules, server, annotations, feedback, facets and existing prospect notes.
-- [ ] Lot 1: additive scoped journal, notes, audit, grants and concurrency guards.
+- [x] Lot 1: additive scoped journal, notes, audit, grants and concurrency guards.
   - [x] Scoped append-only tables and transactional write/read functions drafted.
   - [x] Parent rebased after #1104 reserved 0047; MCP journal index 47 and migration 0048.
-- [ ] Lot 2: write scope, schemas, session-bound elicitation and tools.
+- [x] Lot 2: write scope, schemas, session-bound elicitation and tools.
   - [x] Five contracts registered; verified client identity and current-session elicitation wired.
-- [ ] Lot 3: scoped read projection, UI provenance badges and note addition.
-- [ ] Lot 4: unit, PostgreSQL, MCP client and UI tests; typecheck and lint.
-- [ ] Lot 5: final independent review, selective commits, push and PR to feat/class-feedback.
+- [x] Lot 3: scoped read projection, UI provenance badges and note addition.
+- [x] Lot 4: typecheck/lint pass; 27 API/PostgreSQL, 613 MCP (9 skipped), 5 OAuth/SDK/PostgreSQL, 19 UI and 1 browser tests pass.
+- [x] Every test stack removed with down -v; no containers or volumes remain for this ENV.
+- [ ] Lot 5: selective commits, push and PR to feat/class-feedback.
 - [ ] Verify CI; report tools, scope, schema, tests and PR number. No merge.
