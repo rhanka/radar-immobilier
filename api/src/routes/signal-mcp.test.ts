@@ -15,6 +15,7 @@ describe("signal note browser boundary", () => {
   it("should require a browser session and never accept MCP validation claims", async () => {
     expect((await app().request(path)).status).toBe(401);
     expect((await app({ sub: "viewer", via: "bearer" }).request(path)).status).toBe(403);
+    expect((await app({ sub: "viewer", via: "bearer" }).request(`${path}/decision`, { method: "POST" })).status).toBe(403);
     const response = await app({ sub: "viewer" }).request(path, { method: "POST", headers: { "content-type": "application/json" },
       body: JSON.stringify({ target: { scope: "personal", citySlug: "city", type: "Signal", id: "one" },
         text: "note", version: "a".repeat(32), source: "mcp", validation: "human" }) });

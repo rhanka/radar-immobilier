@@ -42,7 +42,7 @@ export async function decideSignalMcp(db: Database, sub: string, ref: SignalMcpR
     if (state.error) throw new FacetError(403, state.error);
     if (state.version !== version) throw new FacetError(409, "annotation_version_conflict");
     const current = state.current;
-    if (!current || (current.source !== "mcp" && !(current.linked_event_id && current.scope === "workspace"))) {
+    if (!current || (current.source !== "mcp" && !current.linked_event_id)) {
       throw new FacetError(409, "mcp_classification_required");
     }
     if (choice.confirm && (!state.canConfirm || choice.classe !== current.classe)) {
