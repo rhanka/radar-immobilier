@@ -76,6 +76,7 @@ case $1 in
     node -e 'const r=require("./deploy/prod-cutover/runtime.cjs");
       const record=r.json(process.argv[1]);
       if(!r.env.EVIDENCE || !r.path.isAbsolute(r.env.EVIDENCE) || /(^|\/)\.env/.test(r.env.EVIDENCE)) r.fail("evidence_path_required");
+      r.output();
       r.fs.writeFileSync(r.env.EVIDENCE,JSON.stringify({run:record.run,release:r.SHA,
         instances:record.consumers,completedAt:record.closedAt})+"\n",{mode:0o600});' "$WORK/record.json";;
   window-configure)

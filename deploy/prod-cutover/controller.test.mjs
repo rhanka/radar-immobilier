@@ -24,7 +24,7 @@ exec '${node}' "$@"
   const persist = state => writeFileSync(join(f.dir, 'state.json'), JSON.stringify(state));
   const record = () => JSON.parse(f.state().objects.find(o => o.metadata.name === 'radar-change-lock').data.record);
   const run = (action, id) => spawnSync('make', ['-s', '-f', 'deploy/prod-cutover/prod-cutover.mk',
-    action, `RELEASE=${f.dir}/release.json`, `PREVIOUS_RELEASE=${f.dir}/previous.json`, `CURSOR_REFERENCE=${f.dir}/cursor`, `CONFIGURATION=${f.dir}/configuration.json`, ...(id ? [`RUN=${id}`] : []), 'ENV=execution-prod'],
+    action, `OUTPUT=${f.dir}`, `EVIDENCE=${f.dir}/drain.json`, `RELEASE=${f.dir}/release.json`, `PREVIOUS_RELEASE=${f.dir}/previous.json`, `CURSOR_REFERENCE=${f.dir}/cursor`, `CONFIGURATION=${f.dir}/configuration.json`, ...(id ? [`RUN=${id}`] : []), 'ENV=execution-prod'],
   { env: f.env, encoding: 'utf8', timeout: 30000 });
   const success = result => assert.equal(result.status, 0, result.stdout + result.stderr);
   try {
@@ -71,6 +71,11 @@ exec '${node}' "$@"
     assert.notEqual(run('window-close', captured.run).status, 0, 'exécuteur actif non repris');
     busy.executor.state = 'stopped'; cm.data.record = JSON.stringify(busy); persist(active);
     success(run('window-close', captured.run));
+    success(run('window-evidence', captured.run));
+    const drain = JSON.parse(readFileSync(join(f.dir, 'drain.json'), 'utf8'));
+    assert.equal(drain.run, captured.run);
+    assert.ok(drain.instances.length > 0);
+    assert.equal(drain.completedAt, record().closedAt);
     assert.equal(f.state().objects.find(o => o.metadata.name === 'radar-api').spec.replicas, 0);
     assert.ok(JSON.stringify(f.state().objects.find(o => o.kind === 'Ingress')).includes('base-maintenance-'));
     const afterDrain = f.calls().length;
