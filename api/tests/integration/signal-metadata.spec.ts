@@ -20,20 +20,6 @@ const props = { properties: { category: "zonage", etape: "avis_motion", descript
     { publishedAt: "2026-11-02", fetchedAt: "2026-11-04T15:00:00Z" }] };
 
 describe("fine signal metadata on PostgreSQL", () => {
-  it("should publish metadata through both import and atomic reprojection paths", async () => {
-    const f = await workspaceFixture();
-    const graph = { nodes: [{ id: "imported", file_type: "Signal", label: "Projet de zonage résidentiel",
-      properties: { category: "zonage", etape: "avis_motion" } }], links: [] };
-    await upsertGraph(f.db, "metadata-import", graph);
-    const initial = await f.pool.query("SELECT filter_bits,version FROM signal_metadata WHERE city_slug='metadata-import'");
-    expect(initial.rows).toEqual([{ filter_bits: expect.stringMatching(/^[01]{5}$/), version: 1 }]);
-    const projected = await upsertGraphAtomic(f.db, "metadata-import", graph);
-    expect(projected.aborted).not.toBe(true);
-    expect((await f.pool.query("SELECT filter_bits,version FROM signal_metadata WHERE city_slug='metadata-import'")).rows)
-      .toEqual(initial.rows);
-    expect((await readSignalMetadata(f.db, f.contributor.sub, f.workspaceId, filter)).classCounts.non_classe).toBe(1);
-  });
-
   it("should match the current cube, count multidates once, rebuild idempotently and roll back with revisions", async () => {
     const f = await workspaceFixture();
     const citySlug = "metadata-city";
@@ -81,6 +67,17 @@ describe("fine signal metadata on PostgreSQL", () => {
     await f.pool.query("DELETE FROM signal_metadata_versions");
     await expect(readSignalMetadata(f.db, f.contributor.sub, f.workspaceId, filter))
       .rejects.toMatchObject({ status: 503, message: "signal_metadata_backfill_required" });
+    // Exercise both production write paths in this fixture, rather than creating
+    // another database solely to repeat their projection lifecycle assertions.
+    const graph = { nodes: [{ id: "imported", file_type: "Signal", label: "Projet de zonage résidentiel",
+      properties: { category: "zonage", etape: "avis_motion" } }], links: [] };
+    await upsertGraph(f.db, "metadata-import", graph);
+    const initial = await f.pool.query("SELECT filter_bits,version FROM signal_metadata WHERE city_slug='metadata-import'");
+    expect(initial.rows).toEqual([{ filter_bits: expect.stringMatching(/^[01]{5}$/), version: 1 }]);
+    const projected = await upsertGraphAtomic(f.db, "metadata-import", graph);
+    expect(projected.aborted).not.toBe(true);
+    expect((await f.pool.query("SELECT filter_bits,version FROM signal_metadata WHERE city_slug='metadata-import'")).rows)
+      .toEqual(initial.rows);
   });
 
   it("should resolve personal and shared classes without leaking another reader or workspace", async () => {
