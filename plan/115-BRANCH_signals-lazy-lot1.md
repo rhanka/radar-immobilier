@@ -38,6 +38,7 @@
 - [x] Authorized SQL aggregation and exact class resolution.
 - [x] Coordinated map/rail client; remove detail substitution.
 - [x] Unit matrix, reference parity, PostgreSQL rights/dates/reprojection/plans.
-- [ ] Typecheck, lint, targeted API/UI/E2E gates.
+- [x] Typecheck, lint, 170 targeted API/PostgreSQL tests, separate benchmark, 28 UI tests and one real-click E2E (3.2 s) passed. UI waits/actions <=1.8 s. Test stacks removed with down -v.
 - [x] Representative local cold unlimited measurement: 628.884 ms before, 141.048 ms after; 21,615 targets / 763 cities. Application cold, PostgreSQL buffers uncontrolled; budget passed.
-- [ ] Independent review, PR to main, measurements and activation/rollback report.
+- [ ] PR to main, measurements and activation/rollback report.
+- [ ] Independent review pending i-cond: no h2a_run tool and no attested exact author model/effort; selection failed, no consensus claimed.
