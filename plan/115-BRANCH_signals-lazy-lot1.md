@@ -18,6 +18,7 @@
 - [x] Conditional Paths: Makefile, api/drizzle/0049_signal_metadata.sql, api/drizzle/meta/_journal.json.
 
 ## Feedback Loop
+- [x] SL1-EX7: review correction permits api/src/services/workspaces/store.ts, deploy/ci/check-migration-journal*, .github/workflows/ci.yml and tools/make/migration-journal.mk. Impact: locking authority reads and migration CI gate. Rollback: revert the corresponding correction commits.
 - [x] SL1-EX1: add the explicitly requested make backfill target. Impact: one isolated command. Rollback: remove target.
 - [x] SL1-EX2: add replayable migration 0049 and journal entry. Impact: additive fine projection. Rollback: coordinated API/UI rollback; retain inert table.
 - [x] Owner authorizes old contract during coordinated migration; metadata-v2 never falls back to full cards.
@@ -33,6 +34,8 @@
 - [x] Automated isolated stacks only; root UAT remains under conductor control.
 
 ## Plan / Todo (lot-based)
+- [x] Lock membership authority in the metadata snapshot; reject concurrent authority changes with 403 and cover the advisory-lock race on PostgreSQL.
+- [ ] Enforce merge dependencies #1104 then #1107 then #1108; verify disposable merged migration sequence and idempotence.
 - [x] Canonical filter and faceted metadata contract.
 - [x] Versioned projection, transactional refresh, idempotent backfill and migration.
 - [x] Authorized SQL aggregation and exact class resolution.

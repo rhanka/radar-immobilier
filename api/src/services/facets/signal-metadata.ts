@@ -6,6 +6,7 @@ import type { Database } from "../../db/client.js";
 import { facetEvents, facetEventBindings } from "../../db/schema.js";
 import { approvedAccountId, resolveWorkspaceAccess } from "../workspaces/store.js";
 import { lockWorkspace } from "../workspaces/mutations.js";
+import { WorkspaceError } from "../workspaces/types.js";
 import { requireScopedEpochFor } from "./activation.js";
 import { ScopeError } from "./scope.js";
 import { SIGNAL_METADATA_VERSION } from "./signal-metadata-projection.js";
@@ -43,11 +44,11 @@ export function metadataCellsSql(accountId: string, workspaceId: string, filter:
 
 export async function readSignalMetadata(db: Database, sub: string, workspaceId: string,
   filter: SignalMetadataFilter): Promise<SignalMetadataResponse> {
-  return db.transaction(async (tx) => {
+  return db.transaction<SignalMetadataResponse>(async (tx) => {
     await tx.execute(sql`SET TRANSACTION ISOLATION LEVEL REPEATABLE READ`);
     await lockWorkspace(tx, workspaceId);
     const accountId = await approvedAccountId(tx, sub, true);
-    await resolveWorkspaceAccess(tx, workspaceId, sub);
+    await resolveWorkspaceAccess(tx, workspaceId, sub, true);
     await requireScopedEpochFor(tx, workspaceId);
     const unresolved = await tx.select({ id: facetEvents.id }).from(facetEvents)
       .leftJoin(facetEventBindings, eq(facetEventBindings.eventId, facetEvents.id))
@@ -79,5 +80,13 @@ export async function readSignalMetadata(db: Database, sub: string, workspaceId:
     ])).digest("hex");
     const { matched, classCounts, facetCounts } = signalMetadataCounts(all, filter);
     return { contract: "metadata-v2", snapshot, totalMatched: matched, classCounts, facetCounts, cities };
+  }).catch((error: unknown) => {
+    // A locking read under REPEATABLE READ rejects a membership/account changed
+    // since the snapshot, including changes committed while lockWorkspace waited.
+    const cause = error instanceof Error && error.cause ? error.cause : error;
+    if (typeof cause === "object" && cause !== null && "code" in cause && cause.code === "40001") {
+      throw new WorkspaceError(403, "workspace_membership_required");
+    }
+    throw error;
   });
 }
