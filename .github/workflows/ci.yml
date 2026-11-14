@@ -23,6 +23,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Reject missing or out-of-order migrations
+        run: make -f tools/make/migration-journal.mk test check ENV=test-migration-journal
+
       - name: Reject Python files under deploy
         run: |
           bash deploy/ci/check-no-python.sh
