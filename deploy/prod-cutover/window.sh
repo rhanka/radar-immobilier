@@ -73,10 +73,11 @@ case $1 in
     close_once
     jq 'del(.checkpoints["manual-deploy"])' "$WORK/record.json" > "$WORK/next.json"
     mv "$WORK/next.json" "$WORK/record.json"; record_save;;
-  backup|migrate|transition|rollback)
+  backup|migrate|transition|rollback|artifact-roles)
     jq -e '.checkpoints.close=="completed" and .checkpoints["manual-deploy"]==null' "$WORK/record.json" >/dev/null || fail 'Drain requis ; services arrêtés'
     verify_closed || fail 'Consommateurs encore actifs'
-    ENV=execution-prod node deploy/prod-cutover/cli.cjs "$1";;
+    if [[ $1 == artifact-roles ]]; then ENV=execution-prod node deploy/prod-cutover/artifact-roles.cjs
+    else ENV=execution-prod node deploy/prod-cutover/cli.cjs "$1"; fi;;
   window-deploy)
     ENV=execution-prod node deploy/prod-cutover/cli.cjs verify
     manual_bindings candidate

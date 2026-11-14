@@ -13,12 +13,19 @@ export CUTOVER_API_IMAGE CUTOVER_ALLOW_PROD
 export SMOKE_URL
 export RUN CUTOVER_LOCK_RUN CUTOVER_LOCK_EXECUTOR ROSTER
 export CONFIGURATION
+export ARTIFACTS_CONTENT_HOST
+.PHONY: artifact-roles
+artifact-roles:
+	@test "$(ENV)" = execution-prod
+	@cd "$(ROOT)" && timeout --signal=TERM --kill-after=5s 150s bash deploy/prod-cutover/window.sh artifact-roles
 export PREVIOUS_RELEASE
 export CURSOR_REFERENCE
 export COMMENT_FILE
 export ROOT
 render:
 	@cd "$(ROOT)" && node deploy/prod-cutover/render.cjs
+content-ingress:
+	@cd "$(ROOT)" && node deploy/prod-cutover/render.cjs content-ingress
 .PHONY: help prerequisites precheck backup restore-test migrate transition verify smoke rehearsal rollback k8s-plan cd-plan test integration down check image-check publish commit lint
 help:
 	@echo 'Préparation : prerequisites precheck k8s-plan cd-plan. Exécution future : backup restore-test migrate transition verify smoke rehearsal rollback.'
