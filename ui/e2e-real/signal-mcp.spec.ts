@@ -1,5 +1,7 @@
 import { expect, openSeededCity, seed, test } from "./fixtures";
 
+test.skip(process.env.E2E_MCP_SEEDED !== "1", "Requires the dedicated MCP browser seed");
+
 test("MCP provenance and free user notes persist on the signal card", async ({ page }) => {
   await openSeededCity(page);
   const card = page.locator(`[data-signal-node="${seed.signals[0]!.id}"]`);

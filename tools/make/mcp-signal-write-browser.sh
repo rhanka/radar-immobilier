@@ -17,6 +17,7 @@ export MCP_SIGNAL_SEARCH_ENABLED=1
 npm run db:migrate --workspace=api
 node --import tsx ui/e2e-real/seed.mjs
 node --import tsx ui/e2e-real/signal-mcp-seed.mjs
+export E2E_MCP_SEEDED=1
 node --import tsx api/src/index.ts > /workspace/tmp/mcp-api.log 2>&1 &
 api_pid=$!
 npm run dev --workspace=ui -- --port 8080 > /workspace/tmp/mcp-ui.log 2>&1 &
