@@ -16,7 +16,7 @@
 - D9: Repository CronJobs and offline render gates enforce mode off. No schema or UI changes.
 - D10: Classification uses dedicated PostgreSQL sessions with `statement_timeout=5s` and `lock_timeout=1s`. Cancellation destroys the session. The default deadlines are 60 seconds per act and 300 seconds per classification run, including selection. Model calls receive the same cancellation signal; late results cannot reach the writer.
 - D11: Classification has a separate admission budget, active only in two-step or single-pass. In two-step it never counts or stops detection calls. Single-pass includes combined extraction/classification calls. Calls are capped by `REFRESH_SWEEP_MAX_SUBMISSIONS` when nonzero, otherwise `REFRESH_BUDGET_LIMIT`. `REFRESH_RUN_MAX_TOKENS` defaults to 100,000,000. Reservations include failures and fallbacks, UTF-8 prompt/schema bytes and the full output cap. At off this budget is neither constructed nor parsed: detection uses main's receipt counter, model deadlines and between-city sweep stops. A started document may complete its fallback above the sweep cap.
-- D12: Public API annotation overlays and AI-derived visibility/counts use the same mode parser. At off, stored AI history is ignored and manual-only cards preserve the main payload. Operational annotation reads remain available for resume and audit. Set the API deployment mode together with the refresh mode to display annotations.
+- D12: Refresh mode and the legacy flag govern refresh writes only. Stored AI and manual annotations are always read and exposed. At off, cards and counters preserve current main b00c27d63 behavior, including AI exclusions without manual history.
 
 ## Preproduction activation (conductor runbook)
 
@@ -52,7 +52,7 @@ rtk kubectl --kubeconfig "$HOME/.kube/radar-preprod-tenant.kubeconfig" \
   -n radar-immobilier-preprod set env deployment/radar-api REFRESH_CLASSIFY_MODE=off REFRESH_SINGLE_PASS=0
 ```
 
-This stops classification in future refresh Jobs and restores API-off behavior without deleting history. It preserves existing AI annotations and manual decisions. To remove a selected run's AI annotations, use the existing filtered purge, first dry-run, then apply. Do not use a global purge for a run rollback.
+This stops classification in future refresh Jobs. Existing AI annotations and manual decisions remain visible, including their effect on counters. API deployment flags do not hide stored data. To remove a selected run's AI annotations, use the existing filtered purge, first dry-run, then apply. Do not use a global purge for a run rollback.
 
 ```sh
 rtk make purge-ai-annotations-preprod SKIP_DOTENV=1 \

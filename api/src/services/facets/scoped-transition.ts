@@ -14,7 +14,6 @@ import {
   facetReasonCodes,
 } from "../../db/schema.js";
 import { FACET_PROFILE } from "./codebook.js";
-import { refreshClassifyMode } from "../graph/refresh-classify-config.js";
 import { facetCommandDigest } from "./commands.js";
 import { FacetError } from "./target.js";
 
@@ -35,7 +34,6 @@ export async function appendScopedTransition(
     return current;
   }
   if (!current && state === "inactive") {
-    if (refreshClassifyMode() === "off") return null;
     // Clearing an AI class is a human annotation, even without prior human
     // stream history. Preserve the legacy no-op when no AI class exists.
     const automatic = await tx.execute(sql`SELECT 1 FROM signal_class_annotations

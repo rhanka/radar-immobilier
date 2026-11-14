@@ -40,7 +40,7 @@ it.each(["discard", "select"] as const)("should preserve main API bytes for Alic
       expect(response.status).toBe(200);
       return response.text();
     };
-    const bobBaseline = await getBob();
+    expect(await getBob()).not.toContain('"classAnnotation"');
     expect(baseline).not.toContain('"classAnnotation"');
     expect(await get(cookies[1]!)).toBe(baseline);
     await writeFacet(db, alice.sub, { action, target: alice.target,
@@ -59,7 +59,11 @@ it.each(["discard", "select"] as const)("should preserve main API bytes for Alic
       nodeId: bob.target.id, source: "ai", classe: "ecarte", reason: "AI decision", ambiguous: false,
       model: "test", effort: "low", promptId: "v2", promptSha256: "a".repeat(64),
       inputSha256: "b".repeat(64), pipelineRunId: "prior-run" });
-    expect(await getBob()).toBe(bobBaseline);
+    const annotatedBob = await getBob();
+    expect(JSON.parse(annotatedBob).nodes[0].classAnnotation).toMatchObject({ source: "ai", classe: "ecarte" });
+    vi.stubEnv("REFRESH_CLASSIFY_MODE", "two-step");
+    expect(await getBob()).toBe(annotatedBob);
+    vi.stubEnv("REFRESH_CLASSIFY_MODE", "off");
     for (const cookie of cookies) expect(await get(cookie)).toBe(baseline);
   } finally {
     vi.unstubAllEnvs();
