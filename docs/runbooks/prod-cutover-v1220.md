@@ -298,4 +298,7 @@ Deux scénarios Docker TERM/KILL échouent deux fois : hook non observé en cour
 Les conteneurs ont été observés en état Created. Aucun verdict de succès pour ces scénarios.
 Le lint expire pendant une reconstruction Docker, avant ESLint. Code 137. Il reste à relancer.
 Le disque local est à 97 %. La CI du nouveau SHA est à consulter dans la PR.
+La relance locale des huit scénarios donne 3 succès : fermeture, refus public et rollback au SHA court.
+Quatre gardes échouent sur le chemin Node `/usr/local/bin/node`, absent de cet hôte.
+Le scénario IdP échoue au démarrage local. La validation complète reste à refaire dans son conteneur.
 La revue formelle harness reste selection-failed. Aucun GO prod implicite.
