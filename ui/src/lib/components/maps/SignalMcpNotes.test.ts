@@ -7,12 +7,12 @@ vi.mock("$lib/signals/signal-mcp-client.js", async (original) => ({
 }));
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 const annotations = { version: "a".repeat(32), current: null, notes: [{ id: "note-1", source: "mcp" as const,
-  model: "gpt-client", validation: "human" as const, text: "<img src=x onerror=alert(1)>Check council", created_at: "2026-11-13" }] };
+  model: "gpt-client", validation: "auto" as const, pending_human: true, text: "<img src=x onerror=alert(1)>Check council", created_at: "2026-11-13" }] };
 const target = { citySlug: "synthetic-city", type: "Signal", id: "signal-1" };
 describe("signal notes", () => {
-  it("should show model and human validation while escaping all note text", () => {
+  it("should show pending confirmation while escaping all note text", () => {
     const view = render(SignalMcpNotes, { props: { annotations, workspaceId: "workspace-1", target } });
-    expect(screen.getByText("MCP · gpt-client · validé humain")).toBeTruthy();
+    expect(screen.getByText("MCP · gpt-client · à confirmer")).toBeTruthy();
     expect(screen.getByText(/<img src=x/)).toBeTruthy();
     expect(view.container.querySelector("img")).toBeNull();
   });

@@ -46,5 +46,5 @@
 - [x] Delivery report prepared: five tools, explicit write scope, migration 0048, local test totals and activation instructions.
 - [x] Review correction 1: MCP always auto; accepted elicitation is pending_human; SQL CHECK and client contract updated.
 - [x] Review correction 2: browser decisions linked to immutable MCP events; shared archive moderation and projection.
-- [ ] Review correction 3: explicit manual Non classé and confirmation controls in the UI.
+- [x] Review correction 3: explicit manual Non classé and confirmation controls in the UI.
 - [ ] Review correction 4: SQL, SDK, UI and browser regressions; dedicated CI gate; final checks and delivery.

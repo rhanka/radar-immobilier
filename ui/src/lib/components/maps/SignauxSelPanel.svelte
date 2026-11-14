@@ -1267,6 +1267,10 @@
                       </span>
                     {/if}
                   </button>
+                  {#if node.signalAnnotations?.current?.source === "mcp" && node.signalAnnotations.canConfirm && !hasManualClass}
+                    <button type="button" aria-label="Confirmer la classification MCP" disabled={classementInFlight.has(cardClassementKey) || !!classementEntry.restoreBlockedReason}
+                      on:click={() => onApplyClassement(node, classementEntry.classe, classementEntry.reasonCode)}>👍</button>
+                  {/if}
                   {#if node.classAnnotation?.source === "ai" && !hasManualClass && !node.classFeedback && node.signalAnnotations?.current?.source !== "mcp"}
                     <div class="signal-feedback-control">
                       <SignalClassFeedback classe={node.classAnnotation.classe} reasonCodes={classementReasonCodes}
