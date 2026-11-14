@@ -75,7 +75,8 @@ BEGIN
       (e.state='active' AND e.superseded_by IS NULL) DESC,e.created_at DESC,e.id DESC LIMIT 1;
   SELECT value INTO current_class FROM jsonb_array_elements(events)
     WHERE value->>'kind' IN ('class','feedback')
-    ORDER BY (value->>'validation'='human') DESC,(value->>'created_at')::timestamptz DESC,value->>'id' DESC LIMIT 1;
+    ORDER BY (value->>'validation'='human') DESC,(value->>'scope'='workspace' AND value->>'classe'='ecarte') DESC,
+      (value->>'created_at')::timestamptz DESC,value->>'id' DESC LIMIT 1;
   IF current_class->>'validation'='auto' AND (ai->>'updated_at')::timestamptz > (current_class->>'created_at')::timestamptz
     THEN current_class := NULL; END IF;
   IF manual IS NOT NULL THEN
@@ -171,6 +172,8 @@ BEGIN
           RAISE EXCEPTION 'invalid_reason_code';
         END IF;
         IF ref->>'scope'='workspace' AND next_class<>'ecarte' THEN RAISE EXCEPTION 'workspace_archive_only'; END IF;
+        IF state->'current'->>'scope'='workspace' AND ref->>'scope'='personal' AND next_class<>'ecarte' THEN
+          RAISE EXCEPTION 'workspace_archive_only'; END IF;
         IF state->'current'->>'source'='manual' OR (p_validation='auto' AND state->'current'->>'validation'='human') THEN
           RAISE EXCEPTION 'classification_priority_conflict';
         END IF;
