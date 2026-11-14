@@ -10,7 +10,7 @@ try {
     const city = String(row.city_slug);
     await db.transaction(async (tx) => {
       // Same lock as graph-store.lockCityGraph: serialize backfill and import.
-      await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${city}))`);
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${`graph-city:${city}`}))`);
       await bumpGraphSourceRevision(tx, city);
     });
   }

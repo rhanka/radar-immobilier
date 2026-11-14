@@ -23,6 +23,8 @@ import {
 } from "../services/facets/projection-revisions.js";
 import { readScopedPersonalHeads } from "../services/facets/scoped-reader.js";
 import { readScopedByCity } from "../services/facets/scoped-by-city.js";
+import { signalMetadataFilterSchema } from "@radar/domain";
+import { readSignalMetadata } from "../services/facets/signal-metadata.js";
 import { readWorkspaceArchiveCity } from "../services/facets/workspace-reader.js";
 
 const workspaceId = z.string().guid();
@@ -167,6 +169,21 @@ export function scopedProjectionRevisionsRoute(deps: ScopedProjectionRevisionsDe
   // Scoped by-city aggregate: same wire shape and query parameters as the
   // retired legacy aggregate, under the scoped guards and visibility.
   app.get(BY_CITY_PATH, async (c) => {
+    const contract = c.req.query("contract");
+    if (contract !== undefined) {
+      if (contract !== "metadata-v2") return c.json({ error: "unsupported_by_city_contract" }, 400);
+      const filter = signalMetadataFilterSchema.safeParse(c.req.query());
+      if (!filter.success) return c.json({ error: "invalid_metadata_filter" }, 400);
+      const session = c.get("session" as never) as { sub: string };
+      try {
+        return c.json(await readSignalMetadata(deps.db, session.sub, c.req.param("workspaceId"), filter.data));
+      } catch (error) {
+        if (error instanceof WorkspaceError || error instanceof ScopeError || error instanceof FacetError) {
+          return c.json({ error: error.message }, error.status);
+        }
+        throw error;
+      }
+    }
     const params = byCityQuery.safeParse({
       dateFrom: c.req.query("dateFrom") || undefined, dateTo: c.req.query("dateTo") || undefined,
       dateBasis: c.req.query("dateBasis") || undefined,
