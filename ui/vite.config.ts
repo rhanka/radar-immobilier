@@ -102,6 +102,13 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 5173,
     proxy: {
+      // Match production: stream geo bytes directly, without API enrichment
+      // or response interception/decompression. Headers (including Vary) pass through.
+      "/api/geo/collections": {
+        target: process.env.GEO_OGC_BASE_URL ?? "https://api.preprod.geo.sent-tech.ca",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/geo/, ""),
+      },
       "/health": {
         target: apiProxyTarget,
         changeOrigin: true,
