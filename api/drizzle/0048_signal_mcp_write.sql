@@ -93,6 +93,8 @@ BEGIN
       AND node_type=p_ref->>'type' AND node_id=p_ref->>'id' AND (scope='workspace' OR actor_id=actor);
   version := md5(jsonb_build_array(events,ai,manual,graph_version)::text);
   IF current_class IS NOT NULL THEN current_class := current_class || jsonb_build_object(
+    'reason',current_class->'reason','model',current_class->'model','effort',current_class->'effort',
+    'inputSha256',current_class->'input_sha256',
     'reasonCode',current_class->'reason_code','mcpClientId',current_class->'client_id',
     'user',current_class->'oauth_sub','promptId',current_class->'prompt_id',
     'promptSha256',current_class->'prompt_sha256','pipelineRunId',current_class->'pipeline_run_id',
