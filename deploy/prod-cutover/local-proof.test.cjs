@@ -11,14 +11,18 @@ test('refuse les consommateurs locaux actifs, les hooks et les preuves modifiée
   const observed = '2026-11-13T23:00:00Z';
   const api = { Id: 'api-id', Config: { Labels: {} }, State: { Running: false, FinishedAt: observed, ExitCode: 0 } };
   let hook = '';
+  let readers = 0;
   try {
     process.env.ENV = 'rehearsal';
-    r.run = (bin, args) => args[0] === 'inspect' ? JSON.stringify([db, api])
+    r.run = (bin, args) => args[0] === 'exec' ? String(readers) : args[0] === 'inspect' ? JSON.stringify([db, api])
       : args.includes('name=immo-6h-') ? hook : 'db-id\napi-id';
     const snapshot = { network: 'radar-prod-copy-owner_copy-only', databaseContainer: db.Id,
       containers: [{ id: api.Id, finishedAt: observed, exitCode: 0 }] };
     const e = { instances: [api.Id], localTermination: snapshot };
     proof.verify(e);
+    readers = 1;
+    assert.throws(() => proof.verify(e), /local_readers_not_terminated/);
+    readers = 0;
     api.State.Running = true;
     assert.throws(() => proof.verify(e), /local_consumers_not_terminated/);
     api.State.Running = false; hook = 'active-hook';
