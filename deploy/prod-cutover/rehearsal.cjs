@@ -59,9 +59,13 @@ async function main() {
     case 'prepare': result = prepare(); break;
     case 'evidence': result = require('./local-proof.cjs').observe(); break;
     case 'services-up': {
+      const started = Date.now();
       r.destination(); r.approvedPlan();
       if (r.prefix(r.rows()) !== 44 || r.receipt('transition').status !== 'open-success') r.fail('transition_required');
       const auth = r.json(file('auth.json'));
+      r.fs.writeFileSync(file('services.json.partial'), JSON.stringify(config.compose(privateDir, auth), null, 2), { mode: 0o600 });
+      r.fs.renameSync(file('services.json.partial'), file('services.json'));
+      compose('config', '--quiet');
       // These roles already have the candidate grants. Passwords are local and carry no new privilege.
       r.sql(`ALTER ROLE immo_mcp_account_reader LOGIN PASSWORD '${auth.account}';
         ALTER ROLE immo_mcp_artifact_writer LOGIN PASSWORD '${auth.artifact}';`);
@@ -69,6 +73,8 @@ async function main() {
       compose('run', '--rm', '--no-deps', '-T', '-v', `${privateDir}:/private-input:ro`,
         '-v', `${r.ROOT}/deploy/prod-cutover/rehearsal-storage.cjs:/run-storage.cjs:ro`,
         '--entrypoint', 'node', 'api', '/run-storage.cjs');
+      result = { ok: true, durationMs: Date.now() - started };
+      r.save('services', result);
       break;
     }
     case 'services-stop': compose('stop', '--timeout', '30', 'ui', 'api', 'mcp', 'idp', 'minio');
@@ -81,7 +87,9 @@ async function main() {
         .filter(Boolean).map(line => { const { tag, durationMs } = JSON.parse(line); return { tag, durationMs }; });
       const current = r.path.join(r.output(), 'migration-current.json');
       if (r.fs.existsSync(current)) { const { tag, at } = r.json(current); result.current = { tag, at }; }
-      for (const name of ['restore', 'migrations', 'transition', 'rollback']) {
+      const transitions = r.path.join(r.output(), 'transition-times.jsonl');
+      if (r.fs.existsSync(transitions)) result.transitions = r.fs.readFileSync(transitions, 'utf8').trim().split('\n').map(JSON.parse);
+      for (const name of ['restore', 'migrations', 'transition', 'verify', 'services', 'smoke', 'rollback', 'rollback-first', 'rollback-second']) {
         const path = r.path.join(r.output(), `${name}.json`);
         if (!r.fs.existsSync(path)) continue;
         const receipt = r.json(path);
@@ -99,6 +107,13 @@ async function main() {
     }
     case 'rollback-twice': {
       // Keep the same physical copy and RUN. Preserve both receipts before any replay.
+      const forward = {};
+      for (const name of ['restore', 'migrations', 'transition', 'verify', 'services', 'smoke']) {
+        const receipt = r.receipt(name);
+        forward[name] = { durationMs: receipt.durationMs, walBytes: receipt.walBytes,
+          applied: receipt.applied?.map(({ tag, durationMs }) => ({ tag, durationMs })) };
+      }
+      r.save('forward-first', forward);
       compose('stop', '--timeout', '30', 'ui', 'api', 'mcp', 'idp', 'minio');
       require('./local-proof.cjs').observe();
       const first = require('./backup.cjs').rollback(); r.save('rollback-first', first);
@@ -107,8 +122,10 @@ async function main() {
         second: { ok: second.ok, durationMs: second.durationMs } };
       break;
     }
-    case 'smoke': compose('exec', '-T', '-e', 'ENV=rehearsal', '-e', `SMOKE_URL=${config.base}`,
-      'api', 'node', '/run-controller/cli.cjs', 'smoke'); break;
+    case 'smoke':
+      result = JSON.parse(compose('exec', '-T', '-e', 'ENV=rehearsal', '-e', `SMOKE_URL=${config.base}`,
+        'api', 'node', '/run-controller/cli.cjs', 'smoke'));
+      r.save('smoke', result); break;
     default: r.fail('unknown_local_operation');
   }
   process.stdout.write(JSON.stringify(result) + '\n');
