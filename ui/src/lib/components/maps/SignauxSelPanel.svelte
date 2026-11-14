@@ -95,6 +95,7 @@
     type ZoneMillesimeFilter,
   } from "$lib/maps/zone-millesime-filter.js";
   import SignalClassementMenu from "$lib/components/maps/SignalClassementMenu.svelte";
+  import { classAnnotationLabel } from "$lib/signals/class-annotation-label.js";
   import {
     classementKey,
     EMPTY_CLASSEMENT_ENTRY,
@@ -1201,6 +1202,7 @@
                 {@const classementEntry = classementMap.get(classementKey(node.type, node.id, node.citySlug)) ?? EMPTY_CLASSEMENT_ENTRY}
                 {@const cardClassementKey = classementKey(node.type, node.id, node.citySlug)}
                 {@const cardClassementError = classementErrors.get(cardClassementKey)}
+                {@const hasManualClass = classementEntry.annotationSource === "manual" || !!(classementEntry.pertinentExpectedHeadId || classementEntry.aSurveillerExpectedHeadId || classementEntry.archiveHeadId || classementEntry.archiveRestores.length)}
                 <!-- #86 — fiche : ancre de scroll (data-signal-node) + état
                      cross-survolé quand le viewer survole ce signal. Survoler
                      la fiche notifie le parent (→ le surlignage PDF pulse). -->
@@ -1227,6 +1229,9 @@
                     on:click={() => toggleEntity(key)}
                   >
                     <span class="sel-entity-label">{node.label}</span>
+                    <span class="signal-stage-badge" title={node.classAnnotation?.source === "ai" && !hasManualClass ? node.classAnnotation.reason : undefined}>
+                      {classAnnotationLabel(node, hasManualClass)}
+                    </span>
                     {#if isPiiaLie(node)}
                       <!-- PIIA porteur d'un projet résidentiel prouvé : gardé,
                            mais annoncé comme instrument indirect (confiance
@@ -1274,6 +1279,9 @@
                     </span>
                   {/if}
                   </div>
+                  {#if node.classAnnotation?.source === "ai" && !hasManualClass && node.classAnnotation.reason}
+                    <p class="classement-error-detail">{node.classAnnotation.reason}</p>
+                  {/if}
                   {#if cardClassementError && openClassementErrorKey === cardClassementKey}
                     <p class="classement-error-detail" data-testid="classement-error-detail">{cardClassementError}</p>
                   {/if}
