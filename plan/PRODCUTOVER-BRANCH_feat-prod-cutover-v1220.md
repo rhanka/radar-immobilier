@@ -8,6 +8,7 @@
 - [x] Prod en lecture seule. Dump RO autorisé par D4 le 13/11. Aucun tag, migration ou écriture cluster.
 - [x] Aucun .env, secret affiché, kubeconfig par défaut ou exécution Python.
 - [x] Worktree tmp/prod-cutover, branche feat/prod-cutover-v1220 depuis origin/main.
+- [x] Pre-lock PG clients use a process UUID when drain evidence is absent; regression verifies stable labels and explicit RUN precedence (31 guards pass).
 - [x] ENV toujours dernier. Merge prep autorisé. Aucune fusion dans main. Aucun trailer de contribution.
 - [x] Opérations applicatives en Node et binaires natifs selon instruction owner.
 
