@@ -73,13 +73,14 @@ jobs:
           KUBE_CONFIG_DATA_BASCULE_PREPROD: ${{ secrets.KUBE_CONFIG_DATA_BASCULE_PREPROD }}
         run: |
           set -euo pipefail
-          mkdir -p "$HOME/.kube"
+          export KUBECONFIG="$RUNNER_TEMP/radar-tenant.kubeconfig"
+          printf 'KUBECONFIG=%s\n' "$KUBECONFIG" >> "$GITHUB_ENV"
           if printf '%s' "$KUBE_CONFIG_DATA_BASCULE_PREPROD" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
-            printf '%s' "$KUBE_CONFIG_DATA_BASCULE_PREPROD" | base64 -d > "$HOME/.kube/config"
+            printf '%s' "$KUBE_CONFIG_DATA_BASCULE_PREPROD" | base64 -d > "$KUBECONFIG"
           else
-            printf '%s' "$KUBE_CONFIG_DATA_BASCULE_PREPROD" > "$HOME/.kube/config"
+            printf '%s' "$KUBE_CONFIG_DATA_BASCULE_PREPROD" > "$KUBECONFIG"
           fi
-          chmod 600 "$HOME/.kube/config"
+          chmod 600 "$KUBECONFIG"
       - name: Restore on deployed images (no 6H hook, no refresh)
         id: engine
         env:
@@ -127,13 +128,14 @@ jobs:
           KUBE_CONFIG_DATA_BASCULE_PREPROD: ${{ secrets.KUBE_CONFIG_DATA_BASCULE_PREPROD }}
         run: |
           set -euo pipefail
-          mkdir -p "$HOME/.kube"
+          export KUBECONFIG="$RUNNER_TEMP/radar-tenant.kubeconfig"
+          printf 'KUBECONFIG=%s\n' "$KUBECONFIG" >> "$GITHUB_ENV"
           if printf '%s' "$KUBE_CONFIG_DATA_BASCULE_PREPROD" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
-            printf '%s' "$KUBE_CONFIG_DATA_BASCULE_PREPROD" | base64 -d > "$HOME/.kube/config"
+            printf '%s' "$KUBE_CONFIG_DATA_BASCULE_PREPROD" | base64 -d > "$KUBECONFIG"
           else
-            printf '%s' "$KUBE_CONFIG_DATA_BASCULE_PREPROD" > "$HOME/.kube/config"
+            printf '%s' "$KUBE_CONFIG_DATA_BASCULE_PREPROD" > "$KUBECONFIG"
           fi
-          chmod 600 "$HOME/.kube/config"
+          chmod 600 "$KUBECONFIG"
       - name: Reopen a daily restore left closed by this run
         env:
           GH_TOKEN: ${{ github.token }}
