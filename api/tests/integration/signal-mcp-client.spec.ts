@@ -55,7 +55,7 @@ describe.skipIf(process.env.MCP_SIGNAL_DB_TEST !== "1")("MCP SDK to PostgreSQL",
         inputHash: expect.stringMatching(/^[a-f0-9]{64}$/), result: "refused:scope" }));
     } finally { logged.mockRestore(); await f.transport.terminateSession(); await f.client.close(); }
   });
-  it("should persist real accepted elicitation and expose class reasons, provenance and notes", async () => {
+  it("should never grant human validation to a client that automatically accepts elicitation", async () => {
     const f = await fixture();
     try {
       const listed = await f.client.listTools();
@@ -64,27 +64,30 @@ describe.skipIf(process.env.MCP_SIGNAL_DB_TEST !== "1")("MCP SDK to PostgreSQL",
       expect(Object.keys(codes.classes)).toHaveLength(4);
       expect(codes.reasons).toHaveLength(28);
       expect(codes.reasons.every((row: { definition: string }) => !!row.definition)).toBe(true);
-      expect(await f.call("classify_signal", { ...f.input, humanConfirmed: true })).toMatchObject({ validation: "human" });
+      expect(await f.call("classify_signal", { ...f.input, humanConfirmed: true })).toMatchObject({ validation: "auto" });
       expect(f.elicitations()).toBe(1);
-      expect(await f.call("classify_signal", f.input)).toEqual({ error: "classification_priority_conflict" });
+      const pending = await f.call("get_signal_classification", { signalRef: f.signalRef });
+      expect(pending.current).toMatchObject({ validation: "auto", pending_human: true });
+      expect(await f.call("classify_signal", f.input)).toHaveProperty("id");
       expect(await f.call("confirm_classification", { signalRef: f.signalRef, verdict: "down", model: "sdk-client-model" }))
         .toEqual({ error: "reclassification_required" });
       expect(await f.call("annotate_signal", { signalRef: f.signalRef, text: "<b>Watch</b> council", model: "sdk-client-model" }))
         .toMatchObject({ validation: "auto" });
       const state = await f.call("get_signal_classification", { signalRef: f.signalRef });
-      expect(state.current).toMatchObject({ source: "mcp", model: "sdk-client-model", validation: "human", mcpClientId: "test-mcp-client" });
+      expect(state.current).toMatchObject({ source: "mcp", model: "sdk-client-model", validation: "auto", mcpClientId: "test-mcp-client" });
       expect(state.current).toHaveProperty("effort", null);
       expect(state.current).toHaveProperty("promptId", null);
       expect(state.notes[0].text).toBe("Watch council");
       expect(await f.call("confirm_classification", { signalRef: f.signalRef, verdict: "up", model: "sdk-client-model" }))
-        .toMatchObject({ validation: "human" });
+        .toMatchObject({ validation: "auto" });
       expect(await f.call("confirm_classification", { signalRef: f.signalRef, verdict: "down", model: "sdk-client-model",
-        newClasse: "a_surveiller", reasonCode: "S-PLANIFIE", reason: "Wait for adoption" })).toMatchObject({ validation: "human" });
+        newClasse: "a_surveiller", reasonCode: "S-PLANIFIE", reason: "Wait for adoption" })).toMatchObject({ validation: "auto" });
       const corrected = await f.call("get_signal_classification", { signalRef: f.signalRef });
       expect(corrected.current).toMatchObject({ classe: "a_surveiller", reasonCode: "S-PLANIFIE" });
       expect(corrected.feedback.map((row: { verdict: string }) => row.verdict)).toEqual(["down", "up"]);
       expect((await f.pool.query("SELECT result FROM signal_mcp_audit")).rows.map((row) => row.result))
-        .toEqual(expect.arrayContaining(["written", "classification_priority_conflict", "reclassification_required"]));
+        .toEqual(expect.arrayContaining(["written", "reclassification_required"]));
+      expect((await f.pool.query("SELECT validation FROM signal_mcp_events WHERE source='mcp'")).rows.every((row) => row.validation === "auto")).toBe(true);
     } finally { await f.transport.terminateSession(); await f.client.close(); }
   });
   it("should keep declined classification automatic and refuse unconfirmed feedback", async () => {

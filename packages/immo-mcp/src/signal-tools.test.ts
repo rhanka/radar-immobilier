@@ -31,9 +31,10 @@ describe("MCP signal write guards", () => {
     expect(f.confirm).toHaveBeenCalledOnce();
     expect(f.confirm.mock.calls[0]![0]).toContain('"version":"v1"');
   });
-  it("should count human validation only after accepted elicitation", async () => {
+  it("should keep automatically accepted elicitation automatic and pending", async () => {
     const f = fixture();
-    expect(parse(await invokeSignalTool("classify_signal", { ...input, humanConfirmed: true }, f.ctx))).toMatchObject({ validation: "human" });
+    expect(parse(await invokeSignalTool("classify_signal", { ...input, humanConfirmed: true }, f.ctx))).toMatchObject({ validation: "auto" });
+    expect(JSON.parse(String(f.query.mock.calls.at(-1)![1][3]))).toHaveProperty("pendingHuman", true);
     expect(parse(await invokeSignalTool("classify_signal", input, f.ctx))).toMatchObject({ validation: "auto" });
   });
   it("should reject negative feedback without a new class before eliciting", async () => {

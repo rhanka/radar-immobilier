@@ -22,6 +22,7 @@
 - [x] MCPSIGNALWRITE-EX1: additive migration 0048; reserve 0047 for #1104 renumbering after #1102. Impact: scoped journal only. Rollback: disable the binding and scope; retain audit rows.
 - [x] MCPSIGNALWRITE-EX2 unused: no preprod manifest changes. Activation/explicit IdP consent are documented for the preprod train.
 - [x] Route mounting in api/src/app.ts is necessary for UI note access. Impact: one authenticated scoped router. Rollback: remove its registration.
+- [x] MCPSIGNALWRITE-EX3: allow api/src/services/facets/{scoped-writer,workspace-reader}.ts and .github/workflows/ci.yml for PR #1107 corrections. Impact: shared MCP archive authority and a dedicated gated-test CI job. Rollback: disable MCP writes and remove the job; retain journals.
 - [x] Independent design reviews: security and scoped data correctness. Reconciled: global IA table cannot store personal MCP classes; native graph notes need a new scoped anchor.
 
 ## Orchestration Mode (AI-selected)
@@ -43,3 +44,7 @@
 - [x] Lot 5: selective commits pushed; PR #1107 opened against feat/class-feedback.
 - [x] CI observed: branch policy passed; quality gates and generic browser suite running. No merge.
 - [x] Delivery report prepared: five tools, explicit write scope, migration 0048, local test totals and activation instructions.
+- [x] Review correction 1: MCP always auto; accepted elicitation is pending_human; SQL CHECK and client contract updated.
+- [ ] Review correction 2: browser decisions linked to immutable MCP events; shared archive moderation and projection.
+- [ ] Review correction 3: explicit manual Non classé and confirmation controls in the UI.
+- [ ] Review correction 4: SQL, SDK, UI and browser regressions; dedicated CI gate; final checks and delivery.
