@@ -3,16 +3,18 @@ import { scopedSignalFacetsPath } from "./graph-signal-detail-client.js";
 
 export interface SignalNote {
   id: string; source: "mcp" | "manual"; model: string | null;
-  validation: "auto" | "human"; text?: string; created_at: string;
+  validation: "auto" | "human"; pending_human?: boolean; text?: string; created_at: string;
 }
 export interface SignalAnnotations {
   version: string;
-  current: { source: string; model: string | null; validation?: "auto" | "human";
+  canConfirm?: boolean; moderateArchive?: boolean;
+  current: { id?: string; source: string; model: string | null; validation?: "auto" | "human";
+    pending_human?: boolean; scope?: "personal" | "workspace"; linked_event_id?: string; reason_code?: string;
     classe?: "pertinent" | "a_surveiller" | "ecarte" | "non_classe"; reason?: string } | null;
   notes: SignalNote[];
 }
-export function mcpBadge(value: { model: string | null; validation?: "auto" | "human" }): string {
-  return `MCP · ${value.model ?? "modèle inconnu"} · validé ${value.validation === "human" ? "humain" : "auto"}`;
+export function mcpBadge(value: { model: string | null; validation?: "auto" | "human"; pending_human?: boolean }): string {
+  return `MCP · ${value.model ?? "modèle inconnu"} · ${value.pending_human ? "à confirmer" : value.validation === "human" ? "validé humain" : "validé auto"}`;
 }
 export async function appendSignalNote(workspaceId: string,
   target: { citySlug: string; type: string; id: string }, text: string, version: string): Promise<SignalAnnotations> {
