@@ -9,7 +9,7 @@ import { accountAuthorizer } from "../../../packages/immo-mcp/src/account-bindin
 
 const issuer = "https://auth.synthetic.test";
 const resource = "https://immo.synthetic.test/mcp";
-async function fixture(scopes = "immo:read immo:signals:write", accept = true) {
+async function fixture(scopes = "immo:read immo:signals:write", accept = true, supportsElicitation = true) {
   const f = await workspaceFixture();
   const { target } = await workspaceSignal(f);
   const { publicKey, privateKey } = await generateKeyPair("RS256");
@@ -22,8 +22,9 @@ async function fixture(scopes = "immo:read immo:signals:write", accept = true) {
     signals: f.pool, keySource: { resolveKey: async () => publicKey } as never, authorize: accountAuthorizer(f.pool),
   });
   let elicitations = 0;
-  const client = new Client({ name: "signal-write-test", version: "1" }, { capabilities: { elicitation: { form: {} } } });
-  client.setRequestHandler(ElicitRequestSchema, async (request) => {
+  const client = new Client({ name: "signal-write-test", version: "1" }, {
+    capabilities: supportsElicitation ? { elicitation: { form: {} } } : {} });
+  if (supportsElicitation) client.setRequestHandler(ElicitRequestSchema, async (request) => {
     elicitations++;
     expect(request.params.message).toContain('"version"');
     expect(request.params.message).toContain(target.id);
@@ -84,6 +85,24 @@ describe.skipIf(process.env.MCP_SIGNAL_DB_TEST !== "1")("MCP SDK to PostgreSQL",
       expect(await f.call("confirm_classification", { signalRef: f.signalRef, verdict: "up", model: "sdk-client-model" }))
         .toEqual({ error: "human_confirmation_required" });
       expect(f.elicitations()).toBe(2);
+    } finally { await f.transport.terminateSession(); await f.client.close(); }
+  });
+  it("should keep a requested confirmation automatic when the client lacks elicitation", async () => {
+    const f = await fixture(undefined, true, false);
+    try {
+      expect(await f.call("classify_signal", { ...f.input, humanConfirmed: true })).toMatchObject({ validation: "auto" });
+      expect(f.elicitations()).toBe(0);
+    } finally { await f.transport.terminateSession(); await f.client.close(); }
+  });
+  it("should reject acceptance when the signal changed during elicitation", async () => {
+    const f = await fixture();
+    try {
+      f.client.setRequestHandler(ElicitRequestSchema, async () => {
+        await f.pool.query("UPDATE graph_nodes SET label=label || ' changed' WHERE id=$1", [f.signalRef.id]);
+        return { action: "accept", content: { confirm: true } };
+      });
+      expect(await f.call("classify_signal", { ...f.input, humanConfirmed: true })).toEqual({ error: "annotation_version_conflict" });
+      expect((await f.pool.query("SELECT * FROM signal_mcp_events")).rows).toHaveLength(0);
     } finally { await f.transport.terminateSession(); await f.client.close(); }
   });
 });
