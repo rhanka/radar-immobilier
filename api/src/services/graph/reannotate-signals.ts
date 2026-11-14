@@ -86,8 +86,8 @@ export async function runReannotation(options: {
       // A prior fallback result is valid for the same configured model pair.
       const currentModel = [options.primary, options.fallback].some((model) =>
         model.model === annotation?.model && model.effort === annotation?.effort);
-      if (annotation?.inputSha256 === inputSha256 && (options.changedInputOnly ? annotation.promptId === "v2"
-        : (currentModel && annotation.promptSha256 === options.prompt.sha256))) {
+      if (annotation?.inputSha256 === inputSha256 && (options.changedInputOnly
+        || (currentModel && annotation.promptSha256 === options.prompt.sha256))) {
         report.skippedUnchanged++; return;
       }
       const decision = await withinReannotationDeadline(options.classify(signal, abort), abort);

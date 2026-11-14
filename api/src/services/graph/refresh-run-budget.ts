@@ -1,6 +1,6 @@
 import type { TextJsonGenerationClient } from "@sentropic/engram";
 
-/** One admission counter shared by detection, verification and classification. */
+/** Classification admission; single-pass also includes its combined extraction calls. */
 export class RefreshRunBudget {
   calls = 0;
   reservedTokens = 0;
