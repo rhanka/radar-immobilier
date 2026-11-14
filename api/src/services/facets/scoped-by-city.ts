@@ -11,7 +11,6 @@
  * migration, and another member's personal archive never changes the counts.
  */
 import { and, eq, isNull, or, sql } from "drizzle-orm";
-import { refreshClassifyMode } from "../graph/refresh-classify-config.js";
 import type { Database } from "../../db/client.js";
 import { facetEventBindings, facetEvents, facetHeads, facetStreams } from "../../db/schema.js";
 import { approvedAccountId, resolveWorkspaceAccess } from "../workspaces/store.js";
@@ -49,7 +48,7 @@ async function readScopedSignalClassement(
           and(eq(facetStreams.scope, "personal"), eq(facetStreams.facet, "selection")))));
     const hidden = new Set<DiscardedSignalKey>();
     const classement = new Map<DiscardedSignalKey, keyof import("@radar/domain").VivierFiltreCubesByClassement>();
-    const automatic = refreshClassifyMode() === "off" ? { rows: [] } : await tx.execute(sql`SELECT a.city_slug, a.node_type, a.node_id, a.classe
+    const automatic = await tx.execute(sql`SELECT a.city_slug, a.node_type, a.node_id, a.classe
       FROM signal_class_annotations a WHERE a.source='ai' AND NOT EXISTS (
         SELECT 1 FROM facet_events f WHERE f.target_type='signal' AND f.source='manual'
           AND f.city_slug=a.city_slug AND f.node_type=a.node_type AND f.node_id=a.node_id)`);
