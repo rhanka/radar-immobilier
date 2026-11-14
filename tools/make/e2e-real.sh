@@ -31,7 +31,7 @@ exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
 until flock -w 30 8; do echo "[test-e2e] waiting for the Docker campaign lock"; done
 cleanup() {
   status=$?
-  "${compose[@]}" logs --no-color api ui > tmp/e2e-real/stack.log 2>&1 || true
+  "${compose[@]}" logs --no-color api ui postgres > tmp/e2e-real/stack.log 2>&1 || true
   down
   exit "$status"
 }
@@ -41,6 +41,9 @@ trap 'exit 143' TERM
 "${compose[@]}" build api ui
 "${compose[@]}" --profile e2e build e2e
 "${compose[@]}" up -d --wait postgres minio
+# The inherited healthcheck probes the Unix socket, including Postgres' temporary
+# initialization server. The runner needs the final TCP listener before migrating.
+"${compose[@]}" exec -T postgres sh -ec 'for attempt in $(seq 1 30); do pg_isready -h 127.0.0.1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" && exit 0; sleep 1; done; exit 1'
 # UIDFIX-EX1: fresh named volumes are root-owned; hand them (and the
 # e2e state volume) to the host user once, as root, before the
 # UID-mapped runner installs into them.
