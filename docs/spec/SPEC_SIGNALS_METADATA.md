@@ -66,12 +66,15 @@ Durable scope cache invalidation remains lot 3.
 
 ## Activation and rollback
 
-1. Apply migration 0049 before starting the new API writer.
+1. Apply migration 0049, then fully roll out the new API/writers while the old
+   UI keeps using the unversioned contract. Finish replacing old writers before
+   backfilling; old writers do not maintain this projection.
 2. Run `make db-backfill-signal-metadata SKIP_DOTENV=1 ENV=<isolated-env>` using
    the target environment's injected database configuration. Compose invocations
    in this lane also use `--env-file /dev/null`.
 3. Qualify PostgreSQL parity, plans, the unlimited budget and real UI clicks.
-4. Deploy API and UI together. Existing clients without `contract` keep the
+4. Activate the new UI as part of the coordinated API/UI release after the
+   backfill has been verified. Existing clients without `contract` keep the
    previous aggregate contract. metadata-v2 clients fail visibly against an old
    API. They never switch to full city cards to build metadata.
 5. Roll back API and UI together. Leave the additive tables in place. Rebuilding
