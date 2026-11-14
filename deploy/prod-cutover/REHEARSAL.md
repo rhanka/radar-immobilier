@@ -107,7 +107,7 @@ L’écart entre séries ne doit pas être attribué aux seuls DDL.
 - Des lectures conteneurisées ont expiré à 60 s, y compris après la remise au candidat. La vérification locale passe désormais par exec avec read-only forcé et délai SQL de 15 s. Une tentative d’UPDATE sans ligne ciblée est refusée. Les mutations gardent leur voie initiale. La preuve détecte aussi les lecteurs exec actifs.
 - Audit après rollback et remise au candidat lancés trop près. Les commandes ont refusé avant mutation mesurée. Le contrôle est repris seul.
 
-Aucun échec des 31 transactions DDL dans les deux séries publiées.
+Aucun échec des 31 transactions DDL dans les trois séries publiées.
 Un échec après restauration garde désormais la copie arrêtée. La reprise conserve son identité et son RUN.
 Validation : 20 gardes ciblées et huit scénarios contrôleur/IdP réussis. Le test d’interruption des clients passe.
 Une relance finale a dû reconstruire l’image de tests. Le cache builder historique était en lecture seule.

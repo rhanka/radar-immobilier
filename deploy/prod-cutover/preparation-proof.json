@@ -36,6 +36,9 @@
   },
   "imagesPulledByDigest": true,
   "localPostgisDigest": "sha256:44126d872ac91993766c341e369c539e8196614321765d36a6f1bab0419a5fa5",
-  "rehearsalStarted": false,
+  "rehearsalStarted": true,
+  "rehearsalRun": "e64455b4-15a0-4a94-badf-5c2a370bd742",
+  "rehearsalResults": "REHEARSAL.md",
+  "rehearsalCandidateReady": true,
   "productionWrites": false
 }
