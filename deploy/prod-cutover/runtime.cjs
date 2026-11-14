@@ -22,7 +22,18 @@ function run(bin, args, options = {}) {
     maxBuffer: 32 * 1024 * 1024, env: { ...env, PGCONNECT_TIMEOUT: '5',
       PGOPTIONS: '-c lock_timeout=5000 -c statement_timeout=300000' }, ...options });
   // Never relay SQL, stderr, connection strings or row values on failure.
-  if (result.error || result.status !== 0) fail(`command_failed_${bin.replace(/[^a-z0-9]/gi, '_')}`);
+  if (result.error || result.status !== 0) {
+    if (env.ENV === 'rehearsal' && bin === 'pg_restore') {
+      // Report only fixed error categories. Never SQL, row data or connection strings.
+      for (const [pattern, code] of [[/schema "topology" already exists/, 'restore_topology_schema_exists'],
+        [/schema "public" already exists/, 'restore_public_schema_exists'],
+        [/schema "[a-zA-Z0-9_]+" already exists/, 'restore_preloaded_schema_exists'],
+        [/role "[a-zA-Z0-9_]+" does not exist/, 'restore_role_missing'],
+        [/unrecognized configuration parameter/, 'restore_client_server_version_mismatch']])
+        if (pattern.test(result.stderr || '')) fail(code);
+    }
+    fail(`command_failed_${bin.replace(/[^a-z0-9]/gi, '_')}`);
+  }
   return result.stdout;
 }
 function sql(query, options = {}) {

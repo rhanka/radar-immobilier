@@ -96,6 +96,7 @@ async function main(operation = process.argv[2]) {
       break;
     default: r.fail('unknown_operation');
   }
+  if (['verify', 'smoke'].includes(operation) && r.env.OUTPUT) r.save(operation, result);
   process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
 }
 if (require.main === module) main().catch(error => {

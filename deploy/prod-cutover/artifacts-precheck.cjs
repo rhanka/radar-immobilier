@@ -24,8 +24,10 @@ function precheck() {
   const kube = r.path.join(r.env.HOME, '.kube/radar-prod-tenant-admin.kubeconfig');
   return checkSecrets(name => {
     // Only names and encoded lengths reach stdout. Never request secret values as output.
-    const lines = r.run('kubectl', ['--kubeconfig', kube, '--request-timeout=15s', '-n', 'radar-immobilier',
-      'get', 'secret', name, '-o', 'go-template={{range $key, $value := .data}}{{$key}}={{len $value}}{{"\\n"}}{{end}}']);
+    let lines;
+    try { lines = r.run('kubectl', ['--kubeconfig', kube, '--request-timeout=15s', '-n', 'radar-immobilier',
+      'get', 'secret', name, '-o', 'go-template={{range $key, $value := .data}}{{$key}}={{len $value}}{{"\\n"}}{{end}}']); }
+    catch { r.fail(`required_secret_missing_${name.replaceAll('-', '_')}`); }
     return Object.fromEntries(lines.trim().split('\n').filter(Boolean).map(line => {
       const [key, length] = line.split('='); return [key, Number(length)];
     }));
@@ -33,6 +35,7 @@ function precheck() {
 }
 if (require.main === module) {
   try { process.stdout.write(JSON.stringify(precheck()) + '\n'); }
-  catch { process.stderr.write('required_production_secret_missing\n'); process.exitCode = 1; }
+  catch (error) { process.stderr.write((/^required_secret_missing_[a-z0-9_]+$/.test(error.message)
+    ? error.message : 'required_production_secret_missing') + '\n'); process.exitCode = 1; }
 }
 module.exports = { requiredSecrets, checkSecrets };
