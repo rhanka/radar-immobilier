@@ -93,7 +93,8 @@ describeDb("two-step refresh with PostgreSQL", () => {
       .toMatchObject({ skippedManual: 1, written: 1 });
     const rows = await human.db.execute(sql`SELECT id FROM facet_events WHERE city_slug='waterloo'`);
     expect(rows.rows).toEqual([{ id: approval.id }]);
-    expect((await readClassAnnotations(human.db, "waterloo")).get("Signal:new-Signal")?.source).toBe("manual");
+    expect((await createReannotationRepository(human.db).annotation({ citySlug: "waterloo", id: "new-Signal",
+      type: "Signal", label: "Act", props: {}, sourceRef: null }))?.source).toBe("manual");
     expect((await human.db.execute(sql`SELECT node_id FROM signal_class_annotations`)).rows)
       .toEqual([{ node_id: "new-DesignationEvent" }]);
   });

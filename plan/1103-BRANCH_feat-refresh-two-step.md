@@ -13,6 +13,7 @@
 - [x] Allowed Paths: api/src/services/graph/{refresh-*,reannotate-*}, api/src/scripts/{refresh-pv,reannotate-signals}.ts, deploy/k8s/34-refresh-cronjob.yaml, deploy/k8s/refresh-cronjobs/{refresh-018.mk,verify-renders.test.sh}, docs/spec/SPEC_EVOL_REFRESH_TWO_STEP.md, this plan.
 - [x] Forbidden Paths: Makefile, docker-compose*.yml, rules/**, AGENTS.md, CLAUDE.md, GEMINI.md, other branch plans.
 - [x] Conditional Paths: migrations and workflows require an exception; none planned.
+- [x] BR1103-EX1: owner-requested API-off parity authorizes api/src/routes/graph-signals.ts, api/src/services/facets/{scoped-signal-cards,scoped-by-city}.ts, api/src/services/graph/class-annotations* and api/tests/integration/facets-refresh.spec.ts. Impact: API readers ignore stored overlays at off; operational history remains readable. Rollback: revert the mode-aware reader changes.
 
 ## Feedback Loop
 - [x] Owner explicitly authorizes retaining single-pass and compatibility with REFRESH_SINGLE_PASS despite the general no-legacy rule.
@@ -46,3 +47,4 @@
 - [x] Review correction: bound classification SQL sessions with statement/lock timeouts and destroy their dedicated connection on cancellation; bound each act and run.
 - [x] Review correction: reserve calls and conservative token allowances before every model send, across detection/verification/classification; share the sweep deadline and halt extraction cleanly at exhaustion.
 - [x] Review correction: unchanged v2 inputs are skipped regardless of model/prompt changes; missing v2 annotations remain eligible. Add persisted repeated-extraction and new/changed/v1/v2 tests; retain manual preflight independently of API overlays.
+- [x] Review correction: API cards and counts ignore persisted AI overlays at off, including after prior activation; retain inherited #1099 manual payload parity tests.

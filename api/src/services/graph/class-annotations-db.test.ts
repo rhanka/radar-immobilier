@@ -1,4 +1,4 @@
-import { expect, it } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { sql } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { describeDb, fixture, event } from "../facets/scope-db-fixture.js";
@@ -6,6 +6,7 @@ import { workspaceFixture, workspaceSignal } from "../facets/workspace-archive-f
 import { writeScopedPersonalFacet } from "../facets/scoped-writer.js";
 import { readScopedByCity } from "../facets/scoped-by-city.js";
 import { readProjectionScope } from "../facets/projection-revisions.js";
+import { buildScopedSignalCards, buildScopedSignalCardViews } from "../facets/scoped-signal-cards.js";
 import { readClassAnnotations, writeClassAnnotation, type AiClassAnnotation } from "./class-annotations.js";
 
 const input: AiClassAnnotation = { citySlug: "synthetic-city", nodeType: "Signal", nodeId: "test-ai",
@@ -14,6 +15,22 @@ const input: AiClassAnnotation = { citySlug: "synthetic-city", nodeType: "Signal
   pipelineRunId: "run-1", inputSha256: "b".repeat(64) };
 
 describeDb("single-pass class annotations PostgreSQL", () => {
+  beforeEach(() => vi.stubEnv("REFRESH_CLASSIFY_MODE", "two-step"));
+  afterEach(() => vi.unstubAllEnvs());
+  it("should restore main cards and counts at off even with an existing AI exclusion", async () => {
+    const f = await workspaceFixture();
+    const { node, target } = await workspaceSignal(f);
+    const counts = () => readScopedByCity(f.db, f.contributor.sub, f.workspaceId, { showDiscarded: false });
+    const cards = () => buildScopedSignalCards({ db: f.db }, [node], target.citySlug);
+    const views = () => buildScopedSignalCardViews({ db: f.db }, [node], target.citySlug);
+    const baseline = { counts: await counts(), cards: await cards(), views: await views() };
+    await writeClassAnnotation(f.db, { ...input, nodeId: target.id, classe: "ecarte" });
+    expect((await counts()).totalCount).toBe(0);
+    expect((await cards())[0]?.classAnnotation?.classe).toBe("ecarte");
+    vi.stubEnv("REFRESH_CLASSIFY_MODE", "off");
+    expect({ counts: await counts(), cards: await cards(), views: await views() }).toEqual(baseline);
+    expect((await readClassAnnotations(f.db, target.citySlug)).size).toBe(1);
+  });
   it("should increment the shared manual projection revision for AI changes only", async () => {
     const f = await workspaceFixture();
     const { target } = await workspaceSignal(f);
