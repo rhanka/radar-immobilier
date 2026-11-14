@@ -9,7 +9,7 @@ import { readProjectionScope } from "../facets/projection-revisions.js";
 import { readClassAnnotations, writeClassAnnotation, type AiClassAnnotation } from "./class-annotations.js";
 
 const input: AiClassAnnotation = { citySlug: "synthetic-city", nodeType: "Signal", nodeId: "test-ai",
-  classe: "pertinent", reason: "Residential density increase", source: "ai", model: "gpt-6-astra",
+  classe: "pertinent", reason: "Residential density increase", ambiguous: false, source: "ai", model: "gpt-6-astra",
   effort: "medium", promptId: "p0-v1", promptSha256: "a".repeat(64),
   pipelineRunId: "run-1", inputSha256: "b".repeat(64) };
 
@@ -60,7 +60,10 @@ describeDb("single-pass class annotations PostgreSQL", () => {
     expect((await readClassAnnotations(f.db, input.citySlug)).get("Signal:test-ai")).toMatchObject(input);
     expect(await writeClassAnnotation(f.db, { ...input, pipelineRunId: "run-2" })).toBe("noop");
     expect((await readClassAnnotations(f.db, input.citySlug)).get("Signal:test-ai")?.pipelineRunId).toBe("run-1");
-    expect(await writeClassAnnotation(f.db, { ...input, promptSha256: "c".repeat(64) })).toBe("written");
+    expect(await writeClassAnnotation(f.db, { ...input, ambiguous: true, promptSha256: "c".repeat(64) })).toBe("written");
+    expect((await readClassAnnotations(f.db, input.citySlug)).get("Signal:test-ai")?.ambiguous).toBe(true);
+    expect(await writeClassAnnotation(f.db, { ...input, promptSha256: "d".repeat(64) })).toBe("written");
+    expect((await readClassAnnotations(f.db, input.citySlug)).get("Signal:test-ai")?.ambiguous).toBe(false);
   });
 
   it("should preserve human history even when the human selection is inactive", async () => {
@@ -69,7 +72,17 @@ describeDb("single-pass class annotations PostgreSQL", () => {
     expect(await writeClassAnnotation(f.db, input)).toBe("manual");
     const rows = await f.db.execute(sql`SELECT * FROM signal_class_annotations`);
     expect(rows.rows).toEqual([]);
-    expect((await readClassAnnotations(f.db, input.citySlug)).get("Signal:test-ai")?.source).toBe("manual");
+    expect((await readClassAnnotations(f.db, input.citySlug)).has("Signal:test-ai")).toBe(false);
+  });
+
+  it("should expose a real manual annotation stored without facet history", async () => {
+    const f = await fixture();
+    await f.db.execute(sql`INSERT INTO signal_class_annotations
+      (city_slug, node_type, node_id, classe, reason, source)
+      VALUES (${input.citySlug}, ${input.nodeType}, ${input.nodeId}, 'pertinent', 'Stored human annotation', 'manual')`);
+    expect((await readClassAnnotations(f.db, input.citySlug)).get("Signal:test-ai")).toMatchObject({
+      source: "manual", classe: "pertinent", reason: "Stored human annotation", model: null,
+    });
   });
 
   it("should let later human history replace the displayed AI provenance", async () => {

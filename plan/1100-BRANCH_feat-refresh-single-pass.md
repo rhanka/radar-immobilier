@@ -15,6 +15,8 @@
 - [x] Conditional: Makefile, api/Dockerfile, api/drizzle/**, API classification read paths and UI transport types.
 
 ## Feedback Loop
+- [x] BR1100-EX6: owner supersedes EX5 for i-cond. Restore exact main baseline assertions in facets-refresh; test flag-zero API bytes for Alice and Bob after manual archive/selection. Facet history may redact a stored annotation but cannot create one. Impact: no synthetic API provenance; keep human precedence and real manual annotations. Rollback: revert this correction.
+- [x] BR1100-EX5: owner requests the PR #1099 CI correction in api/tests/integration/facets-refresh.spec.ts. Expect the documented redacted manual provenance marker after an archive; retain exact payload, identity and visibility assertions. Add no-AI-write and revision stability checks. Rollback: revert this test-only correction.
 - [x] BR1100-EX4: owner requests rollback purge service, reannotation CLI mode and preprod make target, PostgreSQL coverage, shared annotation revisions and exact model labels. Keep readers independent of the flag. Rollback: flag zero, optional explicit AI purge.
 - [x] BR1100-EX1: Makefile change authorized by owner reannotation target; add SKIP_DOTENV to honor no .env reads. Impact: opt-in skip only. Rollback: revert target/conditional.
 - [x] BR1100-EX2: additive migration plus journal and Dockerfile runtime entrypoint/assets required for deployment. Rollback: flag zero; keep additive schema.
@@ -30,6 +32,11 @@
 - [x] Root checkout remains untouched. Preprod activation is a separate manual pass, schedules stay suspended.
 
 ## Plan / Todo (lot-based)
+- [x] **i-cond — Restore flag-zero API parity**
+  - [x] Reproduce all three payload failures before the code fix; restore main assertions and add byte comparisons for both users and both manual actions.
+  - [x] Require a stored annotation before applying facet-history redaction; omit the API field when absent; cover real stored manual annotations.
+  - [x] Verification: 54 facets/class-annotations tests pass in 14 files with LOT_MIGRATION_DB_TEST=1 and REFRESH_SINGLE_PASS=0; typecheck and lint pass (8 Svelte warnings, 1 ESLint warning). Disposable PostgreSQL only: fsync/full_page_writes disabled; no timeout increases. No independent consensus: exact author metadata and h2a_run unavailable.
+  - [x] Deliver the bounded correction by commit, push and PR #1099 comment; test stack cleanup uses down -v.
 - [x] **Lot 0 — Baseline and constraints**
   - [x] Confirm clean feat/refresh-single-pass at origin/main b7724bdd9015a4f26319897bf240baaf9ee636ae.
 - [x] **Lot 1 — Prompt and extraction**
@@ -41,6 +48,7 @@
   - [x] Review correction: explicit AI-only purge with optional run/prompt filters; dry-run default, shared writer lock and JSON report.
   - [x] B1: require a filter or explicit --all / PURGE_ALL=1 for apply; validate options in the service; Make regression rejects an empty run id before cluster access.
 - [x] **Lot 4 — Verification and delivery**
+  - [x] PR #1099 CI correction: reproduced the exact facets-refresh payload mismatch; expect the documented redacted manual marker. All 51 facets/class-annotations PostgreSQL tests (14 files), typecheck and lint pass at REFRESH_SINGLE_PASS=0. Local test-only fsync/full_page_writes disabled after observing DROP DATABASE waiting on CheckpointDone; unchanged 20-second timeouts. No production code changed. Independent review unavailable: no h2a_run tool or exact author metadata.
   - [x] B1 gate: typecheck, lint, purge unit/PostgreSQL suites at flag zero, four Make refusal checks and 55 render checks pass; test stack removed with down -v.
   - [x] Review correction coverage: purge dry-run, AI-only apply, filters, human history, prior visibility, idempotence, projection tokens and exact model labels.
   - [x] Review correction gate: typecheck, lint, 38 API tests including 14 PostgreSQL tests at flag zero, 27 targeted UI tests and 55 render checks pass; no timeout increase.
