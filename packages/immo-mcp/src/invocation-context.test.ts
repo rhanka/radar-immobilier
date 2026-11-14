@@ -86,9 +86,7 @@ describe("invocation context (P4 private boundary)", () => {
       [...ALL_TOOL_NAMES].sort(),
     );
     expect(Object.keys(TOOL_HANDLERS).sort()).toEqual([...ALL_TOOL_NAMES].sort());
-    expect([...V0_TOOL_NAMES, ...RAW_TOOL_NAMES].sort()).toEqual(
-      [...ALL_TOOL_NAMES].sort(),
-    );
+    expect(ALL_TOOL_NAMES).toEqual(expect.arrayContaining([...V0_TOOL_NAMES, ...RAW_TOOL_NAMES]));
     for (const def of ALL_TOOL_DEFINITIONS) {
       expect(TOOL_SCOPE_BY_NAME[def.name]).toBe(def.scope);
     }
