@@ -17,6 +17,8 @@ export PREVIOUS_RELEASE
 export CURSOR_REFERENCE
 export COMMENT_FILE
 export ROOT
+export STOP_RUN_CONTAINERS
+export CUTOVER_LINT_PROJECT
 render:
 	@cd "$(ROOT)" && node deploy/prod-cutover/render.cjs
 .PHONY: help prerequisites precheck backup restore-test migrate transition verify smoke rehearsal rollback k8s-plan cd-plan test integration down check image-check publish commit lint
@@ -31,6 +33,9 @@ window-start window-configure window-close window-deploy window-rollback-service
 test:
 	@test "$(ENV)" = test-prod-cutover
 	@cd "$(ROOT)" && timeout 90s node --test deploy/prod-cutover/*.test.cjs
+hook-controller-test:
+	@test "$(ENV)" = test-prod-cutover
+	@cd "$(ROOT)" && timeout --kill-after=5s 90s node --test deploy/prod-cutover/containers.integration.cjs
 lint:
 	@test "$(ENV)" = test-prod-cutover
 	@cd "$(ROOT)" && timeout --kill-after=10s 300s bash deploy/prod-cutover/lint.sh

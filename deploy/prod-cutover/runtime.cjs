@@ -18,9 +18,12 @@ const hash = file => crypto.createHash('sha256').update(fs.readFileSync(file)).d
 const env = process.env;
 process.umask(0o077);
 function run(bin, args, options = {}) {
+  const containerRun = env.RUN || (['psql', 'pg_dump', 'pg_restore'].includes(bin)
+    && env.EVIDENCE ? json(env.EVIDENCE).run : '');
   const result = spawnSync(bin, args, { encoding: 'utf8', timeout: 60000,
-    maxBuffer: 32 * 1024 * 1024, env: { ...env, PGCONNECT_TIMEOUT: '5',
-      PGOPTIONS: '-c lock_timeout=5000 -c statement_timeout=300000' }, ...options });
+    maxBuffer: 32 * 1024 * 1024, ...options,
+    env: { ...env, PGCONNECT_TIMEOUT: '5', PGOPTIONS: '-c lock_timeout=5000 -c statement_timeout=300000',
+      ...options.env, CUTOVER_CONTAINER_RUN: containerRun } });
   // Never relay SQL, stderr, connection strings or row values on failure.
   if (result.error || result.status !== 0) fail(`command_failed_${bin.replace(/[^a-z0-9]/gi, '_')}`);
   return result.stdout;
@@ -91,6 +94,8 @@ function approvedPlan() {
   return { plan, ...binding };
 }
 function mutationGuard() {
+  const runId = env.RUN || (env.EVIDENCE ? json(env.EVIDENCE).run : null);
+  if (runId) require('./containers.cjs').guard(runId);
   if (env.ENV !== 'execution-prod') return;
   const kube = path.join(env.HOME, '.kube/radar-prod-tenant-admin.kubeconfig');
   const lock = JSON.parse(run('kubectl', ['--kubeconfig', kube, '--request-timeout=15s',
