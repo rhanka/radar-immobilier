@@ -2,7 +2,7 @@
 
 ## Objective
 - [x] Préparer la bascule de b7724bdd9015a4f26319897bf240baaf9ee636ae sous i-cond.
-- [ ] Faire ratifier le GO par l’owner après répétition sur copie.
+- [x] GO owner reçu pour provision-prod puis bascule, après procédure verte. Exécution prod réservée à i-cond.
 
 ## Scope / Guardrails
 - [x] Prod en lecture seule. Dump RO autorisé par D4 le 13/11. Aucun tag, migration ou écriture cluster.
@@ -31,6 +31,7 @@
 - [x] Tests dédiés ENV=test-prod-cutover. Ports réservés API 18821, UI 15321, Maildev 11121.
 
 ## Plan / Todo (lot-based)
+- [x] Corps PR : séquence exacte de ce soir, acteurs, durées, COMMIT DDL et réouverture comme seuils, reprise complète, tag v1.2.20 différé au SHA candidat. Nouveau dry-run RO : neuf créations prévues, aucune valeur affichée.
 - [x] Cause Docker corrigée dans runtime : stdin ignoré sans input, pipe conservé pour SQL. Tests TERM/KILL d’origine verts, assertions et délais inchangés. verify-local ordonne gardes, Docker, PostgreSQL, lint/contrôleurs et syntaxe.
 - [x] Preuve de drain testée dans les trois scénarios de fenêtre ; répertoire privé créé avant écriture. Intégration PostgreSQL remise au vert par attente TCP après l’initialisation. Diagnostics Docker limités à l’état, au RUN et au code contrôleur.
 - [x] Exécution i-cond explicitée : commandes autonomes de lecture CORS/TLS/RUN, preuve de drain sous verrou, reçu de restauration finale contrôlé et tag candidat différé. Lint et huit scénarios verts ; 26 gardes et deux interruptions Docker réelles vertes.

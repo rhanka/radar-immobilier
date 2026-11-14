@@ -210,6 +210,7 @@ rtk make -f deploy/prod-cutover/prod-cutover.mk window-rollback-services RUN="$R
 ```
 
 Vérifier schéma 13, propriétaires, ACL et accès legacy. Ne pas rejouer les grants candidats.
+Après window-evidence, actualiser aussi le champ drain d’APPROVAL avant rollback ; conserver le RUN.
 Faire la recette privée historique. Consigner reopen=true/run, puis window-reopen avec le même RUN.
 Un smoke candidat échouera sur l’ancienne version : utiliser le smoke historique intégré à window-reopen.
 Après réouverture, toute perte hors PV régénérables exige décision owner avant restauration.
@@ -322,7 +323,7 @@ Le tri Chaperon reste interdit par #1080. Les statiques sont actifs selon D3. Le
 
 Archive prod RO prête : 283590496 octets, dump 72 s, deux empreintes identiques.
 PostgreSQL 16/PostGIS et clients conteneurisés préparés. Rôles recréés par copy-up local.
-Images API/UI téléchargées par digest. Roster OIDC et plan 6H privés prêts. Fournir GO exact.
+Images API/UI téléchargées par digest. Roster OIDC et plan 6H privés prêts. Consigner le GO acquis dans APPROVAL.
 La commande `copy-rehearse OWNER=i-cond ENV=rehearsal` prépare l’attestation locale et les preuves Docker.
 Elle prépare UI/API/MCP, IdP et S3 isolés. Refresh et sorties prod sont absents.
 La recette humaine exige encore les PV autorisés et un compte Product Owner existant.
@@ -332,12 +333,12 @@ Le wildcard pages doit précéder la capture de fenêtre. `CURSOR_REFERENCE` dé
 window-deploy refuse une clé différente. L’opérateur de reprise reste à désigner.
 Voir [les entrées détaillées](../../deploy/prod-cutover/README.md).
 
-Tests isolés : 13 gardes, huit scénarios contrôleur/IdP et PostgreSQL avec archive synthétique.
+Tests isolés : 26 gardes, huit scénarios contrôleur/IdP et PostgreSQL avec archive synthétique.
 Restauration, 31 migrations, reprise et deux rollbacks complets y sont vérifiés.
 Ces preuves ne remplacent pas la copie prod ni le rejeu réel du hook candidat.
 Les mesures backup, restauration, DDL, WAL, 6H, smoke et reprise figurent ci-dessous.
 Trois heures, dont 45 minutes de reprise, restent un budget non validé.
-Attendre la CI verte et la ratification finale. Aucun GO prod dans ce rapport.
+Attendre la CI verte et les préchecks prod. Le GO owner provisionnement puis bascule est acquis.
 
 ## Mesures de la répétition du 13/11
 
@@ -436,14 +437,16 @@ Le lint passe. Les stacks de tests ont été supprimées avec down -v.
 ## Validation de finalisation
 
 Merge hookfix `e1dec8111` intégré par `d3866bbde`. Six conflits résolus.
-Les résultats ci-dessus décrivent la répétition précédente.
-Après merge : 24 gardes réussies et contrôle de syntaxe réussi.
-Dry-run `provision-prod` prod réussi, neuf objets prévus. Aucun APPLY exécuté.
-Deux scénarios Docker TERM/KILL échouent deux fois : hook non observé en cours d’exécution.
-Les conteneurs ont été observés en état Created. Aucun verdict de succès pour ces scénarios.
-Le lint expire pendant une reconstruction Docker, avant ESLint. Code 137. Il reste à relancer.
-Le disque local est à 97 %. La CI du nouveau SHA est à consulter dans la PR.
-La relance locale des huit scénarios donne 3 succès : fermeture, refus public et rollback au SHA court.
-Quatre gardes échouent sur le chemin Node `/usr/local/bin/node`, absent de cet hôte.
-Le scénario IdP échoue au démarrage local. La validation complète reste à refaire dans son conteneur.
-La revue formelle harness reste selection-failed. Aucun GO prod implicite.
+Remise au vert depuis `61fdba631` : chemin Node issu de process.execPath, contrôleurs/IdP conteneurisés.
+Le lanceur ferme stdin sans input. SQL conserve le pipe. Les tests Docker gardent le lanceur Node d’origine.
+Readiness PostgreSQL : attendre TCP après le serveur temporaire d’initialisation.
+Les preuves et les étiquettes de conteneurs conservent le RUN original.
+Résultats : 26/26 gardes, dont les deux gardes containers.test.cjs ; 8/8 scénarios contrôleur/IdP ;
+2/2 interruptions Docker TERM/KILL réelles ; 1/1 intégration PostgreSQL, avec deux rollbacks ; ESLint et syntaxe verts.
+Aucune assertion supprimée. Aucun délai augmenté. Aucun test sauté.
+Commande complète reproductible : `rtk make -f deploy/prod-cutover/prod-cutover.mk verify-local ENV=test-prod-cutover`.
+Chaque stack de tests est nettoyée avec down -v. La copie de recette est conservée.
+Dry-run prod RO : 5 Secrets, 1 Certificate, 1 Ingress et 2 rôles MCP à créer. Aucun APPLY exécuté.
+dotenvRead=false et valuesPrinted=false. Aucun secret affiché.
+Le CORS est maintenant une porte GetBucketCors bloquante. Le provisionnement puis le CORS k8s précèdent le precheck complet.
+La CI du SHA publié est à consulter dans la PR. La revue formelle harness historique reste selection-failed.
