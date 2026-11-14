@@ -79,9 +79,13 @@ function hook(operation) {
   const hookProof = { run: proof.run, release: proof.release, instances: proof.instances, completedAt: proof.completedAt };
   const variables = { ...r.env, CUTOVER_PLAN: JSON.stringify(plan), CUTOVER_EVIDENCE: JSON.stringify(hookProof),
     CUTOVER_OPERATION: operation, PGOPTIONS: '-c lock_timeout=5000 -c statement_timeout=300000' };
+  const localCopy = r.env.ENV === 'rehearsal' && r.env.PGPORT === '25433'
+    && r.env.PGDATABASE === 'radar_cutover_owner_20261113';
+  if (localCopy) Object.assign(variables, { PGHOST: 'postgres', PGPORT: '5432' });
   const names = ['PGHOST', 'PGPORT', 'PGUSER', 'PGDATABASE', 'PGPASSWORD', 'PGOPTIONS', 'PGPASSFILE',
     'CUTOVER_PLAN', 'CUTOVER_EVIDENCE', 'CUTOVER_OPERATION'];
-  const args = ['run', '--pull=never', '--rm', '--name', name, '--network=host',
+  const args = ['run', '--pull=never', '--rm', '--name', name,
+    localCopy ? '--network=radar-prod-copy-owner_copy-only' : '--network=host',
     '--user', `${process.getuid()}:${process.getgid()}`, '--read-only', '--tmpfs', '/tmp',
     '--cap-drop=ALL', '--security-opt=no-new-privileges',
     '--mount', `type=bind,src=${r.ROOT}/deploy/prod-cutover/hook.cjs,dst=/run-cutover.cjs,readonly`];
