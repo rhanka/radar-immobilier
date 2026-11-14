@@ -44,7 +44,7 @@ export interface ScopedSignalCardDeps {
 export async function buildScopedSignalCards(
   deps: ScopedSignalCardDeps, nodes: readonly StoredSignalNode[], citySlug: string,
 ): Promise<GraphSignalCard[]> {
-  const annotations = deps.db ? await readClassAnnotations(deps.db, citySlug) : new Map();
+  const annotations = deps.db ? await readClassAnnotations(deps.db, citySlug, { includeDates: true }) : new Map();
   const annotate = (cards: GraphSignalCard[]) => cards.map((card) => {
     const classAnnotation = annotations.get(`${card.type}:${card.id}`);
     return classAnnotation ? { ...card, classAnnotation } : card;
@@ -113,7 +113,7 @@ export const SCOPED_CARD_ENRICHMENT_CONCURRENCY = 8;
 export async function buildScopedSignalCardViews(
   deps: ScopedSignalCardDeps, nodes: readonly StoredSignalNode[], citySlug: string,
 ): Promise<GraphSignalCard[]> {
-  const annotations = deps.db ? await readClassAnnotations(deps.db, citySlug) : new Map();
+  const annotations = deps.db ? await readClassAnnotations(deps.db, citySlug, { includeDates: true }) : new Map();
   const views = nodes.map((node) => {
     const card = toSignalCardView(toDegradedSignalCard(node));
     const classAnnotation = annotations.get(`${node.type}:${node.id}`);
