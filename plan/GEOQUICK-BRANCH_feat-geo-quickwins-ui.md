@@ -39,5 +39,14 @@ Reduce map transfers while preserving exact geometry for details and calculation
 - [x] Lot 0: verify baseline, rules, scope and isolation.
 - [x] Lot 1: preserve encoded responses across Nginx and Vite; configuration test.
 - [x] Lot 2: display precision, exact detail loading, separation and pagination tests.
-- [ ] Lot 3: typecheck, lint, targeted UI and browser checks; remove stack volumes.
-- [ ] Lot 4: push and open PR to main; no merge.
+- [x] Lot 3: typecheck, lint, targeted UI and browser checks; remove stack volumes.
+  - [x] `make typecheck`: passed (warnings only).
+  - [x] `make lint`: passed (one warning, no errors).
+  - [x] `make test-ui SCOPE=...`: 174 tests passed in 7 files.
+  - [x] `make test-e2e E2E_SPEC=geo-quickwins.spec.ts`: 1 passed (4.5 s).
+  - [x] Browser clicks city, selects lot, opens exact detail; external geo is mocked at HTTP boundary.
+  - [x] Preprod probes: display query and exact geoId item both return HTTP 200.
+  - [x] Unit stack: `make clean` (`down -v`); e2e script teardown: `down -v`.
+- [x] Lot 4: push and open PR to main; no merge.
+  - [x] PR: https://github.com/rhanka/radar-immobilier/pull/1109
+  - [x] CI checks started; merge remains outside this lane.
