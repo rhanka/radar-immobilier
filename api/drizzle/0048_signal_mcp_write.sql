@@ -14,15 +14,19 @@ CREATE TABLE signal_mcp_events (
   kind text NOT NULL CHECK (kind IN ('class','feedback','note')),
   source text NOT NULL CHECK (source IN ('mcp','manual')),
   model text, client_id text, oauth_sub text NOT NULL, validation text NOT NULL CHECK (validation IN ('auto','human')),
+  pending_human boolean NOT NULL DEFAULT false,
+  linked_event_id uuid REFERENCES signal_mcp_events(id),
   classe text CHECK (classe IN ('pertinent','a_surveiller','ecarte','non_classe')),
   reason_code text, reason text, text text CHECK (length(text) BETWEEN 1 AND 2000),
   verdict text CHECK (verdict IN ('up','down')),
   previous_version text NOT NULL,
   created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
   CHECK (source <> 'mcp' OR (length(btrim(model)) > 0 AND length(btrim(client_id)) > 0)),
+  CHECK ((source='mcp' AND validation='auto' AND linked_event_id IS NULL) OR
+    (source='manual' AND validation='human' AND NOT pending_human AND (kind='note' OR linked_event_id IS NOT NULL))),
   CHECK ((kind='note' AND text IS NOT NULL AND classe IS NULL) OR
     (kind IN ('class','feedback') AND classe IS NOT NULL AND length(btrim(reason)) > 0)),
-  CHECK (classe IS DISTINCT FROM 'non_classe' OR validation='human')
+  CHECK (classe IS DISTINCT FROM 'non_classe' OR validation='human' OR pending_human)
 );
 CREATE INDEX signal_mcp_events_target_idx ON signal_mcp_events(workspace_id,city_slug,node_type,node_id,created_at DESC);
 CREATE TABLE signal_mcp_audit (
@@ -43,7 +47,7 @@ CREATE TRIGGER signal_mcp_audit_no_truncate BEFORE TRUNCATE ON signal_mcp_audit
 -- SECURITY INVOKER throughout. The caller supplies verified identity, never tool arguments.
 CREATE FUNCTION signal_mcp_read(p_sub text, p_ref jsonb) RETURNS jsonb LANGUAGE plpgsql AS $$
 DECLARE actor uuid; wid uuid := (p_ref->>'workspaceId')::uuid; events jsonb; ai jsonb; manual jsonb;
-  current_class jsonb; history jsonb; version text; notes jsonb; feedback jsonb; ui_feedback jsonb; graph_version text;
+  current_class jsonb; shared_class jsonb; history jsonb; version text; notes jsonb; feedback jsonb; ui_feedback jsonb; graph_version text;
 BEGIN
   SELECT id INTO actor FROM account_users WHERE sub=p_sub AND status='approved';
   IF actor IS NULL OR NOT EXISTS (SELECT 1 FROM workspace_memberships
@@ -74,7 +78,7 @@ BEGIN
     ORDER BY (e.facet='archive' AND e.state='active' AND e.superseded_by IS NULL) DESC,
       (e.state='active' AND e.superseded_by IS NULL) DESC,e.created_at DESC,e.id DESC LIMIT 1;
   SELECT value INTO current_class FROM jsonb_array_elements(events)
-    WHERE value->>'kind' IN ('class','feedback')
+    WHERE value->>'kind' IN ('class','feedback') AND value->>'scope'='personal'
     ORDER BY (value->>'validation'='human') DESC,(value->>'scope'='workspace' AND value->>'classe'='ecarte') DESC,
       (value->>'created_at')::timestamptz DESC,value->>'id' DESC LIMIT 1;
   IF current_class->>'validation'='auto' AND (ai->>'updated_at')::timestamptz > (current_class->>'created_at')::timestamptz
@@ -83,6 +87,17 @@ BEGIN
     current_class := manual || jsonb_build_object('classe',CASE WHEN manual->>'state'='inactive' THEN 'non_classe'
       WHEN manual->>'facet'='archive' THEN 'ecarte' ELSE manual->>'basket' END,'validation','human');
   ELSE current_class := coalesce(current_class,ai); END IF;
+  -- A manual journal entry wins older UI heads; a shared archive wins all personal state.
+  SELECT value INTO shared_class FROM jsonb_array_elements(events)
+    WHERE value->>'kind' IN ('class','feedback') AND value->>'source'='manual' AND value->>'scope'='personal'
+    ORDER BY (value->>'created_at')::timestamptz DESC,value->>'id' DESC LIMIT 1;
+  IF shared_class IS NOT NULL AND (manual IS NULL OR
+    (NOT (manual->>'facet'='archive' AND manual->>'state'='active' AND manual->>'superseded_by' IS NULL) AND
+    (shared_class->>'created_at')::timestamptz > (manual->>'created_at')::timestamptz)) THEN current_class := shared_class; END IF;
+  SELECT value INTO shared_class FROM jsonb_array_elements(events)
+    WHERE value->>'kind' IN ('class','feedback') AND value->>'scope'='workspace'
+    ORDER BY (value->>'created_at')::timestamptz DESC,value->>'id' DESC LIMIT 1;
+  IF shared_class->>'classe'='ecarte' THEN current_class := shared_class; END IF;
   SELECT coalesce(jsonb_agg(value),'[]') INTO notes FROM jsonb_array_elements(events) WHERE value->>'kind'='note';
   SELECT coalesce(jsonb_agg(value),'[]') INTO feedback FROM jsonb_array_elements(events) WHERE value->>'kind'='feedback';
   SELECT coalesce(jsonb_agg(to_jsonb(h) ORDER BY h.created_at DESC,h.id DESC),'[]') INTO history
@@ -101,6 +116,8 @@ BEGIN
     'createdAt',current_class->'created_at','updatedAt',coalesce(current_class->'updated_at',current_class->'created_at'),
     'validation',coalesce(current_class->>'validation',CASE WHEN current_class->>'source'='ai' THEN 'auto' ELSE 'human' END)); END IF;
   RETURN jsonb_build_object('version',version,'current',current_class,'ai',ai,
+    'canConfirm',current_class->>'actor_id'=actor::text,
+    'moderateArchive',EXISTS (SELECT 1 FROM workspace_memberships WHERE workspace_id=wid AND account_id=actor AND status='active' AND moderate_archive),
     'ambiguous',coalesce((current_class->>'ambiguous')::boolean,current_class->>'classe'='non_classe',true),'history',history,
     'mcpHistory',events,'feedback',feedback || ui_feedback,'notes',notes);
 END $$;
@@ -133,6 +150,7 @@ BEGIN
   BEGIN
     IF state ? 'error' THEN result := state;
     ELSIF p_source NOT IN ('mcp','manual') OR p_validation NOT IN ('auto','human')
+      OR (p_source='mcp' AND p_validation<>'auto')
       OR (p_source='manual' AND p_tool<>'annotate_signal') OR ref->>'scope' NOT IN ('personal','workspace') THEN
       result := jsonb_build_object('error','invalid_signal_command');
     ELSIF p_source='mcp' AND (coalesce(model_name,'')='' OR coalesce(p_client,'')='') THEN
@@ -154,7 +172,7 @@ BEGIN
         IF length(p_body->>'text')>2000 OR coalesce(note,'')='' THEN RAISE EXCEPTION 'invalid_note'; END IF;
       ELSE
         IF p_tool='confirm_classification' THEN
-          IF p_validation<>'human' THEN RAISE EXCEPTION 'human_confirmation_required'; END IF;
+          IF NOT coalesce((p_body->>'pendingHuman')::boolean,false) THEN RAISE EXCEPTION 'human_confirmation_required'; END IF;
           IF p_body->>'verdict' NOT IN ('up','down') THEN RAISE EXCEPTION 'invalid_verdict'; END IF;
           IF p_body->>'verdict'='down' AND (next_class IS NULL OR next_class='non_classe'
             OR next_class=state->'current'->>'classe' OR v_code IS NULL) THEN RAISE EXCEPTION 'reclassification_required'; END IF;
@@ -165,7 +183,7 @@ BEGIN
         IF next_class IS NULL OR next_class NOT IN ('pertinent','a_surveiller','ecarte','non_classe')
           OR coalesce(why,'')='' OR length(why)>2000 THEN RAISE EXCEPTION 'invalid_classification'; END IF;
         IF next_class='non_classe' THEN
-          IF p_validation<>'human' THEN RAISE EXCEPTION 'human_confirmation_required'; END IF;
+          IF NOT coalesce((p_body->>'pendingHuman')::boolean,false) THEN RAISE EXCEPTION 'human_confirmation_required'; END IF;
           IF NOT EXISTS (SELECT 1 FROM facet_reason_codes WHERE profile_id='immo-steve-2026-09'
             AND facet_reason_codes.code=v_code) THEN RAISE EXCEPTION 'invalid_reason_code'; END IF;
         ELSIF NOT (p_tool='confirm_classification' AND p_body->>'verdict'='up') AND NOT EXISTS (
@@ -181,9 +199,9 @@ BEGIN
         END IF;
       END IF;
       INSERT INTO signal_mcp_events(workspace_id,actor_id,scope,city_slug,node_type,node_id,kind,source,
-        model,client_id,oauth_sub,validation,classe,reason_code,reason,text,verdict,previous_version)
+        model,client_id,oauth_sub,validation,pending_human,classe,reason_code,reason,text,verdict,previous_version)
         VALUES(wid,actor,ref->>'scope',ref->>'citySlug',ref->>'type',ref->>'id',kind_name,p_source,
-          model_name,p_client,p_sub,p_validation,next_class,v_code,why,note,p_body->>'verdict',p_version) RETURNING id INTO event_id;
+          model_name,p_client,p_sub,p_validation,coalesce((p_body->>'pendingHuman')::boolean,false),next_class,v_code,why,note,p_body->>'verdict',p_version) RETURNING id INTO event_id;
       IF ref->>'scope'='personal' THEN
         INSERT INTO personal_projection_revisions(workspace_id,owner_id,city_slug,mode,revision)
           VALUES(wid,actor,ref->>'citySlug','signal',1) ON CONFLICT(workspace_id,owner_id,city_slug,mode)
