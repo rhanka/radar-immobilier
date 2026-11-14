@@ -28,6 +28,8 @@ import { extractRefreshProfile, refreshSourceDocumentDate, type RefreshProfileCh
   type RefreshProfileContext } from "./refresh-profile.js";
 import { canonicalHash } from "./replay/canonical-json.js";
 import { extractionToV23Graph } from "./refresh-v23.js";
+import { attachSinglePassAnnotations, type SinglePassPrompt } from "./refresh-single-pass.js";
+import { writeClassAnnotation, type AiClassAnnotation } from "./class-annotations.js";
 import { completeRefreshChunk, matchProjectedRefreshState, matchPublishedRefreshState, openRefreshState,
   readCompletedRefreshChunk, readRefreshStates, recordRefreshModel, reserveRefreshChunk, writeRefreshCandidate,
   writeRefreshStageReceipt, type RefreshStage, type RefreshStateHandle } from "./refresh-state.js";
@@ -240,6 +242,7 @@ export interface RunPvRefreshOptions {
   readonly db: Database;
   readonly profileContext: RefreshProfileContext;
   readonly textClient?: TextJsonGenerationClient;
+  readonly singlePassPrompt?: SinglePassPrompt;
   readonly documentModels?: RefreshDocumentModels;
   readonly onModelReceipt?: (docSha: string, chunkId: string, receipt: RefreshModelReceipt) => void;
   readonly extractPdf: (bytes: Uint8Array, sourceUrl: string) => Promise<string>;
@@ -319,6 +322,17 @@ async function publishSnapshot(options: RunPvRefreshOptions, initial: RefreshSta
     }
     if (projected.aborted) await failProjection("postgres-regression-refused",
       `Postgres projection refused: ${projected.reason ?? "regression"}`);
+    if (options.singlePassPrompt) {
+      for (const node of target.snapshot.nodes) {
+        if (node.type !== "Signal" && node.type !== "DesignationEvent") continue;
+        const annotation = node.properties?.["classAnnotation"] as AiClassAnnotation | undefined;
+        if (annotation?.source === "ai") {
+          await writeClassAnnotation(options.db, {
+            ...annotation, citySlug: options.citySlug, nodeType: node.type, nodeId: node.id,
+          });
+        }
+      }
+    }
     if (options.signal?.aborted) await failProjection("aborted-after-projection",
       "Refresh aborted after projection");
     handle = await completeStage(options.store, handle, "projected", snapshotHash, now);
@@ -497,9 +511,17 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
           return client.generateJson(input);
         } };
         const extracted = (await extractRefreshProfile([chunk], { textClient,
-          context: options.profileContext, maxOutputTokens: options.maxOutputTokens }))[0]!;
-        const result = await options.documentModels?.verify(extracted, options.maxOutputTokens, record,
-          options.citySlug) ?? extracted;
+          context: options.profileContext, maxOutputTokens: options.maxOutputTokens,
+          ...(options.singlePassPrompt ? { singlePassPrompt: options.singlePassPrompt } : {}) }))[0]!;
+        const result = options.singlePassPrompt ? extracted
+          : await options.documentModels?.verify(extracted, options.maxOutputTokens, record,
+            options.citySlug) ?? extracted;
+        if (options.singlePassPrompt) {
+          const model = receipts.filter((receipt) => receipt.status === "completed"
+            && receipt.transition !== "verification").at(-1)?.modelUsed;
+          if (!model) throw new Error("Single-pass annotation requires an accepted model receipt");
+          attachSinglePassAnnotations(result, { model, prompt: options.singlePassPrompt, pipelineRunId: cycleId });
+        }
         handle = await completeRefreshChunk(options.store, handle, chunk.id, result);
         profiled.push(result);
       }
