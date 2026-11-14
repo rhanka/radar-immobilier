@@ -9,6 +9,16 @@ const { randomUUID } = require('node:crypto');
 const r = require('./runtime.cjs');
 const containers = require('./containers.cjs');
 const image = 'postgis/postgis@sha256:44126d872ac91993766c341e369c539e8196614321765d36a6f1bab0419a5fa5';
+test('supervised client receives SQL on standard input', () => {
+  const run = randomUUID();
+  const input = 'SELECT current_database();\n';
+  try {
+    const output = r.run('bash', ['deploy/prod-cutover/run-container.sh', run,
+      'run', '--rm', '-i', '--pull=never', '--network=none',
+      '--label', `${containers.LABEL}=${run}`, '--entrypoint', '/bin/cat', image], { input });
+    assert.equal(output, input);
+  } finally { containers.stop(run); }
+});
 for (const signal of ['SIGTERM', 'SIGKILL']) test(`controller ${signal} during a real Docker hook`, async () => {
   const run = randomUUID();
   const args = ['deploy/prod-cutover/run-container.sh', run, 'run', '--rm', '--pull=never',

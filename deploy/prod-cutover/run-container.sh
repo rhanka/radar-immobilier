@@ -14,6 +14,6 @@ cleanup() {
 trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
-timeout --foreground --signal=TERM --kill-after=5s "${CUTOVER_CONTAINER_TIMEOUT:-550}s" docker "$@" &
+timeout --foreground --signal=TERM --kill-after=5s "${CUTOVER_CONTAINER_TIMEOUT:-550}s" docker "$@" <&0 &
 child=$!
 wait "$child"

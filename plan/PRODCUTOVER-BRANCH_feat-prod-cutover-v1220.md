@@ -32,6 +32,7 @@
 - [x] Tests dédiés ENV=test-prod-cutover. Ports réservés API 18821, UI 15321, Maildev 11121.
 
 ## Plan / Todo (lot-based)
+- [x] Preserve SQL stdin in the supervised background Docker client; regression reproduces empty successful output before the fix and verifies exact input delivery.
 - [x] Runbook final : commandes d’abandon, récupération, HTTPS privé et diagnostic explicite. Gardes 28/28 ; contrôleurs 12/12 ; workflows 6/6 ; PostgreSQL 13 → 44 → 13 ; ESLint et syntaxe verts. Aucun tag, merge ou accès prod.
 - [x] Test Docker ajouté pour le TLS du proxy candidat : publication API, HTML et MCP avec certificat synthétique vérifié. Les fichiers privés restent 0600 ; aucun assouplissement TLS. Scénarios Docker séquentiels, budgets inchangés.
 - [x] FINAL-EX2 : cinq workflows appelant le contrôleur passent au kubeconfig temporaire explicite exporté. Raccord bloquant pour conserver le CD différé avec la nouvelle garde. Aucune autre étape changée. Repli : retirer ensemble garde et raccord.
