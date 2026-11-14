@@ -13,6 +13,7 @@ const dir = process.env.CUTOVER_TEST_STATE;
 if (!dir) process.exit(90);
 fs.appendFileSync(path.join(dir, 'calls'), `${JSON.stringify([tool, ...input])}\n`);
 let args = input.filter(a => !a.startsWith('--request-timeout='));
+const ki = args.indexOf('--kubeconfig'); if (ki >= 0) args.splice(ki, 2);
 const ni = args.indexOf('-n'); if (ni >= 0) args.splice(ni, 2);
 const file = path.join(dir, 'state.json');
 const s = JSON.parse(fs.readFileSync(file));
