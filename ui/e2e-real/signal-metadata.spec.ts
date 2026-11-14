@@ -2,6 +2,7 @@ import { expect as baseExpect, seed, test } from "./fixtures";
 const expect = baseExpect.configure({ timeout: 1800 });
 
 test("metadata: period relevance filters exclusions and city keep exact counts and URLs", async ({ page, network }) => {
+  page.setDefaultTimeout(1800);
   await page.goto("/geo/region/quebec?mode=signal&filter.period=all&filter.zonage=1&filter.residentiel=1&filter.precoce=1&filter.excludePiia=1&filter.excludeDerogations=1");
   const total = page.getByText("3 signaux · 1 ville", { exact: false });
   await expect(total).toBeVisible();
@@ -33,6 +34,8 @@ test("metadata: period relevance filters exclusions and city keep exact counts a
   await expect(page.getByText("0 signaux · 0 villes", { exact: true })).toBeVisible();
   await unclassified.click();
   await expect(total).toBeVisible();
+  await page.getByTestId("classement-filter-trigger").click();
+  await expect(relevance).not.toBeVisible();
 
   await page.getByTestId("filtre-trigger").click();
   const filters = page.getByTestId("filtre-panel");

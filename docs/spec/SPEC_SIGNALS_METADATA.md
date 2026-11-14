@@ -101,6 +101,8 @@ live feed. It can be removed only after those callers have migrated.
 
 One local sample on November 13: old scoped aggregate **628.884 ms** and
 **916,284 JSON bytes**; metadata-v2 **141.048 ms** and **229,834 JSON bytes**.
+The timers surround authorized service reads. HTTP transport, JSON serialization
+and browser rendering are outside the timer; JSON bytes are measured separately.
 This is 4.46 times faster and 74.9% smaller on this fixture. The subsequent
 EXPLAIN execution took **19.559 ms**, with 621 shared-buffer hits and no reads.
 The application-cold budget of one second passed. These numbers do not establish
