@@ -35,7 +35,11 @@
 
 ## Plan / Todo (lot-based)
 - [x] Lock membership authority in the metadata snapshot; reject concurrent authority changes with 403 and cover the advisory-lock race on PostgreSQL.
-- [ ] Enforce merge dependencies #1104 then #1107 then #1108; verify disposable merged migration sequence and idempotence.
+- [x] Enforce merge dependencies #1104 then #1107 then #1108. 0049 keeps when=1793000000019 and moves to idx=48; 0047/0048 read at origin/feat/class-feedback 8f161638 and origin/feat/mcp-signal-write 50a3f8d6 have when=1793000000017/18.
+- [x] CI rejects missing numbers, duplicate indices and non-increasing timestamps. Freeze only the exact deployed 0001/0002 timestamp reversal and the historical absent 0009; never rewrite deployed timestamps. Six guard mutation tests pass. The unmerged lane intentionally fails the gate until its dependencies arrive.
+- [x] Disposable test/signals-lazy-review-integration merged origin/feat/mcp-signal-write without a merge commit. Resolve the journal to 0046/47/48/49; retain this PR's code on application conflicts. PostgreSQL: migrate-idempotence 2/2 and staged upgrade 0046 then 0047 then 0048 then 0049 1/1 pass, including replay, all hashes/timestamps and expected tables. Abort merge; never push the disposable branch.
+- [x] PostgreSQL metadata 4/4 pass, including deterministic advisory-lock revocation. Negative control without membership lock returns metadata and fails the 403 assertion; restoring the lock passes. Earlier unsuccessful runs exposed fixture setup/cleanup and container dependency issues; final reruns pass without increased timeouts.
+- [x] Final workspace typecheck and lint pass (one existing unused eslint-disable warning in an untouched test). Remove all three isolated projects with down -v; delete the disposable branch. No environment files read, no Python, no attribution trailers and no retained merge.
 - [x] Canonical filter and faceted metadata contract.
 - [x] Versioned projection, transactional refresh, idempotent backfill and migration.
 - [x] Authorized SQL aggregation and exact class resolution.
