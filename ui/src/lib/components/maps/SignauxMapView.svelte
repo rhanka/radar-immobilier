@@ -923,13 +923,13 @@
   $: classementMap = new Map([...classementBaseMap, ...classementOverrides]);
   $: classementFilteredNodes = filterNodesByClassement(filteredDetailNodes, classementMap, classementFilter);
   // Full class cubes retain archives regardless of the visibility checkbox.
-  $: classementCountsValue = loadError !== null ? null : classementCountsForPerimeter({
+  $: classementCountsValue = loading || loadError !== null ? null : classementCountsForPerimeter({
     entries: allEntries,
     axes: bAxesFromVivierKey(activeSubsetKey),
     exclusions: vivierBExclusions,
   });
   // Every counter uses date-scoped SQL cells, independently of city detail.
-  $: filtreCountsValue = loadError !== null
+  $: filtreCountsValue = loading || loadError !== null
     ? null
     : filtreCountsForPerimeter({
       entries: allEntries,
