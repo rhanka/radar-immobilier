@@ -36,7 +36,7 @@ function backup() {
       AND has_table_privilege(current_user, quote_ident(schemaname)||'.'||quote_ident(tablename),
       'INSERT,UPDATE,DELETE,TRUNCATE,TRIGGER')) FROM pg_roles WHERE rolname=current_user;`, { env: source });
   if (safe !== 't') fail('source_role_not_read_only');
-  if (!/^s3:\/\/sentropic-pgbackup\/immo\/v1220\/[a-zA-Z0-9_-]+$/.test(env.BACKUP_URI || '')
+  if (env.BACKUP_URI !== 's3://radar-immobilier-backup/v1220-cutover'
     || env.BACKUP_ENDPOINT !== 'https://s3.bhs.io.cloud.ovh.net') fail('backup_location_required');
   const file = archive();
   const record = path.join(r.output(), 'backup.json');

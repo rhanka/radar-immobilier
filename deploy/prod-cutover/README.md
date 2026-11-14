@@ -109,7 +109,7 @@ window-deploy pose les références obligatoires de prod-bindings. CURSOR_REFERE
 L’ingress statique préparé doit exister avant capture. Le rollback rétablit ConfigMaps et env inventoriés.
 
 Pour `backup`, SOURCE_PGHOST/PORT désignent le même serveur que PGHOST/PORT. SOURCE_PGDATABASE=radar et SOURCE_PGUSER=radar_db_ro_prod. SOURCE_PGPASSFILE est fourni par l’opérateur. Le mot de passe destination ne peut pas être repris côté source.
-BACKUP_ENDPOINT=https://s3.bhs.io.cloud.ovh.net et BACKUP_URI=s3://sentropic-pgbackup/immo/v1220/<identifiant>. L’empreinte forme la clé de l’objet. Identité S3 injectée hors Git. Droits bucket pour immo, pas de purge ni de changement IAM dans cette lane.
+BACKUP_ENDPOINT=https://s3.bhs.io.cloud.ovh.net et BACKUP_URI=s3://radar-immobilier-backup/v1220-cutover. L’empreinte forme la clé de l’objet. Identité S3 injectée hors Git. Droits bucket pour immo, pas de purge ni de changement IAM dans cette lane. WRITER autorise put/get/list ; delete reste interdit, conformément au contrat des sauvegardes quotidiennes.
 Au moins quatre fois la taille DB libre est exigée côté dump et côté volume prod au précontrôle. Mesurer séparément la réserve de la copie, les index et le WAL ; ce seuil ne garantit pas le dimensionnement.
 Le dump conserve propriétaires et ACL, pas les rôles globaux. Inventorier ces rôles avant GO.
 La copie restaure ces mêmes droits. Le rollback conserve les propriétaires et rejoue les ACL au schéma 13.
