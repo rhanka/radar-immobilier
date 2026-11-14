@@ -10,6 +10,8 @@ describe("geo proxy configuration", () => {
       expect(location).toContain("proxy_pass_header Vary;");
       expect(location).toContain("gunzip off;");
       expect(location).toContain("gzip off;");
+      expect(location).toContain("proxy_set_header X-Forwarded-Proto $geo_forwarded_proto;");
+      expect(config).toContain("map $http_x_forwarded_proto $geo_forwarded_proto");
       expect(location).not.toContain("proxy_hide_header");
     });
   }

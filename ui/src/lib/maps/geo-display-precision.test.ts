@@ -41,4 +41,15 @@ describe("display precision boundary", () => {
     expect(exact.geometry).toEqual(feature.geometry);
     expect(estimatedFacadeM(exact)).not.toBeNull();
   });
+  it("should retain the upstream identity needed by exact details", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ type: "FeatureCollection", features: [{ ...feature, properties: { ...feature.properties, geoId: "ca/qc/lot/123" } }] }))));
+    const lots = await fetchAllLots("rawdon", { displayOnly: true });
+    expect(lots.featureCollection.features[0]?.id).toBe("ca/qc/lot/123");
+  });
+  it("should reject missing or mismatched exact details without returning display geometry", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 404 })));
+    await expect(fetchExactLot("rawdon", "123", "ca/qc/lot/123")).rejects.toThrow("HTTP 404");
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ ...feature, properties: { noLot: "other" } }))));
+    await expect(fetchExactLot("rawdon", "123", "ca/qc/lot/123")).rejects.toThrow("Unexpected exact lot response");
+  });
 });
