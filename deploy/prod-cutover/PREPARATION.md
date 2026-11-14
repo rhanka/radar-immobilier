@@ -38,7 +38,8 @@ Les scopes MCP statiques, leur compatibilité legacy et offline_access reprennen
 Le receiver reprend search activé et strict non armé. Les URL et coordonnées deviennent prod.
 Le test de rendu contrôle ces portes et la conservation exacte des octets du plan.
 
-Avant application, k8s doit confirmer bucket, DNS/TLS pages, reader et secrets S3/statique.
+Bucket et DNS wildcard sont fournis par k8s. immo provisionne Certificate, Ingress, Secrets et rôles MCP.
+k8s confirme le CORS administrateur avant ouverture. Voir le runbook actualisé.
 `prod-bindings.cjs` reprend les références utiles de préprod avec des noms prod.
 `window-deploy` les pose après drain. Les Secrets sont obligatoires.
 La clé curseur prod doit égaler `CURSOR_REFERENCE`, le fichier privé conservé en préparation.
