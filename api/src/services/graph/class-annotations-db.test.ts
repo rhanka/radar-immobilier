@@ -69,7 +69,17 @@ describeDb("single-pass class annotations PostgreSQL", () => {
     expect(await writeClassAnnotation(f.db, input)).toBe("manual");
     const rows = await f.db.execute(sql`SELECT * FROM signal_class_annotations`);
     expect(rows.rows).toEqual([]);
-    expect((await readClassAnnotations(f.db, input.citySlug)).get("Signal:test-ai")?.source).toBe("manual");
+    expect((await readClassAnnotations(f.db, input.citySlug)).has("Signal:test-ai")).toBe(false);
+  });
+
+  it("should expose a real manual annotation stored without facet history", async () => {
+    const f = await fixture();
+    await f.db.execute(sql`INSERT INTO signal_class_annotations
+      (city_slug, node_type, node_id, classe, reason, source)
+      VALUES (${input.citySlug}, ${input.nodeType}, ${input.nodeId}, 'pertinent', 'Stored human annotation', 'manual')`);
+    expect((await readClassAnnotations(f.db, input.citySlug)).get("Signal:test-ai")).toMatchObject({
+      source: "manual", classe: "pertinent", reason: "Stored human annotation", model: null,
+    });
   });
 
   it("should let later human history replace the displayed AI provenance", async () => {

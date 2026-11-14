@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { Hono } from "hono";
 import { eq, sql } from "drizzle-orm";
-import { afterAll, expect, it } from "vitest";
+import { afterAll, expect, it, vi } from "vitest";
 import { createDb } from "../../src/db/client.js";
 import { loadConfig } from "../../src/config.js";
 import { facetEvents, graphSourceRevisions, workspaceProjectionRevisions } from "../../src/db/schema.js";
@@ -16,6 +16,35 @@ import { facetAuth, facetCookie } from "./facets-http-fixture.js";
 
 const { db, pool } = createDb(loadConfig());
 afterAll(() => pool.end());
+it.each(["discard", "select"] as const)("should preserve main API bytes for Alice and Bob after manual %s with flag zero", async (action) => {
+  vi.stubEnv("REFRESH_SINGLE_PASS", "0");
+  try {
+    const alice = await facetFixture(db);
+    const bob = await facetFixture(db);
+    const app = new Hono();
+    app.use("*", protect(facetAuth, { db }));
+    app.route("/", graphSignalsRoute({ db, store: {} as ObjectStore, auth: facetAuth, discarded: createDiscardedSignalsReader(db) }));
+    const cookies = await Promise.all([facetCookie(alice.sub), facetCookie(bob.sub)]);
+    const get = async (cookie: string) => {
+      const query = cookie === cookies[0] ? "?showDiscarded=1" : "";
+      const response = await app.request(`/api/graph-signals/${alice.target.citySlug}${query}`, { headers: { cookie } });
+      expect(response.status).toBe(200);
+      return response.text();
+    };
+    // Main returns this same unannotated payload before and after personal actions.
+    const baseline = await get(cookies[0]!);
+    expect(baseline).not.toContain('"classAnnotation"');
+    expect(await get(cookies[1]!)).toBe(baseline);
+    await writeFacet(db, alice.sub, { action, target: alice.target,
+      ...(action === "select" ? { basket: "pertinent" as const } : { reasonCode: "V2-PRECEDENT" }),
+      expectedHeadId: null, commandKey: randomUUID() });
+    for (const cookie of cookies) expect(await get(cookie)).toBe(baseline);
+    const annotations = await db.execute(sql`SELECT node_id FROM signal_class_annotations WHERE city_slug = ${alice.target.citySlug}`);
+    expect(annotations.rows).toEqual([]);
+  } finally {
+    vi.unstubAllEnvs();
+  }
+});
 it("should retain personal archive identity through real graph refreshes", async () => {
   const alice = await facetFixture(db);
   const bob = await facetFixture(db);
@@ -52,23 +81,16 @@ it("should retain personal archive identity through real graph refreshes", async
   expect(await get(`${target.citySlug}?showDiscarded=1`)).toEqual(baseline);
   expect(await cityCounts("?showDiscarded=1")).toEqual(counts);
   await writeFacet(db, alice.sub, { action: "discard", target, reasonCode: "V2-PRECEDENT", expectedHeadId: null, commandKey: randomUUID() });
-  // Human history adds a shared, redacted provenance marker, even with no AI writes.
-  const manuallyAnnotated = { ...baseline, nodes: baseline.nodes.map((node: { id: string }) =>
-    node.id === target.id ? { ...node, classAnnotation: {
-      citySlug: target.citySlug, nodeType: target.type, nodeId: target.id,
-      classe: "non_classe", source: "manual", reason: "", model: null, effort: null,
-      promptId: null, promptSha256: null, pipelineRunId: null, inputSha256: null,
-    } } : node) };
   const hidden = await get(target.citySlug);
   expect(hidden.nodes.map((node: { id: string }) => node.id)).toEqual([keep.id]);
   expect((await cityCounts()).signalCount).toBe(1);
-  expect(await get(`${target.citySlug}?showDiscarded=1`)).toEqual(manuallyAnnotated);
+  expect(await get(`${target.citySlug}?showDiscarded=1`)).toEqual(baseline);
   expect(await cityCounts("?showDiscarded=1")).toEqual(counts);
-  expect(await get(target.citySlug, bobCookie)).toEqual(manuallyAnnotated);
+  expect(await get(target.citySlug, bobCookie)).toEqual(baseline);
   expect(await cityCounts("", bobCookie)).toEqual(counts);
   await refresh([original, keep]);
   expect(await sourceRevisions()).toEqual(initialSourceRevisions);
-  expect(await get(`${target.citySlug}?showDiscarded=1`)).toEqual(manuallyAnnotated);
+  expect(await get(`${target.citySlug}?showDiscarded=1`)).toEqual(baseline);
   expect((await get(target.citySlug)).nodes.map((node: { id: string }) => node.id)).toEqual([keep.id]);
   expect((await readCityFacets(db, alice.sub, target.citySlug))[0]?.changedSinceArchive).toBe(false);
   await refresh([{ ...original, community: 7, community_name: "Synthetic community" }, keep]);
