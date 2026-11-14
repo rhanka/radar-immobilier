@@ -16,10 +16,75 @@ D2 : comptes, espaces, capacités, gestionnaires et modérateurs identiques à l
 D3 : statiques actifs. Live désactivé. API et MCP : contrôle general, git off,
 edge 0, qualification/invitations/redrive false. Le rendu est dans prod-settings.json.
 D4 : créneau au plus tôt après répétition réussie, revue et levée des prérequis.
+Décision owner vers 19 h le 13/11 : **« Tout ce soir, bascule décalée »**.
+Le périmètre reste complet. Les artefacts statiques sont actifs. Le live reste à 0.
 RPO accepté : perte des données de PV rafraîchies lors de la restauration. Le refresh les regénère.
 Aucune durée chiffrée de perte n’a été fixée par l’owner. Ne pas en inventer.
 L’archive préliminaire RO, le roster et le plan sont prêts. La répétition reste à lancer par i-cond.
 Voir [les preuves et la commande exacte](../../deploy/prod-cutover/PREPARATION.md).
+
+## Prérequis artefacts prod avant la fermeture
+
+Les noms de clés ci-dessous ont été lus en préprod le 13/11. Aucune valeur affichée.
+Le Secret account-reader y est utilisé. Il est donc aussi requis en prod.
+Les références API/MCP sont obligatoires dans `prod-bindings.cjs`.
+Le précheck refuse un Secret absent, une clé vide ou le TLS absent. Aucun GO implicite.
+Le contrôle RO du 13/11 refuse déjà `radar-artifacts-prod`, absent.
+
+| Prérequis | Objet prod et clés | Responsable |
+| --- | --- | --- |
+| S3 statique | `radar-artifacts-prod` : `ARTIFACTS_S3_ACCESS_KEY`, `ARTIFACTS_S3_SECRET_KEY` | k8s gouverne le mint et la rotation. Bucket dédié et droits bornés. |
+| Page d’upload | `radar-artifacts-upload-page-prod` : `secret` | immo génère 32 octets aléatoires, encodés en 64 caractères hexadécimaux. |
+| Reader | `radar-artifacts-reader-prod` : `ARTIFACTS_READER_GRANT_SECRET`, `ARTIFACTS_READER_SESSION_SECRET` | immo génère chaque clé sur 32 octets. Même Secret pour toutes les instances API. |
+| Writer MCP | `immo-mcp-artifact-writer` : `IMMO_MCP_ARTIFACT_DATABASE_URL` | k8s fournit l’URL privée. La cible de rôles crée `immo_mcp_artifact_writer`, absent aujourd’hui. |
+| Account reader MCP | `immo-mcp-account-reader` : `IMMO_MCP_ACCOUNT_DATABASE_URL` | k8s fournit l’URL privée. La cible de rôles crée `immo_mcp_account_reader`. |
+| Contenu HTTPS | `radar-artifact-content-prod-tls` : `tls.crt`, `tls.key` ; Ingress `radar-artifact-content` | k8s fournit DNS wildcard, certificat et Ingress avant capture de la fenêtre. |
+
+Configuration S3 : bucket `radar-immobilier-artifacts`, endpoint `https://s3.bhs.io.cloud.ovh.net`, région `bhs`.
+k8s confirme ces trois valeurs avant le rendu. Elles restent dans les ConfigMaps, sans identifiants.
+Variable de rendu : `ARTIFACTS_CONTENT_HOST=pages.immo.sent-tech.ca`, sans schéma ni wildcard.
+`render` produit les ConfigMaps. `content-ingress` produit l’Ingress, avec le même hôte wildcard et TLS.
+Chaque cible exige un `CONFIGURATION` absolu neuf. Aucun apply dans cette lane.
+
+Provisionnement **futur**, par l’acteur indiqué, après autorisation séparée :
+
+```sh
+rtk make -f deploy/prod-cutover/artifacts.mk s3-secret PROVISION_OWNER=k8s ARTIFACTS_S3_ENV_FILE=<dotenv-S3-prive> ENV=provision-prod
+rtk make -f deploy/prod-cutover/artifacts.mk generated-secrets PROVISION_OWNER=k8s ENV=provision-prod
+```
+
+Le dotenv dédié ne contient que les deux clés S3. k8s le fournit à la cible. Aucun agent ne le lit.
+La cible ne le source jamais. `kubectl create --from-env-file` ne l’affiche pas.
+Ces cibles conservent les Secrets existants. Elles ne renouvellent pas les clés à chaque appel.
+Les fichiers aléatoires temporaires sont privés puis supprimés. Aucune valeur aléatoire ne sort sur stdout.
+Ces cibles ne sont exécutées ni par la répétition ni par le précheck RO.
+
+Rotation S3 : k8s crée un nouvel identifiant limité au bucket. Il met à jour le Secret sans afficher ses valeurs.
+Il redémarre API/MCP sous contrôle du verrou, puis valide publication et lectures statiques.
+Il révoque ensuite l’ancien identifiant. En échec, il rétablit le Secret antérieur avant révocation.
+Tracer date, responsable et identifiant de version du Secret. Ne jamais tracer les clés.
+Rotation upload/reader : même coordination. La rotation reader invalide les grants et sessions existants.
+
+Le migrateur candidat réapplique les grants. Il **ne crée pas** les rôles absents.
+Après fermeture et preuve de terminaison, exécuter `artifact-roles RUN=<RUN> ENV=execution-prod`.
+La cible exige le GO exact et la propriété du verrou. Elle crée des LOGIN sans privilèges administratifs.
+Les mots de passe viennent des URLs privées des Secrets, sans argument SQL ni affichage.
+Les rôles existants sont conservés. Après les 44 migrations, `transition` réapplique les grants restreints.
+La lecture des noms/courriels reste désactivée en prod. Aucun rôle n’est créé dans cette lane.
+
+Rendu exigé sur API et MCP : `ARTIFACTS_CONTROL_MODE=general`, `IMMO_ARTIFACTS_GIT_MODE=off`,
+`IMMO_ARTIFACTS_LIVE_EDGE_ENABLED=0`, qualifications/invitations/redrive false.
+`IMMO_ARTIFACTS_BUILDER_URL` doit être absent, y compris des env directs et des ConfigMaps appliquées.
+Le test de rendu vérifie ces portes, le bucket, l’endpoint, la région et l’accord hôte/Ingress/TLS.
+
+Recette artefacts obligatoire avant GO de réouverture :
+
+1. Avec un compte autorisé, publier un petit HTML statique depuis la page d’upload ou MCP.
+2. Lire son URL HTTPS publique. Vérifier le contenu, le certificat et le type HTML, sans cookie de session immo.
+3. Lire le même artefact par MCP authentifié. Vérifier le même identifiant, la révision et le contenu.
+4. Vérifier refus hors espace et publication live indisponible. Relever SHA, URL, statut et durée, sans jeton.
+
+Ce smoke artefacts complète le smoke de santé. Son résultat doit être consigné séparément.
 
 ## Ordre de bascule
 
@@ -33,7 +98,7 @@ Voir [les preuves et la commande exacte](../../deploy/prod-cutover/PREPARATION.m
 | 6 | k8s | `window-configure RUN=<RUN> ENV=execution-prod`. Appliquer les ConfigMaps approuvées sous ce même verrou. `window-close RUN=<RUN> ENV=execution-prod`. Fermer les routes et arrêter les consommateurs. Neutraliser les contrôleurs non supportés avant la fenêtre. |
 | 7 | immo | Fournir EVIDENCE avec ce RUN et les UID terminés. `backup RUN=<RUN> ENV=execution-prod`. Sauvegarde finale après drain. SHA-256, S3 et lecture de retour. Restaurer cette archive sur une nouvelle copie. Conserver son reçu restore.json. |
 | 8 | owner | GO avant le premier commit DDL. APPROVAL lie destination, SHA candidat, drain, planSha256 et rosterSha256. Le reçu restore.json porte l’empreinte du backup final. |
-| 9 | immo | `migrate RUN=<RUN> ENV=execution-prod`, puis `transition RUN=<RUN> ENV=execution-prod`. Exiger 44 empreintes, open-success, scoped, zéro non résolu et barrière ouverte. Faire verify. |
+| 9 | immo | `artifact-roles RUN=<RUN> ENV=execution-prod`, puis `migrate RUN=<RUN> ENV=execution-prod` et `transition RUN=<RUN> ENV=execution-prod`. Exiger 44 empreintes, open-success, scoped, zéro non résolu et barrière ouverte. Faire verify. |
 | 10 | k8s | `window-deploy RUN=<RUN> ENV=execution-prod`. Réutiliser restart_services et private_smoke. Images API/UI/MCP et CronJobs par digest. Routes fermées, CronJobs suspendus et verrou conservé. |
 | 11 | immo, PO | Recette privée via accès opérateur isolé. API SHA complet, UI b7724bd, DB/S3 et MCP. Les services candidats peuvent écrire après GO 6H. Aucun ancien écrivain ne redémarre. |
 | 12 | owner, k8s | GO distinct : APPROVAL porte reopen=true et run=<RUN>. `window-reopen RUN=<RUN> ENV=execution-prod`. Restaurer routes et suspensions exactes. Smoke public. Libérer le verrou après contrôles. Observer le prochain refresh complet. |
