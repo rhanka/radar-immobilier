@@ -108,5 +108,8 @@ EXPLAIN execution took **19.559 ms**, with 621 shared-buffer hits and no reads.
 The application-cold budget of one second passed. These numbers do not establish
 a cold PostgreSQL disk-cache result or a production/browser rendering result.
 
-Typecheck, lint and 28 targeted UI tests passed. Final API and real-click
-qualification results and commands are recorded in the PR report.
+Typecheck and lint passed. The final isolated campaign passed 170 targeted
+API/PostgreSQL tests, including both production import paths and migration replay.
+The separate benchmark passed. All 28 targeted UI tests passed. Real-stack native
+click qualification passed in 3.2 seconds (one test, actions/waits bounded to 1.8
+seconds). Each isolated stack was removed with `down -v` after its campaign.
