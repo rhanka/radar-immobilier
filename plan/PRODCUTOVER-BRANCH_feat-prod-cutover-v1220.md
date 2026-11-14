@@ -31,6 +31,7 @@
 - [x] Tests dédiés ENV=test-prod-cutover. Ports réservés API 18821, UI 15321, Maildev 11121.
 
 ## Plan / Todo (lot-based)
+- [x] FINAL-EX2 : cinq workflows appelant le contrôleur passent au kubeconfig temporaire explicite exporté. Raccord bloquant pour conserver le CD différé avec la nouvelle garde. Aucune autre étape changée. Repli : retirer ensemble garde et raccord.
 - [x] Recette HTTPS privée : proxy nginx candidat sur 127.0.0.2:443, port-forwards supervisés et résolution locale. Publication, lecture HTML et MCP testées ; routes publiques inchangées. Aucun secret affiché.
 - [x] Relecture finale : abandon sans sauvegarde sur schéma 13 ; récupération du reçu après réouverture, accord owner sur la perte des écritures et reprise du même RUN. Gardes et scénarios contrôleur validés.
 - [x] FINAL-EX1 : verdict #1100, garde kubeconfig dans tools/make/cutover-{release,cluster,smoke}.sh et doubles associés. Refus avant kubectl si absent ou défaut. Repli : retirer ce correctif. Aucun accès prod exécuté.
