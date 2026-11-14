@@ -83,7 +83,7 @@ lint-image:
 	 timeout --kill-after=10s 600s docker build -f deploy/cutover/Dockerfile.test -t radar-cutover-test:local .; fi
 hook-controller-test:
 	@test "$(ENV)" = test-prod-cutover
-	@cd "$(ROOT)" && timeout --kill-after=5s 90s node --test deploy/prod-cutover/containers.integration.cjs
+	@cd "$(ROOT)" && timeout --kill-after=5s 90s node --test --test-concurrency=1 deploy/prod-cutover/containers.integration.cjs deploy/prod-cutover/private-https.integration.cjs
 lint: lint-image
 	@test "$(ENV)" = test-prod-cutover
 	@cd "$(ROOT)" && timeout --kill-after=10s 300s bash deploy/prod-cutover/lint.sh
