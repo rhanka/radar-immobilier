@@ -74,6 +74,13 @@ describe.skipIf(process.env.MCP_SIGNAL_DB_TEST !== "1")("MCP SDK to PostgreSQL",
       const state = await f.call("get_signal_classification", { signalRef: f.signalRef });
       expect(state.current).toMatchObject({ source: "mcp", model: "sdk-client-model", validation: "human", mcpClientId: "test-mcp-client" });
       expect(state.notes[0].text).toBe("Watch council");
+      expect(await f.call("confirm_classification", { signalRef: f.signalRef, verdict: "up", model: "sdk-client-model" }))
+        .toMatchObject({ validation: "human" });
+      expect(await f.call("confirm_classification", { signalRef: f.signalRef, verdict: "down", model: "sdk-client-model",
+        newClasse: "a_surveiller", reasonCode: "S-PLANIFIE", reason: "Wait for adoption" })).toMatchObject({ validation: "human" });
+      const corrected = await f.call("get_signal_classification", { signalRef: f.signalRef });
+      expect(corrected.current).toMatchObject({ classe: "a_surveiller", reasonCode: "S-PLANIFIE" });
+      expect(corrected.feedback.map((row: { verdict: string }) => row.verdict)).toEqual(["down", "up"]);
       expect((await f.pool.query("SELECT result FROM signal_mcp_audit")).rows.map((row) => row.result))
         .toEqual(expect.arrayContaining(["written", "classification_priority_conflict", "reclassification_required"]));
     } finally { await f.transport.terminateSession(); await f.client.close(); }
