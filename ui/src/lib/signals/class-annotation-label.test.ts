@@ -9,6 +9,13 @@ const node: GraphSignalNode = { id: "one", type: "Signal", citySlug: "city", lab
     promptSha256: "a".repeat(64), pipelineRunId: "run" } };
 
 describe("class annotation provenance", () => {
+  it("should show ambiguity only for the effective AI annotation", () => {
+    const ambiguous = { ...node, classAnnotation: { ...node.classAnnotation!, ambiguous: true } };
+    expect(classAnnotationLabel(ambiguous)).toBe("IA · ambigu · gpt-6-astra medium · prompt v1");
+    expect(classAnnotationLabel(ambiguous, true)).toBe("Manuel");
+    expect(classAnnotationLabel({ ...node, classAnnotation: { ...node.classAnnotation!, ambiguous: false } })).not.toContain("ambigu");
+    expect(withAiClassement(new Map(), [{ ...node, classAnnotation: undefined }]).size).toBe(0);
+  });
   it("should identify the exact AI and prompt while prioritizing manual changes", () => {
     expect(classAnnotationLabel(node)).toBe("IA · gpt-6-astra medium · prompt v1");
     expect(classAnnotationLabel(node, true)).toBe("Manuel");
