@@ -33,6 +33,7 @@
 - [x] Lot 0: read rules, server, annotations, feedback, facets and existing prospect notes.
 - [ ] Lot 1: additive scoped journal, notes, audit, grants and concurrency guards.
   - [x] Scoped append-only tables and transactional write/read functions drafted.
+  - [x] Parent rebased after #1104 reserved 0047; MCP journal index 47 and migration 0048.
 - [ ] Lot 2: write scope, schemas, session-bound elicitation and tools.
   - [x] Five contracts registered; verified client identity and current-session elicitation wired.
 - [ ] Lot 3: scoped read projection, UI provenance badges and note addition.
