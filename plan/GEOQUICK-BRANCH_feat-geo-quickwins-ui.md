@@ -58,4 +58,4 @@ Reduce map transfers while preserving exact geometry for details and calculation
   - [x] Preprod measured from this host: Rawdon 1,843,278 bytes / 0.669 s; Saint-Eustache 3,182,380 bytes / 1.351 s. ETag revalidation: HTTP 304, zero bytes, 0.122 s / 0.104 s respectively.
   - [x] Initial browser failure came from applying M1 assertions to CPTAQ requests; the trace identified the unrelated constraints collection. The simulator now scopes M1 assertions to lots/zoning.
   - [x] Unit stack and both browser campaigns removed with volumes (`down -v`).
-- [ ] Lot 7: push M1 commits and update PR #1109; no merge.
+- [x] Lot 7: push M1 commits and update PR #1109; no merge.
