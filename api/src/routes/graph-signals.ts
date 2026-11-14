@@ -474,6 +474,12 @@ async function enrichDocRefs(
  * dégradées). Fonction pure et synchrone : aucun accès store, donc ne jette
  * pas — elle sert aussi au repli par-nœud.
  */
+export function graphSignalRankFreshness(node: StoredSignalNodeInput): string | null {
+  const refs = extractDocRefs((node.props ?? {}) as Record<string, unknown>, node.sourceRef);
+  return refs.find((ref) => ref.publishedAt !== undefined)?.publishedAt
+    ?? node.createdAt?.toISOString() ?? null;
+}
+
 function buildSignalCard(
   node: StoredSignalNodeInput,
   docRefs: GraphSignalDocRef[],

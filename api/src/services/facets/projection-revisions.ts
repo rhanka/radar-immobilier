@@ -75,7 +75,7 @@ export async function bumpGraphSourceRevision(
   tx: RevisionTx, citySlug: string,
 ): Promise<GraphSourceBump> {
   const rows = await tx.select({ id: graphNodes.id, type: graphNodes.type, label: graphNodes.label,
-    sourceRef: graphNodes.sourceRef, props: graphNodes.props })
+    sourceRef: graphNodes.sourceRef, props: graphNodes.props, createdAt: graphNodes.createdAt })
     .from(graphNodes).where(eq(graphNodes.citySlug, citySlug));
   const signals = rows.filter((row) => row.type === "Signal" || row.type === "DesignationEvent");
   await refreshSignalMetadata(tx, citySlug, signals);
