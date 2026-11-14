@@ -21,7 +21,7 @@ Les sources SQL et le journal doivent correspondre aux objets Git du SHA candida
 | `rollback` | Reset schémas + restauration atomique complète ; ACL originales séparées. | 1 800 s + ACL 60 s |
 | `k8s-plan`, `cd-plan` | Affichent les actes futurs. Aucune exécution cluster/tag/workflow. | 150 s |
 | `test`, `integration`, `down` | Gardes puis DDL natif synthétique ; nettoyage `down -v`. | 90 / 300 s |
-| `lint` | ESLint et test du contrôleur dans le runtime Node, puis `down -v`. | 180 s |
+| `lint` | ESLint, contrôleur et IdP dans le runtime Node, puis `down -v`. | 300 s : installation ≤90 s, scénarios ≤150 s, nettoyage ≤45 s |
 | `window-*` | Capture, fermeture, déploiement privé et réouverture séparée. Même verrou cutover. Exécution prod future uniquement. | 1 200 s par acte |
 
 Chaque cible d’exécution a un plafond externe de 3 600 secondes. Arrêt puis vérification du journal si issue indéterminée.
@@ -32,6 +32,8 @@ Les erreurs n’affichent ni SQL, ni ligne métier, ni secret. Les entrées JSON
 ## Répétition sur copie : état après décisions owner
 
 La répétition prod **n’a pas eu lieu**. Le dump préliminaire RO autorisé est prêt.
+Commande complète : `rtk make -f deploy/prod-cutover/preparation.mk copy-rehearse OWNER=i-cond ENV=rehearsal`.
+Elle laisse la copie ouverte à la recette locale. Suivre ensuite l’arrêt, les deux rollbacks et down -v du dossier.
 Voir le [dossier de préparation](PREPARATION.md), les empreintes et les commandes exactes.
 Le rôle `radar_db_ro_prod` a servi au dump via port-forward. Aucune écriture prod.
 Les clients PostgreSQL 16 sont préparés dans des wrappers Docker privés.
@@ -87,6 +89,11 @@ CONFIGURATION est un JSON ConfigMap radar-cutover-6h, ou une List incluant radar
 La cible render produit cette List depuis PLAN et prod-settings.json. Elle n’applique rien.
 Le namespace est radar-immobilier. Le texte de plan.json doit avoir exactement l’empreinte du PLAN approuvé.
 window-configure reprend le même verrou avant application. Les rôles et références Secret sont des prérequis provisionnés séparément.
+window-start exige aussi PREVIOUS_RELEASE indépendant, au SHA complet et aux digests attendus.
+Les sondes historiques peuvent servir le complet ou le préfixe exact de sept caractères. Le candidat reste strict.
+Le verrou doit être pris. Aucun stamp preparing, run tag CD actif ou Job CD non terminé n’est admis.
+window-deploy pose les références obligatoires de prod-bindings. CURSOR_REFERENCE assure la continuité de clé.
+L’ingress statique préparé doit exister avant capture. Le rollback rétablit ConfigMaps et env inventoriés.
 
 Pour `backup`, SOURCE_PGHOST/PORT désignent le même serveur que PGHOST/PORT. SOURCE_PGDATABASE=radar et SOURCE_PGUSER=radar_db_ro_prod. SOURCE_PGPASSFILE est fourni par l’opérateur. Le mot de passe destination ne peut pas être repris côté source.
 BACKUP_ENDPOINT=https://s3.bhs.io.cloud.ovh.net et BACKUP_URI=s3://sentropic-pgbackup/immo/v1220/<identifiant>. L’empreinte forme la clé de l’objet. Identité S3 injectée hors Git. Droits bucket pour immo, pas de purge ni de changement IAM dans cette lane.

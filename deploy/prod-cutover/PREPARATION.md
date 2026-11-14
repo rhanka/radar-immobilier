@@ -37,7 +37,11 @@ Le receiver reprend search activé et strict non armé. Les URL et coordonnées 
 Le test de rendu contrôle ces portes et la conservation exacte des octets du plan.
 
 Avant application, k8s doit confirmer bucket, DNS/TLS pages, reader et secrets S3/statique.
-Reprendre les références de `patch-artifacts-api-env.yaml` et `patch-artifacts-mcp-env.yaml` de préprod.
+`prod-bindings.cjs` reprend les références utiles de préprod avec des noms prod.
+`window-deploy` les pose après drain. Les Secrets sont obligatoires.
+La clé curseur prod doit égaler `CURSOR_REFERENCE`, le fichier privé conservé en préparation.
+Le snapshot garde les ConfigMaps et les env. Le rollback les restaure avant les anciennes images.
+`prod-content-ingress.json` prépare le reader monté sur radar-api. Le wildcard doit exister avant window-start.
 Employer des Secrets prod. Ne pas reprendre les clés live, ni les endpoints préprod.
 Fournir account-reader, artifact-writer et workload MCP avec leurs grants restreints.
 L’IdP prod doit connaître les scopes artefacts et autoriser refresh_token/offline_access avant leur annonce.
@@ -51,33 +55,45 @@ La cible copy-up initialise radar et quatre rôles NOLOGIN. Elle ne restaure auc
 Le port réservé est 25433. Le réseau Compose est interne. Aucun port UAT utilisé.
 Les images API/UI viennent du manifeste du run 43506353942. Aucun rebuild.
 
-Avant lancement, i-cond doit fournir `approval.json` privé : owner, sha complet, expiresAt,
-planSha256 et rosterSha256 exacts. Le choix D2 est acquis. Le véhicule exige encore cette attestation.
-Il doit fournir `evidence.json` privé avec un UUID run, release complet, instances réellement terminées
-et completedAt de moins de 24 h. Preuve locale uniquement. Aucun drain prod inventé.
-Chaque étape utilise le même OUTPUT privé et la même copie physique.
+`copy-prepare OWNER=i-cond` atteste les empreintes exactes du plan et du roster.
+Il contrôle aussi l’archive. L’approbation expire après 24 h. Elle interdit explicitement la prod.
+Les identifiants de recette, le certificat local et les clés IdP sont distincts. Rien n’est affiché.
+Chaque nouvelle préparation alloue un OUTPUT privé. `active-copy.json` en garde le chemin.
+Toutes les étapes suivantes reprennent cet OUTPUT et la même copie physique.
+`copy-up` termine une vraie sonde PostgreSQL locale. `copy-evidence` observe son conteneur terminé.
+Le reçu porte UUID, release, IDs, heures de fin et identité du conteneur DB.
+Chaque opération sur la copie revérifie l’état Docker. Un consommateur ou hook actif fait refuser.
+Ces preuves ne décrivent aucun drain prod.
 
 ```sh
-rtk make -f deploy/prod-cutover/preparation.mk copy-up ENV=rehearsal
-rtk make -f deploy/prod-cutover/preparation.mk copy-step STEP=restore-test ENV=rehearsal
-rtk make -f deploy/prod-cutover/preparation.mk copy-step STEP=migrate ENV=rehearsal
-rtk make -f deploy/prod-cutover/preparation.mk copy-step STEP=transition ENV=rehearsal
-rtk make -f deploy/prod-cutover/preparation.mk copy-step STEP=verify ENV=rehearsal
+rtk make -f deploy/prod-cutover/preparation.mk copy-rehearse OWNER=i-cond ENV=rehearsal
 ```
 
-Ne pas lancer la cible automatique rehearsal pour remplacer la recette.
-Préparer ensuite UI/API/MCP et stockage objet locaux sur cette copie.
-Refresh et accès aux services prod désactivés. Les secrets de recette sont distincts.
-Faire smoke avec SMOKE_URL local explicite et un compte autorisé du roster.
-Le compte doit pouvoir s’authentifier dans l’IdP de recette. Son sujet doit correspondre au roster.
-Il faut le gestionnaire pour la gestion des membres et le modérateur pour les archives.
-Prévoir un compte PO pour le reclassement, des PV et un client MCP OAuth avec les scopes requis.
-Aucun compte de recette créé en prod. L’authentification locale et les services restent à câbler.
+Cette commande restaure, migre, rejoue 6H deux fois et vérifie les 44 empreintes.
+Elle démarre ensuite API/UI/MCP, IdP et S3 locaux. Elle lance le smoke dans le réseau interne.
+Elle laisse la copie disponible pour la recette humaine. Un échec nettoie la stack avec down -v.
+Ports loopback requis : 25433, 18821, 15321, 15400 et 443. Aucun port UAT.
+Réseau interne. Aucun refresh planifié. Aucun endpoint prod dans la configuration de recette.
+Le backend S3 est adobe/s3mock 3.12.0 épinglé par digest. Le proxy local fournit TLS.
 
-Après recette, arrêter ces services. Renouveler EVIDENCE avec leurs terminaisons constatées.
-Garder le même UUID run. Puis :
+Ouvrir `https://recette.localhost:15321`. Faire confiance au certificat privé `ca.crt` sur le poste de recette.
+L’IdP propose uniquement les comptes du roster. Le mot de passe local est dans `auth.json`, champ login.
+Ne pas publier ce fichier. Choisir le gestionnaire pour les membres et le modérateur pour les archives.
+Prévoir un compte Product Owner déjà autorisé pour le reclassement.
+Client MCP public : `immo-mcp-rehearsal`. PKCE S256. Callback loopback HTTP explicite.
+Issuer : `https://recette.localhost:15321/oidc`. Resource : `https://recette.localhost:15321/mcp`.
+Les scopes artefacts et offline_access sont disponibles. Refresh rotatif et échange MCP locaux.
+
+Pour les PV, fournir les fichiers autorisés dans le sous-répertoire privé `documents`.
+Le manifeste privé `documents.json` liste bucket, key, file et sha256 pour chaque fichier.
+L’import refuse les octets divergents. Il ne télécharge rien en prod.
+Sans ces fichiers, la recette des PDF reste à faire. Ne pas présenter des buckets vides comme des PV validés.
+
+Après recette, arrêter les services. Le reçu est renouvelé avec leurs terminaisons constatées.
+Le même UUID run est conservé. Puis :
 
 ```sh
+rtk make -f deploy/prod-cutover/preparation.mk copy-services-stop ENV=rehearsal
 rtk make -f deploy/prod-cutover/preparation.mk copy-step STEP=rollback ENV=rehearsal
 rtk make -f deploy/prod-cutover/preparation.mk copy-step STEP=rollback ENV=rehearsal
 rtk make -f deploy/prod-cutover/preparation.mk copy-down ENV=rehearsal
