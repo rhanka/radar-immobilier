@@ -36,6 +36,8 @@ export type AiClassAnnotation = ClassAnnotation & {
 /** Human history, including deselections and restored archives, remains authoritative. */
 export async function writeClassAnnotation(db: Database, input: AiClassAnnotation): Promise<"written" | "manual" | "noop"> {
   return db.transaction(async (tx) => {
+    await tx.execute(sql`SET LOCAL statement_timeout = '5s'`);
+    await tx.execute(sql`SET LOCAL lock_timeout = '1s'`);
     // Existing human writers acquire ROW EXCLUSIVE on insertion. SHARE prevents
     // a human insert between the history check and this AI commit.
     await tx.execute(sql`LOCK TABLE facet_events IN SHARE MODE`);

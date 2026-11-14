@@ -23,7 +23,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-vi.mock("../services/graph/class-annotations.js", () => ({ readClassAnnotations: vi.fn(async () => new Map()) }));
+vi.mock("../services/graph/class-annotations.js", () => ({ readVisibleClassAnnotations: vi.fn(async () => new Map()) }));
 
 // Mock the graph-store module so the test does not touch Postgres. Everything
 // else (classification, projection, serialization) runs for real.
