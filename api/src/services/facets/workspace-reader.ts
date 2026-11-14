@@ -25,6 +25,13 @@ import { facetEventResponse } from "./response.js";
 import { ScopeError } from "./scope.js";
 import { requireScopedEpochFor } from "./activation.js";
 import { workspaceStreamHead } from "./workspace-streams.js";
+import { readSignalMcp, readSignalMcpCity, type SignalMcpEntry } from "../graph/signal-mcp.js";
+
+function mcpArchiveHead(entry: SignalMcpEntry | null, target: SignalTarget): WorkspaceArchiveHead | null {
+  if (!entry?.id || entry.scope !== "workspace" || entry.classe !== "ecarte") return null;
+  return { id: entry.id, target, facet: "archive", basket: null, state: "active", reasonCode: entry.reason_code ?? null,
+    verdict: "non_pertinent", createdAt: entry.created_at, targetAvailable: true, changedSinceArchive: null };
+}
 
 export interface WorkspaceArchiveHead {
   id: string;
@@ -84,7 +91,9 @@ export async function readWorkspaceArchiveState(
       workspaceStreamHead(tx, workspaceId, "workspace", null, target),
     ]);
     const personal = personalRow ? toWorkspaceArchiveHead(personalRow.event, personalRow.node) : null;
-    const workspace = workspaceRow ? toWorkspaceArchiveHead(workspaceRow.event, workspaceRow.node) : null;
+    const mcp = await readSignalMcp(tx, sub, { ...target, workspaceId, scope: "personal" });
+    const workspace = workspaceRow?.event.state === "active" ? toWorkspaceArchiveHead(workspaceRow.event, workspaceRow.node)
+      : mcpArchiveHead(mcp.current, target) ?? (workspaceRow ? toWorkspaceArchiveHead(workspaceRow.event, workspaceRow.node) : null);
     return {
       target,
       personal,
@@ -137,6 +146,18 @@ export async function readWorkspaceArchiveCity(
       }
       entry.effectiveDiscarded = isEffectivelyDiscarded(entry.personal, entry.workspace);
       byTarget.set(JSON.stringify([target.citySlug, target.type, target.id]), entry);
+    }
+    const mcp = await readSignalMcpCity(tx, sub, workspaceId, city);
+    for (const [key, state] of mcp) {
+      const [type, id] = JSON.parse(key) as [SignalTarget["type"], string];
+      const target = { citySlug: city, type, id };
+      const head = mcpArchiveHead(state.current, target);
+      if (!head) continue;
+      const targetKey = JSON.stringify([city, type, id]);
+      const entry = byTarget.get(targetKey) ?? { target, personal: null, workspace: null, effectiveDiscarded: false, capabilities };
+      if (entry.workspace?.state !== "active") entry.workspace = head;
+      entry.effectiveDiscarded = true;
+      byTarget.set(targetKey, entry);
     }
     return [...byTarget.values()].sort((left, right) =>
       left.target.type.localeCompare(right.target.type)
