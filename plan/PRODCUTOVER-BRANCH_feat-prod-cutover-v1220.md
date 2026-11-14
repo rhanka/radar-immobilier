@@ -32,6 +32,7 @@
 - [x] Tests dédiés ENV=test-prod-cutover. Ports réservés API 18821, UI 15321, Maildev 11121.
 
 ## Plan / Todo (lot-based)
+- [x] Execution evidence recorded in EXECUTION-20261113.md: final backup restored, 44 migrations and 6H verified; stopped on MCP rollout failure after DDL, same RUN retained and public routes closed.
 - [x] Support operator gh without --slurp using jq -s over paginated responses; retain failure propagation and later-page active-run refusal tests.
 - [x] Preserve SQL stdin in the supervised background Docker client; regression reproduces empty successful output before the fix and verifies exact input delivery.
 - [x] Runbook final : commandes d’abandon, récupération, HTTPS privé et diagnostic explicite. Gardes 28/28 ; contrôleurs 12/12 ; workflows 6/6 ; PostgreSQL 13 → 44 → 13 ; ESLint et syntaxe verts. Aucun tag, merge ou accès prod.
