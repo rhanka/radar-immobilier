@@ -26,8 +26,9 @@ function render(planText, contentHost = settings.shared.ARTIFACTS_CONTENT_BASE) 
 if (require.main === module) {
   const file = r.env.CONFIGURATION;
   if (!file || !r.path.isAbsolute(file) || r.fs.existsSync(file)) r.fail('new_absolute_configuration_required');
-  const manifest = process.argv[2] === 'content-ingress' ? contentIngress(r.env.ARTIFACTS_CONTENT_HOST)
-    : render(r.fs.readFileSync(r.safeFile(r.env.PLAN), 'utf8'), r.env.ARTIFACTS_CONTENT_HOST);
+  const host = r.env.ARTIFACTS_CONTENT_HOST || settings.shared.ARTIFACTS_CONTENT_BASE;
+  const manifest = process.argv[2] === 'content-ingress' ? contentIngress(host)
+    : render(r.fs.readFileSync(r.safeFile(r.env.PLAN), 'utf8'), host);
   r.fs.writeFileSync(file, JSON.stringify(manifest, null, 2) + '\n', { mode: 0o600, flag: 'wx' });
 }
 module.exports = { render, contentIngress };

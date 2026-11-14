@@ -60,8 +60,9 @@ async function main() {
     case 'evidence': result = require('./local-proof.cjs').observe(); break;
     case 'services-up': {
       const started = Date.now();
-      r.destination(); r.approvedPlan();
-      if (r.prefix(r.rows()) !== 44 || r.receipt('transition').status !== 'open-success') r.fail('transition_required');
+      const query = require('./local-query.cjs').read;
+      r.destination(query); r.approvedPlan();
+      if (r.prefix(r.rows(query)) !== 44 || r.receipt('transition').status !== 'open-success') r.fail('transition_required');
       const auth = r.json(file('auth.json'));
       r.fs.writeFileSync(file('services.json.partial'), JSON.stringify(config.compose(privateDir, auth), null, 2), { mode: 0o600 });
       r.fs.renameSync(file('services.json.partial'), file('services.json'));
@@ -82,6 +83,14 @@ async function main() {
     case 'services-stop': compose('stop', '--timeout', '30', 'ui', 'api', 'mcp', 'idp', 'minio');
       result = require('./local-proof.cjs').observe(); break;
     case 'config-check': compose('config', '--quiet'); break;
+    case 'read-check': {
+      const read = require('./local-query.cjs').read;
+      if (read("SELECT current_setting('transaction_read_only');") !== 'on') r.fail('copy_reader_not_read_only');
+      let refused = false;
+      try { read('UPDATE drizzle.__drizzle_migrations SET id=id WHERE false;'); } catch { refused = true; }
+      if (!refused) r.fail('copy_reader_write_allowed');
+      result = { ok: true, readOnly: true, emptyUpdateRefused: true }; break;
+    }
     case 'timings': {
       result = {};
       const times = r.path.join(r.output(), 'migration-times.jsonl');
@@ -100,18 +109,19 @@ async function main() {
       }
       break;
     }
-    case 'database-progress': {
-      result = JSON.parse(r.sql(`SELECT coalesce(json_agg(json_build_object(
-        'state',state,'waitType',wait_event_type,'wait',wait_event,
-        'seconds',extract(epoch FROM clock_timestamp()-query_start)::integer)), '[]'::json)
-        FROM pg_stat_activity WHERE datname=current_database() AND pid<>pg_backend_pid();`));
-      break;
-    }
     case 'export-timings': {
       result = { run: r.receipt('local-run').run, forward: r.receipt('forward-first'),
+        transitions: r.fs.readFileSync(r.path.join(r.output(), 'transition-times.jsonl'), 'utf8').trim().split('\n').slice(0, 2).map(JSON.parse),
         rollbacks: ['rollback-first', 'rollback-second'].map(name => {
           const receipt = r.receipt(name); return { ok: receipt.ok, durationMs: receipt.durationMs };
         }) };
+      result.candidate = {};
+      for (const name of ['migrations', 'transition', 'verify', 'services', 'smoke']) {
+        const receipt = r.receipt(name);
+        result.candidate[name] = { durationMs: receipt.durationMs, walBytes: receipt.walBytes,
+          applied: receipt.applied?.map(({ tag, durationMs }) => ({ tag, durationMs })) };
+      }
+      result.candidate.transitions = r.fs.readFileSync(r.path.join(r.output(), 'transition-times.jsonl'), 'utf8').trim().split('\n').slice(-2).map(JSON.parse);
       for (const name of r.fs.readdirSync(privateDir).filter(name => /^rehearsal-[a-f0-9-]{36}$/.test(name))) {
         if (!r.env.COMPARE_REHEARSAL_RUN) break;
         const run = r.path.join(privateDir, name, 'local-run.json');
@@ -123,18 +133,26 @@ async function main() {
       break;
     }
     case 'rollback-audit': {
-      r.destination();
-      if (r.prefix(r.rows()) !== 13) r.fail('rollback_schema_mismatch');
-      const toc = r.run('pg_restore', ['--list', r.env.ARCHIVE]);
+      const query = require('./local-query.cjs').read;
+      const receipt = r.receipt('rollback');
+      const physical = JSON.parse(query(`SELECT json_build_object('system',
+        (SELECT system_identifier::text FROM pg_control_system()),'oid',
+        (SELECT oid::text FROM pg_database WHERE datname=current_database()));`));
+      if (receipt.destination.system !== physical.system || receipt.destination.oid !== physical.oid
+        || receipt.destination.database !== 'radar_cutover_owner_20261113' || receipt.sha256 !== r.hash(r.safeFile(r.env.ARCHIVE)))
+        r.fail('rollback_receipt_required');
+      if (r.prefix(JSON.parse(query("SELECT json_agg(json_build_object('hash',hash,'created_at',created_at)) FROM drizzle.__drizzle_migrations;"))) !== 13)
+        r.fail('rollback_schema_mismatch');
+      const toc = r.run('bash', ['-c', 'exec docker exec -i radar-prod-copy-owner-postgres-1 pg_restore --list < "$ARCHIVE"']);
       const expected = toc.split('\n').map(line => line.match(/^\d+; \d+ \d+ TABLE (\S+) (\S+) (\S+)$/)).filter(Boolean);
-      const owners = JSON.parse(r.sql(`SELECT json_object_agg(n.nspname||'.'||c.relname,pg_get_userbyid(c.relowner))
+      const owners = JSON.parse(query(`SELECT json_object_agg(n.nspname||'.'||c.relname,pg_get_userbyid(c.relowner))
         FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE c.relkind IN ('r','p');`));
       if (!expected.length || expected.some(([, schema, name, owner]) => owners[`${schema}.${name}`] !== owner))
         r.fail('rollback_table_owner_mismatch');
-      if (r.sql("SELECT pg_get_userbyid(nspowner) FROM pg_namespace WHERE nspname='public';") !== 'pg_database_owner')
+      if (query("SELECT pg_get_userbyid(nspowner) FROM pg_namespace WHERE nspname='public';") !== 'pg_database_owner')
         r.fail('rollback_public_owner_mismatch');
-      const legacy = r.sql('BEGIN READ ONLY; SET LOCAL ROLE radar; SELECT count(*) FROM drizzle.__drizzle_migrations; COMMIT;');
-      const writer = r.sql("SELECT has_table_privilege('immo_mcp_artifact_writer','drizzle.__drizzle_migrations','SELECT');");
+      const legacy = query('BEGIN READ ONLY; SET LOCAL ROLE radar; SELECT count(*) FROM drizzle.__drizzle_migrations; COMMIT;');
+      const writer = query("SELECT has_table_privilege('immo_mcp_artifact_writer','drizzle.__drizzle_migrations','SELECT');");
       if (legacy !== '13' || writer !== 'f') r.fail('rollback_legacy_access_mismatch');
       result = { ok: true, migrations: 13, archiveTables: expected.length, archiveTableOwnersMatch: true,
         publicOwner: 'pg_database_owner', legacyRole: 'radar', legacyRead: true,
