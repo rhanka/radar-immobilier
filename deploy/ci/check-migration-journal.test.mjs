@@ -23,14 +23,14 @@ for (const number of [47, 48]) {
 }
 for (const when of [1793000000017, 1793000000018]) {
   test(`rejects a retrograde or equal timestamp ${when}`, () => {
-    const entries = structuredClone(complete.entries);
+    const entries = JSON.parse(JSON.stringify(complete.entries));
     entries.at(-1).when = when;
     assert.throws(() => validateJournal({ entries }), /Non-increasing/);
   });
 }
 test('rejects a newly introduced gap and duplicate journal index', () => {
   assert.throws(() => validateJournal({ entries: complete.entries.filter((entry) => entry.idx !== 44) }), /Missing or unordered/);
-  const entries = structuredClone(complete.entries);
+  const entries = JSON.parse(JSON.stringify(complete.entries));
   entries.at(-1).idx = 47;
   assert.throws(() => validateJournal({ entries }), /Missing or unordered/);
 });

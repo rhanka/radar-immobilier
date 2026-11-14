@@ -1,5 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
+import process from 'node:process';
+import console from 'node:console';
 
 export function validateJournal({ entries }) {
   let previous;
