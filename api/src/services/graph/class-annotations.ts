@@ -2,7 +2,6 @@ import { sql } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { workspaces } from "../../db/schema.js";
 import { bumpWorkspaceRevision } from "../facets/projection-revisions.js";
-import { refreshClassifyMode } from "./refresh-classify-config.js";
 
 /** AI classes are shared by every workspace; use the manual shared revision counter. */
 export async function bumpClassAnnotationRevision(
@@ -93,7 +92,7 @@ export async function readClassAnnotations(db: Database, citySlug: string): Prom
   return annotations;
 }
 
-/** Operational reads retain history; API overlays follow the explicit mode. */
+/** Stored annotations remain visible independently of refresh write settings. */
 export async function readVisibleClassAnnotations(db: Database, citySlug: string): Promise<Map<string, ClassAnnotation>> {
-  return refreshClassifyMode() === "off" ? new Map() : readClassAnnotations(db, citySlug);
+  return readClassAnnotations(db, citySlug);
 }
