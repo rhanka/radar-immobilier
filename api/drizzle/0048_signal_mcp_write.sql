@@ -99,7 +99,7 @@ BEGIN
     'createdAt',current_class->'created_at','updatedAt',coalesce(current_class->'updated_at',current_class->'created_at'),
     'validation',coalesce(current_class->>'validation',CASE WHEN current_class->>'source'='ai' THEN 'auto' ELSE 'human' END)); END IF;
   RETURN jsonb_build_object('version',version,'current',current_class,'ai',ai,
-    'ambiguous',coalesce(current_class->>'classe'='non_classe',true),'history',history,
+    'ambiguous',coalesce((current_class->>'ambiguous')::boolean,current_class->>'classe'='non_classe',true),'history',history,
     'mcpHistory',events,'feedback',feedback || ui_feedback,'notes',notes);
 END $$;
 --> statement-breakpoint
