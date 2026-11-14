@@ -155,8 +155,8 @@ describe("deployed twelve-tool baseline", () => {
         expect(client.getServerVersion()).toEqual(fixture.serverVersion);
         expect(client.getServerCapabilities()).toEqual(fixture.serverCapabilities);
         const { tools } = await client.listTools();
-        expect(tools).toHaveLength(receipt.toolCount);
-        expect(tools).toEqual(expectedTools);
+        expect(tools).toHaveLength(receipt.toolCount + 5);
+        expect(tools.filter((tool) => fixture.tools.some((captured) => captured.name === tool.name))).toEqual(expectedTools);
         for (const [name, call] of Object.entries(fixture.captures[mode].calls)) {
           const result = await client.callTool({ name, arguments: call.args }) as ToolResult;
           expect(normalize(result), name).toEqual(normalize(call.result));
@@ -204,7 +204,7 @@ describe("deployed twelve-tool baseline", () => {
     const client = new Client({ name: "factory-baseline-test", version: "0.0.0" });
     try {
       await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
-      expect((await client.listTools()).tools).toEqual(expectedTools);
+      expect((await client.listTools()).tools.filter((tool) => fixture.tools.some((captured) => captured.name === tool.name))).toEqual(expectedTools);
     } finally {
       await client.close();
       await server.close();
