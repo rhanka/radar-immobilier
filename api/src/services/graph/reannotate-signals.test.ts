@@ -22,14 +22,14 @@ function fixture(initial?: ReannotationIdentity) {
 }
 
 describe("30-day signal reannotation", () => {
-  it("should classify new, changed and pre-v2 inputs while skipping identical v2 input", async () => {
+  it("should classify new and changed inputs while skipping identical v1 and v2 input", async () => {
     const f = fixture();
     f.repository.list = async () => ["new", "changed", "v1", "unchanged"].map((id) => ({ ...signal, id }));
     f.repository.annotation = async (act) => act.id === "new" ? undefined : { source: "ai", promptId: act.id === "v1" ? "p0-v1" : "v2",
       inputSha256: act.id === "changed" ? "old" : reannotationInputSha256(act) };
     expect(await runReannotation({ ...f.options, changedInputOnly: true }))
-      .toMatchObject({ classified: 3, skippedUnchanged: 1 });
-    expect(f.classify).toHaveBeenCalledTimes(3);
+      .toMatchObject({ classified: 2, skippedUnchanged: 2 });
+    expect(f.classify).toHaveBeenCalledTimes(2);
     expect(f.classify).not.toHaveBeenCalledWith({ ...signal, id: "unchanged" }, expect.any(AbortSignal));
   });
 
