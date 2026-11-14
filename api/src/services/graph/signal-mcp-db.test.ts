@@ -86,6 +86,7 @@ describe.skipIf(process.env.MCP_SIGNAL_DB_TEST !== "1")("scoped MCP PostgreSQL",
       .toEqual({ error: "workspace_archive_only" });
     expect(await f.write(body, "human", "classify_signal", f.moderator.sub)).toHaveProperty("id");
     expect((await f.read()).current).toMatchObject({ classe: "ecarte", validation: "human" });
+    expect(await f.write(f.body, "human")).toEqual({ error: "workspace_archive_only" });
   });
   it("should audit both outcomes and enforce the per-user rate limit", async () => {
     const f = await fixture();

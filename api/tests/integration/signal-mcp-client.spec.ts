@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { generateKeyPair, SignJWT } from "jose";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
@@ -45,10 +45,14 @@ async function fixture(scopes = "immo:read immo:signals:write", accept = true) {
 describe.skipIf(process.env.MCP_SIGNAL_DB_TEST !== "1")("MCP SDK to PostgreSQL", () => {
   it("should deny absent write consent despite artifact write consent", async () => {
     const f = await fixture("immo:read immo:artifacts:write");
+    const logged = vi.spyOn(process.stderr, "write");
     try {
       expect(await f.call("classify_signal", f.input)).toMatchObject({ error: expect.stringContaining("scope_denied") });
       expect((await f.pool.query("SELECT * FROM signal_mcp_events")).rows).toHaveLength(0);
-    } finally { await f.transport.terminateSession(); await f.client.close(); }
+      const attempts = logged.mock.calls.map(([line]) => String(line)).filter((line) => line.includes('"kind":"immo-mcp.signal-write"')).map((line) => JSON.parse(line));
+      expect(attempts).toContainEqual(expect.objectContaining({ clientId: "test-mcp-client", model: "sdk-client-model",
+        inputHash: expect.stringMatching(/^[a-f0-9]{64}$/), result: "refused:scope" }));
+    } finally { logged.mockRestore(); await f.transport.terminateSession(); await f.client.close(); }
   });
   it("should persist real accepted elicitation and expose class reasons, provenance and notes", async () => {
     const f = await fixture();
