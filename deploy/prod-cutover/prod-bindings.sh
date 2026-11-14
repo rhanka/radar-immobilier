@@ -37,7 +37,8 @@ manual_bindings() {
     if [[ $mode == candidate ]]; then
       desired=$(jq --slurpfile b "$WORK/bindings.json" --arg n "$name" '.spec|
         .template.spec.containers|=map(if .name==$b[0][$n].container then
-          .env=((.env//[]|map(select(.name as $key|any($b[0][$n].env[];.name==$key)|not)))+$b[0][$n].env) else . end)' <<< "$current")
+          .env=((.env//[]|map(select(.name!="IMMO_ARTIFACTS_BUILDER_URL")|
+            select(.name as $key|any($b[0][$n].env[];.name==$key)|not)))+$b[0][$n].env) else . end)' <<< "$current")
     else
       desired=$(jq --slurpfile r "$WORK/record.json" --arg n "$name" '.spec|
         .template.spec.containers|=map(. as $c|($r[0].manualEnvironments[]|select(.name==$n)|
