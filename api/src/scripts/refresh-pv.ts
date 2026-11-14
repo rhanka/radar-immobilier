@@ -161,9 +161,10 @@ async function main(): Promise<void> {
     keyring: new EncryptedFileKeyring(required("SENTROPIC_LLM_MESH_KEYRING_DIR")),
     maximumAttempts,
   };
+  const controller = new AbortController();
   // ONE instance for the whole run: the quota circuit it carries is what spares
   // the cities that follow a primary call already known to be refused.
-  const documentModels = createRefreshModelPolicy({ primary, fallback, primaryQualityAttempts, timeoutMs,
+  const documentModels = createRefreshModelPolicy({ primary, fallback, primaryQualityAttempts, timeoutMs, signal: controller.signal,
     ...(city ? { citySlug: city } : {}),
     ...(verification ? { verification } : {}),
     forceFallback: process.env.REFRESH_FORCE_FALLBACK === "1",
@@ -225,7 +226,6 @@ async function main(): Promise<void> {
   // The Job is SIGTERMed before it is SIGKILLed, and the sweep's own deadline is
   // a second, independent guard. Without either, the `aborted` branch of the
   // sweep was dead code and the pod died in the middle of a document.
-  const controller = new AbortController();
   const runBudget = new RefreshRunBudget({ calls: sweepOptions.maxSubmissions || runOptions.budgetLimit,
     tokens: positive("REFRESH_RUN_MAX_TOKENS", 100_000_000, 1_000_000_000), durationMs: sweepOptions.deadlineMs });
   const classification = classifyMode === "two-step" ? {
