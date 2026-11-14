@@ -1,7 +1,8 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { loadOntologyProfile, registryRecordsToExtraction, type TextJsonGenerationInput } from "@sentropic/engram";
+import { loadOntologyProfile, registryRecordsToExtraction, type TextJsonGenerationInput,
+  type TextJsonGenerationClient } from "@sentropic/engram";
 import type { Database } from "../../db/client.js";
 import { FakeGraphStore } from "./canonical-graph-store.fixture.js";
 import { refreshClassifyConfig } from "./refresh-classify-config.js";
@@ -9,8 +10,11 @@ import { createRefreshModelPolicy, type RefreshModel } from "./refresh-model-pol
 import { runPvRefresh, type RunPvRefreshOptions } from "./refresh-run.js";
 import { loadSinglePassPrompt } from "./refresh-single-pass.js";
 import { REFRESH_VERIFICATION_PROMPT } from "./refresh-verification-prompt.js";
+import type { RefreshRunBudget } from "./refresh-run-budget.js";
 
-export async function twoStepFixture(db: Database, mode: "off" | "two-step", failClassification = false) {
+export async function twoStepFixture(db: Database, mode: "off" | "two-step", failClassification = false,
+  budget?: RefreshRunBudget) {
+  const bounded = (client: TextJsonGenerationClient, signal: AbortSignal) => budget ? budget.wrap(client, signal) : client;
   const oracle = JSON.parse(await readFile(new URL("../../../tests/fixtures/refresh-018/oracle.json", import.meta.url), "utf8"));
   const bytes = new TextEncoder().encode("synthetic exact PDF bytes");
   const sha = createHash("sha256").update(bytes).digest("hex");
@@ -35,25 +39,25 @@ export async function twoStepFixture(db: Database, mode: "off" | "two-step", fai
   const fallback: RefreshModel = { provider: "gemini", model: "gemini-3.8-flash", effort: "low" };
   const documentModels = createRefreshModelPolicy({ primary, fallback, verification: fallback,
     forceFallback: false, primaryQualityAttempts: 2, timeoutMs: 1000,
-    createClient: (model) => ({ mode: "mesh", provider: model.provider, model: model.model,
+    createClient: (model, signal) => bounded({ mode: "mesh", provider: model.provider, model: model.model,
       async generateJson(request) {
         detectionRequests.push({ model, prompt: request.prompt, schema: request.schema });
         const verify = request.prompt.startsWith(REFRESH_VERIFICATION_PROMPT);
         await request.validateResponse?.(JSON.stringify(verify ? { decisions: [] } : body));
         return { status: "completed", mode: "mesh", provider: model.provider, model: model.model, audit: {} };
-      } }),
+      } }, signal),
   });
   const config = refreshClassifyConfig({});
   const prompt = await loadSinglePassPrompt();
   const models = createRefreshModelPolicy({ ...config, primaryQualityAttempts: 1, forceFallback: false, timeoutMs: 1000,
-    createClient: (model) => ({ mode: "mesh", provider: model.provider, model: model.model,
+    createClient: (model, signal) => bounded({ mode: "mesh", provider: model.provider, model: model.model,
       async generateJson(request) {
         classificationRequests.push(request);
         if (failClassification) throw new Error("classification service unavailable");
         await request.validateResponse?.(JSON.stringify({ classe: "a_surveiller", reason: "Residential impact uncertain",
           reasonCode: "S-PORTEE-FLOUE", ambiguous: true }));
         return { status: "completed", mode: "mesh", provider: model.provider, model: model.model, audit: {} };
-      } }),
+      } }, signal),
   });
   const notes: Array<{ note: string; detail?: Record<string, unknown> }> = [];
   const options: RunPvRefreshOptions = {
@@ -67,7 +71,7 @@ export async function twoStepFixture(db: Database, mode: "off" | "two-step", fai
     extractPdf: async () => oracle.excerpt,
     acquire: async () => [{ city: "waterloo", sourceId: "proces-verbaux-waterloo", status: "new", casKeys: [key], count: 1 }],
     onNote: (note, detail) => { notes.push({ note, ...(detail ? { detail } : {}) }); },
-    ...(mode === "two-step" ? { classification: { ...config, prompt, models } } : {}),
+    ...(mode === "two-step" ? { classification: { ...config, prompt, models, ...(budget ? { budget } : {}) } } : {}),
   };
   return { run: () => runPvRefresh(options), store, options, detectionRequests, classificationRequests, notes, prompt };
 }
