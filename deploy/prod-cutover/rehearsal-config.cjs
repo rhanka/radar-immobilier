@@ -50,14 +50,15 @@ function compose(privateDir, auth) {
     healthcheck: health(8848, '/mcp/.well-known/oauth-protected-resource') },
     idp: { ...app(['node', '/run-idp.cjs'], {}), healthcheck: health(8080, '/.well-known/openid-configuration'), volumes: [mount('auth.json'), mount('roster.json'),
       mount('idp.key'), mount('idp.pub'), `${r.ROOT}/deploy/prod-cutover/rehearsal-idp.cjs:/run-idp.cjs:ro`] },
-    ui: { image: release.uiImage, pull_policy: 'never', networks: { 'copy-only': { aliases: ['recette.localhost', 'minio.localhost'] } },
+    ui: { image: release.uiImage, pull_policy: 'never', networks: {
+      'copy-only': { aliases: ['recette.localhost', 'minio.localhost'] }, 'copy-entry': {} },
       ports: ['127.0.0.1:15321:15321', '127.0.0.1:15400:15400', '127.0.0.1:443:443'],
       volumes: [`${privateDir}/nginx.conf:/etc/nginx/conf.d/default.conf:ro`, mount('ca.crt'), mount('tls.key')] },
     minio: { image: 'adobe/s3mock@sha256:9da9c179bc0d1cb6986a40fd7ffbbc6deee11522b3892217ca350d65596126fa', pull_policy: 'never', networks: ['copy-only'],
       environment: { COM_ADOBE_TESTING_S3MOCK_HTTPPORT: '9000', root: '/data', retainFilesOnExit: 'true',
         initialBuckets: 'radar-immobilier-raw,radar-immobilier-docs,radar-immobilier-artifacts' },
       volumes: ['copy-objects:/data'] },
-  }, volumes: { 'copy-objects': {} } };
+  }, networks: { 'copy-entry': {} }, volumes: { 'copy-objects': {} } };
 }
 function nginx() {
   return `server {

@@ -31,6 +31,7 @@
 - [x] Tests dédiés ENV=test-prod-cutover. Ports réservés API 18821, UI 15321, Maildev 11121.
 
 ## Plan / Todo (lot-based)
+- [x] Deuxième passage : 31 DDL en 34,361 s ; 0041 en 0,405 s ; 0044 en 10,809 s. Double 6H open-success en 3,767 s puis 2,569 s. Client de diagnostic orphelin supprimé après contrôle exact. Date de fin invalide désormais refusée. Copie restaurée gardée en échec.
 - [x] Dossier mis à jour avec décision owner vers 19 h : Tout ce soir, bascule décalée. Smoke statique HTML/public/MCP requis avant réouverture. K8s reste responsable du mint S3, des URLs DB et de DNS/TLS/Ingress.
 - [x] Copie : restauration réelle 110,847 s après base template0. Mesures et diagnostics sans lignes métier. Génération idempotente des trois clés validée sur kubectl simulé. Seize tests ciblés passent.
 - [x] Rendu statique prod : hôte paramétrable et Ingress TLS cohérent, builder absent. Cible future artifact-roles sous verrou et drain, car le migrateur ne crée pas les rôles absents. Aucun provisionnement prod exécuté.
