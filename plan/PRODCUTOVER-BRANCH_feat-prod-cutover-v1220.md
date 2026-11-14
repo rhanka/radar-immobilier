@@ -31,6 +31,7 @@
 - [x] Tests dédiés ENV=test-prod-cutover. Ports réservés API 18821, UI 15321, Maildev 11121.
 
 ## Plan / Todo (lot-based)
+- [x] Provision prod : inventaire RO, précheck cluster/RBAC/DB/objets. Dry-run sans lecture de dotenv. APPLY futur séparé, création seule.
 - [x] Runbook destiné au corps de la PR actualisé : vingt gardes, trois séries de 31 DDL, double rollback, erreurs, projection et six Secrets manquants. Aucun GO prod. Copie conservée au candidat pour recette humaine.
 - [x] Rapport des trois séries DDL, double rollback et audit publié dans REHEARSAL.md. Socle projeté 292,984 s ; scénario de maxima séparés 1104,965 s ; coupure totale non validée. Vingt tests, huit scénarios et ESLint réussis. Down -v des tests terminé.
 - [x] Préparation de l’image de tests séparée du budget lint. Pull des quatre images de copie par digest. Lectures locales bornées, contrôlées et sans écriture ; source SQL et images candidates inchangées.
