@@ -22,6 +22,31 @@ function fixture(initial?: ReannotationIdentity) {
 }
 
 describe("30-day signal reannotation", () => {
+  it("should classify new, changed and pre-v2 inputs while skipping identical v2 input", async () => {
+    const f = fixture();
+    f.repository.list = async () => ["new", "changed", "v1", "unchanged"].map((id) => ({ ...signal, id }));
+    f.repository.annotation = async (act) => act.id === "new" ? undefined : { source: "ai", promptId: act.id === "v1" ? "p0-v1" : "v2",
+      inputSha256: act.id === "changed" ? "old" : reannotationInputSha256(act) };
+    expect(await runReannotation({ ...f.options, changedInputOnly: true }))
+      .toMatchObject({ classified: 3, skippedUnchanged: 1 });
+    expect(f.classify).toHaveBeenCalledTimes(3);
+    expect(f.classify).not.toHaveBeenCalledWith({ ...signal, id: "unchanged" }, expect.any(AbortSignal));
+  });
+
+  it.each(["act", "run"])("should cancel a stuck model at the %s deadline without writing", async (scope) => {
+    const f = fixture();
+    const policy = createRefreshModelPolicy({ primary, fallback, primaryQualityAttempts: 1,
+      forceFallback: false, timeoutMs: 10_000, createClient: (model) => ({ mode: "mesh",
+        provider: model.provider, model: model.model, generateJson: () => new Promise(() => {}) }) });
+    const run = runReannotation({ ...f.options, apply: true,
+      actTimeoutMs: scope === "act" ? 20 : 1000, runTimeoutMs: scope === "run" ? 20 : 1000,
+      classify: createReannotationClassifier(policy, prompt) });
+    if (scope === "run") await expect(run).rejects.toThrow();
+    else expect(await run).toMatchObject({ classified: 0, written: 0, failures: [{ code: "reannotation_failed",
+      citySlug: signal.citySlug, nodeId: signal.id, nodeType: signal.type }] });
+    expect(f.write).not.toHaveBeenCalled();
+  });
+
   it("should skip identical input in two-step even after changing the model or prompt", async () => {
     const f = fixture({ source: "ai", promptId: "v2", model: "old", effort: "high", promptSha256: "old",
       inputSha256: reannotationInputSha256(signal) });
@@ -86,7 +111,7 @@ describe("30-day signal reannotation", () => {
     expect(await runReannotation({ ...f.options, apply: true })).toMatchObject({ written: 1 });
     expect(f.write).toHaveBeenCalledWith(expect.objectContaining({ source: "ai", promptId: prompt.id,
       promptSha256: prompt.sha256, model: primary.model, effort: primary.effort,
-      inputSha256: reannotationInputSha256(signal), pipelineRunId: "run-1" }));
+      inputSha256: reannotationInputSha256(signal), pipelineRunId: "run-1" }), expect.any(AbortSignal));
     expect(await runReannotation({ ...f.options, apply: true })).toMatchObject({ skippedUnchanged: 1 });
     expect(f.classify).toHaveBeenCalledTimes(1);
     expect(f.write).toHaveBeenCalledTimes(1);

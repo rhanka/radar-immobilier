@@ -3,6 +3,7 @@ import type { RefreshDocumentModels, RefreshModel, RefreshModelReceipt } from ".
 import { canonicalJson } from "./replay/canonical-json.js";
 import { parseSinglePassClass, singlePassClasses, singlePassReasonCodes } from "./refresh-single-pass.js";
 import { parseRefreshVerificationJson } from "./refresh-verification.js";
+import { withinReannotationDeadline } from "./reannotate-deadline.js";
 
 export interface ReannotationSignal {
   citySlug: string; id: string; type: string; label: string; props: unknown;
@@ -71,7 +72,8 @@ export async function runReannotation(options: {
     pipelineRunId: options.pipelineRunId, since: since.toISOString(), candidates: 0,
     classified: 0, written: 0, skippedManual: 0, skippedUnchanged: 0,
     classes: { pertinent: 0, a_surveiller: 0, ecarte: 0 }, failures: [] };
-  const signals = await options.repository.list(since, runSignal);
+  runSignal.throwIfAborted();
+  const signals = await withinReannotationDeadline(options.repository.list(since, runSignal), runSignal);
   report.candidates = signals.length;
   let next = 0;
   async function classifyOne(signal: ReannotationSignal) {
@@ -88,7 +90,7 @@ export async function runReannotation(options: {
         : (currentModel && annotation.promptSha256 === options.prompt.sha256))) {
         report.skippedUnchanged++; return;
       }
-      const decision = await options.classify(signal, abort);
+      const decision = await withinReannotationDeadline(options.classify(signal, abort), abort);
       abort.throwIfAborted();
       report.classified++;
       report.classes[decision.classe]++;

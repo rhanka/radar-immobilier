@@ -1,4 +1,4 @@
-import { and, asc, eq, gte, inArray } from "drizzle-orm";
+import { and, asc, eq, gte, inArray, sql } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { graphNodes } from "../../db/schema.js";
 import { readClassAnnotations, writeClassAnnotation, type ClassAnnotation } from "./class-annotations.js";
@@ -16,6 +16,10 @@ export function createReannotationRepository(db: Database,
         : gte(graphNodes.createdAt, since), inArray(graphNodes.type, ["Signal", "DesignationEvent"])))
       .orderBy(asc(graphNodes.citySlug), asc(graphNodes.id))),
     async annotation(signal, abort) {
+      const manual = await withReannotationDb(db, abort, (bounded) => bounded.execute(sql`SELECT 1
+        FROM facet_events WHERE target_type='signal' AND source='manual' AND city_slug=${signal.citySlug}
+        AND node_type=${signal.type} AND node_id=${signal.id} LIMIT 1`));
+      if (manual.rows.length) return { source: "manual" };
       let city = annotations.get(signal.citySlug);
       if (!city) {
         city = await withReannotationDb(db, abort, (bounded) => readClassAnnotations(bounded, signal.citySlug));

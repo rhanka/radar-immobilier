@@ -2,6 +2,7 @@ import type { Database } from "../../db/client.js";
 import type { ObjectStore } from "../../storage/object-store.js";
 import type { RefreshDocumentModels, RefreshModel, RefreshModelReceipt } from "./refresh-model-policy.js";
 import type { RefreshRunBudget } from "./refresh-run-budget.js";
+import { withinReannotationDeadline } from "./reannotate-deadline.js";
 import type { RefreshProfileChunk } from "./refresh-profile.js";
 import { createReannotationRepository } from "./reannotate-repository.js";
 import { createReannotationClassifier, runReannotation } from "./reannotate-signals.js";
@@ -34,7 +35,8 @@ export async function classifyPublishedRefresh(options: {
     signal.throwIfAborted();
     const nodeIds = new Set<string>();
     for (const id of Object.keys(options.handle.state.completedChunks)) {
-      const chunk = await readCompletedRefreshChunk<RefreshProfileChunk>(options.store, options.handle, id);
+      const chunk = await withinReannotationDeadline(
+        readCompletedRefreshChunk<RefreshProfileChunk>(options.store, options.handle, id), signal);
       signal.throwIfAborted();
       for (const node of chunk.extraction.nodes) {
         if (node.node_type === "Signal" || node.node_type === "DesignationEvent") nodeIds.add(node.id);
