@@ -49,6 +49,10 @@ release-tag:
 provision-prod:
 	@cd "$(ROOT)" && timeout --kill-after=5s 150s node deploy/prod-cutover/provision-prod.cjs
 .PHONY: controller-test
+verify-local:
+	@test "$(ENV)" = test-prod-cutover
+	@for step in test hook-controller-test integration lint check; do \
+	 $(MAKE) --no-print-directory -f "$(ROOT)/deploy/prod-cutover/prod-cutover.mk" "$$step" ENV=test-prod-cutover || exit $$?; done
 controller-test: lint-image
 	@test "$(ENV)" = test-prod-cutover
 	@cd "$(ROOT)" && timeout --kill-after=10s 300s bash deploy/prod-cutover/lint.sh controller
