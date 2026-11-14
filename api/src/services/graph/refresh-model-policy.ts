@@ -48,7 +48,7 @@ export interface RefreshModelPolicyOptions {
 export interface RefreshDocumentModels {
   readonly policy: string;
   readonly maximumAttempts: number;
-  forDocument(docSha: string, record: (receipt: RefreshModelReceipt) => Promise<void>): TextJsonGenerationClient;
+  forDocument(docSha: string, record: (receipt: RefreshModelReceipt) => Promise<void>, signal?: AbortSignal): TextJsonGenerationClient;
   verify(input: RefreshProfileChunk, maxOutputTokens: number,
     record: (receipt: RefreshModelReceipt) => Promise<void>,
     citySlug?: string): Promise<RefreshProfileChunk>;
@@ -191,7 +191,8 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
       documents.set(docSha, { ...(reason ? { reason } : {}), counted: reason !== undefined,
         terminal: extractionReceipts.some((receipt) => receipt.terminalFailure), attempts: receipts.length, primaryQualityCalls });
     },
-    forDocument(docSha, record) {
+    forDocument(docSha, record, signal) {
+      const requestSignal = AbortSignal.any([...(options.signal ? [options.signal] : []), ...(signal ? [signal] : [])]);
       let document = documents.get(docSha);
       if (!document) {
         document = { counted: false, attempts: 0, primaryQualityCalls: 0,
@@ -205,16 +206,17 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
         provider: options.primary.provider,
         model: options.primary.model,
         async generateJson(input) {
-          options.signal?.throwIfAborted();
+          requestSignal.throwIfAborted();
           if (selected.terminal) throw Object.assign(new Error("Refresh document has a terminal receipt"),
             { code: "REFRESH_TERMINAL_STATE" });
           const { outputPath, ...generationInput } = input;
           const attempt = async (model: RefreshModel, transition: RefreshModelTransition,
             fallbackReason?: RefreshFallbackReason) => {
+            requestSignal.throwIfAborted();
             const attemptNumber = ++selected.attempts;
             const controller = new AbortController();
-            const abort = () => controller.abort(options.signal?.reason);
-            options.signal?.addEventListener("abort", abort, { once: true });
+            const abort = () => controller.abort(requestSignal.reason);
+            requestSignal.addEventListener("abort", abort, { once: true });
             const timeout = setTimeout(() => controller.abort(new DOMException("Refresh model timeout", "TimeoutError")),
               options.timeoutMs);
             let qualityRefused = false;
@@ -258,7 +260,7 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
             }
             finally {
               clearTimeout(timeout);
-              options.signal?.removeEventListener("abort", abort);
+              requestSignal.removeEventListener("abort", abort);
               controller.signal.removeEventListener("abort", rejectDeadline);
             }
             const reason = controller.signal.aborted ? "timeout" : refreshFallbackReason(failure);
@@ -272,7 +274,7 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
               ...(terminalFailure ? { terminalFailure: true as const } : {}),
               ...(fallbackReason ? { fallbackReason } : {}),
               ...(failed && !qualityRefused ? { failureReason: reason } : {}), latencyMs: Date.now() - startedAt });
-            options.signal?.throwIfAborted();
+            requestSignal.throwIfAborted();
             return { failed, failure, qualityRefused, terminalFailure, reason, result, text };
           };
           const finish = async (attempted: Awaited<ReturnType<typeof attempt>>) => {
