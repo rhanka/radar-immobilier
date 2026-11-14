@@ -850,16 +850,13 @@
   $: allEntries = buildCityMapEntries(graphItems);
   $: citySignalCounts = new Map(allEntries.map((entry) => [entry.municipality.slug,
     displayedSignalCountForCity(entry, activeSubsetKey, classementFilter, vivierBExclusions)]));
-  $: visibleCitySlugs = allEntries
-    .filter((entry) => (citySignalCounts.get(entry.municipality.slug) ?? 0) > 0)
-    .map((entry) => entry.municipality.slug);
   $: geoEngineLayers = GEO3D_ENGINE_ENABLED ? ([
     {
       id: "radar-immo/signaux/municipalities",
       kind: "points",
       data: {
         type: "FeatureCollection",
-        features: allEntries.filter((entry) => visibleCitySlugs.includes(entry.municipality.slug)).map((entry) => ({
+        features: allEntries.map((entry) => ({
           type: "Feature",
           geometry: {
             type: "Point",
@@ -2765,7 +2762,6 @@
     onBasemapModeChange={setBasemap}
     {fillColorExpression}
     {fillOpacityExpression}
-    {visibleCitySlugs}
     {showLotLabels}
     {showZoneLabels}
     activeCitySlug={selectedCity?.municipality.slug ?? null}
