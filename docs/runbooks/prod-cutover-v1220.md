@@ -106,6 +106,7 @@ Le fichier S3 de provisionnement s’appelle `s3-provision.input`, mode 0600 ; s
 planSha256 et rosterSha256. Les empreintes portent sur les fichiers préparés, sans les réécrire.
 
 ```sh
+export KUBECONFIG="$HOME/.kube/radar-prod-tenant-admin.kubeconfig"
 export PLAN="$HOME/.local/share/radar-prod-copy/plan.json"
 export ROSTER="$HOME/.local/share/radar-prod-copy/roster.json"
 export RELEASE="$PWD/deploy/prod-cutover/release.json"
@@ -186,7 +187,26 @@ rtk make -f deploy/prod-cutover/prod-cutover.mk window-deploy RUN="$RUN" ENV=exe
 Exiger 44 empreintes, open-success, scoped, zéro non résolu et barrière ouverte.
 Le rollout et le smoke privés gardent routes fermées, schedules suspendus et verrou présent.
 **6. i-cond, immo et Product Owner, 5–15 min.** Faire la recette privée décrite ci-dessous.
-Inclure publication HTML, lecture HTTPS publique et lecture MCP du même artefact.
+Inclure publication HTML, lecture HTTPS privée à l’URL canonique et lecture MCP du même artefact.
+Les Ingress publics restent en maintenance. Dans un second terminal avec le même environnement,
+lancer le proxy privé :
+
+```sh
+export ARTIFACTS_CONTENT_HOST=pages.immo.sent-tech.ca
+rtk make -f deploy/prod-cutover/prod-cutover.mk window-private-https RUN="$RUN" ENV=execution-prod
+```
+
+k8s fournit quatre fichiers privés hors dépôt : TLS_CERT/TLS_KEY pour immo.sent-tech.ca,
+CONTENT_TLS_CERT/CONTENT_TLS_KEY pour le wildcard ARTIFACTS_CONTENT_HOST. Les exporter par chemin,
+sans afficher leur contenu. Le conteneur nginx candidat utilise les port-forwards existants.
+Il écoute seulement sur 127.0.0.2:443. Aucun Ingress n’est modifié.
+Pour curl : `curl -q --noproxy '*' --resolve immo.sent-tech.ca:443:127.0.0.2 https://immo.sent-tech.ca/health`.
+Pour le HTML : utiliser `--resolve <hôte-exact-de-la-page>:443:127.0.0.2` et son URL HTTPS canonique.
+Pour publier et lire via MCP, conserver la même résolution privée et l’authentification habituelle.
+Le navigateur de recette doit résoudre immo.sent-tech.ca et le wildcard de contenu vers 127.0.0.2.
+Vérifier le certificat sans option insecure. Depuis un autre poste sans cette résolution,
+les mêmes routes doivent répondre en maintenance. Arrêter le terminal privé par Ctrl-C avant réouverture.
+Le trap supprime le proxy et les port-forwards. Un refus conserve le verrou et la fermeture.
 Consigner les preuves sans jeton. Si acceptée, i-cond consigne reopen=true et run dans APPROVAL.
 
 ```sh
@@ -195,10 +215,35 @@ rtk make -f deploy/prod-cutover/prod-cutover.mk smoke ENV=prod
 ```
 
 Réouverture : 30–90 s attendues. Observer ensuite le premier refresh complet.
+Sans résolution privée, relire aussi le même HTML par HTTPS et le même artefact par MCP.
+Cette lecture confirme le chemin Ingress restauré. Un refus déclenche la décision de reprise ci-dessous.
 La réouverture est le second seuil : une restauration ultérieure perd aussi les nouvelles écritures.
 Budget opérateur : 15–35 min hors attente k8s et refresh. Réserver 15 min pour la reprise.
 
 **Retour arrière, immo puis k8s sous i-cond, 3–10 min attendues.**
+Avant toute tentative de migration, si configuration, fermeture ou sauvegarde échoue,
+exécuter la voie d’abandon suivante. Elle ne demande ni backup.json ni RESTORE_SHA256.
+Elle termine le drain, vérifie les 13 empreintes historiques, restaure ConfigMaps, env,
+images, routes et schedules sous le même verrou. Aucun dump n’est restauré.
+Une tentative de migration ou un schéma divergent refuse cette voie et impose la restauration complète.
+
+```sh
+rtk make -f deploy/prod-cutover/prod-cutover.mk window-abort RUN="$RUN" ENV=execution-prod
+```
+
+Après une réouverture réussie, le verrou a été libéré. Avant toute restauration,
+l’owner consigne dans APPROVAL `rollbackAfterReopen=true`, `acceptPostReopenWriteLoss=true`
+et le RUN initial. Cette décision accepte la perte de **toutes les écritures depuis la sauvegarde finale**,
+y compris celles après réouverture. Sans cette décision, ne pas restaurer.
+Reprendre le reçu radar-cutover-receipt avec la commande suivante. Elle crée le verrou par create exclusif,
+vérifie RUN, inventaire, fin de l’exécuteur et inactivité CD, puis referme sans recapturer l’état candidat.
+
+```sh
+rtk make -f deploy/prod-cutover/prod-cutover.mk window-recover RUN="$RUN" ENV=execution-prod
+```
+
+En cas de fermeture interrompue après récupération, reprendre window-close avec ce même RUN.
+Continuer ensuite la restauration complète ci-dessous. Conserver OUTPUT, archive et manifeste historique initiaux.
 Au moindre refus : garder le même RUN. Ne pas supprimer le verrou. Après rollout partiel, refermer d’abord.
 Si un hook survit, ajouter STOP_RUN_CONTAINERS=1 à window-close ; la disparition doit être prouvée.
 
@@ -233,10 +278,15 @@ Rendu exigé sur API et MCP : `ARTIFACTS_CONTROL_MODE=general`, `IMMO_ARTIFACTS_
 `IMMO_ARTIFACTS_BUILDER_URL` doit être absent, y compris des env directs et des ConfigMaps appliquées.
 Le test de rendu vérifie ces portes, le bucket, l’endpoint, la région et l’accord hôte/Ingress/TLS.
 
+Validation des correctifs de relecture finale : 28 gardes, 12 scénarios contrôleur/IdP,
+trois scénarios Docker (TERM, KILL, TLS candidat), intégration PostgreSQL 13 → 44 → 13,
+cinq tests de workflows et un test du kubeconfig explicite sur les 11 configurations CD.
+ESLint et syntaxe passent. Données synthétiques uniquement ; aucune mutation prod.
+
 Recette artefacts obligatoire avant GO de réouverture :
 
 1. Avec un compte autorisé, publier un petit HTML statique depuis la page d’upload ou MCP.
-2. Lire son URL HTTPS publique. Vérifier le contenu, le certificat et le type HTML, sans cookie de session immo.
+2. Lire son URL HTTPS canonique par le bypass loopback privé ci-dessus. Vérifier le contenu, le certificat et le type HTML, sans cookie de session immo. Vérifier aussi le refus public depuis un autre poste.
 3. Lire le même artefact par MCP authentifié. Vérifier le même identifiant, la révision et le contenu.
 4. Vérifier refus hors espace et publication live indisponible. Relever SHA, URL, statut et durée, sans jeton.
 
@@ -290,7 +340,9 @@ Une promotion concurrente échoue à la prise du verrou.
 Les opérations DB vérifient aussi le RUN et l’exécuteur exact avant écriture.
 Les copies restent locales. Elles ne prennent aucun verrou prod.
 
-Après échec, garder la fermeture. Lire `operator.mk status ENV=prod`.
+Après échec, garder la fermeture. Le diagnostic exige aussi le kubeconfig tenant explicite :
+`rtk make -f deploy/cutover/operator.mk status KUBECONFIG="$HOME/.kube/radar-prod-tenant-admin.kubeconfig" ENV=prod`.
+Un KUBECONFIG absent, multiple ou pointant vers le fichier par défaut est refusé avant kubectl.
 Reprendre par les commandes de cette fenêtre avec le RUN original.
 Une capture interrompue avant drain se reprend par `window-start RUN=<RUN>`.
 Ne pas utiliser le resume générique pour ce record manuel. Aucun effacement forcé.
