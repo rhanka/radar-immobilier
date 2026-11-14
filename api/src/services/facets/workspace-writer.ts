@@ -63,6 +63,7 @@ export async function writeWorkspaceArchiveFacet(
 /** Shared BASE executor; the caller owns commit, rollback, and isolation. */
 export async function writeWorkspaceArchiveFacetInTx(
   tx: WorkspaceTx, sub: string, workspaceId: string, command: WorkspaceArchiveCommand,
+  options: { validatedAiFeedbackId?: string } = {},
 ) {
   if (command.action !== "discard" && command.action !== "restore") {
     throw new FacetError(400, "invalid_facet_command");
@@ -75,7 +76,7 @@ export async function writeWorkspaceArchiveFacetInTx(
   if (command.action === "restore" && command.reasonCode !== undefined) {
     throw new FacetError(400, "invalid_facet_command");
   }
-  if (command.action === "discard" && command.reasonCode === undefined) {
+  if (command.action === "discard" && command.reasonCode === undefined && !options.validatedAiFeedbackId) {
     throw new FacetError(422, "reason_code_required");
   }
   if (command.expectedHeadId === undefined || command.displayedFingerprint === undefined) {
@@ -128,7 +129,7 @@ export async function writeWorkspaceArchiveFacetInTx(
       nodeId: command.target.id, facet: "archive", basket: null,
     }).returning())[0]!.id : stream.id;
     const event = await appendWorkspaceTransition(tx, actorId, command,
-      streamId, command.action === "discard" ? "active" : "inactive", fingerprint, base);
+      streamId, command.action === "discard" ? "active" : "inactive", fingerprint, base, options.validatedAiFeedbackId);
     // 6L1: the shared revision moves only when a transition was appended;
     // no-op commands keep every member's token stable.
     const [head] = await tx.select().from(facetHeads)
@@ -162,6 +163,7 @@ async function workspaceConflictHeads(
 async function appendWorkspaceTransition(
   tx: WorkspaceTx, actorId: string, command: WorkspaceArchiveCommand,
   streamId: string, state: string, fingerprint: string, commandDigest: string,
+  classFeedbackId?: string,
 ) {
   const { target } = command;
   const reasonCode = state === "active" ? command.reasonCode ?? null : null;
@@ -185,6 +187,7 @@ async function appendWorkspaceTransition(
     await tx.update(facetEvents).set({ supersededBy: id }).where(eq(facetEvents.id, current.id));
   }
   const [event] = await tx.insert(facetEvents).values({
+    classFeedbackId: classFeedbackId ?? null,
     id, scope: "workspace", ownerId: null, actorId, citySlug: target.citySlug,
     nodeType: target.type, nodeId: target.id, facet: "archive", basket: null,
     state, reasonCode, profileId: reasonCode ? FACET_PROFILE : null,
