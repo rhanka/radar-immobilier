@@ -9,4 +9,8 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 "${compose[@]}" run --rm --no-deps --pull never -T -u 0:0 --entrypoint sh api -c "chown $(id -u):$(id -g) /workspace/node_modules /workspace/api/node_modules"
-"${compose[@]}" run --rm --no-deps --pull never -T -v /dev/null:/etc/bash.bashrc:ro -v /dev/null:/etc/profile:ro api bash -ec 'timeout 90s npm ci --ignore-scripts --silent && npx eslint deploy/prod-cutover/*.cjs deploy/prod-cutover/*.mjs && timeout 150s node --test --test-concurrency=1 deploy/prod-cutover/*.test.mjs'
+"${compose[@]}" run --rm --no-deps --pull never -T -v /dev/null:/etc/bash.bashrc:ro -v /dev/null:/etc/profile:ro api bash -ec '
+  timeout 90s npm ci --ignore-scripts --silent
+  if [[ $1 != controller ]]; then npx eslint deploy/prod-cutover/*.cjs deploy/prod-cutover/*.mjs; fi
+  timeout 150s node --test --test-concurrency=1 deploy/prod-cutover/*.test.mjs
+' bash "${1:-lint}"
