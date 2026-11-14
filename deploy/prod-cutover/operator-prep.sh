@@ -80,13 +80,13 @@ while IFS='=' read -r key value; do
 done < "$private/backup-writer.env"
 [[ $endpoint == https://s3.bhs.io.cloud.ovh.net && $AWS_REGION == bhs ]] || fail backup_endpoint_region
 printf 'operator preparation probe\n' > "$private/s3-probe.txt"
-uri="s3://sentropic-pgbackup/immo/v1220/tonight/operator-prep-$(date -u +%Y%m%dT%H%M%SZ)-$$.txt"
+uri="s3://radar-immobilier-backup/v1220-cutover/operator-prep-$(date -u +%Y%m%dT%H%M%SZ)-$$.txt"
 s3_status=0
 : > "$private/s3-probe-status.txt"
 for operation in put ls delete; do
   case $operation in
     put) args=(cp "$private/s3-probe.txt" "$uri") ;;
-    ls) args=(ls 's3://sentropic-pgbackup/immo/v1220/tonight/') ;;
+    ls) args=(ls "$uri") ;;
     delete) args=(rm "$uri") ;;
   esac
   code=0
@@ -95,7 +95,7 @@ for operation in put ls delete; do
   printf '%s exit=%s\n' "$operation" "$code" >> "$private/s3-probe-status.txt"
   if (( code != 0 )); then
     # Only a fixed service-error token may leave the private result file.
-    awk 'match($0,/(AccessDenied|InvalidAccessKeyId|SignatureDoesNotMatch|NoSuchBucket|RequestTimeTooSkewed)/) {print "S3 error=" substr($0,RSTART,RLENGTH); exit}' "$private/s3-probe.result"
+    awk 'match($0,/(AccessDenied|Access Denied|InvalidAccessKeyId|SignatureDoesNotMatch|NoSuchBucket|RequestTimeTooSkewed)/) {print "S3 error=" substr($0,RSTART,RLENGTH); exit}' "$private/s3-probe.result"
     s3_status=3
   fi
 done
