@@ -21,6 +21,10 @@ cleanup() {
   trap - EXIT
   stop_forwards
   if [[ $OWNED == 1 ]]; then
+    if ! node deploy/prod-cutover/containers.cjs stop "$RUN"; then
+      rm -rf "$WORK"
+      exit 1
+    fi
     if ((code != 0)) && jq -e '.checkpoints.reopen!=null' "$WORK/record.json" >/dev/null; then
       (set -e; stop_schedules; reclose_best_effort) || code=1
     fi
@@ -41,6 +45,7 @@ if [[ $1 == window-start ]]; then
     lock_read; record_read
     jq -e '.kind=="cutover" and .manualV1220==true and .checkpoints.close==null
       and .checkpoints["manual-inventory"]==null' "$WORK/record.json" >/dev/null || fail 'Capture déjà terminée'
+    node deploy/prod-cutover/containers.cjs guard "$RUN"
     lock_resume
   else lock_acquire cutover; fi
   jq '.manualV1220=true|.environment="prod"' "$WORK/record.json" > "$WORK/next.json"
@@ -61,6 +66,7 @@ fi
 lock_read; record_read
 jq -e '.kind=="cutover" and .manualV1220==true and .environment=="prod"
   and .checkpoints["manual-inventory"]=="completed"' "$WORK/record.json" >/dev/null || fail 'Inventaire de fenêtre requis'
+node deploy/prod-cutover/containers.cjs guard "${RUN:-}"
 lock_resume
 export CUTOVER_LOCK_RUN="$RUN" CUTOVER_LOCK_EXECUTOR="$EXECUTOR"
 case $1 in

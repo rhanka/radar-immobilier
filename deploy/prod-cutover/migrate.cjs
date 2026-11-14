@@ -86,6 +86,7 @@ function hook(operation) {
     'CUTOVER_PLAN', 'CUTOVER_EVIDENCE', 'CUTOVER_OPERATION'];
   const args = ['run', '--pull=never', '--rm', '--name', name,
     localCopy ? '--network=radar-prod-copy-owner_copy-only' : '--network=host',
+    "--label", `${require("./containers.cjs").LABEL}=${proof.run}`,
     '--user', `${process.getuid()}:${process.getgid()}`, '--read-only', '--tmpfs', '/tmp',
     '--cap-drop=ALL', '--security-opt=no-new-privileges',
     '--mount', `type=bind,src=${r.ROOT}/deploy/prod-cutover/hook.cjs,dst=/run-cutover.cjs,readonly`];
@@ -93,12 +94,8 @@ function hook(operation) {
   for (const name of names) args.push('-e', name);
   args.push('--entrypoint', 'node', image, '/run-cutover.cjs');
   if (!variables.PGPASSWORD) r.fail('hook_password_injected_by_operator_required');
-  let verdict;
-  try { verdict = JSON.parse(r.run('docker', args, { timeout: 550000, env: variables }).trim()); }
-  finally {
-    // A killed Docker client must never leave the hook running in the daemon.
-    try { r.run('docker', ['rm', '-f', name], { timeout: 15000 }); } catch { /* already removed */ }
-  }
+  const verdict = JSON.parse(r.run('bash', ['deploy/prod-cutover/run-container.sh', proof.run, ...args],
+    { timeout: 610000, env: variables }).trim());
   if (!verdict.ok || (operation === 'transition' && (verdict.status !== 'open-success'
     || verdict.epoch !== 'scoped' || verdict.sealedUnresolved !== 0 || verdict.maintenanceBarrier !== false)))
     r.fail('hook_verdict_refused');

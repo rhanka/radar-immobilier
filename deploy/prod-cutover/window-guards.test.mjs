@@ -8,6 +8,7 @@ import { fixture } from '../../tools/make/cutover-fixture.mjs';
 function check(change, expected, resume = false) {
   const f = fixture({ url: 'https://immo.sent-tech.ca' });
   try {
+    writeFileSync(join(f.dir, 'bin/docker'), '#!/bin/sh\nexit 0\n', { mode: 0o755 });
     // The authorization port is exercised by bindings.test.cjs. No real cluster or GH access.
     writeFileSync(join(f.dir, 'bin/node'), `#!/bin/sh
 if [ "$1" = deploy/prod-cutover/cli.cjs ]; then exit 0; fi
