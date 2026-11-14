@@ -14,6 +14,8 @@
 - [x] Conditional: existing annotation tests and transport fixtures when additive dates require updated assertions.
 
 ## Feedback Loop
+- [x] Main-sync E2E: all 3 real-stack feedback scenarios pass on production images (17.5 s). Test/quality/E2E stacks removed with down -v; inspection confirms no remaining E2E containers, volumes or network. Log: tmp/upgrade-e2e-detail.log. Latest origin/main is 7fa5c2505; PR #1106 remains open at handoff and is not merged by this branch.
+- [x] Main-sync gates: typecheck (0 errors, 8 Svelte warnings), lint (0 errors, 1 warning), 12 focused UI tests and 44 API/PostgreSQL tests across 9 files pass. Includes unchanged facets-refresh byte-equality tests, migrate-idempotence, artifacts-migrations and 0047 replay. Initial npm ECONNRESET recovered on retry; the stale purge expectation was corrected, then the entire API selection passed. Logs: tmp/upgrade-quality-detail.log, tmp/upgrade-api-final.log.
 - [x] CLASSFEEDBACK-EX5: update the purge regression for main's stored-annotation-only contract. Assert redacted provenance before purge, no fabricated annotation after purge, retained stored manual annotation, and unchanged private heads/history. Rollback: revert this test-only change.
 - [x] PR #1104 main synchronization: retain stored-annotation-only projection from 8e4b8e2ba, v2 ambiguity and 0046 before 0047. Preserve feedback dates and both UI provenance tests. Do not edit 0045 or 0046.
 - [x] Root cause of facets-refresh: manual facet history fabricated a public classAnnotation without a stored annotation. Keep main's guard and byte-equality regressions unchanged; do not relax the API contract. This supersedes the fixture-alignment proposal below.
