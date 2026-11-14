@@ -10,6 +10,7 @@ export interface ReannotationSignal {
 }
 export interface ReannotationIdentity {
   source: "ai" | "manual"; model?: string | null; effort?: string | null;
+  promptId?: string | null;
   promptSha256?: string | null; inputSha256?: string | null;
 }
 export interface ReannotationDecision {
@@ -21,9 +22,9 @@ export interface ReannotationWrite extends ReannotationDecision {
   promptId: string; promptSha256: string; inputSha256: string; pipelineRunId: string;
 }
 export interface ReannotationRepository {
-  list(since: Date): Promise<ReannotationSignal[]>;
-  annotation(signal: ReannotationSignal): Promise<ReannotationIdentity | undefined>;
-  write(input: ReannotationWrite): Promise<"written" | "manual" | "noop">;
+  list(since: Date, abort?: AbortSignal): Promise<ReannotationSignal[]>;
+  annotation(signal: ReannotationSignal, abort?: AbortSignal): Promise<ReannotationIdentity | undefined>;
+  write(input: ReannotationWrite, abort?: AbortSignal): Promise<"written" | "manual" | "noop">;
 }
 export interface ReannotationPrompt { id: string; sha256: string; text: string }
 export interface ReannotationReport {
@@ -51,48 +52,54 @@ export function reannotationInputSha256(signal: ReannotationSignal): string {
 export async function runReannotation(options: {
   repository: ReannotationRepository; prompt: ReannotationPrompt; primary: RefreshModel;
   fallback: RefreshModel; pipelineRunId: string; now: Date; apply?: boolean;
-  classify(signal: ReannotationSignal): Promise<ReannotationDecision>;
+  classify(signal: ReannotationSignal, abort?: AbortSignal): Promise<ReannotationDecision>;
   signal?: AbortSignal;
   concurrency?: number;
   changedInputOnly?: boolean;
+  actTimeoutMs?: number;
+  runTimeoutMs?: number;
 }): Promise<ReannotationReport> {
   const concurrency = options.concurrency ?? 1;
   if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 16) {
     throw new Error("Reannotation concurrency must be an integer from 1 to 16");
   }
   const since = new Date(options.now.getTime() - 30 * 86_400_000);
+  const runSignal = AbortSignal.any([AbortSignal.timeout(options.runTimeoutMs ?? 300_000),
+    ...(options.signal ? [options.signal] : [])]);
   const report: ReannotationReport = { mode: options.apply ? "apply" : "dry-run",
     pipelineRunId: options.pipelineRunId, since: since.toISOString(), candidates: 0,
     classified: 0, written: 0, skippedManual: 0, skippedUnchanged: 0,
     classes: { pertinent: 0, a_surveiller: 0, ecarte: 0 }, failures: [] };
-  const signals = await options.repository.list(since);
+  const signals = await options.repository.list(since, runSignal);
   report.candidates = signals.length;
   let next = 0;
   async function classifyOne(signal: ReannotationSignal) {
-    options.signal?.throwIfAborted();
+    runSignal.throwIfAborted();
+    const abort = AbortSignal.any([runSignal, AbortSignal.timeout(options.actTimeoutMs ?? 60_000)]);
     try {
-      const annotation = await options.repository.annotation(signal);
+      const annotation = await options.repository.annotation(signal, abort);
       if (annotation?.source === "manual") { report.skippedManual++; return; }
       const inputSha256 = reannotationInputSha256(signal);
       // A prior fallback result is valid for the same configured model pair.
       const currentModel = [options.primary, options.fallback].some((model) =>
         model.model === annotation?.model && model.effort === annotation?.effort);
-      if (annotation?.inputSha256 === inputSha256 && (options.changedInputOnly
-        || (currentModel && annotation.promptSha256 === options.prompt.sha256))) {
+      if (annotation?.inputSha256 === inputSha256 && (options.changedInputOnly ? annotation.promptId === "v2"
+        : (currentModel && annotation.promptSha256 === options.prompt.sha256))) {
         report.skippedUnchanged++; return;
       }
-      const decision = await options.classify(signal);
+      const decision = await options.classify(signal, abort);
+      abort.throwIfAborted();
       report.classified++;
       report.classes[decision.classe]++;
       if (!options.apply) return;
       const result = await options.repository.write({ ...decision, citySlug: signal.citySlug,
         nodeId: signal.id, nodeType: signal.type, source: "ai", promptId: options.prompt.id,
-        promptSha256: options.prompt.sha256, inputSha256, pipelineRunId: options.pipelineRunId });
+        promptSha256: options.prompt.sha256, inputSha256, pipelineRunId: options.pipelineRunId }, abort);
       if (result === "written") report.written++;
       else if (result === "manual") report.skippedManual++;
       else report.skippedUnchanged++;
     } catch (error) {
-      options.signal?.throwIfAborted();
+      runSignal.throwIfAborted();
       const code = error && typeof error === "object" && "code" in error && typeof error.code === "string"
         && /^[A-Za-z0-9_-]{1,100}$/u.test(error.code) ? error.code : "reannotation_failed";
       report.failures.push({ citySlug: signal.citySlug, nodeType: signal.type, nodeId: signal.id, code });
@@ -109,13 +116,13 @@ export async function runReannotation(options: {
 
 /** Classification reads the same versioned instructions as extraction, over stored evidence. */
 export function createReannotationClassifier(models: RefreshDocumentModels, prompt: ReannotationPrompt) {
-  return async (signal: ReannotationSignal): Promise<ReannotationDecision> => {
+  return async (signal: ReannotationSignal, abort?: AbortSignal): Promise<ReannotationDecision> => {
     const identity = reannotationInputSha256(signal);
     const accepted: { model?: RefreshModel; decision?: ReturnType<typeof parseSinglePassClass> } = {};
     try {
       const client = models.forDocument(identity, async (receipt) => {
         if (receipt.status === "completed" && receipt.modelUsed) accepted.model = receipt.modelUsed;
-      });
+      }, abort);
       const result = await client.generateJson({
         prompt: `${prompt.text}\n\nReclassify only this existing signal using its stored evidence. `
           + "Do not extract or invent additional acts. Return only {classe,reason,reasonCode,ambiguous}.\n"
