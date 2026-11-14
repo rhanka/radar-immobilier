@@ -31,6 +31,7 @@
 - [x] Tests dédiés ENV=test-prod-cutover. Ports réservés API 18821, UI 15321, Maildev 11121.
 
 ## Plan / Todo (lot-based)
+- [x] Relecture finale : abandon sans sauvegarde sur schéma 13 ; récupération du reçu après réouverture, accord owner sur la perte des écritures et reprise du même RUN. Gardes et scénarios contrôleur validés.
 - [x] FINAL-EX1 : verdict #1100, garde kubeconfig dans tools/make/cutover-{release,cluster,smoke}.sh et doubles associés. Refus avant kubectl si absent ou défaut. Repli : retirer ce correctif. Aucun accès prod exécuté.
 - [x] Corps PR : séquence exacte de ce soir, acteurs, durées, COMMIT DDL et réouverture comme seuils, reprise complète, tag v1.2.20 différé au SHA candidat. Nouveau dry-run RO : neuf créations prévues, aucune valeur affichée.
 - [x] Cause Docker corrigée dans runtime : stdin ignoré sans input, pipe conservé pour SQL. Tests TERM/KILL d’origine verts, assertions et délais inchangés. verify-local ordonne gardes, Docker, PostgreSQL, lint/contrôleurs et syntaxe.
