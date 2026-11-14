@@ -6,6 +6,7 @@ export * from "./signals/b-prime.js";
 export * from "./signals/document-date-filter.js";
 export * from "./signals/vivier-display-exclusions.js";
 export * from "./signals/signal-filter-v1.js";
+export * from "./signals/signal-metadata-v2.js";
 export * from "./valleyfield-dossiers.js";
 export * from "./vivier/vivier-v2.js";
 export * from "./vivier/counts.js";
