@@ -185,6 +185,7 @@
   import { classementCountsForPerimeter, displayedSignalCountForCity, filtreCountsForPerimeter } from "$lib/signals/signal-filter-counts.js";
   import {
     buildClassementMap,
+    withAiClassement,
     DEFAULT_CLASSEMENT_FILTER,
     classementKey,
     filterNodesByClassement,
@@ -918,7 +919,7 @@
   $: filteredDetailNodes = gatedDetailNodes;
   // Classement: class map from coherent heads (+ optimistic overrides), then
   // the Classement filter lens on the displayed list.
-  $: classementBaseMap = buildClassementMap(detailSelectionHeads, detailArchiveHeads);
+  $: classementBaseMap = withAiClassement(buildClassementMap(detailSelectionHeads, detailArchiveHeads), detailProjection.nodes);
   $: classementMap = new Map([...classementBaseMap, ...classementOverrides]);
   $: classementFilteredNodes = filterNodesByClassement(filteredDetailNodes, classementMap, classementFilter);
   // Full class cubes retain archives regardless of the visibility checkbox.
@@ -982,7 +983,7 @@
     };
     classementInFlight = new Set([...classementInFlight, key]);
     const overrides = new Map(classementOverrides);
-    overrides.set(key, { ...current, classe: nextClass, reasonCode, discarded: nextClass === "ecarte" });
+    overrides.set(key, { ...current, annotationSource: "manual", classe: nextClass, reasonCode, discarded: nextClass === "ecarte" });
     classementOverrides = overrides;
     const clearOverride = () => {
       const next = new Map(classementOverrides);

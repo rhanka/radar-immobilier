@@ -7,6 +7,8 @@
  * enrichment budget and a failed card degrades to its node-only version.
  */
 import type { ObjectStore } from "../../storage/object-store.js";
+import type { Database } from "../../db/client.js";
+import { readClassAnnotations } from "../graph/class-annotations.js";
 import {
   createDocEnrichmentContext,
   DOC_ENRICHMENT_BUDGET_MS,
@@ -24,6 +26,7 @@ import { projectProps } from "./props-projection.js";
 export type StoredSignalNode = Parameters<typeof toDegradedSignalCard>[0];
 
 export interface ScopedSignalCardDeps {
+  db?: Database;
   store?: ObjectStore;
   docEnrichmentBudgetMs?: number;
   /**
@@ -41,11 +44,16 @@ export interface ScopedSignalCardDeps {
 export async function buildScopedSignalCards(
   deps: ScopedSignalCardDeps, nodes: readonly StoredSignalNode[], citySlug: string,
 ): Promise<GraphSignalCard[]> {
+  const annotations = deps.db ? await readClassAnnotations(deps.db, citySlug) : new Map();
+  const annotate = (cards: GraphSignalCard[]) => cards.map((card) => {
+    const classAnnotation = annotations.get(`${card.type}:${card.id}`);
+    return classAnnotation ? { ...card, classAnnotation } : card;
+  });
   const store = deps.store;
-  if (!store) return nodes.map((node) => toDegradedSignalCard(node));
+  if (!store) return annotate(nodes.map((node) => toDegradedSignalCard(node)));
   if (nodes.length === 0) return [];
   const enrichment = createDocEnrichmentContext(deps.docEnrichmentBudgetMs);
-  return Promise.all(nodes.map((node) =>
+  return annotate(await Promise.all(nodes.map((node) =>
     toGraphSignalCard(store, node, enrichment, citySlug, deps.onRefFailed).catch((error) => {
       if (deps.onDegraded) {
         deps.onDegraded(error);
@@ -53,7 +61,7 @@ export async function buildScopedSignalCards(
       }
       console.error(`[scoped-signal-cards] card degraded (city=${citySlug} node=${node.id}):`, error);
       return toDegradedSignalCard(node);
-    })));
+    }))));
 }
 
 /** Thin card view (SPEC_FILTRAGE_API §3): closed props projection, no S3. */
@@ -105,7 +113,12 @@ export const SCOPED_CARD_ENRICHMENT_CONCURRENCY = 8;
 export async function buildScopedSignalCardViews(
   deps: ScopedSignalCardDeps, nodes: readonly StoredSignalNode[], citySlug: string,
 ): Promise<GraphSignalCard[]> {
-  const views = nodes.map((node) => toSignalCardView(toDegradedSignalCard(node)));
+  const annotations = deps.db ? await readClassAnnotations(deps.db, citySlug) : new Map();
+  const views = nodes.map((node) => {
+    const card = toSignalCardView(toDegradedSignalCard(node));
+    const classAnnotation = annotations.get(`${node.type}:${node.id}`);
+    return classAnnotation ? { ...card, classAnnotation } : card;
+  });
   const store = deps.store;
   if (!store) return views;
   const budgetMs = deps.docEnrichmentBudgetMs ?? DOC_ENRICHMENT_BUDGET_MS;
