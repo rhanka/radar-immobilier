@@ -6,6 +6,7 @@ import { workspaceFixture, workspaceSignal } from "../facets/workspace-archive-f
 import { writeScopedPersonalFacet } from "../facets/scoped-writer.js";
 import { readScopedByCity } from "../facets/scoped-by-city.js";
 import { readProjectionScope } from "../facets/projection-revisions.js";
+import { targetFingerprint } from "../facets/target.js";
 import { buildScopedSignalCards, buildScopedSignalCardViews } from "../facets/scoped-signal-cards.js";
 import { readClassAnnotations, writeClassAnnotation, type AiClassAnnotation } from "./class-annotations.js";
 
@@ -29,6 +30,10 @@ describeDb("single-pass class annotations PostgreSQL", () => {
     expect((await cards())[0]?.classAnnotation?.classe).toBe("ecarte");
     vi.stubEnv("REFRESH_CLASSIFY_MODE", "off");
     expect({ counts: await counts(), cards: await cards(), views: await views() }).toEqual(baseline);
+    expect(await writeScopedPersonalFacet(f.db, f.contributor.sub, f.workspaceId, {
+      action: "deselect", basket: "pertinent", target, displayedFingerprint: targetFingerprint(node),
+      expectedHeadId: null, commandKey: randomUUID(),
+    })).toBeNull();
     expect((await readClassAnnotations(f.db, target.citySlug)).size).toBe(1);
   });
   it("should increment the shared manual projection revision for AI changes only", async () => {
