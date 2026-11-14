@@ -73,6 +73,8 @@ describe.skipIf(process.env.MCP_SIGNAL_DB_TEST !== "1")("MCP SDK to PostgreSQL",
         .toMatchObject({ validation: "auto" });
       const state = await f.call("get_signal_classification", { signalRef: f.signalRef });
       expect(state.current).toMatchObject({ source: "mcp", model: "sdk-client-model", validation: "human", mcpClientId: "test-mcp-client" });
+      expect(state.current).toHaveProperty("effort", null);
+      expect(state.current).toHaveProperty("promptId", null);
       expect(state.notes[0].text).toBe("Watch council");
       expect(await f.call("confirm_classification", { signalRef: f.signalRef, verdict: "up", model: "sdk-client-model" }))
         .toMatchObject({ validation: "human" });
