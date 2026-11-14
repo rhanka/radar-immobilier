@@ -13,6 +13,7 @@ case ${1:-} in
     k=(kubectl --kubeconfig "$KUBECONFIG" --request-timeout=15s -n radar-immobilier)
     server=$("${k[@]}" config view --minify -o jsonpath='{.clusters[0].cluster.server}')
     [[ $server == https://hlhedx.c1.bhs5.k8s.ovh.net ]]
+    node deploy/prod-cutover/artifacts-precheck.cjs
     for path in build.json health; do
       curl -q -fsS --connect-timeout 5 --max-time 15 "https://immo.sent-tech.ca/$path" |
         jq -e 'if .sha!="79c2bd9" then error("unexpected_served_sha") elif has("db") then
