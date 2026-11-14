@@ -80,21 +80,25 @@ done < "$private/backup-writer.env"
 [[ $endpoint == https://s3.bhs.io.cloud.ovh.net && $AWS_REGION == bhs ]] || fail backup_endpoint_region
 printf 'operator preparation probe\n' > "$private/s3-probe.txt"
 uri="s3://sentropic-pgbackup/immo/v1220/tonight/operator-prep-$(date -u +%Y%m%dT%H%M%SZ)-$$.txt"
+s3_status=0
+: > "$private/s3-probe-status.txt"
 for operation in put ls delete; do
   case $operation in
     put) args=(cp "$private/s3-probe.txt" "$uri") ;;
-    ls) args=(ls "$uri") ;;
+    ls) args=(ls 's3://sentropic-pgbackup/immo/v1220/tonight/') ;;
     delete) args=(rm "$uri") ;;
   esac
   code=0
   timeout --kill-after=5s 45s s5cmd --endpoint-url "$endpoint" "${args[@]}" > "$private/s3-probe.result" 2>&1 || code=$?
   printf '3 S3 %s exit=%s\n' "$operation" "$code"
+  printf '%s exit=%s\n' "$operation" "$code" >> "$private/s3-probe-status.txt"
   if (( code != 0 )); then
     # Only a fixed service-error token may leave the private result file.
     awk 'match($0,/(AccessDenied|InvalidAccessKeyId|SignatureDoesNotMatch|NoSuchBucket|RequestTimeTooSkewed)/) {print "S3 error=" substr($0,RSTART,RLENGTH); exit}' "$private/s3-probe.result"
-    printf '3 MISSING backup writer permission; remaining prerequisites continue\n'
-    break
+    s3_status=3
   fi
 done
 unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
+bash "$(dirname "$0")/operator-history.sh"
 source "$(dirname "$0")/operator-prep-local.sh"
+exit "$s3_status"

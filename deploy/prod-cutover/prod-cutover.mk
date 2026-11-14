@@ -2,6 +2,9 @@
 SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
 .DEFAULT_GOAL := help
+.PHONY: operator-prep
+operator-prep:
+	@$(MAKE) --no-print-directory -f deploy/prod-cutover/operator-prep.mk operator-prep ENV=$(ENV)
 override ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/../..)
 export COMPOSE_DISABLE_ENV_FILE := 1
 export DOTENV_CONFIG_PATH := /dev/null
