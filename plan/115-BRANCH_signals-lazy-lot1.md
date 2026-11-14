@@ -36,7 +36,7 @@
 - [x] Versioned projection, transactional refresh, idempotent backfill and migration.
 - [x] Authorized SQL aggregation and exact class resolution.
 - [x] Coordinated map/rail client; remove detail substitution.
-- [ ] Unit matrix, reference parity, PostgreSQL rights/dates/reprojection/plans.
+- [x] Unit matrix, reference parity, PostgreSQL rights/dates/reprojection/plans.
 - [ ] Typecheck, lint, targeted API/UI/E2E gates.
-- [ ] Representative local cold unlimited measurement, budget 1 second.
+- [x] Representative local cold unlimited measurement: 628.884 ms before, 141.048 ms after; 21,615 targets / 763 cities. Application cold, PostgreSQL buffers uncontrolled; budget passed.
 - [ ] Independent review, PR to main, measurements and activation/rollback report.
