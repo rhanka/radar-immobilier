@@ -17,7 +17,7 @@ describeDb("PostgreSQL recent signal reannotation", () => {
     }
     await db.execute(sql`INSERT INTO signal_class_annotations (city_slug,node_type,node_id,classe,reason,source)
       VALUES (${citySlug},'Signal','manual','ecarte','Human decision','manual')`);
-    const classify = vi.fn(async () => ({ classe: "pertinent" as const, reason: "Housing",
+    const classify = vi.fn(async () => ({ classe: "pertinent" as const, reason: "Housing", ambiguous: true,
       model: "gpt-6-astra", effort: "medium" }));
     const options = { repository: createReannotationRepository(db), classify, now,
       primary: { provider: "openai" as const, model: "gpt-6-astra", effort: "medium" },
@@ -28,7 +28,7 @@ describeDb("PostgreSQL recent signal reannotation", () => {
     expect(await runReannotation({ ...options, apply: true })).toMatchObject({ written: 1 });
     const stored = await db.execute(sql`SELECT * FROM signal_class_annotations WHERE source='ai'`);
     expect(stored.rows).toHaveLength(1);
-    expect(stored.rows[0]).toMatchObject({ source: "ai", model: "gpt-6-astra", effort: "medium",
+    expect(stored.rows[0]).toMatchObject({ source: "ai", ambiguous: true, model: "gpt-6-astra", effort: "medium",
       prompt_id: "p0-v1", prompt_sha256: "a".repeat(64), pipeline_run_id: options.pipelineRunId });
     expect(await runReannotation({ ...options, repository: createReannotationRepository(db), apply: true }))
       .toMatchObject({ skippedUnchanged: 1, skippedManual: 1, written: 0, classified: 0 });
