@@ -26,6 +26,8 @@ describe("fine signal metadata on PostgreSQL", () => {
     await f.db.insert(graphNodes).values([
       { id: "known", type: "Signal", citySlug, label: "Projet de zonage résidentiel", props },
       { id: "unknown", type: "DesignationEvent", citySlug, label: "Projet de zonage résidentiel", props: {} },
+      { id: "piia-description", type: "Signal", citySlug, label: "PIIA — secteur résidentiel",
+        props: { properties: { category: "piia", etape: "adoption", description: "Projet de quatre logements" } } },
     ]);
     const refresh = () => f.db.transaction(async (tx) => {
       await lockCityGraph(tx, citySlug);
