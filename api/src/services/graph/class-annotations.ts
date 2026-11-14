@@ -91,8 +91,3 @@ export async function readClassAnnotations(db: Database, citySlug: string): Prom
   }
   return annotations;
 }
-
-/** Stored annotations remain visible independently of refresh write settings. */
-export async function readVisibleClassAnnotations(db: Database, citySlug: string): Promise<Map<string, ClassAnnotation>> {
-  return readClassAnnotations(db, citySlug);
-}
