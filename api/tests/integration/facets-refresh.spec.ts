@@ -13,11 +13,13 @@ import { readCityFacets } from "../../src/services/facets/reader.js";
 import { upsertGraphAtomic } from "../../src/services/graph/graph-store.js";
 import { facetFixture, writeDisplayedFacet as writeFacet } from "./facets-fixture.js";
 import { facetAuth, facetCookie } from "./facets-http-fixture.js";
+import { writeClassAnnotation } from "../../src/services/graph/class-annotations.js";
 
 const { db, pool } = createDb(loadConfig());
 afterAll(() => pool.end());
 it.each(["discard", "select"] as const)("should preserve main API bytes for Alice and Bob after manual %s with flag zero", async (action) => {
   vi.stubEnv("REFRESH_SINGLE_PASS", "0");
+  vi.stubEnv("REFRESH_CLASSIFY_MODE", "off");
   try {
     const alice = await facetFixture(db);
     const bob = await facetFixture(db);
@@ -33,6 +35,12 @@ it.each(["discard", "select"] as const)("should preserve main API bytes for Alic
     };
     // Main returns this same unannotated payload before and after personal actions.
     const baseline = await get(cookies[0]!);
+    const getBob = async () => {
+      const response = await app.request(`/api/graph-signals/${bob.target.citySlug}`, { headers: { cookie: cookies[1]! } });
+      expect(response.status).toBe(200);
+      return response.text();
+    };
+    const bobBaseline = await getBob();
     expect(baseline).not.toContain('"classAnnotation"');
     expect(await get(cookies[1]!)).toBe(baseline);
     await writeFacet(db, alice.sub, { action, target: alice.target,
@@ -41,6 +49,18 @@ it.each(["discard", "select"] as const)("should preserve main API bytes for Alic
     for (const cookie of cookies) expect(await get(cookie)).toBe(baseline);
     const annotations = await db.execute(sql`SELECT node_id FROM signal_class_annotations WHERE city_slug = ${alice.target.citySlug}`);
     expect(annotations.rows).toEqual([]);
+    // Simulate activation, then rollback to off without deleting AI history.
+    await writeClassAnnotation(db, { citySlug: alice.target.citySlug, nodeType: alice.target.type,
+      nodeId: alice.target.id, source: "ai", classe: "ecarte", reason: "AI decision", ambiguous: false,
+      model: "test", effort: "low", promptId: "v2", promptSha256: "a".repeat(64),
+      inputSha256: "b".repeat(64), pipelineRunId: "prior-run" });
+    // The manual act is protected; put a second AI-only annotation on Bob's act.
+    await writeClassAnnotation(db, { citySlug: bob.target.citySlug, nodeType: bob.target.type,
+      nodeId: bob.target.id, source: "ai", classe: "ecarte", reason: "AI decision", ambiguous: false,
+      model: "test", effort: "low", promptId: "v2", promptSha256: "a".repeat(64),
+      inputSha256: "b".repeat(64), pipelineRunId: "prior-run" });
+    expect(await getBob()).toBe(bobBaseline);
+    for (const cookie of cookies) expect(await get(cookie)).toBe(baseline);
   } finally {
     vi.unstubAllEnvs();
   }
