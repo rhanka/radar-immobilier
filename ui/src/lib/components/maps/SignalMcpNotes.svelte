@@ -25,7 +25,7 @@
     <p><small>{note.source === "mcp" ? mcpBadge(note) : "Note utilisateur"}</small><br />{note.text}</p>
   {/each}
   <form aria-label="Ajouter une note" on:submit|preventDefault={submit}>
-    <label>Note libre<textarea bind:value={text} maxlength="2000" rows="2" disabled={saving} /></label>
+    <label>Note libre<textarea bind:value={text} maxlength="2000" rows="2" disabled={saving}></textarea></label>
     <button type="submit" disabled={saving || !text.trim()}>Ajouter la note</button>
     {#if error}<p role="alert">{error}</p>{/if}
   </form>

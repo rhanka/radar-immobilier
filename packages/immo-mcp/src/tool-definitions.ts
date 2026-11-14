@@ -246,9 +246,9 @@ export const RAW_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
 
 /** Every tool contract in registration order (domain first, raw-data second). */
 export const ALL_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
-  ...SIGNAL_TOOL_DEFINITIONS,
   ...TOOL_DEFINITIONS,
   ...RAW_TOOL_DEFINITIONS,
+  ...SIGNAL_TOOL_DEFINITIONS,
 ];
 
 /** Scope required per tool name (mirrors the registrar enforcement). */

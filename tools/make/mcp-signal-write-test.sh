@@ -6,6 +6,8 @@ runner_image=node:24-bookworm-slim
 [[ $mode != test-ui-e2e ]] || runner_image=radar-immobilier-e2e:dev
 run_dir="$PWD/tmp/mcp-signal-write-test"
 mkdir -p "$run_dir"
+exec 9>"$run_dir/campaign.lock"
+flock 9
 export COMPOSE_DISABLE_ENV_FILE=1
 unset COMPOSE_ENV_FILES COMPOSE_FILE COMPOSE_PROFILES
 cat > "$run_dir/compose.yml" <<YAML

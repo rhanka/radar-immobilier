@@ -1,4 +1,3 @@
-/* global console */
 // Synthetic MCP state for browser rendering. Protocol elicitation is covered by the SDK integration suite.
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";

@@ -21,7 +21,7 @@ const config = JSON.parse(readFileSync(
 };
 
 describe("Immo provider definition", () => {
-  it("should lock exactly the twelve public tool names", () => {
+  it("should lock exactly the seventeen public tool names", () => {
     expect([...IMMO_TOOL_NAMES]).toEqual([
       "search_lots",
       "get_lot_card",
@@ -35,6 +35,7 @@ describe("Immo provider definition", () => {
       "get_lots_geojson",
       "get_grille_pdf",
       "get_pv_pdf",
+      "list_class_reasons", "get_signal_classification", "classify_signal", "confirm_classification", "annotate_signal",
     ]);
   });
 
@@ -57,7 +58,7 @@ describe("Immo provider definition", () => {
     expect(config.provider.id).toBe(IMMO_PROVIDER_ID);
     expect(config.provider.centralRegistryRequest).toBe("never");
     expect(config.entryScope).toBe(IMMO_ENTRY_SCOPE);
-    expect(config.compatibility.toolCount).toBe(12);
+    expect(config.compatibility.toolCount).toBe(17);
     expect(config.tools.map((t) => t.name)).toEqual([...IMMO_TOOL_NAMES]);
     for (const tool of config.tools) {
       expect(tool.scope).toBe(IMMO_TOOL_SCOPES[tool.name as (typeof IMMO_TOOL_NAMES)[number]]);

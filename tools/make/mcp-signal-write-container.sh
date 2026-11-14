@@ -7,7 +7,7 @@ case "$mode" in
   lint) npx --no-install eslint . ;;
   test-api) npm run test --workspace=api -- ${scope:-src/services/graph/signal-mcp-db.test.ts src/routes/signal-mcp.test.ts} ;;
   test-mcp)
-    npm run test --workspace=packages/immo-mcp -- ${scope:-src/signal-tools.test.ts}
+    npm run test --workspace=packages/immo-mcp -- --exclude '**/*.e2e.test.ts' $scope
     npm run test --workspace=api -- tests/integration/signal-mcp-client.spec.ts ;;
   test-ui) npm run test --workspace=ui -- ${scope:-src/lib/components/maps/SignalMcpNotes.test.ts} ;;
   test-ui-e2e) bash tools/make/mcp-signal-write-browser.sh ;;
