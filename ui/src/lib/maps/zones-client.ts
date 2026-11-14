@@ -151,9 +151,9 @@ export function resolveZonesUrl(
   const base = baseUrl ? baseUrl.replace(/\/$/, "") : "";
   const path = `/api/geo/collections/${encodeURIComponent(zonesCollectionId(citySlug))}/items`;
   const params = new URLSearchParams();
-  if (opts.displayOnly) params.set("coordPrecision", "6");
-  if (opts.limit !== undefined) params.set("limit", String(opts.limit));
-  if (opts.bbox) params.set("bbox", opts.bbox.join(","));
+  if (opts.displayOnly) params.set("profile", "display");
+  if (!opts.displayOnly && opts.limit !== undefined) params.set("limit", String(opts.limit));
+  if (!opts.displayOnly && opts.bbox) params.set("bbox", opts.bbox.join(","));
   const qs = params.toString();
   return `${base}${path}${qs ? `?${qs}` : ""}`;
 }
@@ -172,11 +172,19 @@ export async function fetchZones(
   opts: FetchZonesOptions = {},
 ): Promise<ZonesResponse> {
   const url = resolveZonesUrl(citySlug, opts);
-  const res = await fetchWithTimeout(url, {
+  let res = await fetchWithTimeout(url, {
     signal: opts.signal,
     timeoutMs: opts.timeoutMs,
   });
   const collectionId = zonesCollectionId(citySlug);
+  if (opts.displayOnly && [400, 404, 503].includes(res.status)) {
+    console.warn(`[geo display] ${collectionId} HTTP ${res.status}; falling back to exact coordPrecision=6`);
+    const exactUrl = resolveZonesUrl(citySlug, { ...opts, displayOnly: false });
+    res = await fetchWithTimeout(`${exactUrl}${exactUrl.includes("?") ? "&" : "?"}coordPrecision=6`, {
+      signal: opts.signal,
+      timeoutMs: opts.timeoutMs,
+    });
+  }
   if (res.status === 404) {
     return {
       ok: false,

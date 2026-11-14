@@ -26,7 +26,7 @@ Reduce map transfers while preserving exact geometry for details and calculation
   - None.
 
 ## Feedback Loop
-- No external deployment. Activation follows geo#439 in preprod.
+- No external deployment. M1 display contract follows geo#440 in preprod.
 - Review consensus unavailable: this session exposes no h2a MCP launcher. No peer verdict is asserted.
 
 ## Orchestration Mode (AI-selected)
@@ -50,3 +50,6 @@ Reduce map transfers while preserving exact geometry for details and calculation
 - [x] Lot 4: push and open PR to main; no merge.
   - [x] PR: https://github.com/rhanka/radar-immobilier/pull/1109
   - [x] CI checks started; merge remains outside this lane.
+- [x] Lot 5: load M1 display mirrors once per collection; log explicit exact fallback for HTTP 400/404/503; preserve exact item details and browser cache validation.
+  - [x] Typecheck and lint pass (warnings only); targeted UI tests pass in 7 files, including 16 display-boundary cases.
+- [ ] Lot 6: validate M1 client tests and real-click browser scenarios; push and update PR #1109.
