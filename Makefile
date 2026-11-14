@@ -284,6 +284,10 @@ db-migrate: chown-dev-node-modules ## Run Drizzle migrations against the running
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm -T api npm run db:migrate --workspace=api
 
 .PHONY: db-backup
+.PHONY: db-backfill-signal-metadata
+db-backfill-signal-metadata: chown-dev-node-modules ## Idempotently rebuild fine signal metadata under city locks
+	$(COMPOSE_RUN_API_NODEPS) npx tsx api/src/db/scripts/backfill-signal-metadata.ts
+
 db-backup: ## pg_dump backup
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) exec -T postgres \
 	  pg_dump -U $(POSTGRES_USER) $(POSTGRES_DB) > backups/$(ENV)-$(shell date +%Y%m%d-%H%M%S).sql

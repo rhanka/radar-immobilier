@@ -23,6 +23,7 @@ import { lockWorkspace } from "../workspaces/mutations.js";
 import { approvedAccountId, resolveWorkspaceAccess } from "../workspaces/store.js";
 import { requireScopedEpochFor } from "./activation.js";
 import { ScopeError } from "./scope.js";
+import { refreshSignalMetadata } from "./signal-metadata-projection.js";
 import {
   SIGNAL_PROJECTION_MODE,
   sourceContentDigest,
@@ -77,6 +78,7 @@ export async function bumpGraphSourceRevision(
     sourceRef: graphNodes.sourceRef, props: graphNodes.props })
     .from(graphNodes).where(eq(graphNodes.citySlug, citySlug));
   const signals = rows.filter((row) => row.type === "Signal" || row.type === "DesignationEvent");
+  await refreshSignalMetadata(tx, citySlug, signals);
   const contentDigest = sourceContentDigest(signals);
   const [current] = await tx.select().from(graphSourceRevisions)
     .where(eq(graphSourceRevisions.citySlug, citySlug));
