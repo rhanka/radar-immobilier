@@ -22,6 +22,7 @@ type ScopedTx = Parameters<Parameters<Database["transaction"]>[0]>[0];
 export async function appendScopedTransition(
   tx: ScopedTx, ownerId: string, command: FacetCommand, streamId: string,
   facet: string, basket: string | null, state: string, fingerprint: string,
+  classFeedbackId?: string,
 ) {
   const { target } = command;
   const reasonCode = state === "active" ? command.reasonCode ?? null : null;
@@ -52,6 +53,7 @@ export async function appendScopedTransition(
     await tx.update(facetEvents).set({ supersededBy: id }).where(eq(facetEvents.id, current.id));
   }
   const [event] = await tx.insert(facetEvents).values({
+    classFeedbackId: classFeedbackId ?? null,
     id, ownerId, actorId: ownerId, citySlug: target.citySlug, nodeType: target.type,
     nodeId: target.id, facet, basket, state, reasonCode,
     profileId: reasonCode ? FACET_PROFILE : null,

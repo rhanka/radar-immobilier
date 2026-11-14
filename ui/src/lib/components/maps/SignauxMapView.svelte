@@ -191,6 +191,7 @@
     filterNodesByClassement,
   } from "$lib/signals/signal-classement.js";
   import { applyClassement as applyClassementWrite, classementWriteErrorMessage, fetchReasonCodes } from "$lib/signals/signal-classement-client.js";
+  import { postClassFeedback, type FeedbackChoice } from "$lib/signals/class-feedback-client.js";
   import {
     buildSignauxLotLegend,
     lotLineColorExpression,
@@ -957,6 +958,30 @@
     classementFilter = next;
     syncFilterRoute();
     if (visibilityChanged && selectedCity) void loadDetailForCity(selectedCity.municipality.slug);
+  }
+  async function handleClassFeedback(node: GraphSignalNode, choice: FeedbackChoice): Promise<boolean> {
+    const workspaceId = scopedWorkspaceId;
+    const citySlug = node.citySlug;
+    if (!workspaceId || !citySlug) return false;
+    const key = classementKey(node.type, node.id, citySlug);
+    if (classementInFlight.has(key)) return false;
+    const current = classementMap.get(key);
+    if (!current) return false;
+    classementInFlight = new Set([...classementInFlight, key]);
+    try {
+      await postClassFeedback({ workspaceId }, node, current, choice);
+      if (scopedWorkspaceId === workspaceId) {
+        const errors = new Map(classementErrors); errors.delete(key); classementErrors = errors;
+        if (selectedCity?.municipality.slug === citySlug) await loadDetailForCity(citySlug, { silent: true });
+        void load();
+      }
+      return true;
+    } catch (error) {
+      if (scopedWorkspaceId === workspaceId) classementErrors = new Map(classementErrors).set(key, classementWriteErrorMessage(error));
+      return false;
+    } finally {
+      const next = new Set(classementInFlight); next.delete(key); classementInFlight = next;
+    }
   }
   async function handleApplyClassement(
     node: GraphSignalNode,
@@ -3047,6 +3072,7 @@
       {classementError}
       {classementErrors}
       onApplyClassement={(node, nextClass, reasonCode) => void handleApplyClassement(node, nextClass, reasonCode)}
+      onClassFeedback={handleClassFeedback}
     />
   </svelte:fragment>
 </ViewLayout>
