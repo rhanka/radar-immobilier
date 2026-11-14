@@ -22,7 +22,8 @@ for (const signal of ['SIGTERM', 'SIGKILL']) test(`controller ${signal} during a
   const present = () => r.run('docker', ['ps', '-q', '--filter', `label=${containers.LABEL}=${run}`]).trim();
   try {
     for (let i = 0; i < 500 && !present(); i++) await delay(50);
-    assert.ok(present(), `hook started: ${diagnostic}`);
+    const state = r.run('docker', ['ps', '-a', '--filter', `label=${containers.LABEL}=${run}`, '--format', '{{.State}}']);
+    assert.ok(present(), `hook started: controller=${controller.exitCode}, state=${state}, ${diagnostic}`);
     process.kill(-controller.pid, signal);
     await exited;
     if (signal === 'SIGKILL') {
