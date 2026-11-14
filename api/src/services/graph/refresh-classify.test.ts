@@ -5,6 +5,7 @@ import { refreshClassifyConfig } from "./refresh-classify-config.js";
 import { classifyPublishedRefresh } from "./refresh-classify.js";
 import { createRefreshModelPolicy } from "./refresh-model-policy.js";
 import { openRefreshState } from "./refresh-state.js";
+import { canonicalHash } from "./replay/canonical-json.js";
 
 const repository = vi.hoisted(() => ({ list: vi.fn(), annotation: vi.fn(), write: vi.fn() }));
 vi.mock("./reannotate-repository.js", () => ({ createReannotationRepository: () => repository }));
@@ -14,8 +15,10 @@ describe("post-publication classification isolation", () => {
     vi.clearAllMocks();
     const store = new FakeGraphStore();
     const objectStore = store as unknown as RunPvRefreshOptions["store"];
-    const handle = await openRefreshState(objectStore, { citySlug: "city", inputHash: "input", baselineHash: "baseline",
+    const baseline = { nodes: [] };
+    const handle = await openRefreshState(objectStore, { citySlug: "city", inputHash: "input", baselineHash: canonicalHash(baseline),
       profileHash: "profile", registryHash: "registry", packageVersion: "0.18.0", modelPolicy: "B", exclusions: [] }, 100);
+    store.seed(`graphify-34-backups/refresh-018-${handle.state.identityHash.slice(7)}/graph/city/latest.json`, JSON.stringify(baseline));
     const onNote = vi.fn();
     const controller = new AbortController();
     if (failure === "cancellation") controller.abort();
@@ -29,7 +32,7 @@ describe("post-publication classification isolation", () => {
     const classification = { ...config, models, prompt: { id: "v2", sha256: "a".repeat(64), text: "v2" } };
     const writes = [...store.puts];
     await expect(classifyPublishedRefresh({ classification,
-      db: {} as RunPvRefreshOptions["db"], store: objectStore,
+      db: {} as RunPvRefreshOptions["db"], store: objectStore, snapshot: { nodes: [], edges: [] },
       handle: failure === "evidence" ? { ...handle, state: { ...handle.state,
         completedChunks: { missing: { key: "missing-chunk", hash: "sha256:absent" } } } } : handle,
       citySlug: "city", pipelineRunId: "run", now: new Date("2026-11-13T17:00:00Z"),

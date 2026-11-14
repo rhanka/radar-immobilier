@@ -9,30 +9,34 @@ import * as graphStore from "./graph-store.js";
 import { RefreshRunBudget } from "./refresh-run-budget.js";
 
 describeDb("two-step refresh with PostgreSQL", () => {
-  it("should cover the document while stopping classification at the shared detection budget", async () => {
+  it("should cover the document while bounding classification separately from detection", async () => {
     const { db } = await database();
-    const budget = new RefreshRunBudget({ calls: 3, tokens: 1_000_000, durationMs: 60_000 });
+    const budget = new RefreshRunBudget({ calls: 1, tokens: 1_000_000, durationMs: 60_000 });
     const f = await twoStepFixture(db, "two-step", false, budget);
     expect(await f.run()).toMatchObject({ status: "published", coverage: { covered: 1 } });
     expect(f.detectionRequests).toHaveLength(2);
     expect(f.classificationRequests).toHaveLength(1);
-    expect(budget).toMatchObject({ calls: 3, haltedBy: "calls" });
+    expect(budget).toMatchObject({ calls: 1, haltedBy: "calls" });
     expect((await readClassAnnotations(db, "waterloo")).size).toBe(1);
     expect(f.notes.find(({ note }) => note === "classification-completed")?.detail)
       .toMatchObject({ written: 1, haltedBy: "calls" });
   });
 
-  it("should not reclassify an existing unchanged v2 act emitted by another extraction", async () => {
+  it.each(["missing", "v1", "v2"])("should not classify an existing unchanged act with %s annotation", async (annotation) => {
     const { db } = await database();
     const first = await twoStepFixture(db, "two-step");
     await first.run();
-    const second = await twoStepFixture(db, "two-step");
+    if (annotation === "missing") await db.execute(sql`DELETE FROM signal_class_annotations`);
+    if (annotation === "v1") await db.execute(sql`UPDATE signal_class_annotations SET prompt_id='p0-v1'`);
+    const second = await twoStepFixture(db, "two-step", false, undefined, " next document");
     second.store.seed("graph/waterloo/latest.json", await first.store.get("graph/waterloo/latest.json"));
     await second.run();
     expect(second.detectionRequests).toHaveLength(2);
     expect(second.classificationRequests).toHaveLength(0);
     expect(second.notes.find(({ note }) => note === "classification-completed")?.detail)
-      .toMatchObject({ skippedUnchanged: 2, written: 0 });
+      .toMatchObject({ candidates: 0, written: 0 });
+    expect((await db.execute(sql`SELECT DISTINCT prompt_id FROM signal_class_annotations`)).rows)
+      .toEqual(annotation === "missing" ? [] : [{ prompt_id: annotation === "v1" ? "p0-v1" : "v2" }]);
   });
 
   it("should classify after resuming a published document without another detection call", async () => {

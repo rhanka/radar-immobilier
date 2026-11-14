@@ -1,7 +1,7 @@
 # Feature: Detection B followed by per-act P0 v2 classification
 
 ## Objective
-- [x] Apply the owner's 2026-11-13 decision: preserve detection B, classify existing acts afterwards.
+- [x] Apply the owner's decision: preserve detection B; classify only new or changed acts in the current two-step run.
 
 ## Scope / Guardrails
 - [x] Branch feat/refresh-two-step; base feat/refresh-single-pass-v2 (#1102, stacked on #1099); no merge or rebase of other lanes.
@@ -10,7 +10,7 @@
 - [x] Test project test-refresh-two-step; API 18896, UI 15396, Maildev 11996, PostgreSQL 15596, S3 19196, Obscura 19296, SMTP 11096.
 
 ## Branch Scope Boundaries (MANDATORY)
-- [x] Allowed Paths: api/src/services/graph/{refresh-*,reannotate-*}, api/src/scripts/{refresh-pv,reannotate-signals}.ts, deploy/k8s/34-refresh-cronjob.yaml, deploy/k8s/refresh-cronjobs/{refresh-018.mk,verify-renders.test.sh}, docs/spec/SPEC_EVOL_REFRESH_TWO_STEP.md, this plan.
+- [x] Allowed Paths: api/src/services/graph/{refresh-*,reannotate-*}, api/src/scripts/{refresh-pv,reannotate-signals}.ts, api/src/scripts/refresh-pv.test.ts, deploy/k8s/34-refresh-cronjob.yaml, deploy/k8s/refresh-cronjobs/{refresh-018.mk,verify-renders.test.sh}, docs/spec/SPEC_EVOL_REFRESH_TWO_STEP.md, this plan.
 - [x] Forbidden Paths: Makefile, docker-compose*.yml, rules/**, AGENTS.md, CLAUDE.md, GEMINI.md, other branch plans.
 - [x] Conditional Paths: migrations and workflows require an exception; BR1103-EX2 covers the replay correction for unmerged migration 0046. No workflow change.
 - [x] BR1103-EX2: failing required validation authorizes api/src/services/graph/purge-ai-annotations-db.test.ts and api/drizzle/0046_signal_class_ambiguity.sql. Evidence: rollback tests expected implicit activation/manual provenance synthesis; CI run 43530288804 fails migration replay on duplicate ambiguous column. Impact: align tests with explicit mode and inherited API contract; make the unmerged v2 migration replayable. Rollback: revert these scoped fixes. No deployed migration or workflow is changed.
@@ -47,7 +47,7 @@
 - [x] Review correction: integrate #1099 head 8e4b8e2ba into v2, then merge updated v2 locally; no PR merge.
 - [x] Review correction: bound classification SQL sessions with statement/lock timeouts and destroy their dedicated connection on cancellation; bound each act and run.
 - [x] Review correction: reserve calls and conservative token allowances before every model send, across detection/verification/classification; share the sweep deadline and halt extraction cleanly at exhaustion.
-- [x] Review correction: unchanged v2 inputs are skipped regardless of model/prompt changes; missing v2 annotations remain eligible. Add persisted repeated-extraction and new/changed/v1/v2 tests; retain manual preflight independently of API overlays.
+- [x] Earlier review correction (superseded below): unchanged v2 inputs skipped regardless of model/prompt changes; missing v2 annotations remained eligible. Manual preflight retained independently of API overlays.
 - [x] Review correction: API cards and counts ignore persisted AI overlays at off, including after prior activation; retain inherited #1099 manual payload parity tests.
 - [x] Review correction: propagate the sweep stop signal to detection too; test successful document coverage with classification stopped at the shared call cap.
 - [x] Review correction: keep inactive selections as main no-ops at off, even with stored AI history; align route test doubles with the visible-annotation reader; install transaction-local writer timeouts for every caller.
@@ -55,3 +55,4 @@
 - [x] Final correction gate: typecheck and lint passed (8 Svelte warnings, 1 ESLint warning); targeted test-api passed 218 tests in 23 files, including 50 PostgreSQL/storage integration tests and migration replays; test-refresh-renders passed 62 checks plus 4 purge guards. Logs: tmp/review-{static-final,api-final,renders}.log.
 - [x] Final correction isolation: PostgreSQL backend exit 2 and slow fsync recovery were observed on the initial disk-backed test stack. Final campaign used a fresh tmpfs PGDATA under the same isolated project, unchanged assertions/timeouts and --maxWorkers=1. Clean completed with down -v; no root/dev data touched.
 - [x] Final correction inspection: #1099 head 8e4b8e2ba is an ancestor; remote v2 is ac0641632 and was merged by 45f40c893. Main comparison is b7724bdd9. Off tests preserve manual API bytes and restore cards/counts/inactive-selection no-ops despite existing AI rows. No detection prompt/schema edits; no PR merge or deployment.
+- [x] Final owner decision: compare classification input SHA against the immutable pre-publication archive, including projection resumes. Existing unchanged acts are excluded with missing/v1/v2 annotations. Catch-up is exclusively the 30-day reannotation, dry-run then apply on owner GO.

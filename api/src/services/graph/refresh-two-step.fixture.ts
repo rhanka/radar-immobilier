@@ -13,10 +13,10 @@ import { REFRESH_VERIFICATION_PROMPT } from "./refresh-verification-prompt.js";
 import type { RefreshRunBudget } from "./refresh-run-budget.js";
 
 export async function twoStepFixture(db: Database, mode: "off" | "two-step", failClassification = false,
-  budget?: RefreshRunBudget) {
+  budget?: RefreshRunBudget, documentSuffix = "") {
   const bounded = (client: TextJsonGenerationClient, signal: AbortSignal) => budget ? budget.wrap(client, signal) : client;
   const oracle = JSON.parse(await readFile(new URL("../../../tests/fixtures/refresh-018/oracle.json", import.meta.url), "utf8"));
-  const bytes = new TextEncoder().encode("synthetic exact PDF bytes");
+  const bytes = new TextEncoder().encode(`synthetic exact PDF bytes${documentSuffix}`);
   const sha = createHash("sha256").update(bytes).digest("hex");
   const key = `raw/proces-verbaux-waterloo/cas/${sha}.pdf`;
   const store = new FakeGraphStore();
@@ -39,13 +39,13 @@ export async function twoStepFixture(db: Database, mode: "off" | "two-step", fai
   const fallback: RefreshModel = { provider: "gemini", model: "gemini-3.8-flash", effort: "low" };
   const documentModels = createRefreshModelPolicy({ primary, fallback, verification: fallback,
     forceFallback: false, primaryQualityAttempts: 2, timeoutMs: 1000,
-    createClient: (model, signal) => bounded({ mode: "mesh", provider: model.provider, model: model.model,
+    createClient: (model) => ({ mode: "mesh", provider: model.provider, model: model.model,
       async generateJson(request) {
         detectionRequests.push({ model, prompt: request.prompt, schema: request.schema });
         const verify = request.prompt.startsWith(REFRESH_VERIFICATION_PROMPT);
         await request.validateResponse?.(JSON.stringify(verify ? { decisions: [] } : body));
         return { status: "completed", mode: "mesh", provider: model.provider, model: model.model, audit: {} };
-      } }, signal),
+      } }),
   });
   const config = refreshClassifyConfig({});
   const prompt = await loadSinglePassPrompt();

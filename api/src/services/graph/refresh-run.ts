@@ -340,7 +340,7 @@ async function publishSnapshot(options: RunPvRefreshOptions, initial: RefreshSta
     handle = await completeStage(options.store, handle, "projected", snapshotHash, now);
   }, { resume, now });
   if (options.classification) await classifyPublishedRefresh({ classification: options.classification,
-    db: options.db, store: options.store, handle, citySlug: options.citySlug,
+    db: options.db, store: options.store, handle, snapshot, citySlug: options.citySlug,
     pipelineRunId: options.cycleId ?? backupId, now: now(),
     ...(options.signal ? { signal: options.signal } : {}),
     ...(options.onNote ? { onNote: options.onNote } : {}) });
