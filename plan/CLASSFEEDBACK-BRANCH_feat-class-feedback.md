@@ -14,6 +14,8 @@
 - [x] Conditional: existing annotation tests and transport fixtures when additive dates require updated assertions.
 
 ## Feedback Loop
+- [x] PR #1104 replay correction: guard 0047 columns, tables, index, functions, triggers and archive constraint. Backfill only missing creation dates and history snapshots. Regression removes the journal row after an annotation update and asserts unchanged creation dates and history.
+- [x] Replay verification: migrate-idempotence (2), artifacts-migrations (6), feedback migration (2) and UI feedback/annotation labels (11) pass. Initial expanded API run: 40 assertions pass; feedback afterAll exceeds 20 s and facets-refresh expects a response without the redacted manual classAnnotation. Owner: i-cond; acceptance: align that fixture with the public privacy projection and rerun facets-refresh. No production code or timeout changed for these observations.
 - [x] PR #1104 correction: reserve feedback migration 0047, idx 46, timestamp 1793000000017 after v2's 0046 (idx 45, timestamp 1793000000016). No 0046 snapshot exists: this repository uses hand-authored migrations after snapshots 0000/0001.
 - [x] Add PostgreSQL migration regressions for fresh installation, incremental upgrade preserving the previous AI annotation, and idempotent replay; assert v2's 0046 precedes 0047 when present.
 - [x] Reproduce all five stale/concurrent head cases on PostgreSQL (5 failed, 8 passed before correction). Compare both selection and archive heads, including null, under the workspace lock before any transition; retain exact AI timestamp/class checks and the shared feedback/reclassification transaction.

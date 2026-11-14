@@ -1,9 +1,9 @@
-ALTER TABLE signal_class_annotations ADD COLUMN created_at timestamptz;
-UPDATE signal_class_annotations SET created_at = updated_at;
+ALTER TABLE signal_class_annotations ADD COLUMN IF NOT EXISTS created_at timestamptz;
+UPDATE signal_class_annotations SET created_at = updated_at WHERE created_at IS NULL;
 ALTER TABLE signal_class_annotations ALTER COLUMN created_at SET DEFAULT now();
 ALTER TABLE signal_class_annotations ALTER COLUMN created_at SET NOT NULL;
 --> statement-breakpoint
-CREATE TABLE signal_class_annotation_history (
+CREATE TABLE IF NOT EXISTS signal_class_annotation_history (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   city_slug text NOT NULL, node_type text NOT NULL, node_id text NOT NULL,
   classe text NOT NULL CHECK (classe IN ('pertinent','a_surveiller','ecarte','non_classe')),
@@ -15,9 +15,15 @@ CREATE TABLE signal_class_annotation_history (
 INSERT INTO signal_class_annotation_history
   (city_slug,node_type,node_id,classe,reason,source,model,effort,prompt_id,prompt_sha256,pipeline_run_id,input_sha256,created_at)
   SELECT city_slug,node_type,node_id,classe,reason,source,model,effort,prompt_id,prompt_sha256,pipeline_run_id,input_sha256,updated_at
-  FROM signal_class_annotations WHERE source='ai';
+  FROM signal_class_annotations a WHERE source='ai' AND NOT EXISTS (
+    SELECT 1 FROM signal_class_annotation_history h
+    WHERE (h.city_slug,h.node_type,h.node_id,h.classe,h.reason,h.source,h.model,h.effort,
+      h.prompt_id,h.prompt_sha256,h.pipeline_run_id,h.input_sha256,h.created_at)
+      IS NOT DISTINCT FROM (a.city_slug,a.node_type,a.node_id,a.classe,a.reason,a.source,a.model,a.effort,
+        a.prompt_id,a.prompt_sha256,a.pipeline_run_id,a.input_sha256,a.updated_at)
+  );
 --> statement-breakpoint
-CREATE FUNCTION record_signal_class_annotation() RETURNS trigger LANGUAGE plpgsql AS $$
+CREATE OR REPLACE FUNCTION record_signal_class_annotation() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
   IF NEW.source = 'ai' THEN
     INSERT INTO signal_class_annotation_history
@@ -27,10 +33,11 @@ BEGIN
   END IF;
   RETURN NEW;
 END $$;
+DROP TRIGGER IF EXISTS signal_class_annotation_record ON signal_class_annotations;
 CREATE TRIGGER signal_class_annotation_record AFTER INSERT OR UPDATE ON signal_class_annotations
   FOR EACH ROW EXECUTE FUNCTION record_signal_class_annotation();
 --> statement-breakpoint
-CREATE TABLE signal_class_feedback (
+CREATE TABLE IF NOT EXISTS signal_class_feedback (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   city_slug text NOT NULL, node_type text NOT NULL, node_id text NOT NULL,
   workspace_id uuid NOT NULL REFERENCES workspaces(id),
@@ -49,20 +56,29 @@ CREATE TABLE signal_class_feedback (
   CHECK ((verdict='up' AND human_class=judged_class) OR
     (verdict='down' AND human_class<>judged_class AND human_class<>'non_classe' AND reason_code IS NOT NULL))
 );
-CREATE INDEX signal_class_feedback_scope_idx ON signal_class_feedback(workspace_id,city_slug,actor_id);
+CREATE INDEX IF NOT EXISTS signal_class_feedback_scope_idx ON signal_class_feedback(workspace_id,city_slug,actor_id);
 --> statement-breakpoint
-ALTER TABLE facet_events ADD COLUMN class_feedback_id uuid REFERENCES signal_class_feedback(id) DEFERRABLE INITIALLY DEFERRED;
-ALTER TABLE facet_events DROP CONSTRAINT chk_facet_events_archive_reason;
-ALTER TABLE facet_events ADD CONSTRAINT chk_facet_events_archive_reason
-  CHECK (facet <> 'archive' OR state <> 'active' OR reason_code IS NOT NULL OR class_feedback_id IS NOT NULL);
+ALTER TABLE facet_events ADD COLUMN IF NOT EXISTS class_feedback_id uuid REFERENCES signal_class_feedback(id) DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE facet_events DROP CONSTRAINT IF EXISTS chk_facet_events_archive_reason;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid = 'facet_events'::regclass
+    AND conname = 'chk_facet_events_archive_reason') THEN
+    ALTER TABLE facet_events ADD CONSTRAINT chk_facet_events_archive_reason
+      CHECK (facet <> 'archive' OR state <> 'active' OR reason_code IS NOT NULL OR class_feedback_id IS NOT NULL);
+  END IF;
+END $$;
 --> statement-breakpoint
-CREATE FUNCTION reject_class_feedback_mutation() RETURNS trigger LANGUAGE plpgsql AS $$
+CREATE OR REPLACE FUNCTION reject_class_feedback_mutation() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN RAISE EXCEPTION 'Class annotation audit rows are append-only'; END $$;
+DROP TRIGGER IF EXISTS signal_class_history_immutable ON signal_class_annotation_history;
 CREATE TRIGGER signal_class_history_immutable BEFORE UPDATE OR DELETE ON signal_class_annotation_history
   FOR EACH ROW EXECUTE FUNCTION reject_class_feedback_mutation();
+DROP TRIGGER IF EXISTS signal_class_feedback_immutable ON signal_class_feedback;
 CREATE TRIGGER signal_class_feedback_immutable BEFORE UPDATE OR DELETE ON signal_class_feedback
   FOR EACH ROW EXECUTE FUNCTION reject_class_feedback_mutation();
+DROP TRIGGER IF EXISTS signal_class_history_no_truncate ON signal_class_annotation_history;
 CREATE TRIGGER signal_class_history_no_truncate BEFORE TRUNCATE ON signal_class_annotation_history
   FOR EACH STATEMENT EXECUTE FUNCTION reject_class_feedback_mutation();
+DROP TRIGGER IF EXISTS signal_class_feedback_no_truncate ON signal_class_feedback;
 CREATE TRIGGER signal_class_feedback_no_truncate BEFORE TRUNCATE ON signal_class_feedback
   FOR EACH STATEMENT EXECUTE FUNCTION reject_class_feedback_mutation();
