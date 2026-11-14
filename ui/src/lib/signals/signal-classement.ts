@@ -65,6 +65,9 @@ export interface ArchiveHeadLike {
 }
 
 export interface ClassementEntry {
+  mcpVersion?: string;
+  mcpScope?: "personal" | "workspace";
+  mcpCanConfirm?: boolean;
   annotationSource?: "ai" | "manual" | "mcp";
   classe: SignalClass;
   reasonCode: string | null;
@@ -110,10 +113,16 @@ export function withAiClassement(
   const result = new Map(map);
   for (const node of nodes) {
     const mcp = node.signalAnnotations?.current;
-    const annotation = mcp?.source === "mcp" && mcp.classe ? { source: "mcp" as const, classe: mcp.classe } : node.classAnnotation;
+    const journal = mcp?.source === "mcp" || (mcp?.source === "manual" && mcp.linked_event_id);
+    const annotation = journal && mcp?.classe ? { source: mcp.source as "mcp" | "manual", classe: mcp.classe } : node.classAnnotation;
     const key = classementKey(node.type, node.id, node.citySlug);
-    if (!annotation || (annotation.source !== "ai" && annotation.source !== "mcp") || result.has(key)) continue;
+    if (!annotation || (result.has(key) && !(mcp?.linked_event_id || mcp?.scope === "workspace"))) continue;
     result.set(key, { ...EMPTY_CLASSEMENT_ENTRY, annotationSource: annotation.source, classe: annotation.classe,
+      ...(journal && mcp ? { mcpVersion: node.signalAnnotations!.version, mcpScope: mcp.scope ?? "personal",
+        mcpCanConfirm: node.signalAnnotations?.canConfirm,
+        reasonCode: mcp.reason_code ?? null,
+        restoreBlockedReason: mcp.scope === "workspace" && !node.signalAnnotations?.moderateArchive
+          ? "Archive partagée : seul un modérateur peut restaurer ce signal." : null } : {}),
       discarded: annotation.classe === "ecarte" });
   }
   return result;

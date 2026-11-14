@@ -47,6 +47,20 @@ const entry = (patch: Partial<ClassementEntry>): ClassementEntry => ({
 afterEach(() => vi.unstubAllGlobals());
 
 describe("signal classement client — acceptance criteria", () => {
+  it("should explicitly persist Non classé over a pending MCP classification", async () => {
+    const { calls } = stubFetchOk();
+    await applyClassement(SCOPE, { target: TARGET, displayedFingerprint: FINGERPRINT,
+      current: { ...NON_CLASSE, annotationSource: "mcp", classe: "pertinent", mcpVersion: "a".repeat(32) }, nextClass: "non_classe" });
+    expect(posts(calls)).toHaveLength(1);
+    expect(posts(calls)[0]?.url).toContain("/annotations/decision");
+    expect(posts(calls)[0]?.body).toMatchObject({ classe: "non_classe", version: "a".repeat(32), target: { ...TARGET, scope: "personal" } });
+  });
+  it("should send an explicit browser confirmation for the same MCP class", async () => {
+    const { calls } = stubFetchOk();
+    await applyClassement(SCOPE, { target: TARGET, displayedFingerprint: FINGERPRINT,
+      current: { ...NON_CLASSE, annotationSource: "mcp", classe: "pertinent", mcpVersion: "a".repeat(32) }, nextClass: "pertinent" });
+    expect(posts(calls)[0]?.body).toMatchObject({ confirm: true, classe: "pertinent" });
+  });
   it("should persist a human Non classé override of an AI class without human heads", async () => {
     const { calls } = stubFetchOk();
     await applyClassement(SCOPE, { target: TARGET, displayedFingerprint: FINGERPRINT,

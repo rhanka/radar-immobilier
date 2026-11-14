@@ -29,6 +29,15 @@ function head(basket: string | null, state = "active", reasonCode: string | null
 }
 
 describe("signal classement — acceptance criteria", () => {
+  it("should keep shared MCP archive authority over personal selections without moderation", () => {
+    const manual = buildClassementMap([head("pertinent")], []);
+    const current = { id: "mcp-1", source: "mcp", model: "client-model", scope: "workspace" as const,
+      validation: "auto" as const, pending_human: true, classe: "ecarte" as const, reason_code: "N-NON-RES" };
+    const nodes = [{ type: "Signal", id: "sig-1", citySlug: "delson",
+      signalAnnotations: { version: "a".repeat(32), notes: [], current, moderateArchive: false } }];
+    expect(withAiClassement(manual, nodes).get("delson:Signal:sig-1"))
+      .toMatchObject({ classe: "ecarte", mcpScope: "workspace", restoreBlockedReason: expect.stringContaining("modérateur") });
+  });
   it("should show the scoped MCP class while preserving manual UI precedence", () => {
     const nodes = [{ type: "Signal", id: "sig-1", citySlug: "delson",
       classAnnotation: { source: "ai" as const, classe: "ecarte" as const },
