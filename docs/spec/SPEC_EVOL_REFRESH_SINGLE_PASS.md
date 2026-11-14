@@ -28,7 +28,10 @@ city, node type and node id. AI annotations carry `source`, `model`, `effort`, `
 selection and archive history in any workspace, blocks AI writes. A short SHARE lock on human events
 serializes the history check with human inserts. Human readers and UI always prioritize human history.
 Explicitly confirming an AI class or selecting Non classé creates human history too.
-API cards expose `classAnnotation`; UI classes, reasons, badges and city counters consume it.
+API cards expose `classAnnotation` only for a real row in `signal_class_annotations` (AI or manual).
+Facet history can redact an existing annotation, but never creates one. Without a stored annotation,
+manual archive/selection keeps the main API payload byte-identical, including with flag zero.
+UI classes, reasons, badges and city counters consume stored annotations.
 The badge displays the exact accepted model identifier, or `modèle inconnu` when absent.
 Every changed AI annotation increments the existing shared workspace projection revision for its city,
 in the same transaction. Refresh, reannotation and purge use that same counter. No-op writes do not bump it.
