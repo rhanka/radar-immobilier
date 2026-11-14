@@ -17,9 +17,12 @@ const json = file => JSON.parse(fs.readFileSync(safeFile(file), 'utf8'));
 const hash = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const env = process.env;
 process.umask(0o077);
+const prelockRun = crypto.randomUUID();
 function run(bin, args, options = {}) {
+  // Before the lock exists (authorize, window-start), PG clients still run in a labelled,
+  // --rm container: use a pre-lock label so the wrapper never receives an empty run.
   const containerRun = env.RUN || (['psql', 'pg_dump', 'pg_restore'].includes(bin)
-    && env.EVIDENCE ? json(env.EVIDENCE).run : '');
+    ? ((env.EVIDENCE && fs.existsSync(env.EVIDENCE) ? json(env.EVIDENCE).run : '') || prelockRun) : '');
   const result = spawnSync(bin, args, { encoding: 'utf8', timeout: 60000,
     stdio: [options.input === undefined ? 'ignore' : 'pipe', 'pipe', 'pipe'],
     maxBuffer: 32 * 1024 * 1024, ...options,
