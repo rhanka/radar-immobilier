@@ -149,14 +149,14 @@ describe("filtreCountsForPerimeter — Filtre dropdown counts over the displayed
     expect(counts).toEqual({ z: 3, r: 3, p: 3, piia: 2, derog: 1 });
   });
 
-  it("should replace the selected city's bulk cube by its loaded detail", () => {
+  it("should preserve exact SQL counts when selected detail is incomplete", () => {
     const counts = filtreCountsForPerimeter({
       entries: [entry(A, { "11100": 9 }), entry(B, { "11100": 1 })],
       axes: ALL_AXES, exclusions: BOTH,
       // Pertinence left one early node in A's scoped detail.
       live: { slug: A!.slug, nodes: [node("kept", {})] },
     });
-    expect(counts).toEqual({ z: 2, r: 2, p: 2, piia: 0, derog: 0 });
+    expect(counts).toEqual({ z: 10, r: 10, p: 10, piia: 0, derog: 0 });
   });
 
   it("should give zeroes for an empty perimeter, not null", () => {
