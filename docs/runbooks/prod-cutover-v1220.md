@@ -30,6 +30,7 @@ Le Secret account-reader y est utilisé. Il est donc aussi requis en prod.
 Les références API/MCP sont obligatoires dans `prod-bindings.cjs`.
 Le précheck refuse un Secret absent, une clé vide ou le TLS absent. Aucun GO implicite.
 Le contrôle RO du 13/11 refuse déjà `radar-artifacts-prod`, absent.
+L’inventaire RO de 19 h 52 confirme les six Secrets artefacts de ce tableau absents en prod.
 
 | Prérequis | Objet prod et clés | Responsable |
 | --- | --- | --- |
@@ -50,7 +51,7 @@ Provisionnement **futur**, par l’acteur indiqué, après autorisation séparé
 
 ```sh
 rtk make -f deploy/prod-cutover/artifacts.mk s3-secret PROVISION_OWNER=k8s ARTIFACTS_S3_ENV_FILE=<dotenv-S3-prive> ENV=provision-prod
-rtk make -f deploy/prod-cutover/artifacts.mk generated-secrets PROVISION_OWNER=k8s ENV=provision-prod
+rtk make -f deploy/prod-cutover/artifacts.mk generated-secrets PROVISION_OWNER=immo ENV=provision-prod
 ```
 
 Le dotenv dédié ne contient que les deux clés S3. k8s le fournit à la cible. Aucun agent ne le lit.

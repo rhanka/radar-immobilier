@@ -7,11 +7,12 @@ override KUBE := kubectl --kubeconfig $(HOME)/.kube/radar-prod-tenant-admin.kube
 .PHONY: guard s3-secret generated-secrets
 guard:
 	@test "$(ENV)" = provision-prod
-	@test "$(PROVISION_OWNER)" = k8s
+	@case "$(PROVISION_OWNER)" in k8s|immo) ;; *) exit 1;; esac
 	@test "$$($(KUBE) config view --minify -o jsonpath='{.clusters[0].cluster.server}')" = https://hlhedx.c1.bhs5.k8s.ovh.net
 # K8s mints and rotates the S3 principal. Dedicated dotenv has ONLY the two S3 keys.
 # Neither make nor the shell sources it. Kubectl reads it without displaying it.
 s3-secret: guard
+	@test "$(PROVISION_OWNER)" = k8s
 	@existing=$$($(KUBE) get secret radar-artifacts-prod --ignore-not-found -o name); \
 	 if [[ -n $$existing ]]; then echo 'S3 Secret retained'; exit 0; fi; \
 	 test -f "$(ARTIFACTS_S3_ENV_FILE)"; test ! -L "$(ARTIFACTS_S3_ENV_FILE)"; \

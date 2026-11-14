@@ -30,9 +30,14 @@ create)
 esac
 `, { mode: 0o700 });
     const invoke = env => spawnSync('make', ['--no-print-directory', '-f', 'deploy/prod-cutover/artifacts.mk', 'generated-secrets',
-      'PROVISION_OWNER=k8s', `ENV=${env}`], { encoding: 'utf8', env: {
+      'PROVISION_OWNER=immo', `ENV=${env}`], { encoding: 'utf8', env: {
       ...process.env, PATH: `${dir}:${process.env.PATH}`, SECRET_TEST_STATE: state } });
     assert.notEqual(invoke('prod').status, 0);
+    assert.deepEqual(fs.readdirSync(state), []);
+    const s3 = spawnSync('make', ['--no-print-directory', '-f', 'deploy/prod-cutover/artifacts.mk',
+      's3-secret', 'PROVISION_OWNER=immo', 'ENV=provision-prod'], { encoding: 'utf8', env: {
+      ...process.env, PATH: `${dir}:${process.env.PATH}`, SECRET_TEST_STATE: state } });
+    assert.notEqual(s3.status, 0, 'Only k8s may import the S3 principal');
     assert.deepEqual(fs.readdirSync(state), []);
     const first = invoke('provision-prod');
     assert.equal(first.status, 0, first.stderr);

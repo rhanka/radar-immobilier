@@ -4,7 +4,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { createHash } = require('node:crypto');
 const { setTimeout } = require('node:timers/promises');
-const { S3Client, CreateBucketCommand, HeadBucketCommand, PutBucketCorsCommand, PutObjectCommand } = require('/workspace/node_modules/@aws-sdk/client-s3');
+const { S3Client, CreateBucketCommand, HeadBucketCommand, PutObjectCommand } = require('/workspace/node_modules/@aws-sdk/client-s3');
+let phase = 'setup';
 async function main() {
   const client = new S3Client({ endpoint: process.env.S3_ENDPOINT, region: 'us-east-1', forcePathStyle: true,
     credentials: { accessKeyId: process.env.S3_ACCESS_KEY, secretAccessKey: process.env.S3_SECRET_KEY },
@@ -12,6 +13,7 @@ async function main() {
   try {
     for (const Bucket of ['radar-immobilier-raw', 'radar-immobilier-docs', 'radar-immobilier-artifacts']) {
       let ready = false;
+      phase = 'bucket';
       for (let attempt = 0; attempt < 15; attempt++) {
         try {
           await client.send(new CreateBucketCommand({ Bucket })); ready = true; break;
@@ -23,13 +25,11 @@ async function main() {
         }
       }
       if (!ready) throw Error();
-      await client.send(new PutBucketCorsCommand({ Bucket, CORSConfiguration: { CORSRules: [{
-        AllowedOrigins: ['https://recette.localhost:15321'], AllowedMethods: ['GET', 'HEAD', 'PUT'],
-        AllowedHeaders: ['*'], ExposeHeaders: ['ETag'],
-      }] } }));
+      // This pinned S3 mock does not implement PutBucketCors. The local TLS proxy owns CORS.
     }
     // Optional private fixtures. No fetch to production or municipal services.
     const manifest = '/private-input/documents.json';
+    phase = 'documents';
     let imported = 0;
     if (fs.existsSync(manifest)) {
       for (const item of JSON.parse(fs.readFileSync(manifest, 'utf8'))) {
@@ -47,4 +47,7 @@ async function main() {
     process.stdout.write(JSON.stringify({ buckets: 3, imported, remoteFetch: false }) + '\n');
   } finally { client.destroy(); }
 }
-main().catch(() => { process.stderr.write('local_storage_setup_failed\n'); process.exitCode = 1; });
+main().catch(error => {
+  const name = /^[a-zA-Z0-9_]+$/.test(error.name) ? error.name : 'Error';
+  process.stderr.write(`local_storage_${phase}_${name}\n`); process.exitCode = 1;
+});
