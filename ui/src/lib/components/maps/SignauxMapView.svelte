@@ -2601,6 +2601,7 @@
       }
       try {
         const value = await fetchAllLots(citySlug, {
+          displayOnly: true,
           signal: lease.signal,
           onPage: (partial) => {
             if (!lease.isCurrent()) return;
