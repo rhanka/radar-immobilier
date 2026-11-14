@@ -40,5 +40,6 @@
 - [x] Lot 3: scoped read projection, UI provenance badges and note addition.
 - [x] Lot 4: typecheck/lint pass; 27 API/PostgreSQL, 613 MCP (9 skipped), 5 OAuth/SDK/PostgreSQL, 19 UI and 1 browser tests pass.
 - [x] Every test stack removed with down -v; no containers or volumes remain for this ENV.
-- [ ] Lot 5: selective commits, push and PR to feat/class-feedback.
-- [ ] Verify CI; report tools, scope, schema, tests and PR number. No merge.
+- [x] Lot 5: selective commits pushed; PR #1107 opened against feat/class-feedback.
+- [x] CI observed: branch policy passed; quality gates and generic browser suite running. No merge.
+- [x] Delivery report prepared: five tools, explicit write scope, migration 0048, local test totals and activation instructions.
