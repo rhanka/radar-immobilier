@@ -83,6 +83,7 @@ function backup() {
 function restoreTest() {
   r.destination();
   if (env.ENV === 'execution-prod') fail('restore_test_must_be_disposable');
+  r.mutationGuard();
   const { planSha256, rosterSha256 } = r.approvedPlan();
   const proof = r.evidence();
   const file = checkedArchive();
