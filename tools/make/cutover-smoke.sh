@@ -68,7 +68,7 @@ start_forward() {
   [[ $resource == */* ]] || resource=service/$resource
   start=$(awk '{print $22}' "/proc/$parent/stat")
   (
-    command kubectl --request-timeout=0 -n "$NS" port-forward --address=127.0.0.1 "$resource" "$2" > "$3" 2>&1 &
+    command kubectl --kubeconfig "$KUBECONFIG" --request-timeout=0 -n "$NS" port-forward --address=127.0.0.1 "$resource" "$2" > "$3" 2>&1 &
     child=$!
     trap 'kill "$child" 2>/dev/null || true; wait "$child" 2>/dev/null || true' EXIT
     trap 'exit 143' TERM INT
