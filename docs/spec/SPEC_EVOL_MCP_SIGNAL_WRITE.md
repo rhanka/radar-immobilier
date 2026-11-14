@@ -53,10 +53,10 @@ Read-only OAuth tokens still cannot write with that binding enabled.
 
 ## Verification
 
-Cover missing scope, forged confirmation, accepted/declined elicitation, stale acceptance, manual and human priority, negative feedback validation, cleaned notes, audit, user rate limits and cross-workspace isolation.
+Cover missing scope, forged confirmation, accepted/declined elicitation, stale acceptance, manual priority, negative feedback validation, cleaned notes, audit, user rate limits and cross-workspace isolation.
 Run typecheck, lint, scoped test-api, test-mcp, test-ui and browser badge/note checks.
 
-## Review availability
+## Initial review availability
 
 Design received two independent reviews, for scoped correctness and authorization.
 The installed final-review skill requires a complementary host/model pair launched through h2a MCP.
@@ -79,10 +79,14 @@ observed-failure: h2a_run MCP tool and exact author model/effort metadata unavai
 `make -f tools/make/mcp-signal-write.mk verify ENV=test-mcp-signal-write` passes.
 Typecheck covers every workspace. Lint covers the repository.
 Diagnostics: eight Svelte warnings and one lint warning; zero errors.
-API/PostgreSQL: 27 pass. MCP: 613 pass, nine skipped. OAuth/SDK/PostgreSQL: five pass.
-UI: 19 pass. The final provenance-null change was rechecked with test-api and test-mcp.
-`make -f tools/make/mcp-signal-write.mk test-ui-e2e ENV=test-mcp-signal-write` passes one real browser/API/PostgreSQL scenario.
-It verifies human/automatic badges, cleaned notes and persisted user notes after reload.
+API/PostgreSQL: 30 pass in the default scope; 44 pass when including the existing shared-archive suites.
+MCP: 613 pass, nine skipped. OAuth/SDK/PostgreSQL: five pass. UI: 37 pass.
+The nine MCP skips concern unrelated P0 database transport profiles: four source transport,
+three strict registry transport, one v2 transport and one strict HTTP transport case.
+They require their dedicated database/profile setup. No signal SQL or SDK test is skipped in this gate.
+`make -f tools/make/mcp-signal-write.mk test-ui-e2e ENV=test-mcp-signal-write` covers two real browser/API/PostgreSQL scenarios.
+They verify pending/automatic badges, cleaned notes, persisted user notes, linked browser confirmation,
+reclassification after confirmation and explicit Non classé after reload.
 The dedicated target supplies `E2E_MCP_SEEDED=1` after preparing its MCP seed.
 The generic browser suite skips this case because its shared baseline does not contain MCP state.
 The CI `MCP signals (PostgreSQL, SDK and browser)` job runs the dedicated make targets with
