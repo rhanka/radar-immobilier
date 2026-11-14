@@ -125,7 +125,8 @@ Hôte configurable : ARTIFACTS_CONTENT_HOST. Ingress et TLS cohérents avec ce n
 Le précheck refuse chaque Secret absent ou clé vide. Les tests couvrent chaque refus.
 
 Inventaire RO : les six Secrets S3, upload, reader, writer MCP, account-reader MCP et TLS manquent en prod.
-K8s doit fournir le principal S3, le bucket et son CORS prod, les URLs privées DB,
-DNS wildcard, TLS et Ingress. Immo doit générer les trois clés applicatives avant ouverture.
+k8s a fourni le principal S3 limité au préfixe, le bucket et le DNS wildcard.
+k8s doit encore confirmer le CORS avec son principal administrateur.
+immo provisionne les Secrets, URL DB et rôles MCP, Certificate et Ingress. Voir le runbook actualisé.
 La publication HTML statique, la lecture publique HTTPS et la lecture MCP font partie de la recette.
 
