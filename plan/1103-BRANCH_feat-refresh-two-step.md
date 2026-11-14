@@ -13,6 +13,7 @@
 - [x] Allowed Paths: api/src/services/graph/{refresh-*,reannotate-*}, api/src/scripts/{refresh-pv,reannotate-signals}.ts, deploy/k8s/34-refresh-cronjob.yaml, deploy/k8s/refresh-cronjobs/{refresh-018.mk,verify-renders.test.sh}, docs/spec/SPEC_EVOL_REFRESH_TWO_STEP.md, this plan.
 - [x] Forbidden Paths: Makefile, docker-compose*.yml, rules/**, AGENTS.md, CLAUDE.md, GEMINI.md, other branch plans.
 - [x] Conditional Paths: migrations and workflows require an exception; none planned.
+- [x] BR1103-EX2: failing required validation authorizes api/src/services/graph/purge-ai-annotations-db.test.ts and api/drizzle/0046_signal_class_ambiguity.sql. Evidence: rollback tests expected implicit activation/manual provenance synthesis; CI run 43530288804 fails migration replay on duplicate ambiguous column. Impact: align tests with explicit mode and inherited API contract; make the unmerged v2 migration replayable. Rollback: revert these scoped fixes. No deployed migration or workflow is changed.
 - [x] BR1103-EX1: owner-requested API-off parity authorizes api/src/routes/{graph-signals*,signal-facets-headers.test,legacy-filter-a-transport-golden.test}.ts, api/src/services/facets/{scoped-signal-cards,scoped-by-city,scoped-transition}.ts, api/src/services/graph/class-annotations* and api/tests/integration/facets-refresh.spec.ts. Impact: API readers and inactive-selection no-ops ignore stored overlays at off; operational history remains readable. Rollback: revert the mode-aware changes and test boundary mocks.
 
 ## Feedback Loop
@@ -50,3 +51,4 @@
 - [x] Review correction: API cards and counts ignore persisted AI overlays at off, including after prior activation; retain inherited #1099 manual payload parity tests.
 - [x] Review correction: propagate the sweep stop signal to detection too; test successful document coverage with classification stopped at the shared call cap.
 - [x] Review correction: keep inactive selections as main no-ops at off, even with stored AI history; align route test doubles with the visible-annotation reader; install transaction-local writer timeouts for every caller.
+- [x] Validation correction: enable AI explicitly in rollback fixtures, include ambiguity, assert manual history without synthesizing removed overlays; make migration 0046 replay-safe after missing journal entries.
