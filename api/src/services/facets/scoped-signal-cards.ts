@@ -45,9 +45,10 @@ export async function buildScopedSignalCards(
   deps: ScopedSignalCardDeps, nodes: readonly StoredSignalNode[], citySlug: string,
 ): Promise<GraphSignalCard[]> {
   const annotations = deps.db ? await readClassAnnotations(deps.db, citySlug) : new Map();
-  const annotate = (cards: GraphSignalCard[]) => cards.map((card) => ({ ...card,
-    ...(annotations.has(`${card.type}:${card.id}`) ? { classAnnotation: annotations.get(`${card.type}:${card.id}`) } : {}),
-  }));
+  const annotate = (cards: GraphSignalCard[]) => cards.map((card) => {
+    const classAnnotation = annotations.get(`${card.type}:${card.id}`);
+    return classAnnotation ? { ...card, classAnnotation } : card;
+  });
   const store = deps.store;
   if (!store) return annotate(nodes.map((node) => toDegradedSignalCard(node)));
   if (nodes.length === 0) return [];
@@ -113,9 +114,11 @@ export async function buildScopedSignalCardViews(
   deps: ScopedSignalCardDeps, nodes: readonly StoredSignalNode[], citySlug: string,
 ): Promise<GraphSignalCard[]> {
   const annotations = deps.db ? await readClassAnnotations(deps.db, citySlug) : new Map();
-  const views = nodes.map((node) => ({ ...toSignalCardView(toDegradedSignalCard(node)),
-    ...(annotations.has(`${node.type}:${node.id}`) ? { classAnnotation: annotations.get(`${node.type}:${node.id}`) } : {}),
-  }));
+  const views = nodes.map((node) => {
+    const card = toSignalCardView(toDegradedSignalCard(node));
+    const classAnnotation = annotations.get(`${node.type}:${node.id}`);
+    return classAnnotation ? { ...card, classAnnotation } : card;
+  });
   const store = deps.store;
   if (!store) return views;
   const budgetMs = deps.docEnrichmentBudgetMs ?? DOC_ENRICHMENT_BUDGET_MS;
