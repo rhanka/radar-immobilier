@@ -21,6 +21,8 @@
 - [x] SL1-EX1: add the explicitly requested make backfill target. Impact: one isolated command. Rollback: remove target.
 - [x] SL1-EX2: add replayable migration 0049 and journal entry. Impact: additive fine projection. Rollback: coordinated API/UI rollback; retain inert table.
 - [x] Owner authorizes old contract during coordinated migration; metadata-v2 never falls back to full cards.
+- [x] SL1-EX3: allow ui/e2e-real/** and ui/playwright.real.config.ts for real-click qualification and source-projection seeding. Rollback: revert isolated test changes.
+- [x] SL1-EX4: pass optional E2E_SPEC through Makefile and tools/make/e2e-real*.sh for the explicitly requested scoped real-stack run. Default suite unchanged. Rollback: remove optional argument.
 
 ## Orchestration Mode (AI-selected)
 - [x] Mono-branch BUILD lane; no merge.
