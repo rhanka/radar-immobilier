@@ -4,7 +4,7 @@ import { expect, it } from "vitest";
 import { database, describeDb } from "../facets/scope-db-fixture.js";
 
 describeDb("feedback migration ordering", () => {
-  it("should apply 0047 once after the preceding migrations and retain existing annotations", async () => {
+  it("should replay 0047 after journal drift without changing annotation dates or history", async () => {
     const { db, pool } = await database(true);
     mkdirSync("tmp", { recursive: true });
     const folder = mkdtempSync("tmp/feedback-migrations-");
@@ -29,6 +29,14 @@ describeDb("feedback migration ordering", () => {
       expect((await pool.query(`SELECT judged_class FROM signal_class_feedback`)).rows).toEqual([]);
       expect((await pool.query(`SELECT node_id,classe FROM signal_class_annotation_history`)).rows)
         .toEqual([{ node_id: "migration-signal", classe: "pertinent" }]);
+      const createdAt = (await pool.query(`SELECT created_at FROM signal_class_annotations`)).rows;
+      await pool.query(`UPDATE signal_class_annotations SET updated_at = updated_at + interval '1 day'`);
+      const historyBefore = (await pool.query(`SELECT * FROM signal_class_annotation_history ORDER BY created_at,id`)).rows;
+      await pool.query(`DELETE FROM drizzle.__drizzle_migrations WHERE created_at=$1`, [feedback.when]);
+      await migrate(db, { migrationsFolder: "drizzle" });
+      expect((await pool.query(`SELECT created_at FROM signal_class_annotations`)).rows).toEqual(createdAt);
+      expect((await pool.query(`SELECT * FROM signal_class_annotation_history ORDER BY created_at,id`)).rows)
+        .toEqual(historyBefore);
       expect((await pool.query(`SELECT count(*)::int AS count FROM drizzle.__drizzle_migrations WHERE created_at=$1`,
         [feedback.when])).rows).toEqual([{ count: 1 }]);
       // On the temporary v2 merge, prove that its 0046 actually ran first.
