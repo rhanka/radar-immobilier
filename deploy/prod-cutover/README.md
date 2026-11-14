@@ -35,6 +35,16 @@ La répétition est faite sous i-cond le 13/11. Restaurations : 110,847 s et 113
 Deux rollbacks complets réussis. La même copie est remise au candidat et gardée pour la recette humaine.
 Les [mesures détaillées](REHEARSAL.md) incluent chaque migration, les erreurs et la projection de coupure.
 Le dump préliminaire RO autorisé reste distinct de la sauvegarde finale après drain.
+### Hooks et clients temporaires après interruption
+
+Chaque hook et client PostgreSQL temporaire porte `ca.sent-tech.immo.cutover-run=<RUN>` et `--rm`.
+Le trap arrête les conteneurs du RUN, attend leur fin et contrôle leur disparition. Le hook est borné à 550 s ; les clients à 1 800 s.
+Une reprise de fenêtre et un rollback refusent si un conteneur du RUN subsiste, même créé, suspendu ou en redémarrage. Une erreur Docker conserve le refus.
+Ajouter `STOP_RUN_CONTAINERS=1` à la commande de reprise pour autoriser explicitement leur arrêt. Chaque appel Docker est borné à 15 s ; stop accorde 5 s avant KILL. Une disparition confirmée est obligatoire avant toute suite.
+Après mise à jour du véhicule, régénérer les wrappers privés avec `make -f deploy/prod-cutover/preparation.mk runtime ENV=test-prod-cutover`.
+Régression isolée sans réseau ni base : `make -f deploy/prod-cutover/prod-cutover.mk hook-controller-test ENV=test-prod-cutover`.
+
+La répétition prod **n’a pas eu lieu**. Le dump préliminaire RO autorisé est prêt.
 Commande complète : `rtk make -f deploy/prod-cutover/preparation.mk copy-rehearse OWNER=i-cond ENV=rehearsal`.
 Elle laisse la copie ouverte à la recette locale. Suivre ensuite l’arrêt, les deux rollbacks et down -v du dossier.
 Voir le [dossier de préparation](PREPARATION.md), les empreintes et les commandes exactes.

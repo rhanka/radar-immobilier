@@ -3,7 +3,7 @@ set -euo pipefail
 unset COMPOSE_ENV_FILES COMPOSE_FILE COMPOSE_PROFILES
 export BUILDX_CONFIG="$HOME/.cache/radar-prod-cutover-buildx"
 mkdir -p "$BUILDX_CONFIG"
-compose=(env UID="$(id -u)" GID="$(id -g)" docker compose --env-file /dev/null -p radar-test-prod-cutover-lint -f deploy/cutover/test.compose.yml)
+compose=(env UID="$(id -u)" GID="$(id -g)" docker compose --env-file /dev/null -p "${CUTOVER_LINT_PROJECT:-radar-test-prod-cutover-lint}" -f deploy/cutover/test.compose.yml)
 cleanup() { timeout --kill-after=5s 45s "${compose[@]}" down -v --remove-orphans >/dev/null; }
 trap cleanup EXIT
 trap 'exit 130' INT
