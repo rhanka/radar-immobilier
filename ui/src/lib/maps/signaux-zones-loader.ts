@@ -191,6 +191,7 @@ export async function loadSignauxZones(
 
   // ── 1. Collection OGC qc-zonage-<slug> (live geo) — FORME des zones ────────
   const collection = await fetchCollection(citySlug, {
+    displayOnly: true,
     limit: opts.collectionLimit ?? ZONES_COLLECTION_LIMIT,
     signal: opts.signal,
   });

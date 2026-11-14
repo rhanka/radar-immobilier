@@ -119,6 +119,8 @@ export interface ZonesResponse {
 }
 
 export interface FetchZonesOptions {
+  /** Display only. Never opt in for spatial calculations. */
+  displayOnly?: boolean;
   limit?: number;
   bbox?: [number, number, number, number];
   baseUrl?: string;
@@ -149,6 +151,7 @@ export function resolveZonesUrl(
   const base = baseUrl ? baseUrl.replace(/\/$/, "") : "";
   const path = `/api/geo/collections/${encodeURIComponent(zonesCollectionId(citySlug))}/items`;
   const params = new URLSearchParams();
+  if (opts.displayOnly) params.set("coordPrecision", "6");
   if (opts.limit !== undefined) params.set("limit", String(opts.limit));
   if (opts.bbox) params.set("bbox", opts.bbox.join(","));
   const qs = params.toString();

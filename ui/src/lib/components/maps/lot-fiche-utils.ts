@@ -20,6 +20,7 @@ import type { LotFeature, LotProperties } from "$lib/maps/lots-client.js";
 export function centroid(
   feature: LotFeature,
 ): { lat: number; lon: number } | null {
+  if (feature.displayOnly) return null;
   const geom = feature.geometry;
   if (!geom || geom.type !== "Polygon") return null;
   const ring = (geom.coordinates as number[][][])[0];
@@ -71,6 +72,7 @@ export function googleStreetViewUrl(lat: number, lon: number): string {
  * ou d'aire nulle — aucune invention.
  */
 export function estimatedFacadeM(feature: LotFeature): number | null {
+  if (feature.displayOnly) return null;
   const geom = feature.geometry;
   if (!geom || geom.type !== "Polygon") return null;
   const ring = (geom.coordinates as number[][][])[0];

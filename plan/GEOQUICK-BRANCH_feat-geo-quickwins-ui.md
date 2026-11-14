@@ -37,6 +37,6 @@ Reduce map transfers while preserving exact geometry for details and calculation
 ## Plan / Todo (lot-based)
 - [x] Lot 0: verify baseline, rules, scope and isolation.
 - [x] Lot 1: preserve encoded responses across Nginx and Vite; configuration test.
-- [ ] Lot 2: display precision, exact detail loading, separation and pagination tests.
+- [x] Lot 2: display precision, exact detail loading, separation and pagination tests.
 - [ ] Lot 3: typecheck, lint, targeted UI and browser checks; remove stack volumes.
 - [ ] Lot 4: push and open PR to main; no merge.
