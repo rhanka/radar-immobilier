@@ -30,7 +30,7 @@ export async function refreshSignalMetadata(tx: Tx, citySlug: string, rows: read
       description: text("description"), etapeAnnote: text("etape") });
     return { id: row.id, type: row.type,
       documentDates: resultCivilDates(row.props, "document"), scrapDates: resultCivilDates(row.props, "scrap"),
-      bits: vivierFiltreCubeKey({ ...row, classification }),
+      bits: vivierFiltreCubeKey({ ...row, props: (row.props ?? {}) as Record<string, unknown>, classification }),
       rank: vivierRankTuple({ id: row.id, classification, fraicheur: graphSignalRankFreshness({ ...row, citySlug }) }),
       attachments: attachments.get(row.id) ?? [] };
   });
