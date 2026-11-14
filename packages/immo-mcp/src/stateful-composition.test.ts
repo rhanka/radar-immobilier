@@ -161,7 +161,7 @@ describe("P6 composed effects", () => {
     try {
       await Promise.all([server.connect(s), client.connect(c)]);
       const tools = await client.listTools();
-      expect(tools.tools).toHaveLength(12);
+      expect(tools.tools).toHaveLength(17);
       expect(tools.tools.some((tool) => tool.name.startsWith("artifacts_"))).toBe(false);
       const result = await client.callTool({ name: "get_zones_geojson", arguments: { city: "longueuil" } });
       expect(result.isError).not.toBe(true);
