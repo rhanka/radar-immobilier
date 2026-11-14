@@ -74,4 +74,6 @@ API/PostgreSQL: 27 pass. MCP: 613 pass, nine skipped. OAuth/SDK/PostgreSQL: five
 UI: 19 pass. The final provenance-null change was rechecked with test-api and test-mcp.
 `make -f tools/make/mcp-signal-write.mk test-ui-e2e ENV=test-mcp-signal-write` passes one real browser/API/PostgreSQL scenario.
 It verifies human/automatic badges, cleaned notes and persisted user notes after reload.
+The dedicated target supplies `E2E_MCP_SEEDED=1` after preparing its MCP seed.
+The generic browser suite skips this case because its shared baseline does not contain MCP state.
 All stacks were removed with volumes. Root UAT was untouched.
