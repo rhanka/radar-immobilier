@@ -1,7 +1,7 @@
 import { expect, seed, test } from "./fixtures";
 
 test("metadata: period relevance filters exclusions and city keep exact counts and URLs", async ({ page, network }) => {
-  await page.goto("/geo/region/quebec?mode=signal&filter.period=all");
+  await page.goto("/geo/region/quebec?mode=signal&filter.period=all&filter.zonage=1&filter.residentiel=1&filter.precoce=1&filter.excludePiia=1&filter.excludeDerogations=1");
   const total = page.getByText("3 signaux · 1 ville", { exact: false });
   await expect(total).toBeVisible();
   expect(network.filter((r) => r.url.includes("coherent-city"))).toHaveLength(0);
@@ -17,7 +17,7 @@ test("metadata: period relevance filters exclusions and city keep exact counts a
   await expect(page.getByText(/0 signaux.*0 ville/).first()).toBeVisible();
   await period.click();
   await page.getByRole("option", { name: "Illimité", exact: true }).click();
-  await expect(page).toHaveURL(/filter.period=all/);
+  await expect.poll(() => new URL(page.url()).searchParams.get("filter.period")).toBeNull();
   await expect(total).toBeVisible();
 
   await page.getByTestId("classement-filter-trigger").click();

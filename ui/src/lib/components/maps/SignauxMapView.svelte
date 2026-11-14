@@ -703,6 +703,7 @@
   function handleExclusionsChange(next: VivierBExclusions): void {
     vivierBExclusions = next;
     syncFilterRoute();
+    void load();
     reconcileToVisibleNodes();
     updateGeoLayers();
   }
@@ -740,6 +741,7 @@
   ): void {
     applyActiveSubsetKey(subsetKey);
     syncFilterRoute();
+    void load();
     updateGeoLayers();
   }
 
@@ -941,6 +943,7 @@
     const visibilityChanged = next.ecarte !== classementFilter.ecarte;
     classementFilter = next;
     syncFilterRoute();
+    void load();
     if (visibilityChanged && selectedCity) void loadDetailForCity(selectedCity.municipality.slug);
   }
   async function handleApplyClassement(
@@ -2661,6 +2664,12 @@
       // 6H : agrégat scopé dans l'espace de travail explicite.
       const res = await fetchSignalMetadata({ workspaceId }, {
         ...signalDocumentDateWindow(dateRange, dateBasis),
+        filter: {
+          classes: (["pertinent", "a_surveiller", "non_classe", "ecarte"] as const).filter((c) => classementFilter[c]),
+          requireZonage: bAxesFromVivierKey(activeSubsetKey).z,
+          requireResidentielEligible: bAxesFromVivierKey(activeSubsetKey).r,
+          requirePrecoce: bAxesFromVivierKey(activeSubsetKey).p,
+        },
         excludePiia: vivierBExclusions.piiaSansProjetResidentiel,
         excludeDerogations: vivierBExclusions.derogationsMineures,
         signal: lease.signal,
