@@ -47,9 +47,7 @@
     buildCityMapEntries,
     type CityMapEntry,
   } from "$lib/maps/maps-data.js";
-  import {
-    fetchGraphSignalsByCity,
-  } from "$lib/signals/graph-signals-by-city-client.js";
+  import { fetchSignalMetadata, metadataCityItems } from "$lib/signals/signal-metadata-client.js";
   import {
     fetchGraphSignalDetail,
     scopedReadErrorMessage,
@@ -928,17 +926,7 @@
     axes: bAxesFromVivierKey(activeSubsetKey),
     exclusions: vivierBExclusions,
   });
-  // Filtre counts (owner 2026-11-13): over the WHOLE displayed perimeter,
-  // with or without a selection — every city's cubes scoped by Pertinence, the
-  // selected city's cube being rebuilt from its loaded detail (period +
-  // Pertinence lens on the raw detail, before any Filtre criterion) under the
-  // same condition as its live header count. Faceted: each criterion follows
-  // the other active criteria (see signal-filter-counts.ts).
-  $: filtreScopedNodes = filterNodesByClassement(
-    filterNodesByDocumentDate(detailNodes, dateRange, dateBasis),
-    classementMap,
-    classementFilter,
-  );
+  // Every counter uses date-scoped SQL cells, independently of city detail.
   $: filtreCountsValue = loadError !== null
     ? null
     : filtreCountsForPerimeter({
@@ -946,9 +934,6 @@
       classement: classementFilter,
       axes: bAxesFromVivierKey(activeSubsetKey),
       exclusions: vivierBExclusions,
-      live: selectedCity && !detailLoading && detailProjection.available
-        ? { slug: selectedCity.municipality.slug, nodes: filtreScopedNodes }
-        : null,
     });
   function handleClassementFilterChange(
     next: import("$lib/signals/signal-classement.js").ClassementFilter,
@@ -1043,10 +1028,7 @@
    *  - la projection serveur est indisponible (`!detailProjection.available`) —
    *    on ne substitue jamais un compte qu'on ne peut pas garantir exact.
    */
-  $: selectedCityLiveCount =
-    selectedCity && !detailLoading && detailProjection.available
-      ? classementFilteredNodes.length
-      : null;
+  $: selectedCityLiveCount = null;
   $: displayedLots = buildDisplayedLots(lotsResponse, zonesResponse, classementFilteredNodes);
 
   /**
@@ -2677,14 +2659,14 @@
       // date-cohérents avec le filtre date actif → fin du 0/50 (parité globale,
       // pas seulement la ville sélectionnée). Sans borne = all-time (Illimité).
       // 6H : agrégat scopé dans l'espace de travail explicite.
-      const res = await fetchGraphSignalsByCity({ workspaceId }, {
+      const res = await fetchSignalMetadata({ workspaceId }, {
         ...signalDocumentDateWindow(dateRange, dateBasis),
         excludePiia: vivierBExclusions.piiaSansProjetResidentiel,
         excludeDerogations: vivierBExclusions.derogationsMineures,
         signal: lease.signal,
       });
       if (version !== bulkLoadVersion || !lease.isCurrent()) return "stale";
-      graphItems = res.cities;
+      graphItems = metadataCityItems(res);
       return "ok";
     } catch (e) {
       if (version !== bulkLoadVersion || !lease.isCurrent() || isAbortError(e)) return "stale";

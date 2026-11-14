@@ -8,9 +8,7 @@
  *  - every city: the cubes served by the by-city aggregate (period, archive
  *    visibility), merged only for the checked visible Pertinence classes;
  *    archives enter the list and counts when Écarté is checked;
- *  - the selected city, once its detail is loaded: the cube rebuilt from that
- *    detail scoped by period + Pertinence, exactly like the header swaps in
- *    the selected city's live count.
+ * City selection and detail loading never replace the served cubes.
  *
  * Counting is faceted: a criterion is counted over the signals that pass every
  * OTHER active criterion (see `facetedVivierFiltreCounts`). Each count thus
@@ -84,7 +82,7 @@ export interface FiltrePerimeterInput {
    * already scoped by period + Pertinence. `null`: no selection, or detail not
    * loaded yet (the bulk cube stays, as for the header count).
    */
-  live: { slug: string; nodes: readonly GraphSignalNode[] } | null;
+  live?: { slug: string; nodes: readonly GraphSignalNode[] } | null;
 }
 
 /** Relevance uses full server cubes independently of the selected classes. */
@@ -107,7 +105,6 @@ export function filtreCountsForPerimeter(input: FiltrePerimeterInput): FiltreCou
     return facetedVivierFiltreCounts({}, input.axes, input.exclusions);
   }
   for (const entry of input.entries) {
-    if (input.live && entry.municipality.slug === input.live.slug) continue;
     // A city absent from the aggregate has no signal in scope: nothing to add.
     const cube = entry.filtreCube ?? null;
     if (entry.vivierV2Counts === null && cube === null) continue;
@@ -119,11 +116,6 @@ export function filtreCountsForPerimeter(input: FiltrePerimeterInput): FiltreCou
       if (cube === null || filter.ecarte || !filter.pertinent || !filter.a_surveiller || !filter.non_classe) return null;
       cubes.push(cube);
     }
-  }
-  if (input.live) {
-    const liveCube = filtreCubeOfNodes(input.live.nodes);
-    if (liveCube === null) return null;
-    cubes.push(liveCube);
   }
   return facetedVivierFiltreCounts(mergeVivierFiltreCubes(cubes), input.axes, input.exclusions);
 }
