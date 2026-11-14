@@ -48,4 +48,5 @@
 - [x] Review correction 2: browser decisions linked to immutable MCP events; shared archive moderation and projection.
 - [x] Review correction 3: explicit manual Non classé and confirmation controls in the UI.
 - [x] PostgreSQL regressions cover forged human CHECK violations, linked browser decisions, Non classé, shared moderation, confirmed archive restoration and subsequent corrections.
-- [ ] Review correction 4: SQL, SDK, UI and browser regressions; dedicated CI gate; final checks and delivery.
+- [x] Review correction 4: SQL, SDK, UI and browser regressions; dedicated CI gate; final local checks.
+- [x] Corrective gates: typecheck/lint pass; API/PostgreSQL 30 default and 44 with shared-archive suites; MCP 613 pass/9 unrelated skips; SDK 5; UI 37; browser 2. All isolated stacks removed with down -v.
