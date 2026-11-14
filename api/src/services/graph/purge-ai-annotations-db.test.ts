@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { expect, it } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { describeDb } from "../facets/scope-db-fixture.js";
 import { workspaceFixture, workspaceSignal } from "../facets/workspace-archive-fixture.js";
 import { readProjectionScope } from "../facets/projection-revisions.js";
@@ -14,7 +14,7 @@ async function setup() {
   const f = await workspaceFixture();
   const { target, fingerprint } = await workspaceSignal(f);
   const annotation: AiClassAnnotation = { citySlug: target.citySlug, nodeType: "Signal", nodeId: target.id,
-    classe: "ecarte", reason: "AI decision", source: "ai", model: "gpt-6-astra", effort: "low",
+    classe: "ecarte", reason: "AI decision", ambiguous: false, source: "ai", model: "gpt-6-astra", effort: "low",
     promptId: "v1", promptSha256: "a".repeat(64), pipelineRunId: "run-1", inputSha256: "b".repeat(64) };
   const revision = () => readProjectionScope(f.db, f.contributor.sub, f.workspaceId, target.citySlug, "signal");
   const counts = () => readScopedByCity(f.db, f.contributor.sub, f.workspaceId, { showDiscarded: false });
@@ -27,6 +27,8 @@ async function setup() {
 }
 
 describeDb("AI annotation rollback PostgreSQL", () => {
+  beforeEach(() => vi.stubEnv("REFRESH_CLASSIFY_MODE", "two-step"));
+  afterEach(() => vi.unstubAllEnvs());
   it("should default to dry-run without changing annotations or projection revisions", async () => {
     const f = await setup();
     const before = await f.rows();
@@ -81,7 +83,8 @@ describeDb("AI annotation rollback PostgreSQL", () => {
     expect((await f.db.execute(sql`SELECT * FROM facet_events`)).rows).toEqual(events.rows);
     const annotations = await readClassAnnotations(f.db, f.annotation.citySlug);
     expect(annotations.has(`Signal:${f.annotation.nodeId}`)).toBe(false);
-    expect(annotations.get("Signal:manual")).toMatchObject({ source: "manual", classe: "a_surveiller", reason: "Human decision" });
+    expect(annotations.get("Signal:manual")).toMatchObject({ source: "manual",
+      classe: "a_surveiller", reason: "Human decision" });
   });
 
   it("should combine both filters and preserve a matching manual annotation", async () => {

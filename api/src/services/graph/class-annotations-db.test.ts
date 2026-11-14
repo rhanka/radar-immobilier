@@ -1,11 +1,16 @@
-import { expect, it } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { sql } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
+import { Hono } from "hono";
+import { graphSignalsRoute } from "../../routes/graph-signals.js";
+import type { ObjectStore } from "../../storage/object-store.js";
 import { describeDb, fixture, event } from "../facets/scope-db-fixture.js";
 import { workspaceFixture, workspaceSignal } from "../facets/workspace-archive-fixture.js";
 import { writeScopedPersonalFacet } from "../facets/scoped-writer.js";
 import { readScopedByCity } from "../facets/scoped-by-city.js";
 import { readProjectionScope } from "../facets/projection-revisions.js";
+import { targetFingerprint } from "../facets/target.js";
+import { buildScopedSignalCards, buildScopedSignalCardViews } from "../facets/scoped-signal-cards.js";
 import { readClassAnnotations, writeClassAnnotation, type AiClassAnnotation } from "./class-annotations.js";
 
 const input: AiClassAnnotation = { citySlug: "synthetic-city", nodeType: "Signal", nodeId: "test-ai",
@@ -14,6 +19,53 @@ const input: AiClassAnnotation = { citySlug: "synthetic-city", nodeType: "Signal
   pipelineRunId: "run-1", inputSha256: "b".repeat(64) };
 
 describeDb("single-pass class annotations PostgreSQL", () => {
+  beforeEach(() => vi.stubEnv("REFRESH_CLASSIFY_MODE", "two-step"));
+  afterEach(() => vi.unstubAllEnvs());
+  it("should preserve current main cards and counts at off with an existing AI exclusion", async () => {
+    const f = await workspaceFixture();
+    const { node, target } = await workspaceSignal(f);
+    const counts = () => readScopedByCity(f.db, f.contributor.sub, f.workspaceId, { showDiscarded: false });
+    const cards = () => buildScopedSignalCards({ db: f.db }, [node], target.citySlug);
+    const views = () => buildScopedSignalCardViews({ db: f.db }, [node], target.citySlug);
+    await writeClassAnnotation(f.db, { ...input, nodeId: target.id, classe: "ecarte" });
+    const baseline = { counts: await counts(), cards: await cards(), views: await views() };
+    expect((await counts()).totalCount).toBe(0);
+    expect((await cards())[0]?.classAnnotation?.classe).toBe("ecarte");
+    vi.stubEnv("REFRESH_CLASSIFY_MODE", "off");
+    expect({ counts: await counts(), cards: await cards(), views: await views() }).toEqual(baseline);
+    expect(await writeScopedPersonalFacet(f.db, f.contributor.sub, f.workspaceId, {
+      action: "deselect", basket: "pertinent", target, displayedFingerprint: targetFingerprint(node),
+      expectedHeadId: null, commandKey: randomUUID(),
+    })).toMatchObject({ state: "inactive" });
+    expect((await readClassAnnotations(f.db, target.citySlug)).size).toBe(1);
+  });
+  it("should preserve main b00c27d63 API annotations at off without manual history", async () => {
+    const f = await workspaceFixture();
+    const { target } = await workspaceSignal(f);
+    const annotation = { ...input, nodeId: target.id, classe: "ecarte" as const };
+    await writeClassAnnotation(f.db, annotation);
+    const history = await f.db.execute(sql`SELECT 1 FROM facet_events
+      WHERE city_slug=${target.citySlug} AND node_id=${target.id} AND source='manual'`);
+    expect(history.rows).toEqual([]);
+    const app = new Hono().route("/", graphSignalsRoute({ db: f.db, store: {} as ObjectStore }));
+    const get = async () => {
+      const response = await app.request(`/api/graph-signals/${target.citySlug}?showDiscarded=1`);
+      expect(response.status).toBe(200);
+      return response.text();
+    };
+    // Current main reads stored annotations unconditionally; refresh flags only control writes.
+    const baseline = await get();
+    expect(JSON.parse(baseline).nodes[0].classAnnotation).toEqual(annotation);
+    for (const mode of ["off", "single-pass", "two-step"]) {
+      vi.stubEnv("REFRESH_CLASSIFY_MODE", mode);
+      vi.stubEnv("REFRESH_SINGLE_PASS", "0");
+      expect(await get()).toBe(baseline);
+      expect((await readScopedByCity(f.db, f.contributor.sub, f.workspaceId,
+        { showDiscarded: false })).totalCount).toBe(0);
+      expect((await readScopedByCity(f.db, f.contributor.sub, f.workspaceId,
+        { showDiscarded: true })).totalCount).toBe(1);
+    }
+  });
   it("should increment the shared manual projection revision for AI changes only", async () => {
     const f = await workspaceFixture();
     const { target } = await workspaceSignal(f);
