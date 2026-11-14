@@ -50,3 +50,5 @@
 - [x] PostgreSQL regressions cover forged human CHECK violations, linked browser decisions, Non classé, shared moderation, confirmed archive restoration and subsequent corrections.
 - [x] Review correction 4: SQL, SDK, UI and browser regressions; dedicated CI gate; final local checks.
 - [x] Corrective gates: typecheck/lint pass; API/PostgreSQL 30 default and 44 with shared-archive suites; MCP 613 pass/9 unrelated skips; SDK 5; UI 37; browser 2. All isolated stacks removed with down -v.
+- [x] Idempotence correction: guard 0048 tables, indexes, constraints and triggers; replace functions; no migration backfill exists. Add populated replay coverage preserving audit, events and append-only protections.
+- [x] Start the isolated object store for API tests so artifacts-migrations.spec.ts can run through the standalone runner.
