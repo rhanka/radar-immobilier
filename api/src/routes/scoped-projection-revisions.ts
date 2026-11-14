@@ -133,6 +133,9 @@ export function scopedProjectionRevisionsRoute(deps: ScopedProjectionRevisionsDe
       const key = (row: { type: string; id: string }) => JSON.stringify([row.type, row.id]);
       const hiddenKeys = new Set(heads.filter((head) => head.effectiveDiscarded)
         .map((head) => key(head.target)));
+      for (const [targetKey, state] of coherent.payload.mcp) {
+        if (state.current?.classe === "ecarte" && (state.current.source === "mcp" || state.current.linked_event_id)) hiddenKeys.add(targetKey);
+      }
       // Each served node carries the displayed fingerprint computed exactly
       // like the 6B contract, so the snapshot supports a follow-up command,
       // plus the server card fields derived from that same stored node
