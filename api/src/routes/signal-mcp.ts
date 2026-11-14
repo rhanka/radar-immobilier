@@ -1,7 +1,8 @@
 import { Hono } from "hono";
 import { z } from "zod";
 import type { Database } from "../db/client.js";
-import { addSignalNote, readSignalMcp } from "../services/graph/signal-mcp.js";
+import { addSignalNote, decideSignalMcp, readSignalMcp } from "../services/graph/signal-mcp.js";
+import { FacetError } from "../services/facets/target.js";
 import { privateSignalResponse } from "../services/facets/private-response.js";
 
 const target = z.object({ scope: z.enum(["personal", "workspace"]),
@@ -9,6 +10,9 @@ const target = z.object({ scope: z.enum(["personal", "workspace"]),
   type: z.enum(["Signal", "DesignationEvent"]), id: z.string().min(1).max(512) }).strict();
 const note = z.object({ target, text: z.string().trim().min(1).max(2000),
   version: z.string().regex(/^[a-f0-9]{32}$/) }).strict();
+const decision = z.object({ target, version: z.string().regex(/^[a-f0-9]{32}$/),
+  classe: z.enum(["pertinent", "a_surveiller", "ecarte", "non_classe"]),
+  reasonCode: z.string().min(1).max(128).optional(), confirm: z.boolean().optional() }).strict();
 export function signalMcpRoute(deps: { db: Database; auth?: { enabled: boolean } }) {
   const app = new Hono();
   const path = "/api/v1/workspaces/:workspaceId/signal-facets/annotations";
@@ -26,6 +30,18 @@ export function signalMcpRoute(deps: { db: Database; auth?: { enabled: boolean }
     const session = c.get("session" as never) as { sub: string };
     const state = await readSignalMcp(deps.db, session.sub, { ...parsed.data, workspaceId: c.req.param("workspaceId") });
     return state.error ? c.json({ error: state.error }, 403) : c.json(state);
+  });
+  app.post(`${path}/decision`, async (c) => {
+    const parsed = decision.safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) return c.json({ error: "invalid_signal_command" }, 400);
+    const session = c.get("session" as never) as { sub: string };
+    try {
+      return c.json(await decideSignalMcp(deps.db, session.sub, { ...parsed.data.target,
+        workspaceId: c.req.param("workspaceId") }, parsed.data.version, parsed.data), 201);
+    } catch (error) {
+      if (error instanceof FacetError) return c.json({ error: error.message }, error.status);
+      throw error;
+    }
   });
   app.post(path, async (c) => {
     const parsed = note.safeParse(await c.req.json().catch(() => null));
