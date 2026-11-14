@@ -54,3 +54,24 @@ The installed final-review skill requires a complementary host/model pair launch
 That launch tool is absent in this session. Exact author model/effort metadata is also unavailable.
 Final peer selection status: `selection-failed`. No final consensus verdict is claimed.
 Implementation is checked through executable PostgreSQL, OAuth/SDK and browser contracts.
+
+```yaml
+review-author:
+  host: codex
+  model: unavailable
+  effort: unavailable
+target-ref: 91b9d6b857557dc0309c135e1dbed417e3d12fe0
+status: selection-failed
+observed-failure: h2a_run MCP tool and exact author model/effort metadata unavailable
+```
+
+## Qualification
+
+`make -f tools/make/mcp-signal-write.mk verify ENV=test-mcp-signal-write` passes.
+Typecheck covers every workspace. Lint covers the repository.
+Diagnostics: eight Svelte warnings and one lint warning; zero errors.
+API/PostgreSQL: 27 pass. MCP: 613 pass, nine skipped. OAuth/SDK/PostgreSQL: five pass.
+UI: 19 pass. The final provenance-null change was rechecked with test-api and test-mcp.
+`make -f tools/make/mcp-signal-write.mk test-ui-e2e ENV=test-mcp-signal-write` passes one real browser/API/PostgreSQL scenario.
+It verifies human/automatic badges, cleaned notes and persisted user notes after reload.
+All stacks were removed with volumes. Root UAT was untouched.
