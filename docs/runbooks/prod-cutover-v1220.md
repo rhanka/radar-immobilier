@@ -1,8 +1,8 @@
 # Bascule prod v1.2.20 — procédure sous i-cond
 
-**NO-GO. La répétition sur copie prod reste à faire. Aucun acte prod exécuté par cette lane.**
+**NO-GO. La répétition sur copie prod reste à faire. Aucune mutation prod par cette lane.**
 Candidate : `b7724bdd9015a4f26319897bf240baaf9ee636ae`.
-La branche de procédure reste distincte. Aucun tag ni merge ici.
+La branche de procédure reste distincte. La préparation est intégrée par merge. Aucun tag ni merge dans main.
 
 Toutes les commandes passent par `rtk make -f deploy/prod-cutover/prod-cutover.mk`.
 `ENV` vient toujours en dernier. Aucun `.env` chargé.
@@ -45,6 +45,13 @@ Le promote candidat ne sait pas recevoir une fenêtre destructive fermée.
 prepare/run attendent des consommateurs observables. run exige une API Ready et des URL publiques.
 Son budget peut déclencher une réouverture automatique. Il ne pilote donc pas les étapes 5 à 12.
 La fenêtre capture l’ancienne release et l’inventaire avant le drain.
+Fournir `PREVIOUS_RELEASE`, manifeste historique indépendant avec SHA complet et digests vérifiés.
+La capture exige les mêmes digests et un SHA servi égal au complet ou à ses sept premiers caractères.
+Elle conserve les valeurs réellement servies pour les sondes de rollback. Le manifeste candidat reste strict.
+Sous le verrou acquis, la fenêtre refuse radar-prepared-db en preparing ou d’état inconnu.
+Elle refuse les runs v* non terminés de build-push-images, qui porte le job promote-prod.
+Elle refuse aussi les dispatchs actifs dont la cible est indéterminée et les Jobs CD non terminés.
+Les pages GitHub sont toutes consultées. Un échec de lecture fait refuser. Aucun abandon par délai.
 Après DDL et 6H, elle déploie les digests épinglés du build main `43506353942`.
 Elle réutilise les fonctions du contrôleur. Elle ne lance ni prepare, ni run, ni les DDL du CD.
 Elle attend le GO séparé avant reopen. Aucun blocage externe ne doit empêcher le smoke public à cette étape.
@@ -76,6 +83,7 @@ Après le premier commit DDL, la restauration complète est obligatoire.
 `rollback RUN=<RUN> ENV=execution-prod` remet schémas et données de l’archive finale.
 Il conserve les propriétaires et rejoue les ACL originales. Les rôles doivent préexister.
 `window-rollback-services RUN=<RUN> ENV=execution-prod` remet les images inventoriées.
+Il restaure d’abord les ConfigMaps et les env inventoriés avant configuration.
 Il exige le reçu de rollback et le schéma 13. Il fait le smoke privé.
 Vérifier les accès de l’ancienne release avant un nouveau GO de réouverture.
 Ne pas cumuler cette voie avec Rollback release ou le rollback générique du CD.
@@ -95,12 +103,16 @@ Le tri Chaperon reste interdit par #1080. Les statiques sont actifs selon D3. Le
 Archive prod RO prête : 283590496 octets, dump 72 s, deux empreintes identiques.
 PostgreSQL 16/PostGIS et clients conteneurisés préparés. Rôles recréés par copy-up local.
 Images API/UI téléchargées par digest. Roster OIDC et plan 6H privés prêts. Fournir GO exact.
-Fournir preuves réelles de terminaison, documents et compte de recette.
-Préparer UI/API/MCP locaux sur la copie. Neutraliser refresh et sorties prod.
-OUTPUT privé prévu. Câblage curseur/MCP/statique et opérateur de reprise restent requis.
+La commande `copy-rehearse OWNER=i-cond ENV=rehearsal` prépare l’attestation locale et les preuves Docker.
+Elle prépare UI/API/MCP, IdP et S3 isolés. Refresh et sorties prod sont absents.
+La recette humaine exige encore les PV autorisés et un compte Product Owner existant.
+Le câblage prod est préparé dans prod-bindings et prod-content-ingress.json. Aucun objet prod n’est provisionné.
+K8s doit fournir les Secrets, rôles, grants, bucket et DNS/TLS. L’IdP prod doit autoriser les scopes annoncés.
+Le wildcard pages doit précéder la capture de fenêtre. `CURSOR_REFERENCE` désigne la clé privée conservée.
+window-deploy refuse une clé différente. L’opérateur de reprise reste à désigner.
 Voir [les entrées détaillées](../../deploy/prod-cutover/README.md).
 
-Tests isolés : neuf gardes, contrôleur simulé et PostgreSQL avec archive synthétique.
+Tests isolés : 13 gardes, huit scénarios contrôleur/IdP et PostgreSQL avec archive synthétique.
 Restauration, 31 migrations, reprise et deux rollbacks complets y sont vérifiés.
 Ces preuves ne remplacent pas la copie prod ni le rejeu réel du hook candidat.
 Mesurer backup, restauration, DDL, WAL, 6H, recette et reprise sur cette copie.
