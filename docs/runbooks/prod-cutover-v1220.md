@@ -1,6 +1,6 @@
 # Bascule prod v1.2.20 — procédure sous i-cond
 
-**NO-GO. La répétition sur copie prod reste à faire. Aucune mutation prod par cette lane.**
+**NO-GO. Répétition technique faite. Recette humaine et prérequis prod attendus. Aucune mutation prod par cette lane.**
 Candidate : `b7724bdd9015a4f26319897bf240baaf9ee636ae`.
 La branche de procédure reste distincte. La préparation est intégrée par merge. Aucun tag ni merge dans main.
 
@@ -20,7 +20,7 @@ Décision owner vers 19 h le 13/11 : **« Tout ce soir, bascule décalée »**.
 Le périmètre reste complet. Les artefacts statiques sont actifs. Le live reste à 0.
 RPO accepté : perte des données de PV rafraîchies lors de la restauration. Le refresh les regénère.
 Aucune durée chiffrée de perte n’a été fixée par l’owner. Ne pas en inventer.
-L’archive préliminaire RO, le roster et le plan sont prêts. La répétition reste à lancer par i-cond.
+L’archive préliminaire RO, le roster et le plan sont prêts. La répétition technique est faite sous i-cond.
 Voir [les preuves et la commande exacte](../../deploy/prod-cutover/PREPARATION.md).
 
 ## Prérequis artefacts prod avant la fermeture
@@ -30,7 +30,7 @@ Le Secret account-reader y est utilisé. Il est donc aussi requis en prod.
 Les références API/MCP sont obligatoires dans `prod-bindings.cjs`.
 Le précheck refuse un Secret absent, une clé vide ou le TLS absent. Aucun GO implicite.
 Le contrôle RO du 13/11 refuse déjà `radar-artifacts-prod`, absent.
-L’inventaire RO de 19 h 52 confirme les six Secrets artefacts de ce tableau absents en prod.
+Un inventaire RO du 13/11 confirme les six Secrets artefacts de ce tableau absents en prod.
 
 | Prérequis | Objet prod et clés | Responsable |
 | --- | --- | --- |
@@ -181,6 +181,90 @@ Voir [les entrées détaillées](../../deploy/prod-cutover/README.md).
 Tests isolés : 13 gardes, huit scénarios contrôleur/IdP et PostgreSQL avec archive synthétique.
 Restauration, 31 migrations, reprise et deux rollbacks complets y sont vérifiés.
 Ces preuves ne remplacent pas la copie prod ni le rejeu réel du hook candidat.
-Mesurer backup, restauration, DDL, WAL, 6H, recette et reprise sur cette copie.
+Les mesures backup, restauration, DDL, WAL, 6H, smoke et reprise figurent ci-dessous.
 Trois heures, dont 45 minutes de reprise, restent un budget non validé.
 Attendre la CI verte et la ratification finale. Aucun GO prod dans ce rapport.
+
+## Mesures de la répétition du 13/11
+
+Commande lancée sous i-cond. Prod restée en lecture seule.
+Run de la copie conservée : `e64455b4-15a0-4a94-badf-5c2a370bd742`.
+Le [rapport détaillé](../../deploy/prod-cutover/REHEARSAL.md) garde les erreurs et les trois séries DDL.
+Les reçus complets restent privés. Aucun secret ni sujet OIDC dans ce tableau.
+
+| Étape | Secondes | Résultat |
+| --- | ---: | --- |
+| Dump RO préliminaire déjà pris | 72 | 283590496 octets ; double empreinte identique |
+| Restauration de la copie conservée | 113,569 | 13 empreintes |
+| 31 DDL | 34,361 | 44 empreintes |
+| 6H initial | 3,767 | open-success ; scoped ; barrière ouverte ; zéro non résolu |
+| Rejeu 6H | 2,569 | Même résultat |
+| Vérification comptes et espace | 7,224 | Six appartenances et droits conformes |
+| Reprise services et stockage | 10,601 | Sur services déjà créés ; démarrage froid non mesuré ici |
+| Smoke santé | 0,042 | UI, SHA, DB/S3, refus anonymes et discovery MCP |
+| Rollback complet 1 | 108,501 | Schémas, données et ACL originales ; retour à 13 |
+| Rollback complet 2 | 286,380 | Même restauration complète ; retour à 13 |
+| Remise finale : DDL / 6H / rejeu 6H | 50,097 / 3,897 / 138,218 | Même copie remise au candidat |
+| Remise finale : vérification / services / smoke | 0,787 / 52,547 / 0,087 | 44 empreintes ; services et stockage prêts ; smoke réussi |
+
+Après les deux rollbacks : propriétaires des 27 tables conformes au catalogue de l’archive.
+Propriétaire de public : pg_database_owner. Lecture du rôle applicatif radar réussie.
+Lecture du writer candidat refusée. Aucun grant candidat rejoué au schéma 13.
+TLS local, SHA servi et préflight CORS vérifiés depuis l’hôte.
+La recette humaine, les PDF et le smoke artefacts authentifié restent à consigner.
+
+La copie reste à `https://recette.localhost:15321`, au schéma candidat. Aucun down -v sur cette copie avant recette humaine.
+**Coupure projetée : socle de 292,984 s, soit 4 min 52,984 s, avec la remise finale.**
+Calcul : 72 + 113,569 + 50,097 + 3,897 + 0,787 + 52,547 + 0,087.
+Le rejeu 6H est exclu. La procédure prod ne l’appelle qu’une fois.
+En combinant les maxima DDL et 6H observés séparément, ce socle atteint 18 min 24,965 s.
+Ce scénario combine des passages différents. Il ne borne pas la coupure totale fermeture → réouverture.
+Il faut ajouter drain, transfert S3 et lecture de retour, rôles, déploiement k8s,
+recette privée, décisions GO et réouverture. Ces étapes prod ne sont pas mesurées.
+**La coupure totale reste non validée.** Le dump final après drain reste obligatoire.
+Le rollback ajoute le retour des configurations et images, le smoke privé et un GO distinct.
+
+Les clients conteneurisés et le commit sont inclus dans les durées DDL.
+WAL : 347989216 octets sur la copie conservée ; 370208912 au premier passage.
+Le stockage local est passé de 96 à 97 % d’occupation. Des attentes IO ont été observées.
+L’écart entre séries ne prouve pas une durée propre aux seuls DDL.
+
+| Migration | Avant retours, s | Remise finale, s | Premier passage, s |
+| --- | ---: | ---: | ---: |
+| 0014_facets_signal | 0,886 | 0,520 | 4,486 |
+| 0015_artifacts_core | 0,744 | 0,544 | 130,672 |
+| 0016_artifacts_lifecycle | 0,625 | 0,742 | 121,137 |
+| 0017_workspace_memberships | 0,525 | 0,597 | 9,877 |
+| 0018_facet_scope_bindings | 0,731 | 0,435 | 1,268 |
+| 0019_facet_workspace_archive | 0,969 | 1,076 | 98,786 |
+| 0020_facet_projection_revisions | 2,121 | 0,530 | 3,386 |
+| 0021_facet_lot_history | 0,684 | 0,552 | 9,717 |
+| 0022_facet_lot_cutover | 0,573 | 0,783 | 2,077 |
+| 0023_facet_lot_versions_fence | 0,684 | 0,702 | 1,508 |
+| 0024_artifacts_coordinator | 0,720 | 0,741 | 1,326 |
+| 0025_artifacts_actor_quotas | 0,531 | 0,511 | 1,567 |
+| 0026_artifacts_reader_tickets | 0,531 | 0,636 | 1,237 |
+| 0027_pw_write_persistence | 0,551 | 0,723 | 80,455 |
+| 0028_artifacts_p0b | 0,515 | 0,584 | 130,850 |
+| 0029_artifacts_parity | 0,426 | 0,451 | 5,225 |
+| 0030_admission_sync | 0,541 | 0,628 | 5,687 |
+| 0031_artifacts_reader_tickets_ttl | 0,469 | 0,412 | 1,354 |
+| 0032_artifacts_sharing_access_mode | 0,636 | 0,621 | 1,283 |
+| 0033_artifacts_upload_sessions | 0,514 | 0,531 | 1,285 |
+| 0034_artifacts_reader_consent | 0,549 | 0,713 | 89,929 |
+| 0035_artifacts_upload_pages | 0,544 | 0,713 | 1,311 |
+| 0036_artifacts_git_bindings | 0,539 | 0,659 | 1,133 |
+| 0037_artifacts_live_drafts | 0,738 | 0,512 | 0,966 |
+| 0038_artifacts_live_invitations | 0,613 | 0,699 | 0,912 |
+| 0039_artifacts_host_build_ledger | 0,588 | 0,734 | 0,841 |
+| 0040_artifacts_git_attach_intents | 0,709 | 0,519 | 0,739 |
+| 0041_drop_artifacts_live_invitations | 0,405 | 0,445 | 0,713 |
+| 0042_artifacts_live_invitations | 0,528 | 0,804 | 0,774 |
+| 0043_artifacts_host_build_failure | 0,867 | 0,236 | 0,561 |
+| 0044_signal_effective_dates | 10,809 | 10,462 | 9,285 |
+
+Les refus rencontrés sont corrigés : readiness TCP, base template0, accès au réseau interne,
+clients interrompus, image UI manquante, UID du proxy et CORS du mock.
+Les gardes ont bloqué les preuves Docker invalides. Aucun échec DDL dans ces trois séries.
+Vingt tests ciblés et huit scénarios contrôleur/IdP passent.
+Le lint passe. Les stacks de tests ont été supprimées avec down -v.
