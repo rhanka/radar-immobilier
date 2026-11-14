@@ -37,6 +37,7 @@ import { scopedEpochFor } from "./activation.js";
 import { resolveStream, type StreamRef } from "./scoped-reader.js";
 import { appendScopedTransition, assertScopedExpectations } from "./scoped-transition.js";
 import type { Basket, FacetCommand } from "./writer.js";
+import { assertNoMcpSharedArchive } from "../graph/signal-mcp.js";
 
 /** Pre-6B payload: no displayed fingerprint, recovery only, never a new command. */
 export type HistoricalScopedCommand = Omit<FacetCommand, "expectedHeadId" | "displayedFingerprint"> & {
@@ -89,6 +90,7 @@ export async function writeScopedPersonalFacetInTx(
     if (contextRow?.commandDigest === originalDigest) commandDigest = originalDigest;
     const replay = await readCommand(tx, accountId, key, commandDigest);
     if (replay !== undefined) return replay;
+    if (command.action === "select" || command.action === "deselect") await assertNoMcpSharedArchive(tx, sub, workspaceId, command.target);
     await lockCityGraph(tx, command.target.citySlug);
     const fingerprint = await resolveTarget(tx, command.target);
     if (fingerprint !== command.displayedFingerprint) {
