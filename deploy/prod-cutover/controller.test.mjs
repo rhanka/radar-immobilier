@@ -8,7 +8,7 @@ import { fixture } from '../../tools/make/cutover-fixture.mjs';
 import { Buffer } from 'node:buffer';
 import wiring from './prod-bindings.cjs';
 
-for (const [publicFailure, short] of [[false, false], [true, false], [false, true]]) test(`fenêtre fermée : capture, verrou, rollout privé, GO ; échec public=${publicFailure}, SHA court=${short}`, () => {
+for (const [publicFailure, short, abort] of [[false, false], [true, false], [false, true], [false, false, 'configured'], [false, false, 'partial']]) test(`fenêtre fermée : capture, verrou, rollout privé, GO ; échec public=${publicFailure}, SHA court=${short}, abandon=${abort}`, () => {
   const f = fixture({ url: 'https://immo.sent-tech.ca' });
   const node = process.execPath;
   writeFileSync(join(f.dir, 'bin/docker'), '#!/bin/sh\nif [ -f "$CUTOVER_TEST_STATE/hook-live" ]; then echo hook-id; fi\n', { mode: 0o755 });
@@ -61,6 +61,24 @@ exec '${node}' "$@"
     assert.notEqual(f.run('prepare', [], 'prod').status, 0, 'promote-prod prepare doit refuser');
     assert.notEqual(run('window-close', captured.run).status, 0, 'configuration requise avant drain');
     success(run('window-configure', captured.run));
+    if (abort === 'partial') {
+      const partial = f.state();
+      const map = partial.objects.find(o => o.metadata.name === 'radar-change-lock');
+      const r = JSON.parse(map.data.record); delete r.checkpoints['manual-configuration'];
+      map.data.record = JSON.stringify(r); persist(partial);
+    }
+    if (abort) {
+      if (abort === 'configured') success(run('window-close', captured.run));
+      success(run('window-abort', captured.run));
+      const restored = f.state();
+      assert.equal(restored.objects.some(o => o.metadata.name === 'radar-change-lock'), false);
+      assert.deepEqual(restored.objects.find(o => o.kind === 'ConfigMap' && o.metadata.name === 'radar-api').data, { GEO_DOCUMENTS_REPOINT: 'old' });
+      assert.equal(restored.objects.find(o => o.metadata.name === 'radar-refresh-pv').spec.suspend, false);
+      assert.ok(!JSON.stringify(restored.objects.find(o => o.kind === 'Ingress')).includes('base-maintenance-'));
+      const calls = readFileSync(join(f.dir, 'application-calls'), 'utf8');
+      assert.match(calls, /abort-verify/); assert.doesNotMatch(calls, /rollback|backup/);
+      return;
+    }
     assert.notEqual(run('window-close', '00000000-0000-0000-0000-000000000000').status, 0);
     const active = f.state();
     const cm = active.objects.find(o => o.metadata.name === 'radar-change-lock');
@@ -113,6 +131,16 @@ exec '${node}' "$@"
     } else {
       success(run('window-reopen', captured.run));
       assert.equal(f.state().objects.some(o => o.metadata.name === 'radar-change-lock'), false);
+      success(run('window-recover', captured.run));
+      assert.equal(record().run, captured.run);
+      assert.deepEqual(record().ingresses, captured.ingresses);
+      assert.deepEqual(record().previousRelease, captured.previousRelease);
+      assert.ok(JSON.stringify(f.state().objects.find(o => o.kind === 'Ingress')).includes('base-maintenance-'));
+      assert.notEqual(run('window-abort', captured.run).status, 0);
+      success(run('window-evidence', captured.run));
+      success(run('rollback', captured.run));
+      success(run('window-rollback-services', captured.run));
+      success(run('window-reopen', captured.run));
     }
     assert.ok(readFileSync(join(f.dir, 'application-calls'), 'utf8').includes('reopen-authorize'));
     assert.deepEqual(f.state().jobCreation || [], [], 'aucun prepare, DDL ou 6H du CD');
