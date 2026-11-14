@@ -53,13 +53,14 @@ jobs:
         env:
           KUBE_CONFIG_DATA_PREPROD: ${{ secrets.KUBE_CONFIG_DATA_PREPROD }}
         run: |
-          mkdir -p "$HOME/.kube"
+          export KUBECONFIG="$RUNNER_TEMP/radar-tenant.kubeconfig"
+          printf 'KUBECONFIG=%s\n' "$KUBECONFIG" >> "$GITHUB_ENV"
           if printf '%s' "$KUBE_CONFIG_DATA_PREPROD" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
-            printf '%s' "$KUBE_CONFIG_DATA_PREPROD" | base64 -d > "$HOME/.kube/config"
+            printf '%s' "$KUBE_CONFIG_DATA_PREPROD" | base64 -d > "$KUBECONFIG"
           else
-            printf '%s' "$KUBE_CONFIG_DATA_PREPROD" > "$HOME/.kube/config"
+            printf '%s' "$KUBE_CONFIG_DATA_PREPROD" > "$KUBECONFIG"
           fi
-          chmod 600 "$HOME/.kube/config"
+          chmod 600 "$KUBECONFIG"
       - uses: ./deploy/cutover/lock-action
         with:
           action: lock
@@ -102,13 +103,14 @@ jobs:
         env:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         run: |
-          mkdir -p "$HOME/.kube"
+          export KUBECONFIG="$RUNNER_TEMP/radar-tenant.kubeconfig"
+          printf 'KUBECONFIG=%s\n' "$KUBECONFIG" >> "$GITHUB_ENV"
           if printf '%s' "$KUBE_CONFIG_DATA" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
-            printf '%s' "$KUBE_CONFIG_DATA" | base64 -d > "$HOME/.kube/config"
+            printf '%s' "$KUBE_CONFIG_DATA" | base64 -d > "$KUBECONFIG"
           else
-            printf '%s' "$KUBE_CONFIG_DATA" > "$HOME/.kube/config"
+            printf '%s' "$KUBE_CONFIG_DATA" > "$KUBECONFIG"
           fi
-          chmod 600 "$HOME/.kube/config"
+          chmod 600 "$KUBECONFIG"
       - uses: ./deploy/cutover/lock-action
         with:
           action: lock
