@@ -18,7 +18,8 @@
    * réinitialise PAS son filtre — le compteur « N/M » du bandeau d'accordéon
    * reste affiché pour signaler un filtre actif.
    */
-  import { tick } from "svelte";
+  import { tick, onDestroy } from "svelte";
+  import { fetchExactLot } from "$lib/maps/lots-client.js";
   import { Badge, IconButton, Search } from "@sentropic/design-system-svelte";
   import BucketReloadAction from "$lib/components/maps/BucketReloadAction.svelte";
   import { normalizeLotKey, zoneSearchKey } from "@radar/domain";
@@ -494,6 +495,31 @@
     const sep = parsed.id.indexOf("/");
     return sep > 0 && sep < parsed.id.length - 1 ? parsed.id.slice(sep + 1) : null;
   })();
+  let exactLot: LotFeature | null = null;
+  let exactLotKey = "";
+  let exactLotAbort: AbortController | undefined;
+  let exactLotError = false;
+  $: loadExactDetail(lots.find((lot) => lot.properties.noLot === focusedLotNo));
+  onDestroy(() => exactLotAbort?.abort());
+
+  function loadExactDetail(lot: LotFeature | undefined): void {
+    const slug = lot?.properties.citySlug;
+    const key = lot?.displayOnly && slug ? `${slug}/${lot.properties.noLot}` : "";
+    if (key === exactLotKey) return;
+    exactLotAbort?.abort();
+    exactLotKey = key;
+    exactLot = null;
+    exactLotError = false;
+    if (!key || !lot || !slug) return;
+    const controller = new AbortController();
+    exactLotAbort = controller;
+    if (!lot.id) { exactLotError = true; return; }
+    void fetchExactLot(slug, lot.properties.noLot, lot.id, controller.signal).then((feature) => {
+      if (!controller.signal.aborted) exactLot = feature;
+    }).catch(() => {
+      if (!controller.signal.aborted) exactLotError = true;
+    });
+  }
   // Plafond DOM de la liste lots de NAVIGATION : le lot FOCUSÉ reste TOUJOURS
   // rendu (s'il dépasse le cap OU est écarté par le filtre lots, il est remonté
   // en tête — la sélection carte → fiche n'est jamais cassée par un filtre). La
@@ -1999,7 +2025,8 @@
             {#if displayedLots.length === 0}
               <p class="sel-empty" data-testid="lot-search-empty">Aucun lot trouvé.</p>
             {:else}
-            {#each displayedLots as lot (lot.properties.noLot)}
+            {#each displayedLots as displayLot (displayLot.properties.noLot)}
+              {@const lot = displayLot.displayOnly && exactLot?.properties.noLot === displayLot.properties.noLot && exactLot.properties.citySlug === displayLot.properties.citySlug ? exactLot : displayLot}
               {@const key = lotKey(lot)}
               {#if key}
                 {@const lotVisual = visual(selectionState, key)}
@@ -2025,6 +2052,9 @@
                          fois (focus exclusif). -->
                     {@const lotZoneFeature = zoneFeatureForLot(lot, zones)}
                     <div class="sel-entity-detail" data-testid="sel-lot-drawer">
+                      {#if lot.displayOnly}
+                        <p role="status">{exactLotError ? "Géométrie exacte indisponible." : "Chargement de la géométrie exacte…"}</p>
+                      {/if}
                       <div class="entity-meta">
                         <span class="entity-meta-key">Lot</span>
                         <code class="entity-meta-val">{lot.properties.noLot}</code>
