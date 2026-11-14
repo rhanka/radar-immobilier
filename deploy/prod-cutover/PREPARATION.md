@@ -4,8 +4,10 @@ D1 : tout le train part. La préprod devient la prod.
 D2 : mêmes comptes, espaces, capacités, gestionnaires et modérateurs que la préprod actuelle.
 D3 : artefacts statiques actifs. Artefacts live désactivés.
 D4 : au plus tôt. La perte de données PV rafraîchies est acceptée. Le refresh les regénère.
+Vers 19 h : « Tout ce soir, bascule décalée ». Les prérequis statiques restent obligatoires.
 
 Les [preuves agrégées](preparation-proof.json) ne contiennent aucun sujet OIDC.
+La [répétition réelle](REHEARSAL.md) est terminée. La copie reste au candidat pour recette humaine.
 Le répertoire privé `/home/antoinefa/.local/share/radar-prod-copy` est en 0700.
 Le roster, le plan, les inventaires, le rendu, le curseur et l’archive sont en 0600.
 Aucune donnée de tri Chaperon n’a été extraite de préprod. #1080 reste applicable.
@@ -23,7 +25,7 @@ Le dump passe par le service PostgreSQL prod et le port-forward local 25432.
 Les identifiants viennent de `radar-db-ro-prod`. Le rôle est vérifié sans capacités DML/DDL héritées.
 Transaction RO imposée. Dump custom `--no-owner --lock-wait-timeout=5s`.
 Le port-forward est arrêté. Le mot de passe temporaire est supprimé.
-Le catalogue custom est lisible avec pg_restore 16.4. Aucune restauration lancée.
+Le catalogue custom est lisible avec pg_restore 16.4. La restauration sur copie a réussi en 110,847 s.
 L’archive préliminaire ne remplace pas la sauvegarde finale après drain.
 
 ## Configuration préparée
@@ -51,8 +53,10 @@ Cette lane ne provisionne aucun de ces éléments en prod. Le rendu ne suffit pa
 
 Clients PG16 préparés dans le répertoire privé `bin`. Aucune installation hôte.
 L’image PostGIS locale est épinglée. Elle correspond à PostgreSQL 16.4/PostGIS 3.4.3 observés en prod.
-La cible copy-up initialise radar et quatre rôles NOLOGIN. Elle ne restaure aucune archive.
-Le port réservé est 25433. Le réseau Compose est interne. Aucun port UAT utilisé.
+La cible copy-up initialise radar et quatre rôles NOLOGIN. Elle recrée la base depuis template0.
+Le marqueur de destination reste 127.0.0.1:25433. Les clients PG et le hook passent par le réseau interne.
+Docker ne publie pas de port sur ce réseau interne. Seul le proxy UI rejoint aussi le réseau d’entrée.
+Les ports du proxy restent en loopback. API, MCP, IdP et S3 n’ont aucun réseau de sortie.
 Les images API/UI viennent du manifeste du run 43506353942. Aucun rebuild.
 
 `copy-prepare OWNER=i-cond` atteste les empreintes exactes du plan et du roster.
@@ -71,9 +75,10 @@ rtk make -f deploy/prod-cutover/preparation.mk copy-rehearse OWNER=i-cond ENV=re
 
 Cette commande restaure, migre, rejoue 6H deux fois et vérifie les 44 empreintes.
 Elle démarre ensuite API/UI/MCP, IdP et S3 locaux. Elle lance le smoke dans le réseau interne.
-Elle laisse la copie disponible pour la recette humaine. Un échec nettoie la stack avec down -v.
+Elle laisse la copie disponible pour la recette humaine. Un échec avant restauration nettoie avec down -v.
+Après restauration réussie, un échec garde la copie arrêtée pour diagnostic. `copy-resume` reprend sous la même attestation.
 Ports loopback requis : 25433, 18821, 15321, 15400 et 443. Aucun port UAT.
-Réseau interne. Aucun refresh planifié. Aucun endpoint prod dans la configuration de recette.
+Backend sur réseau interne. Aucun refresh planifié. Aucun endpoint prod dans la configuration de recette.
 Le backend S3 est adobe/s3mock 3.12.0 épinglé par digest. Le proxy local fournit TLS.
 
 Ouvrir `https://recette.localhost:15321`. Faire confiance au certificat privé `ca.crt` sur le poste de recette.
@@ -101,3 +106,7 @@ rtk make -f deploy/prod-cutover/preparation.mk copy-down ENV=rehearsal
 
 Relever les durées, le WAL, les 44 puis 13 empreintes, les propriétaires, les ACL et les accès legacy.
 Ne pas présenter l’inspection du catalogue comme une restauration validée.
+Pour mesurer les deux retours sans écraser le premier reçu, `copy-rollback-twice ENV=rehearsal`
+arrête les services et conserve `rollback-first.json` et `rollback-second.json` dans OUTPUT.
+La répétition du 13/11 a remis la même copie au candidat pour la recette humaine.
+La suppression finale reste différée à la fin de cette recette.

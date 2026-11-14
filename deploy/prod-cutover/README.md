@@ -21,7 +21,7 @@ Les sources SQL et le journal doivent correspondre aux objets Git du SHA candida
 | `rollback` | Reset schémas + restauration atomique complète ; ACL originales séparées. | 1 800 s + ACL 60 s |
 | `k8s-plan`, `cd-plan` | Affichent les actes futurs. Aucune exécution cluster/tag/workflow. | 150 s |
 | `test`, `integration`, `down` | Gardes puis DDL natif synthétique ; nettoyage `down -v`. | 90 / 300 s |
-| `lint` | ESLint, contrôleur et IdP dans le runtime Node, puis `down -v`. | 300 s : installation ≤90 s, scénarios ≤150 s, nettoyage ≤45 s |
+| `lint` | Image de tests préparée séparément, puis ESLint, contrôleur et IdP, puis `down -v`. | Image absente ≤600 s ; lint 300 s : installation ≤90 s, scénarios ≤150 s, nettoyage ≤45 s |
 | `window-*` | Capture, fermeture, déploiement privé et réouverture séparée. Même verrou cutover. Exécution prod future uniquement. | 1 200 s par acte |
 
 Chaque cible d’exécution a un plafond externe de 3 600 secondes. Arrêt puis vérification du journal si issue indéterminée.
@@ -31,7 +31,10 @@ Les erreurs n’affichent ni SQL, ni ligne métier, ni secret. Les entrées JSON
 
 ## Répétition sur copie : état après décisions owner
 
-La répétition prod **n’a pas eu lieu**. Le dump préliminaire RO autorisé est prêt.
+La répétition est faite sous i-cond le 13/11. Restaurations : 110,847 s et 113,569 s.
+Deux rollbacks complets réussis. La même copie est remise au candidat et gardée pour la recette humaine.
+Les [mesures détaillées](REHEARSAL.md) incluent chaque migration, les erreurs et la projection de coupure.
+Le dump préliminaire RO autorisé reste distinct de la sauvegarde finale après drain.
 Commande complète : `rtk make -f deploy/prod-cutover/preparation.mk copy-rehearse OWNER=i-cond ENV=rehearsal`.
 Elle laisse la copie ouverte à la recette locale. Suivre ensuite l’arrêt, les deux rollbacks et down -v du dossier.
 Voir le [dossier de préparation](PREPARATION.md), les empreintes et les commandes exactes.
@@ -41,10 +44,10 @@ Le runtime local recrée les rôles de l’archive et les deux rôles MCP, sans 
 
 État des prérequis :
 
-1. Archive custom `radar` prête en privé. Double SHA-256 identique. Provenance et durée dans preparation-proof.json. La restauration reste à faire.
+1. Archive custom `radar` prête en privé. Double SHA-256 identique. Provenance et durée dans preparation-proof.json. Restauration réelle réussie.
 2. Accès RO attesté. Grants hérités sans écriture vérifiés. Aucun rôle créé en prod. Port-forward terminé et mot de passe temporaire supprimé.
-3. PostgreSQL 16.4/PostGIS 3.4.3 local épinglé. Base `radar_cutover_owner_20261113`, hôte 127.0.0.1, port 25433. copy-up crée l’instance et les rôles. Non lancé ici.
-4. Images API/UI candidates présentes par digest. Manifeste comparé au run 43506353942. Aucun rebuild. `image-check` réussit. Le hook réel reste non exécuté.
+3. PostgreSQL 16.4/PostGIS 3.4.3 local épinglé. Base `radar_cutover_owner_20261113`. Marqueur local 127.0.0.1:25433. Clients sur le réseau Docker interne. Instance lancée par copy-up, base template0.
+4. Images API/UI candidates présentes par digest. Manifeste comparé au run 43506353942. Aucun rebuild. `image-check` réussit. Le hook suit les 31 DDL.
 5. Roster et plan privés extraits de préprod selon D2. Six comptes aussi approuvés en prod. APPROVAL reste à fournir avec owner, sha, expiresAt, planSha256 et rosterSha256. Ces empreintes portent sur les octets exacts. Toute modification exige une nouvelle attestation.
 6. Une preuve réelle de terminaison des processus de restauration/migration de la copie. Ne pas inventer de preuve prod. `EVIDENCE` contient run UUID, release SHA complet, instances et completedAt ISO de moins de 24 h.
 7. UI/API/MCP candidats locaux pointant vers cette même copie. Refresh et sortie réseau vers la prod désactivés. `SMOKE_URL=http://127.0.0.1:<port>` doit servir ces services. Un compte de recette local autorisé et les documents nécessaires sont requis.

@@ -21,7 +21,7 @@
 ## Feedback Loop
 - [x] clarification : instruction owner prime pour français et absence de trailers.
 - [x] acknowledge : deux revues de conception. Backup final après drain. Comptes préexistants.
-- [ ] deferred : répétition et recette par i-cond après revue. Archive, roster, attestation locale et services préparés. Preuves Docker produites au lancement. PV et compte Product Owner de recette à fournir.
+- [ ] deferred : recette humaine par i-cond après revue. Répétition technique et deux rollbacks faits. Même copie remise au candidat. PV et compte Product Owner de recette à fournir.
 
 ## Orchestration Mode (AI-selected)
 - [x] Mono-branch. Deux lectures indépendantes de conception. Implémentation unique.
@@ -31,6 +31,7 @@
 - [x] Tests dédiés ENV=test-prod-cutover. Ports réservés API 18821, UI 15321, Maildev 11121.
 
 ## Plan / Todo (lot-based)
+- [x] Runbook destiné au corps de la PR actualisé : vingt gardes, trois séries de 31 DDL, double rollback, erreurs, projection et six Secrets manquants. Aucun GO prod. Copie conservée au candidat pour recette humaine.
 - [x] Rapport des trois séries DDL, double rollback et audit publié dans REHEARSAL.md. Socle projeté 292,984 s ; scénario de maxima séparés 1104,965 s ; coupure totale non validée. Vingt tests, huit scénarios et ESLint réussis. Down -v des tests terminé.
 - [x] Préparation de l’image de tests séparée du budget lint. Pull des quatre images de copie par digest. Lectures locales bornées, contrôlées et sans écriture ; source SQL et images candidates inchangées.
 - [x] Remise au candidat : DDL 50,097 s ; 6H 3,897 s ; rejeu 138,218 s ; vérification RO par exec 0,787 s ; services 52,547 s ; smoke 0,087 s. Copie ouverte pour recette humaine. Vingt gardes passent. Le reader local refuse un UPDATE vide et tout autre environnement.
