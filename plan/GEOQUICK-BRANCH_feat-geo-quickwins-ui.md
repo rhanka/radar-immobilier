@@ -52,4 +52,10 @@ Reduce map transfers while preserving exact geometry for details and calculation
   - [x] CI checks started; merge remains outside this lane.
 - [x] Lot 5: load M1 display mirrors once per collection; log explicit exact fallback for HTTP 400/404/503; preserve exact item details and browser cache validation.
   - [x] Typecheck and lint pass (warnings only); targeted UI tests pass in 7 files, including 16 display-boundary cases.
-- [ ] Lot 6: validate M1 client tests and real-click browser scenarios; push and update PR #1109.
+- [x] Lot 6: validate M1 client tests and real-click browser scenarios.
+  - [x] Four browser scenarios pass in 4.94 s: nominal display and explicit fallback on HTTP 400/404/503, then exact lot detail without profile or precision.
+  - [x] Local synthetic nominal city-click-to-exact-card measurement: 578 ms. Geo is mocked; this is not a city-scale performance benchmark.
+  - [x] Preprod measured from this host: Rawdon 1,843,278 bytes / 0.669 s; Saint-Eustache 3,182,380 bytes / 1.351 s. ETag revalidation: HTTP 304, zero bytes, 0.122 s / 0.104 s respectively.
+  - [x] Initial browser failure came from applying M1 assertions to CPTAQ requests; the trace identified the unrelated constraints collection. The simulator now scopes M1 assertions to lots/zoning.
+  - [x] Unit stack and both browser campaigns removed with volumes (`down -v`).
+- [ ] Lot 7: push M1 commits and update PR #1109; no merge.
