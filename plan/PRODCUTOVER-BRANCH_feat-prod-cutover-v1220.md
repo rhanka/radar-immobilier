@@ -31,6 +31,7 @@
 - [x] Tests dédiés ENV=test-prod-cutover. Ports réservés API 18821, UI 15321, Maildev 11121.
 
 ## Plan / Todo (lot-based)
+- [x] Rapport des trois séries DDL, double rollback et audit publié dans REHEARSAL.md. Socle projeté 292,984 s ; scénario de maxima séparés 1104,965 s ; coupure totale non validée. Vingt tests, huit scénarios et ESLint réussis. Down -v des tests terminé.
 - [x] Préparation de l’image de tests séparée du budget lint. Pull des quatre images de copie par digest. Lectures locales bornées, contrôlées et sans écriture ; source SQL et images candidates inchangées.
 - [x] Remise au candidat : DDL 50,097 s ; 6H 3,897 s ; rejeu 138,218 s ; vérification RO par exec 0,787 s ; services 52,547 s ; smoke 0,087 s. Copie ouverte pour recette humaine. Vingt gardes passent. Le reader local refuse un UPDATE vide et tout autre environnement.
 - [x] Dix-huit gardes passent. Régression d’interruption : le client Docker est arrêté avant suppression du conteneur nommé. L’audit après double rollback confirme 27 propriétaires, public, lecture legacy et refus du writer candidat.
