@@ -58,6 +58,7 @@ export async function writeScopedPersonalFacet(
 /** Shared BASE executor; the caller owns commit, rollback, and isolation. */
 export async function writeScopedPersonalFacetInTx(
   tx: ScopedTx, sub: string, workspaceId: string, command: FacetCommand,
+  options: { validatedAiFeedbackId?: string } = {},
 ) {
   if (command.expectedHeadId === undefined) {
     throw new FacetError(400, "invalid_facet_command");
@@ -134,7 +135,7 @@ export async function writeScopedPersonalFacetInTx(
       }
       throw new FacetHeadConflictError({ target: command.target, version: null, heads });
     }
-    if (command.action === "discard" && command.reasonCode === undefined) {
+    if (command.action === "discard" && command.reasonCode === undefined && !options.validatedAiFeedbackId) {
       throw new FacetError(422, "reason_code_required");
     }
     if (command.action === "select" && basket === null) {
@@ -147,7 +148,7 @@ export async function writeScopedPersonalFacetInTx(
       nodeId: command.target.id, facet, basket,
     }).returning())[0]!.id : main.id;
     const event = await appendScopedTransition(tx, accountId, command, streamId,
-      facet, basket, active ? "active" : "inactive", fingerprint);
+      facet, basket, active ? "active" : "inactive", fingerprint, options.validatedAiFeedbackId);
     const touched = new Map<string, string | null>([[streamId, main.headEventId ?? null]]);
     for (const [entry, ref] of removed) {
       const targetId = ref.id === "" ? (await tx.insert(facetStreams).values({

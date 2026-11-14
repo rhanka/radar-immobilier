@@ -1,14 +1,64 @@
 import { expect, it, vi } from "vitest";
 import { sql } from "drizzle-orm";
 import { database, describeDb, event, fixture } from "../facets/scope-db-fixture.js";
-import { readClassAnnotations } from "./class-annotations.js";
+import { readClassAnnotations, writeClassAnnotation } from "./class-annotations.js";
 import { createReannotationRepository } from "./reannotate-repository.js";
 import { reannotationInputSha256, runReannotation } from "./reannotate-signals.js";
 import { twoStepFixture } from "./refresh-two-step.fixture.js";
 import * as graphStore from "./graph-store.js";
 import { RefreshRunBudget } from "./refresh-run-budget.js";
+import { randomUUID } from "node:crypto";
+import { graphNodes } from "../../db/schema.js";
+import { workspaceFixture } from "../facets/workspace-archive-fixture.js";
+import { targetFingerprint } from "../facets/target.js";
+import { writeClassFeedback } from "./class-feedback.js";
 
 describeDb("two-step refresh with PostgreSQL", () => {
+  it.each(["feedback", "manual"] as const)("should preserve %s through refresh and changed-input reannotation", async (kind) => {
+    const human = await workspaceFixture();
+    const target = { citySlug: "waterloo", type: "Signal" as const, id: "new-Signal" };
+    const [node] = await human.db.insert(graphNodes).values({ citySlug: target.citySlug,
+      id: target.id, type: target.type, label: "Previous act evidence" }).returning();
+    await writeClassAnnotation(human.db, { citySlug: target.citySlug, nodeType: target.type, nodeId: target.id,
+      source: "ai", classe: "pertinent", reason: "Previous residential evidence", model: "gpt-6-astra",
+      effort: "low", promptId: "v2", promptSha256: "a".repeat(64), pipelineRunId: "before-human",
+      inputSha256: reannotationInputSha256(node!) });
+    const annotation = (await readClassAnnotations(human.db, target.citySlug, { includeDates: true })).get(`Signal:${target.id}`)!;
+    if (kind === "feedback") {
+      await writeClassFeedback(human.db, human.contributor.sub, human.workspaceId, {
+        target, displayedFingerprint: targetFingerprint(node!), scope: "personal", verdict: "up",
+        annotation: { source: "ai", model: annotation.model!, classe: annotation.classe,
+          promptSha256: annotation.promptSha256!, pipelineRunId: annotation.pipelineRunId!, updatedAt: annotation.updatedAt! },
+        selectionHeads: { pertinent: null, a_surveiller: null }, archives: { personal: null, workspace: null },
+        commandKey: randomUUID(),
+      });
+    } else {
+      await human.db.execute(sql`UPDATE signal_class_annotations SET source='manual', classe='pertinent',
+        reason='Human decision' WHERE node_id=${target.id}`);
+    }
+    const before = await human.db.execute(sql`SELECT * FROM signal_class_annotations WHERE node_id=${target.id}`);
+    const feedback = await human.db.execute(sql`SELECT * FROM signal_class_feedback`);
+    const events = await human.db.execute(sql`SELECT * FROM facet_events ORDER BY id`);
+    const second = await twoStepFixture(human.db, "two-step", false, undefined, " changed document");
+    expect(await second.run()).toMatchObject({ status: "published" });
+    expect(second.classificationRequests).toHaveLength(1);
+    expect(second.notes.find(({ note }) => note === "classification-completed")?.detail)
+      .toMatchObject({ candidates: 2, skippedManual: 1, written: 1 });
+    const refreshed = (await createReannotationRepository(human.db).list(new Date(0)))
+      .find((entry) => entry.id === target.id)!;
+    expect(reannotationInputSha256(refreshed)).not.toBe(reannotationInputSha256(node!));
+    await human.db.execute(sql`UPDATE graph_nodes SET label='Changed act evidence' WHERE id=${target.id}`);
+    const classify = vi.fn();
+    expect(await runReannotation({ ...second.options.classification!,
+      repository: createReannotationRepository(human.db, { citySlug: target.citySlug, nodeIds: [target.id] }),
+      now: second.options.now!(), pipelineRunId: "reannotation-after-human", apply: true, changedInputOnly: true, classify,
+    })).toMatchObject({ candidates: 1, skippedManual: 1, classified: 0, written: 0 });
+    expect(classify).not.toHaveBeenCalled();
+    expect((await human.db.execute(sql`SELECT * FROM signal_class_annotations WHERE node_id=${target.id}`)).rows).toEqual(before.rows);
+    expect((await human.db.execute(sql`SELECT * FROM signal_class_feedback`)).rows).toEqual(feedback.rows);
+    expect((await human.db.execute(sql`SELECT * FROM facet_events ORDER BY id`)).rows).toEqual(events.rows);
+  });
+
   it("should cover the document while bounding classification separately from detection", async () => {
     const { db } = await database();
     const budget = new RefreshRunBudget({ calls: 1, tokens: 1_000_000, durationMs: 60_000 });
