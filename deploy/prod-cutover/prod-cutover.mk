@@ -21,7 +21,7 @@ export STOP_RUN_CONTAINERS
 export CUTOVER_LINT_PROJECT
 render:
 	@cd "$(ROOT)" && node deploy/prod-cutover/render.cjs
-.PHONY: help prerequisites precheck backup restore-test migrate transition verify smoke rehearsal rollback k8s-plan cd-plan test integration down check image-check publish commit lint
+.PHONY: help prerequisites precheck backup restore-test migrate transition verify smoke rehearsal rollback k8s-plan cd-plan test integration down check image-check publish commit lint hook-controller-test
 help:
 	@echo 'Préparation : prerequisites precheck k8s-plan cd-plan. Exécution future : backup restore-test migrate transition verify smoke rehearsal rollback.'
 prerequisites precheck k8s-plan cd-plan:
@@ -41,7 +41,7 @@ lint:
 	@cd "$(ROOT)" && timeout --kill-after=10s 300s bash deploy/prod-cutover/lint.sh
 lint-down:
 	@test "$(ENV)" = test-prod-cutover
-	@env UID="$$(id -u)" GID="$$(id -g)" docker compose --env-file /dev/null -p radar-test-prod-cutover-lint -f "$(ROOT)/deploy/cutover/test.compose.yml" down -v --remove-orphans
+	@env UID="$$(id -u)" GID="$$(id -g)" docker compose --env-file /dev/null -p "$(or $(CUTOVER_LINT_PROJECT),radar-test-prod-cutover-lint)" -f "$(ROOT)/deploy/cutover/test.compose.yml" down -v --remove-orphans
 integration:
 	@test "$(ENV)" = test-prod-cutover
 	@cd "$(ROOT)" && timeout --kill-after=10s 300s bash deploy/prod-cutover/integration.sh

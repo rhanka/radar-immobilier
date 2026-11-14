@@ -1,4 +1,4 @@
-/* global require, module, process, Atomics, SharedArrayBuffer */
+/* global require, module, process */
 /* eslint-disable @typescript-eslint/no-require-imports */
 const r = require('./runtime.cjs');
 const LABEL = 'ca.sent-tech.immo.cutover-run';
