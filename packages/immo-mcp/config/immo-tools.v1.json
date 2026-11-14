@@ -14,11 +14,6 @@
     "note": "Generic scopes never replace the Immo scope policy."
   },
   "tools": [
-    { "name": "list_class_reasons", "scope": "immo:read", "binding": { "context": "signals", "registeredBy": "registerTools" } },
-    { "name": "get_signal_classification", "scope": "immo:read", "binding": { "context": "signals", "registeredBy": "registerTools" } },
-    { "name": "classify_signal", "scope": "immo:signals:write", "binding": { "context": "signals", "registeredBy": "registerTools" } },
-    { "name": "confirm_classification", "scope": "immo:signals:write", "binding": { "context": "signals", "registeredBy": "registerTools" } },
-    { "name": "annotate_signal", "scope": "immo:signals:write", "binding": { "context": "signals", "registeredBy": "registerTools" } },
     { "name": "search_lots", "scope": "immo:search", "binding": { "context": "data", "registeredBy": "registerTools" } },
     { "name": "get_lot_card", "scope": "immo:read", "binding": { "context": "data", "registeredBy": "registerTools" } },
     { "name": "search_signals", "scope": "immo:search", "binding": { "context": "data", "registeredBy": "registerTools" } },
@@ -30,7 +25,12 @@
     { "name": "get_zones_geojson", "scope": "immo:read", "binding": { "context": "raw", "registeredBy": "registerTools" } },
     { "name": "get_lots_geojson", "scope": "immo:read", "binding": { "context": "raw", "registeredBy": "registerTools" } },
     { "name": "get_grille_pdf", "scope": "immo:documents:read", "binding": { "context": "raw", "registeredBy": "registerTools" } },
-    { "name": "get_pv_pdf", "scope": "immo:documents:read", "binding": { "context": "raw", "registeredBy": "registerTools" } }
+    { "name": "get_pv_pdf", "scope": "immo:documents:read", "binding": { "context": "raw", "registeredBy": "registerTools" } },
+    { "name": "list_class_reasons", "scope": "immo:read", "binding": { "context": "signals", "registeredBy": "registerTools" } },
+    { "name": "get_signal_classification", "scope": "immo:read", "binding": { "context": "signals", "registeredBy": "registerTools" } },
+    { "name": "classify_signal", "scope": "immo:signals:write", "binding": { "context": "signals", "registeredBy": "registerTools" } },
+    { "name": "confirm_classification", "scope": "immo:signals:write", "binding": { "context": "signals", "registeredBy": "registerTools" } },
+    { "name": "annotate_signal", "scope": "immo:signals:write", "binding": { "context": "signals", "registeredBy": "registerTools" } }
   ],
   "compatibility": {
     "toolCount": 17,

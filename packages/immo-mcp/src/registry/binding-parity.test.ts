@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { resolveAuthContext } from "../auth-context.js";
 import { registerTools, type ToolContext } from "../tools.js";
 import { IMMO_TOOL_BINDINGS, IMMO_TOOL_NAMES, IMMO_TOOL_SCOPES } from "./immo-provider.js";
+import { isSignalWrite } from "../signal-contract.js";
 
 const calls = [
   ["search_lots", "searchLots", { city: "test-city" }],
@@ -33,10 +34,10 @@ describe("existing handler binding parity", () => {
       await server.connect(serverTransport);
       await client.connect(clientTransport);
       const listed = await client.listTools();
-      expect(listed.tools).toHaveLength(12);
+      expect(listed.tools).toHaveLength(17);
       expect(new Set(listed.tools.map((tool) => tool.name))).toEqual(new Set(IMMO_TOOL_NAMES));
       for (const tool of listed.tools) expect(tool.annotations).toEqual({
-        readOnlyHint: true, destructiveHint: false, openWorldHint: false, idempotentHint: true,
+        readOnlyHint: !isSignalWrite(tool.name), destructiveHint: false, openWorldHint: false, idempotentHint: !isSignalWrite(tool.name),
       });
     } finally {
       await client.close();

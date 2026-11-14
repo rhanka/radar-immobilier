@@ -38,7 +38,7 @@ describe("local composition registry", () => {
     const first = compileComposition([immoProvider()]);
     const second = compileComposition([immoProvider()]);
     expect(first.providers).toEqual(["immo"]);
-    expect(Object.keys(first.toolScopes)).toHaveLength(12);
+    expect(Object.keys(first.toolScopes)).toHaveLength(17);
     expect(first.artifact).toBeNull();
     expect(first.digest).toMatch(/^[0-9a-f]{64}$/);
     expect(second.digest).toBe(first.digest);
