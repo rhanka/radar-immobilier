@@ -13,6 +13,7 @@ import { targetFingerprint } from "../../src/services/facets/target.js";
 import { writeWorkspaceArchiveFacet } from "../../src/services/facets/workspace-writer.js";
 import { writeClassAnnotation } from "../../src/services/graph/class-annotations.js";
 import { scopedProjectionRevisionsRoute } from "../../src/routes/scoped-projection-revisions.js";
+import { setTimeout } from "node:timers/promises";
 
 const filter = signalMetadataFilterSchema.parse({});
 const props = { properties: { category: "zonage", etape: "avis_motion", description: "Projet de quatre logements" },
@@ -20,6 +21,36 @@ const props = { properties: { category: "zonage", etape: "avis_motion", descript
     { publishedAt: "2026-11-02", fetchedAt: "2026-11-04T15:00:00Z" }] };
 
 describe("fine signal metadata on PostgreSQL", () => {
+  it("should refuse metadata when revocation commits while the reader waits for the workspace lock", async () => {
+    const f = await workspaceFixture();
+    const revoker = await f.pool.connect();
+    let reading: Promise<unknown> | undefined;
+    try {
+      await revoker.query("BEGIN");
+      await revoker.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))",
+        [JSON.stringify(["workspace", f.workspaceId])]);
+      await revoker.query("UPDATE workspace_memberships SET status='revoked', revoked_at=now(), revision=revision+1 WHERE workspace_id=$1 AND account_id=$2",
+        [f.workspaceId, f.contributor.id]);
+      // Attach the rejection handler immediately; the revoker controls release.
+      reading = readSignalMetadata(f.db, f.contributor.sub, f.workspaceId, filter)
+        .then((value) => value, (error: unknown) => error);
+      let waiting = false;
+      for (let attempt = 0; attempt < 100; attempt++) {
+        const result = await revoker.query("SELECT 1 FROM pg_stat_activity WHERE $1 = ANY(pg_blocking_pids(pid)) AND wait_event='advisory'",
+          [revoker.processID]);
+        if (result.rowCount) { waiting = true; break; }
+        await setTimeout(10);
+      }
+      expect(waiting, "metadata reader must wait with its snapshot established").toBe(true);
+      await revoker.query("COMMIT");
+      expect(await reading).toMatchObject({ status: 403, message: "workspace_membership_required" });
+    } finally {
+      await revoker.query("ROLLBACK");
+      revoker.release();
+      await reading;
+    }
+  });
+
   it("should match the current cube, count multidates once, rebuild idempotently and roll back with revisions", async () => {
     const f = await workspaceFixture();
     const citySlug = "metadata-city";
