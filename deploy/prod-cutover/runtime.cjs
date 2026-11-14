@@ -21,6 +21,7 @@ function run(bin, args, options = {}) {
   const containerRun = env.RUN || (['psql', 'pg_dump', 'pg_restore'].includes(bin)
     && env.EVIDENCE ? json(env.EVIDENCE).run : '');
   const result = spawnSync(bin, args, { encoding: 'utf8', timeout: 60000,
+    stdio: [options.input === undefined ? 'ignore' : 'pipe', 'pipe', 'pipe'],
     maxBuffer: 32 * 1024 * 1024, ...options,
     env: { ...env, PGCONNECT_TIMEOUT: '5', PGOPTIONS: '-c lock_timeout=5000 -c statement_timeout=300000',
       ...options.env, CUTOVER_CONTAINER_RUN: containerRun } });
