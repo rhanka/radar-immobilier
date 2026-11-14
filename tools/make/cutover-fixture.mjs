@@ -46,6 +46,7 @@ export function fixture(changes = {}) {
   delete env.NAMESPACE; delete env.PREPROD_NAMESPACE; delete env.GITHUB_RUN_ID;
   delete env.GITHUB_ENV; delete env.GITHUB_OUTPUT;
   env.GITHUB_ACTIONS = 'false';
+  env.KUBECONFIG = join(dir, 'tenant.kubeconfig');
   if (changes.fastClock) env['BASH_FUNC_sleep%%'] = '() { if [ "$1" = 2 ]; then SECONDS=$((SECONDS+31)); else command sleep "$@"; fi; }';
   const run = (action = 'run', extra = [], environment = 'preprod') => {
     const result = spawnSync('make', ['-s', '-f', 'deploy/cutover/operator.mk', action,

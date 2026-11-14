@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    pull_policy: never
+    network_mode: none
+    environment:
+      POSTGRES_USER: radar
+      POSTGRES_PASSWORD: synthetic-only
+      POSTGRES_DB: radar_cutover_test
+    tmpfs: [/var/lib/postgresql/data]
+    volumes:
+      - ${CUTOVER_TEST_OUTPUT:?isolated output required}:${CUTOVER_TEST_OUTPUT:?isolated output required}
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U radar -d radar_cutover_test]
+      interval: 1s
+      retries: 30
