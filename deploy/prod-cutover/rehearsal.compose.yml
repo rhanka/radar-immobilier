@@ -13,7 +13,7 @@ services:
       - ./rehearsal-roles.sql:/docker-entrypoint-initdb.d/roles.sql:ro
     networks: [copy-only]
     healthcheck:
-      test: [CMD-SHELL, pg_isready -U radar -d radar_cutover_owner_20261113]
+      test: [CMD-SHELL, pg_isready -h 127.0.0.1 -U radar -d radar_cutover_owner_20261113]
       interval: 1s
       retries: 30
   baseline-probe:
