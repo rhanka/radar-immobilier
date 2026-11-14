@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import process from 'node:process';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { writeFileSync, readFileSync } from 'node:fs';
+import { writeFileSync, readFileSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { fixture } from '../../tools/make/cutover-fixture.mjs';
 import { Buffer } from 'node:buffer';
@@ -11,6 +11,7 @@ import wiring from './prod-bindings.cjs';
 for (const [publicFailure, short] of [[false, false], [true, false], [false, true]]) test(`fenêtre fermée : capture, verrou, rollout privé, GO ; échec public=${publicFailure}, SHA court=${short}`, () => {
   const f = fixture({ url: 'https://immo.sent-tech.ca' });
   const node = process.execPath;
+  writeFileSync(join(f.dir, 'bin/docker'), '#!/bin/sh\nif [ -f "$CUTOVER_TEST_STATE/hook-live" ]; then echo hook-id; fi\n', { mode: 0o755 });
   // Only the application DB/GO port is doubled. Kubernetes, lock, controller and HTTP
   // use the same stateful boundary as the existing operator regression suite.
   writeFileSync(join(f.dir, 'bin/node'), `#!/bin/bash
@@ -73,6 +74,17 @@ exec '${node}' "$@"
     assert.equal(f.state().objects.find(o => o.metadata.name === 'radar-api').spec.replicas, 0);
     assert.ok(JSON.stringify(f.state().objects.find(o => o.kind === 'Ingress')).includes('base-maintenance-'));
     const afterDrain = f.calls().length;
+    writeFileSync(join(f.dir, 'hook-live'), 'running');
+    const beforeHookRefusal = readFileSync(join(f.dir, 'application-calls'), 'utf8');
+    for (const action of ['window-close', 'rollback']) {
+      const refused = run(action, captured.run);
+      assert.notEqual(refused.status, 0);
+      assert.match(refused.stderr, /run_containers_still_present/);
+    }
+    assert.equal(readFileSync(join(f.dir, 'application-calls'), 'utf8'),
+      beforeHookRefusal + 'authorize\nauthorize\n', 'no mutating application call while hook lives');
+    unlinkSync(join(f.dir, 'hook-live'));
+    success(run('rollback', captured.run));
     success(run(short ? 'window-rollback-services' : 'window-deploy', captured.run));
     const deployed = f.state();
     if (short) {

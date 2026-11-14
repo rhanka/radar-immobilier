@@ -31,6 +31,7 @@
 - [x] Tests dédiés ENV=test-prod-cutover. Ports réservés API 18821, UI 15321, Maildev 11121.
 
 ## Plan / Todo (lot-based)
+- [x] B3 validé : 15 gardes, ESLint, huit scénarios contrôleur/IdP et deux coupures Docker réelles TERM/KILL. Reprise/rollback refusés avant arrêt, admis après disparition. Erreurs Docker/stop/rm refusées. Stack lint isolée supprimée avec down -v ; aucun hook de test restant.
 - [x] B3 : lane feat/prod-cutover-v1220-hookfix. Hooks et clients temporaires étiquetés par RUN, --rm, délai et trap. Reprise et rollback refusés avant disparition confirmée. Arrêt explicite STOP_RUN_CONTAINERS=1.
 - [x] Dossier et runbook actualisés : commande exacte de copie, recette locale, terminaisons, double rollback, prérequis externes prod et conservation du SHA historique.
 - [x] Validation : 13 gardes, huit scénarios contrôleur/IdP, ESLint, import de l’image, Compose et intégration PostgreSQL réussis. Budgets installation/scénarios/nettoyage séparés après un nettoyage interrompu. Relance complète réussie, down -v terminé.
