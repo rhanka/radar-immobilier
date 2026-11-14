@@ -7,7 +7,7 @@
 set -euo pipefail
 env_name="${ENV:-}"
 case "$env_name" in
-  test-*) ;;
+  test-*|e2e-*) ;;
   *) echo "[test-e2e] refused: ENV=$env_name is not a test-* environment (synthetic data only)" >&2; exit 2;;
 esac
 project="radar-${env_name}"
