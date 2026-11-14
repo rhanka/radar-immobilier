@@ -53,19 +53,18 @@ copy-sql-progress:
 copy-service-status:
 	@test "$(ENV)" = rehearsal
 	@docker ps -a --filter label=com.docker.compose.project=radar-prod-copy-owner --format '{{.Names}} {{.Status}} {{.Ports}}'
+copy-client-status:
+	@test "$(ENV)" = rehearsal
+	@docker ps -a --filter network=radar-prod-copy-owner_copy-only --format '{{.ID}} {{.Names}} {{.Status}}'
+copy-client-inspect:
+	@test "$(ENV)" = rehearsal
+	@docker inspect "$(CLIENT_ID)" | jq '.[0]|{name:.Name,status:.State.Status,image:.Config.Image,command:.Args[0],network:.HostConfig.NetworkMode}'
 copy-compose-check:
 	@test "$(ENV)" = rehearsal
 	@docker compose --env-file /dev/null -p radar-prod-copy-owner -f deploy/prod-cutover/rehearsal.compose.yml -f "$(HOME)/.local/share/radar-prod-copy/services.json" config --quiet
-copy-compose-up:
-	@test "$(ENV)" = rehearsal
-	@docker compose --env-file /dev/null -p radar-prod-copy-owner -f deploy/prod-cutover/rehearsal.compose.yml -f "$(HOME)/.local/share/radar-prod-copy/services.json" up -d --wait --wait-timeout 60 --no-build --pull never minio idp api mcp ui
 copy-ui-logs:
 	@test "$(ENV)" = rehearsal
 	@docker compose --env-file /dev/null -p radar-prod-copy-owner -f deploy/prod-cutover/rehearsal.compose.yml -f "$(HOME)/.local/share/radar-prod-copy/services.json" logs --no-color ui
-copy-storage:
-	@test "$(ENV)" = rehearsal
-	@docker compose --env-file /dev/null -p radar-prod-copy-owner -f deploy/prod-cutover/rehearsal.compose.yml -f "$(HOME)/.local/share/radar-prod-copy/services.json" run --rm --no-deps -T \
-	 -v "$(HOME)/.local/share/radar-prod-copy:/private-input:ro" -v "$(CURDIR)/deploy/prod-cutover/rehearsal-storage.cjs:/run-storage.cjs:ro" --entrypoint node api /run-storage.cjs
 copy-proxy-smoke:
 	@test "$(ENV)" = rehearsal
 	@headers=$$(mktemp); trap 'rm -f "$$headers"' EXIT; \
@@ -79,7 +78,7 @@ copy-proxy-smoke:
 copy-remove-created-client:
 	@test "$(ENV)" = rehearsal
 	@test -n "$(CLIENT_ID)"
-	@docker inspect "$(CLIENT_ID)" | jq -e 'length==1 and (.[0] | .State.Status=="created" and .Args[0]=="psql" and .Config.Image=="postgis/postgis@sha256:44126d872ac91993766c341e369c539e8196614321765d36a6f1bab0419a5fa5" and .NetworkSettings.Networks["radar-prod-copy-owner_copy-only"]!=null)' >/dev/null
+	@docker inspect "$(CLIENT_ID)" | jq -e 'length==1 and (.[0] | .State.Status=="created" and (.Args[0]=="psql" or (.Args[0]=="pg_restore" and .Args[1]=="--list")) and .Config.Image=="postgis/postgis@sha256:44126d872ac91993766c341e369c539e8196614321765d36a6f1bab0419a5fa5" and .HostConfig.NetworkMode=="radar-prod-copy-owner_copy-only")' >/dev/null
 	@docker rm "$(CLIENT_ID)" >/dev/null
 copy-resume:
 	@test "$(ENV)" = rehearsal
@@ -97,7 +96,7 @@ copy-rehearse:
 copy-prepare:
 	@test "$(ENV)" = rehearsal
 	@bash deploy/prod-cutover/rehearse-copy.sh local-prepare
-copy-evidence copy-services-stop copy-config-check copy-timings copy-rollback-twice copy-database-progress copy-export-timings copy-rollback-audit:
+copy-evidence copy-services-stop copy-config-check copy-timings copy-rollback-twice copy-export-timings copy-rollback-audit copy-read-check:
 	@test "$(ENV)" = rehearsal
 	@bash deploy/prod-cutover/rehearse-copy.sh local-$(@:copy-%=%)
 copy-services-up:
@@ -109,6 +108,9 @@ copy-services-up:
 	@bash deploy/prod-cutover/rehearse-copy.sh local-services-up
 copy-images:
 	@test "$(ENV)" = rehearsal
+	@jq -r '.apiImage,.uiImage' deploy/prod-cutover/release.json | while IFS= read -r image; do \
+	 [[ $$image =~ ^ghcr.io/rhanka/radar-(api|ui)@sha256:[a-f0-9]{64}$$ ]]; docker pull "$$image"; done
+	@docker pull postgis/postgis@sha256:44126d872ac91993766c341e369c539e8196614321765d36a6f1bab0419a5fa5
 	@docker pull adobe/s3mock@sha256:9da9c179bc0d1cb6986a40fd7ffbbc6deee11522b3892217ca350d65596126fa
 copy-step:
 	@test "$(ENV)" = rehearsal
