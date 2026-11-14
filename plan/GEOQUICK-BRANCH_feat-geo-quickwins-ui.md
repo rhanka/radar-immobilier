@@ -59,3 +59,8 @@ Reduce map transfers while preserving exact geometry for details and calculation
   - [x] Initial browser failure came from applying M1 assertions to CPTAQ requests; the trace identified the unrelated constraints collection. The simulator now scopes M1 assertions to lots/zoning.
   - [x] Unit stack and both browser campaigns removed with volumes (`down -v`).
 - [x] Lot 7: push M1 commits and update PR #1109; no merge.
+- [x] Lot 8: address i-cond blocking review on PR #1109 (comment 6871338068).
+  - [x] Reject HTTP failures on every exact fallback page, including HTTP 404; log the city, page and error; propagate rejection to the existing UI error handler without publishing a partial display load.
+  - [x] Reproduced page-2 HTTP 404 returning partial success before the fix; regression now passes for HTTP 404 and 503, including logging and no progress publication.
+  - [x] Targeted `make test-ui`: 68 tests passed across lots-client, geo-display-precision and geo-clients-abort-timeout.
+  - [x] `make typecheck lint`: passed (warnings only); isolated stack removed with volumes via `make clean` (`down -v`).

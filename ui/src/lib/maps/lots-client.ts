@@ -281,7 +281,7 @@ async function fetchLotsPage(
     return fetchAllLotsExact(citySlug, opts, true);
   }
   const collectionId = lotsCollectionId(citySlug);
-  if (res.status === 404) {
+  if (res.status === 404 && !reducedExact && !opts.offset) {
     return {
       ok: false,
       citySlug,
@@ -395,16 +395,20 @@ async function fetchAllLotsExact(
   let last: LotsResponse | null = null;
 
   for (let page = 0; page < maxPages; page++) {
-    const res = await fetchLotsPage(citySlug, {
-      ...opts,
-      limit: pageLimit,
-      offset: merged.length,
-    }, reducedExact);
-    // Ville sans collection (ok=false) : réponse honnête telle quelle en
-    // première page ; sinon on garde ce qui est déjà fusionné.
-    if (!res.ok) {
-      if (page === 0) return res;
-      break;
+    let res: LotsResponse;
+    try {
+      res = await fetchLotsPage(citySlug, {
+        ...opts,
+        limit: pageLimit,
+        offset: merged.length,
+      }, reducedExact);
+      if (!res.ok) {
+        if (page === 0 && !reducedExact) return res;
+        throw new Error(`lots page ${page + 1} unavailable for ${citySlug}: ${res.reason ?? "unknown error"}`);
+      }
+    } catch (error) {
+      console.error(`[geo lots] ${citySlug} page ${page + 1} failed; discarding incomplete load`, error);
+      throw error;
     }
     let added = 0;
     for (const feature of res.featureCollection.features) {

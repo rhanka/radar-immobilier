@@ -69,6 +69,21 @@ describe("display precision boundary", () => {
     await expect(load("rawdon", { displayOnly: true })).rejects.toThrow("HTTP 500");
     expect(fetcher).toHaveBeenCalledOnce();
   });
+  it.each([404, 503])("should reject the whole load when fallback page 2 returns HTTP %s", async (status) => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    const fetcher = vi.fn().mockResolvedValueOnce(new Response("{}", { status: 503 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ type: "FeatureCollection", features: [feature], numberMatched: 2 })))
+      .mockResolvedValueOnce(new Response("{}", { status }));
+    vi.stubGlobal("fetch", fetcher);
+    const onPage = vi.fn();
+    await expect(fetchAllLots("rawdon", { displayOnly: true, pageLimit: 2, onPage }))
+      .rejects.toThrow(`lots HTTP ${status} for rawdon`);
+    expect(fetcher).toHaveBeenCalledTimes(3);
+    expect(fetcher.mock.calls[2][0]).toContain("offset=1&coordPrecision=6");
+    expect(onPage).not.toHaveBeenCalled();
+    expect(log).toHaveBeenCalledWith(expect.stringContaining("page 2"), expect.any(Error));
+  });
   it("should fetch exact detail without precision even after a reduced map load", async () => {
     const fetcher = vi.fn(async (url: string) => new Response(JSON.stringify(url.includes("profile=display") ? { type: "FeatureCollection", features: [feature] } : feature)));
     vi.stubGlobal("fetch", fetcher);
