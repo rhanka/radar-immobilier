@@ -275,6 +275,7 @@ describe("loadSignauxZones — collection (live geo) → endpoint → contour", 
       signal: controller.signal,
     });
     expect(fetchCollection).toHaveBeenCalledWith(CITY, {
+      displayOnly: true,
       limit: ZONES_COLLECTION_LIMIT,
       signal: controller.signal,
     });

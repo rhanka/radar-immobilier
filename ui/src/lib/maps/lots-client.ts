@@ -176,6 +176,9 @@ export interface LotGeometry {
 
 export interface LotFeature {
   type: "Feature";
+  id?: string;
+  /** Reduced coordinates must never be used for measurements. */
+  displayOnly?: boolean;
   geometry: LotGeometry | null;
   properties: LotProperties;
 }
@@ -203,6 +206,8 @@ export interface LotsResponse {
 }
 
 export interface FetchLotsOptions {
+  /** Opt in only for map painting. Details and calculations stay exact. */
+  displayOnly?: boolean;
   limit?: number;
   /** Décalage OGC (pagination multi-pages, cf. fetchAllLots). */
   offset?: number;
@@ -235,11 +240,12 @@ export function resolveLotsUrl(
   const base = baseUrl ? baseUrl.replace(/\/$/, "") : "";
   const path = `/api/geo/collections/${encodeURIComponent(lotsCollectionId(citySlug))}/items`;
   const params = new URLSearchParams();
-  if (opts.limit !== undefined) params.set("limit", String(opts.limit));
-  if (opts.offset !== undefined && opts.offset > 0) {
+  if (opts.displayOnly) params.set("profile", "display");
+  if (!opts.displayOnly && opts.limit !== undefined) params.set("limit", String(opts.limit));
+  if (!opts.displayOnly && opts.offset !== undefined && opts.offset > 0) {
     params.set("offset", String(opts.offset));
   }
-  if (opts.bbox) params.set("bbox", opts.bbox.join(","));
+  if (!opts.displayOnly && opts.bbox) params.set("bbox", opts.bbox.join(","));
   const qs = params.toString();
   return `${base}${path}${qs ? `?${qs}` : ""}`;
 }
@@ -256,13 +262,26 @@ export async function fetchLots(
   citySlug: string,
   opts: FetchLotsOptions = {},
 ): Promise<LotsResponse> {
-  const url = resolveLotsUrl(citySlug, opts);
+  return fetchLotsPage(citySlug, opts);
+}
+
+async function fetchLotsPage(
+  citySlug: string,
+  opts: FetchLotsOptions,
+  reducedExact = false,
+): Promise<LotsResponse> {
+  let url = resolveLotsUrl(citySlug, reducedExact ? { ...opts, displayOnly: false } : opts);
+  if (reducedExact) url += `${url.includes("?") ? "&" : "?"}coordPrecision=6`;
   const res = await fetchWithTimeout(url, {
     signal: opts.signal,
     timeoutMs: opts.timeoutMs,
   });
+  if (opts.displayOnly && !reducedExact && [400, 404, 503].includes(res.status)) {
+    console.warn(`[geo display] ${lotsCollectionId(citySlug)} HTTP ${res.status}; falling back to exact coordPrecision=6`);
+    return fetchAllLotsExact(citySlug, opts, true);
+  }
   const collectionId = lotsCollectionId(citySlug);
-  if (res.status === 404) {
+  if (res.status === 404 && !reducedExact && !opts.offset) {
     return {
       ok: false,
       citySlug,
@@ -280,6 +299,7 @@ export async function fetchLots(
   const body = await res.json();
   if (isLegacyLotsResponse(body)) {
     const featureCollection = normalizeFeatureCollection(body.featureCollection, body.citySlug);
+    if (opts.displayOnly) featureCollection.features = featureCollection.features.map((feature) => ({ ...feature, displayOnly: true }));
     return {
       ...body,
       featureCollection,
@@ -303,8 +323,18 @@ export async function fetchLots(
     collectionId,
     numberMatched: body.numberMatched ?? features.length,
     numberReturned: body.numberReturned ?? features.length,
-    featureCollection: { type: "FeatureCollection", features },
+    featureCollection: { type: "FeatureCollection", features: opts.displayOnly ? features.map((feature) => ({ ...feature, displayOnly: true })) : features },
   };
+}
+
+/** Load an exact lot for its detail card. Never forwards display options. */
+export async function fetchExactLot(citySlug: string, noLot: string, featureId: string, signal?: AbortSignal): Promise<LotFeature> {
+  const url = `${resolveLotsUrl(citySlug)}/${encodeURIComponent(featureId)}`;
+  const res = await fetchWithTimeout(url, { signal });
+  if (!res.ok) throw new Error(`lot detail HTTP ${res.status}`);
+  const feature = normalizeOgcLotFeature(await res.json(), citySlug);
+  if (!feature || feature.properties.noLot !== noLot) throw new Error("Unexpected exact lot response");
+  return feature;
 }
 
 export interface FetchAllLotsOptions extends Omit<FetchLotsOptions, "limit" | "offset"> {
@@ -344,6 +374,20 @@ export async function fetchAllLots(
   citySlug: string,
   opts: FetchAllLotsOptions = {},
 ): Promise<LotsResponse> {
+  if (opts.displayOnly) {
+    const { onPage, ...requestOpts } = opts;
+    const res = await fetchLots(citySlug, requestOpts);
+    onPage?.(res, 0);
+    return res;
+  }
+  return fetchAllLotsExact(citySlug, opts);
+}
+
+async function fetchAllLotsExact(
+  citySlug: string,
+  opts: FetchAllLotsOptions,
+  reducedExact = false,
+): Promise<LotsResponse> {
   const pageLimit = opts.pageLimit ?? 10_000;
   const maxPages = opts.maxPages ?? 30;
   const seen = new Set<string>();
@@ -351,16 +395,20 @@ export async function fetchAllLots(
   let last: LotsResponse | null = null;
 
   for (let page = 0; page < maxPages; page++) {
-    const res = await fetchLots(citySlug, {
-      ...opts,
-      limit: pageLimit,
-      offset: merged.length,
-    });
-    // Ville sans collection (ok=false) : réponse honnête telle quelle en
-    // première page ; sinon on garde ce qui est déjà fusionné.
-    if (!res.ok) {
-      if (page === 0) return res;
-      break;
+    let res: LotsResponse;
+    try {
+      res = await fetchLotsPage(citySlug, {
+        ...opts,
+        limit: pageLimit,
+        offset: merged.length,
+      }, reducedExact);
+      if (!res.ok) {
+        if (page === 0 && !reducedExact) return res;
+        throw new Error(`lots page ${page + 1} unavailable for ${citySlug}: ${res.reason ?? "unknown error"}`);
+      }
+    } catch (error) {
+      console.error(`[geo lots] ${citySlug} page ${page + 1} failed; discarding incomplete load`, error);
+      throw error;
     }
     let added = 0;
     for (const feature of res.featureCollection.features) {
@@ -427,6 +475,7 @@ function isOgcFeatureCollection(value: unknown): value is OgcFeatureCollection {
 function normalizeOgcLotFeature(feature: unknown, citySlug: string): LotFeature | null {
   if (typeof feature !== "object" || feature === null) return null;
   const raw = feature as {
+    id?: unknown;
     type?: unknown;
     geometry?: unknown;
     properties?: Record<string, unknown> | null;
@@ -438,6 +487,7 @@ function normalizeOgcLotFeature(feature: unknown, citySlug: string): LotFeature 
 
   return {
     type: "Feature",
+    ...(typeof raw.id === "string" || typeof raw.id === "number" ? { id: String(raw.id) } : typeof properties.geoId === "string" ? { id: properties.geoId } : {}),
     geometry: normalizeGeometry(raw.geometry),
     properties: {
       noLot,
