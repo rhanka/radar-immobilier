@@ -52,6 +52,14 @@ describe.skipIf(process.env.MCP_SIGNAL_DB_TEST !== "1")("scoped MCP PostgreSQL",
     await writeClassAnnotation(f.db, ai);
     expect((await f.read()).current).toMatchObject({ source: "mcp", classe: "pertinent", validation: "human" });
   });
+  it("should serialize a manual UI write against an automatic MCP write", async () => {
+    const f = await fixture();
+    await Promise.all([f.write(), writeScopedPersonalFacet(f.db, f.contributor.sub, f.workspaceId, {
+      target: f.target, action: "select", basket: "a_surveiller", reasonCode: "S-PLANIFIE", expectedHeadId: null,
+      displayedFingerprint: f.fingerprint, commandKey: randomUUID(),
+    })]);
+    expect((await f.read()).current).toMatchObject({ source: "manual", classe: "a_surveiller" });
+  });
   it("should reject stale human acceptance and negative feedback without reclassification", async () => {
     const f = await fixture();
     const previous = await f.read();
