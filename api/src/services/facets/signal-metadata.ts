@@ -54,9 +54,11 @@ export async function readSignalMetadata(db: Database, sub: string, workspaceId:
       .where(and(eq(facetEvents.ownerId, accountId), isNull(facetEventBindings.eventId))).limit(1);
     if (unresolved.length) throw new ScopeError(503, "personal_history_unresolved");
     // Missing/stale backfills are explicit failures. Never invoke the payload reader.
-    const missing = await tx.execute(sql`SELECT g.city_slug FROM graph_source_revisions g
-      LEFT JOIN signal_metadata_versions v USING(city_slug)
-      WHERE v.version IS DISTINCT FROM ${SIGNAL_METADATA_VERSION} LIMIT 1`);
+    const missing = await tx.execute(sql`SELECT g.city_slug FROM graph_nodes g
+      LEFT JOIN signal_metadata m ON m.city_slug=g.city_slug AND m.node_id=g.id AND m.node_type=g.type
+      LEFT JOIN signal_metadata_versions v ON v.city_slug=g.city_slug
+      WHERE g.type IN ('Signal','DesignationEvent') AND
+        (v.version IS DISTINCT FROM ${SIGNAL_METADATA_VERSION} OR m.version IS DISTINCT FROM ${SIGNAL_METADATA_VERSION}) LIMIT 1`);
     if (missing.rows.length) throw new ScopeError(503, "signal_metadata_backfill_required");
     const cells = await tx.execute(metadataCellsSql(accountId, workspaceId, filter));
     const byCity = new Map<string, VivierFiltreCubesByClassement>();
