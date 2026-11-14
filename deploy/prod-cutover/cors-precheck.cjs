@@ -31,8 +31,32 @@ function precheck() {
     .catch(()=>process.exit(1));`;
   return checkCors(JSON.parse(r.run('kubectl', [...kube, 'exec', '-i', 'deployment/radar-api', '--', 'node', '-'], { input })));
 }
-if (require.main === module) {
-  try { process.stdout.write(JSON.stringify(precheck()) + '\n'); }
-  catch { process.stderr.write('bucket_cors_missing_unreadable_or_divergent\n'); process.exitCode = 1; }
+// Behavioural fallback: the prefix-limited key cannot GetBucketCors (CORS is set by the k8s
+// bucket owner). An unauthenticated preflight proves the effective rule without credentials.
+function preflight(origin) {
+  const url = 'https://s3.bhs.io.cloud.ovh.net/radar-immobilier-artifacts/artifacts/radar-immobilier/cors-probe';
+  const out = r.run('curl', ['-s', '-o', '/dev/null', '-D', '-', '--max-time', '15', '-X', 'OPTIONS', url,
+    '-H', `Origin: ${origin}`, '-H', 'Access-Control-Request-Method: PUT',
+    '-H', 'Access-Control-Request-Headers: content-type']);
+  const status = Number((/^HTTP\/[\d.]+ (\d{3})/m.exec(out) || [])[1]);
+  const acao = ((/^access-control-allow-origin:\s*(\S+)/im.exec(out)) || [])[1] || null;
+  return { status, acao };
 }
-module.exports = { checkCors, precheck };
+function preflightPrecheck() {
+  const allowed = r.json(r.path.join(__dirname, 'artifacts-cors.json')).CORSRules[0].AllowedOrigins;
+  for (const origin of allowed) {
+    const res = preflight(origin);
+    if (res.status !== 200 || res.acao !== origin) r.fail('bucket_cors_preflight_refused');
+  }
+  const foreign = preflight('https://cors-probe.invalid');
+  if (foreign.acao) r.fail('bucket_cors_preflight_too_open');
+  return { ok: true, operation: 'preflight', origins: allowed.length, valuesPrinted: false };
+}
+if (require.main === module) {
+  let result;
+  try { result = precheck(); }
+  catch { try { result = preflightPrecheck(); } catch { result = null; } }
+  if (result) process.stdout.write(JSON.stringify(result) + '\n');
+  else { process.stderr.write('bucket_cors_missing_unreadable_or_divergent\n'); process.exitCode = 1; }
+}
+module.exports = { checkCors, precheck, preflightPrecheck };
