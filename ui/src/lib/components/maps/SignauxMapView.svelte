@@ -1018,20 +1018,6 @@
       : null
   );
 
-  /**
-   * m1.7 — Compte LIVE de la ville sélectionnée, transmis au rail pour que son
-   * badge cesse d'ignorer les filtres client (axes A/B, exclusions B) :
-   * `filteredDetailNodes` EST déjà ce pipeline complet, c'est
-   * exactement ce que voit l'utilisateur dans le panneau droit.
-   *
-   * `null` (repli sur le compte bulk du rail) tant que :
-   *  - aucune ville n'est sélectionnée ;
-   *  - le détail est en cours de chargement (`detailLoading` — pas de flash à
-   *    0/n·d le temps du fetch, cf. #378) ;
-   *  - la projection serveur est indisponible (`!detailProjection.available`) —
-   *    on ne substitue jamais un compte qu'on ne peut pas garantir exact.
-   */
-  $: selectedCityLiveCount = null;
   $: displayedLots = buildDisplayedLots(lotsResponse, zonesResponse, classementFilteredNodes);
 
   /**
@@ -2720,7 +2706,6 @@
       exclusions={vivierBExclusions}
       {timeRange}
       {dateBasis}
-      {selectedCityLiveCount}
       {citySearch}
       onCitySearchChange={(query) => { citySearch = query; syncFilterRoute(); }}
       onSelectCity={selectCity}

@@ -96,4 +96,12 @@ live feed. It can be removed only after those callers have migrated.
 - Real-stack Playwright: native clicks on period, relevance, axes, exclusions
   and city; exact counters, canonical URL, no cards before city selection.
 
-Measured results and final commands are recorded in the PR qualification report.
+One local sample on November 13: old scoped aggregate **628.884 ms** and
+**916,284 JSON bytes**; metadata-v2 **141.048 ms** and **229,834 JSON bytes**.
+This is 4.46 times faster and 74.9% smaller on this fixture. The subsequent
+EXPLAIN execution took **19.559 ms**, with 621 shared-buffer hits and no reads.
+The application-cold budget of one second passed. These numbers do not establish
+a cold PostgreSQL disk-cache result or a production/browser rendering result.
+
+Typecheck, lint and 28 targeted UI tests passed. Final API and real-click
+qualification results and commands are recorded in the PR report.
