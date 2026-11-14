@@ -27,7 +27,9 @@ test("metadata: period relevance filters exclusions and city keep exact counts a
   await unclassified.click();
   await expect(page).toHaveURL(/filter.classement=/);
   // Relevance counters ignore the selected class set.
-  await expect(relevance.locator(".classement-row").filter({ has: unclassified }).getByLabel("3 signaux")).toBeVisible();
+  await expect(relevance.locator(".classement-row").filter({
+    has: page.getByRole("checkbox", { name: "Non classé", exact: true }),
+  })).toHaveText(/Non classé\s*3/);
   await expect(page.getByText("0 signaux · 0 villes", { exact: true })).toBeVisible();
   await unclassified.click();
   await expect(total).toBeVisible();
