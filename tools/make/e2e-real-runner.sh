@@ -33,7 +33,7 @@ case "$phase" in
     # host user now). System deps are baked in e2e/Dockerfile.
     ./node_modules/.bin/playwright install --only-shell chromium
     cd ui
-    ../node_modules/.bin/playwright test --config playwright.real.config.ts
+    ../node_modules/.bin/playwright test --config playwright.real.config.ts "${E2E_SPEC:-e2e-real}"
     ;;
   *)
     echo "[e2e] unknown phase: $phase" >&2
