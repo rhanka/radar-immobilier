@@ -16,6 +16,7 @@ export CUTOVER_API_IMAGE CUTOVER_ALLOW_PROD
 export SMOKE_URL
 export RUN CUTOVER_LOCK_RUN CUTOVER_LOCK_EXECUTOR ROSTER
 export CONFIGURATION
+export KUBECONFIG TLS_CERT TLS_KEY CONTENT_TLS_CERT CONTENT_TLS_KEY
 export ARTIFACTS_CONTENT_HOST
 .PHONY: artifact-roles
 artifact-roles:
@@ -72,7 +73,7 @@ prerequisites precheck k8s-plan cd-plan:
 	@cd "$(ROOT)" && timeout --signal=TERM --kill-after=5s 150s bash deploy/prod-cutover/inspect.sh $@
 backup restore-test migrate transition verify smoke rehearsal rollback:
 	@cd "$(ROOT)" && if [[ "$(ENV)" == execution-prod && "$@" =~ ^(backup|migrate|transition|rollback)$$ ]]; then timeout --signal=TERM --kill-after=10s 3600s bash deploy/prod-cutover/window.sh $@; else timeout --signal=TERM --kill-after=10s 3600s node deploy/prod-cutover/cli.cjs $@; fi
-window-start window-configure window-close window-evidence window-deploy window-rollback-services window-reopen:
+window-start window-configure window-close window-evidence window-deploy window-rollback-services window-reopen window-abort window-recover window-private-https:
 	@cd "$(ROOT)" && timeout --signal=TERM --kill-after=10s 1200s bash deploy/prod-cutover/window.sh $@
 test:
 	@test "$(ENV)" = test-prod-cutover
@@ -85,7 +86,7 @@ lint-image:
 	 timeout --kill-after=10s 600s docker build -f deploy/cutover/Dockerfile.test -t radar-cutover-test:local .; fi
 hook-controller-test:
 	@test "$(ENV)" = test-prod-cutover
-	@cd "$(ROOT)" && timeout --kill-after=5s 90s node --test deploy/prod-cutover/containers.integration.cjs
+	@cd "$(ROOT)" && timeout --kill-after=5s 90s node --test --test-concurrency=1 deploy/prod-cutover/containers.integration.cjs deploy/prod-cutover/private-https.integration.cjs
 lint: lint-image
 	@test "$(ENV)" = test-prod-cutover
 	@cd "$(ROOT)" && timeout --kill-after=10s 300s bash deploy/prod-cutover/lint.sh

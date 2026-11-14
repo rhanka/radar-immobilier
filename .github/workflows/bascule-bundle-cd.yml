@@ -137,13 +137,14 @@ jobs:
           KUBE_CONFIG_DATA_PROD: ${{ secrets.KUBE_CONFIG_DATA_PROD }}
         run: |
           set -euo pipefail
-          mkdir -p "$HOME/.kube"
+          export KUBECONFIG="$RUNNER_TEMP/radar-tenant.kubeconfig"
+          printf 'KUBECONFIG=%s\n' "$KUBECONFIG" >> "$GITHUB_ENV"
           if printf '%s' "$KUBE_CONFIG_DATA_PROD" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
-            printf '%s' "$KUBE_CONFIG_DATA_PROD" | base64 -d > "$HOME/.kube/config"
+            printf '%s' "$KUBE_CONFIG_DATA_PROD" | base64 -d > "$KUBECONFIG"
           else
-            printf '%s' "$KUBE_CONFIG_DATA_PROD" > "$HOME/.kube/config"
+            printf '%s' "$KUBE_CONFIG_DATA_PROD" > "$KUBECONFIG"
           fi
-          chmod 600 "$HOME/.kube/config"
+          chmod 600 "$KUBECONFIG"
 
       # POSITIVE pre-flight (same pattern as build-push-images / run-job): assert
       # the kubeconfig targets the expected PROD apiserver BEFORE any mutating call.
@@ -369,13 +370,14 @@ jobs:
           KUBE_CONFIG_DATA_PROD: ${{ secrets.KUBE_CONFIG_DATA_PROD }}
         run: |
           set -euo pipefail
-          mkdir -p "$HOME/.kube"
+          export KUBECONFIG="$RUNNER_TEMP/radar-tenant.kubeconfig"
+          printf 'KUBECONFIG=%s\n' "$KUBECONFIG" >> "$GITHUB_ENV"
           if printf '%s' "$KUBE_CONFIG_DATA_PROD" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
-            printf '%s' "$KUBE_CONFIG_DATA_PROD" | base64 -d > "$HOME/.kube/config"
+            printf '%s' "$KUBE_CONFIG_DATA_PROD" | base64 -d > "$KUBECONFIG"
           else
-            printf '%s' "$KUBE_CONFIG_DATA_PROD" > "$HOME/.kube/config"
+            printf '%s' "$KUBE_CONFIG_DATA_PROD" > "$KUBECONFIG"
           fi
-          chmod 600 "$HOME/.kube/config"
+          chmod 600 "$KUBECONFIG"
 
       - name: Pre-flight — assert PROD cluster
         env:
