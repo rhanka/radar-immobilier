@@ -14,6 +14,7 @@
 - [x] Conditional: existing annotation tests and transport fixtures when additive dates require updated assertions.
 
 ## Feedback Loop
+- [x] CLASSFEEDBACK-EX5: update the purge regression for main's stored-annotation-only contract. Assert redacted provenance before purge, no fabricated annotation after purge, retained stored manual annotation, and unchanged private heads/history. Rollback: revert this test-only change.
 - [x] PR #1104 main synchronization: retain stored-annotation-only projection from 8e4b8e2ba, v2 ambiguity and 0046 before 0047. Preserve feedback dates and both UI provenance tests. Do not edit 0045 or 0046.
 - [x] Root cause of facets-refresh: manual facet history fabricated a public classAnnotation without a stored annotation. Keep main's guard and byte-equality regressions unchanged; do not relax the API contract. This supersedes the fixture-alignment proposal below.
 - [x] PR #1104 replay correction: guard 0047 columns, tables, index, functions, triggers and archive constraint. Backfill only missing creation dates and history snapshots. Regression removes the journal row after an annotation update and asserts unchanged creation dates and history.
