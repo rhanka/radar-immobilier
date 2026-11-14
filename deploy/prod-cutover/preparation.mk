@@ -35,6 +35,10 @@ copy-network-check:
 	@docker inspect --format '{{json .NetworkSettings.Ports}}' radar-prod-copy-owner-postgres-1
 	@ss -H -ltn 'sport = :25433'
 	@docker context show
+copy-host-progress:
+	@test "$(ENV)" = rehearsal
+	@df -h "$(HOME)/.local/share/radar-prod-copy"
+	@timeout --kill-after=2s 10s docker stats --no-stream --format '{{.Name}} CPU={{.CPUPerc}} RAM={{.MemUsage}} IO={{.BlockIO}}' radar-prod-copy-owner-postgres-1
 copy-down:
 	@test "$(ENV)" = rehearsal
 	@status=0; bash deploy/prod-cutover/rehearse-copy.sh local-services-stop || status=$$?; \
@@ -45,7 +49,7 @@ copy-rehearse:
 copy-prepare:
 	@test "$(ENV)" = rehearsal
 	@bash deploy/prod-cutover/rehearse-copy.sh local-prepare
-copy-evidence copy-services-stop copy-config-check:
+copy-evidence copy-services-stop copy-config-check copy-timings copy-rollback-twice copy-database-progress:
 	@test "$(ENV)" = rehearsal
 	@bash deploy/prod-cutover/rehearse-copy.sh local-$(@:copy-%=%)
 copy-services-up:
