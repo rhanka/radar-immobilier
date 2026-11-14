@@ -104,6 +104,8 @@ function hook(operation) {
     r.fail('hook_verdict_refused');
   const result = { ...verdict, sha: r.SHA, planSha256, rosterSha256, run: proof.run, destination: r.identity(), durationMs: Date.now() - begin };
   r.save(operation, result);
+  if (operation === 'transition') r.fs.appendFileSync(r.path.join(r.output(), 'transition-times.jsonl'),
+    JSON.stringify({ durationMs: result.durationMs, status: result.status }) + '\n', { mode: 0o600 });
   return result;
 }
 module.exports = { migrationSql, migrate, hook };

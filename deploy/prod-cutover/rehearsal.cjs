@@ -74,6 +74,39 @@ async function main() {
     case 'services-stop': compose('stop', '--timeout', '30', 'ui', 'api', 'mcp', 'idp', 'minio');
       result = require('./local-proof.cjs').observe(); break;
     case 'config-check': compose('config', '--quiet'); break;
+    case 'timings': {
+      result = {};
+      const times = r.path.join(r.output(), 'migration-times.jsonl');
+      if (r.fs.existsSync(times)) result.committed = r.fs.readFileSync(times, 'utf8').trim().split('\n')
+        .filter(Boolean).map(line => { const { tag, durationMs } = JSON.parse(line); return { tag, durationMs }; });
+      const current = r.path.join(r.output(), 'migration-current.json');
+      if (r.fs.existsSync(current)) { const { tag, at } = r.json(current); result.current = { tag, at }; }
+      for (const name of ['restore', 'migrations', 'transition', 'rollback']) {
+        const path = r.path.join(r.output(), `${name}.json`);
+        if (!r.fs.existsSync(path)) continue;
+        const receipt = r.json(path);
+        result[name] = { durationMs: receipt.durationMs, migrations: receipt.migrations,
+          applied: receipt.applied?.map(({ tag, durationMs }) => ({ tag, durationMs })) };
+      }
+      break;
+    }
+    case 'database-progress': {
+      result = JSON.parse(r.sql(`SELECT coalesce(json_agg(json_build_object(
+        'state',state,'waitType',wait_event_type,'wait',wait_event,
+        'seconds',extract(epoch FROM clock_timestamp()-query_start)::integer)), '[]'::json)
+        FROM pg_stat_activity WHERE datname=current_database() AND pid<>pg_backend_pid();`));
+      break;
+    }
+    case 'rollback-twice': {
+      // Keep the same physical copy and RUN. Preserve both receipts before any replay.
+      compose('stop', '--timeout', '30', 'ui', 'api', 'mcp', 'idp', 'minio');
+      require('./local-proof.cjs').observe();
+      const first = require('./backup.cjs').rollback(); r.save('rollback-first', first);
+      const second = require('./backup.cjs').rollback(); r.save('rollback-second', second);
+      result = { first: { ok: first.ok, durationMs: first.durationMs },
+        second: { ok: second.ok, durationMs: second.durationMs } };
+      break;
+    }
     case 'smoke': compose('exec', '-T', '-e', 'ENV=rehearsal', '-e', `SMOKE_URL=${config.base}`,
       'api', 'node', '/run-controller/cli.cjs', 'smoke'); break;
     default: r.fail('unknown_local_operation');
