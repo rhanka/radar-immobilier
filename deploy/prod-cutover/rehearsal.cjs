@@ -65,11 +65,13 @@ async function main() {
       const auth = r.json(file('auth.json'));
       r.fs.writeFileSync(file('services.json.partial'), JSON.stringify(config.compose(privateDir, auth), null, 2), { mode: 0o600 });
       r.fs.renameSync(file('services.json.partial'), file('services.json'));
+      r.fs.writeFileSync(file('nginx.conf'), config.nginx(), { mode: 0o600 });
       compose('config', '--quiet');
       // These roles already have the candidate grants. Passwords are local and carry no new privilege.
       r.sql(`ALTER ROLE immo_mcp_account_reader LOGIN PASSWORD '${auth.account}';
         ALTER ROLE immo_mcp_artifact_writer LOGIN PASSWORD '${auth.artifact}';`);
       compose('up', '-d', '--wait', '--wait-timeout', '60', '--no-build', '--pull', 'never', 'minio', 'idp', 'api', 'mcp', 'ui');
+      compose('exec', '-T', 'ui', 'nginx', '-s', 'reload');
       compose('run', '--rm', '--no-deps', '-T', '-v', `${privateDir}:/private-input:ro`,
         '-v', `${r.ROOT}/deploy/prod-cutover/rehearsal-storage.cjs:/run-storage.cjs:ro`,
         '--entrypoint', 'node', 'api', '/run-storage.cjs');
@@ -104,6 +106,40 @@ async function main() {
         'seconds',extract(epoch FROM clock_timestamp()-query_start)::integer)), '[]'::json)
         FROM pg_stat_activity WHERE datname=current_database() AND pid<>pg_backend_pid();`));
       break;
+    }
+    case 'export-timings': {
+      result = { run: r.receipt('local-run').run, forward: r.receipt('forward-first'),
+        rollbacks: ['rollback-first', 'rollback-second'].map(name => {
+          const receipt = r.receipt(name); return { ok: receipt.ok, durationMs: receipt.durationMs };
+        }) };
+      for (const name of r.fs.readdirSync(privateDir).filter(name => /^rehearsal-[a-f0-9-]{36}$/.test(name))) {
+        if (!r.env.COMPARE_REHEARSAL_RUN) break;
+        const run = r.path.join(privateDir, name, 'local-run.json');
+        if (!r.fs.existsSync(run) || r.json(run).run !== r.env.COMPARE_REHEARSAL_RUN) continue;
+        const prior = r.json(r.path.join(privateDir, name, 'migrations.json'));
+        result.prior = { run: r.env.COMPARE_REHEARSAL_RUN, durationMs: prior.durationMs,
+          walBytes: prior.walBytes, applied: prior.applied.map(({ tag, durationMs }) => ({ tag, durationMs })) };
+      }
+      break;
+    }
+    case 'rollback-audit': {
+      r.destination();
+      if (r.prefix(r.rows()) !== 13) r.fail('rollback_schema_mismatch');
+      const toc = r.run('pg_restore', ['--list', r.env.ARCHIVE]);
+      const expected = toc.split('\n').map(line => line.match(/^\d+; \d+ \d+ TABLE (\S+) (\S+) (\S+)$/)).filter(Boolean);
+      const owners = JSON.parse(r.sql(`SELECT json_object_agg(n.nspname||'.'||c.relname,pg_get_userbyid(c.relowner))
+        FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE c.relkind IN ('r','p');`));
+      if (!expected.length || expected.some(([, schema, name, owner]) => owners[`${schema}.${name}`] !== owner))
+        r.fail('rollback_table_owner_mismatch');
+      if (r.sql("SELECT pg_get_userbyid(nspowner) FROM pg_namespace WHERE nspname='public';") !== 'pg_database_owner')
+        r.fail('rollback_public_owner_mismatch');
+      const legacy = r.sql('BEGIN READ ONLY; SET LOCAL ROLE radar; SELECT count(*) FROM drizzle.__drizzle_migrations; COMMIT;');
+      const writer = r.sql("SELECT has_table_privilege('immo_mcp_artifact_writer','drizzle.__drizzle_migrations','SELECT');");
+      if (legacy !== '13' || writer !== 'f') r.fail('rollback_legacy_access_mismatch');
+      result = { ok: true, migrations: 13, archiveTables: expected.length, archiveTableOwnersMatch: true,
+        publicOwner: 'pg_database_owner', legacyRole: 'radar', legacyRead: true,
+        candidateWriterRead: false, originalAclReplay: 'pg_restore_exit_0' };
+      r.save('rollback-audit', result); break;
     }
     case 'rollback-twice': {
       // Keep the same physical copy and RUN. Preserve both receipts before any replay.

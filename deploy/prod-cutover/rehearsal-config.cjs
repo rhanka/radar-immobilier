@@ -50,12 +50,12 @@ function compose(privateDir, auth) {
     healthcheck: health(8848, '/mcp/.well-known/oauth-protected-resource') },
     idp: { ...app(['node', '/run-idp.cjs'], {}), healthcheck: health(8080, '/.well-known/openid-configuration'), volumes: [mount('auth.json'), mount('roster.json'),
       mount('idp.key'), mount('idp.pub'), `${r.ROOT}/deploy/prod-cutover/rehearsal-idp.cjs:/run-idp.cjs:ro`] },
-    ui: { image: release.uiImage, pull_policy: 'never', networks: {
+    ui: { image: release.uiImage, pull_policy: 'never', user: `${process.getuid()}:${process.getgid()}`, networks: {
       'copy-only': { aliases: ['recette.localhost', 'minio.localhost'] }, 'copy-entry': {} },
       ports: ['127.0.0.1:15321:15321', '127.0.0.1:15400:15400', '127.0.0.1:443:443'],
       volumes: [`${privateDir}/nginx.conf:/etc/nginx/conf.d/default.conf:ro`, mount('ca.crt'), mount('tls.key')] },
     minio: { image: 'adobe/s3mock@sha256:9da9c179bc0d1cb6986a40fd7ffbbc6deee11522b3892217ca350d65596126fa', pull_policy: 'never', networks: ['copy-only'],
-      environment: { COM_ADOBE_TESTING_S3MOCK_HTTPPORT: '9000', root: '/data', retainFilesOnExit: 'true',
+      environment: { root: '/data', retainFilesOnExit: 'true',
         initialBuckets: 'radar-immobilier-raw,radar-immobilier-docs,radar-immobilier-artifacts' },
       volumes: ['copy-objects:/data'] },
   }, networks: { 'copy-entry': {} }, volumes: { 'copy-objects': {} } };
@@ -76,7 +76,14 @@ server {
   listen 15400 ssl; server_name minio.localhost;
   ssl_certificate /private/ca.crt; ssl_certificate_key /private/tls.key;
   client_max_body_size 30m;
-  location / { proxy_pass http://minio:9000; proxy_set_header Host $http_host; }
+  location / {
+    add_header Access-Control-Allow-Origin https://recette.localhost:15321 always;
+    add_header Access-Control-Allow-Methods "GET, HEAD, PUT" always;
+    add_header Access-Control-Allow-Headers "*, Authorization" always;
+    add_header Access-Control-Expose-Headers ETag always;
+    if ($request_method = OPTIONS) { return 204; }
+    proxy_pass http://minio:9090; proxy_set_header Host $http_host;
+  }
 }
 server {
   listen 443 ssl; server_name .pages.localhost;
