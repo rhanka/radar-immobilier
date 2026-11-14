@@ -125,7 +125,7 @@ async function seedSavedInput(store: S3ObjectStore, city: string): Promise<Refre
   return async () => [{ city, sourceId, status: "seen", casKeys: [key], count: 1 }];
 }
 
-async function main(): Promise<void> {
+export async function main(): Promise<void> {
   const classifyMode = refreshClassifyMode();
   const classifyConfig = classifyMode !== "off" ? refreshClassifyConfig() : undefined;
   const classifyPrompt = classifyMode !== "off" ? await loadSinglePassPrompt() : undefined;
@@ -164,15 +164,19 @@ async function main(): Promise<void> {
   const controller = new AbortController();
   // ONE instance for the whole run: the quota circuit it carries is what spares
   // the cities that follow a primary call already known to be refused.
-  const documentModels = createRefreshModelPolicy({ primary, fallback, primaryQualityAttempts, timeoutMs, signal: controller.signal,
+  const documentModels = createRefreshModelPolicy({ primary, fallback, primaryQualityAttempts, timeoutMs,
+    ...(classifyMode !== "off" ? { signal: controller.signal } : {}),
     ...(city ? { citySlug: city } : {}),
     ...(verification ? { verification } : {}),
     forceFallback: process.env.REFRESH_FORCE_FALLBACK === "1",
-    createClient: (model, signal) => runBudget.wrap(createRefreshMesh({ ...common,
-      provider: model.provider, model: model.model,
-      reasoning: { effort: model.effort as "low" }, signal }).textClient, signal),
+    createClient: (model, signal) => {
+      const client = createRefreshMesh({ ...common, provider: model.provider, model: model.model,
+        reasoning: { effort: model.effort as "low" }, signal }).textClient;
+      return classifyMode === "single-pass" ? runBudget!.wrap(client, signal) : client;
+    },
   });
   let modelCalls = 0;
+  let submissions = 0;
   // Calls actually SENT to a seat, refusals included. `modelCalls` counts every
   // receipt, including the verification skipped for want of an act, which costs
   // nothing; a budget must be spent against what was paid.
@@ -226,18 +230,19 @@ async function main(): Promise<void> {
   // The Job is SIGTERMed before it is SIGKILLed, and the sweep's own deadline is
   // a second, independent guard. Without either, the `aborted` branch of the
   // sweep was dead code and the pod died in the middle of a document.
-  const runBudget = new RefreshRunBudget({ calls: sweepOptions.maxSubmissions || runOptions.budgetLimit,
+  const runBudget = classifyMode === "off" ? undefined : new RefreshRunBudget({
+    calls: sweepOptions.maxSubmissions || runOptions.budgetLimit,
     tokens: positive("REFRESH_RUN_MAX_TOKENS", 100_000_000, 1_000_000_000), durationMs: sweepOptions.deadlineMs });
   const classification = classifyMode === "two-step" ? {
-    ...classifyConfig!, prompt: classifyPrompt!, budget: runBudget,
+    ...classifyConfig!, prompt: classifyPrompt!, budget: runBudget!,
     onReceipt(receipt: import("../services/graph/refresh-model-policy.js").RefreshModelReceipt) {
       modelCalls++;
-      logger.info({ stage: "classification", ...receipt, modelCalls, submissions: runBudget.calls,
-        reservedTokens: runBudget.reservedTokens }, "refresh-pv: model receipt");
+      logger.info({ stage: "classification", ...receipt, modelCalls, submissions: runBudget!.calls,
+        reservedTokens: runBudget!.reservedTokens }, "refresh-pv: model receipt");
     },
     models: createRefreshModelPolicy({ primary: classifyConfig!.primary, fallback: classifyConfig!.fallback,
       primaryQualityAttempts: 1, timeoutMs, signal: controller.signal, forceFallback: false,
-      createClient: (model, signal) => runBudget.wrap(createRefreshMesh({ ...common,
+      createClient: (model, signal) => runBudget!.wrap(createRefreshMesh({ ...common,
         provider: model.provider, model: model.model,
         reasoning: { effort: model.effort as "low" }, signal }).textClient, signal) }),
   } : undefined;
@@ -266,8 +271,8 @@ async function main(): Promise<void> {
       },
       onModelReceipt(docSha, chunkId, receipt) {
         modelCalls += 1;
-        logger.info({ citySlug, docSha, chunkId, modelCalls, submissions: runBudget.calls,
-          reservedTokens: runBudget.reservedTokens, ...receipt },
+        if (receipt.modelUsed) submissions += 1;
+        logger.info({ citySlug, docSha, chunkId, modelCalls, submissions, ...receipt },
           "refresh-pv: model receipt");
       },
       onNote: (note, detail) => logger.info({ citySlug, ...detail }, `refresh-pv: ${note}`),
@@ -295,8 +300,7 @@ async function main(): Promise<void> {
     if (!target.all) {
       // `status` carries the outcome: `up-to-date` when the index answered and
       // the city owed nothing — no document downloaded, no model called, exit 0.
-      logger.info({ ...await refreshCity(city!), modelCalls, submissions: runBudget.calls,
-        reservedTokens: runBudget.reservedTokens }, "refresh-pv: completed");
+      logger.info({ ...await refreshCity(city!), modelCalls, submissions }, "refresh-pv: completed");
       return;
     }
     const report = await runRefreshSweep({
@@ -313,14 +317,14 @@ async function main(): Promise<void> {
       },
       deadlineMs: sweepOptions.deadlineMs,
       maxSubmissions: sweepOptions.maxSubmissions,
-      submissions: () => runBudget.calls,
+      submissions: () => submissions,
       // The primary's quota circuit already spares the following cities a call
       // known to be refused. Nothing covered the FALLBACK: once it too is out of
       // quota, every remaining city would pay a 429 and fail.
       // Same for a fallback with no eligible route at all (account needing
       // re-authorization): every remaining extraction would fail in milliseconds
       // and the run would still take hours. Stop extracting and fail loudly.
-      haltExtraction: () => runBudget.haltedBy ? "submission-budget"
+      haltExtraction: () => classifyMode === "single-pass" && runBudget?.haltedBy ? "submission-budget"
         : documentModels.fallbackQuotaExhausted() ? "fallback-quota-exhausted"
         : documentModels.fallbackUnroutable() ? "fallback-no-route" : null,
       cityReserveMs: sweepOptions.cityReserveMs,
@@ -372,7 +376,7 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((error: unknown) => {
+if (process.argv[1] === fileURLToPath(import.meta.url)) main().catch((error: unknown) => {
   console.error("refresh-pv: failed", refreshErrorDiagnostic(error));
   process.exitCode = 1;
 });
