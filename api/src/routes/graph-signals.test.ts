@@ -10,6 +10,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
+vi.mock("../services/graph/class-annotations.js", () => ({ readClassAnnotations: vi.fn(async () => new Map()) }));
 import { Hono } from "hono";
 import {
   SignJWT,

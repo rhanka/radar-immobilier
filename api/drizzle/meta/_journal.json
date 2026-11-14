@@ -309,6 +309,13 @@
       "when": 1793000000014,
       "tag": "0044_signal_effective_dates",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1793000000015,
+      "tag": "0045_signal_class_annotations",
+      "breakpoints": true
     }
   ]
 }
