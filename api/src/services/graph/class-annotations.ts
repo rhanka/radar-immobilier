@@ -79,6 +79,8 @@ export async function readClassAnnotations(db: Database, citySlug: string): Prom
   const manual = await db.execute(sql`SELECT DISTINCT node_type, node_id FROM facet_events
     WHERE target_type='signal' AND city_slug=${citySlug} AND source='manual'`);
   for (const row of manual.rows) {
+    // Facet history overrides existing annotations; it never creates one.
+    if (!annotations.has(`${row.node_type}:${row.node_id}`)) continue;
     // Do not disclose another user's class or reason through the public graph card.
     annotations.set(`${row.node_type}:${row.node_id}`, { citySlug, nodeType: String(row.node_type),
       nodeId: String(row.node_id), source: "manual", classe: "non_classe", reason: "",
