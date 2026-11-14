@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { Hono } from "hono";
 import { sql } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 import { signalMetadataFilterSchema } from "@radar/domain";
@@ -10,6 +11,8 @@ import { aggregateGraphSignalProjectionRows, lockCityGraph } from "../../src/ser
 import { writeScopedPersonalFacet } from "../../src/services/facets/scoped-writer.js";
 import { targetFingerprint } from "../../src/services/facets/target.js";
 import { writeWorkspaceArchiveFacet } from "../../src/services/facets/workspace-writer.js";
+import { writeClassAnnotation } from "../../src/services/graph/class-annotations.js";
+import { scopedProjectionRevisionsRoute } from "../../src/routes/scoped-projection-revisions.js";
 
 const filter = signalMetadataFilterSchema.parse({});
 const props = { properties: { category: "zonage", etape: "avis_motion", description: "Projet de quatre logements" },
@@ -73,6 +76,11 @@ describe("fine signal metadata on PostgreSQL", () => {
     const read = (sub: string, ws = f.workspaceId) => readSignalMetadata(f.db, sub, ws, filter);
     await expect(read(f.outsider.sub)).rejects.toMatchObject({ status: 403 });
     await expect(read("unknown-account")).rejects.toMatchObject({ status: 403 });
+    await writeClassAnnotation(f.db, { citySlug: node!.citySlug, nodeType: "Signal", nodeId: node!.id,
+      classe: "pertinent", reason: "Synthetic annotation", source: "ai", model: "synthetic", effort: "medium",
+      promptId: "test", promptSha256: "a".repeat(64), inputSha256: "b".repeat(64), pipelineRunId: "test" });
+    expect((await read(f.contributor.sub)).classCounts.pertinent).toBe(1);
+    expect((await read(f.moderator.sub)).classCounts.pertinent).toBe(1);
     await writeScopedPersonalFacet(f.db, f.contributor.sub, f.workspaceId,
       { action: "discard", target, reasonCode: "N-NON-RES", expectedHeadId: null,
         displayedFingerprint: targetFingerprint(node!), commandKey: randomUUID() });
@@ -84,5 +92,32 @@ describe("fine signal metadata on PostgreSQL", () => {
         displayedFingerprint: targetFingerprint(node!), commandKey: randomUUID() });
     expect((await read(f.moderator.sub)).classCounts.ecarte).toBe(1);
     expect((await read(f.contributor.sub, f.otherId)).classCounts.ecarte).toBe(0);
+  });
+
+  it("should version the HTTP contract explicitly and preserve the old reader", async () => {
+    const f = await workspaceFixture();
+    await f.db.insert(graphNodes).values({ id: "http", citySlug: "metadata-http", type: "Signal",
+      label: "Projet de zonage résidentiel", props });
+    await f.db.transaction((tx) => bumpGraphSourceRevision(tx, "metadata-http"));
+    const app = (sub: string | null) => {
+      const app = new Hono();
+      app.use("*", async (c, next) => { c.set("session" as never, (sub ? { sub } : null) as never); await next(); });
+      app.route("/", scopedProjectionRevisionsRoute({ db: f.db, auth: { enabled: true } }));
+      return app;
+    };
+    const path = `/api/v1/workspaces/${f.workspaceId}/signal-facets/by-city`;
+    expect((await app(null).request(`${path}?contract=metadata-v2`)).status).toBe(401);
+    expect((await app(f.outsider.sub).request(`${path}?contract=metadata-v2`)).status).toBe(403);
+    const member = app(f.contributor.sub);
+    expect((await member.request(`${path}?contract=metadata-v3`)).status).toBe(400);
+    expect((await member.request(`${path}?contract=metadata-v2&classes=invalid`)).status).toBe(400);
+    const response = await member.request(`${path}?contract=metadata-v2&classes=none`);
+    expect(response.headers.get("cache-control")).toBe("private, no-store");
+    const body = await response.json();
+    expect(body).toMatchObject({ contract: "metadata-v2", totalMatched: 0, classCounts: { non_classe: 1 } });
+    expect(JSON.stringify(body)).not.toMatch(/"(signals|props|description|evidence)"/);
+    const old = await (await member.request(path)).json();
+    expect(old).toMatchObject({ ok: true, totalCount: 1 });
+    expect(old).not.toHaveProperty("contract");
   });
 });
