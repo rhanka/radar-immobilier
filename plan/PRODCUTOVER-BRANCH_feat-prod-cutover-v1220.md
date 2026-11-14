@@ -31,6 +31,7 @@
 - [x] Tests dédiés ENV=test-prod-cutover. Ports réservés API 18821, UI 15321, Maildev 11121.
 
 ## Plan / Todo (lot-based)
+- [x] Remise opérateur : deux connexions RO, base finale vide, manifeste historique validé et configuration liée aux octets du plan. Clients PG16 distincts de la copie 25433. Tunnel persistant ; S3 put/ls refusés AccessDenied et delete exit 1.
 - [x] Base finale vide template0 sur 25435, rôles NOLOGIN, pgpass 0600 et configuration de ce soir. Approbation owner liée aux empreintes, drain laissé à la fenêtre. Historique v1.2.19 issu du build tag 42669916074, sans sonde publique.
 - [x] Préparation opérateur autorisée le 13/11 : cible autonome, tunnel supervisé loopback, pgpass RO et extraction S3 par liste fermée. Test put refusé : exit 1, AccessDenied. Aucun secret affiché.
 - [x] Corps PR : séquence exacte de ce soir, acteurs, durées, COMMIT DDL et réouverture comme seuils, reprise complète, tag v1.2.20 différé au SHA candidat. Nouveau dry-run RO : neuf créations prévues, aucune valeur affichée.

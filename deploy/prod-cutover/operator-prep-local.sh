@@ -63,6 +63,11 @@ if [[ ! -e $private/configuration-tonight.json ]]; then
 fi
 mkdir -p "$private/prod-window-v1220" "$private/final-restore-v1220"
 chmod 700 "$private/prod-window-v1220" "$private/final-restore-v1220"
+mkdir -p "$private/operator-bin"
+for client in psql pg_dump pg_restore; do
+  install -m 700 deploy/prod-cutover/operator-pg.sh "$private/operator-bin/$client"
+done
+printf '8 PG16 wrappers: add private/operator-bin to PATH; never private/bin\n'
 for file in plan.json roster.json previous-release.json classification-cursor.secret prod-approval.json configuration-tonight.json prod-admin.pgpass prod-ro.pgpass backup-writer.env s3-provision.input final-copy.pgpass; do
   if [[ -s $private/$file && ! -L $private/$file ]]; then
     printf '8 present %s mode=%s\n' "$file" "$(stat -c %a "$private/$file")"
