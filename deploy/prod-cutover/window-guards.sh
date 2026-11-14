@@ -32,9 +32,9 @@ manual_cd_idle() {
       || fail 'CD preparation active or indeterminate'
   fi
   # build-push-images contains the promote-prod job. Unknown dispatch targets also refuse.
-  timeout --kill-after=5s 45s gh api --paginate --slurp \
+  timeout --kill-after=5s 45s gh api --paginate \
     'repos/rhanka/radar-immobilier/actions/workflows/build-push-images.yml/runs?per_page=100' \
-    > "$WORK/cd-runs.json" || fail 'Cannot establish CD inactivity'
+    | jq -s '.' > "$WORK/cd-runs.json" || fail 'Cannot establish CD inactivity'
   jq -e 'type=="array" and length>0 and all(.[];
     (.workflow_runs|type=="array") and all(.workflow_runs[];
       .status=="completed" or

@@ -16,13 +16,14 @@ if [ "$1" = deploy/prod-cutover/cli.cjs ]; then exit 0; fi
 exec '${process.execPath}' "$@"
 `, { mode: 0o755 });
     writeFileSync(join(f.dir, 'bin/gh'), `#!/bin/sh
+for arg do [ "$arg" != --slurp ] || exit 1; done
 cat "$CUTOVER_TEST_STATE/runs.json"
 `, { mode: 0o755 });
     const state = f.state();
     const runs = [{ workflow_runs: [] }];
     change(state, runs);
     writeFileSync(join(f.dir, 'state.json'), JSON.stringify(state));
-    writeFileSync(join(f.dir, 'runs.json'), JSON.stringify(runs));
+    writeFileSync(join(f.dir, 'runs.json'), runs.map(page => JSON.stringify(page)).join('\n'));
     const result = spawnSync('make', ['-s', '-f', 'deploy/prod-cutover/prod-cutover.mk', 'window-start',
       `RELEASE=${f.dir}/release.json`, `PREVIOUS_RELEASE=${f.dir}/release.json`, 'ENV=execution-prod'],
     { env: f.env, encoding: 'utf8', timeout: 30000 });
