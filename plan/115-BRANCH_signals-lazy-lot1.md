@@ -24,6 +24,7 @@
 - [x] SL1-EX3: allow ui/e2e-real/** and ui/playwright.real.config.ts for real-click qualification and source-projection seeding. Rollback: revert isolated test changes.
 - [x] SL1-EX4: pass optional E2E_SPEC through Makefile and tools/make/e2e-real*.sh for the explicitly requested scoped real-stack run. Default suite unchanged. Rollback: remove optional argument.
 - [x] SL1-EX5: expose the existing graph card freshness helper in api/src/routes/graph-signals.ts so the stored rank uses the current document/ingestion precedence. Rollback: remove helper and its projection caller.
+- [x] SL1-EX6: the real-stack runner observed healthy PostgreSQL followed by TCP ECONNREFUSED before migration; its inherited healthcheck probes Unix only. Add a bounded TCP readiness check and preserve PostgreSQL logs. No UI timeout change. Rollback: remove runner check/log addition.
 
 ## Orchestration Mode (AI-selected)
 - [x] Mono-branch BUILD lane; no merge.
