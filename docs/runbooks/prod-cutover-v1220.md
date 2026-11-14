@@ -1,6 +1,6 @@
 # Bascule prod v1.2.20 — procédure sous i-cond
 
-**NO-GO. Répétition technique faite. Recette humaine et prérequis prod attendus. Aucune mutation prod par cette lane.**
+**GO owner reçu pour le provisionnement puis la bascule. Exécution par i-cond dès les portes vertes. Cette lane reste en lecture seule en prod.**
 Candidate : `b7724bdd9015a4f26319897bf240baaf9ee636ae`.
 La branche de procédure reste distincte. La préparation est intégrée par merge. Aucun tag ni merge dans main.
 
@@ -80,7 +80,152 @@ Son outil S3 sécurisé appelle `put-bucket-cors` sur le bucket indiqué, avec c
 Puis `get-bucket-cors` et OPTIONS depuis `https://immo.sent-tech.ca`. Refuser une origine étrangère.
 La clé limitée n’a aucun droit `PutBucketCors` attesté. Ce droit porte sur le bucket entier.
 Les accès racine sont refusés. Ne pas élargir cette clé. Le principal administrateur k8s doit agir.
-La cible immo ne modifie pas le bucket. Le CORS reste à confirmer avant ouverture.
+La cible immo ne modifie pas le bucket. `precheck` appelle désormais `GetBucketCors` avant les autres contrôles.
+Une règle absente, illisible ou différente du JSON attendu bloque la bascule.
+La clé du Secret doit permettre cette lecture. Un AccessDenied bloque aussi. k8s règle ce droit sans élargir les accès objet.
+
+## Séquence exacte de ce soir pour i-cond
+
+Chaque ligne est exécutée séparément. Arrêter au premier code non nul. Ne pas lancer le CD pendant la fenêtre.
+Acteur conducteur : **i-cond**. Exécution immo et k8s selon les étapes ci-dessous.
+Les GO provisionnement et bascule sont acquis. i-cond les matérialise dans l’attestation privée ; ne pas les redemander.
+La recette et la décision de réouverture restent consignées avant ouverture.
+
+Préparer le processus opérateur sans sourcing de fichier. Aucun `.env` ne doit être lu.
+k8s fournit le port-forward prod en loopback `127.0.0.1:25432`, les fichiers pgpass privés
+`prod-admin.pgpass` et `prod-ro.pgpass`, et l’injection de PGPASSWORD pour le hook.
+Le rôle destination est `radar`. Le rôle source reste `radar_db_ro_prod`.
+Les identités S3 de sauvegarde sont injectées dans le processus, jamais dans les arguments.
+Les clients PG16 et s5cmd opérateur doivent être disponibles. Ne pas mettre le `bin` de la copie 25433 dans PATH.
+k8s fournit aussi une **nouvelle base jetable vide** `radar_cutover_final` en loopback `127.0.0.1:25435`.
+Elle vient de template0. Les rôles du dump préexistent, comme dans rehearsal-roles.sql.
+Son pgpass est `final-copy.pgpass`. Ne pas réutiliser la copie de recette déjà migrée.
+Le fichier S3 de provisionnement s’appelle `s3-provision.input`, mode 0600 ; seuls les champs attendus y figurent.
+`previous-release.json` est le manifeste historique indépendant. Ne pas le dériver des sondes publiques.
+`prod-approval.json` contient owner, SHA candidat, expiration future, host/port/database,
+planSha256 et rosterSha256. Les empreintes portent sur les fichiers préparés, sans les réécrire.
+
+```sh
+export PLAN="$HOME/.local/share/radar-prod-copy/plan.json"
+export ROSTER="$HOME/.local/share/radar-prod-copy/roster.json"
+export RELEASE="$PWD/deploy/prod-cutover/release.json"
+export PREVIOUS_RELEASE="$HOME/.local/share/radar-prod-copy/previous-release.json"
+export CURSOR_REFERENCE="$HOME/.local/share/radar-prod-copy/classification-cursor.secret"
+export APPROVAL="$HOME/.local/share/radar-prod-copy/prod-approval.json"
+export OUTPUT="$HOME/.local/share/radar-prod-copy/prod-window-v1220"
+export CONFIGURATION="$HOME/.local/share/radar-prod-copy/configuration-tonight.json"
+export EVIDENCE="$OUTPUT/drain.json"
+export ARCHIVE="$HOME/.local/share/radar-prod-copy/prod-final-v1220.dump"
+export FINAL_OUTPUT="$HOME/.local/share/radar-prod-copy/final-restore-v1220"
+export PGHOST=127.0.0.1 PGPORT=25432 PGUSER=radar PGDATABASE=radar
+export PGPASSFILE="$HOME/.local/share/radar-prod-copy/prod-admin.pgpass"
+export SOURCE_PGHOST=127.0.0.1 SOURCE_PGPORT=25432 SOURCE_PGUSER=radar_db_ro_prod SOURCE_PGDATABASE=radar
+export SOURCE_PGPASSFILE="$HOME/.local/share/radar-prod-copy/prod-ro.pgpass"
+export BACKUP_ENDPOINT=https://s3.bhs.io.cloud.ovh.net
+export BACKUP_URI=s3://sentropic-pgbackup/immo/v1220/tonight
+export CUTOVER_ALLOW_PROD=b7724bdd9015a4f26319897bf240baaf9ee636ae
+```
+
+**1. immo, 30–90 s. Provisionner avant toute fermeture.** Le premier appel reste RO.
+Le second est la mutation autorisée exécutée par i-cond. Création seule, clés existantes conservées.
+
+```sh
+rtk make -f deploy/prod-cutover/prod-cutover.mk provision-prod ENV=prod
+rtk make -f deploy/prod-cutover/prod-cutover.mk provision-prod APPLY=1 ARTIFACTS_PROD_ENV_FILE="$HOME/.local/share/radar-prod-copy/s3-provision.input" ENV=prod
+rtk make -f deploy/prod-cutover/prod-cutover.mk certificate-wait ENV=prod
+```
+
+**2. k8s puis immo, 1–5 min.** k8s pose le CORS demandé avec son principal administrateur.
+Attendre Certificate Ready, wildcard DNS et droits GetBucketCors. Le précheck doit sortir avec code 0.
+La configuration doit être un nouveau fichier. À la reprise, conserver le fichier déjà rendu.
+
+```sh
+rtk make -f deploy/prod-cutover/prod-cutover.mk cors-precheck ENV=prod
+rtk make -f deploy/prod-cutover/prod-cutover.mk precheck ENV=prod
+rtk make -f deploy/prod-cutover/prod-cutover.mk render ENV=prod
+```
+
+**3. k8s sous i-cond, 30–90 s.** Capturer avant drain. Même RUN pour toute la suite.
+Le répertoire OUTPUT privé doit exister en 0700 avant la preuve de drain.
+
+```sh
+rtk make -f deploy/prod-cutover/prod-cutover.mk window-start ENV=execution-prod
+export RUN=$(rtk make -s -f deploy/prod-cutover/prod-cutover.mk window-run ENV=prod)
+rtk make -f deploy/prod-cutover/prod-cutover.mk window-configure RUN="$RUN" ENV=execution-prod
+rtk make -f deploy/prod-cutover/prod-cutover.mk window-close RUN="$RUN" ENV=execution-prod
+rtk make -f deploy/prod-cutover/prod-cutover.mk window-evidence RUN="$RUN" ENV=execution-prod
+```
+
+i-cond reporte le JSON exact de `drain.json` dans `prod-approval.json`, champ drain.
+Ajouter writersStopped=true. Le RUN du drain est celui du verrou. Conserver les empreintes approuvées.
+Ce sont les constatations du drain réel, jamais celles de la copie.
+
+**4. immo, 3–8 min. Sauvegarde finale et restauration de contrôle.** Dump observé : 72 s.
+Restauration observée : 114 s. L’upload et la relecture S3 ajoutent leur durée réelle.
+
+```sh
+rtk make -f deploy/prod-cutover/prod-cutover.mk backup RUN="$RUN" ENV=execution-prod
+export RESTORE_SHA256=$(rtk make -s -f deploy/prod-cutover/prod-cutover.mk backup-sha ENV=prod)
+rtk make -f deploy/prod-cutover/prod-cutover.mk restore-test PGHOST=127.0.0.1 PGPORT=25435 PGUSER=radar PGDATABASE=radar_cutover_final PGPASSWORD= PGPASSFILE="$HOME/.local/share/radar-prod-copy/final-copy.pgpass" OUTPUT="$FINAL_OUTPUT" RUN="$RUN" ENV=test-prod-cutover-final
+rtk make -f deploy/prod-cutover/prod-cutover.mk accept-final-restore ENV=prod
+```
+
+**5. immo, 1–6 min. Point de non-retour : premier COMMIT DDL dans migrate.**
+Dès ce commit, un retour d’images seul est interdit. Le retour exige la restauration complète.
+Les 31 DDL ont pris 34–50 s dans deux séries. Le scénario de maxima séparés dépasse 18 min. Ne pas garantir cinq minutes.
+La procédure conserve ses délais bornés. Aucun délai ne vaut preuve de terminaison.
+
+```sh
+rtk make -f deploy/prod-cutover/prod-cutover.mk artifact-roles RUN="$RUN" ENV=execution-prod
+rtk make -f deploy/prod-cutover/prod-cutover.mk migrate RUN="$RUN" ENV=execution-prod
+rtk make -f deploy/prod-cutover/prod-cutover.mk transition RUN="$RUN" ENV=execution-prod
+rtk make -f deploy/prod-cutover/prod-cutover.mk verify ENV=execution-prod
+rtk make -f deploy/prod-cutover/prod-cutover.mk window-deploy RUN="$RUN" ENV=execution-prod
+```
+
+Exiger 44 empreintes, open-success, scoped, zéro non résolu et barrière ouverte.
+Le rollout et le smoke privés gardent routes fermées, schedules suspendus et verrou présent.
+**6. i-cond, immo et Product Owner, 5–15 min.** Faire la recette privée décrite ci-dessous.
+Inclure publication HTML, lecture HTTPS publique et lecture MCP du même artefact.
+Consigner les preuves sans jeton. Si acceptée, i-cond consigne reopen=true et run dans APPROVAL.
+
+```sh
+rtk make -f deploy/prod-cutover/prod-cutover.mk window-reopen RUN="$RUN" ENV=execution-prod
+rtk make -f deploy/prod-cutover/prod-cutover.mk smoke ENV=prod
+```
+
+Réouverture : 30–90 s attendues. Observer ensuite le premier refresh complet.
+La réouverture est le second seuil : une restauration ultérieure perd aussi les nouvelles écritures.
+Budget opérateur : 15–35 min hors attente k8s et refresh. Réserver 15 min pour la reprise.
+
+**Retour arrière, immo puis k8s sous i-cond, 3–10 min attendues.**
+Au moindre refus : garder le même RUN. Ne pas supprimer le verrou. Après rollout partiel, refermer d’abord.
+Si un hook survit, ajouter STOP_RUN_CONTAINERS=1 à window-close ; la disparition doit être prouvée.
+
+```sh
+rtk make -f deploy/prod-cutover/prod-cutover.mk window-close RUN="$RUN" ENV=execution-prod
+rtk make -f deploy/prod-cutover/prod-cutover.mk window-evidence RUN="$RUN" ENV=execution-prod
+rtk make -f deploy/prod-cutover/prod-cutover.mk rollback RUN="$RUN" ENV=execution-prod
+rtk make -f deploy/prod-cutover/prod-cutover.mk window-rollback-services RUN="$RUN" ENV=execution-prod
+```
+
+Vérifier schéma 13, propriétaires, ACL et accès legacy. Ne pas rejouer les grants candidats.
+Faire la recette privée historique. Consigner reopen=true/run, puis window-reopen avec le même RUN.
+Un smoke candidat échouera sur l’ancienne version : utiliser le smoke historique intégré à window-reopen.
+Après réouverture, toute perte hors PV régénérables exige décision owner avant restauration.
+
+**7. i-cond, après recette acceptée et réouverture seulement. CD différé.**
+La commande suivante cible le SHA candidat, jamais la tête de procédure. Ne pas l’exécuter dans cette préparation.
+Durée de déclenchement : moins de 30 s. La durée du CD dépend de GitHub Actions.
+
+```sh
+rtk make -f deploy/prod-cutover/prod-cutover.mk release-tag TAG_GO=v1.2.20 ENV=release-prod
+rtk make -f deploy/prod-cutover/prod-cutover.mk pr-status ENV=test-prod-cutover
+```
+
+Suivre le run `build-push-images` du tag jusqu’au succès de promote-prod. Aucun rebuild attendu.
+Le tag refuse s’il existe déjà. En cas de push interrompu, vérifier la ref distante avant toute reprise.
+Le down -v de la base finale jetable relève de k8s après conservation du reçu ; celui de la copie attend la fin de recette.
 
 Rendu exigé sur API et MCP : `ARTIFACTS_CONTROL_MODE=general`, `IMMO_ARTIFACTS_GIT_MODE=off`,
 `IMMO_ARTIFACTS_LIVE_EDGE_ENABLED=0`, qualifications/invitations/redrive false.
