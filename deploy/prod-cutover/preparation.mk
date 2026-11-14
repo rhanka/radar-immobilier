@@ -4,11 +4,17 @@ SHELL := /bin/bash
 export COMPOSE_DISABLE_ENV_FILE := 1
 export DOTENV_CONFIG_PATH := /dev/null
 export ENV OWNER
+export COMPARE_REHEARSAL_RUN
 .PHONY: preprod-artifact-keys
 preprod-artifact-keys:
 	@test "$(ENV)" = test-prod-cutover
 	@for name in radar-artifacts-preprod radar-artifacts-upload-page-preprod radar-artifacts-reader-preprod immo-mcp-artifact-writer immo-mcp-account-reader; do \
 	 kubectl --kubeconfig "$(HOME)/.kube/radar-preprod-tenant.kubeconfig" --request-timeout=15s -n radar-immobilier-preprod get secret "$$name" -o go-template='{{.metadata.name}}{{"\n"}}{{range $$key, $$value := .data}}{{$$key}}{{"\n"}}{{end}}'; done
+prod-artifact-keys:
+	@test "$(ENV)" = prod
+	@for name in radar-artifacts-prod radar-artifacts-upload-page-prod radar-artifacts-reader-prod immo-mcp-artifact-writer immo-mcp-account-reader radar-artifact-content-prod-tls; do \
+	 result=$$(kubectl --kubeconfig "$(HOME)/.kube/radar-prod-tenant-admin.kubeconfig" --request-timeout=15s -n radar-immobilier get secret "$$name" --ignore-not-found -o go-template='{{.metadata.name}}{{"\n"}}{{range $$key, $$value := .data}}{{$$key}}{{"\n"}}{{end}}'); \
+	 if [[ -n $$result ]]; then printf '%s\n' "$$result"; else printf 'MISSING %s\n' "$$name"; fi; done
 .PHONY: inventory archive images runtime copy-up copy-down copy-step copy-rehearse copy-prepare copy-evidence copy-services-stop copy-config-check copy-services-up copy-images
 inventory archive images:
 	@test "$(ENV)" = test-prod-cutover
@@ -53,6 +59,23 @@ copy-compose-check:
 copy-compose-up:
 	@test "$(ENV)" = rehearsal
 	@docker compose --env-file /dev/null -p radar-prod-copy-owner -f deploy/prod-cutover/rehearsal.compose.yml -f "$(HOME)/.local/share/radar-prod-copy/services.json" up -d --wait --wait-timeout 60 --no-build --pull never minio idp api mcp ui
+copy-ui-logs:
+	@test "$(ENV)" = rehearsal
+	@docker compose --env-file /dev/null -p radar-prod-copy-owner -f deploy/prod-cutover/rehearsal.compose.yml -f "$(HOME)/.local/share/radar-prod-copy/services.json" logs --no-color ui
+copy-storage:
+	@test "$(ENV)" = rehearsal
+	@docker compose --env-file /dev/null -p radar-prod-copy-owner -f deploy/prod-cutover/rehearsal.compose.yml -f "$(HOME)/.local/share/radar-prod-copy/services.json" run --rm --no-deps -T \
+	 -v "$(HOME)/.local/share/radar-prod-copy:/private-input:ro" -v "$(CURDIR)/deploy/prod-cutover/rehearsal-storage.cjs:/run-storage.cjs:ro" --entrypoint node api /run-storage.cjs
+copy-proxy-smoke:
+	@test "$(ENV)" = rehearsal
+	@headers=$$(mktemp); trap 'rm -f "$$headers"' EXIT; \
+	 code=$$(curl -q -fsS --max-time 10 --cacert "$(HOME)/.local/share/radar-prod-copy/ca.crt" \
+	 --resolve minio.localhost:15400:127.0.0.1 -X OPTIONS -H 'Origin: https://recette.localhost:15321' \
+	 -D "$$headers" -o /dev/null -w '%{http_code}' https://minio.localhost:15400/radar-immobilier-artifacts); \
+	 test "$$code" = 204; \
+	 awk 'tolower($$1)=="access-control-allow-origin:" {gsub("\r", "", $$2); if ($$2=="https://recette.localhost:15321") ok=1} END {exit !ok}' "$$headers"; \
+	 curl -q -fsS --max-time 10 --cacert "$(HOME)/.local/share/radar-prod-copy/ca.crt" --resolve recette.localhost:15321:127.0.0.1 \
+	 https://recette.localhost:15321/build.json | jq -e '.sha=="b7724bd"' >/dev/null; echo 'Local TLS, served SHA and bounded CORS verified'
 copy-remove-created-client:
 	@test "$(ENV)" = rehearsal
 	@test -n "$(CLIENT_ID)"
@@ -74,12 +97,15 @@ copy-rehearse:
 copy-prepare:
 	@test "$(ENV)" = rehearsal
 	@bash deploy/prod-cutover/rehearse-copy.sh local-prepare
-copy-evidence copy-services-stop copy-config-check copy-timings copy-rollback-twice copy-database-progress:
+copy-evidence copy-services-stop copy-config-check copy-timings copy-rollback-twice copy-database-progress copy-export-timings copy-rollback-audit:
 	@test "$(ENV)" = rehearsal
 	@bash deploy/prod-cutover/rehearse-copy.sh local-$(@:copy-%=%)
 copy-services-up:
 	@test "$(ENV)" = rehearsal
-	@for port in 18821 15321 15400 443; do test -z "$$(ss -H -ltn "sport = :$$port")"; done
+	@for port in 18821 15321 15400 443; do \
+	 if [[ -n $$(ss -H -ltn "sport = :$$port") ]]; then \
+	  test -n "$$(docker ps -q --filter label=com.docker.compose.project=radar-prod-copy-owner --filter publish=$$port)"; \
+	 fi; done
 	@bash deploy/prod-cutover/rehearse-copy.sh local-services-up
 copy-images:
 	@test "$(ENV)" = rehearsal
