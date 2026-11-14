@@ -92,6 +92,8 @@
 - [x] Lot 3 : six tests des refus et test PostgreSQL natif de reprise transactionnelle.
 - [x] Lot 4 : runbook, prérequis, décisions owner, PR draft #1100 vers main.
 - [ ] Lot 5 : revue complémentaire harness. Aucun GO implicite.
+- [x] Destination S3 finale vérifiée : radar-immobilier-backup/v1220-cutover, put/ls réussis. Garde et séquence alignés. Delete refusé par le contrat WRITER ; objet unique à supprimer par k8s, sans modification IAM.
+- [x] Destination S3 : deux tests ciblés en conteneur et syntaxe Bash réussis. Suite safety non exécutée : Git absent de radar-cutover-test:local (command_failed_git).
 - [x] Runbook, prérequis et décisions rédigés. Syntaxes CJS/Bash et tests ciblés passent.
 - [x] Revue formelle selection-failed documentée : MCP h2a et métadonnées auteur manquants.
 - [x] Image API candidate absente localement ; aucun pull ni hook réel lancé.

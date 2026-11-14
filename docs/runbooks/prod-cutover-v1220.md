@@ -122,9 +122,20 @@ export PGPASSFILE="$HOME/.local/share/radar-prod-copy/prod-admin.pgpass"
 export SOURCE_PGHOST=127.0.0.1 SOURCE_PGPORT=25432 SOURCE_PGUSER=radar_db_ro_prod SOURCE_PGDATABASE=radar
 export SOURCE_PGPASSFILE="$HOME/.local/share/radar-prod-copy/prod-ro.pgpass"
 export BACKUP_ENDPOINT=https://s3.bhs.io.cloud.ovh.net
-export BACKUP_URI=s3://sentropic-pgbackup/immo/v1220/tonight
+export BACKUP_URI=s3://radar-immobilier-backup/v1220-cutover
 export CUTOVER_ALLOW_PROD=b7724bdd9015a4f26319897bf240baaf9ee636ae
 ```
+
+Destination vérifiée le 14/11/2026 à 03:10 UTC (13/11 au Québec) :
+put et ls réussis avec RADAR_BACKUP_WRITER sous `v1220-cutover/`.
+Delete : exit 1, `Access Denied`, conforme au contrat WRITER sans suppression.
+Le test ne valide pas encore la lecture de retour du dump final.
+L’objet de test de 26 octets reste présent ; seule sa suppression est à confier à k8s :
+`s3://radar-immobilier-backup/v1220-cutover/destination-probe-20261114T031014Z-d3e0a69d-2e2f-4ac3-a6ee-de73f2309648.txt`.
+Ne pas employer le PURGER quotidien : son périmètre se limite aux préfixes datés
+`pg/*`, `manifests/*`, `docs-inventory/*`. Pour un test put/ls/delete entièrement
+réussi, k8s doit émettre une clé dédiée à `v1220-cutover/*` avec suppression limitée
+à ce préfixe. L’environnement privé préparé est `backup-destination.env` (0600).
 
 **1. immo, 30–90 s. Provisionner avant toute fermeture.** Le premier appel reste RO.
 Le second est la mutation autorisée exécutée par i-cond. Création seule, clés existantes conservées.
