@@ -8,21 +8,24 @@ test('refuse les consommateurs locaux actifs, les hooks et les preuves modifiée
   const before = { run: r.run, environment: process.env.ENV };
   const db = { Id: 'db-id', Config: { Labels: { 'com.docker.compose.project': 'radar-prod-copy-owner',
     'com.docker.compose.service': 'postgres' } }, State: { Running: true } };
-  const api = { Id: 'api-id', Config: { Labels: {} }, State: { Running: false, FinishedAt: 'observed', ExitCode: 0 } };
+  const observed = '2026-11-13T23:00:00Z';
+  const api = { Id: 'api-id', Config: { Labels: {} }, State: { Running: false, FinishedAt: observed, ExitCode: 0 } };
   let hook = '';
   try {
     process.env.ENV = 'rehearsal';
     r.run = (bin, args) => args[0] === 'inspect' ? JSON.stringify([db, api])
       : args.includes('name=immo-6h-') ? hook : 'db-id\napi-id';
     const snapshot = { network: 'radar-prod-copy-owner_copy-only', databaseContainer: db.Id,
-      containers: [{ id: api.Id, finishedAt: 'observed', exitCode: 0 }] };
+      containers: [{ id: api.Id, finishedAt: observed, exitCode: 0 }] };
     const e = { instances: [api.Id], localTermination: snapshot };
     proof.verify(e);
     api.State.Running = true;
     assert.throws(() => proof.verify(e), /local_consumers_not_terminated/);
     api.State.Running = false; hook = 'active-hook';
     assert.throws(() => proof.verify(e), /local_hook_not_terminated/);
-    hook = ''; api.State.FinishedAt = 'restarted';
+    hook = ''; api.State.FinishedAt = '0001-01-01T00:00:00Z';
+    assert.throws(() => proof.verify(e), /local_consumers_not_terminated/);
+    api.State.FinishedAt = '2026-11-13T23:01:00Z';
     assert.throws(() => proof.verify(e), /local_termination_proof_changed/);
     process.env.ENV = 'execution-prod';
     assert.throws(() => proof.verify(e), /local_termination_proof_required/);

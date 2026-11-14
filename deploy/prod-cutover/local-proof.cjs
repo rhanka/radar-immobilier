@@ -12,7 +12,9 @@ function stoppedSnapshot() {
   if (db.length !== 1 || !db[0].State.Running) r.fail('local_copy_database_required');
   const consumers = containers.filter(c => c.Id !== db[0].Id);
   if (!consumers.length) r.fail('local_baseline_proof_required');
-  if (consumers.some(c => c.State.Running || c.State.Restarting || c.State.Paused)) r.fail('local_consumers_not_terminated');
+  if (consumers.some(c => c.State.Running || c.State.Restarting || c.State.Paused
+    || !Number.isFinite(Date.parse(c.State.FinishedAt)) || Date.parse(c.State.FinishedAt) <= 0
+    || !Number.isInteger(c.State.ExitCode))) r.fail('local_consumers_not_terminated');
   if (r.run('docker', ['ps', '-q', '--filter', 'name=immo-6h-']).trim()) r.fail('local_hook_not_terminated');
   return { network: NETWORK, databaseContainer: db[0].Id,
     containers: consumers.map(c => ({ id: c.Id, finishedAt: c.State.FinishedAt, exitCode: c.State.ExitCode })) };

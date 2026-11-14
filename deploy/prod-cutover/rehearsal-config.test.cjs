@@ -19,4 +19,7 @@ test('recette : services locaux épinglés, rôles séparés et aucune origine p
   assert.equal(env.IMMO_ARTIFACTS_GIT_MODE, 'off');
   assert.equal(c.services.api.environment.ARTIFACTS_CONTROL_MODE, 'general');
   assert.equal(c.services.api.environment.CLASSIFICATION_CURSOR_KEY_ID, 'rehearsal-v1');
+  for (const name of ['api', 'mcp', 'minio', 'idp'])
+    assert.equal(Object.keys(c.services[name].networks).includes('copy-entry'), false);
+  assert.ok(c.services.ui.networks['copy-entry']);
 });

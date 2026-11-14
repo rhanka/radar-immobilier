@@ -39,6 +39,31 @@ copy-host-progress:
 	@test "$(ENV)" = rehearsal
 	@df -h "$(HOME)/.local/share/radar-prod-copy"
 	@timeout --kill-after=2s 10s docker stats --no-stream --format '{{.Name}} CPU={{.CPUPerc}} RAM={{.MemUsage}} IO={{.BlockIO}}' radar-prod-copy-owner-postgres-1
+copy-sql-progress:
+	@test "$(ENV)" = rehearsal
+	@timeout --kill-after=2s 10s docker compose --env-file /dev/null -p radar-prod-copy-owner -f deploy/prod-cutover/rehearsal.compose.yml exec -T postgres \
+	 psql -XqAt -U radar -d radar_cutover_owner_20261113 -v ON_ERROR_STOP=1 \
+	 -c "SELECT state,wait_event_type,wait_event,extract(epoch FROM clock_timestamp()-query_start)::integer FROM pg_stat_activity WHERE datname=current_database() AND pid<>pg_backend_pid();"
+copy-service-status:
+	@test "$(ENV)" = rehearsal
+	@docker ps -a --filter label=com.docker.compose.project=radar-prod-copy-owner --format '{{.Names}} {{.Status}} {{.Ports}}'
+copy-compose-check:
+	@test "$(ENV)" = rehearsal
+	@docker compose --env-file /dev/null -p radar-prod-copy-owner -f deploy/prod-cutover/rehearsal.compose.yml -f "$(HOME)/.local/share/radar-prod-copy/services.json" config --quiet
+copy-compose-up:
+	@test "$(ENV)" = rehearsal
+	@docker compose --env-file /dev/null -p radar-prod-copy-owner -f deploy/prod-cutover/rehearsal.compose.yml -f "$(HOME)/.local/share/radar-prod-copy/services.json" up -d --wait --wait-timeout 60 --no-build --pull never minio idp api mcp ui
+copy-remove-created-client:
+	@test "$(ENV)" = rehearsal
+	@test -n "$(CLIENT_ID)"
+	@docker inspect "$(CLIENT_ID)" | jq -e 'length==1 and (.[0] | .State.Status=="created" and .Args[0]=="psql" and .Config.Image=="postgis/postgis@sha256:44126d872ac91993766c341e369c539e8196614321765d36a6f1bab0419a5fa5" and .NetworkSettings.Networks["radar-prod-copy-owner_copy-only"]!=null)' >/dev/null
+	@docker rm "$(CLIENT_ID)" >/dev/null
+copy-resume:
+	@test "$(ENV)" = rehearsal
+	@$(MAKE) --no-print-directory -f deploy/prod-cutover/preparation.mk copy-evidence ENV=rehearsal
+	@for step in migrate transition transition verify; do $(MAKE) --no-print-directory -f deploy/prod-cutover/preparation.mk copy-step STEP="$$step" ENV=rehearsal; done
+	@$(MAKE) --no-print-directory -f deploy/prod-cutover/preparation.mk copy-services-up ENV=rehearsal
+	@$(MAKE) --no-print-directory -f deploy/prod-cutover/preparation.mk copy-step STEP=smoke ENV=rehearsal
 copy-down:
 	@test "$(ENV)" = rehearsal
 	@status=0; bash deploy/prod-cutover/rehearse-copy.sh local-services-stop || status=$$?; \
