@@ -22,6 +22,7 @@ import { runPersonalAttachmentActivation } from "../../api/src/services/facets/a
 import { requireScopedEpochFor } from "../../api/src/services/facets/activation.ts";
 import { signSession } from "../../api/src/services/auth/session.ts";
 import { classifyGraphNodeVivierV2 } from "../../api/src/services/graph/graph-store.ts";
+import { bumpGraphSourceRevision } from "../../api/src/services/facets/projection-revisions.ts";
 
 const STATE_DIR = process.env.E2E_STATE_DIR ?? "/e2e-state";
 const SESSION_SECRET = process.env.E2E_SESSION_SECRET ?? "";
@@ -112,6 +113,7 @@ async function seed() {
         fail(`seeded signal ${signal.id} is not qualified for the B view: ${JSON.stringify(classification)}`);
       }
     }
+    await db.transaction((tx) => bumpGraphSourceRevision(tx, CITY));
     // Geo rows read by the géo view (zones + lots with geometry).
     for (const [index, code] of ["H-901", "H-902"].entries()) {
       const x = -74.13 + index * 0.01;

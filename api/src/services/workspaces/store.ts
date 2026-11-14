@@ -55,16 +55,17 @@ export async function listWorkspacesForAccount(
 }
 
 export async function resolveWorkspaceAccess(
-  db: Pick<Database, "select">, workspaceId: string, sub: string,
+  db: Pick<Database, "select">, workspaceId: string, sub: string, lock = false,
 ): Promise<WorkspaceAccess> {
   const accountId = await approvedAccountId(db, sub);
   const [workspace] = await db.select().from(workspaces)
     .where(eq(workspaces.id, workspaceId));
   if (!workspace) throw new WorkspaceError(404, "workspace_not_found");
-  const [row] = await db.select().from(workspaceMemberships).where(and(
+  const query = db.select().from(workspaceMemberships).where(and(
     eq(workspaceMemberships.workspaceId, workspaceId),
     eq(workspaceMemberships.accountId, accountId),
   ));
+  const [row] = await (lock ? query.for("share") : query);
   const membership = row ? toRecord(row) : null;
   if (membership?.status !== "active") {
     throw new WorkspaceError(403, "workspace_membership_required");

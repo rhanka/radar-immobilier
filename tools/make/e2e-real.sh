@@ -7,7 +7,7 @@
 set -euo pipefail
 env_name="${ENV:-}"
 case "$env_name" in
-  test-*) ;;
+  test-*|e2e-*) ;;
   *) echo "[test-e2e] refused: ENV=$env_name is not a test-* environment (synthetic data only)" >&2; exit 2;;
 esac
 project="radar-${env_name}"
@@ -31,7 +31,7 @@ exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
 until flock -w 30 8; do echo "[test-e2e] waiting for the Docker campaign lock"; done
 cleanup() {
   status=$?
-  "${compose[@]}" logs --no-color api ui > tmp/e2e-real/stack.log 2>&1 || true
+  "${compose[@]}" logs --no-color api ui postgres > tmp/e2e-real/stack.log 2>&1 || true
   down
   exit "$status"
 }
@@ -41,10 +41,13 @@ trap 'exit 143' TERM
 "${compose[@]}" build api ui
 "${compose[@]}" --profile e2e build e2e
 "${compose[@]}" up -d --wait postgres minio
+# The inherited healthcheck probes the Unix socket, including Postgres' temporary
+# initialization server. The runner needs the final TCP listener before migrating.
+"${compose[@]}" exec -T postgres sh -ec 'for attempt in $(seq 1 30); do pg_isready -h 127.0.0.1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" && exit 0; sleep 1; done; exit 1'
 # UIDFIX-EX1: fresh named volumes are root-owned; hand them (and the
 # e2e state volume) to the host user once, as root, before the
 # UID-mapped runner installs into them.
 "${compose[@]}" --profile e2e run --rm -T -u 0:0 --entrypoint sh e2e -c 'chown -R '"$(id -u):$(id -g)"' /workspace/node_modules /workspace/api/node_modules /workspace/ui/node_modules /workspace/packages/immo-mcp/node_modules /e2e-state'
 "${compose[@]}" --profile e2e run --rm -T e2e prepare
 "${compose[@]}" up -d api ui
-"${compose[@]}" --profile e2e run --rm -T e2e run
+"${compose[@]}" --profile e2e run --rm -T -e E2E_SPEC="${E2E_SPEC:-}" e2e run

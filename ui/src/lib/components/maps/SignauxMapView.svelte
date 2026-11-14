@@ -47,9 +47,7 @@
     buildCityMapEntries,
     type CityMapEntry,
   } from "$lib/maps/maps-data.js";
-  import {
-    fetchGraphSignalsByCity,
-  } from "$lib/signals/graph-signals-by-city-client.js";
+  import { fetchSignalMetadata, metadataCityItems } from "$lib/signals/signal-metadata-client.js";
   import {
     fetchGraphSignalDetail,
     scopedReadErrorMessage,
@@ -705,6 +703,7 @@
   function handleExclusionsChange(next: VivierBExclusions): void {
     vivierBExclusions = next;
     syncFilterRoute();
+    void load();
     reconcileToVisibleNodes();
     updateGeoLayers();
   }
@@ -742,6 +741,7 @@
   ): void {
     applyActiveSubsetKey(subsetKey);
     syncFilterRoute();
+    void load();
     updateGeoLayers();
   }
 
@@ -923,32 +923,19 @@
   $: classementMap = new Map([...classementBaseMap, ...classementOverrides]);
   $: classementFilteredNodes = filterNodesByClassement(filteredDetailNodes, classementMap, classementFilter);
   // Full class cubes retain archives regardless of the visibility checkbox.
-  $: classementCountsValue = loadError !== null ? null : classementCountsForPerimeter({
+  $: classementCountsValue = loading || loadError !== null ? null : classementCountsForPerimeter({
     entries: allEntries,
     axes: bAxesFromVivierKey(activeSubsetKey),
     exclusions: vivierBExclusions,
   });
-  // Filtre counts (owner 2026-11-13): over the WHOLE displayed perimeter,
-  // with or without a selection — every city's cubes scoped by Pertinence, the
-  // selected city's cube being rebuilt from its loaded detail (period +
-  // Pertinence lens on the raw detail, before any Filtre criterion) under the
-  // same condition as its live header count. Faceted: each criterion follows
-  // the other active criteria (see signal-filter-counts.ts).
-  $: filtreScopedNodes = filterNodesByClassement(
-    filterNodesByDocumentDate(detailNodes, dateRange, dateBasis),
-    classementMap,
-    classementFilter,
-  );
-  $: filtreCountsValue = loadError !== null
+  // Every counter uses date-scoped SQL cells, independently of city detail.
+  $: filtreCountsValue = loading || loadError !== null
     ? null
     : filtreCountsForPerimeter({
       entries: allEntries,
       classement: classementFilter,
       axes: bAxesFromVivierKey(activeSubsetKey),
       exclusions: vivierBExclusions,
-      live: selectedCity && !detailLoading && detailProjection.available
-        ? { slug: selectedCity.municipality.slug, nodes: filtreScopedNodes }
-        : null,
     });
   function handleClassementFilterChange(
     next: import("$lib/signals/signal-classement.js").ClassementFilter,
@@ -956,6 +943,7 @@
     const visibilityChanged = next.ecarte !== classementFilter.ecarte;
     classementFilter = next;
     syncFilterRoute();
+    void load();
     if (visibilityChanged && selectedCity) void loadDetailForCity(selectedCity.municipality.slug);
   }
   async function handleApplyClassement(
@@ -1030,23 +1018,6 @@
       : null
   );
 
-  /**
-   * m1.7 — Compte LIVE de la ville sélectionnée, transmis au rail pour que son
-   * badge cesse d'ignorer les filtres client (axes A/B, exclusions B) :
-   * `filteredDetailNodes` EST déjà ce pipeline complet, c'est
-   * exactement ce que voit l'utilisateur dans le panneau droit.
-   *
-   * `null` (repli sur le compte bulk du rail) tant que :
-   *  - aucune ville n'est sélectionnée ;
-   *  - le détail est en cours de chargement (`detailLoading` — pas de flash à
-   *    0/n·d le temps du fetch, cf. #378) ;
-   *  - la projection serveur est indisponible (`!detailProjection.available`) —
-   *    on ne substitue jamais un compte qu'on ne peut pas garantir exact.
-   */
-  $: selectedCityLiveCount =
-    selectedCity && !detailLoading && detailProjection.available
-      ? classementFilteredNodes.length
-      : null;
   $: displayedLots = buildDisplayedLots(lotsResponse, zonesResponse, classementFilteredNodes);
 
   /**
@@ -2677,14 +2648,20 @@
       // date-cohérents avec le filtre date actif → fin du 0/50 (parité globale,
       // pas seulement la ville sélectionnée). Sans borne = all-time (Illimité).
       // 6H : agrégat scopé dans l'espace de travail explicite.
-      const res = await fetchGraphSignalsByCity({ workspaceId }, {
+      const res = await fetchSignalMetadata({ workspaceId }, {
         ...signalDocumentDateWindow(dateRange, dateBasis),
+        filter: {
+          classes: (["pertinent", "a_surveiller", "non_classe", "ecarte"] as const).filter((c) => classementFilter[c]),
+          requireZonage: bAxesFromVivierKey(activeSubsetKey).z,
+          requireResidentielEligible: bAxesFromVivierKey(activeSubsetKey).r,
+          requirePrecoce: bAxesFromVivierKey(activeSubsetKey).p,
+        },
         excludePiia: vivierBExclusions.piiaSansProjetResidentiel,
         excludeDerogations: vivierBExclusions.derogationsMineures,
         signal: lease.signal,
       });
       if (version !== bulkLoadVersion || !lease.isCurrent()) return "stale";
-      graphItems = res.cities;
+      graphItems = metadataCityItems(res);
       return "ok";
     } catch (e) {
       if (version !== bulkLoadVersion || !lease.isCurrent() || isAbortError(e)) return "stale";
@@ -2729,7 +2706,6 @@
       exclusions={vivierBExclusions}
       {timeRange}
       {dateBasis}
-      {selectedCityLiveCount}
       {citySearch}
       onCitySearchChange={(query) => { citySearch = query; syncFilterRoute(); }}
       onSelectCity={selectCity}

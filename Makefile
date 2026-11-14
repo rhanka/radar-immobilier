@@ -256,7 +256,7 @@ test-immo-mcp: chown-test-node-modules ## Run isolated MCP tests (SCOPE=<file>, 
 
 .PHONY: test-e2e
 test-e2e: ## Real-stack Playwright suite on production images (ENV=test-* only, always down -v)
-	ENV=$(ENV) bash tools/make/e2e-real.sh
+	ENV=$(ENV) E2E_SPEC="$(E2E_SPEC)" bash tools/make/e2e-real.sh
 
 .PHONY: test-e2e-down
 test-e2e-down: ## Tear down the real-stack e2e compose project of ENV (down -v)
@@ -284,6 +284,10 @@ db-migrate: chown-dev-node-modules ## Run Drizzle migrations against the running
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm -T api npm run db:migrate --workspace=api
 
 .PHONY: db-backup
+.PHONY: db-backfill-signal-metadata
+db-backfill-signal-metadata: chown-dev-node-modules ## Idempotently rebuild fine signal metadata under city locks
+	$(COMPOSE_RUN_API_NODEPS) npx tsx api/src/db/scripts/backfill-signal-metadata.ts
+
 db-backup: ## pg_dump backup
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) exec -T postgres \
 	  pg_dump -U $(POSTGRES_USER) $(POSTGRES_DB) > backups/$(ENV)-$(shell date +%Y%m%d-%H%M%S).sql
