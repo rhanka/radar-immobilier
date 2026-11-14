@@ -98,6 +98,8 @@
   import SignalClassFeedback from "$lib/components/maps/SignalClassFeedback.svelte";
   import type { FeedbackChoice } from "$lib/signals/class-feedback-client.js";
   import { classAnnotationLabel } from "$lib/signals/class-annotation-label.js";
+  import { mcpBadge } from "$lib/signals/signal-mcp-client.js";
+  import SignalMcpNotes from "./SignalMcpNotes.svelte";
   import {
     classementKey,
     EMPTY_CLASSEMENT_ENTRY,
@@ -1232,9 +1234,16 @@
                     on:click={() => toggleEntity(key)}
                   >
                     <span class="sel-entity-label">{node.label}</span>
+                    {#if node.classAnnotation?.source === "ai" || node.signalAnnotations?.current?.source !== "mcp" || hasManualClass}
                     <span class="signal-stage-badge" title={node.classAnnotation?.source === "ai" && !hasManualClass ? node.classAnnotation.reason : undefined}>
                       {classAnnotationLabel(node, hasManualClass)}
                     </span>
+                    {/if}
+                    {#if node.signalAnnotations?.current?.source === "mcp" && !hasManualClass}
+                      <span class="signal-stage-badge" title={node.signalAnnotations.current.reason}>
+                        {mcpBadge(node.signalAnnotations.current)}
+                      </span>
+                    {/if}
                     {#if isPiiaLie(node)}
                       <!-- PIIA porteur d'un projet résidentiel prouvé : gardé,
                            mais annoncé comme instrument indirect (confiance
@@ -1258,7 +1267,11 @@
                       </span>
                     {/if}
                   </button>
-                  {#if node.classAnnotation?.source === "ai" && !hasManualClass && !node.classFeedback}
+                  {#if node.signalAnnotations?.current?.source === "mcp" && node.signalAnnotations.canConfirm && !hasManualClass}
+                    <button type="button" aria-label="Confirmer la classification MCP" disabled={classementInFlight.has(cardClassementKey) || !!classementEntry.restoreBlockedReason}
+                      on:click={() => onApplyClassement(node, classementEntry.classe, classementEntry.reasonCode)}>👍</button>
+                  {/if}
+                  {#if node.classAnnotation?.source === "ai" && !hasManualClass && !node.classFeedback && node.signalAnnotations?.current?.source !== "mcp"}
                     <div class="signal-feedback-control">
                       <SignalClassFeedback classe={node.classAnnotation.classe} reasonCodes={classementReasonCodes}
                         disabled={classementInFlight.has(cardClassementKey)} restoreBlockedReason={classementEntry.restoreBlockedReason}
@@ -1293,6 +1306,13 @@
                     </span>
                   {/if}
                   </div>
+                  {#if node.signalAnnotations && node.annotationsWorkspaceId && node.citySlug}
+                    <SignalMcpNotes annotations={node.signalAnnotations} workspaceId={node.annotationsWorkspaceId}
+                      target={{ citySlug: node.citySlug, type: node.type, id: node.id }} />
+                  {/if}
+                  {#if node.signalAnnotations?.current?.source === "mcp" && !hasManualClass}
+                    <p class="classement-error-detail">{node.signalAnnotations.current.reason}</p>
+                  {/if}
                   {#if node.classAnnotation?.source === "ai" && !hasManualClass && node.classAnnotation.reason}
                     <p class="classement-error-detail">{node.classAnnotation.reason}</p>
                   {/if}

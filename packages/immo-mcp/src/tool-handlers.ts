@@ -1,4 +1,5 @@
 import { assertScope, IMMO_SCOPES, redact } from "./auth-context.js";
+import { SIGNAL_TOOL_HANDLERS } from "./signal-tools.js";
 import { invalidateExchangedCallContext, resolveExchangedCallContext } from "./authorized-egress.js";
 import type { InvocationContext } from "./invocation-context.js";
 import { RadarSignalReadError } from "./signal-read-error.js";
@@ -305,6 +306,7 @@ async function queryZoningEventsHandler(
  * dispatcher and no duplicated business logic.
  */
 export const TOOL_HANDLERS: Readonly<Record<string, ToolHandler>> = Object.freeze({
+  ...SIGNAL_TOOL_HANDLERS,
   search_lots: searchLotsHandler,
   get_lot_card: getLotCardHandler,
   search_signals: searchSignalsHandler,

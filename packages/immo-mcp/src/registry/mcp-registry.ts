@@ -22,7 +22,7 @@ export const REGISTRY_NETWORK_POLICY = "no-central-registry-request" as const;
 export const ARTIFACT_PROVIDER_ID = "sentropic.artifacts" as const;
 
 const TOOL_NAME_RE = /^[a-z][a-z0-9_]*$/;
-export const DEFAULT_ALLOWED_SCOPES: readonly string[] = ["immo:read", "immo:search", "immo:documents:read"];
+export const DEFAULT_ALLOWED_SCOPES: readonly string[] = ["immo:read", "immo:search", "immo:documents:read", "immo:signals:write"];
 /** Artifact tools never borrow an Immo data scope: each one requires its explicit artifact scope. */
 export const ARTIFACT_ALLOWED_SCOPES: readonly string[] = [ARTIFACT_INVOCATION_SCOPES.read, ARTIFACT_INVOCATION_SCOPES.write];
 

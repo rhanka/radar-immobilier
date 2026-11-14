@@ -11,9 +11,10 @@ describeDb("feedback migration ordering", () => {
     try {
       mkdirSync(`${folder}/meta`);
       const journal = JSON.parse(readFileSync("drizzle/meta/_journal.json", "utf8"));
-      const feedback = journal.entries.at(-1);
+      const feedbackIndex = journal.entries.findIndex((entry: { tag: string }) => entry.tag === "0047_signal_class_feedback");
+      const feedback = journal.entries[feedbackIndex];
       expect(feedback).toMatchObject({ idx: 46, tag: "0047_signal_class_feedback", when: 1793000000017 });
-      const preceding = { ...journal, entries: journal.entries.slice(0, -1) };
+      const preceding = { ...journal, entries: journal.entries.slice(0, feedbackIndex) };
       expect(preceding.entries.every((entry: { idx: number; when: number }) =>
         entry.idx < feedback.idx && entry.when < feedback.when)).toBe(true);
       writeFileSync(`${folder}/meta/_journal.json`, JSON.stringify(preceding));
@@ -42,7 +43,7 @@ describeDb("feedback migration ordering", () => {
       if (preceding.entries.at(-1).tag === "0046_signal_class_ambiguity") {
         expect((await pool.query(`SELECT ambiguous FROM signal_class_annotations`)).rows).toEqual([{ ambiguous: false }]);
         expect((await pool.query(`SELECT created_at::text FROM drizzle.__drizzle_migrations
-          ORDER BY created_at DESC LIMIT 2`)).rows)
+          WHERE created_at<=1793000000017 ORDER BY created_at DESC LIMIT 2`)).rows)
           .toEqual([{ created_at: "1793000000017" }, { created_at: "1793000000016" }]);
       }
     } finally { rmSync(folder, { recursive: true }); }

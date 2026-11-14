@@ -122,7 +122,7 @@ describe("P7 composed transport (contract double; no storage qualification)", ()
       return (await response.json()).result.tools;
     };
     const first = await list(h.session);
-    expect(first).toHaveLength(12 + profile.selectedCapabilities.length);
+    expect(first).toHaveLength(17 + profile.selectedCapabilities.length);
     expect(first.filter((tool: { name: string }) => tool.name.startsWith("artifacts_"))
       .map((tool: { name: string }) => tool.name)).toEqual(profile.selectedCapabilities);
     for (const tool of first) {
@@ -137,10 +137,10 @@ describe("P7 composed transport (contract double; no storage qualification)", ()
       const write = ["artifacts_ensure", "artifacts_publish", "artifacts_set_access", "artifacts_delete",
         "artifacts_create_upload", "artifacts_commit_upload", "artifacts_publish_bundle",
         "artifacts_create_upload_page", "artifacts_publish_bundle_v2",
-        "artifacts_revoke_reader_consent"].includes(tool.name);
+        "artifacts_revoke_reader_consent", "classify_signal", "confirm_classification", "annotate_signal"].includes(tool.name);
       expect(tool.annotations).toEqual({ readOnlyHint: !write, destructiveHint: tool.name === "artifacts_delete",
         openWorldHint: false, idempotentHint: tool.name !== "artifacts_create_upload" &&
-          tool.name !== "artifacts_create_upload_page" });
+          tool.name !== "artifacts_create_upload_page" && !["classify_signal", "confirm_classification", "annotate_signal"].includes(tool.name) });
     }
     const serialized = JSON.stringify(first);
     const readScopes = "immo:read immo:artifacts:read";
@@ -159,7 +159,7 @@ describe("P7 composed transport (contract double; no storage qualification)", ()
   it("should list exactly twelve plus four and dispatch each call once with fresh frozen authority", async () => {
     const h = await setup();
     const list = await (await h.post({ jsonrpc: "2.0", id: 2, method: "tools/list" }, h.session)).json();
-    expect(list.result.tools).toHaveLength(12 + profile.selectedCapabilities.length);
+    expect(list.result.tools).toHaveLength(17 + profile.selectedCapabilities.length);
     expect(list.result.tools.filter((t: { name: string }) => t.name.startsWith("artifacts_")).map((t: { name: string }) => t.name))
       .toEqual(profile.selectedCapabilities);
     for (const name of ["artifacts_list", "artifacts_get"]) {

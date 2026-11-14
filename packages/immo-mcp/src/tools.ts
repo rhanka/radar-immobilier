@@ -17,8 +17,12 @@ import { ALL_TOOL_DEFINITIONS, IMMO_READ_ANNOTATIONS } from "./tool-definitions.
 import { RadarSignalReadError } from "./signal-read-error.js";
 import { TOOL_HANDLERS, type ToolTextResult } from "./tool-handlers.js";
 import { installNormalizedListHandler } from "./zod4-list-handler.js";
+import { isSignalWrite, SIGNAL_WRITE_ANNOTATIONS, SIGNAL_TOOL_DEFINITIONS } from "./signal-contract.js";
+import type { SignalRuntime } from "./signal-store.js";
+import { auditSignalResult, signalAttempt } from "./signal-audit.js";
 
 export interface ToolContext {
+  signals?: SignalRuntime;
   auth: ImmoMcpAuthContext;
   data: ImmoDataSource;
   /** Raw-data seam (zones/lots GeoJSON, grille & PV PDFs) — see raw-data.ts. */
@@ -38,11 +42,11 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
     const registered = server.registerTool(
       def.name,
       { title: def.title, description: def.description, inputSchema: def.inputSchema,
-        annotations: IMMO_READ_ANNOTATIONS },
+        annotations: isSignalWrite(def.name) ? SIGNAL_WRITE_ANNOTATIONS : IMMO_READ_ANNOTATIONS },
       async (args): Promise<ToolTextResult> => {
         const snapshot =
           getInvocationContext() ??
-          captureInvocationContext({ auth: ctx.auth, data: ctx.data, raw: ctx.raw });
+          captureInvocationContext(ctx);
         return invokeTool(def.name, args as Record<string, unknown>, snapshot);
       },
     );
@@ -58,10 +62,14 @@ export async function invokeTool(name: string, args: Record<string, unknown>, sn
         if (!def || !handler) throw new Error(`missing_handler:${name}`);
         const correlationId = randomUUID();
         try {
-          assertScope(snapshot.auth, def.scope);
+          if (!isSignalWrite(def.name)) assertScope(snapshot.auth, def.scope);
           auditToolCall(snapshot.auth, def.name, hashInput(args), correlationId);
-          return await handler(args as Record<string, unknown>, snapshot);
+          const outcome = await handler(args as Record<string, unknown>, snapshot);
+          const attempt = signalAttempt(name, args);
+          auditSignalResult(snapshot, attempt, outcome.isError ? String(JSON.parse(outcome.content[0]!.text).error ?? "refused") : "written");
+          return outcome;
         } catch (err) {
+          auditSignalResult(snapshot, signalAttempt(name, args), "failed");
           if (err instanceof RadarSignalReadError) {
             const payload = {
               ...err.toPublicPayload(def.name, correlationId),
@@ -112,4 +120,4 @@ export const RAW_TOOL_NAMES = [
 ] as const;
 
 /** Every tool registered by `registerTools` (used by tests + docs). */
-export const ALL_TOOL_NAMES = [...V0_TOOL_NAMES, ...RAW_TOOL_NAMES] as const;
+export const ALL_TOOL_NAMES = [...V0_TOOL_NAMES, ...RAW_TOOL_NAMES, ...SIGNAL_TOOL_DEFINITIONS.map((def) => def.name)] as const;

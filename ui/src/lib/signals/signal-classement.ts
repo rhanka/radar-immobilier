@@ -65,7 +65,10 @@ export interface ArchiveHeadLike {
 }
 
 export interface ClassementEntry {
-  annotationSource?: "ai" | "manual";
+  mcpVersion?: string;
+  mcpScope?: "personal" | "workspace";
+  mcpCanConfirm?: boolean;
+  annotationSource?: "ai" | "manual" | "mcp";
   classe: SignalClass;
   reasonCode: string | null;
   /** Active selection head id per basket (null when the basket is off). */
@@ -104,14 +107,22 @@ export const EMPTY_CLASSEMENT_ENTRY: ClassementEntry = {
 export function withAiClassement(
   map: Map<string, ClassementEntry>,
   nodes: readonly { type: string; id: string; citySlug: string | null;
+    signalAnnotations?: import("./signal-mcp-client.js").SignalAnnotations;
     classAnnotation?: { source: "ai" | "manual"; classe: SignalClass } }[],
 ): Map<string, ClassementEntry> {
   const result = new Map(map);
   for (const node of nodes) {
-    const annotation = node.classAnnotation;
+    const mcp = node.signalAnnotations?.current;
+    const journal = mcp?.source === "mcp" || (mcp?.source === "manual" && mcp.linked_event_id);
+    const annotation = journal && mcp?.classe ? { source: mcp.source as "mcp" | "manual", classe: mcp.classe } : node.classAnnotation;
     const key = classementKey(node.type, node.id, node.citySlug);
-    if (annotation?.source !== "ai" || result.has(key)) continue;
-    result.set(key, { ...EMPTY_CLASSEMENT_ENTRY, annotationSource: "ai", classe: annotation.classe,
+    if (!annotation || (result.has(key) && !(mcp?.linked_event_id || mcp?.scope === "workspace"))) continue;
+    result.set(key, { ...EMPTY_CLASSEMENT_ENTRY, annotationSource: annotation.source, classe: annotation.classe,
+      ...(journal && mcp ? { mcpVersion: node.signalAnnotations!.version, mcpScope: mcp.scope ?? "personal",
+        mcpCanConfirm: node.signalAnnotations?.canConfirm,
+        reasonCode: mcp.reason_code ?? null,
+        restoreBlockedReason: mcp.scope === "workspace" && !node.signalAnnotations?.moderateArchive
+          ? "Archive partagée : seul un modérateur peut restaurer ce signal." : null } : {}),
       discarded: annotation.classe === "ecarte" });
   }
   return result;

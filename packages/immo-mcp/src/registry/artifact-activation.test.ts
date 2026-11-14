@@ -134,7 +134,7 @@ describe("artifact activation", () => {
       }],
     };
     const candidate = compileComposition([immoProvider(), withExtra], { artifact: artifactRequest() });
-    expect(Object.keys(candidate.toolScopes)).toHaveLength(12 + ARTIFACT_SELECTION.length);
+    expect(Object.keys(candidate.toolScopes)).toHaveLength(17 + ARTIFACT_SELECTION.length);
     expect(candidate.toolScopes).not.toHaveProperty("artifacts_restore");
     expect(candidate.toolScopes).toEqual(baseline.toolScopes);
     expect(candidate.digest).toBe(baseline.digest);

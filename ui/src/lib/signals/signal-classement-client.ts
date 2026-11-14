@@ -99,6 +99,7 @@ export interface ApplyClassementArgs {
   nextClass: SignalClass;
   reasonCode?: string | null;
   catalog?: readonly ReasonCodeEntry[];
+  confirmMcp?: boolean;
 }
 
 async function restoreAtomically(scope: SignalScope, args: ApplyClassementArgs): Promise<void> {
@@ -147,9 +148,21 @@ export async function applyClassement(scope: SignalScope, args: ApplyClassementA
     if (!check.ok) throw new Error(check.error);
   }
   if (nextClass === "ecarte" && !reasonCode) throw new Error("reason_code_required");
-  if (current.annotationSource !== "ai" && nextClass === current.classe && reasonCode === current.reasonCode) return;
+  if (current.annotationSource !== "ai" && current.annotationSource !== "mcp" && nextClass === current.classe && reasonCode === current.reasonCode) return;
   if (nextClass !== "ecarte" && current.restoreBlockedReason) {
     throw new Error("workspace_capability_required");
+  }
+  if (current.mcpVersion) {
+    const res = await fetchJsonWithTimeout(scopedSignalFacetsPath(scope, "annotations/decision"), {
+      timeoutMs: DEFAULT_REQUEST_TIMEOUT_MS,
+      init: { method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ target: { ...target, scope: current.mcpScope ?? "personal" },
+          version: current.mcpVersion, classe: nextClass,
+          ...(reasonCode ? { reasonCode } : {}),
+          ...(args.confirmMcp || (nextClass === current.classe && reasonCode === current.reasonCode) ? { confirm: true } : {}) }) },
+    });
+    if (!res.ok) throw new GraphSignalsHttpError("MCP classification decision failed", res.status, readJsonErrorCode(res.json));
+    return;
   }
 
   const activeBaskets: ("pertinent" | "a_surveiller")[] = [];

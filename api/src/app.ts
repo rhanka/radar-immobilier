@@ -46,6 +46,7 @@ import { privateSignalResponse } from "./services/facets/private-response.js";
 import { documentsRoute, type DocumentsDeps } from "./routes/documents.js";
 import { workspacesRoute } from "./routes/workspaces.js";
 import { classFeedbackRoute } from "./routes/class-feedback.js";
+import { signalMcpRoute } from "./routes/signal-mcp.js";
 import { scopedSignalFacetsRoute } from "./routes/scoped-signal-facets.js";
 import { scopedWorkspaceArchiveRoute } from "./routes/scoped-workspace-archive.js";
 import { scopedProjectionRevisionsRoute } from "./routes/scoped-projection-revisions.js";
@@ -254,6 +255,7 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", workspacesRoute(deps));
   app.route("/", scopedSignalFacetsRoute(deps));
   app.route("/", classFeedbackRoute(deps));
+  app.route("/", signalMcpRoute(deps));
   app.route("/", scopedWorkspaceArchiveRoute(deps));
   app.route("/", scopedProjectionRevisionsRoute(deps));
   app.route("/", scopedProjectionEventsRoute(deps));
