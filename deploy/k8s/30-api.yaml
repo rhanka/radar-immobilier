@@ -220,6 +220,18 @@ spec:
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
             - name: POSTGRES_DB
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
+            # PROD literals codified from live (2026-11-15). They are in the
+            # live last-applied annotation, so a client-side apply of this file
+            # without them would remove them. A literal env wins over envFrom:
+            # prod runs NODE_OPTIONS=--max-old-space-size=640 (heap cap under
+            # the 768Mi limit), not the ConfigMap value. The preprod overlay
+            # deletes both entries, so preprod keeps the ConfigMap values.
+            # Required list: deploy/k8s/prod-configmap-keys.json
+            # (`radar-api-deployment-env`).
+            - name: POSTGRES_HOST
+              value: "radar-postgres"
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=640"
             # Complete OVH canonical DOCS binding. Coordinates and credentials come from
             # one bucket-scoped Secret; no ConfigMap or generic-key fallback.
             - name: S3_ENDPOINT
