@@ -234,14 +234,27 @@ preprod artifacts and imports the prod ones. Spec:
    `prepare` exports from the live database (`LIVE_DB`), never from the
    candidate. A relaunched daily restore reuses an existing stash.
 2. The coherence gate runs, then the migrations (`ddl`, `data`).
-3. The `catalogue` Job runs `import-stash`: union with the replayed prod
-   catalogue, then drops the stash. Prod wins on any unique key; the preprod
+3. The `catalogue` Job first copies the prod artifact blobs (init container
+   `blobs`, `deploy/cutover/artifacts-blobs.sh`): prod bucket
+   `radar-immobilier-artifacts`, prefix `artifacts/radar-immobilier/blobs/sha256/`,
+   read only; destination `radar-immobilier-artifacts-preprod`, prefix
+   `artifacts/radar-immobilier-preprod/blobs/sha256/`; missing names only, no
+   delete. Then `import-stash` moves the prod rows to the preprod scope, checks
+   that every visible release has its blobs, runs the union with the replayed
+   prod catalogue, checks the blobs again, then drops the stash. Prod wins on any unique key; the preprod
    row is kept in `catalogue_journal.conflicts`, a row whose parent is gone is
    kept there as `orphan:<parent>`. Per-table counts land in
    `catalogue_journal.imports`. No stash = nothing to do (exit 0).
 
 Refusals (the run fails, nothing is imported, the stash stays for a rerun):
 
+- Missing blob: a visible release references a `sha256:` digest absent from
+  the preprod bucket listing (blob check before and after the union).
+- Copy identity: Secret `radar-artifacts-restore-copy` (keys `S3_ACCESS_KEY`,
+  `S3_SECRET_KEY`) must exist in the preprod namespace with `s3:ListBucket` and
+  `s3:GetObject` on `radar-immobilier-artifacts` (read only) and
+  `s3:ListBucket`, `s3:GetObject`, `s3:PutObject` on
+  `radar-immobilier-artifacts-preprod`. No delete right is needed.
 - In-flight publishes: the export refuses while `artifacts.object_intents`
   holds `pending` rows. Wait for them to drain (or let them expire), then
   relaunch. Closure (`MODE=restore`) and the writer drain (`prepare`) stop new
