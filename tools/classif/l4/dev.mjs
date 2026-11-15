@@ -23,6 +23,7 @@ import { check as budgetCheck } from '../lib/budget.mjs';
 import { assertNoVerbatim } from '../lib/freeze.mjs';
 import { loadCodes } from '../l2/run.mjs';
 import { createAccountGuard } from '../lib/account-guard.mjs';
+import { combinePasses, passPlan, planRules } from './passes.mjs';
 
 // Evaluated routes (plan v3 C–D): low and medium models. Argon runs once its seat quota is
 // back; pass --deferred gemini-4-argon-low,gemini-4-argon-medium to skip it. The vibe
@@ -91,15 +92,18 @@ export function selectBest(ranked) {
  * (series,promptSha256,route,itemId) matches exactly; corrupt or stale entries read as null
  * (re-run). Exported for the resume test.
  */
-export function readDevItemCache(dir, route, itemId, k, promptSha) {
-  const f = path.join(dir, `dev-${route}.${itemId}.json`);
+export function readDevItemCache(dir, route, itemId, k, promptSha, pass = null) {
+  const f = path.join(dir, devItemCacheName(route, itemId, pass));
   if (!existsSync(f)) return null;
   try {
     const c = JSON.parse(readFileSync(f, 'utf8'));
-    if (c.series === String(k) && c.promptSha256 === promptSha && c.route === route && c.itemId === itemId) return c.row;
+    if (c.series === String(k) && c.promptSha256 === promptSha && c.route === route && c.itemId === itemId && (c.pass ?? null) === pass) return c.row;
   } catch { /* corrupt cache: re-run */ }
   return null;
 }
+
+/** Per-item dev cache file: one per pass in a multi-pass series (`.p<n>`), none otherwise. */
+export const devItemCacheName = (route, itemId, pass = null) => `dev-${route}${pass ? `.p${pass}` : ''}.${itemId}.json`;
 
 export function readTuning(home) {
   const ref = parseJsonlTolerant(readFileSync(path.join(home, 'l3b', 'reference-d.jsonl'), 'utf8'));
@@ -152,10 +156,15 @@ export async function main(argv = process.argv.slice(2)) {
   const dir = privateDir(path.join(home, 'l4', `series-${k}`));
   // Review §5 (D5): planned counts only non-cached items — a resume with 1 item left
   // is not refused near the cap.
+  // Multi-pass series (owner 15/11): every item is called plan.count times, one cache per pass.
+  const plan = passPlan(seriesSpec);
+  const passes = plan ? Array.from({ length: plan.count }, (_, i) => i + 1) : [null];
   let uncachedDev = 0;
   for (const route of routes) {
-    for (const item of tuning) {
-      if (!readDevItemCache(dir, route, item.itemId, k, promptSha)) uncachedDev++;
+    for (const pass of passes) {
+      for (const item of tuning) {
+        if (!readDevItemCache(dir, route, item.itemId, k, promptSha, pass)) uncachedDev++;
+      }
     }
   }
   budgetCheck(home, uncachedDev);
@@ -172,15 +181,17 @@ export async function main(argv = process.argv.slice(2)) {
     // Review §8: per-item persistence with key (series,promptSha,route,itemId) verified on
     // resume — a crash never repays finished items, a changed prompt never reuses stale rows.
     // Review §9: the predicted code is kept (pred.verdict + pred.code).
-    const loadCached = (itemId) => readDevItemCache(dir, route, itemId, k, promptSha);
-    const rows = await pool(tuning.map((item) => async () => {
-      const hit = loadCached(item.itemId);
+    const loadCached = (itemId, pass) => readDevItemCache(dir, route, itemId, k, promptSha, pass);
+    // Pass-major order: pass 1 over every item, then pass 2, ... (independent passes).
+    const tasks = passes.flatMap((pass) => tuning.map((item) => ({ pass, item })));
+    const flat = await pool(tasks.map(({ pass, item }) => async () => {
+      const hit = loadCached(item.itemId, pass);
       if (hit) return hit;
       if (quotaGuard.blocks(route) || accountGuard.blocks()) return null;
       const prompt = devPrompt(frozen, item);
-      appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: true, phase: `l4-dev-s${k}`, route, itemId: item.itemId });
+      appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: true, phase: `l4-dev-s${k}`, route, itemId: item.itemId, ...(pass ? { pass } : {}) });
       const r = await callSeat(route, prompt, { base: seatTmp, timeoutMs: 1800000 });
-      appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: `l4-dev-s${k}`, route, itemId: item.itemId,
+      appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: `l4-dev-s${k}`, route, itemId: item.itemId, ...(pass ? { pass } : {}),
         exitCode: r.code, latencyMs: r.latencyMs, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null, toolEvents: r.toolEvents ?? null, ...(r.toolEvents && r.toolKinds ? { toolKinds: r.toolKinds } : {}), ...quotaFields(r) });
       quotaGuard.observe(route, r.rateLimits);
       accountGuard.observe(route, r);
@@ -190,17 +201,30 @@ export async function main(argv = process.argv.slice(2)) {
         usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null };
       // Review N4: failures are never cached — retried on resume with a new counted intent.
       if (!row.failed) {
-        writeFileSync(path.join(dir, `dev-${route}.${item.itemId}.json`),
-          JSON.stringify({ series: String(k), promptSha256: promptSha, route, itemId: item.itemId, row }), { mode: 0o600 });
+        writeFileSync(path.join(dir, devItemCacheName(route, item.itemId, pass)),
+          JSON.stringify({ series: String(k), promptSha256: promptSha, route, itemId: item.itemId, ...(pass ? { pass } : {}), row }), { mode: 0o600 });
       }
       return row;
     }), concurrency);
+    const byPass = passes.map((_, pi) => flat.slice(pi * tuning.length, (pi + 1) * tuning.length));
     // Answered items are cached above; a paused codex route stops the run before any aggregate.
     if (quotaGuard.paused && isCodexSeat(route)) throw quotaGuard.error(resumeCommand);
     if (accountGuard.tripped) throw accountGuard.error(resumeCommand);
+    if (!plan) {
+      const rows = byPass[0];
+      writeFileSync(outFile, `${rows.map((r) => JSON.stringify(r)).join('\n')}\n`, { mode: 0o600 });
+      return rows;
+    }
+    // Multi-pass: the pre-registered decision rule gives the scored rows; the information rules
+    // are aggregated beside them (never used for the verdict). Pass rows stay private.
+    for (const [pi, pr] of byPass.entries()) writeFileSync(path.join(dir, `dev-${route}.p${pi + 1}.jsonl`), `${pr.map((r) => JSON.stringify(r)).join('\n')}\n`, { mode: 0o600 });
+    const combined = Object.fromEntries(planRules(plan).map(({ label, rule }) => [label, tuning.map((_, i) => combinePasses(byPass.map((pr) => pr[i]), rule))]));
+    const rows = combined[planRules(plan)[0].label];
+    infoRows[route] = Object.fromEntries(Object.entries(combined).filter(([label]) => label !== planRules(plan)[0].label));
     writeFileSync(outFile, `${rows.map((r) => JSON.stringify(r)).join('\n')}\n`, { mode: 0o600 });
     return rows;
   };
+  const infoRows = {};
   const perRoute = {};
   if (argv.includes('--sequential')) {
     for (const route of routes) perRoute[route] = await runDevRoute(route);
@@ -238,6 +262,18 @@ export async function main(argv = process.argv.slice(2)) {
       costUsd: rows.reduce((s, r) => s + (r.costUsd ?? 0), 0),
       items: rows.length };
   }
+  // Multi-pass information rules (never the verdict): same shown stats and GEPA gate per rule.
+  const infoAggregate = (rows) => {
+    const stats = shownStats(rows.map((r) => ({ ref: r.refVerdict, pred: r.failed ? { failed: true } : r.pred, unresolved: r.unresolved })),
+      { recallSupport: devSupports.recall ?? 30, precisionSupport: devSupports.precision ?? 30 });
+    const resolved = rows.filter((r) => !r.unresolved);
+    const g = gepaRouteVerdict({ misses: shownMisses(rows).length, failures: resolved.filter((r) => r.failed).length, items: resolved.length }, specFailureCeiling);
+    return { ...stats, failures: rows.filter((r) => r.failed).length, misses: g.misses, verdict: g.verdict, items: rows.length };
+  };
+  const passesInfo = plan ? { ...seriesSpec.passes, decisionLabel: planRules(plan)[0].label,
+    note: 'aggregates[route] = the decision rule; info = information rules only, never used for the verdict',
+    info: Object.fromEntries(Object.entries(infoRows).map(([route, byLabel]) => [route,
+      Object.fromEntries(Object.entries(byLabel).map(([label, rows]) => [label, infoAggregate(rows)]))])) } : null;
   // Review §9: errors carry failures and code errors (not verdict mismatches only).
   const errors = {};
   for (const [route, rows] of Object.entries(perRoute)) {
@@ -255,7 +291,7 @@ export async function main(argv = process.argv.slice(2)) {
     .sort(compareRoutes);
   const selection = selectBest(ranked);
   const manifest = { kind: 'l4-dev', series: k, createdAt: new Date().toISOString(), promptSha256: promptSha,
-    routes, deferred, tuningItems: tuning.length, aggregates,
+    routes, deferred, tuningItems: tuning.length, aggregates, ...(passesInfo ? { passes: passesInfo } : {}),
     ...(seriesSpec.method === GEPA_METHOD ? { method: GEPA_METHOD, gepa: { ...gepaSeriesVerdict(aggregates, seriesSpec.routes),
       rule: 'pass only when every GEPA route has 0 miss (P/S predicted non_pertinent) and a failure share within the ceiling; precision reported, no floor' } } : {}),
     ...(recallBaseline ? { recallNonRegression: { baselineSeries: recallBaseline.baselineSeries, half: 'tuning', metric: 'recall',
