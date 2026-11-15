@@ -39,6 +39,7 @@ Survive prod-to-preprod restores without losing the preprod-only artifact catalo
 - `BR-D2-EX2` (accepted): branch work happens in user-assigned `.worktrees/restore-persist`, not `./tmp/<slug>`. Reason: conductor lane assignment. Impact: none on isolation (dedicated worktree, own test ENV). Rollback: n/a.
 - `BR-D2-EX3` (accepted): commits via plain `git commit` (no `make commit`). Reason: owner bans all trailers; the make target appends one. Impact: message format unchanged otherwise. Rollback: n/a.
 - `BR-D2-EX4` (accepted): bootstrap commits for the new CLI and persist test exceed ~150 lines. Reason: a new self-contained tool cannot land in fragments without breaking intermediate states. Impact: review happens per lot with green gates. Rollback: `git revert` per commit.
+- `BR-D2-EX5` (accepted 2026-11-15, union lane): touch `deploy/cutover/test.compose.yml` to mount the repo read-only in the postgres test service, so the persist test runs with the native pg 16 client tools (the api test image no longer runs as root and cannot install them). Impact: test stack only. Rollback: revert the mount and the test-api line.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + cherry-pick** (default for orthogonal tasks; single final test cycle)
