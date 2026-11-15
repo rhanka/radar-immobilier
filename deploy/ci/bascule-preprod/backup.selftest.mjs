@@ -729,6 +729,7 @@ const renders = {
   "db-restore-backup-job.tmpl.yaml": { ...common, DUMP_IMAGE: "postgis/postgis:16-3.4", BACKUP_DATE: D, PIN_MANIFEST_SHA256: "a".repeat(64), PIN_PG_SHA256: "b".repeat(64),
     DB_SECRET: "radar-db-credentials", PGHOST: "radar-postgres", EXPECTED_DATABASE: "radar", RESTORE_ASSERT_DB: "1",
     RESTORE_SCRIPT: indentBlock(readFileSync(join(DIR, "../../cutover/atomic-restore.sh"), "utf8"), 14),
+    CATALOGUE_SCRIPT: indentBlock(readFileSync(join(DIR, "../../cutover/artifacts-catalogue.sh"), "utf8"), 14), CATALOGUE_DIR: "/work/catalogue",
     RESTORE_REQUEST_CPU: RESTORE_RES.requests.cpu, RESTORE_REQUEST_MEMORY: RESTORE_RES.requests.memory,
     RESTORE_LIMIT_CPU: RESTORE_RES.limits.cpu, RESTORE_LIMIT_MEMORY: RESTORE_RES.limits.memory },
   "docs-restore-backup-job.tmpl.yaml": { ...common, JOB_NAME: JOBS.docs, BR_STEP: "docs", COPY_SECRET: "radar-backup-restore-docs", BACKUP_DATE: D, PIN_MANIFEST_SHA256: "a".repeat(64),
