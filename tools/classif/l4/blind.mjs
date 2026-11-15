@@ -25,6 +25,7 @@ import { assertNoVerbatim } from '../lib/freeze.mjs';
 import { loadCodes } from '../l2/run.mjs';
 import { createAccountGuard } from '../lib/account-guard.mjs';
 import { createMeshPauseGuard } from '../lib/mesh-seat.mjs';
+import { combinePasses, passPlan, planRules } from './passes.mjs';
 import { assertBlindRunAllowed, audit, blindDir, openBlindSet, readAudit } from '../lib/blind.mjs';
 import { assertEvalRunAllowed, audit as auditEval, openEvalSet, readAudit as readEvalAudit } from '../guard/evalset.mjs';
 import { assertSeriesHalves, assertSeriesRoutes, gepaSeriesRoutes, loadSeriesManifest, seriesMethod } from './series.mjs';
@@ -294,12 +295,16 @@ export async function main(argv = process.argv.slice(2)) {
     rerun.set(route, a);
   }
   // Review §5 (D5): planned counts only non-cached items — blind + S113 caches deducted.
-  const blindCachedCount = (route, itemId) => {
-    const f = path.join(outDir, `blind-s${k}-${route}.${itemId}.json`);
+  // Multi-pass series (owner 15/11): every item is called plan.count times, one cache per pass.
+  const plan = passPlan(seriesSpec);
+  const passes = plan ? Array.from({ length: plan.count }, (_, i) => i + 1) : [null];
+  const passTag = (pass) => (pass ? `.p${pass}` : '');
+  const blindCachedCount = (route, itemId, pass) => {
+    const f = path.join(outDir, `blind-s${k}-${route}${passTag(pass)}.${itemId}.json`);
     if (!existsSync(f)) return null;
     try {
       const c = JSON.parse(readFileSync(f, 'utf8'));
-      if (c.series === String(k) && c.promptSha256 === promptSha && c.route === route && c.itemId === itemId) return c.row;
+      if (c.series === String(k) && c.promptSha256 === promptSha && c.route === route && c.itemId === itemId && (c.pass ?? null) === pass) return c.row;
     } catch { /* re-run */ }
     return null;
   };
@@ -310,8 +315,10 @@ export async function main(argv = process.argv.slice(2)) {
     const done = readAudit(home).some((e) => e.action === 'blind-run' && e.promptSha256 === promptSha && e.model === model && e.effort === effort
       && String(e.purpose ?? '').includes(`l4-blind-s${k}`)) && existsSync(routeFile) && !rerun.has(route);
     if (done) continue;
-    for (const item of blind) {
-      if (!blindCachedCount(route, item.itemId)) uncachedBlind++;
+    for (const pass of passes) {
+      for (const item of blind) {
+        if (!blindCachedCount(route, item.itemId, pass)) uncachedBlind++;
+      }
     }
   }
   // S113: inputs per remaining route minus matching per-item caches. Review D3: the
@@ -329,7 +336,7 @@ export async function main(argv = process.argv.slice(2)) {
         if (c.series === String(k) && c.promptSha256 === promptSha && c.route === route) cached++;
       } catch { /* re-run */ }
     }
-    uncachedS113 += Math.max(0, 113 - cached);
+    uncachedS113 += Math.max(0, passes.length * 113 - cached);
   }
   budgetCheck(home, uncachedBlind + uncachedS113);
 
@@ -367,7 +374,7 @@ function readdirSyncSafe(dir) {
       const prev = JSON.parse(readFileSync(routeFile, 'utf8'));
       if (prev.promptSha256 !== promptSha) throw new Error(`blind resume refused: ${routeFile} prompt sha differs (re-run with the frozen prompt)`);
       return { ...prev.stats, withUnresolved: prev.withUnresolved, failures: prev.failures, verdict: prev.verdict,
-        ...(gepa ? { misses: prev.misses, failureShare: prev.failureShare } : {}) };
+        ...(gepa ? { misses: prev.misses, failureShare: prev.failureShare } : {}), ...(prev.passes ? { passes: prev.passes } : {}) };
     }
     if (infra) {
       // Audited allowance first (the guard admits exactly one more blind-run per allowance),
@@ -390,24 +397,18 @@ function readdirSyncSafe(dir) {
       ...(infra ? { infraRerun: true } : {}) }, { home, env: process.env });
     // Review §8: per-item cache keyed (series,promptSha,route,itemId), written on return.
     // Review §9: the predicted code is kept.
-    const loadBlindCached = (itemId) => {
-      const f = path.join(outDir, `blind-s${k}-${route}.${itemId}.json`);
-      if (!existsSync(f)) return null;
-      try {
-        const c = JSON.parse(readFileSync(f, 'utf8'));
-        if (c.series === String(k) && c.promptSha256 === promptSha && c.route === route && c.itemId === itemId) return c.row;
-      } catch { /* re-run */ }
-      return null;
-    };
-    const rows = await pool(blind.map((item) => async () => {
-      const hit = loadBlindCached(item.itemId);
+    const loadBlindCached = (itemId, pass) => blindCachedCount(route, itemId, pass);
+    // Pass-major order: pass 1 over every item, then pass 2, ... (independent passes).
+    const tasks = passes.flatMap((pass) => blind.map((item) => ({ pass, item })));
+    const flat = await pool(tasks.map(({ pass, item }) => async () => {
+      const hit = loadBlindCached(item.itemId, pass);
       if (hit) return hit;
       if (quotaGuard.blocks(route) || accountGuard.blocks() || meshGuard.blocks()) return null;
       if (pilot && pilotStats.launched >= pilot) return null;
       pilotStats.launched++;
-      appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: true, phase: `l4-blind-s${k}`, route, itemId: item.itemId });
+      appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: true, phase: `l4-blind-s${k}`, route, itemId: item.itemId, ...(pass ? { pass } : {}) });
       const r = await callSeat(route, devPrompt(frozen, item), { base: seatTmp, timeoutMs: 1800000 });
-      appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: `l4-blind-s${k}`, route, itemId: item.itemId,
+      appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: `l4-blind-s${k}`, route, itemId: item.itemId, ...(pass ? { pass } : {}),
         exitCode: r.code, latencyMs: r.latencyMs, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null, toolEvents: r.toolEvents ?? null, ...(r.toolEvents && r.toolKinds ? { toolKinds: r.toolKinds } : {}), ...quotaFields(r) });
       quotaGuard.observe(route, r.rateLimits);
       accountGuard.observe(route, r);
@@ -424,11 +425,12 @@ function readdirSyncSafe(dir) {
       // Review N4: failures are never cached — a transient seat failure is retried on
       // resume (new intent, counted) instead of becoming a permanent series failure.
       if (!row.failed) {
-        writeFileSync(path.join(outDir, `blind-s${k}-${route}.${item.itemId}.json`),
-          JSON.stringify({ series: String(k), promptSha256: promptSha, route, itemId: item.itemId, row }), { mode: 0o600 });
+        writeFileSync(path.join(outDir, `blind-s${k}-${route}${passTag(pass)}.${item.itemId}.json`),
+          JSON.stringify({ series: String(k), promptSha256: promptSha, route, itemId: item.itemId, ...(pass ? { pass } : {}), row }), { mode: 0o600 });
       }
       return row;
     }), concurrency);
+    const byPass = passes.map((_, pi) => flat.slice(pi * blind.length, (pi + 1) * blind.length));
     // Answered items are cached above; a paused codex route stops before its blind-run audit.
     if (quotaGuard.paused && isCodexSeat(route)) throw quotaGuard.error(resumeCommand);
     if (accountGuard.tripped) throw accountGuard.error(resumeCommand);
@@ -436,6 +438,17 @@ function readdirSyncSafe(dir) {
     if (pilot) throw new BlindPilotStop({ route, ...pilotStats });
     // Review §9a: indeterminate supports come from the pre-registered series manifest.
     const supports = seriesSpec.supports ?? {};
+    // Multi-pass: the pre-registered decision rule gives the scored rows; information rules are
+    // aggregated beside them in the private route file, never used for the verdict.
+    const rules = plan ? planRules(plan) : [];
+    const combined = Object.fromEntries(rules.map(({ label, rule }) => [label, blind.map((_, i) => combinePasses(byPass.map((pr) => pr[i]), rule))]));
+    const rows = plan ? combined[rules[0].label] : byPass[0];
+    const passesInfo = plan ? { decisionLabel: rules[0].label, info: Object.fromEntries(rules.slice(1).map(({ label }) => {
+      const rr = combined[label];
+      const st = shownStats(blind.map((b, i) => ({ ref: b.verdict, pred: rr[i].failed ? { failed: true } : rr[i].pred, unresolved: b.status === 'unresolved' })),
+        { recallSupport: supports.recall ?? 30, precisionSupport: supports.precision ?? 30 });
+      return [label, { ...st, failures: rr.filter((r) => r.failed).length, ...gepaBlindRouteGate(blind, rr, seriesSpec.failureCeiling) }];
+    })) } : null;
     const stats = shownStats(blind.map((b, i) => ({ ref: b.verdict, pred: rows[i].failed ? { failed: true } : rows[i].pred, unresolved: b.status === 'unresolved' })),
       { recallSupport: supports.recall ?? 30, precisionSupport: supports.precision ?? 30 });
     const statsWithUnresolved = shownStats(blind.map((b, i) => ({ ref: b.verdict, pred: rows[i].failed ? { failed: true } : rows[i].pred, unresolved: false })),
@@ -443,10 +456,11 @@ function readdirSyncSafe(dir) {
     const failures = rows.filter((r) => r.failed).length;
     const gate = gepa ? gepaBlindRouteGate(blind, rows, seriesSpec.failureCeiling)
       : blindRouteVerdict({ stats, failures, items: rows.length }, seriesSpec, recallBaseline, route);
-    writeFileSync(routeFile, JSON.stringify({ series: k, route, model, effort, promptSha256: promptSha, stats, withUnresolved: statsWithUnresolved, failures, ...gate }, null, 1), { mode: 0o600 });
+    writeFileSync(routeFile, JSON.stringify({ series: k, route, model, effort, promptSha256: promptSha, stats, withUnresolved: statsWithUnresolved, failures, ...gate,
+      ...(passesInfo ? { passes: passesInfo } : {}) }, null, 1), { mode: 0o600 });
     audit({ action: 'blind-run', purpose: `l4-blind-s${k}`, promptSha256: promptSha, model, effort, items: rows.length, failures,
       ...(infra ? { infraRerun: true } : {}) }, { home, env: process.env });
-    return { ...stats, withUnresolved: statsWithUnresolved, failures, ...gate };
+    return { ...stats, withUnresolved: statsWithUnresolved, failures, ...gate, ...(passesInfo ? { passes: passesInfo } : {}) };
   };
   const sequential = argv.includes('--sequential');
   const perRoute = {};
@@ -486,22 +500,23 @@ function readdirSyncSafe(dir) {
   const runS113Route = async (route) => {
     const { model, effort } = ROUTES[route];
     const s113File = path.join(outDir, `s113-series-${k}-${route}.json`);
-    const loadS113Cached = (evalId) => {
-      const f = path.join(outDir, `s113-s${k}-${route}.${evalId}.json`);
+    const loadS113Cached = (evalId, pass) => {
+      const f = path.join(outDir, `s113-s${k}-${route}${passTag(pass)}.${evalId}.json`);
       if (!existsSync(f)) return null;
       try {
         const c = JSON.parse(readFileSync(f, 'utf8'));
-        if (c.series === String(k) && c.promptSha256 === promptSha && c.route === route && c.evalId === evalId) return c.row;
+        if (c.series === String(k) && c.promptSha256 === promptSha && c.route === route && c.evalId === evalId && (c.pass ?? null) === pass) return c.row;
       } catch { /* re-run */ }
       return null;
     };
-    const rows = await pool(inputs.map((item) => async () => {
-      const hit = loadS113Cached(item.evalId);
+    const s113Tasks = passes.flatMap((pass) => inputs.map((item) => ({ pass, item })));
+    const s113Flat = await pool(s113Tasks.map(({ pass, item }) => async () => {
+      const hit = loadS113Cached(item.evalId, pass);
       if (hit) return hit;
       if (quotaGuard.blocks(route) || accountGuard.blocks() || meshGuard.blocks()) return null;
-      appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: true, phase: `l4-s113-s${k}`, route, itemId: item.evalId });
+      appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: true, phase: `l4-s113-s${k}`, route, itemId: item.evalId, ...(pass ? { pass } : {}) });
       const r = await callSeat(route, devPrompt(frozen, item), { base: seatTmp, timeoutMs: 1800000 });
-      appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: `l4-s113-s${k}`, route, itemId: item.evalId,
+      appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: `l4-s113-s${k}`, route, itemId: item.evalId, ...(pass ? { pass } : {}),
         exitCode: r.code, latencyMs: r.latencyMs, toolEvents: r.toolEvents ?? null, ...(r.toolEvents && r.toolKinds ? { toolKinds: r.toolKinds } : {}), ...quotaFields(r) });
       quotaGuard.observe(route, r.rateLimits);
       accountGuard.observe(route, r);
@@ -510,11 +525,16 @@ function readdirSyncSafe(dir) {
       const row = { failed: parsed.failed, pred: parsed.failed ? null : { verdict: parsed.verdict, code: parsed.code } };
       // Review N4: failures are never cached — retried on resume.
       if (!row.failed) {
-        writeFileSync(path.join(outDir, `s113-s${k}-${route}.${item.evalId}.json`),
-          JSON.stringify({ series: String(k), promptSha256: promptSha, route, evalId: item.evalId, row }), { mode: 0o600 });
+        writeFileSync(path.join(outDir, `s113-s${k}-${route}${passTag(pass)}.${item.evalId}.json`),
+          JSON.stringify({ series: String(k), promptSha256: promptSha, route, evalId: item.evalId, ...(pass ? { pass } : {}), row }), { mode: 0o600 });
       }
       return row;
     }), concurrency);
+    const s113ByPass = passes.map((_, pi) => s113Flat.slice(pi * inputs.length, (pi + 1) * inputs.length));
+    // Multi-pass: S113 is scored with the same pre-registered decision rule (secondary measure).
+    // (A null pass row = a call not launched behind a tripped guard: the guard checks below throw first.)
+    const s113Blocked = s113ByPass.some((pr) => pr.some((r) => !r));
+    const rows = plan && !s113Blocked ? inputs.map((_, i) => combinePasses(s113ByPass.map((pr) => pr[i]), plan.decision)) : s113ByPass[0];
     if (accountGuard.tripped) throw accountGuard.error(resumeCommand);
     if (meshGuard.tripped) throw meshGuard.error(resumeCommand);
     if (quotaGuard.paused && isCodexSeat(route)) throw quotaGuard.error(resumeCommand);
