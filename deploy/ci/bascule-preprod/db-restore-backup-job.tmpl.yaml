@@ -134,6 +134,7 @@ ${RESTORE_SCRIPT}
             - { name: CATALOGUE_DIR, value: "${CATALOGUE_DIR}" }
             - { name: CATALOGUE_SCRIPT, value: "/work/artifacts-catalogue.sh" }
             - { name: CATALOGUE_STASH, value: "1" }
+            - { name: CATALOGUE_STASH_TAG, value: "${CATALOGUE_STASH_TAG}" }
             - { name: PGUSER, valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_USER } } }
             - { name: PGPASSWORD, valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_PASSWORD } } }
             - { name: PGDATABASE, valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_DB } } }
