@@ -57,9 +57,29 @@ lists the whole preprod bucket (about 100 s), so it runs after writers are
 suspended and before closure, with the preparation deadline (840 s). The
 database switch refuses without that completed evidence.
 
-Preprod preparation copies documents additively into the live preprod document
-bucket before closure (additive copy, no deletion); this is kept
-deliberately so the cutover never waits on document copy.
+Preprod preparation and the daily restore copy the documents of the pinned
+backup into the live preprod document bucket before closure. Outside the
+PG-coupled prefixes the copy is additive. The PG-coupled prefixes (`graph/`,
+`refresh/018/`: canonical graph, run states, receipts and coverage ledgers) are
+MIRRORED from the same snapshot as the restored database: objects absent from
+the snapshot are deleted. `refresh/018/sweep/` (preprod sweep cursor), the
+artifact catalogue (`artifacts.*` schema, `artifacts/` blobs) and every other
+prefix survive. Deletion needs `DeleteObject` on `graph/*` and
+`refresh/018/*` of the preprod bucket for the copy identity; the docs Job probes
+it before the first write and refuses otherwise. After the restore Job,
+`coherence_gate` (`tools/make/cutover-coherence.jq`) refuses unless the
+database dump, the documents and the recon share the pinned snapshot and the
+mirror prefixes hold nothing outside it. The PG-coupled CronJobs
+(`preprod.coherenceSchedules`: `radar-refresh-pv`) stay suspended from the
+document mirror until the live database is that snapshot: a `prepare` holds
+them (annotation `sentropic.io/held-until-coherent`) until the release switch;
+a successful switch or coherent daily restore releases them to their original
+state; a rollback or a restore reopened without restoration keeps them held.
+
+Incident 2026-11-14: the former additive copy left preprod run receipts and
+ledgers next to the production ones; every projection was then refused with
+`postgres-regression-refused`. Remediation is the daily restore below, never a
+manual alignment.
 
 `radar-prepared-db` records preparation ownership, status, backup fingerprints,
 release SHA, migration count and smoke result. Cutover refuses unless the stamp
