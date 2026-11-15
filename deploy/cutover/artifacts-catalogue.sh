@@ -46,6 +46,7 @@ catalogue_log() { printf '[catalogue] %s\n' "$*" >&2; }
 catalogue_destructive_paths() {
   printf '%s\n' \
     'deploy/cutover/atomic-restore.sh|drop-schema|CATALOGUE_DIR hook preserves and re-imports before reopen' \
+    'deploy/cutover/artifacts-catalogue.sh|drop-schema|drops only its own catalogue_stash schema after a union import, never artifacts.*' \
     'deploy/cutover/database.cjs|drop-database|candidate-only reset, refuses live identity, caller re-imports catalogue' \
     'tools/make/base-api-ct8.mjs|drop-database|test-only CT8 helper, never on preprod data' \
     'tools/make/base-api-l5-ct8.mjs|drop-database|test-only CT8 helper, never on preprod data'
@@ -669,7 +670,7 @@ catalogue_union_verify() {
 catalogue_import_session() {
   local in_dir="$1" map="$2" report="$3" generation="$4"
   local table rows want_rows disabled_before
-  # tgenabled is a char (O/R/A enabled flavours, D disabled): DISABLE TRIGGER ALL
+  # tgenabled is a char (O/R/A enabled flavours, D disabled): DISABLE TRIGGER USER
   # marks rows D, so before/after parity compares the D count.
   disabled_before=$(catalogue_psql -At -c "SELECT count(*) FROM pg_trigger t JOIN pg_class c ON c.oid = t.tgrelid JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'artifacts' AND NOT t.tgisinternal AND t.tgenabled = 'D'")
   coproc CATPSQL { psql -X --no-psqlrc -q -A -t -v ON_ERROR_STOP=1; }

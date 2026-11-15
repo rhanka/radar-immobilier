@@ -212,10 +212,10 @@ test('archive refuses prod buckets and missing arguments', () => {
   assert.notEqual(missing.status, 0, 'missing arguments must be refused');
 });
 
-test('stable and pinned URL derivation still keys on artifact and release ids', () => {
+test('content URLs derive from artifact and release ids plus the content base (no scope, no stored host)', () => {
   const composition = fs.readFileSync(path.join(root, 'packages/artifacts-host/src/composition.ts'), 'utf8');
-  assert.match(composition, /stableUrl: `https:\/\/\$\{artifactId\}/);
-  assert.match(composition, /pinnedUrl: `https:\/\/\$\{releaseId\}\.pinned\./);
+  assert.match(composition, /stableUrl: `https:\/\/\$\{artifactId\}\.\$\{options\.contentBase\}\/`/);
+  assert.match(composition, /versionUrl: `https:\/\/\$\{releaseId\}\.\$\{options\.contentBase\}\/`/);
 });
 
 test('union rule: prod wins on unique keys, every dropped preprod row is journaled', () => {
