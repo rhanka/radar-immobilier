@@ -50,7 +50,7 @@ No other runtime, no cluster access, no environment files.
 - `import --in-dir DIR [--map FILE] [--report FILE] [--allow-same-db]` →
   single-transaction load (coprocess-driven; any mismatch rolls back):
   checksum chain, journal equality, per-table column equality, trigger
-  state restore, row counts, then byte fingerprints. No `--map` means
+  state restore, then the union accounting of §2b. No `--map` means
   unattended: missing subjects are created `pending`, never `approved`.
 - `verify --in-dir DIR` → byte-level proof the live catalogue matches the
   manifest (row counts + fingerprints + journal).
@@ -70,10 +70,53 @@ the restored data references). A subject `rejected` in the target while
 copied; they are reported for the operator. Explicit `--map` restores
 approvals under supervision; without it no approval is ever minted.
 
+## 2b. Union with the prod catalogue (owner rule 2026-11-15)
+
+The prod-to-preprod restore must not overwrite preprod artifacts and must
+import the prod ones: the result is the UNION of the replayed prod catalogue
+and the sealed preprod export. The import is a union, not a replacement:
+
+- A preprod row identical to a live row (same values, identity columns
+  ignored) is already there: counted `same`. Prod rows carried by an earlier
+  restore therefore never duplicate; repeated restores are idempotent.
+- A preprod-only row is inserted. Identity columns (event logs) take a fresh
+  value after the prod sequence, never a prod id.
+- Collision = the preprod row hits ANY unique key of a different live row:
+  same artifact or release UUID, same `(storage_scope_id, owner_id,
+  binding_name)` (the artifact slug), same staged path, etc. PROD WINS: the
+  live row stays, the preprod row is not loaded and is journaled in
+  `conflicts.tsv` (`table`, `collision:prod-wins`, full row as JSON). No rename:
+  a renamed artifact would need a cascaded remap of every child; the journal
+  plus the sealed export keep the preprod version recoverable.
+- Orphan = a preprod row whose catalogue parent is absent from the live
+  database (the parent lost a slug collision, or lives in an ephemeral
+  table). It is journaled as `orphan:<parent>`, never loaded dangling:
+  foreign keys stay enforced during the load (`DISABLE TRIGGER USER` only).
+  A preprod child of a parent that lost an id collision attaches to the prod
+  parent (same id), so it is kept.
+- Invariant per table before COMMIT: exported = same + inserted + collisions
+  + orphans (`union.tsv`). Post-commit `verify --union` proves every exported
+  row is live or journaled. Byte-for-byte `verify` still holds when the prod
+  catalogue is empty.
+
+S3 blobs: keys are `artifacts/<scope>/blobs/sha256/<digest>` (content
+addressed). The docs restore Job (#1113) mirrors only `graph/` and
+`refresh/018/`; `artifacts/` is additive: preprod blobs are never deleted and
+prod blobs present in the backup inventory are copied in. The same key always
+holds the same bytes, so the two catalogues stay coherent with the bucket.
+The hermetic test pins `artifacts/` outside the mirror prefixes.
+
+Coherence gate (#1113): the import only adds rows under `artifacts.*`; it
+writes nothing in S3 and nothing the gate reads (pinned dump, docs, recon of
+`graph/` and `refresh/018/`), so it is compatible with the gate.
+
 ## 3. Restore-path integration (`deploy/cutover/atomic-restore.sh`)
 
 Opt-in via `CATALOGUE_DIR` (+ `CATALOGUE_SCRIPT`, optional `CATALOGUE_MAP`).
 Unset keeps the historical behavior byte-for-byte.
+Status 2026-11-15: no Job template sets `CATALOGUE_DIR` yet (`db-restore-backup`
+and the cutover render embed `atomic-restore.sh` without the catalogue
+script), so live restores do not run the union until that wiring lands.
 
 - Live restore: fresh export before the schema reset, import after the
   replay, before any reopening.
