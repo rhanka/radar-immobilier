@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 import YAML from 'yaml';
 const workflow = name => YAML.parse(readFileSync(`.github/workflows/${name}`, 'utf8'));
 test('main deployment rehearses preparation without gating the preprod rollout on it', () => {
@@ -9,9 +10,11 @@ test('main deployment rehearses preparation without gating the preprod rollout o
   const deploy = w.jobs['deploy-preprod'];
   assert.deepEqual(job.needs, ['build-push', 'cutover-release']);
   assert.equal(job['timeout-minutes'], 240);
-  assert.equal(job.if, "github.ref == 'refs/heads/main' && vars.PREPROD_CD_ENABLED == 'true'");
+  const arming = "github.ref == 'refs/heads/main' && vars.PREPROD_CD_ENABLED == 'true'";
+  assert.equal(job.if, `${arming} && vars.PREPROD_PREPARE_ENABLED == 'true'`, 'prepare has its own switch, off when absent');
   assert.deepEqual(deploy.needs, ['build-push', 'prepare-preprod-db']);
-  assert.equal(deploy.if, `!cancelled() && needs.build-push.result == 'success' && ${job.if}`, 'deploy shares the preprod CD arming');
+  assert.equal(deploy.if, `!cancelled() && needs.build-push.result == 'success' && ${arming}`, 'deploy keeps the preprod CD arming only');
+  assert.equal(JSON.stringify(w.jobs).split('PREPROD_PREPARE_ENABLED').length, 2, 'the switch gates prepare-preprod-db only');
   assert.equal(JSON.stringify(deploy).includes('needs.prepare-preprod-db.outputs'), false);
   const report = deploy.steps[0];
   assert.equal(report.if, "needs.prepare-preprod-db.result != 'success'");
@@ -19,6 +22,15 @@ test('main deployment rehearses preparation without gating the preprod rollout o
   assert.equal(JSON.stringify(report).includes('exit 1'), false);
   assert.ok(job.steps.some(s => s.run === 'make -f deploy/cutover/operator.mk prepare RELEASE=cutover-release/release.json ENV=preprod'));
   assert.equal(JSON.stringify(job).includes('continue-on-error'), false);
+});
+test('releases carry no data hook and production promotion requires none', () => {
+  const generated = spawnSync('bash', ['-ec', 'fail(){ exit 42; }; source tools/make/cutover-release.sh; out=$(mktemp); generate_release "$out"; cat "$out"'],
+    { env: { PATH: process.env.PATH, GIT_SHA: 'a'.repeat(40), API_DIGEST: `sha256:${'b'.repeat(64)}`, UI_DIGEST: `sha256:${'c'.repeat(64)}` }, encoding: 'utf8' });
+  assert.equal(generated.status, 0, generated.stderr);
+  assert.equal(JSON.parse(generated.stdout).dataMigration, null);
+  const promote = readFileSync('.github/workflows/build-push-images.yml', 'utf8');
+  assert.ok(promote.includes(`'.gitSha==$sha and .dataMigration==null'`));
+  assert.equal(promote.includes('.dataMigration=="6h"'), false);
 });
 test('daily and inter-tenant interfaces use the engine with protected arming unchanged', () => {
   const w = workflow('bascule-preprod.yml');
