@@ -69,7 +69,10 @@ prefix survive. Deletion needs `DeleteObject` on `graph/*` and
 it in both prefixes before the first write and refuses otherwise. Deletions run only
 after every copy succeeded; a copy error skips them all (`deleteSkipped`). Keys
 with a `.`, `..` or empty inner segment are counted (`mirrorAnomalies`) and never
-deleted. A volume guard refuses before any write when snapshot D holds nothing in a
+deleted, but listing readers (`readRefreshStates` lists `refresh/018/<city>/runs/`)
+would still read them: recon and `coherence_gate` refuse while any remains. Remove
+them by hand after review, then re-run; the `Coherence OK` line prints
+`mirror_anomalies=0`. A volume guard refuses before any write when snapshot D holds nothing in a
 mirror prefix that preprod fills, or when more than `MIRROR_MAX_DELETE_RATIO`
 (default 0.5) of a prefix would be deleted; review the logged plan, then pass
 `MIRROR_FORCE=1` (or a higher ratio) to the `make` command. After the restore Job,

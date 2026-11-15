@@ -21,17 +21,25 @@ const aligned = () => ({
   jobs: {
     restore: { verdict: { ok: true, date: D, pgSha256: P } },
     docs: { verdict: { ok: true, date: D, manifestSha256: M, copyErrors: 0, deleteErrors: 0, mirrorExtra: 0 } },
-    recon: { verdict: { ok: true, date: D, manifestSha256: M, missing: 0, sizeMismatch: 0, mirrorExtra: 0 } },
+    recon: { verdict: { ok: true, date: D, manifestSha256: M, missing: 0, sizeMismatch: 0, mirrorExtra: 0, mirrorAnomalies: 0 } },
   },
 });
 
 test('coherence: database and mirrored documents from one pinned snapshot pass', () => {
-  assert.deepEqual(coherence(aligned()), { ok: true, reasons: [] });
+  assert.deepEqual(coherence(aligned()), { ok: true, reasons: [], mirrorAnomalies: 0 });
 });
 test('coherence: incident 2026-11-14 (additive copy, preprod receipts left) is refused', () => {
   const r = aligned();
   r.jobs.recon.verdict.mirrorExtra = 3;
-  assert.deepEqual(coherence(r), { ok: false, reasons: ['mirror prefixes hold 3 object(s) outside the snapshot'] });
+  assert.deepEqual(coherence(r), { ok: false, reasons: ['mirror prefixes hold 3 object(s) outside the snapshot'], mirrorAnomalies: 0 });
+});
+test('coherence: non-canonical mirror keys (readable by listing readers) are refused', () => {
+  const r = aligned();
+  r.jobs.recon.verdict.mirrorAnomalies = 2;
+  assert.deepEqual(coherence(r), { ok: false,
+    reasons: ['mirror prefixes hold 2 non-canonical object(s) readable by listing readers'], mirrorAnomalies: 2 });
+  delete r.jobs.recon.verdict.mirrorAnomalies;
+  assert.deepEqual(coherence(r).reasons, ['recon did not count non-canonical mirror keys']);
 });
 test('coherence: a recon verdict without mirror counters (additive tool) is refused', () => {
   const r = aligned();
@@ -75,7 +83,7 @@ test('daily restore: coherent snapshot passes the gate and leaves radar-refresh-
   try {
     const result = f.run();
     assert.equal(result.status, 0, result.stdout + result.stderr);
-    assert.ok(result.stdout.includes('Coherence OK: database and mirrored documents from backup 2026-10-29'), result.stdout);
+    assert.ok(result.stdout.includes('Coherence OK: database and mirrored documents from backup 2026-10-29 (mirror_anomalies=0)'), result.stdout);
     assert.equal(refresh(f).spec.suspend, false);
     assert.equal(held(refresh(f)), undefined);
   } finally { f.cleanup(); }
@@ -133,5 +141,15 @@ test('daily restore releases a hold written as <run>:false', () => {
     assert.ok(result.stdout.includes('RELEASED radar-refresh-pv'), result.stdout);
     assert.equal(refresh(f).spec.suspend, false);
     assert.equal(held(refresh(f)), undefined);
+  } finally { f.cleanup(); }
+});
+test('daily restore: non-canonical mirror keys fail clearly and hold radar-refresh-pv', () => {
+  const f = fixture({ mirrorAnomalies: 2 });
+  try {
+    const result = f.run();
+    assert.notEqual(result.status, 0);
+    assert.ok(result.stderr.includes('INCOHERENT restore (database vs documents): mirror prefixes hold 2 non-canonical object(s)'),
+      result.stdout + result.stderr);
+    assert.equal(refresh(f).spec.suspend, true);
   } finally { f.cleanup(); }
 });
