@@ -49,7 +49,8 @@ coherence_gate() {
   mv "$WORK/next.json" "$WORK/record.json"; record_save
   jq -e '.ok==true' "$WORK/coherence.json" >/dev/null ||
     fail "INCOHERENT restore (database vs documents): $(jq -r '.reasons|join("; ")' "$WORK/coherence.json")"
-  printf 'Coherence OK: database and mirrored documents from backup %s\n' "$(jq -r .pin.date "$WORK/record.json")"
+  printf 'Coherence OK: database and mirrored documents from backup %s (mirror_anomalies=%s)\n' \
+    "$(jq -r .pin.date "$WORK/record.json")" "$(jq -r .mirrorAnomalies "$WORK/coherence.json")"
 }
 migrate_stage() {
   run_job backup 840 900
