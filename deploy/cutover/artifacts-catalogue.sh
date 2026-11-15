@@ -19,6 +19,8 @@
 #   artifacts-catalogue.sh archive --in-dir DIR --bucket NAME --prefix PATH --endpoint-url URL [--s5cmd BIN]
 #   artifacts-catalogue.sh manifest-check --in-dir DIR
 #   artifacts-catalogue.sh map-check --map FILE --subjects FILE
+#   artifacts-catalogue.sh stash --in-dir DIR | stash-exists | stash-drop
+#   artifacts-catalogue.sh import-stash --work DIR [--map FILE]
 #
 # Connection through libpq PG* env (PGHOST, PGUSER, PGPASSWORD, PGDATABASE,
 # PGPORT). Exit 0 on success (gate: GO), 1 on refusal/failure (gate: NO-GO).
@@ -489,20 +491,30 @@ cmd_import() {
   if [[ -n "$map" ]]; then
     cmd_map_check --map "$map" --subjects "$in_dir/subjects.tsv" >/dev/null
   fi
-  # Schema-version awareness: the target must carry exactly the journal and
-  # columns the export was taken with. A 0029 export on a 0028 target (or the
-  # reverse) refuses here instead of silently dropping or inventing columns.
+  # Schema-version awareness. Same journal: the target must carry exactly the
+  # export columns (drift outside migrations refuses). Newer target (journal is
+  # a strict superset, e.g. a prepared candidate migrated to the next release):
+  # every export column must exist in the target; new columns take their
+  # defaults. An older target, or any other journal difference, refuses.
+  local table want_cols have_cols newer=0 extra
   if [[ $(catalogue_journal_signature | sha256sum | awk '{print $1}') != \
         $(sha256sum "$in_dir/journal.tsv" | awk '{print $1}') ]]; then
-    catalogue_fail 'import: migration journal differs from manifest (schema version mismatch)'
+    extra=$(LC_ALL=C comm -23 <(LC_ALL=C sort -u "$in_dir/journal.tsv") <(catalogue_journal_signature | LC_ALL=C sort -u))
+    [[ -z "$extra" ]] || catalogue_fail 'import: migration journal differs from manifest (schema version mismatch)'
+    newer=1
+    catalogue_log 'import: target schema is newer than the export (journal superset), column superset accepted'
   fi
-  local table want_cols have_cols
   while read -r table; do
     [[ -n "$table" ]] || continue
     [[ -f "$in_dir/data/$table.copy" ]] || catalogue_fail "import: missing data file for $table"
     want_cols=$(tr '\n' ' ' < "$in_dir/data/$table.columns")
     have_cols=$(catalogue_table_columns "$table" | awk '{print $1}' | tr '\n' ' ')
-    [[ "$want_cols" == "$have_cols" ]] || catalogue_fail "import: column mismatch on $table (want [$want_cols] have [$have_cols])"
+    if ((newer)); then
+      extra=$(LC_ALL=C comm -23 <(tr ' ' '\n' <<< "$want_cols" | grep . | LC_ALL=C sort) <(tr ' ' '\n' <<< "$have_cols" | grep . | LC_ALL=C sort))
+      [[ -z "$extra" ]] || catalogue_fail "import: export columns missing on $table (${extra//$'\n'/ })"
+    else
+      [[ "$want_cols" == "$have_cols" ]] || catalogue_fail "import: column mismatch on $table (want [$want_cols] have [$have_cols])"
+    fi
   done < "$in_dir/order.tsv"
   [[ $(catalogue_psql -At -c "SELECT count(*) FROM pg_extension WHERE extname = 'pgcrypto'") != 0 ]] \
     || catalogue_fail 'import: pgcrypto extension absent (identity remap needs it)'
@@ -549,8 +561,18 @@ catalogue_coproc_read_value() {
 # collisions + orphans. Nothing is dropped without a journal line.
 
 catalogue_value_cols() {
-  # Non-identity columns: the comparison and insert key of the union.
-  catalogue_psql -At -c "SELECT a.attname FROM pg_attribute a JOIN pg_class c ON c.oid = a.attrelid JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'artifacts' AND c.relname = '$1' AND a.attnum > 0 AND NOT a.attisdropped AND a.attidentity = '' ORDER BY a.attnum"
+  # Export columns minus the target identity columns: the comparison and
+  # insert key of the union (columns added by a newer target take defaults).
+  local in_dir="$1" table="$2" ident
+  ident=$(catalogue_psql -At -c "SELECT a.attname FROM pg_attribute a JOIN pg_class c ON c.oid = a.attrelid JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'artifacts' AND c.relname = '$table' AND a.attnum > 0 AND NOT a.attisdropped AND a.attidentity <> ''")
+  if [[ -z "$ident" ]]; then cat "$in_dir/data/$table.columns"; else grep -vxF -f <(printf '%s\n' $ident) "$in_dir/data/$table.columns" || true; fi
+}
+
+catalogue_stage_sql() {
+  # Untyped-constraint stage holding exactly the export columns, in order.
+  local in_dir="$1" table="$2" name="$3" all
+  all=$(sed 's/.*/"&"/' "$in_dir/data/$table.columns" | paste -sd, -)
+  printf 'CREATE TEMP TABLE "%s" ON COMMIT DROP AS SELECT %s FROM artifacts."%s" WITH NO DATA;' "$name" "$all" "$table"
 }
 
 catalogue_fk_specs() {
@@ -578,11 +600,11 @@ catalogue_union_table() {
   local in_dir="$1" table="$2" want_rows="$3" out="$4" in="$5"
   local stg="cat_stg_$table" cols collist srow trow spec parent ccols pcols cond i
   local staged same inserted collisions orphans=0 n
-  cols=$(catalogue_value_cols "$table" | tr '\n' ' ')
+  cols=$(catalogue_value_cols "$in_dir" "$table" | tr '\n' ' ')
   [[ -n "$cols" ]] || { catalogue_rollback "$in"; catalogue_fail "import: no value columns for $table, rolled back"; }
   collist=$(for c in $cols; do printf '"%s",' "$c"; done | sed 's/,$//')
   srow=$(catalogue_row_expr s "$cols"); trow=$(catalogue_row_expr x "$cols")
-  cat_send "CREATE TEMP TABLE \"$stg\" (LIKE artifacts.\"$table\") ON COMMIT DROP;" "CAT-STAGE-$table"
+  cat_send "$(catalogue_stage_sql "$in_dir" "$table" "$stg")" "CAT-STAGE-$table"
   printf '%s\n' "\\copy pg_temp.\"$stg\" FROM '$in_dir/data/$table.copy'" "SELECT 'CAT-LOAD-$table';" >&"$in"
   catalogue_coproc_read_until "$out" "CAT-LOAD-$table" || catalogue_fail "import: database session aborted loading $table"
   printf '%s\n' "SELECT count(*) FROM \"$stg\";" "SELECT 'CAT-COUNT-$table';" >&"$in"
@@ -624,9 +646,9 @@ catalogue_union_verify() {
   [[ -f "$in_dir/conflicts.tsv" ]] || catalogue_fail 'verify: union journal conflicts.tsv missing'
   while read -r table; do
     [[ -n "$table" ]] || continue
-    cols=$(catalogue_value_cols "$table" | tr '\n' ' ')
+    cols=$(catalogue_value_cols "$in_dir" "$table" | tr '\n' ' ')
     srow=$(catalogue_row_expr s "$cols"); trow=$(catalogue_row_expr x "$cols")
-    missing=$(catalogue_psql -At -c "CREATE TEMP TABLE cat_v (LIKE artifacts.\"$table\")" \
+    missing=$(catalogue_psql -At -c "BEGIN" -c "$(catalogue_stage_sql "$in_dir" "$table" cat_v)" \
       -c "\\copy cat_v FROM '$in_dir/data/$table.copy'" \
       -c "SELECT count(*) FROM cat_v s WHERE $srow NOT IN (SELECT $trow FROM artifacts.\"$table\" x)")
     journaled=$(awk -F'\t' -v t="$table" '$1 == t' "$in_dir/conflicts.tsv" | wc -l | tr -d ' ')
@@ -681,7 +703,7 @@ catalogue_import_session() {
     || { catalogue_rollback "$in"; catalogue_fail 'import: trigger marker missing, rolled back'; }
   [[ "$disabled_after" == "$disabled_before" ]] || { catalogue_rollback "$in"; catalogue_fail 'import: trigger state not restored, rolled back'; }
   cat_send 'COMMIT;' 'CAT-COMMIT'
-  exec {in}>&-; wait "${CATPSQL_PID}" 2>/dev/null || true
+  exec {in}>&-; wait "$CATPSQL_PID" 2>/dev/null || true
 }
 
 # Identity reconciliation (design §4.5): artifact UUIDs and TEXT subject
@@ -733,9 +755,93 @@ catalogue_import_identities() {
   done < "$in_dir/subjects.tsv"
 }
 
+# ── Stash: carry a sealed export across Jobs inside the restored database ──
+# The restore Job exports the live preprod catalogue before the schema reset
+# and stashes it in schema catalogue_stash of the database it restores (the
+# reset never drops catalogue_stash nor catalogue_journal). The catalogue Job
+# runs after the migrations (ddl, data) and imports it in union, then drops
+# the stash. Conflicts are kept in catalogue_journal (durable, in-database).
+CATALOGUE_STASH_SCHEMA=catalogue_stash
+CATALOGUE_JOURNAL_SCHEMA=catalogue_journal
+
+cmd_stash_exists() {
+  [[ $(catalogue_psql -At -c "SELECT to_regclass('$CATALOGUE_STASH_SCHEMA.files') IS NOT NULL") == t ]]
+}
+
+cmd_stash() {
+  local in_dir=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --in-dir) in_dir="$2"; shift 2 ;;
+      *) catalogue_fail "stash: unknown argument '$1'" ;;
+    esac
+  done
+  [[ -n "$in_dir" ]] || catalogue_fail 'stash: --in-dir is required'
+  catalogue_refuse_prod "$(catalogue_current_db)"
+  cmd_manifest_check --in-dir "$in_dir" >/dev/null
+  ! cmd_stash_exists || catalogue_fail 'stash: a stash already exists in this database, refusing to overwrite it'
+  local files f count
+  files=$( (cd "$in_dir" && awk '{print $2}' manifest.sha256; printf 'manifest.sha256\n') | LC_ALL=C sort -u)
+  {
+    printf 'BEGIN;\nCREATE SCHEMA %s;\n' "$CATALOGUE_STASH_SCHEMA"
+    printf 'CREATE TABLE %s.files (path text PRIMARY KEY, b64 text NOT NULL);\n' "$CATALOGUE_STASH_SCHEMA"
+    printf 'COPY %s.files (path, b64) FROM STDIN;\n' "$CATALOGUE_STASH_SCHEMA"
+    while read -r f; do
+      [[ -n "$f" ]] || continue
+      printf '%s\t%s\n' "$f" "$(base64 -w0 < "$in_dir/$f")"
+    done <<< "$files"
+    printf '\\.\nCOMMIT;\n'
+  } | catalogue_psql --file=- >/dev/null
+  count=$(catalogue_psql -At -c "SELECT count(*) FROM $CATALOGUE_STASH_SCHEMA.files")
+  [[ "$count" == "$(grep -c . <<< "$files")" ]] || catalogue_fail "stash: read-back count $count differs"
+  catalogue_log "stashed generation $(catalogue_manifest_value "$in_dir" generation) ($count files) in $(catalogue_current_db)"
+}
+
+cmd_stash_drop() {
+  catalogue_refuse_prod "$(catalogue_current_db)"
+  catalogue_psql -c "DROP SCHEMA IF EXISTS $CATALOGUE_STASH_SCHEMA CASCADE" >/dev/null
+}
+
+# Unstash into WORK/export, import in union, journal conflicts, drop the stash.
+# No stash means nothing to do (already imported, or the restore was skipped).
+# A rerun after a lost drop is safe: the union counts every row as "same".
+cmd_import_stash() {
+  local work="" map="" path dir generation
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --work) work="$2"; shift 2 ;;
+      --map) map="$2"; shift 2 ;;
+      *) catalogue_fail "import-stash: unknown argument '$1'" ;;
+    esac
+  done
+  [[ -n "$work" ]] || catalogue_fail 'import-stash: --work is required'
+  catalogue_refuse_prod "$(catalogue_current_db)"
+  if ! cmd_stash_exists; then catalogue_log 'import-stash: no stash, nothing to import'; return 0; fi
+  dir="$work/export"; rm -rf "$dir"; mkdir -p "$dir/data"
+  while read -r path; do
+    [[ -n "$path" ]] || continue
+    case "$path" in /*|*..*) catalogue_fail "import-stash: unsafe path in stash" ;; esac
+    catalogue_psql -At -c "SELECT b64 FROM $CATALOGUE_STASH_SCHEMA.files WHERE path = '${path//\'/\'\'}'" | base64 -d > "$dir/$path"
+  done < <(catalogue_psql -At -c "SELECT path FROM $CATALOGUE_STASH_SCHEMA.files ORDER BY 1")
+  cmd_manifest_check --in-dir "$dir" >/dev/null
+  generation=$(catalogue_manifest_value "$dir" generation)
+  if [[ -n "$map" ]]; then cmd_import --in-dir "$dir" --allow-same-db --map "$map"; else cmd_import --in-dir "$dir" --allow-same-db; fi
+  tail -n +2 "$dir/union.tsv" > "$dir/union.rows"
+  catalogue_psql -c "CREATE SCHEMA IF NOT EXISTS $CATALOGUE_JOURNAL_SCHEMA" \
+    -c "CREATE TABLE IF NOT EXISTS $CATALOGUE_JOURNAL_SCHEMA.conflicts (generation text NOT NULL, recorded_at timestamptz NOT NULL DEFAULT now(), tbl text NOT NULL, reason text NOT NULL, payload text NOT NULL)" \
+    -c "CREATE TABLE IF NOT EXISTS $CATALOGUE_JOURNAL_SCHEMA.imports (generation text NOT NULL, recorded_at timestamptz NOT NULL DEFAULT now(), tbl text NOT NULL, exported int NOT NULL, same int NOT NULL, inserted int NOT NULL, collisions int NOT NULL, orphans int NOT NULL)" \
+    -c "CREATE TEMP TABLE j (tbl text, reason text, payload text)" -c "\\copy j FROM '$dir/conflicts.tsv'" \
+    -c "INSERT INTO $CATALOGUE_JOURNAL_SCHEMA.conflicts (generation, tbl, reason, payload) SELECT '$generation', tbl, reason, payload FROM j" \
+    -c "CREATE TEMP TABLE u (tbl text, exported int, same int, inserted int, collisions int, orphans int)" \
+    -c "\\copy u FROM '$dir/union.rows'" \
+    -c "INSERT INTO $CATALOGUE_JOURNAL_SCHEMA.imports (generation, tbl, exported, same, inserted, collisions, orphans) SELECT '$generation', * FROM u" >/dev/null
+  cmd_stash_drop
+  catalogue_log "import-stash: generation $generation imported in union, journal in $CATALOGUE_JOURNAL_SCHEMA, stash dropped"
+}
+
 cmd_main() {
   local cmd="${1:-}"
-  [[ -n "$cmd" ]] || catalogue_fail 'usage: artifacts-catalogue.sh {gate|export|import|verify|archive|manifest-check|map-check} ...'
+  [[ -n "$cmd" ]] || catalogue_fail 'usage: artifacts-catalogue.sh {gate|export|import|verify|archive|manifest-check|map-check|stash|stash-exists|stash-drop|import-stash} ...'
   shift
   case "$cmd" in
     gate) cmd_gate "$@" ;;
@@ -745,6 +851,10 @@ cmd_main() {
     archive) cmd_archive "$@" ;;
     manifest-check) cmd_manifest_check "$@" ;;
     map-check) cmd_map_check "$@" ;;
+    stash) cmd_stash "$@" ;;
+    stash-exists) cmd_stash_exists ;;
+    stash-drop) cmd_stash_drop ;;
+    import-stash) cmd_import_stash "$@" ;;
     *) catalogue_fail "unknown command '$cmd'" ;;
   esac
 }
