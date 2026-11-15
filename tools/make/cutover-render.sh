@@ -32,6 +32,7 @@ render_template() {
   case $step in
     resolve|list) template=deploy/ci/bascule-preprod/backup-read-job.tmpl.yaml;;
     docs|recon) template=deploy/ci/bascule-preprod/docs-restore-backup-job.tmpl.yaml;;
+    catalogue) template=deploy/cutover/catalogue-import-job.tmpl.yaml;;
     restore)
       template=deploy/ci/bascule-preprod/db-restore-backup-job.tmpl.yaml
       # Per-environment sizing that fits the namespace ResourceQuota; pg_restore keeps -j 4.
@@ -61,9 +62,14 @@ render_template() {
   BR_SCRIPT=$(sed 's/^/              /' deploy/ci/bascule-preprod/backup-restore.cjs)
   export RESTORE_SCRIPT
   RESTORE_SCRIPT=$(sed 's/^/              /' deploy/cutover/atomic-restore.sh)
+  # Preprod artifact catalogue union (restore stash + catalogue import). Empty
+  # CATALOGUE_DIR outside preprod disables the hook: prod is never touched.
+  export CATALOGUE_SCRIPT CATALOGUE_DIR=
+  CATALOGUE_SCRIPT=$(sed 's/^/              /' deploy/cutover/artifacts-catalogue.sh)
+  if [[ $ENV == preprod ]]; then CATALOGUE_DIR=/work/catalogue; fi
   if [[ $step == refs ]]; then BR_SCRIPT=$(sed 's/^/              /' deploy/ci/bascule-preprod/served-refs.cjs); fi
   # Only known placeholders; runtime libpq variables remain in the original script.
-  envsubst '${JOB_NAME} ${NAMESPACE} ${IMAGE} ${DUMP_IMAGE} ${TTL_SECONDS} ${PGHOST} ${DB_SECRET} ${S3_ENDPOINT} ${S3_REGION} ${EXPECTED_BACKUP_BUCKET} ${READER_SECRET} ${COPY_SECRET} ${BR_STEP} ${BACKUP_ID} ${ALLOW_STALE_BACKUP} ${MAX_AGE_HOURS} ${S3_FORCE_PATH_STYLE} ${BACKUP_DATE} ${PIN_MANIFEST_SHA256} ${PIN_PG_SHA256} ${EXPECTED_DATABASE} ${RESTORE_ASSERT_DB} ${DST_BUCKET} ${FORBIDDEN_DST_BUCKETS} ${COPY_GRANTEE} ${COPY_CONCURRENCY} ${DOCS_DRY} ${BR_SCRIPT} ${RESTORE_SCRIPT} ${RESTORE_REQUEST_CPU} ${RESTORE_REQUEST_MEMORY} ${RESTORE_LIMIT_CPU} ${RESTORE_LIMIT_MEMORY} ${UPLOAD_IMAGE} ${BACKUP_S3_ENDPOINT} ${BACKUP_S3_REGION} ${BACKUP_S3_BUCKET} ${S3_SECRET} ${KEY} ${CYCLE_ID} ${REFS_CONFIGMAP_PREFIX} ${REFS_CONFIGMAP_COUNT} ${REFS_WRITER_SA}' < "$template"
+  envsubst '${JOB_NAME} ${NAMESPACE} ${IMAGE} ${DUMP_IMAGE} ${TTL_SECONDS} ${PGHOST} ${DB_SECRET} ${S3_ENDPOINT} ${S3_REGION} ${EXPECTED_BACKUP_BUCKET} ${READER_SECRET} ${COPY_SECRET} ${BR_STEP} ${BACKUP_ID} ${ALLOW_STALE_BACKUP} ${MAX_AGE_HOURS} ${S3_FORCE_PATH_STYLE} ${BACKUP_DATE} ${PIN_MANIFEST_SHA256} ${PIN_PG_SHA256} ${EXPECTED_DATABASE} ${RESTORE_ASSERT_DB} ${DST_BUCKET} ${FORBIDDEN_DST_BUCKETS} ${COPY_GRANTEE} ${COPY_CONCURRENCY} ${DOCS_DRY} ${BR_SCRIPT} ${RESTORE_SCRIPT} ${CATALOGUE_SCRIPT} ${CATALOGUE_DIR} ${RESTORE_REQUEST_CPU} ${RESTORE_REQUEST_MEMORY} ${RESTORE_LIMIT_CPU} ${RESTORE_LIMIT_MEMORY} ${UPLOAD_IMAGE} ${BACKUP_S3_ENDPOINT} ${BACKUP_S3_REGION} ${BACKUP_S3_BUCKET} ${S3_SECRET} ${KEY} ${CYCLE_ID} ${REFS_CONFIGMAP_PREFIX} ${REFS_CONFIGMAP_COUNT} ${REFS_WRITER_SA}' < "$template"
 }
 sanitize_job() {
   jq --rawfile wrapper deploy/cutover/job-wrapper.cjs --rawfile shellWrapper deploy/cutover/shell-wrapper.sh \

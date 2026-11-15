@@ -28,6 +28,11 @@
 # `fetch` args and the RESTORE_SCRIPT placeholder under the `restore` args (never
 # written as placeholders in a comment: they span many lines). The $VAR of the
 # restore shell are RUNTIME variables (no braces).
+# Preprod artifact catalogue (union, owner rule 2026-11-15): the restore container
+# writes deploy/cutover/artifacts-catalogue.sh to /work and the atomic restore
+# stashes the live preprod catalogue before the reset (CATALOGUE_STASH=1). The
+# catalogue Job imports it after the migrations. CATALOGUE_DIR is empty outside
+# preprod, which disables the hook (prod is never touched).
 # =============================================================================
 apiVersion: batch/v1
 kind: Job
@@ -115,6 +120,9 @@ ${BR_SCRIPT}
               . /work/backup.env
               [ "$PGDATABASE" = "$EXPECTED_DATABASE" ] || exit 2
               echo "[restore] backup date=$BACKUP_DATE sha256=$PG_SHA256 (verified by fetch)"
+              cat > /work/artifacts-catalogue.sh <<'ARTIFACTS_CATALOGUE_EOF'
+${CATALOGUE_SCRIPT}
+              ARTIFACTS_CATALOGUE_EOF
 ${RESTORE_SCRIPT}
           env:
             - { name: PGHOST, value: "${PGHOST}" }
@@ -123,6 +131,9 @@ ${RESTORE_SCRIPT}
             - { name: TARGET_DB, value: "" }
             - { name: LIVE_DB, value: "" }
             - { name: RESTORE_DUMP, value: "/work/radar.dump" }
+            - { name: CATALOGUE_DIR, value: "${CATALOGUE_DIR}" }
+            - { name: CATALOGUE_SCRIPT, value: "/work/artifacts-catalogue.sh" }
+            - { name: CATALOGUE_STASH, value: "1" }
             - { name: PGUSER, valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_USER } } }
             - { name: PGPASSWORD, valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_PASSWORD } } }
             - { name: PGDATABASE, valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_DB } } }
