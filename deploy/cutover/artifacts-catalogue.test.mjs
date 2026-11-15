@@ -237,3 +237,84 @@ test('docs restore mirror never touches an artifacts/ prefix (artifact blobs liv
     assert.equal(isMirrored(key), false, `${key} survives the restore (preprod) or is copied in (prod)`);
   }
 });
+
+// ── Blob copy (artifacts-blobs.sh) against a local fake s5cmd ────────────────
+// Buckets are directories under ROOT; every s5cmd call is logged. Proves the
+// additive copy, the absence of recopy, the read-only prod bucket and the guards.
+const blobsScript = path.join(here, 'artifacts-blobs.sh');
+const FAKE_S5CMD = `#!/bin/sh
+set -eu
+printf '%s\\n' "$*" >> "$ROOT/calls.log"
+[ "$1" = --endpoint-url ] && shift 2
+key() { printf '%s' "$1" | sed 's#^s3://##'; }
+case "$1" in
+  ls)
+    p=$(key "$2" | sed 's#\\*$##'); found=0
+    for f in "$ROOT/$p"*; do [ -f "$f" ] || continue; found=1; printf '2026/11/15 00:00:00 %s %s\\n' "$(wc -c < "$f")" "$(basename "$f")"; done
+    [ "$found" = 1 ] || { echo 'ERROR "ls": no object found' >&2; exit 1; } ;;
+  run)
+    while read -r op flag s d; do
+      [ "$op $flag" = "cp -n" ] || exit 9
+      s=$(key "$(echo "$s" | tr -d '"')"); d=$(key "$(echo "$d" | tr -d '"')")
+      echo "WRITE $d" >> "$ROOT/calls.log"
+      [ -e "$ROOT/$d" ] || { mkdir -p "$(dirname "$ROOT/$d")"; cp "$ROOT/$s" "$ROOT/$d"; }
+    done < "$2" ;;
+  *) exit 9 ;;
+esac
+`;
+const hex = c => c.repeat(64);
+function blobWorld() {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'blobs-'));
+  const fake = path.join(root, 's5cmd'); fs.writeFileSync(fake, FAKE_S5CMD, { mode: 0o755 });
+  const put = (bucket, scope, name, body) => {
+    const dir = path.join(root, bucket, 'artifacts', scope, 'blobs', 'sha256'); fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, name), body);
+  };
+  const work = path.join(root, 'work'); fs.mkdirSync(work);
+  const env = { PATH: BASE_PATH, ROOT: root, S5CMD: fake, WORK: work, ENDPOINT: 'https://s3.example.test',
+    SRC_BUCKET: 'radar-immobilier-artifacts', SRC_SCOPE: 'radar-immobilier',
+    DST_BUCKET: 'radar-immobilier-artifacts-preprod', DST_SCOPE: 'radar-immobilier-preprod',
+    FORBIDDEN_DST_BUCKETS: 'radar-immobilier-artifacts,radar-immobilier-docs' };
+  const run = (extra = {}) => spawnSync('sh', [blobsScript], { encoding: 'utf8', env: { ...env, ...extra } });
+  const tree = bucket => spawnSync('sh', ['-c', `cd "${root}" && find "${bucket}" -type f | sort | xargs -r sha256sum`], { encoding: 'utf8' }).stdout;
+  return { root, put, run, tree, work, calls: () => fs.readFileSync(path.join(root, 'calls.log'), 'utf8') };
+}
+
+test('blob copy: prod blobs land under the preprod scope, existing ones are never recopied, prod is never written', () => {
+  const w = blobWorld();
+  try {
+    w.put('radar-immobilier-artifacts', 'radar-immobilier', hex('a'), 'blob-a');
+    w.put('radar-immobilier-artifacts', 'radar-immobilier', hex('b'), 'blob-b');
+    w.put('radar-immobilier-artifacts-preprod', 'radar-immobilier-preprod', hex('a'), 'blob-a');
+    w.put('radar-immobilier-artifacts-preprod', 'radar-immobilier-preprod', hex('c'), 'preprod-own');
+    const prodBefore = w.tree('radar-immobilier-artifacts');
+    const first = w.run();
+    assert.equal(first.status, 0, first.stderr);
+    const writes = w.calls().split('\n').filter(l => l.startsWith('WRITE '));
+    assert.deepEqual(writes, [`WRITE radar-immobilier-artifacts-preprod/artifacts/radar-immobilier-preprod/blobs/sha256/${hex('b')}`], 'only the missing blob is copied');
+    assert.equal(fs.readFileSync(path.join(w.root, 'radar-immobilier-artifacts-preprod/artifacts/radar-immobilier-preprod/blobs/sha256', hex('b')), 'utf8'), 'blob-b');
+    assert.deepEqual(fs.readFileSync(path.join(w.work, 'preprod-blob-keys.txt'), 'utf8').trim().split('\n'), [hex('a'), hex('b'), hex('c')]);
+    assert.equal(w.tree('radar-immobilier-artifacts'), prodBefore, 'prod bucket unchanged');
+    assert.ok(w.calls().split('\n').every(l => !/^WRITE radar-immobilier-artifacts\//.test(l)), 'no write in the prod bucket');
+    fs.writeFileSync(path.join(w.root, 'calls.log'), '');
+    const second = w.run();
+    assert.equal(second.status, 0, second.stderr);
+    assert.doesNotMatch(w.calls(), /WRITE |\brun\b/, 'second run copies nothing');
+  } finally { fs.rmSync(w.root, { recursive: true, force: true }); }
+});
+
+test('blob copy: empty prod prefix is a no-op; guards refuse any non-preprod or forbidden destination', () => {
+  const w = blobWorld();
+  try {
+    w.put('radar-immobilier-artifacts-preprod', 'radar-immobilier-preprod', hex('c'), 'preprod-own');
+    const empty = w.run();
+    assert.equal(empty.status, 0, empty.stderr);
+    assert.deepEqual(fs.readFileSync(path.join(w.work, 'preprod-blob-keys.txt'), 'utf8').trim().split('\n'), [hex('c')]);
+    for (const extra of [{ DST_BUCKET: 'radar-immobilier-artifacts' }, { DST_BUCKET: 'radar-immobilier-artifacts-x' },
+      { DST_BUCKET: 'radar-immobilier-docs-preprod', FORBIDDEN_DST_BUCKETS: 'radar-immobilier-docs-preprod' }]) {
+      fs.writeFileSync(path.join(w.root, 'calls.log'), '');
+      assert.equal(w.run(extra).status, 2, JSON.stringify(extra));
+      assert.equal(w.calls(), '', 'refused before any S3 call');
+    }
+  } finally { fs.rmSync(w.root, { recursive: true, force: true }); }
+});

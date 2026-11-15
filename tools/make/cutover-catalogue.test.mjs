@@ -13,6 +13,7 @@ const job = (f, step) => f.state().objects.find(o => o.kind === 'Job' && o.metad
 const container = (j, name) => j.spec.template.spec.containers.find(c => c.name === name);
 const env = (c, name) => c.env.find(e => e.name === name);
 const catalogueScript = readFileSync('deploy/cutover/artifacts-catalogue.sh', 'utf8');
+const blobsScript = readFileSync('deploy/cutover/artifacts-blobs.sh', 'utf8');
 // The shell wrapper runs `bash -c <script>`: the script is the last argument.
 const script = c => c.args.at(-1);
 
@@ -37,6 +38,17 @@ function assertCatalogueImport(f, expectedDb) {
   assert.equal(env(c, 'CATALOGUE_DIR').value, '/work/catalogue');
   assert.match(script(c), /bash \/work\/artifacts-catalogue\.sh import-stash --work "\/work\/catalogue"/);
   assert.equal(c.image, 'postgis/postgis:16-3.4', 'same native-tools image as the restore container');
+  assert.match(script(c), /--rewrite-from "radar-immobilier" --rewrite-to "radar-immobilier-preprod"/);
+  assert.match(script(c), /--blob-keys \/work\/preprod-blob-keys\.txt/);
+  const blobs = job(f, 'catalogue').spec.template.spec.initContainers.find(i => i.name === 'blobs');
+  assert.ok(blobs, 'blob copy runs before the import (init container)');
+  assert.equal(blobs.image, 'peakcom/s5cmd:v2.2.2');
+  assert.equal(env(blobs, 'SRC_BUCKET').value, 'radar-immobilier-artifacts');
+  assert.equal(env(blobs, 'DST_BUCKET').value, 'radar-immobilier-artifacts-preprod');
+  assert.equal(env(blobs, 'DST_SCOPE').value, 'radar-immobilier-preprod');
+  assert.ok(env(blobs, 'FORBIDDEN_DST_BUCKETS').value.split(',').includes('radar-immobilier-artifacts'), 'prod bucket is a forbidden destination');
+  assert.equal(env(blobs, 'AWS_ACCESS_KEY_ID').valueFrom.secretKeyRef.name, 'radar-artifacts-restore-copy');
+  assert.equal(script(blobs).trimEnd(), blobsScript.trimEnd(), 'embedded blob script is byte-identical');
   const db = env(c, 'PGDATABASE');
   if (expectedDb) assert.equal(db.value, expectedDb);
   else assert.equal(db.valueFrom.secretKeyRef.key, 'POSTGRES_DB');

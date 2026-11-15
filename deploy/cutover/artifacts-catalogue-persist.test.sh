@@ -26,7 +26,7 @@ READER=witness-reader
 
 work=$(mktemp -d)
 cleanup() {
-  for db in cat_src cat_prodd cat_prodrej cat_dst cat_dst_map cat_dst2 cat_dst29 cat_src29 cat_prep cat_pu1 cat_pu2 cat_dstu cat_dsts cat_preps tmp-prod-x; do
+  for db in cat_src cat_prodd cat_prodrej cat_dst cat_dst_map cat_dst2 cat_dst29 cat_src29 cat_prep cat_pu1 cat_pu2 cat_dstu cat_dsts cat_preps cat_sc_src cat_sc cat_sc_miss tmp-prod-x; do
     dropdb --if-exists --force "$db" >/dev/null 2>&1 || true
   done
   rm -rf "$work"
@@ -378,4 +378,65 @@ q cat_preps "INSERT INTO drizzle.__drizzle_migrations (hash, created_at) VALUES 
 PGDATABASE=cat_preps bash "$CATALOGUE" import-stash --work "$work/stashp-import" > "$work/stashp-import.out" 2>&1 || { cat "$work/stashp-import.out"; fail 'stash: prepared import refused'; }
 [[ $(q cat_preps 'SELECT count(*) FROM artifacts.artifacts') == 5 ]] || fail 'stash: prepared union artifact count'
 printf 'Stash wiring green: restore stashes, relaunch reuses, union after a newer schema, journal kept, prepared exports from live only\n'
+
+# ── Scope rewrite + blob check (owner decision 2026-11-15) ───────────────────
+# Prod rows (scope radar-immobilier) move to the preprod scope before the union;
+# a preprod row bound to the same slug then collides and prod wins (journaled).
+# Scope configuration (storage_scopes, host_policy) stays the preprod one.
+PS=radar-immobilier; QS=radar-immobilier-preprod
+HA=$(printf 'a%.0s' $(seq 64)); HB=$(printf 'b%.0s' $(seq 64))
+PA=f1000000-0000-0000-0000-00000000000a; QA=f2000000-0000-0000-0000-00000000000a; QB=f2000000-0000-0000-0000-00000000000b
+seed_scope_prod() {
+  psql -X -q -v ON_ERROR_STOP=1 --dbname="$1" <<SQL
+INSERT INTO artifacts.storage_scopes (id, org_id) VALUES ('$PS', 'org-prod');
+INSERT INTO artifacts.host_policy (storage_scope_id, revision) VALUES ('$PS', 'prod-rev');
+INSERT INTO public.account_users (id, sub, email, status) VALUES ('60000000-0000-0000-0000-000000000001', 'prod-user', 'p@example.test', 'approved');
+INSERT INTO artifacts.artifacts (id, storage_scope_id, owner_id, binding_name, profile) VALUES ('$PA', '$PS', 'prod-user', 'shared', '{"v":"prod"}');
+INSERT INTO artifacts.releases (id, artifact_id, manifest_digest, manifest, state)
+  VALUES ('f3000000-0000-0000-0000-00000000000a', '$PA', 'ma', '{"files":{"index.html":"sha256:$HA"}}', 'ready');
+INSERT INTO artifacts.artifact_current (artifact_id, release_id) VALUES ('$PA', 'f3000000-0000-0000-0000-00000000000a');
+INSERT INTO artifacts.blobs (storage_scope_id, digest, size) VALUES ('$PS', 'sha256:$HA', 6);
+SQL
+}
+apply_schema cat_sc_src
+psql -X -q -v ON_ERROR_STOP=1 --dbname=cat_sc_src <<SQL
+INSERT INTO artifacts.storage_scopes (id, org_id) VALUES ('$QS', '$QS');
+INSERT INTO artifacts.host_policy (storage_scope_id, revision) VALUES ('$QS', 'pre-rev');
+INSERT INTO public.account_users (id, sub, email, status) VALUES ('60000000-0000-0000-0000-000000000001', 'prod-user', 'p@example.test', 'approved');
+INSERT INTO artifacts.artifacts (id, storage_scope_id, owner_id, binding_name, profile) VALUES
+  ('$QA', '$QS', 'prod-user', 'shared', '{"v":"pre"}'), ('$QB', '$QS', 'prod-user', 'qb', '{"v":"pre"}');
+INSERT INTO artifacts.releases (id, artifact_id, manifest_digest, manifest, state)
+  VALUES ('f4000000-0000-0000-0000-00000000000b', '$QB', 'mb', '{"files":{"index.html":"sha256:$HB"}}', 'ready');
+INSERT INTO artifacts.blobs (storage_scope_id, digest, size) VALUES ('$QS', 'sha256:$HB', 7);
+SQL
+PGDATABASE=cat_sc_src bash "$CATALOGUE" export --out-dir "$work/sc-export" >/dev/null || fail 'scope: export refused'
+fk_count() { q "$1" "SELECT count(*) FROM pg_constraint c JOIN pg_namespace n ON n.oid = c.connamespace WHERE c.contype = 'f' AND n.nspname = 'artifacts'"; }
+# Missing prod blob in the preprod bucket: refused before any preprod row is imported.
+apply_schema cat_sc_miss; seed_scope_prod cat_sc_miss
+PGDATABASE=cat_sc_miss bash "$CATALOGUE" stash --in-dir "$work/sc-export" >/dev/null || fail 'scope: stash refused'
+printf '%s\n' "$HB" > "$work/keys-missing.txt"
+if PGDATABASE=cat_sc_miss bash "$CATALOGUE" import-stash --work "$work/sc-miss" --rewrite-from "$PS" --rewrite-to "$QS" --blob-keys "$work/keys-missing.txt" > "$work/sc-miss.out" 2>&1; then
+  fail 'scope: missing blob accepted'
+fi
+grep -q 'blob-check: 1 blob' "$work/sc-miss.out" || { cat "$work/sc-miss.out"; fail 'scope: refusal is not the blob check'; }
+[[ $(q cat_sc_miss "SELECT count(*) FROM artifacts.artifacts WHERE id IN ('$QA', '$QB')") == 0 ]] || fail 'scope: preprod rows imported despite the missing blob'
+PGDATABASE=cat_sc_miss bash "$CATALOGUE" stash-exists || fail 'scope: stash lost by the refusal'
+# All blobs present: rewrite, union, final check.
+apply_schema cat_sc; seed_scope_prod cat_sc
+fks=$(fk_count cat_sc)
+PGDATABASE=cat_sc bash "$CATALOGUE" stash --in-dir "$work/sc-export" >/dev/null || fail 'scope: stash refused'
+printf '%s\n%s\n' "$HA" "$HB" > "$work/keys-all.txt"
+PGDATABASE=cat_sc bash "$CATALOGUE" import-stash --work "$work/sc" --rewrite-from "$PS" --rewrite-to "$QS" --blob-keys "$work/keys-all.txt" > "$work/sc.out" 2>&1 \
+  || { cat "$work/sc.out"; fail 'scope: import with rewrite refused'; }
+[[ $(q cat_sc "SELECT string_agg(DISTINCT storage_scope_id, ',') FROM (SELECT storage_scope_id FROM artifacts.artifacts UNION ALL SELECT storage_scope_id FROM artifacts.blobs UNION ALL SELECT storage_scope_id FROM artifacts.host_policy) s") == "$QS" ]] || fail 'scope: rows left under the prod scope'
+[[ $(q cat_sc "SELECT id || '|' || org_id FROM artifacts.storage_scopes") == "$QS|$QS" ]] || fail 'scope: storage scope is not the preprod one'
+[[ $(q cat_sc "SELECT revision FROM artifacts.host_policy") == pre-rev ]] || fail 'scope: preprod host policy lost'
+[[ $(q cat_sc "SELECT string_agg(id::text, ' ' ORDER BY id) FROM artifacts.artifacts") == "$PA $QB" ]] || fail 'scope: union artifact set'
+[[ $(q cat_sc "SELECT count(*) FROM catalogue_journal.conflicts WHERE tbl = 'artifacts' AND payload LIKE '%$QA%'") == 1 ]] || fail 'scope: slug collision under the preprod scope not journaled'
+[[ $(fk_count cat_sc) == "$fks" ]] || fail 'scope: foreign keys not restored'
+[[ $(q cat_sc "SELECT count(*) FROM artifacts.blobs WHERE digest = 'sha256:$HA'") == 1 ]] || fail 'scope: prod blob registry row lost'
+if PGDATABASE=cat_sc bash "$CATALOGUE" stash-exists; then fail 'scope: stash not dropped'; fi
+# Relaunch: rewrite and blob check are idempotent.
+PGDATABASE=cat_sc bash "$CATALOGUE" import-stash --work "$work/sc2" --rewrite-from "$PS" --rewrite-to "$QS" --blob-keys "$work/keys-all.txt" >/dev/null 2>&1 || fail 'scope: relaunch refused'
+printf 'Scope rewrite green: prod rows under the preprod scope, preprod scope config kept, slug collision journaled, blob check refuses a missing blob\n'
 printf 'Catalogue preservation round-trip green: witness byte-identical, identities remapped, prod untouched\n'
