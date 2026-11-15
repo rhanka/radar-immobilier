@@ -14,9 +14,12 @@
 # CATALOGUE_STASH=1 (restore Jobs, preprod only): the export is stashed in schema
 # catalogue_stash of the restored database instead of being imported here; the
 # catalogue Job imports it in union AFTER the migrations (ddl, data), so a prod
-# dump older than the preprod release never blocks it. Live path: an existing
-# stash is reused (a rerun after the replay must never re-export prod rows).
-# Prepared path: always a fresh export from LIVE_DB, never from the candidate.
+# dump older than the preprod release never blocks it. CATALOGUE_STASH_TAG (run
+# and backup pin) binds the stash: the same run reuses it (a relaunch after the
+# replay must never re-export prod rows); a stash of another run is kept and the
+# live database is exported again as a newer generation (no loss). Prepared
+# path: fresh export from LIVE_DB (never the candidate), plus the pending
+# generations of the live stash.
 # The schema reset keeps catalogue_stash and catalogue_journal.
 #
 # A snapshot older than the destination schema (fewer migrations) cannot be
@@ -59,18 +62,29 @@ if [ -n "$catalogue_export_dir" ]; then
   [ -f "$catalogue_script" ] || { echo "[restore] ERROR — catalogue script missing"; exit 1; }
   mkdir -p "$catalogue_export_dir/export"
   if [ "${CATALOGUE_STASH:-0}" = 1 ]; then
+    catalogue_tag=${CATALOGUE_STASH_TAG:-}
+    [ -n "$catalogue_tag" ] || { echo "[restore] ERROR — CATALOGUE_STASH without CATALOGUE_STASH_TAG (run and backup pin)" >&2; exit 1; }
     if [ -n "$TARGET_DB" ]; then
       [ -n "${LIVE_DB:-}" ] && [ "$LIVE_DB" != "$TARGET_DB" ] || { echo "[restore] ERROR — prepared-database restore needs LIVE_DB as catalogue source (never the candidate)" >&2; exit 1; }
-      rm -rf "$catalogue_export_dir/export"
-      PGDATABASE="$LIVE_DB" bash "$catalogue_script" export --out-dir "$catalogue_export_dir/export" || exit 1
+      rm -rf "$catalogue_export_dir/export" "$catalogue_export_dir/carry"
       bash "$catalogue_script" stash-drop || exit 1
-      bash "$catalogue_script" stash --in-dir "$catalogue_export_dir/export" || exit 1
-    elif bash "$catalogue_script" stash-exists; then
-      echo "[restore] catalogue stash already present, reusing it"
+      # A pending stash of the live database (an import that never completed) follows.
+      bash "$catalogue_script" stash-carry --from-db "$LIVE_DB" --work "$catalogue_export_dir/carry" || exit 1
+      PGDATABASE="$LIVE_DB" bash "$catalogue_script" export --out-dir "$catalogue_export_dir/export" || exit 1
+      bash "$catalogue_script" stash --in-dir "$catalogue_export_dir/export" --tag "$catalogue_tag" || exit 1
     else
-      rm -rf "$catalogue_export_dir/export"
-      bash "$catalogue_script" export --out-dir "$catalogue_export_dir/export" || exit 1
-      bash "$catalogue_script" stash --in-dir "$catalogue_export_dir/export" || exit 1
+      catalogue_current=$(bash "$catalogue_script" stash-tag) || exit 1
+      if [ "$catalogue_current" = "$catalogue_tag" ]; then
+        # Same run and pin: the live database may already hold the prod replay.
+        echo "[restore] catalogue stash of this run already present, reusing it"
+      else
+        if [ -n "$catalogue_current" ]; then
+          echo "[restore] pending catalogue stash from another run ($catalogue_current): exporting the live database again as a newer generation, both are imported newest first"
+        fi
+        rm -rf "$catalogue_export_dir/export"
+        bash "$catalogue_script" export --out-dir "$catalogue_export_dir/export" || exit 1
+        bash "$catalogue_script" stash --in-dir "$catalogue_export_dir/export" --tag "$catalogue_tag" || exit 1
+      fi
     fi
   elif [ -f "$catalogue_export_dir/export/manifest.json" ] \
     && bash "$catalogue_script" manifest-check --in-dir "$catalogue_export_dir/export" >/dev/null 2>&1; then
