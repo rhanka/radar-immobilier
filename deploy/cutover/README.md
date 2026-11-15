@@ -57,9 +57,36 @@ lists the whole preprod bucket (about 100 s), so it runs after writers are
 suspended and before closure, with the preparation deadline (840 s). The
 database switch refuses without that completed evidence.
 
-Preprod preparation copies documents additively into the live preprod document
-bucket before closure (additive copy, no deletion); this is kept
-deliberately so the cutover never waits on document copy.
+Preprod preparation and the daily restore copy the documents of the pinned
+backup into the live preprod document bucket before closure. Outside the
+PG-coupled prefixes the copy is additive. The PG-coupled prefixes (`graph/`,
+`refresh/018/`: canonical graph, run states, receipts and coverage ledgers) are
+MIRRORED from the same snapshot as the restored database: objects absent from
+the snapshot are deleted. `refresh/018/sweep/` (preprod sweep cursor), the
+artifact catalogue (`artifacts.*` schema, `artifacts/` blobs) and every other
+prefix survive. Deletion needs `DeleteObject` on `graph/*` and
+`refresh/018/*` of the preprod bucket for the copy identity; the docs Job probes
+it in both prefixes before the first write and refuses otherwise. Deletions run only
+after every copy succeeded; a copy error skips them all (`deleteSkipped`). Keys
+with a `.`, `..` or empty inner segment are counted (`mirrorAnomalies`) and never
+deleted. A volume guard refuses before any write when snapshot D holds nothing in a
+mirror prefix that preprod fills, or when more than `MIRROR_MAX_DELETE_RATIO`
+(default 0.5) of a prefix would be deleted; review the logged plan, then pass
+`MIRROR_FORCE=1` (or a higher ratio) to the `make` command. After the restore Job,
+`coherence_gate` (`tools/make/cutover-coherence.jq`) refuses unless the
+database dump, the documents and the recon share the pinned snapshot and the
+mirror prefixes hold nothing outside it. The PG-coupled CronJobs
+(`preprod.coherenceSchedules`: `radar-refresh-pv`) stay suspended from the
+document mirror until the live database is that snapshot: a `prepare` holds
+them (annotation `sentropic.io/held-until-coherent`) until the release switch;
+a successful switch or coherent daily restore releases them to the original state
+recorded as `<run>:(true|false)`. Any other annotation value is a human hold: it is
+kept and never released automatically (remove it, or write `<token>:false`, by hand); a rollback or a restore reopened without restoration keeps them held.
+
+Incident 2026-11-14: the former additive copy left preprod run receipts and
+ledgers next to the production ones; every projection was then refused with
+`postgres-regression-refused`. Remediation is the daily restore below, never a
+manual alignment.
 
 `radar-prepared-db` records preparation ownership, status, backup fingerprints,
 release SHA, migration count and smoke result. Cutover refuses unless the stamp
@@ -77,10 +104,10 @@ cutover deletes them immediately by UID. Sweep cursors under
 `refresh/018/sweep/` are excluded from copy and reconciliation.
 
 The `prepare-preprod-db` CI job runs only when the repository variable
-`PREPROD_PREPARE_ENABLED` is `true` (absent = off); the preprod rollout ignores it.
-Releases carry `dataMigration: null` since production applied 6H on 2026-11-14.
-The `prepare-preprod-db` CI job blocks deployment on restore, DDL, 6H or smoke
-failure. Its runner polls cluster Jobs for up to 240 minutes, aligned with the
+`PREPROD_PREPARE_ENABLED` is `true` (absent = off). It is a rehearsal: its failure
+on restore, DDL, 6H or smoke is reported as a warning and never gates the preprod
+rollout. Releases carry `dataMigration: null` since production applied 6H on
+2026-11-14. Its runner polls cluster Jobs for up to 240 minutes, aligned with the
 sum of the preparation stage budgets (about 12 390 s after the preparing
 stamp). This is incompatible
 with the design's simultaneous five-minute runner wall-time budget; no long work
