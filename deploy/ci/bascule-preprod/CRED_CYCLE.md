@@ -158,14 +158,17 @@ SealedSecret). `BACKUP_BUCKET` is the fixed value `radar-immobilier-backup`.
 | secret (k8s name) | OVH user | GitHub secrets (env `radar-bascule`) | scope |
 | --- | --- | --- | --- |
 | `radar-backup-reader-preprod` | 809853 | `RADAR_BACKUP_READER_PREPROD_ACCESS_KEY`, `RADAR_BACKUP_READER_PREPROD_SECRET_KEY` | backup bucket: GetObject on `pg/*`, `manifests/*`, `docs-inventory/*` + ListBucket; `docs/` → 403; no write, no delete |
-| `radar-backup-restore-docs` | `radar-backup-restore-preprod` (809849) | `RADAR_BACKUP_RESTORE_DOCS_ACCESS_KEY`, `RADAR_BACKUP_RESTORE_DOCS_SECRET_KEY` | backup bucket: GetObject on `docs/*`; preprod docs bucket `radar-immobilier-docs-preprod`: ListBucket + GetBucketLocation (preprod listing of S3'/S3b') + PutObject + PutObjectAcl (versioned CopyObject with GrantFullControl), no delete |
+| `radar-backup-restore-docs` | `radar-backup-restore-preprod` (809849) | `RADAR_BACKUP_RESTORE_DOCS_ACCESS_KEY`, `RADAR_BACKUP_RESTORE_DOCS_SECRET_KEY` | backup bucket: GetObject on `docs/*`; preprod docs bucket `radar-immobilier-docs-preprod`: ListBucket + GetBucketLocation (preprod listing of S3'/S3b') + PutObject + PutObjectAcl (versioned CopyObject with GrantFullControl); statement `PreprodMirrorDelete` (granted 2026-11-15): DeleteObject ONLY on `arn:aws:s3:::radar-immobilier-docs-preprod/graph/*` and `arn:aws:s3:::radar-immobilier-docs-preprod/refresh/018/*` (mirror of the PG-coupled prefixes), no other delete; access key unchanged |
 
 OVH: `s3:GetObjectVersion` is refused in policies; a versioned read (GetObject /
 CopyObject with `versionId`) is covered by GetObject.
 
 k8s check 2026-09-26 (effective policy + real tests 7/7): `radar-backup-restore-preprod`
 has ListBucket + GetBucketLocation on the preprod docs bucket (real LIST 200) and no
-delete of any kind. The docs-sync identity held by `radar-docs-src-preprod`
+delete of any kind. Superseded 2026-11-15 for the mirror only: k8s added statement
+`PreprodMirrorDelete` (DeleteObject on `graph/*` and `refresh/018/*` of the preprod
+docs bucket, nothing else; same access key), recorded in poc-k8s
+`docs/runbooks/preprod-cred-governance.md` (commit 239b647). The docs-sync identity held by `radar-docs-src-preprod`
 (`radar-docs-sync` in the k8s check; older bascule docs name it `immo-docs-prod`) is
 read-only on the prod docs bucket (PUT, DELETE and PUT `?acl` answer 403) and writes
 without delete on the preprod docs bucket.
