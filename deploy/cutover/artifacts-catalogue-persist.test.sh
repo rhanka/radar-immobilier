@@ -26,7 +26,7 @@ READER=witness-reader
 
 work=$(mktemp -d)
 cleanup() {
-  for db in cat_src cat_prodd cat_prodrej cat_dst cat_dst_map cat_dst2 cat_dst29 cat_src29 cat_prep cat_pu1 cat_pu2 cat_dstu cat_dsts cat_preps cat_sc_src cat_sc cat_sc_miss tmp-prod-x; do
+  for db in cat_src cat_prodd cat_prodrej cat_dst cat_dst_map cat_dst2 cat_dst29 cat_src29 cat_prep cat_pu1 cat_pu2 cat_dstu cat_dsts cat_preps cat_sc_src cat_sc cat_sc_miss cat_stale cat_gate1 cat_gate2 tmp-prod-x; do
     dropdb --if-exists --force "$db" >/dev/null 2>&1 || true
   done
   rm -rf "$work"
@@ -335,7 +335,7 @@ stash_restore() {
   local db="$1" dump="$2" catdir="$3" target="${4:-}" live="${5:-}" toc
   toc=$(pg_restore --list "$dump" | grep -c '^[0-9]' || true)
   PGDATABASE=$db EXPECTED_DATABASE=$db TARGET_DB="$target" LIVE_DB="$live" RESTORE_DUMP="$dump" EXPECTED_TOC_ENTRIES=$toc \
-    RESTORE_ASSERT_DB=0 DUMP_DATABASE=x CATALOGUE_DIR="$catdir" CATALOGUE_SCRIPT="$CATALOGUE" CATALOGUE_STASH=1 bash "$RESTORE"
+    RESTORE_ASSERT_DB=0 DUMP_DATABASE=x CATALOGUE_DIR="$catdir" CATALOGUE_SCRIPT="$CATALOGUE" CATALOGUE_STASH=1 CATALOGUE_STASH_TAG="${STASH_TAG:-run1}" bash "$RESTORE"
 }
 createdb --template=template0 cat_dsts
 pg_restore --no-owner --no-privileges --exit-on-error --dbname=cat_dsts "$work/preprod-live.dump"
@@ -359,7 +359,7 @@ if PGDATABASE=cat_dsts bash "$CATALOGUE" stash-exists; then fail 'stash: not dro
 PGDATABASE=cat_dsts bash "$CATALOGUE" import-stash --work "$work/stash-import2" >/dev/null 2>&1 || fail 'stash: second import must be a no-op'
 [[ $(q cat_dsts 'SELECT count(*) FROM artifacts.artifacts') == 5 ]] || fail 'stash: no-op import changed the catalogue'
 # The next restore keeps the conflict journal (schema reset spares it).
-stash_restore cat_dsts "$work/prod-v2.dump" "$work/stash3" > "$work/stash3.out" 2>&1 || { cat "$work/stash3.out"; fail 'stash restore 2 refused'; }
+STASH_TAG=run2 stash_restore cat_dsts "$work/prod-v2.dump" "$work/stash3" > "$work/stash3.out" 2>&1 || { cat "$work/stash3.out"; fail 'stash restore 2 refused'; }
 [[ $(q cat_dsts 'SELECT count(*) FROM catalogue_journal.conflicts') == 3 ]] || fail 'stash: journal lost by the next restore'
 # The export carried the newer schema: the migrations run again before the import.
 q cat_dsts "ALTER TABLE artifacts.artifacts ADD COLUMN union_next_release TEXT NOT NULL DEFAULT 'next'" >/dev/null
@@ -369,9 +369,9 @@ PGDATABASE=cat_dsts bash "$CATALOGUE" import-stash --work "$work/stash-import3" 
 [[ $(q cat_dsts 'SELECT count(*) FROM catalogue_journal.conflicts') == 3 ]] || fail 'stash: conflict-free import added journal lines'
 # Prepared database: export from LIVE_DB only, stash in the candidate.
 createdb --template=template0 cat_preps
-if stash_restore cat_preps "$work/prod-v2.dump" "$work/stashp0" cat_preps "" >/dev/null 2>&1; then fail 'stash: prepared restore without LIVE_DB accepted'; fi
-if stash_restore cat_preps "$work/prod-v2.dump" "$work/stashp0" cat_preps cat_preps >/dev/null 2>&1; then fail 'stash: prepared restore from the candidate accepted'; fi
-stash_restore cat_preps "$work/prod-v2.dump" "$work/stashp" cat_preps cat_dsts > "$work/stashp.out" 2>&1 || { cat "$work/stashp.out"; fail 'stash: prepared restore refused'; }
+if STASH_TAG=runP stash_restore cat_preps "$work/prod-v2.dump" "$work/stashp0" cat_preps "" >/dev/null 2>&1; then fail 'stash: prepared restore without LIVE_DB accepted'; fi
+if STASH_TAG=runP stash_restore cat_preps "$work/prod-v2.dump" "$work/stashp0" cat_preps cat_preps >/dev/null 2>&1; then fail 'stash: prepared restore from the candidate accepted'; fi
+STASH_TAG=runP stash_restore cat_preps "$work/prod-v2.dump" "$work/stashp" cat_preps cat_dsts > "$work/stashp.out" 2>&1 || { cat "$work/stashp.out"; fail 'stash: prepared restore refused'; }
 [[ $(q cat_dsts 'SELECT count(*) FROM artifacts.artifacts') == 5 ]] || fail 'stash: live source mutated by the prepared restore'
 q cat_preps "ALTER TABLE artifacts.artifacts ADD COLUMN union_next_release TEXT NOT NULL DEFAULT 'next'" >/dev/null
 q cat_preps "INSERT INTO drizzle.__drizzle_migrations (hash, created_at) VALUES ('simulated-next-release', now())" >/dev/null
@@ -413,7 +413,7 @@ PGDATABASE=cat_sc_src bash "$CATALOGUE" export --out-dir "$work/sc-export" >/dev
 fk_count() { q "$1" "SELECT count(*) FROM pg_constraint c JOIN pg_namespace n ON n.oid = c.connamespace WHERE c.contype = 'f' AND n.nspname = 'artifacts'"; }
 # Missing prod blob in the preprod bucket: refused before any preprod row is imported.
 apply_schema cat_sc_miss; seed_scope_prod cat_sc_miss
-PGDATABASE=cat_sc_miss bash "$CATALOGUE" stash --in-dir "$work/sc-export" >/dev/null || fail 'scope: stash refused'
+PGDATABASE=cat_sc_miss bash "$CATALOGUE" stash --in-dir "$work/sc-export" --tag scope-run >/dev/null || fail 'scope: stash refused'
 printf '%s\n' "$HB" > "$work/keys-missing.txt"
 if PGDATABASE=cat_sc_miss bash "$CATALOGUE" import-stash --work "$work/sc-miss" --rewrite-from "$PS" --rewrite-to "$QS" --blob-keys "$work/keys-missing.txt" > "$work/sc-miss.out" 2>&1; then
   fail 'scope: missing blob accepted'
@@ -421,10 +421,12 @@ fi
 grep -q 'blob-check: 1 blob' "$work/sc-miss.out" || { cat "$work/sc-miss.out"; fail 'scope: refusal is not the blob check'; }
 [[ $(q cat_sc_miss "SELECT count(*) FROM artifacts.artifacts WHERE id IN ('$QA', '$QB')") == 0 ]] || fail 'scope: preprod rows imported despite the missing blob'
 PGDATABASE=cat_sc_miss bash "$CATALOGUE" stash-exists || fail 'scope: stash lost by the refusal'
+[[ $(q cat_sc_miss "SELECT count(*) FROM artifacts.artifacts WHERE storage_scope_id = '$PS'") == 1 ]] || fail 'scope: rewrite committed although a blob is missing'
+[[ $(q cat_sc_miss "SELECT count(*) FROM artifacts.storage_scopes WHERE id = '$PS'") == 1 ]] || fail 'scope: prod scope row lost by the refusal'
 # All blobs present: rewrite, union, final check.
 apply_schema cat_sc; seed_scope_prod cat_sc
 fks=$(fk_count cat_sc)
-PGDATABASE=cat_sc bash "$CATALOGUE" stash --in-dir "$work/sc-export" >/dev/null || fail 'scope: stash refused'
+PGDATABASE=cat_sc bash "$CATALOGUE" stash --in-dir "$work/sc-export" --tag scope-run >/dev/null || fail 'scope: stash refused'
 printf '%s\n%s\n' "$HA" "$HB" > "$work/keys-all.txt"
 PGDATABASE=cat_sc bash "$CATALOGUE" import-stash --work "$work/sc" --rewrite-from "$PS" --rewrite-to "$QS" --blob-keys "$work/keys-all.txt" > "$work/sc.out" 2>&1 \
   || { cat "$work/sc.out"; fail 'scope: import with rewrite refused'; }
@@ -439,4 +441,45 @@ if PGDATABASE=cat_sc bash "$CATALOGUE" stash-exists; then fail 'scope: stash not
 # Relaunch: rewrite and blob check are idempotent.
 PGDATABASE=cat_sc bash "$CATALOGUE" import-stash --work "$work/sc2" --rewrite-from "$PS" --rewrite-to "$QS" --blob-keys "$work/keys-all.txt" >/dev/null 2>&1 || fail 'scope: relaunch refused'
 printf 'Scope rewrite green: prod rows under the preprod scope, preprod scope config kept, slug collision journaled, blob check refuses a missing blob\n'
+
+# ── Stale stash of another run (review 2026-11-15): never imported alone ─────
+# Run 1 stashes and replays prod, its catalogue import never completes, the
+# site reopens and preprod work continues (Q9). Run 2 must keep run 1's
+# generation AND export the live database again: both are imported, newest
+# first, and nothing created in between is lost.
+Q9=e2000000-0000-0000-0000-000000000009
+createdb --template=template0 cat_stale
+pg_restore --no-owner --no-privileges --exit-on-error --dbname=cat_stale "$work/preprod-live.dump"
+STASH_TAG=run1 stash_restore cat_stale "$work/prod-v2.dump" "$work/stale1" > "$work/stale1.out" 2>&1 || { cat "$work/stale1.out"; fail 'stale: run 1 refused'; }
+q cat_stale "INSERT INTO artifacts.artifacts (id, storage_scope_id, owner_id, binding_name, profile) VALUES ('$Q9', '$SCOPE', 'pre-user', 'q9', '{\"v\":\"after-reopen\"}')" >/dev/null
+STASH_TAG=run2 stash_restore cat_stale "$work/prod-v2.dump" "$work/stale2" > "$work/stale2.out" 2>&1 || { cat "$work/stale2.out"; fail 'stale: run 2 refused'; }
+grep -q 'pending catalogue stash from another run (run1)' "$work/stale2.out" || { cat "$work/stale2.out"; fail 'stale: stash of another run silently reused'; }
+[[ $(q cat_stale "SELECT string_agg(tag, ',' ORDER BY seq) FROM catalogue_stash.meta") == run1,run2 ]] || fail 'stale: generations not kept newest last'
+[[ $(q cat_stale "SELECT count(*) FROM artifacts.artifacts WHERE id = '$Q9'") == 0 ]] || fail 'stale: run 2 did not replay prod'
+PGDATABASE=cat_stale bash "$CATALOGUE" import-stash --work "$work/stale-import" > "$work/stale-import.out" 2>&1 || { cat "$work/stale-import.out"; fail 'stale: import refused'; }
+[[ $(q cat_stale "SELECT count(*) FROM artifacts.artifacts WHERE id IN ('$Q1', '$Q2', '$Q9')") == 3 ]] || fail 'stale: preprod artifacts lost across runs'
+[[ $(q cat_stale "SELECT count(DISTINCT generation) FROM catalogue_journal.imports") == 2 ]] || fail 'stale: both generations not imported'
+if PGDATABASE=cat_stale bash "$CATALOGUE" stash-exists; then fail 'stale: stash not dropped'; fi
+# Same run relaunched after its replay reuses its own generation only.
+STASH_TAG=run3 stash_restore cat_stale "$work/prod-v2.dump" "$work/stale3" >/dev/null 2>&1 || fail 'stale: run 3 refused'
+STASH_TAG=run3 stash_restore cat_stale "$work/prod-v2.dump" "$work/stale3b" > "$work/stale3b.out" 2>&1 || fail 'stale: run 3 relaunch refused'
+grep -q 'stash of this run already present' "$work/stale3b.out" || fail 'stale: same-run relaunch did not reuse its stash'
+[[ $(q cat_stale "SELECT count(*) FROM catalogue_stash.meta") == 1 ]] || fail 'stale: same-run relaunch added a generation'
+printf 'Stale stash green: another run never imported alone, both generations imported, no artifact lost\n'
+
+# ── Schema gate refuses before loading (review 2026-11-15) ────────────────────
+createdb --template=template0 cat_gate1; createdb --template=template0 cat_gate2
+for db in cat_gate1 cat_gate2; do pg_restore --no-owner --no-privileges --exit-on-error --dbname=$db "$work/prod-v2.dump"; done
+PGDATABASE=cat_stale bash "$CATALOGUE" export --out-dir "$work/gate-export" >/dev/null || fail 'gate: export refused'
+q cat_gate1 "ALTER TABLE artifacts.artifacts ADD COLUMN must_fill TEXT" >/dev/null
+q cat_gate1 "UPDATE artifacts.artifacts SET must_fill = 'x'" >/dev/null
+q cat_gate1 "ALTER TABLE artifacts.artifacts ALTER COLUMN must_fill SET NOT NULL" >/dev/null
+q cat_gate1 "INSERT INTO drizzle.__drizzle_migrations (hash, created_at) VALUES ('simulated-not-null', now())" >/dev/null
+if PGDATABASE=cat_gate1 bash "$CATALOGUE" import --in-dir "$work/gate-export" > "$work/gate1.out" 2>&1; then fail 'gate: NOT NULL without default accepted'; fi
+grep -q 'NOT NULL without default absent from the export on artifacts' "$work/gate1.out" || { cat "$work/gate1.out"; fail 'gate: NOT NULL refusal not raised by the gate'; }
+q cat_gate2 "ALTER TABLE artifacts.artifacts ALTER COLUMN binding_name TYPE varchar(200)" >/dev/null
+if PGDATABASE=cat_gate2 bash "$CATALOGUE" import --in-dir "$work/gate-export" > "$work/gate2.out" 2>&1; then fail 'gate: type change accepted'; fi
+grep -q 'column type mismatch on artifacts (binding_name)' "$work/gate2.out" || { cat "$work/gate2.out"; fail 'gate: type refusal not raised by the gate'; }
+for db in cat_gate1 cat_gate2; do [[ $(q $db "SELECT count(*) FROM artifacts.artifacts") == 3 ]] || fail "gate: $db catalogue touched by a refused import"; done
+printf 'Schema gate green: NOT NULL without default and type change refused before any load\n'
 printf 'Catalogue preservation round-trip green: witness byte-identical, identities remapped, prod untouched\n'
