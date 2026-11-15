@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { test } from 'node:test';
+import { join } from 'node:path';
 
 const config = readFileSync('deploy/cutover/config.json', 'utf8');
 const jq = (file, record, args = []) => {
@@ -100,6 +101,21 @@ test('prepare holds radar-refresh-pv; the switch to the prepared snapshot releas
     const run = f.run('run', ['MODE=run']);
     assert.equal(run.status, 0, run.stdout + run.stderr);
     assert.ok(run.stdout.includes('RELEASED radar-refresh-pv'), run.stdout);
+    assert.equal(refresh(f).spec.suspend, false);
+    assert.equal(held(refresh(f)), undefined);
+  } finally { f.cleanup(); }
+});
+test('daily restore releases a manual hold whose annotation is free text', () => {
+  const f = fixture();
+  try {
+    const state = f.state();
+    const cronjob = state.objects.find((o) => o.kind === 'CronJob' && o.metadata.name === 'radar-refresh-pv');
+    cronjob.spec.suspend = true;
+    cronjob.metadata.annotations = { 'sentropic.io/held-until-coherent': 'i-cond 2026-11-15: preprod PG/S3 incoherent, held until #1113 restore' };
+    writeFileSync(join(f.dir, 'state.json'), JSON.stringify(state));
+    const result = f.run();
+    assert.equal(result.status, 0, result.stdout + result.stderr);
+    assert.ok(result.stdout.includes('RELEASED radar-refresh-pv'), result.stdout);
     assert.equal(refresh(f).spec.suspend, false);
     assert.equal(held(refresh(f)), undefined);
   } finally { f.cleanup(); }
