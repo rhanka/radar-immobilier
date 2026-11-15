@@ -217,3 +217,23 @@ test('stable and pinned URL derivation still keys on artifact and release ids', 
   assert.match(composition, /stableUrl: `https:\/\/\$\{artifactId\}/);
   assert.match(composition, /pinnedUrl: `https:\/\/\$\{releaseId\}\.pinned\./);
 });
+
+test('union rule: prod wins on unique keys, every dropped preprod row is journaled', () => {
+  const body = fs.readFileSync(script, 'utf8');
+  assert.match(body, /ON CONFLICT DO NOTHING/, 'insert keeps the live (prod) row on any unique key');
+  assert.match(body, /collision:prod-wins/, 'collisions are journaled');
+  assert.match(body, /orphan:/, 'children of a lost parent are journaled');
+  assert.match(body, /union does not add up/, 'per-table accounting refuses silent loss');
+  assert.match(body, /DISABLE TRIGGER USER/, 'foreign keys stay enforced during the union load');
+  assert.doesNotMatch(body, /DISABLE TRIGGER ALL/, 'no load path bypasses foreign keys');
+});
+
+test('artifact blobs in S3 are additive on restore: never mirrored, never pruned', async () => {
+  const { createRequire } = await import('node:module');
+  const require = createRequire(import.meta.url);
+  const { LAYOUT, isMirrored } = require(path.join(root, 'deploy/ci/bascule-preprod/backup-restore.cjs'));
+  assert.ok(!LAYOUT.mirrorPrefixes.some((p) => 'artifacts/'.startsWith(p) || p.startsWith('artifacts/')), 'artifacts/ is not a mirror prefix');
+  for (const key of ['artifacts/radar-immobilier-preprod/blobs/sha256/aa', 'artifacts/radar-immobilier-prod/blobs/sha256/bb']) {
+    assert.equal(isMirrored(key), false, `${key} survives the restore (preprod) or is copied in (prod)`);
+  }
+});
