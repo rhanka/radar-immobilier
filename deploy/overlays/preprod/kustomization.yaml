@@ -185,3 +185,25 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/resources/requests/cpu
         value: 40m
+# The base radar-api Deployment carries two PROD literal env entries codified
+# from live (POSTGRES_HOST, NODE_OPTIONS=--max-old-space-size=640). Preprod
+# keeps its previous render: both entries are deleted, so preprod reads them
+# from ConfigMap radar-api (envFrom) as before.
+  - target:
+      kind: Deployment
+      name: radar-api
+    patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: radar-api
+      spec:
+        template:
+          spec:
+            containers:
+              - name: api
+                env:
+                  - name: POSTGRES_HOST
+                    $patch: delete
+                  - name: NODE_OPTIONS
+                    $patch: delete
