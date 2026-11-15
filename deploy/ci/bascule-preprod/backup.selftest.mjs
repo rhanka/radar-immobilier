@@ -972,11 +972,12 @@ async function mirrorSuite() {
 
   const nf = incidentFixture({ destExtra: { "graph/../artifacts/x": "A", "refresh/018/./sweep/c.json": "C", "graph//double": "D" } });
   const odd = await step({ s: nf.s, env: docsEnv(nf.manSha, { BR_STEP: "docs" }), copier: deleter });
-  ok("non-canonical keys — counted, never deleted", odd.code === 0 && odd.t.mirrorAnomalies === 3 &&
+  ok("non-canonical keys — counted, never deleted, docs refuses (exit 1)", odd.code === 1 && odd.t.ok === false && odd.t.mirrorAnomalies === 3 && odd.t.deleted === 3 &&
     ["graph/../artifacts/x", "refresh/018/./sweep/c.json", "graph//double"].every((k) => nf.s.latest(DST, k)) &&
     !nf.s.calls.some((c) => c.name === "DeleteObjectCommand" && /\/\.\.?\/|\/\//.test(c.Key)));
   const oddRecon = await step({ s: nf.s, env: docsEnv(nf.manSha, { BR_STEP: "recon" }), copier: deleter });
-  eq("non-canonical keys — recon counts them apart (ok, mirrorAnomalies 3, mirrorExtra 0)", [oddRecon.code, oddRecon.t.mirrorAnomalies, oddRecon.t.mirrorExtra], [0, 3, 0]);
+  eq("non-canonical keys — recon refuses them (exit 1, mirrorAnomalies 3, mirrorExtra 0)", [oddRecon.code, oddRecon.t.ok, oddRecon.t.mirrorAnomalies, oddRecon.t.mirrorExtra], [1, false, 3, 0]);
+  ok("non-canonical keys — the refusal says how to resolve", oddRecon.logs.some((l) => /non-canonical object\(s\).*remove them by hand/.test(l)));
 
   const gf = incidentFixture({ noGraph: true });
   const empty = await step({ s: gf.s, env: docsEnv(gf.manSha, { BR_STEP: "docs" }), copier: deleter });

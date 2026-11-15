@@ -33,7 +33,7 @@ const jobVerdict = (step, job) => ['database', 'destination', 'reset', 'discard'
     dumpStartedAt: '2026-10-29T01:00:00Z', migrations: 25,
     manifestSha256: 'd'.repeat(64), pgSha256: 'e'.repeat(64), pgSizeBytes: 1024, ...s.pinOverride } :
   (step === 'docs' || step === 'recon') ? { ok: true, date: pin().date, manifestSha256: pin().manifestSha256, missing: 0, sizeMismatch: 0,
-    copyErrors: 0, deleteErrors: 0, mirrorExtra: s.mirrorExtra ?? 0, ...(s.inventoryAnomalies ? {
+    copyErrors: 0, deleteErrors: 0, mirrorExtra: s.mirrorExtra ?? 0, mirrorAnomalies: s.mirrorAnomalies ?? 0, ...(s.inventoryAnomalies ? {
     inventoryAnomalies: s.inventoryAnomalies, inventoryAnomalyCount: s.inventoryAnomalies.length, inventoryAnomaliesTruncated: false } : {}) } :
   step === 'restore' ? { ok: true, date: pin().date, pgSha256: pin().pgSha256, pgSizeBytes: 1024 } : step === 'data' ?
   { ok: true, status: 'open-success', epoch: 'scoped', sealedUnresolved: 0, maintenanceBarrier: false } : { ok: true };
