@@ -21,6 +21,9 @@ Make the sources the prod CD applies (deploy/k8s/30-api.yaml, deploy/k8s/40-immo
   - `deploy/ci/check-h3-preprod-render.sh`
   - `deploy/ci/h3-disabled-fixture.sh`
   - `plan/PRODCM-BRANCH_fix-prod-configmap-codify.md`
+  - `deploy/overlays/preprod/patch-immo-mcp-config.yaml` (comments only)
+  - `docs/spec/mcp/claude-ai-connector-setup.md`
+  - `packages/immo-mcp/src/server-http.ts` (comment only)
 - **Forbidden Paths (must not change in this branch)**:
   - `Makefile`
   - `docker-compose*.yml`
@@ -34,7 +37,7 @@ Make the sources the prod CD applies (deploy/k8s/30-api.yaml, deploy/k8s/40-immo
   - PRODCM-EX1: one CI step in `ci.yml` runs the new gate and its mutation tests. Impact: one offline step in the quality job. Rollback: remove the step.
 
 ## Feedback Loop
-- [ ] `attention`: the production base now carries artifact keys; `check-h3-preprod-render.sh` accepts only the keys listed in `prod-configmap-keys.json` (any other ARTIFACTS_ entry still fails).
+- [x] `attention`: the production base now carries artifact keys; `check-h3-preprod-render.sh` masks only the key names of the listed radar-api keys, inside ConfigMap radar-api data; values are still checked and the same key elsewhere still fails (review #1114).
 - [ ] `attention`: preprod render gains `IMMO_ARTIFACTS_LIVE_REDRIVE_ENABLED: "false"` on radar-api (inherited, equals the code default).
 
 ## Plan / Todo (lot-based)
