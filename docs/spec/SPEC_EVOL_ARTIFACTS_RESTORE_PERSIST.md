@@ -108,16 +108,33 @@ Consequences:
 
 - Preprod blobs: no restore step writes or deletes in the preprod artifacts
   bucket, so preprod-own rows keep their blobs.
-- Prod rows imported by the union keep scope `radar-immobilier`; their blobs
-  are in the PROD artifacts bucket. No step copies them to the preprod bucket,
-  and the preprod API serves scope `radar-immobilier-preprod` only. GAP, owner
-  decision needed: copy prod blobs into the preprod bucket and/or rewrite the
-  scope of imported prod rows, or accept prod rows as catalogue-only in preprod.
-  This was already the state before this change (a restore replaced the
-  preprod catalogue with prod-scope rows).
-- Distinct scopes mean a slug collision `(storage_scope_id, owner_id,
-  binding_name)` cannot occur between a prod row and a preprod-own row; UUID
-  collisions and prod rows carried by an earlier restore remain the cases.
+- Owner decision 2026-11-15: copy the files and move to the preprod scope.
+  The `catalogue` Job first runs the `blobs` init container
+  (`deploy/cutover/artifacts-blobs.sh`, s5cmd): it lists
+  `artifacts/radar-immobilier/blobs/sha256/` of the prod bucket and
+  `artifacts/radar-immobilier-preprod/blobs/sha256/` of the preprod bucket and
+  copies only the missing names (`cp -n`, content addressed: same name = same
+  bytes). No delete; the prod bucket is only listed and read. Guards: the
+  destination differs from the source, ends in `-preprod` and is not in
+  `FORBIDDEN_DST_BUCKETS` (prod artifacts, prod documents, prod recovery,
+  backup buckets); the render refuses outside preprod.
+- Then `import-stash --rewrite-from radar-immobilier --rewrite-to
+  radar-immobilier-preprod`: every `artifacts.*` row of the prod scope moves to
+  the preprod scope in one transaction (foreign keys on `storage_scope_id`
+  dropped and re-created, validated), BEFORE the union. Blob keys follow the
+  scope. Content URLs derive from the artifact or release UUID and the
+  environment content base, so they need no rewrite. JSON values embedding the
+  scope (receipts, signed bodies) are left unchanged. Scope configuration stays
+  the preprod one: the preprod `storage_scopes` row comes from the export,
+  prod `host_policy` and `host_quotas` rows are dropped and the preprod ones
+  return with the union.
+- After the rewrite, a slug collision `(storage_scope_id, owner_id,
+  binding_name)` between a prod row and a preprod-own row is possible: prod
+  wins and the preprod row is journaled, like a UUID collision.
+- Blob check (`blob-check`), before the union and again after it: every
+  `sha256:` digest of the releases of visible artifacts (lifecycle not
+  deleted/purged, release not purged) of the preprod scope must be in the
+  preprod bucket listing taken by the init container, else the Job refuses.
 - The docs restore Job (#1113) mirrors only `graph/` and `refresh/018/` of the
   docs bucket; a hermetic test pins `artifacts/` outside its mirror prefixes.
 
