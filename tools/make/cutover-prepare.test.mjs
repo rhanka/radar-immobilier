@@ -8,6 +8,9 @@ const clone = value => JSON.parse(JSON.stringify(value));
 const success = r => assert.equal(r.status, 0, r.stdout + r.stderr);
 const object = (f, name) => f.state().objects.find(o => o.metadata.name === name);
 const save = (f, state) => writeFileSync(join(f.dir, 'state.json'), JSON.stringify(state));
+// Documents mirrored without the matching live database: held suspended, original state recorded.
+const assertHeld = (cronjob) => { assert.equal(cronjob.spec.suspend, true);
+  assert.match(cronjob.metadata.annotations?.['sentropic.io/held-until-coherent'] ?? '', /:false$/); };
 test('prepare stamps ready without closing live services and releases the lock during restore', () => {
   const f = fixture();
   try {
@@ -19,7 +22,7 @@ test('prepare stamps ready without closing live services and releases the lock d
     assert.equal(object(f, 'radar-db-credentials').data.POSTGRES_DB, Buffer.from('radar').toString('base64'));
     assert.equal(object(f, 'radar-change-lock'), undefined);
     assert.equal(object(f, 'radar-api-prepared'), undefined);
-    assert.equal(object(f, 'radar-refresh-pv').spec.suspend, false);
+    assertHeld(object(f, 'radar-refresh-pv'));
     const restore = f.state().jobCreation.find(j => j.step === 'restore');
     assert.deepEqual([restore.closed, restore.lockHeld, restore.preparedStatus, restore.watchdogSuspended], [false, false, 'preparing', true]);
     for (const job of f.state().objects.filter(o => o.kind === 'Job' && /-(restore|ddl|data)$/.test(o.metadata.name))) {
@@ -57,7 +60,7 @@ for (const step of ['restore', 'ddl', 'data']) test(`prepare fails pipeline and 
     assert.notEqual(f.run('prepare').status, 0);
     assert.equal(object(f, 'radar-prepared-db').data.status, 'failed');
     assert.ok(f.state().jobCreation.some(j => j.step === 'discard'));
-    assert.equal(object(f, 'radar-refresh-pv').spec.suspend, false);
+    assertHeld(object(f, 'radar-refresh-pv'));
     assert.equal(object(f, 'radar-api').spec.replicas, 1);
     assert.equal(f.state().jobCreation.some(j => j.closed), false);
   } finally { f.cleanup(); }
@@ -109,7 +112,7 @@ test('cutover refuses stale and mismatched prepared stamps before closure', () =
       assert.notEqual(f.run('run', ['MODE=run']).status, 0, JSON.stringify(change));
       assert.equal(JSON.stringify(object(f, 'application').spec).includes('base-maintenance-'), false);
       assert.equal(object(f, 'radar-api').spec.replicas, 1);
-      assert.equal(object(f, 'radar-refresh-pv').spec.suspend, false);
+      assertHeld(object(f, 'radar-refresh-pv'));
     }
     for (const pinOverride of [{ ageHours: 27 }, { date: '2026-10-30' }]) {
       const state = clone(original); state.pinOverride = pinOverride; save(f, state);
@@ -199,7 +202,7 @@ test('prepare drain ignores terminated writer Pods (Error/Completed) and waits f
     assert.equal(object(f, 'radar-prepared-db').data.status, 'ready');
     assert.equal(f.state().jobCreation.find(j => j.step === 'docs').watchdogSuspended, true);
     assert.ok(drainReads(f).length >= 1);
-    assert.equal(object(f, 'radar-refresh-pv').spec.suspend, false);
+    assertHeld(object(f, 'radar-refresh-pv'));
     assert.equal(object(f, 'radar-refresh-pending-watchdog').spec.suspend, false);
     assert.equal(object(f, 'originally-suspended').spec.suspend, true);
     assert.equal(f.calls().some(c => c.includes('delete') && c.some(a => /\/jobs\/(refresh|watchdog)-/.test(a))), false);
@@ -245,7 +248,7 @@ test('budget exhaustion after closure rolls back automatically and reopens', () 
     assert.equal(object(f, 'radar-change-lock'), undefined);
     assert.deepEqual(object(f, 'application').spec, ingress);
     assert.equal(object(f, 'radar-db-credentials').data.POSTGRES_DB, Buffer.from('radar').toString('base64'));
-    assert.equal(object(f, 'radar-refresh-pv').spec.suspend, false);
+    assertHeld(object(f, 'radar-refresh-pv'));
     const receipt = JSON.parse(object(f, 'radar-cutover-receipt').data.receipt);
     assert.equal(receipt.checkpoints.switch, 'rolled-back');
     assert.ok(Object.values(receipt.jobs).every(j => j.outcome === 'completed'));
@@ -309,7 +312,7 @@ test('rollback reopens when the record holds a terminated Failed Job', () => {
     success(f.run('rollback', [`RUN=${record.run}`, 'MODE=run']));
     assert.deepEqual(object(f, 'application').spec, ingress);
     assert.equal(object(f, 'radar-change-lock'), undefined);
-    assert.equal(object(f, 'radar-refresh-pv').spec.suspend, false);
+    assertHeld(object(f, 'radar-refresh-pv'));
     assert.equal(JSON.parse(object(f, 'radar-cutover-receipt').data.receipt).checkpoints.switch, 'rolled-back');
   } finally { f.cleanup(); }
 });

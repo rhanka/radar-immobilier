@@ -10,6 +10,9 @@ const lock = f => f.state().objects.find(o => o.metadata.name === 'radar-change-
 const record = f => JSON.parse(lock(f).data.record);
 const save = (f, state) => writeFileSync(join(f.dir, 'state.json'), JSON.stringify(state));
 const jobs = (f, step) => f.state().objects.filter(o => o.kind === 'Job' && o.metadata.name.endsWith(`-${step}`));
+// Documents mirrored without the matching live database: held suspended, original state recorded.
+const assertHeld = (cronjob) => { assert.equal(cronjob.spec.suspend, true);
+  assert.match(cronjob.metadata.annotations?.['sentropic.io/held-until-coherent'] ?? '', /:false$/); };
 function addArtifactIngress(f) {
   const state = f.state();
   state.objects.push({ apiVersion: 'v1', kind: 'Ingress', metadata: { name: 'radar-artifact-content', uid: 'uid-artifact', resourceVersion: '1' },
@@ -22,7 +25,7 @@ function assertReopened(f, originals) {
   assert.equal(lock(f), undefined, 'lock released after reopening');
   for (const ingress of objects.filter(o => o.kind === 'Ingress')) assert.deepEqual(ingress.spec, originals[ingress.metadata.name]);
   for (const name of ['radar-api', 'radar-ui', 'radar-immo-mcp']) assert.equal(objects.find(o => o.metadata.name === name).spec.replicas, 1);
-  assert.equal(objects.find(o => o.metadata.name === 'radar-refresh-pv').spec.suspend, false);
+  assertHeld(objects.find(o => o.metadata.name === 'radar-refresh-pv'));
   assert.equal(objects.find(o => o.metadata.name === 'originally-suspended').spec.suspend, true);
   assert.equal(objects.some(o => o.kind === 'Service' && o.metadata.name.startsWith('base-maintenance-')), false);
   assert.equal(objects.some(o => o.metadata.name === 'radar-cutover-receipt'), false, 'no receipt for an unserved pin');
