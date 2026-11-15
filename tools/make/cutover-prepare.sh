@@ -27,6 +27,7 @@ prepare_database() {
     run_job recon 840 900
     run_job reset 60 90
     run_job restore 1800 1920
+    coherence_gate
     run_job ddl 540 600
     if [[ $(jq -r .release.dataMigration "$WORK/record.json") == 6h ]]; then
       prepared_data_evidence
@@ -43,7 +44,11 @@ prepare_database() {
   run_job destination 60 90
   prepared_smoke
   prepared_slot_lock
+  # Documents now mirror the snapshot of the prepared (not yet live) database:
+  # radar-refresh-pv stays held until the switch proves them coherent.
+  coupled_schedules_decide
   restore_schedules
+  coupled_schedules_apply
   prepared_write ready
   PREPARING=0
   lock_delete
@@ -71,7 +76,9 @@ prepare_failed() {
   fi
   # Serialize restoration of the original schedules with all other writers.
   if [[ $OWNED != 1 ]]; then prepared_slot_lock || return 1; fi
+  coupled_schedules_decide || return 1
   restore_schedules || return 1
+  coupled_schedules_apply || return 1
   prepared_write failed || return 1
   lock_delete
 }
