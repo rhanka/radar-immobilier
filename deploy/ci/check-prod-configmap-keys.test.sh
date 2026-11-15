@@ -76,6 +76,16 @@ bash "$H3" "$SCRATCH/root" >"$SCRATCH/out" 2>&1
 if grep -q "leaked into the production base" "$SCRATCH/out"; then
   ok "H3 gate still refuses an unlisted ARTIFACTS_ key in the base"
 else bad "H3 gate still refuses an unlisted ARTIFACTS_ key in the base"; fi
+h3_leaks() { # h3_leaks <label>: the H3 gate must report a base leak
+  bash "$H3" "$SCRATCH/root" >"$SCRATCH/out" 2>&1
+  if grep -q "leaked into the production base" "$SCRATCH/out"; then ok "$1"; else bad "$1"; fi
+}
+fresh; sed -i 's/^data:$/data:\n  ARTIFACTS_S3_BUCKET: "radar-artifact-x"/' "$SCRATCH/root/deploy/k8s/39-mcp-receiver-config.yaml"
+h3_leaks "H3 gate refuses a listed radar-api key in another ConfigMap"
+fresh; sed -i 's/^  ARTIFACTS_S3_BUCKET: .*/  ARTIFACTS_S3_BUCKET: "radar-artifact-x"/' "$API"
+h3_leaks "H3 gate still checks the value of a listed radar-api key"
+fresh; sed -i 's/^  PORT: "3000"$/  PORT: "3000"\n  IMMO_MCP_ARTIFACTS_LEGACY_READ_SCOPE: "true"/' "$API"
+h3_leaks "H3 gate refuses an immo-mcp-only key in radar-api"
 
 echo "PASS=$PASS FAIL=$FAIL"
 [ "$FAIL" -eq 0 ]
