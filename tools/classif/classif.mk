@@ -172,10 +172,10 @@ classif-l4-optimise: ## Classification pilot L4: 2 max optimisers + reconciliati
 	@test "$(ENV)" = "preprod" || { echo "[classif-l4-optimise] ENV=preprod required"; exit 2; }
 	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l4/optimise.mjs --series $(SERIES) $(if $(DEFERRED),--deferred $(DEFERRED),) $(if $(OPTIMISERS),--optimisers $(OPTIMISERS),) $(if $(RECONCILER),--reconciler $(RECONCILER),) $(if $(DEVIATION),--deviation '$(DEVIATION)',)
 
-classif-l4-blind: ## Classification pilot L4: executor-only blind-half scoring + S113 secondary (SERIES=k CLASSIF_ROLE=test-executor RERUN_INFRA_FAILED=route,route)
+classif-l4-blind: ## Classification pilot L4: executor-only blind-half scoring + S113 secondary (SERIES=k CLASSIF_ROLE=test-executor RERUN_INFRA_FAILED=route,route PILOT=n CONCURRENCY=2)
 	@test "$(ENV)" = "preprod" || { echo "[classif-l4-blind] ENV=preprod required"; exit 2; }
 	@test "$(CLASSIF_ROLE)" = "test-executor" || { echo "[classif-l4-blind] CLASSIF_ROLE=test-executor required"; exit 2; }
-	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l4/blind.mjs --series $(SERIES) $(if $(DEFERRED),--deferred $(DEFERRED),) --concurrency $(if $(CONCURRENCY),$(CONCURRENCY),2) $(if $(RERUN_INFRA_FAILED),--rerun-infra-failed $(RERUN_INFRA_FAILED),) $(CODEX_QUOTA_FLAG)
+	@$(CLASSIF_NODE) $(CLASSIF_DIR)/l4/blind.mjs --series $(SERIES) $(if $(DEFERRED),--deferred $(DEFERRED),) --concurrency $(if $(CONCURRENCY),$(CONCURRENCY),2) $(if $(RERUN_INFRA_FAILED),--rerun-infra-failed $(RERUN_INFRA_FAILED),) $(if $(PILOT),--pilot $(PILOT),) $(CODEX_QUOTA_FLAG)
 
 # L4 GEPA — population of prompts (P0..P4), reflective mutation by astra-max (fallback and
 # repair opus-5.5-max), per-case Pareto selection on the tuning half only, 2 evaluation routes

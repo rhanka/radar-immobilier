@@ -104,14 +104,14 @@ export const callsOf = (home) => {
 export const auditOf = (home) => readFileSync(path.join(home, 'blind', 'access-log.jsonl'), 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l));
 
 /** One blind pass of series k over `routes` with the fake-seat modes in `fake` ({FAKE_GLM, ...}). */
-export async function blindPass(home, { k, routes, fake = {}, argv = [] }) {
+export async function blindPass(home, { k, routes, fake = {}, argv = [], concurrency = 8 }) {
   const restores = Object.entries(fake).map(([key, v]) => swapEnv(key, v));
   const before = callsOf(home).length;
   const { main } = await import('../l4/blind.mjs');
   const skip = EVAL_ROUTES.filter((r) => !routes.includes(r));
   let manifest = null;
   let error = null;
-  try { manifest = await main(['--series', k, '--deferred', skip.join(','), '--concurrency', '8', ...argv]); }
+  try { manifest = await main(['--series', k, '--deferred', skip.join(','), '--concurrency', String(concurrency), ...argv]); }
   catch (e) { error = e; }
   finally { while (restores.length) restores.pop()(); }
   return { manifest, error, calls: callsOf(home).slice(before) };
