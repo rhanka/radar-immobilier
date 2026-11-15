@@ -88,6 +88,12 @@ coupled_schedules_apply() {
     else
       original=$(jq -r --arg key "$key" '.metadata.annotations[$key]//""' <<< "$live")
       [[ -n $original ]] || continue
+      # Only `<run>:(true|false)` records an original state; any other value is a human
+      # hold and is never released automatically (remove or rewrite it by hand).
+      if [[ ! $original =~ ^[A-Za-z0-9._-]{1,64}:(true|false)$ ]]; then
+        printf 'HELD %s: annotation %s is not <run>:(true|false); human hold kept, not released (%s)\n' "$name" "$key" "$RUN"
+        continue
+      fi
       change=$(jq -nc --arg key "$key" --argjson s "$([[ ${original##*:} == true ]] && echo true || echo false)" \
         '[{op:"remove",path:("/metadata/annotations/"+($key|gsub("/";"~1")))},{op:"add",path:"/spec/suspend",value:$s}]')
       patch_uid cronjob "$name" "$(jq -r .metadata.uid <<< "$live")" "$change"

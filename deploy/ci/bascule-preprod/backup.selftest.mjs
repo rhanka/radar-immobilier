@@ -732,7 +732,7 @@ const renders = {
     RESTORE_REQUEST_CPU: RESTORE_RES.requests.cpu, RESTORE_REQUEST_MEMORY: RESTORE_RES.requests.memory,
     RESTORE_LIMIT_CPU: RESTORE_RES.limits.cpu, RESTORE_LIMIT_MEMORY: RESTORE_RES.limits.memory },
   "docs-restore-backup-job.tmpl.yaml": { ...common, JOB_NAME: JOBS.docs, BR_STEP: "docs", COPY_SECRET: "radar-backup-restore-docs", BACKUP_DATE: D, PIN_MANIFEST_SHA256: "a".repeat(64),
-    DST_BUCKET: DST, FORBIDDEN_DST_BUCKETS: PROD, COPY_GRANTEE: "g", COPY_CONCURRENCY: "48", DOCS_DRY: "0" },
+    DST_BUCKET: DST, FORBIDDEN_DST_BUCKETS: PROD, COPY_GRANTEE: "g", COPY_CONCURRENCY: "48", DOCS_DRY: "0", MIRROR_FORCE: "0", MIRROR_MAX_DELETE_RATIO: "0.5" },
 };
 for (const [tmpl, vars] of Object.entries(renders)) {
   const { text, leftover } = render(tmpl, vars);
@@ -838,16 +838,23 @@ async function refsSuite() {
 // Backup D holds prod's canonical graph and refresh/018 state for one city. The
 // preprod bucket holds a preprod run of the same city (other digest, its own
 // receipts and ledger), the preprod sweep cursor, an artifact blob and raw docs.
-function incidentFixture() {
+function incidentFixture({ prodExtra = {}, destExtra = {}, noGraph = false } = {}) {
   const s = new Store();
   const city = "mont-tremblant";
-  const prod = {
+  // barkmere: identical in prod D and preprod (keeps the deletion ratio realistic).
+  const shared = {
+    "graph/barkmere/latest.json": '{"nodes":["barkmere"]}',
+    "refresh/018/barkmere/coverage.json": '{"ledger":"barkmere"}',
+    "refresh/018/barkmere/runs/prod2/state.json": '{"run":"prod2"}',
+  };
+  const prod = { ...shared, ...prodExtra,
     [`graph/${city}/latest.json`]: '{"nodes":["prod-D"]}',
     [`refresh/018/${city}/coverage.json`]: '{"ledger":"prod-D"}',
     [`refresh/018/${city}/runs/prodrun/state.json`]: '{"run":"prod"}',
     [`refresh/018/${city}/runs/prodrun/receipts/published.json`]: '{"stage":"published"}',
     "raw/prod.pdf": "PROD-PDF",
   };
+  if (noGraph) for (const k of Object.keys(prod)) if (k.startsWith("graph/")) delete prod[k];
   const objects = Object.entries(prod).map(([key, body]) => {
     const v = s.put(B, "docs/" + key, body, "2026-11-14T02:30:00Z");
     return { key, size: v.Size, etag: v.ETag, state: "backed-up", backupEtag: v.ETag, versionId: v.VersionId };
@@ -869,6 +876,7 @@ function incidentFixture() {
   s.put(DST, "refresh/018/sweep/cursor.json", '{"cursor":"preprod"}');
   s.put(DST, "artifacts/scope-1/blobs/sha256/abc", "ARTIFACT");
   s.put(DST, "raw/preprod-only.pdf", "PREPROD-PDF");
+  for (const [key, body] of Object.entries({ ...shared, ...destExtra })) s.put(DST, key, body);
   return { s, city, manSha: sha(manBuf) };
 }
 const runDigests = (s, city) => [...(s.b.get(DST) || new Map()).keys()]
@@ -912,7 +920,8 @@ async function mirrorSuite() {
     body(fix.s, "refresh/018/mont-tremblant/coverage.json")], ['{"nodes":["prod-D"]}', '{"ledger":"prod-D"}']);
   eq("mirror — preserved: sweep cursor, artifact blob, preprod raw doc", [body(fix.s, "refresh/018/sweep/cursor.json"),
     body(fix.s, "artifacts/scope-1/blobs/sha256/abc"), body(fix.s, "raw/preprod-only.pdf")], ['{"cursor":"preprod"}', "ARTIFACT", "PREPROD-PDF"]);
-  ok("mirror — the delete probe targets a key outside the snapshot", fix.s.calls.some((c) => c.name === "DeleteObjectCommand" && c.Key === br.LAYOUT.deleteProbeKey));
+  ok("mirror — one delete probe per mirror prefix, outside the snapshot", br.LAYOUT.deleteProbeKeys.every((k) =>
+    fix.s.calls.some((c) => c.name === "DeleteObjectCommand" && c.Key === k)) && br.LAYOUT.deleteProbeKeys.length === 2);
   const after = await step({ s: fix.s, env: docsEnv(fix.manSha, { BR_STEP: "recon" }), copier: deleter });
   ok("mirror — coherence recon passes (exit 0, mirrorExtra 0)", after.code === 0 && after.t.ok === true && after.t.mirrorExtra === 0);
   eq("mirror — recon carries the pinned manifest", after.t.manifestSha256, fix.manSha);
@@ -930,9 +939,61 @@ async function mirrorSuite() {
   const inv = { objects: [{ key: "graph/a/latest.json", state: "backed-up", size: 1 }, { key: "graph/b/latest.json", state: "excluded", size: 1 }] };
   const r = br.reconInventory(inv, new Map([["graph/a/latest.json", { Size: 1 }], ["graph/b/latest.json", { Size: 1 }]]));
   ok("reconInventory — an excluded entry inside a mirror prefix blocks (cannot mirror exactly)", r.ok === false && r.notInBackup === 1);
-  eq("planMirrorPrune — keeps inventory keys, preserved and outside keys", br.planMirrorPrune({ inventory: inv,
-    destIndex: new Map([["graph/a/latest.json", {}], ["graph/z/old.json", {}], ["refresh/018/sweep/c.json", {}], ["raw/x", {}]]) }).toDelete,
-  ["graph/b/latest.json", "graph/z/old.json"].filter((k) => k !== "graph/b/latest.json"));
+  eq("planMirrorPrune — deletes only mirror keys absent from D (inventory, preserved, outside kept)", br.planMirrorPrune({ inventory: inv,
+    destIndex: new Map([["graph/a/latest.json", {}], ["graph/z/old.json", {}], ["graph/y/a.json", {}], ["graph/x/a.json", {}],
+      ["refresh/018/sweep/c.json", {}], ["raw/x", {}]]), maxDeleteRatio: 1 }).toDelete, ["graph/x/a.json", "graph/y/a.json", "graph/z/old.json"]);
+  ok("isNonCanonical — '.', '..' and empty inner segments", br.isNonCanonical("graph/../a") && br.isNonCanonical("refresh/018/./sweep/c") &&
+    br.isNonCanonical("graph//x") && !br.isNonCanonical("graph/x/latest.json") && !br.isNonCanonical("graph/x/"));
+
+  // 6. Review 2026-11-15: hardening of the destructive step.
+  const deletesOf = (s) => s.calls.filter((c) => c.name === "DeleteObjectCommand" && !br.LAYOUT.deleteProbeKeys.includes(c.Key)).length;
+  const cf = incidentFixture();
+  const copyDenied = await step({ s: cf.s, env: docsEnv(cf.manSha, { BR_STEP: "docs" }), copier: { ...deleter, write: [] } });
+  ok(`copy refused — docs fails (exit 1), deletions skipped, nothing deleted (got ${JSON.stringify([copyDenied.code, copyDenied.t.deleteSkipped, copyDenied.t.deleted, deletesOf(cf.s), copyDenied.t.copyErrors, copyDenied.t.reason])})`, copyDenied.code === 1 && copyDenied.t.deleteSkipped === true &&
+    copyDenied.t.deleted === 0 && deletesOf(cf.s) === 0 && copyDenied.t.copyErrors === 5);
+  ok("copy refused — preprod lineage untouched", runDigests(cf.s, cf.city).includes("preprodrun"));
+
+  const pf = incidentFixture();
+  const partial = await step({ s: pf.s, env: docsEnv(pf.manSha, { BR_STEP: "docs" }), copier: { ...copierPolicy, delete: [`${DST}/refresh/018/`] } });
+  ok("partial delete right (refresh/018/ only) — refused (exit 2) before any copy or delete", partial.code === 2 &&
+    partial.t.reason === "mirror-delete-denied" && pf.s.copies.length === 0 && deletesOf(pf.s) === 0);
+
+  const big = {}; const bigExtra = {};
+  for (let i = 0; i < 1500; i++) big[`refresh/018/big/runs/prod/${String(i).padStart(4, "0")}.json`] = "P" + i;
+  for (let i = 0; i < 1200; i++) bigExtra[`refresh/018/big/runs/preprod/${String(i).padStart(4, "0")}.json`] = "Q" + i;
+  const bf = incidentFixture({ prodExtra: big, destExtra: { ...big, ...bigExtra } });
+  const paged = await step({ s: bf.s, env: docsEnv(bf.manSha, { BR_STEP: "docs" }), copier: deleter });
+  eq("pagination > 1000 keys — 1203 deletions, mirror exact", [paged.code, paged.t.deleted, paged.t.mirrorExtra], [0, 1203, 0]);
+  ok("pagination > 1000 keys — the listing is paged (pages of 2 keys)", bf.s.counts.ListObjectsV2Command > 1000);
+
+  const lf = incidentFixture();
+  const listErr = await step({ s: lf.s, env: docsEnv(lf.manSha, { BR_STEP: "docs" }), copier: { ...deleter, list: [] } });
+  ok("listing error — docs fails (exit 1), no copy, no delete", listErr.code === 1 && lf.s.copies.length === 0 && deletesOf(lf.s) === 0 && !lf.s.deletes);
+
+  const nf = incidentFixture({ destExtra: { "graph/../artifacts/x": "A", "refresh/018/./sweep/c.json": "C", "graph//double": "D" } });
+  const odd = await step({ s: nf.s, env: docsEnv(nf.manSha, { BR_STEP: "docs" }), copier: deleter });
+  ok("non-canonical keys — counted, never deleted", odd.code === 0 && odd.t.mirrorAnomalies === 3 &&
+    ["graph/../artifacts/x", "refresh/018/./sweep/c.json", "graph//double"].every((k) => nf.s.latest(DST, k)) &&
+    !nf.s.calls.some((c) => c.name === "DeleteObjectCommand" && /\/\.\.?\/|\/\//.test(c.Key)));
+  const oddRecon = await step({ s: nf.s, env: docsEnv(nf.manSha, { BR_STEP: "recon" }), copier: deleter });
+  eq("non-canonical keys — recon counts them apart (ok, mirrorAnomalies 3, mirrorExtra 0)", [oddRecon.code, oddRecon.t.mirrorAnomalies, oddRecon.t.mirrorExtra], [0, 3, 0]);
+
+  const gf = incidentFixture({ noGraph: true });
+  const empty = await step({ s: gf.s, env: docsEnv(gf.manSha, { BR_STEP: "docs" }), copier: deleter });
+  ok("volume guard — snapshot without graph/ while preprod has it: refused (exit 2), no write", empty.code === 2 &&
+    empty.t.reason === "mirror-volume-guard" && gf.s.copies.length === 0 && !gf.s.deletes);
+  const emptyDry = await step({ s: gf.s, env: docsEnv(gf.manSha, { BR_STEP: "docs", DOCS_DRY: "1" }), copier: deleter });
+  ok("volume guard — the dry run reports it (exit 2)", emptyDry.code === 2 && emptyDry.t.mirrorGuard.includes("snapshot-empty:graph/"));
+  const forced = await step({ s: gf.s, env: docsEnv(gf.manSha, { BR_STEP: "docs", MIRROR_FORCE: "1" }), copier: deleter });
+  ok("volume guard — MIRROR_FORCE=1 overrides it", forced.code === 0 && forced.t.mirrorExtra === 0);
+  const rf = incidentFixture({ destExtra: bigExtra });
+  const ratio = await step({ s: rf.s, env: docsEnv(rf.manSha, { BR_STEP: "docs" }), copier: deleter });
+  ok("volume guard — more than 50 % of refresh/018/ to delete: refused (exit 2), no write", ratio.code === 2 &&
+    ratio.t.mirrorGuard.includes("ratio:refresh/018/") && rf.s.copies.length === 0 && !rf.s.deletes);
+  const raised = await step({ s: rf.s, env: docsEnv(rf.manSha, { BR_STEP: "docs", MIRROR_MAX_DELETE_RATIO: "1" }), copier: deleter });
+  ok("volume guard — MIRROR_MAX_DELETE_RATIO=1 accepts it", raised.code === 0 && raised.t.deleted === 1203);
+  const badRatio = await step({ s: rf.s, env: docsEnv(rf.manSha, { BR_STEP: "docs", MIRROR_MAX_DELETE_RATIO: "2" }), copier: deleter });
+  ok("volume guard — invalid ratio refused", badRatio.code === 2);
 }
 
 await suite();
