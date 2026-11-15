@@ -70,7 +70,7 @@ coupled_schedules_decide() {
   mv "$WORK/next.json" "$WORK/record.json"; record_save
 }
 coupled_schedules_apply() {
-  local decision name live original suspend key=sentropic.io/held-until-coherent
+  local decision name live original change key=sentropic.io/held-until-coherent
   decision=$(jq -r '.coupledSchedules//"keep"' "$WORK/record.json")
   [[ $decision != keep ]] || return 0
   while read -r name; do
@@ -79,16 +79,18 @@ coupled_schedules_apply() {
       # The first hold records the original state; a later hold never overwrites it.
       if jq -e --arg key "$key" '.metadata.annotations[$key]==null' <<< "$live" >/dev/null; then
         original=$(jq -r --arg n "$name" '[.cronjobs[]|select(.name==$n)|.suspend==true]|first//false' "$WORK/record.json")
-        "${k[@]}" patch cronjob "$name" --type=merge -p "$(jq -nc --arg key "$key" --arg v "$RUN:$original" \
-          '{metadata:{annotations:{($key):$v}},spec:{suspend:true}}')" >/dev/null
+        change=$(jq -c --arg key "$key" --arg v "$RUN:$original" '[{op:"add",path:"/spec/suspend",value:true}]+
+          if .metadata.annotations==null then [{op:"add",path:"/metadata/annotations",value:{($key):$v}}]
+          else [{op:"add",path:("/metadata/annotations/"+($key|gsub("/";"~1"))),value:$v}] end' <<< "$live")
+        patch_uid cronjob "$name" "$(jq -r .metadata.uid <<< "$live")" "$change"
       fi
       printf 'HELD %s suspended: live database and mirrored documents not proven coherent (%s)\n' "$name" "$RUN"
     else
       original=$(jq -r --arg key "$key" '.metadata.annotations[$key]//""' <<< "$live")
       [[ -n $original ]] || continue
-      suspend=false; [[ ${original##*:} != true ]] || suspend=true
-      "${k[@]}" patch cronjob "$name" --type=merge -p "$(jq -nc --arg key "$key" --argjson s "$suspend" \
-        '{metadata:{annotations:{($key):null}},spec:{suspend:$s}}')" >/dev/null
+      change=$(jq -nc --arg key "$key" --argjson s "$([[ ${original##*:} == true ]] && echo true || echo false)" \
+        '[{op:"remove",path:("/metadata/annotations/"+($key|gsub("/";"~1")))},{op:"add",path:"/spec/suspend",value:$s}]')
+      patch_uid cronjob "$name" "$(jq -r .metadata.uid <<< "$live")" "$change"
       printf 'RELEASED %s: live database and mirrored documents share one snapshot (%s)\n' "$name" "$RUN"
     fi
   done < <(jq -r '.preprod.coherenceSchedules//[]|.[]' "$CONFIG")
