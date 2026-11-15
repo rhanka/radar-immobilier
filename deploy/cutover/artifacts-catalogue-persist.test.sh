@@ -361,6 +361,9 @@ PGDATABASE=cat_dsts bash "$CATALOGUE" import-stash --work "$work/stash-import2" 
 # The next restore keeps the conflict journal (schema reset spares it).
 stash_restore cat_dsts "$work/prod-v2.dump" "$work/stash3" > "$work/stash3.out" 2>&1 || { cat "$work/stash3.out"; fail 'stash restore 2 refused'; }
 [[ $(q cat_dsts 'SELECT count(*) FROM catalogue_journal.conflicts') == 3 ]] || fail 'stash: journal lost by the next restore'
+# The export carried the newer schema: the migrations run again before the import.
+q cat_dsts "ALTER TABLE artifacts.artifacts ADD COLUMN union_next_release TEXT NOT NULL DEFAULT 'next'" >/dev/null
+q cat_dsts "INSERT INTO drizzle.__drizzle_migrations (hash, created_at) VALUES ('simulated-next-release', now())" >/dev/null
 PGDATABASE=cat_dsts bash "$CATALOGUE" import-stash --work "$work/stash-import3" >/dev/null 2>&1 || fail 'stash: import after the second restore refused'
 [[ $(q cat_dsts 'SELECT count(*) FROM artifacts.artifacts') == 5 ]] || fail 'stash: second restore lost the union'
 [[ $(q cat_dsts 'SELECT count(*) FROM catalogue_journal.conflicts') == 3 ]] || fail 'stash: conflict-free import added journal lines'
