@@ -14,6 +14,7 @@
  * i-cond #3 steer (A): measure the served payload, don't conclude from the code.
  */
 import { describe, it, expect, vi } from "vitest";
+vi.mock("../services/graph/class-annotations.js", () => ({ readClassAnnotations: vi.fn(async () => new Map()) }));
 import { rawMetaKey } from "@radar/sources";
 
 import { graphSignalsRoute } from "./graph-signals.js";

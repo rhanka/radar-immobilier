@@ -4,7 +4,7 @@
  * the existing event; inactive-to-inactive without history appends nothing.
  */
 import { randomUUID } from "node:crypto";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import type { Basket, FacetCommand } from "./writer.js";
 import {
@@ -22,6 +22,7 @@ type ScopedTx = Parameters<Parameters<Database["transaction"]>[0]>[0];
 export async function appendScopedTransition(
   tx: ScopedTx, ownerId: string, command: FacetCommand, streamId: string,
   facet: string, basket: string | null, state: string, fingerprint: string,
+  classFeedbackId?: string,
 ) {
   const { target } = command;
   const reasonCode = state === "active" ? command.reasonCode ?? null : null;
@@ -33,7 +34,14 @@ export async function appendScopedTransition(
   if (current?.state === state && current.reasonCode === reasonCode) {
     return current;
   }
-  if (!current && state === "inactive") return null;
+  if (!current && state === "inactive") {
+    // Clearing an AI class is a human annotation, even without prior human
+    // stream history. Preserve the legacy no-op when no AI class exists.
+    const automatic = await tx.execute(sql`SELECT 1 FROM signal_class_annotations
+      WHERE city_slug=${target.citySlug} AND node_type=${target.type} AND node_id=${target.id}
+        AND source='ai' LIMIT 1`);
+    if (automatic.rows.length === 0) return null;
+  }
   if (reasonCode !== null) {
     const [reason] = await tx.select().from(facetReasonCodes).where(and(
       eq(facetReasonCodes.profileId, FACET_PROFILE), eq(facetReasonCodes.code, reasonCode),
@@ -45,6 +53,7 @@ export async function appendScopedTransition(
     await tx.update(facetEvents).set({ supersededBy: id }).where(eq(facetEvents.id, current.id));
   }
   const [event] = await tx.insert(facetEvents).values({
+    classFeedbackId: classFeedbackId ?? null,
     id, ownerId, actorId: ownerId, citySlug: target.citySlug, nodeType: target.type,
     nodeId: target.id, facet, basket, state, reasonCode,
     profileId: reasonCode ? FACET_PROFILE : null,
