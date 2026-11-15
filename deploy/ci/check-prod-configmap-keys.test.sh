@@ -52,6 +52,15 @@ expect fail "a credential-like key is refused even when listed"
 fresh; jq '.["immo-mcp-config"] = []' "$LIST" > "$LIST.new" && mv "$LIST.new" "$LIST"
 expect fail "an empty key list is refused (no vacuous pass)"
 
+fresh; sed -i '/^            - name: NODE_OPTIONS$/,+1d' "$API"
+expect fail "Deployment radar-api without the NODE_OPTIONS literal is refused"
+
+fresh; sed -i 's/^              value: "radar-postgres"$/              value: ""/' "$API"
+expect fail "an empty POSTGRES_HOST literal on Deployment radar-api is refused"
+
+fresh; sed -i '/^                  - name: NODE_OPTIONS$/,+1d' "$SCRATCH/root/deploy/overlays/preprod/kustomization.yaml"
+expect fail "a preprod render carrying the PROD NODE_OPTIONS literal is refused"
+
 fresh
 if bash "$GATE" extract "$SCRATCH/cm.yaml" "$SCRATCH/root" >/dev/null 2>&1 \
   && [ "$(grep -c '^kind: ConfigMap$' "$SCRATCH/cm.yaml")" = 2 ] \
