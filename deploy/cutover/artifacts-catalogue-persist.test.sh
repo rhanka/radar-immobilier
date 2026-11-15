@@ -271,7 +271,9 @@ SQL
 }
 apply_schema cat_pu1; seed_union_prod cat_pu1
 pg_dump --format=custom --dbname=cat_pu1 --file="$work/prod-v1.dump"
-apply_schema cat_pu2; seed_union_prod cat_pu2
+# prod v2 is v1 evolved (same bytes for unchanged rows), not a fresh seed.
+createdb --template=template0 cat_pu2
+pg_restore --no-owner --no-privileges --exit-on-error --dbname=cat_pu2 "$work/prod-v1.dump"
 psql -X -q -v ON_ERROR_STOP=1 --dbname=cat_pu2 <<SQL
 INSERT INTO artifacts.artifacts (id, storage_scope_id, owner_id, binding_name, profile)
   VALUES ('$P2', '$SCOPE', 'prod-user', 'shared-binding', '{"v":"prod"}');
