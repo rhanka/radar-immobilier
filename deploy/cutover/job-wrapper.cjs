@@ -26,10 +26,10 @@ for (const key of ['date', 'backupId', 'dumpStartedAt', 'startedAt']) {
 for (const key of ['manifestSha256', 'pgSha256', 'codeSha']) {
   if (typeof raw[key] === 'string' && /^[a-f0-9]{7,64}$/.test(raw[key])) clean[key] = raw[key];
 }
-for (const key of ['pgSizeBytes', 'docsObjects', 'migrations', 'ageHours', 'copied', 'missing', 'sizeMismatch', 'sealedUnresolved', 'streamsBound', 'pendingReceipts', 'inventoryAnomalyCount', 'notInBackup', 'unresolved', 'excluded', 'upToDate', 'toCopy', 'copyErrors']) {
+for (const key of ['pgSizeBytes', 'docsObjects', 'migrations', 'ageHours', 'copied', 'missing', 'sizeMismatch', 'sealedUnresolved', 'streamsBound', 'pendingReceipts', 'inventoryAnomalyCount', 'notInBackup', 'unresolved', 'excluded', 'upToDate', 'toCopy', 'copyErrors', 'toDelete', 'deleted', 'deleteErrors', 'mirrorExtra', 'mirrorAnomalies']) {
   if (Number.isFinite(raw[key]) && raw[key] >= 0) clean[key] = raw[key];
 }
-for (const key of ['stale', 'staleOverridden', 'maintenanceBarrier', 'inventoryAnomaliesTruncated']) {
+for (const key of ['stale', 'staleOverridden', 'maintenanceBarrier', 'inventoryAnomaliesTruncated', 'deleteSkipped']) {
   if (typeof raw[key] === 'boolean') clean[key] = raw[key];
 }
 // Refusal causes are the fixed chooseVersion tokens (backup-restore.cjs) with numeric counts.
