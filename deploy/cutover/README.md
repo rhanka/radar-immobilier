@@ -66,15 +66,25 @@ the snapshot are deleted. `refresh/018/sweep/` (preprod sweep cursor), the
 artifact catalogue (`artifacts.*` schema, `artifacts/` blobs) and every other
 prefix survive. Deletion needs `DeleteObject` on `graph/*` and
 `refresh/018/*` of the preprod bucket for the copy identity; the docs Job probes
-it before the first write and refuses otherwise. After the restore Job,
+it in both prefixes before the first write and refuses otherwise. Deletions run only
+after every copy succeeded; a copy error skips them all (`deleteSkipped`). Keys
+with a `.`, `..` or empty inner segment are counted (`mirrorAnomalies`) and never
+deleted, but listing readers (`readRefreshStates` lists `refresh/018/<city>/runs/`)
+would still read them: recon and `coherence_gate` refuse while any remains. Remove
+them by hand after review, then re-run; the `Coherence OK` line prints
+`mirror_anomalies=0`. A volume guard refuses before any write when snapshot D holds nothing in a
+mirror prefix that preprod fills, or when more than `MIRROR_MAX_DELETE_RATIO`
+(default 0.5) of a prefix would be deleted; review the logged plan, then pass
+`MIRROR_FORCE=1` (or a higher ratio) to the `make` command. After the restore Job,
 `coherence_gate` (`tools/make/cutover-coherence.jq`) refuses unless the
 database dump, the documents and the recon share the pinned snapshot and the
 mirror prefixes hold nothing outside it. The PG-coupled CronJobs
 (`preprod.coherenceSchedules`: `radar-refresh-pv`) stay suspended from the
 document mirror until the live database is that snapshot: a `prepare` holds
 them (annotation `sentropic.io/held-until-coherent`) until the release switch;
-a successful switch or coherent daily restore releases them to their original
-state; a rollback or a restore reopened without restoration keeps them held.
+a successful switch or coherent daily restore releases them to the original state
+recorded as `<run>:(true|false)`. Any other annotation value is a human hold: it is
+kept and never released automatically (remove it, or write `<token>:false`, by hand); a rollback or a restore reopened without restoration keeps them held.
 
 Incident 2026-11-14: the former additive copy left preprod run receipts and
 ledgers next to the production ones; every projection was then refused with
