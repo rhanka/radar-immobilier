@@ -28,6 +28,9 @@ import { extractRefreshProfile, refreshSourceDocumentDate, type RefreshProfileCh
   type RefreshProfileContext } from "./refresh-profile.js";
 import { canonicalHash } from "./replay/canonical-json.js";
 import { extractionToV23Graph } from "./refresh-v23.js";
+import { attachSinglePassAnnotations, type SinglePassPrompt } from "./refresh-single-pass.js";
+import { writeClassAnnotation, type AiClassAnnotation } from "./class-annotations.js";
+import { classifyPublishedRefresh, type RefreshClassification } from "./refresh-classify.js";
 import { completeRefreshChunk, matchProjectedRefreshState, matchPublishedRefreshState, openRefreshState,
   readCompletedRefreshChunk, readRefreshStates, recordRefreshModel, reserveRefreshChunk, writeRefreshCandidate,
   writeRefreshStageReceipt, type RefreshStage, type RefreshStateHandle } from "./refresh-state.js";
@@ -240,6 +243,8 @@ export interface RunPvRefreshOptions {
   readonly db: Database;
   readonly profileContext: RefreshProfileContext;
   readonly textClient?: TextJsonGenerationClient;
+  readonly singlePassPrompt?: SinglePassPrompt;
+  readonly classification?: RefreshClassification;
   readonly documentModels?: RefreshDocumentModels;
   readonly onModelReceipt?: (docSha: string, chunkId: string, receipt: RefreshModelReceipt) => void;
   readonly extractPdf: (bytes: Uint8Array, sourceUrl: string) => Promise<string>;
@@ -288,6 +293,17 @@ async function completeStage(store: ObjectStore, handle: RefreshStateHandle,
   });
 }
 
+/**
+ * The error a refused projection throws. Its code (`PROJECTION_POSTGRES_REGRESSION_REFUSED`,
+ * `PROJECTION_ABORTED_BEFORE_PROJECTION`, ...) is what the redacted diagnostic logs; the
+ * message, which may name nodes, is never logged. The prefix is deliberately NOT
+ * `REFRESH_`: that namespace drives the sweep outcomes and the ledger failure reasons
+ * ({@link refreshDocumentFailureReason}); this code is diagnostic only.
+ */
+export function refreshProjectionFailure(reason: string, message: string): Error & { code: string } {
+  return Object.assign(new Error(message), { code: `PROJECTION_${reason.toUpperCase().replace(/-/g, "_")}` });
+}
+
 function requireRunning(signal: AbortSignal | undefined, where: string): void {
   if (signal?.aborted) throw new Error(`Refresh aborted ${where}`);
 }
@@ -306,7 +322,7 @@ async function publishSnapshot(options: RunPvRefreshOptions, initial: RefreshSta
     const failProjection = async (reason: string, message: string): Promise<never> => {
       handle = await writeRefreshStageReceipt(options.store, handle, { stage: "projected",
         status: "failed", reason, recordedAt: now().toISOString() });
-      throw new Error(message);
+      throw refreshProjectionFailure(reason, message);
     };
     if (options.signal?.aborted) await failProjection("aborted-before-projection",
       "Refresh aborted before projection");
@@ -319,10 +335,26 @@ async function publishSnapshot(options: RunPvRefreshOptions, initial: RefreshSta
     }
     if (projected.aborted) await failProjection("postgres-regression-refused",
       `Postgres projection refused: ${projected.reason ?? "regression"}`);
+    if (options.singlePassPrompt) {
+      for (const node of target.snapshot.nodes) {
+        if (node.type !== "Signal" && node.type !== "DesignationEvent") continue;
+        const annotation = node.properties?.["classAnnotation"] as AiClassAnnotation | undefined;
+        if (annotation?.source === "ai") {
+          await writeClassAnnotation(options.db, {
+            ...annotation, citySlug: options.citySlug, nodeType: node.type, nodeId: node.id,
+          });
+        }
+      }
+    }
     if (options.signal?.aborted) await failProjection("aborted-after-projection",
       "Refresh aborted after projection");
     handle = await completeStage(options.store, handle, "projected", snapshotHash, now);
   }, { resume, now });
+  if (options.classification) await classifyPublishedRefresh({ classification: options.classification,
+    db: options.db, store: options.store, handle, snapshot, citySlug: options.citySlug,
+    pipelineRunId: options.cycleId ?? backupId, now: now(),
+    ...(options.signal ? { signal: options.signal } : {}),
+    ...(options.onNote ? { onNote: options.onNote } : {}) });
   return { citySlug: options.citySlug, candidateHash: snapshotHash, stateKey: handle.key };
 }
 
@@ -443,7 +475,7 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
   if (prior) {
     const resumed = baselineJson as Graphify34Snapshot;
     if (canonicalHash(resumed) !== baselineHash) throw new Error("Published refresh state no longer matches canonical bytes");
-    return { ...await publishSnapshot(options, prior, resumed, readAnchor, now), cycleId,
+    return { ...await publishSnapshot({ ...options, cycleId }, prior, resumed, readAnchor, now), cycleId,
       inputHash: selected.inputHash, documentSha: selected.sha, candidates: candidates.length,
       status: "published" as const };
   }
@@ -497,9 +529,17 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
           return client.generateJson(input);
         } };
         const extracted = (await extractRefreshProfile([chunk], { textClient,
-          context: options.profileContext, maxOutputTokens: options.maxOutputTokens }))[0]!;
-        const result = await options.documentModels?.verify(extracted, options.maxOutputTokens, record,
-          options.citySlug) ?? extracted;
+          context: options.profileContext, maxOutputTokens: options.maxOutputTokens,
+          ...(options.singlePassPrompt ? { singlePassPrompt: options.singlePassPrompt } : {}) }))[0]!;
+        const result = options.singlePassPrompt ? extracted
+          : await options.documentModels?.verify(extracted, options.maxOutputTokens, record,
+            options.citySlug) ?? extracted;
+        if (options.singlePassPrompt) {
+          const model = receipts.filter((receipt) => receipt.status === "completed"
+            && receipt.transition !== "verification").at(-1)?.modelUsed;
+          if (!model) throw new Error("Single-pass annotation requires an accepted model receipt");
+          attachSinglePassAnnotations(result, { model, prompt: options.singlePassPrompt, pipelineRunId: cycleId });
+        }
         handle = await completeRefreshChunk(options.store, handle, chunk.id, result);
         profiled.push(result);
       }
@@ -529,7 +569,7 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
   const { snapshot } = enrichGraphify34Snapshot(candidate, options.citySlug);
   const snapshotHash = canonicalHash(snapshot);
   handle = await completeStage(options.store, handle, "enriched", snapshotHash, now);
-  return { ...await publishSnapshot(options, handle, snapshot, readAnchor, now),
+  return { ...await publishSnapshot({ ...options, cycleId }, handle, snapshot, readAnchor, now),
     cycleId, inputHash: corpus.inputHash, documentSha: selected.sha,
     candidates: candidates.length, status: "published" as const };
   }
@@ -595,6 +635,8 @@ export async function recoverRefreshDocumentDates(store: ObjectStore,
 /**
  * The redacted reason code kept against a failing document. Model-side reasons
  * come from the policy's own closed vocabulary; everything else is `error`.
+ * Only `REFRESH_*` codes are read here; `PROJECTION_*` codes (refreshProjectionFailure)
+ * are diagnostic only and never become a ledger reason.
  */
 export function refreshDocumentFailureReason(error: unknown): string {
   const code = error && typeof error === "object" ? (error as { code?: unknown }).code : undefined;

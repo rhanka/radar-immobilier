@@ -185,11 +185,13 @@
   import { classementCountsForPerimeter, displayedSignalCountForCity, filtreCountsForPerimeter } from "$lib/signals/signal-filter-counts.js";
   import {
     buildClassementMap,
+    withAiClassement,
     DEFAULT_CLASSEMENT_FILTER,
     classementKey,
     filterNodesByClassement,
   } from "$lib/signals/signal-classement.js";
   import { applyClassement as applyClassementWrite, classementWriteErrorMessage, fetchReasonCodes } from "$lib/signals/signal-classement-client.js";
+  import { postClassFeedback, type FeedbackChoice } from "$lib/signals/class-feedback-client.js";
   import {
     buildSignauxLotLegend,
     lotLineColorExpression,
@@ -915,7 +917,7 @@
   $: filteredDetailNodes = gatedDetailNodes;
   // Classement: class map from coherent heads (+ optimistic overrides), then
   // the Classement filter lens on the displayed list.
-  $: classementBaseMap = buildClassementMap(detailSelectionHeads, detailArchiveHeads);
+  $: classementBaseMap = withAiClassement(buildClassementMap(detailSelectionHeads, detailArchiveHeads), detailProjection.nodes);
   $: classementMap = new Map([...classementBaseMap, ...classementOverrides]);
   $: classementFilteredNodes = filterNodesByClassement(filteredDetailNodes, classementMap, classementFilter);
   // Full class cubes retain archives regardless of the visibility checkbox.
@@ -954,6 +956,30 @@
     syncFilterRoute();
     if (visibilityChanged && selectedCity) void loadDetailForCity(selectedCity.municipality.slug);
   }
+  async function handleClassFeedback(node: GraphSignalNode, choice: FeedbackChoice): Promise<boolean> {
+    const workspaceId = scopedWorkspaceId;
+    const citySlug = node.citySlug;
+    if (!workspaceId || !citySlug) return false;
+    const key = classementKey(node.type, node.id, citySlug);
+    if (classementInFlight.has(key)) return false;
+    const current = classementMap.get(key);
+    if (!current) return false;
+    classementInFlight = new Set([...classementInFlight, key]);
+    try {
+      await postClassFeedback({ workspaceId }, node, current, choice);
+      if (scopedWorkspaceId === workspaceId) {
+        const errors = new Map(classementErrors); errors.delete(key); classementErrors = errors;
+        if (selectedCity?.municipality.slug === citySlug) await loadDetailForCity(citySlug, { silent: true });
+        void load();
+      }
+      return true;
+    } catch (error) {
+      if (scopedWorkspaceId === workspaceId) classementErrors = new Map(classementErrors).set(key, classementWriteErrorMessage(error));
+      return false;
+    } finally {
+      const next = new Set(classementInFlight); next.delete(key); classementInFlight = next;
+    }
+  }
   async function handleApplyClassement(
     node: GraphSignalNode,
     nextClass: import("$lib/signals/signal-classement.js").SignalClass,
@@ -979,7 +1005,7 @@
     };
     classementInFlight = new Set([...classementInFlight, key]);
     const overrides = new Map(classementOverrides);
-    overrides.set(key, { ...current, classe: nextClass, reasonCode, discarded: nextClass === "ecarte" });
+    overrides.set(key, { ...current, annotationSource: "manual", classe: nextClass, reasonCode, discarded: nextClass === "ecarte" });
     classementOverrides = overrides;
     const clearOverride = () => {
       const next = new Map(classementOverrides);
@@ -3042,6 +3068,7 @@
       {classementError}
       {classementErrors}
       onApplyClassement={(node, nextClass, reasonCode) => void handleApplyClassement(node, nextClass, reasonCode)}
+      onClassFeedback={handleClassFeedback}
     />
   </svelte:fragment>
 </ViewLayout>
