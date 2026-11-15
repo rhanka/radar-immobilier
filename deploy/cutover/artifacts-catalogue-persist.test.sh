@@ -26,7 +26,7 @@ READER=witness-reader
 
 work=$(mktemp -d)
 cleanup() {
-  for db in cat_src cat_prodd cat_prodrej cat_dst cat_dst_map cat_dst2 cat_dst29 cat_src29 cat_prep tmp-prod-x; do
+  for db in cat_src cat_prodd cat_prodrej cat_dst cat_dst_map cat_dst2 cat_dst29 cat_src29 cat_prep cat_pu1 cat_pu2 cat_dstu tmp-prod-x; do
     dropdb --if-exists --force "$db" >/dev/null 2>&1 || true
   done
   rm -rf "$work"
@@ -241,4 +241,88 @@ createdb --template=template0 tmp-prod-x
 if PGDATABASE=tmp-prod-x bash "$CATALOGUE" import --in-dir "$work/export" >/dev/null 2>&1; then fail 'prod import accepted'; fi
 [[ $(q tmp-prod-x "SELECT count(*) FROM information_schema.schemata WHERE schema_name = 'artifacts'") == 0 ]] || fail 'prod target touched'
 
+
+# ── Union: prod catalogue + preprod-own catalogue (owner rule 2026-11-15) ──
+# prod v1 = P1 + C. Preprod = an earlier restore of v1, then preprod work:
+# Q1, Q2 (own), C edited (id collision later), a release under C, Q3 bound
+# to 'shared-binding'. prod v2 = v1 + P2 bound to 'shared-binding' (slug
+# collision with Q3). Rule: prod wins on any unique key, the preprod row is
+# journaled, children of a lost parent are journaled as orphans, never dropped
+# silently. Expected union: P1 P2 C(prod) Q1 Q2 = 5 artifacts.
+P1=e1000000-0000-0000-0000-000000000001; P2=e1000000-0000-0000-0000-000000000002
+CC=e1000000-0000-0000-0000-00000000000c
+Q1=e2000000-0000-0000-0000-000000000001; Q2=e2000000-0000-0000-0000-000000000002; Q3=e2000000-0000-0000-0000-000000000003
+rel() { printf "('%s', '%s', '%s', '{\"files\":{\"index.html\":\"sha256:%s\"}}', 'ready')" "$1" "$2" "$3" "$3"; }
+seed_union_prod() {
+  local db="$1"
+  psql -X -q -v ON_ERROR_STOP=1 --dbname="$db" <<SQL
+INSERT INTO artifacts.storage_scopes (id, org_id) VALUES ('$SCOPE', 'org-shared');
+INSERT INTO public.account_users (id, sub, email, status) VALUES
+  ('40000000-0000-0000-0000-000000000001', 'prod-user', 'prod@example.test', 'approved');
+INSERT INTO artifacts.artifacts (id, storage_scope_id, owner_id, binding_name, profile) VALUES
+  ('$P1', '$SCOPE', 'prod-user', 'p1', '{"v":"prod"}'),
+  ('$CC', '$SCOPE', 'prod-user', 'c', '{"v":"prod"}');
+INSERT INTO artifacts.releases (id, artifact_id, manifest_digest, manifest, state) VALUES
+  $(rel e3000000-0000-0000-0000-000000000001 "$P1" dp1), $(rel e3000000-0000-0000-0000-00000000000c "$CC" dc);
+INSERT INTO artifacts.blobs (storage_scope_id, digest, size) VALUES ('$SCOPE', 'dp1', 1), ('$SCOPE', 'dc', 1);
+CREATE TABLE bulk (id int PRIMARY KEY, payload text);
+INSERT INTO bulk VALUES (1, 'prod-v1');
+SQL
+}
+apply_schema cat_pu1; seed_union_prod cat_pu1
+pg_dump --format=custom --dbname=cat_pu1 --file="$work/prod-v1.dump"
+apply_schema cat_pu2; seed_union_prod cat_pu2
+psql -X -q -v ON_ERROR_STOP=1 --dbname=cat_pu2 <<SQL
+INSERT INTO artifacts.artifacts (id, storage_scope_id, owner_id, binding_name, profile)
+  VALUES ('$P2', '$SCOPE', 'prod-user', 'shared-binding', '{"v":"prod"}');
+INSERT INTO artifacts.releases (id, artifact_id, manifest_digest, manifest, state) VALUES $(rel e3000000-0000-0000-0000-000000000002 "$P2" dp2);
+INSERT INTO artifacts.blobs (storage_scope_id, digest, size) VALUES ('$SCOPE', 'dp2', 1);
+UPDATE bulk SET payload = 'prod-v2';
+SQL
+pg_dump --format=custom --dbname=cat_pu2 --file="$work/prod-v2.dump"
+createdb --template=template0 cat_dstu
+pg_restore --no-owner --no-privileges --exit-on-error --dbname=cat_dstu "$work/prod-v1.dump"
+psql -X -q -v ON_ERROR_STOP=1 --dbname=cat_dstu <<SQL
+INSERT INTO public.account_users (id, sub, email, status) VALUES
+  ('50000000-0000-0000-0000-000000000001', 'pre-user', 'pre@example.test', 'approved');
+INSERT INTO artifacts.artifacts (id, storage_scope_id, owner_id, binding_name, profile) VALUES
+  ('$Q1', '$SCOPE', 'pre-user', 'q1', '{"v":"pre"}'),
+  ('$Q2', '$SCOPE', 'pre-user', 'q2', '{"v":"pre"}'),
+  ('$Q3', '$SCOPE', 'prod-user', 'shared-binding', '{"v":"pre"}');
+UPDATE artifacts.artifacts SET profile = '{"v":"preprod-edit"}' WHERE id = '$CC';
+INSERT INTO artifacts.releases (id, artifact_id, manifest_digest, manifest, state) VALUES
+  $(rel e4000000-0000-0000-0000-000000000001 "$Q1" dq1), $(rel e4000000-0000-0000-0000-000000000002 "$Q2" dq2),
+  $(rel e4000000-0000-0000-0000-000000000003 "$Q3" dq3), $(rel e4000000-0000-0000-0000-00000000000c "$CC" dcq);
+INSERT INTO artifacts.blobs (storage_scope_id, digest, size) VALUES
+  ('$SCOPE', 'dq1', 1), ('$SCOPE', 'dq2', 1), ('$SCOPE', 'dq3', 1), ('$SCOPE', 'dcq', 1);
+SQL
+if ! restore_with_catalogue cat_dstu "$work/prod-v2.dump" "$work/cat-union" > "$work/restore-union.out" 2>&1; then
+  cat "$work/restore-union.out"; fail 'union restore refused'
+fi
+[[ $(q cat_dstu 'SELECT payload FROM bulk') == prod-v2 ]] || fail 'union: prod data not restored'
+[[ $(q cat_dstu 'SELECT string_agg(id::text, $$ $$ ORDER BY id) FROM artifacts.artifacts') == "$P1 $P2 $CC $Q1 $Q2" ]] \
+  || fail "union: artifact set $(q cat_dstu 'SELECT string_agg(id::text, $$ $$ ORDER BY id) FROM artifacts.artifacts')"
+[[ $(q cat_dstu "SELECT profile->>'v' FROM artifacts.artifacts WHERE id = '$CC'") == prod ]] || fail 'union: id collision not won by prod'
+[[ $(q cat_dstu "SELECT id::text FROM artifacts.artifacts WHERE binding_name = 'shared-binding'") == "$P2" ]] || fail 'union: slug collision not won by prod'
+[[ $(q cat_dstu "SELECT artifact_id::text FROM artifacts.releases WHERE id = 'e4000000-0000-0000-0000-00000000000c'") == "$CC" ]] \
+  || fail 'union: preprod release under a prod artifact lost'
+[[ $(q cat_dstu 'SELECT count(*) FROM artifacts.releases') == 6 ]] || fail 'union: release count'
+[[ $(q cat_dstu 'SELECT count(*) FROM artifacts.releases r WHERE NOT EXISTS (SELECT 1 FROM artifacts.blobs b WHERE b.digest = r.manifest_digest)') == 0 ]] \
+  || fail 'union: a release lacks its blob registry row'
+journal=$work/cat-union/export/conflicts.tsv
+[[ $(awk -F'\t' '$1 == "artifacts" && $2 == "collision:prod-wins"' "$journal" | wc -l) == 2 ]] || { cat "$journal"; fail 'union: collisions not journaled'; }
+grep -q "$CC.*preprod-edit" "$journal" || fail 'union: preprod version of the id collision not journaled'
+grep -q "\"id\":\"$Q3\"" "$journal" || fail 'union: slug collision row not journaled'
+[[ $(awk -F'\t' '$1 == "releases" && $2 == "orphan:artifacts.artifacts"' "$journal" | wc -l) == 1 ]] || { cat "$journal"; fail 'union: orphan release not journaled'; }
+grep -qx $'artifacts\t5\t1\t2\t2\t0' "$work/cat-union/export/union.tsv" || { cat "$work/cat-union/export/union.tsv"; fail 'union: accounting'; }
+PGDATABASE=cat_dstu bash "$CATALOGUE" verify --in-dir "$work/cat-union/export" --union >/dev/null || fail 'union: verify refused'
+if PGDATABASE=cat_dstu bash "$CATALOGUE" verify --in-dir "$work/cat-union/export" >/dev/null 2>&1; then fail 'union: byte verify should differ once prod rows exist'; fi
+# Repeated restore of the same prod snapshot: no duplicate, no new conflict.
+restore_with_catalogue cat_dstu "$work/prod-v2.dump" "$work/cat-union2" > "$work/restore-union2.out" 2>&1 || { cat "$work/restore-union2.out"; fail 'second union restore refused'; }
+[[ $(q cat_dstu 'SELECT count(*) FROM artifacts.artifacts') == 5 ]] || fail 'union: repeated restore changed the artifact count'
+[[ $(q cat_dstu 'SELECT count(*) FROM artifacts.releases') == 6 ]] || fail 'union: repeated restore changed the release count'
+[[ ! -s "$work/cat-union2/export/conflicts.tsv" ]] || { cat "$work/cat-union2/export/conflicts.tsv"; fail 'union: repeated restore journaled conflicts'; }
+grep -qx $'artifacts\t5\t3\t2\t0\t0' "$work/cat-union2/export/union.tsv" || { cat "$work/cat-union2/export/union.tsv"; fail 'union: repeated accounting'; }
+[[ $(q cat_pu2 'SELECT count(*) FROM artifacts.artifacts') == 3 ]] || fail 'union: prod origin mutated'
+printf 'Union green: 3 prod + 2 preprod-own artifacts, 2 collisions prod-wins journaled, 1 orphan journaled, repeat idempotent\n'
 printf 'Catalogue preservation round-trip green: witness byte-identical, identities remapped, prod untouched\n'
