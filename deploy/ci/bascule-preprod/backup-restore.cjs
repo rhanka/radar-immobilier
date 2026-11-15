@@ -381,7 +381,9 @@ function reconInventory(inventory, destIndex, expectedSizes = new Map()) {
     else if (isMirrored(k)) r.mirrorExtra += 1;
     else r.extra += 1;
   }
-  r.ok = r.missing === 0 && r.sizeMismatch === 0 && r.notInBackup === 0 && r.mirrorExtra === 0;
+  // Non-canonical keys are never deleted, but listing readers (refresh-state.ts
+  // readRefreshStates) would still read them: they keep the mirror incoherent.
+  r.ok = r.missing === 0 && r.sizeMismatch === 0 && r.notInBackup === 0 && r.mirrorExtra === 0 && r.mirrorAnomalies === 0;
   return r;
 }
 
@@ -859,6 +861,8 @@ async function runRecon({ cfg, reader, copier, log }) {
     `size_mismatch=${recon.sizeMismatch} excluded=${recon.excluded} not_in_backup=${recon.notInBackup} ` +
     `mirror_extra=${recon.mirrorExtra} mirror_anomalies=${recon.mirrorAnomalies} dest_extra=${recon.extra}`);
   if (recon.mirrorExtra > 0) log(`RECON FAIL — ${recon.mirrorExtra} object(s) in the mirror prefixes are not in the snapshot ${cfg.date}: S3 and the restored database are not aligned`);
+  if (recon.mirrorAnomalies > 0) log(`RECON FAIL — ${recon.mirrorAnomalies} non-canonical object(s) ('.', '..' or empty segment) in the mirror prefixes: ` +
+    'never deleted by this tool but readable by listing readers; remove them by hand after review, then re-run');
   return { exitCode: recon.ok ? EXIT.OK : EXIT.ERROR, termination: { ok: recon.ok, step: 'recon', date: cfg.date,
     manifestSha256: cfg.pinManifestSha256, ...recon, ...anomalyReport(plan, log), ...counters } };
 }
