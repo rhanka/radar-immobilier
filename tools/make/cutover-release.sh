@@ -31,9 +31,11 @@ validate_release() {
   [[ $path != */.env* ]] || fail 'Environment files are never release inputs'
   jq -e -f tools/make/cutover-release.jq "$1" >/dev/null 2>&1 || fail 'Invalid release manifest'
 }
+# Production applied the protected 6H migration on 2026-11-14 (receipt run 0434e640):
+# every later backup is post-6H, so new releases carry no data hook.
 generate_release() {
   jq -n --arg sha "$GIT_SHA" --arg api "$API_DIGEST" --arg ui "$UI_DIGEST" \
-    '{version:1,gitSha:$sha,apiImage:("ghcr.io/rhanka/radar-api@"+$api),uiImage:("ghcr.io/rhanka/radar-ui@"+$ui),apiServedSha:$sha,uiServedSha:$sha[0:7],dataMigration:"6h"}' > "$1"
+    '{version:1,gitSha:$sha,apiImage:("ghcr.io/rhanka/radar-api@"+$api),uiImage:("ghcr.io/rhanka/radar-ui@"+$ui),apiServedSha:$sha,uiServedSha:$sha[0:7],dataMigration:null}' > "$1"
   validate_release "$1"
 }
 budget_exhausted() {
