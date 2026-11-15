@@ -31,5 +31,10 @@
   "by": "conductor (owner request 14/11 and 15/11)",
   "before": "routes gemini-4-argon-low, gemini-4-carbon-low, gemini-3.8-flash-low",
   "reason": "Committed BEFORE any blind call of this series. Blind of P0 x Gemini 4 Argon low only. Carbon low and 3.8 Flash low are dropped: their tuning runs were invalidated by the agy account refusal (27/252 and 126/252 failed calls) and agy is no longer used (owner ban). Argon low runs the blind on the llm-mesh route (local gateway, enrolled Google seat, model gemini-4-argon + reasoning effort low = cloud-code wire id gemini-4-argon-low, served model checked per answer), not on the agy route of its tuning run: same model and effort, different transport, recorded as a method deviation. Concurrency 1, mesh pause on unavailability (no consumed run), 10-item pilot first."
+ },
+ "amendment2": {
+  "at": "2026-11-15T12:05-05:00",
+  "by": "conductor (owner decision 15/11 12:05)",
+  "reason": "Committed BEFORE any blind call of this series. Owner decision: the blind of Gemini 4 Argon low runs on the agy headless route of its tuning run (agy --model gemini-4-argon-low --input-format stream-json --output-format stream-json --disable-slash-commands --print=, empty cwd, no tools), explicitly allowed for this measure; it supersedes the llm-mesh transport of the first amendment (the local gateway answers 503 for Argon, a gateway bug). Same route, model and effort as the tuning run: no method deviation. Concurrency 1, pause on transient seat errors (429, 5xx, exhausted, timeout) with resume, 10-item pilot first (stop above 20 % infrastructure failures)."
  }
 }
