@@ -63,3 +63,44 @@ test('coupled schedules: release after a switch or a coherent daily restore, hol
   assert.equal(coupled({ kind: 'cutover', mode: 'restore', coherence: { ok: false }, jobs: { docs: {} } }).decision, 'hold');
   assert.equal(coupled({ kind: 'prepare', jobs: { docs: {} } }, 'prod').decision, 'keep');
 });
+
+// Controller end-to-end on the synthetic cluster (deploy/cutover/test-boundary.cjs).
+import { fixture } from './cutover-fixture.mjs';
+const refresh = (f) => f.state().objects.find((o) => o.kind === 'CronJob' && o.metadata.name === 'radar-refresh-pv');
+const held = (o) => o.metadata.annotations?.['sentropic.io/held-until-coherent'];
+
+test('daily restore: coherent snapshot passes the gate and leaves radar-refresh-pv active', () => {
+  const f = fixture();
+  try {
+    const result = f.run();
+    assert.equal(result.status, 0, result.stdout + result.stderr);
+    assert.ok(result.stdout.includes('Coherence OK: database and mirrored documents from backup 2026-10-29'), result.stdout);
+    assert.equal(refresh(f).spec.suspend, false);
+    assert.equal(held(refresh(f)), undefined);
+  } finally { f.cleanup(); }
+});
+test('daily restore: incident state (mirror extras) fails clearly and holds radar-refresh-pv', () => {
+  const f = fixture({ mirrorExtra: 3 });
+  try {
+    const result = f.run();
+    assert.notEqual(result.status, 0);
+    assert.ok(result.stderr.includes('INCOHERENT restore (database vs documents): mirror prefixes hold 3 object(s) outside the snapshot'),
+      result.stdout + result.stderr);
+    assert.equal(refresh(f).spec.suspend, true);
+    assert.match(held(refresh(f)) ?? '', /:false$/);
+  } finally { f.cleanup(); }
+});
+test('prepare holds radar-refresh-pv; the switch to the prepared snapshot releases it', () => {
+  const f = fixture();
+  try {
+    const prepared = f.run('prepare');
+    assert.equal(prepared.status, 0, prepared.stdout + prepared.stderr);
+    assert.ok(prepared.stdout.includes('HELD radar-refresh-pv'), prepared.stdout);
+    assert.equal(refresh(f).spec.suspend, true);
+    const run = f.run('run', ['MODE=run']);
+    assert.equal(run.status, 0, run.stdout + run.stderr);
+    assert.ok(run.stdout.includes('RELEASED radar-refresh-pv'), run.stdout);
+    assert.equal(refresh(f).spec.suspend, false);
+    assert.equal(held(refresh(f)), undefined);
+  } finally { f.cleanup(); }
+});

@@ -56,7 +56,10 @@ cleanup() {
     else
       # Preclosure helper Jobs must end before ownership is released.
       (set -e; stop_operation_jobs
-        if jq -e '.checkpoints.suspend!=null' "$WORK/record.json" >/dev/null; then restore_schedules; fi
+        # A started document mirror keeps the PG-coupled schedules held (old live database).
+        if jq -e '.checkpoints.suspend!=null' "$WORK/record.json" >/dev/null; then
+          coupled_schedules_decide; restore_schedules; coupled_schedules_apply
+        fi
         lock_delete) || printf 'Helper state unknown; lock retained\n' >&2
     fi
   fi
