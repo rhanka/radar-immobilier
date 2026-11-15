@@ -345,7 +345,7 @@ PGDATABASE=cat_dsts bash "$CATALOGUE" stash-exists || fail 'stash: missing after
 gen1=$(q cat_dsts "SELECT convert_from(decode(b64, 'base64'), 'UTF8') FROM catalogue_stash.files WHERE path = 'manifest.json'" | grep -o '"generation":"[^"]*"')
 # Relaunch after the replay: the stash (pre-restore preprod state) is reused, never re-exported from prod rows.
 stash_restore cat_dsts "$work/prod-v2.dump" "$work/stash2" > "$work/stash2.out" 2>&1 || { cat "$work/stash2.out"; fail 'stash relaunch refused'; }
-grep -q 'stash already present' "$work/stash2.out" || fail 'stash: relaunch did not reuse the stash'
+grep -q 'stash of this run already present' "$work/stash2.out" || fail 'stash: relaunch did not reuse the stash'
 [[ $(q cat_dsts "SELECT convert_from(decode(b64, 'base64'), 'UTF8') FROM catalogue_stash.files WHERE path = 'manifest.json'" | grep -o '"generation":"[^"]*"') == "$gen1" ]] || fail 'stash: relaunch replaced the stash'
 # Simulated ddl of a newer release: one more migration and a defaulted column.
 q cat_dsts "ALTER TABLE artifacts.artifacts ADD COLUMN union_next_release TEXT NOT NULL DEFAULT 'next'" >/dev/null
