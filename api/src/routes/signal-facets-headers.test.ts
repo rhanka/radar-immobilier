@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+vi.mock("../services/graph/class-annotations.js", () => ({ readClassAnnotations: vi.fn(async () => new Map()) }));
 import type { Database } from "../db/client.js";
 import type { ObjectStore } from "../storage/object-store.js";
 import { graphSignalsRoute } from "./graph-signals.js";

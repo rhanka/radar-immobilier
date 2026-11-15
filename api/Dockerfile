@@ -84,6 +84,7 @@ RUN npm install --no-save esbuild@0.25.12 \
   "    'api/src/scripts/graphify-34-enrich.ts'," \
   "    'api/src/scripts/emit-graphify34-candidates.ts'," \
   "    'api/src/scripts/refresh-pv.ts'," \
+  "    'api/src/scripts/reannotate-signals.ts'," \
   "    'api/src/scripts/refresh-pending-watchdog.ts'," \
   "    'api/src/scripts/refresh-requeue-abandoned.ts'," \
   "    'api/src/scripts/refresh-requeue-recurrent.ts'," \
@@ -177,6 +178,7 @@ COPY --from=build /workspace/api/src/artifacts/design-assets ./api/dist/artifact
 # both the api deploy and every Job entrypoint at this copy (COPY'd from the
 # build context, not the build stage, which does not ship radar/).
 COPY radar/ontology ./radar/ontology
+COPY radar/prompts ./radar/prompts
 ENV RADAR_ONTOLOGY_PROFILE_PATH=/workspace/radar/ontology/ontology-profile.yaml
 # Deployed build identity (full 40-character git SHA). The CI build passes it
 # (`--build-arg GIT_SHA=<sha>`, see build-push-images.yml) and the running
