@@ -39,7 +39,7 @@ const md5q = (b) => `"${createHash("md5").update(b).digest("hex")}"`;
 // ═════════════════════════════ in-memory versioned S3 ═════════════════════════
 class Cmd { constructor(input) { this.input = input; } }
 const sdk = {};
-for (const n of ["GetObjectCommand", "HeadObjectCommand", "ListObjectsV2Command", "ListObjectVersionsCommand", "CopyObjectCommand", "PutObjectCommand"]) {
+for (const n of ["GetObjectCommand", "HeadObjectCommand", "ListObjectsV2Command", "ListObjectVersionsCommand", "CopyObjectCommand", "PutObjectCommand", "DeleteObjectCommand"]) {
   sdk[n] = { [n]: class extends Cmd {} }[n];
 }
 const denied = () => Object.assign(new Error("AccessDenied"), { name: "AccessDenied", $metadata: { httpStatusCode: 403 } });
@@ -119,6 +119,13 @@ function client(store, policy) {
         store.copies.push({ key: i.Key, from: srcKey, versionId: vid, grant: i.GrantFullControl || null });
         store.put(i.Bucket, i.Key, v.body, "2026-09-27T05:00:00Z");
         return { CopyObjectResult: { ETag: v.ETag }, $metadata: { attempts: policy.copyAttempts || 1 } };
+      }
+      if (cmd instanceof sdk.DeleteObjectCommand) {
+        if (!can("delete", i.Bucket, i.Key)) throw denied();
+        const m = store.b.get(i.Bucket);
+        if (m) m.delete(i.Key);
+        store.deletes = (store.deletes || 0) + 1;
+        return {};
       }
       throw new Error("unexpected command");
     },
@@ -827,7 +834,109 @@ async function refsSuite() {
   }
 }
 
+// ═══════════ incident 2026-11-14: additive copy mixes PG-coupled prefixes ═══════════
+// Backup D holds prod's canonical graph and refresh/018 state for one city. The
+// preprod bucket holds a preprod run of the same city (other digest, its own
+// receipts and ledger), the preprod sweep cursor, an artifact blob and raw docs.
+function incidentFixture() {
+  const s = new Store();
+  const city = "mont-tremblant";
+  const prod = {
+    [`graph/${city}/latest.json`]: '{"nodes":["prod-D"]}',
+    [`refresh/018/${city}/coverage.json`]: '{"ledger":"prod-D"}',
+    [`refresh/018/${city}/runs/prodrun/state.json`]: '{"run":"prod"}',
+    [`refresh/018/${city}/runs/prodrun/receipts/published.json`]: '{"stage":"published"}',
+    "raw/prod.pdf": "PROD-PDF",
+  };
+  const objects = Object.entries(prod).map(([key, body]) => {
+    const v = s.put(B, "docs/" + key, body, "2026-11-14T02:30:00Z");
+    return { key, size: v.Size, etag: v.ETag, state: "backed-up", backupEtag: v.ETag, versionId: v.VersionId };
+  });
+  const inventory = { format: "radar-backup-docs-inventory/v1", date: D, createdAt: "2026-09-26T03:40:00.000Z",
+    sourceBucket: PROD, backupBucket: B, backupPrefix: "docs/", counts: { objects: objects.length }, objects };
+  const invBuf = Buffer.from(JSON.stringify(inventory));
+  s.put(B, `docs-inventory/${D}.json`, invBuf);
+  const manifest = { ...fixture().manifest, docs: { status: "complete", objects: objects.length,
+    inventoryKey: `docs-inventory/${D}.json`, inventorySha256: sha(invBuf) } };
+  const manBuf = Buffer.from(JSON.stringify(manifest));
+  s.put(B, `manifests/${D}.json`, manBuf);
+  // preprod before the restore
+  s.put(DST, `graph/${city}/latest.json`, '{"nodes":["preprod-lineage"]}');
+  s.put(DST, `graph/${city}/archive/preprod-x/latest.json`, '{"nodes":["preprod-archive"]}');
+  s.put(DST, `refresh/018/${city}/coverage.json`, '{"ledger":"preprod","abandoned":12}');
+  s.put(DST, `refresh/018/${city}/runs/preprodrun/state.json`, '{"run":"preprod"}');
+  s.put(DST, `refresh/018/${city}/runs/preprodrun/receipts/published.json`, '{"stage":"published"}');
+  s.put(DST, "refresh/018/sweep/cursor.json", '{"cursor":"preprod"}');
+  s.put(DST, "artifacts/scope-1/blobs/sha256/abc", "ARTIFACT");
+  s.put(DST, "raw/preprod-only.pdf", "PREPROD-PDF");
+  return { s, city, manSha: sha(manBuf) };
+}
+const runDigests = (s, city) => [...(s.b.get(DST) || new Map()).keys()]
+  .map((k) => new RegExp(`^refresh/018/${city}/runs/([^/]+)/`).exec(k)?.[1]).filter(Boolean)
+  .filter((d, i, a) => a.indexOf(d) === i).sort();
+const body = (s, key) => s.latest(DST, key)?.body.toString() ?? null;
+
+async function mirrorSuite() {
+  console.log("\n── incident replay: additive copy vs mirror of the PG-coupled prefixes");
+  const docsEnv = (pin, extra = {}) => baseEnv({ COPIER_ACCESS_KEY: "c", COPIER_SECRET_KEY: "c", DST_BUCKET: DST,
+    FORBIDDEN_DST_BUCKETS: PROD, BACKUP_DATE: D, PIN_MANIFEST_SHA256: pin, COPY_GRANTEE: "g", ...extra });
+  const deleter = { ...copierPolicy, delete: [`${DST}/graph/`, `${DST}/refresh/018/`] };
+
+  // 1. Replay: the additive restore (copies only) leaves both lineages side by side.
+  const inc = incidentFixture();
+  for (const [key] of [["graph/mont-tremblant/latest.json"], ["refresh/018/mont-tremblant/coverage.json"],
+    ["refresh/018/mont-tremblant/runs/prodrun/state.json"], ["refresh/018/mont-tremblant/runs/prodrun/receipts/published.json"], ["raw/prod.pdf"]]) {
+    inc.s.put(DST, key, inc.s.latest(B, "docs/" + key).body);
+  }
+  eq("additive state — refresh sees runs of two lineages (prod + preprod receipts mixed)", runDigests(inc.s, inc.city), ["preprodrun", "prodrun"]);
+  const additive = await step({ s: inc.s, env: docsEnv(inc.manSha, { BR_STEP: "recon" }), copier: deleter });
+  ok("additive state — coherence recon REFUSES (exit 1, ok:false)", additive.code === 1 && additive.t.ok === false);
+  eq("additive state — mirror extras counted (preprod run, its receipt, archive)", additive.t.mirrorExtra, 3);
+  ok("additive state — refusal names the misalignment", additive.logs.some((l) => /not aligned/.test(l)));
+
+  // 2. Dry run plans the copies and the deletions, writes nothing.
+  const dry = incidentFixture();
+  const before = [...dry.s.b.get(DST).keys()].sort();
+  const plan = await step({ s: dry.s, env: docsEnv(dry.manSha, { BR_STEP: "docs", DOCS_DRY: "1" }), copier: deleter });
+  ok("dry run — ok, no copy, no delete", plan.code === 0 && plan.t.copied === 0 && plan.t.deleted === 0 && !dry.s.deletes && dry.s.copies.length === 0);
+  eq("dry run — plan counts (to_copy, to_delete, by prefix)", [plan.t.toCopy, plan.t.toDelete, plan.t.mirrorByPrefix], [5, 3, { "graph/": 1, "refresh/018/": 2 }]);
+  eq("dry run — destination unchanged", [...dry.s.b.get(DST).keys()].sort(), before);
+
+  // 3. Mirror: same snapshot D for the coupled prefixes, everything else kept.
+  const fix = incidentFixture();
+  const run = await step({ s: fix.s, env: docsEnv(fix.manSha, { BR_STEP: "docs" }), copier: deleter });
+  ok("mirror — docs ok (exit 0)", run.code === 0 && run.t.ok === true);
+  eq("mirror — copied/deleted/mirrorExtra", [run.t.copied, run.t.deleted, run.t.deleteErrors, run.t.mirrorExtra], [5, 3, 0, 0]);
+  eq("mirror — only the snapshot run remains", runDigests(fix.s, fix.city), ["prodrun"]);
+  eq("mirror — canonical graph and ledger are the snapshot's", [body(fix.s, "graph/mont-tremblant/latest.json"),
+    body(fix.s, "refresh/018/mont-tremblant/coverage.json")], ['{"nodes":["prod-D"]}', '{"ledger":"prod-D"}']);
+  eq("mirror — preserved: sweep cursor, artifact blob, preprod raw doc", [body(fix.s, "refresh/018/sweep/cursor.json"),
+    body(fix.s, "artifacts/scope-1/blobs/sha256/abc"), body(fix.s, "raw/preprod-only.pdf")], ['{"cursor":"preprod"}', "ARTIFACT", "PREPROD-PDF"]);
+  ok("mirror — the delete probe targets a key outside the snapshot", fix.s.calls.some((c) => c.name === "DeleteObjectCommand" && c.Key === br.LAYOUT.deleteProbeKey));
+  const after = await step({ s: fix.s, env: docsEnv(fix.manSha, { BR_STEP: "recon" }), copier: deleter });
+  ok("mirror — coherence recon passes (exit 0, mirrorExtra 0)", after.code === 0 && after.t.ok === true && after.t.mirrorExtra === 0);
+  eq("mirror — recon carries the pinned manifest", after.t.manifestSha256, fix.manSha);
+  const rerun = await step({ s: fix.s, env: docsEnv(fix.manSha, { BR_STEP: "docs" }), copier: deleter });
+  eq("mirror — rerun is a no-op (repeatable)", [rerun.code, rerun.t.toCopy, rerun.t.toDelete], [0, 0, 0]);
+
+  // 4. Without the delete right the restore refuses before any write.
+  const nodel = incidentFixture();
+  const refusedRun = await step({ s: nodel.s, env: docsEnv(nodel.manSha, { BR_STEP: "docs" }), copier: copierPolicy });
+  ok("no delete right — refused (exit 2) before any copy", refusedRun.code === 2 && nodel.s.copies.length === 0 && refusedRun.t.reason === "mirror-delete-denied");
+
+  // 5. Pure helpers.
+  ok("isMirrored — graph/ and refresh/018/ yes, sweep and others no", br.isMirrored("graph/x/latest.json") && br.isMirrored("refresh/018/x/coverage.json") &&
+    !br.isMirrored("refresh/018/sweep/cursor.json") && !br.isMirrored("artifacts/a") && !br.isMirrored("raw/a.pdf"));
+  const inv = { objects: [{ key: "graph/a/latest.json", state: "backed-up", size: 1 }, { key: "graph/b/latest.json", state: "excluded", size: 1 }] };
+  const r = br.reconInventory(inv, new Map([["graph/a/latest.json", { Size: 1 }], ["graph/b/latest.json", { Size: 1 }]]));
+  ok("reconInventory — an excluded entry inside a mirror prefix blocks (cannot mirror exactly)", r.ok === false && r.notInBackup === 1);
+  eq("planMirrorPrune — keeps inventory keys, preserved and outside keys", br.planMirrorPrune({ inventory: inv,
+    destIndex: new Map([["graph/a/latest.json", {}], ["graph/z/old.json", {}], ["refresh/018/sweep/c.json", {}], ["raw/x", {}]]) }).toDelete,
+  ["graph/b/latest.json", "graph/z/old.json"].filter((k) => k !== "graph/b/latest.json"));
+}
+
 await suite();
+await mirrorSuite();
 await refsSuite();
 console.log(`\nbackup.selftest — ${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
