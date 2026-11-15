@@ -54,7 +54,27 @@ exit 0
     chmodSync(f, 0o755);
   }
   const restore = swapEnv('PATH', `${bin}:${process.env.PATH}`);
-  return { bin, restore: () => { restore(); rmSync(bin, { recursive: true, force: true }); } };
+  const restoreMesh = fakeMesh(counter, Number(sleep) * 1000);
+  return { bin, restore: () => { restore(); restoreMesh(); rmSync(bin, { recursive: true, force: true }); } };
+}
+
+/**
+ * Fake llm-mesh gateway for the mesh routes (gemini-4-argon-low): a test-only gateway URL and a
+ * stubbed global fetch that sleeps then answers P-DENSITE as the requested model. No network.
+ */
+function fakeMesh(counter, sleepMs) {
+  const realFetch = globalThis.fetch;
+  const restoreUrl = swapEnv('CLASSIF_MESH_GATEWAY', 'http://fake-mesh.invalid');
+  const json = (status, body, served) => ({ ok: status < 300, status, headers: { get: (h) => (h === 'x-sentropic-served' ? served : null) }, json: async () => body });
+  globalThis.fetch = async (url, init) => {
+    if (!String(url).startsWith('http://fake-mesh.invalid/')) throw new Error(`unexpected network call in a hermetic test: ${url}`);
+    if (String(url).endsWith('/v1/session')) return json(201, { gatewayToken: 'fake' });
+    appendFileSync(counter, 'x\n');
+    await new Promise((r) => { setTimeout(r, sleepMs); });
+    const model = JSON.parse(init.body).model;
+    return json(200, { choices: [{ message: { content: '{"verdict":"pertinent","code":"P-DENSITE"}' } }] }, `provider=gemini; model=${model}; transport=cloud-code`);
+  };
+  return () => { globalThis.fetch = realFetch; restoreUrl(); };
 }
 
 const invocations = (counter) => (existsSync(counter) ? readFileSync(counter, 'utf8').split('\n').filter(Boolean).length : 0);

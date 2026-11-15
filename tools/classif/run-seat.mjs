@@ -12,6 +12,7 @@ import { ALIASES, LEVELS, vibeHome } from './lib/vibe-home.mjs';
 import { classifHome, testOnlyEnv } from './lib/paths.mjs';
 import { privateDir } from './lib/paths.mjs';
 import { extractCodexRateLimits } from './lib/codex-quota.mjs';
+import { callMesh } from './lib/mesh-seat.mjs';
 
 const SCRUB = /(_API_KEY|_AUTH_TOKEN|_API_BASE|_BASE_URL|_SECRET_KEY|_ACCESS_KEY)$|^(ANTHROPIC_|OPENAI_|GEMINI_|CLAUDE_CODE_USE_|AWS_|GOOGLE_CLOUD_|GOOGLE_APPLICATION_CREDENTIALS|GOOGLE_GENAI_USE_VERTEXAI|VERTEX|SCRAPE_S3_|REFERENCE_C_KEY|CLASSIF_EVAL_KEY|CLASSIF_BLIND_KEY|MISTRAL_|VIBE_ACTIVE_MODEL)/;
 /**
@@ -64,14 +65,15 @@ export const ROUTES = {
       '--disable-web-tools', '--disable-reminders', '--disable-request-user-input', '--no-foreign-personal-context', '--no-session-log', '--workspace', dir] }),
     parse: parseMuse,
   }])),
+  // Owner 14/11: Gemini 4 Argon low runs on the llm-mesh route (enrolled seat, the preprod and prod
+  // path), never on agy. Same series identity (model gemini-4-argon-low, effort low): the mesh maps
+  // model gemini-4-argon + reasoning effort low to the cloud-code wire id gemini-4-argon-low.
   'gemini-4-argon-low': {
-    family: 'Gemini 4 Argon', model: 'gemini-4-argon-low', effort: 'low', route: 'agy --print= with stream-json stdin input, slash commands disabled, empty cwd',
-    build: (_dir, _file, prompt) => ({ cmd: 'agy', args: ['--model', 'gemini-4-argon-low', '--input-format', 'stream-json', '--output-format', 'stream-json',
-      '--disable-slash-commands', '--print='], stdin: `${JSON.stringify({ event: 'user', message: { role: 'user', content: prompt } })}\n` }),
-    parse: parseAgyStream,
+    family: 'Gemini 4 Argon', model: 'gemini-4-argon-low', effort: 'low', transport: 'mesh', mesh: { model: 'gemini-4-argon', effort: 'low' },
+    route: 'llm-mesh gateway (local h2a gateway host, enrolled Google seat, cloud-code transport): POST /v1/chat/completions, model gemini-4-argon, reasoning effort low, one user message, no tools; served model checked on every answer',
   },
   // agy: prompt on stdin as one stream-json "user" event (no 128 KB argument limit, L0 open point).
-  ...Object.fromEntries(['high', 'medium', 'low'].map((e) => [`gemini-4-argon-${e}`, {
+  ...Object.fromEntries(['high', 'medium'].map((e) => [`gemini-4-argon-${e}`, {
     family: 'Gemini 4 Argon', model: `gemini-4-argon-${e}`, effort: e, route: 'agy --print= with stream-json stdin input, slash commands disabled, empty cwd',
     build: (_dir, _file, prompt) => ({ cmd: 'agy', args: ['--model', `gemini-4-argon-${e}`, '--input-format', 'stream-json', '--output-format', 'stream-json',
       '--disable-slash-commands', '--print='], stdin: `${JSON.stringify({ event: 'user', message: { role: 'user', content: prompt } })}\n` }),
@@ -640,6 +642,8 @@ export function killSeatTree(child, sig = 'SIGTERM') {
 export function callSeat(label, prompt, { timeoutMs = 900000, base = process.env.CLASSIF_SEAT_TMP ?? os.tmpdir(), killEscalationMs = 15000, closeGraceMs = 30000, spawnImpl = spawn } = {}) {
   const r = ROUTES[label];
   if (!r) throw new Error(`unknown route ${label}`);
+  // llm-mesh route: no child process, no seat dir; the prompt goes over HTTP to the local gateway.
+  if (r.transport === 'mesh') return callMesh({ ...r, label }, prompt, { timeoutMs });
   // Codex seats can run commands: their cwd is an empty per-call dir OUTSIDE $CLASSIF_HOME,
   // whatever base the caller passed (review GEPA B1b).
   const codex = r.parse === parseCodex;
