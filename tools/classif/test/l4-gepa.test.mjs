@@ -213,8 +213,10 @@ test('gepa series shape: a non-empty subset of the GEPA routes, ceiling <= 5 %, 
   assert.throws(() => assertGepaSeriesShape({ ...ok, recallNonRegression: { baselineSeries: 0 } }, 5), /own verdict/);
 });
 
-test('agy seats: argon, carbon and 3.8 flash low on the same agy route; the stream parser fails closed', () => {
-  for (const [label, family] of [['gemini-4-argon-low', 'Gemini 4 Argon'], ['gemini-4-carbon-low', 'Gemini 4 Carbon'], ['gemini-3.8-flash-low', 'Gemini 3.8 Flash']]) {
+test('agy seats: carbon and 3.8 flash low on the same agy route (argon low is on the mesh route); the stream parser fails closed', () => {
+  assert.equal(ROUTES['gemini-4-argon-low'].transport, 'mesh', 'owner 14/11: argon low never on agy');
+  assert.equal(ROUTES['gemini-4-argon-low'].build, undefined);
+  for (const [label, family] of [['gemini-4-carbon-low', 'Gemini 4 Carbon'], ['gemini-3.8-flash-low', 'Gemini 3.8 Flash']]) {
     const r = ROUTES[label];
     assert.equal(r.family, family);
     assert.equal(r.effort, 'low');
