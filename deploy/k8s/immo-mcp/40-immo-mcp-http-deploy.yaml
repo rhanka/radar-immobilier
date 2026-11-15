@@ -66,16 +66,18 @@ data:
   # replayed against the unrelated radar-api/radar-ui surface on the same host.
   IMMO_MCP_OAUTH_RESOURCE: "https://immo.sent-tech.ca/mcp"
   # Space-separated, advertised verbatim in the RFC 9728 PRM `scopes_supported`.
-  # PROD keeps the three data scopes: the artifact tools are not active in prod
-  # and the prod IdP does not list the artifact scopes yet. The preprod overlay
-  # (patch-immo-mcp-config.yaml) adds immo:artifacts:read,
-  # immo:artifacts:write and offline_access. Never add offline_access here:
-  # the prod immo-mcp client row is not refresh-eligible, so advertising it
-  # would only produce invalid_scope errors at authorize time. Enabling
-  # refresh in prod is an owner decision (upsert the client row first:
-  # grant_types with refresh_token, allowed_scopes with offline_access);
-  # only then extend this base value and the prod IdP catalogue together.
-  IMMO_MCP_OAUTH_SCOPES_SUPPORTED: "immo:read immo:search immo:documents:read"
+  # PROD value set by the v1.2.20 cutover (2026-11-14, PR #1100,
+  # deploy/prod-cutover/prod-settings.json `mcp`): the three data scopes plus
+  # the artifact scopes and offline_access, the same list as preprod.
+  # Codified from live. PRECONDITION (PR #1100,
+  # deploy/prod-cutover/PREPARATION.md): the prod IdP catalogue lists the
+  # artifact scopes and the prod immo-mcp client row is refresh-eligible
+  # (grant_types with refresh_token, allowed_scopes with offline_access)
+  # before these scopes are advertised. This change does not prove that
+  # state; without it an authorization request carrying them gets
+  # invalid_scope.
+  IMMO_MCP_OAUTH_SCOPES_SUPPORTED: "immo:read immo:search immo:documents:read immo:artifacts:read immo:artifacts:write offline_access"
+  IMMO_MCP_ARTIFACTS_LEGACY_READ_SCOPE: "true"
   # Left UNSET on purpose: @sentropic/mcp-auth defaults to
   # `${issuer}/.well-known/jwks.json` when absent (see core.js `getKeySource`).
   # Only set IMMO_MCP_OAUTH_JWKS_URI if the IdP publishes its JWKS at a
@@ -110,6 +112,27 @@ data:
   # Public base used in the URLs handed back to the MCP client (get_pv_pdf):
   # the nginx ui pod proxies /api/* on this host to radar-api (50-ui.yaml).
   RADAR_PUBLIC_BASE_URL: "https://immo.sent-tech.ca"
+  # ── Artifacts (PROD, codified from live) ──────────────────────────────────
+  # Activated in prod by the v1.2.20 cutover (prod-settings.json `shared`).
+  # Codified so a client-side apply of this file keeps them. Non-secret only.
+  # The matching credentials are NOT in this source: they exist only on the
+  # live Deployment, as secretKeyRef env entries bound by
+  # deploy/prod-cutover/prod-bindings.sh (PR #1100). The preprod
+  # overlay overrides every key below (patch-immo-mcp-config.yaml).
+  # Required key list: deploy/k8s/prod-configmap-keys.json.
+  ARTIFACTS_CONTROL_MODE: "general"
+  ARTIFACTS_STORAGE_SCOPE: "radar-immobilier"
+  ARTIFACTS_ORG_ID: "radar-immobilier"
+  ARTIFACTS_S3_BUCKET: "radar-immobilier-artifacts"
+  ARTIFACTS_S3_ENDPOINT: "https://s3.bhs.io.cloud.ovh.net"
+  ARTIFACTS_S3_REGION: "bhs"
+  ARTIFACTS_CONTENT_BASE: "pages.immo.sent-tech.ca"
+  ARTIFACTS_PUBLISH_BLOB_DEADLINE_MS: "120000"
+  IMMO_ARTIFACTS_GIT_MODE: "off"
+  IMMO_ARTIFACTS_LIVE_EDGE_ENABLED: "0"
+  IMMO_ARTIFACTS_LIVE_QUALIFIED: "false"
+  IMMO_ARTIFACTS_LIVE_INVITATIONS_QUALIFIED: "false"
+  IMMO_ARTIFACTS_LIVE_REDRIVE_ENABLED: "false"
 ---
 apiVersion: apps/v1
 kind: Deployment
