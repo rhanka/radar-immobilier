@@ -101,7 +101,7 @@ Le [runbook](../../docs/runbooks/prod-cutover-v1220.md) fixe l’ordre. Il diff�
 CONFIGURATION est un JSON ConfigMap radar-cutover-6h, ou une List incluant radar-api, immo-mcp-config et radar-mcp-receiver.
 La cible render produit cette List depuis PLAN et prod-settings.json. Elle n’applique rien.
 Le namespace est radar-immobilier. Le texte de plan.json doit avoir exactement l’empreinte du PLAN approuvé.
-window-configure reprend le même verrou avant application. Les rôles et références Secret sont des prérequis provisionnés séparément.
+window-configure reprend le même verrou. Il fusionne clé par clé (patch merge), jamais d’apply du rendu partiel (incident 14/11). Les rôles et références Secret sont des prérequis provisionnés séparément.
 window-start exige aussi PREVIOUS_RELEASE indépendant, au SHA complet et aux digests attendus.
 Les sondes historiques peuvent servir le complet ou le préfixe exact de sept caractères. Le candidat reste strict.
 Le verrou doit être pris. Aucun stamp preparing, run tag CD actif ou Job CD non terminé n’est admis.
