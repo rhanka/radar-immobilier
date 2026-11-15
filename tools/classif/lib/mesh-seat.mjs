@@ -118,11 +118,12 @@ export function meshUnavailable(r) {
   return Boolean(r) && r.code !== 0 && (r.code === 429 || r.code >= 500 || r.code === MESH_TRANSPORT_ERROR || r.code === MESH_SERVED_MISMATCH);
 }
 
-const TRANSIENT = /\b(?:429|500|502|503|504)\b|resource[_ ]exhausted|\bunavailable\b|overloaded|temporarily|rate[ _-]?limit|too many requests|quota|deadline[_ ]exceeded/i;
+const TRANSIENT = /\b(?:429|500|502|503|504)\b|resource[_ ]exhausted|\bunavailable\b|overloaded|temporarily|rate[ _-]?limit|too many requests|quota|deadline[_ ]exceeded|hit your [^\n]{0,40}\blimit\b|usage limit/i;
 /**
  * A failed seat call that reads as a transient unavailability: a mesh one (codes), a timeout, or a
  * CLI error text (stderr or error envelope, never the answer) naming 429, 5xx, exhausted or
- * unavailable resources, a rate limit or a quota.
+ * unavailable resources, a rate limit or a quota, or a seat usage limit (claude CLI 15/11:
+ * « You've hit your Fable limit · resets ... », exit 1: a pause, never a scored failure).
  */
 export function seatUnavailable(r) {
   if (!r || r.code === 0) return false;

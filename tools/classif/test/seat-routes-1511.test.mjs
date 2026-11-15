@@ -142,3 +142,13 @@ test('meta api: refused in test mode without a fake server or a fake key file (n
   assert.throws(() => metaApiBase({ CLASSIF_META_API_BASE: 'http://x' }), /test-only/);
   await assert.rejects(callSeat('muse-ember-1.0-low-api', 'p'), /refused in test mode/);
 });
+
+test('a seat usage limit (claude CLI « hit your Fable limit ») pauses the blind, never a scored failure', async () => {
+  const { seatUnavailable } = await import('../lib/mesh-seat.mjs');
+  const msg = "You've hit your Fable limit · resets Nov 22, 9am (America/Toronto).";
+  const f = fakeSpawn(JSON.stringify({ type: 'result', is_error: true, result: msg, usage: {}, modelUsage: {} }), 1);
+  const r = await callSeat('fable-5.2-low', 'p', { spawnImpl: f.spawnImpl });
+  assert.equal(r.code, 1);
+  assert.equal(seatUnavailable(r), true);
+  assert.equal(seatUnavailable({ code: 1, stderrTail: '', errorEnvelope: 'invalid json answer' }), false);
+});
