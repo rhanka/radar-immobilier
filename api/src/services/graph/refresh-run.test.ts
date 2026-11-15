@@ -9,8 +9,10 @@ import { extractionToV23Graph } from "./refresh-v23.js";
 import { refreshCorpusInputHash, type RefreshCorpus, type RefreshCorpusDocument } from "./refresh-corpus.js";
 import { acquireRefreshPdfCandidates, bindDocumentSourceIds, DEFAULT_REFRESH_DOCUMENT_TIMEOUT_MS,
   DEFAULT_REFRESH_MAX_DOCUMENT_BYTES,
-  orderRefreshPdfCandidates, recoverRefreshDocumentDates, refreshSourceDelayMs, writeRefreshPdfManifest,
+  orderRefreshPdfCandidates, recoverRefreshDocumentDates, refreshDocumentFailureReason,
+  refreshProjectionFailure, refreshSourceDelayMs, writeRefreshPdfManifest,
   type RefreshAcquire } from "./refresh-run.js";
+import { refreshErrorDiagnostic } from "./refresh-mesh.js";
 
 class MemoryStore implements ObjectStore {
   readonly objects = new Map<string, Uint8Array>();
@@ -292,5 +294,27 @@ describe("documentary dates in the existing refresh", () => {
     const hydrated = await hydrateGraphDocumentDates(store, baseline);
     expect(hydrated.nodes[0]?.properties).toMatchObject({ date: "2026-07-28" });
     expect(baseline.nodes[0]?.properties).not.toHaveProperty("date");
+  });
+});
+
+describe("refreshProjectionFailure", () => {
+  it("should carry the receipt reason as a REFRESH_ code the diagnostic logs", () => {
+    const secret = "business-property regression for mont-tremblant: node-secret: valeur";
+    const error = refreshProjectionFailure("postgres-regression-refused", `Postgres projection refused: ${secret}`);
+    expect(error.code).toBe("REFRESH_POSTGRES_REGRESSION_REFUSED");
+    expect(error.message).toContain(secret);
+    const wrapped = Object.assign(new Error("apply interrupted"), { name: "Graphify34ApplyInterrupted",
+      stage: "projection", cause: error });
+    const diagnostic = refreshErrorDiagnostic(wrapped);
+    expect(diagnostic).toMatchObject({ causeCode: "REFRESH_POSTGRES_REGRESSION_REFUSED", stage: "projection",
+      rootCauseCode: "REFRESH_POSTGRES_REGRESSION_REFUSED" });
+    expect(JSON.stringify(diagnostic)).not.toContain(secret);
+  });
+
+  it("should map every projection receipt reason to its code", () => {
+    expect(refreshProjectionFailure("aborted-before-projection", "x").code).toBe("REFRESH_ABORTED_BEFORE_PROJECTION");
+    expect(refreshProjectionFailure("aborted-after-projection", "x").code).toBe("REFRESH_ABORTED_AFTER_PROJECTION");
+    expect(refreshDocumentFailureReason(refreshProjectionFailure("postgres-regression-refused", "x")))
+      .toBe("refresh-postgres-regression-refused");
   });
 });

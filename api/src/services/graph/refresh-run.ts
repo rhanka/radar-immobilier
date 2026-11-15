@@ -293,6 +293,15 @@ async function completeStage(store: ObjectStore, handle: RefreshStateHandle,
   });
 }
 
+/**
+ * The error a refused projection throws. Its code (`REFRESH_POSTGRES_REGRESSION_REFUSED`,
+ * `REFRESH_ABORTED_BEFORE_PROJECTION`, ...) is what the redacted diagnostic logs; the
+ * message, which may name nodes, is never logged.
+ */
+export function refreshProjectionFailure(reason: string, message: string): Error & { code: string } {
+  return Object.assign(new Error(message), { code: `REFRESH_${reason.toUpperCase().replace(/-/g, "_")}` });
+}
+
 function requireRunning(signal: AbortSignal | undefined, where: string): void {
   if (signal?.aborted) throw new Error(`Refresh aborted ${where}`);
 }
@@ -311,7 +320,7 @@ async function publishSnapshot(options: RunPvRefreshOptions, initial: RefreshSta
     const failProjection = async (reason: string, message: string): Promise<never> => {
       handle = await writeRefreshStageReceipt(options.store, handle, { stage: "projected",
         status: "failed", reason, recordedAt: now().toISOString() });
-      throw new Error(message);
+      throw refreshProjectionFailure(reason, message);
     };
     if (options.signal?.aborted) await failProjection("aborted-before-projection",
       "Refresh aborted before projection");
