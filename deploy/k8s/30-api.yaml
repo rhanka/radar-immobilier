@@ -61,6 +61,9 @@ data:
   # OAUTH_ISSUER_URL=https://auth.sent-tech.ca; discovery at
   # /.well-known/openid-configuration, JWKS at /.well-known/jwks.json).
   SENTROPIC_IDP_ISSUER: "https://auth.sent-tech.ca"
+  # Explicit JWKS location (live prod value since the v1.2.20 cutover,
+  # prod-settings.json `api`); the preprod overlay pins the preprod one.
+  SENTROPIC_IDP_JWKS_URL: "https://auth.sent-tech.ca/.well-known/jwks.json"
   # This app's registered oauth_clients id at the IdP. The `radar-immobilier`
   # client row is seeded at auth.sent-tech.ca with redirect_uri below.
   # resolveAuthConfig() (api/src/config.ts) sets `enabled=true` only when all
@@ -79,6 +82,39 @@ data:
   # These mirror the config.ts defaults; set here so the values are declarative.
   SESSION_TTL_SECONDS: "1296000"
   SESSION_ABSOLUTE_TTL_SECONDS: "2592000"
+  # ── Artifacts + classification cursor (PROD, codified from live) ──────────
+  # Activated in prod by the v1.2.20 cutover (2026-11-14, PR #1100 render,
+  # deploy/prod-cutover/prod-settings.json `shared` + `api`). Codified here so
+  # a client-side `kubectl apply -f deploy/k8s/30-api.yaml` (k8s-apply-mcp.yaml)
+  # keeps them instead of pruning them. Non-secret only: the matching
+  # credentials (ARTIFACTS_S3_*_KEY, ARTIFACTS_READER_*_SECRET,
+  # ARTIFACTS_UPLOAD_PAGE_SECRET, CLASSIFICATION_CURSOR_SECRET) are never
+  # ConfigMap data and are NOT in this source either: they exist only on the
+  # live Deployment, as secretKeyRef env entries bound by
+  # deploy/prod-cutover/prod-bindings.sh (PR #1100).
+  # The preprod overlay overrides every key below
+  # (deploy/overlays/preprod/patch-artifacts-control.yaml).
+  # Required key list: deploy/k8s/prod-configmap-keys.json
+  # (gate: deploy/ci/check-prod-configmap-keys.sh).
+  ARTIFACTS_CONTROL_MODE: "general"
+  ARTIFACTS_STORAGE_SCOPE: "radar-immobilier"
+  ARTIFACTS_ORG_ID: "radar-immobilier"
+  ARTIFACTS_S3_BUCKET: "radar-immobilier-artifacts"
+  ARTIFACTS_S3_ENDPOINT: "https://s3.bhs.io.cloud.ovh.net"
+  ARTIFACTS_S3_REGION: "bhs"
+  ARTIFACTS_CONTENT_BASE: "pages.immo.sent-tech.ca"
+  ARTIFACTS_PUBLISH_BLOB_DEADLINE_MS: "120000"
+  ARTIFACTS_READER_ISSUER: "https://immo.sent-tech.ca"
+  ARTIFACTS_READER_AUDIENCE: "https://immo.sent-tech.ca/reader"
+  ARTIFACTS_READER_TIER: "prod"
+  # Key id only (the HMAC secret is CLASSIFICATION_CURSOR_SECRET). The prod
+  # value is `preprod-v1` on purpose: it is the id the v1.2.20 cutover set.
+  CLASSIFICATION_CURSOR_KEY_ID: "preprod-v1"
+  IMMO_ARTIFACTS_GIT_MODE: "off"
+  IMMO_ARTIFACTS_LIVE_EDGE_ENABLED: "0"
+  IMMO_ARTIFACTS_LIVE_QUALIFIED: "false"
+  IMMO_ARTIFACTS_LIVE_INVITATIONS_QUALIFIED: "false"
+  IMMO_ARTIFACTS_LIVE_REDRIVE_ENABLED: "false"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -184,6 +220,18 @@ spec:
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
             - name: POSTGRES_DB
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
+            # PROD literals codified from live (2026-11-15). They are in the
+            # live last-applied annotation, so a client-side apply of this file
+            # without them would remove them. A literal env wins over envFrom:
+            # prod runs NODE_OPTIONS=--max-old-space-size=640 (heap cap under
+            # the 768Mi limit), not the ConfigMap value. The preprod overlay
+            # deletes both entries, so preprod keeps the ConfigMap values.
+            # Required list: deploy/k8s/prod-configmap-keys.json
+            # (`radar-api-deployment-env`).
+            - name: POSTGRES_HOST
+              value: "radar-postgres"
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=640"
             # Complete OVH canonical DOCS binding. Coordinates and credentials come from
             # one bucket-scoped Secret; no ConfigMap or generic-key fallback.
             - name: S3_ENDPOINT
