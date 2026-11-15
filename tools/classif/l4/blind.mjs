@@ -12,7 +12,7 @@
 import path from 'node:path';
 import process from 'node:process';
 import { chmodSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, writeFileSync } from 'node:fs';
-import { ROUTES, callSeat, isCodexSeat } from '../run-seat.mjs';
+import { ROUTES, callSeat, isCodexSeat, parseAgyStream } from '../run-seat.mjs';
 import { CODEX_QUOTA_PAUSE_DEFAULT, createQuotaGuard, parseQuotaPause, quotaFields } from '../lib/codex-quota.mjs';
 import { appendJsonlRecord, parseJsonlTolerant } from '../lib/jsonl.mjs';
 import { sha256, stableStringify } from '../lib/render.mjs';
@@ -347,9 +347,10 @@ function readdirSyncSafe(dir) {
   // Account-refusal guard (owner 12/11): the first refused account stops every launch, blind
   // and S113, before any blind-run or eval-run audit (the one-shot run is never consumed).
   const accountGuard = createAccountGuard();
-  // Mesh availability pause (owner 15/11): a mesh route still unavailable after its retries stops
-  // the run before any audit; answered items stay cached and the same command resumes.
-  const meshGuard = createMeshPauseGuard((route) => ROUTES[route]?.transport === 'mesh');
+  // Availability pause (owner 15/11): a mesh or agy call that reads as a transient unavailability
+  // (429, 5xx, exhausted, timeout) stops the run before any audit; answered items stay cached and
+  // the same command resumes after a delay. An account refusal stays with the account guard.
+  const meshGuard = createMeshPauseGuard((route) => ROUTES[route]?.transport === 'mesh' || ROUTES[route]?.parse === parseAgyStream);
   // Pilot (--pilot N): at most N new seat calls, then a stop that reports infrastructure counts
   // only (launched, answered, failures by reason); answered items stay cached for the full run.
   const pilot = argv.includes('--pilot') ? Number(argv[argv.indexOf('--pilot') + 1]) : 0;

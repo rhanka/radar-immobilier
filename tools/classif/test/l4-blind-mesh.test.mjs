@@ -1,4 +1,4 @@
-// Blind executor on the llm-mesh route (owner 15/11): pilot stop with infrastructure counts only,
+// Blind executor pause and pilot on a mesh route (owner 15/11): pilot stop with infrastructure counts only,
 // mesh pause on a model still unavailable after its retries (no audit, nothing consumed), resume
 // without losing answered items. Hermetic: fake gateway (stubbed fetch, test-only URL), temp home.
 import { test } from 'node:test';
@@ -7,6 +7,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { swapEnv, withTempHome } from './hermetic-helpers.mjs';
 import { SCORE_KEYS, auditOf, blindIds, blindPass, setupBlind } from './l4-blind-fixture.mjs';
+import { ROUTES } from '../run-seat.mjs';
 
 const K = '96';
 const ROUTE = 'gemini-4-argon-low';
@@ -31,10 +32,18 @@ function fakeMesh(down = () => false) {
   return { calls: () => calls, restore: () => { globalThis.fetch = real; while (restores.length) restores.pop()(); } };
 }
 
+/** No route uses the mesh transport today (owner 15/11): the test mounts one on argon low for its duration. */
+function meshRoute() {
+  const saved = ROUTES[ROUTE];
+  ROUTES[ROUTE] = { family: saved.family, model: saved.model, effort: saved.effort, transport: 'mesh', mesh: { model: 'gemini-4-argon', effort: 'low' }, route: 'test mesh route' };
+  return () => { ROUTES[ROUTE] = saved; };
+}
+
 const blindRuns = (home) => auditOf(home).filter((e) => e.action === 'blind-run').length;
 
 test('mesh blind: pilot stops with counts only, a 503 pauses without audit, the resume reuses answered items', withTempHome(async (home) => {
   const s = await setupBlind(home, { k: K, routes: [ROUTE], ids: IDS });
+  const unmount = meshRoute();
   try {
     let gw = fakeMesh();
     const pilot = await blindPass(home, { k: K, routes: [ROUTE], concurrency: 1, argv: ['--pilot', '3'] });
@@ -61,5 +70,14 @@ test('mesh blind: pilot stops with counts only, a 503 pauses without audit, the 
     assert.equal(blindCalls, 5, 'only b-006..b-010 are called again');
     assert.equal(blindRuns(home), 1);
     assert.ok(existsSync(path.join(home, 'blind', `series-${K}-aggregates.json`)));
-  } finally { s.cleanup(); }
+  } finally { unmount(); s.cleanup(); }
 }));
+
+test('agy blind: a transient seat error (429, 503, exhausted, timeout) pauses; an answer or a parse failure does not', async () => {
+  const { seatUnavailable } = await import('../lib/mesh-seat.mjs');
+  assert.equal(seatUnavailable({ code: 1, stderrTail: 'Error: 429 RESOURCE_EXHAUSTED' }), true);
+  assert.equal(seatUnavailable({ code: 1, errorEnvelope: '{"code":503,"status":"UNAVAILABLE"}' }), true);
+  assert.equal(seatUnavailable({ code: null, timedOut: true }), true);
+  assert.equal(seatUnavailable({ code: 0, text: 'quota 429 in the answer' }), false);
+  assert.equal(seatUnavailable({ code: 1, stderrTail: 'PERMISSION_DENIED 403' }), false, 'an account refusal stays with the account guard');
+});

@@ -65,15 +65,11 @@ export const ROUTES = {
       '--disable-web-tools', '--disable-reminders', '--disable-request-user-input', '--no-foreign-personal-context', '--no-session-log', '--workspace', dir] }),
     parse: parseMuse,
   }])),
-  // Owner 14/11: Gemini 4 Argon low runs on the llm-mesh route (enrolled seat, the preprod and prod
-  // path), never on agy. Same series identity (model gemini-4-argon-low, effort low): the mesh maps
-  // model gemini-4-argon + reasoning effort low to the cloud-code wire id gemini-4-argon-low.
-  'gemini-4-argon-low': {
-    family: 'Gemini 4 Argon', model: 'gemini-4-argon-low', effort: 'low', transport: 'mesh', mesh: { model: 'gemini-4-argon', effort: 'low' },
-    route: 'llm-mesh gateway (local h2a gateway host, enrolled Google seat, cloud-code transport): POST /v1/chat/completions, model gemini-4-argon, reasoning effort low, one user message, no tools; served model checked on every answer',
-  },
+  // Owner 15/11 12:05: the series 9 blind of Argon low runs on the agy route of its tuning run
+  // (explicitly allowed for this measure). The llm-mesh client (lib/mesh-seat.mjs, transport 'mesh')
+  // stays in code, used by no route.
   // agy: prompt on stdin as one stream-json "user" event (no 128 KB argument limit, L0 open point).
-  ...Object.fromEntries(['high', 'medium'].map((e) => [`gemini-4-argon-${e}`, {
+  ...Object.fromEntries(['high', 'medium', 'low'].map((e) => [`gemini-4-argon-${e}`, {
     family: 'Gemini 4 Argon', model: `gemini-4-argon-${e}`, effort: e, route: 'agy --print= with stream-json stdin input, slash commands disabled, empty cwd',
     build: (_dir, _file, prompt) => ({ cmd: 'agy', args: ['--model', `gemini-4-argon-${e}`, '--input-format', 'stream-json', '--output-format', 'stream-json',
       '--disable-slash-commands', '--print='], stdin: `${JSON.stringify({ event: 'user', message: { role: 'user', content: prompt } })}\n` }),
