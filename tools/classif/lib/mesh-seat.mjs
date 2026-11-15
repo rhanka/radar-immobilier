@@ -32,6 +32,12 @@ export function meshGateway(env = process.env) {
   return MESH_GATEWAY_DEFAULT;
 }
 
+/** Retry delays: the default, or the test-only CLASSIF_TEST_MESH_BACKOFF_MS list (comma separated). */
+export function meshBackoff(env = process.env) {
+  const o = testOnlyEnv(env, 'CLASSIF_TEST_MESH_BACKOFF_MS');
+  return o === undefined ? MESH_BACKOFF_MS_DEFAULT : String(o).split(',').filter(Boolean).map(Number);
+}
+
 /** Served model from the `x-sentropic-served` header (`provider=..; model=..; transport=..`). */
 export function servedModel(header) {
   const m = /(?:^|;)\s*model=([^;\s]+)/.exec(String(header ?? ''));
@@ -66,7 +72,7 @@ async function bearer(base, sessionId, fetchImpl) {
  * model; otherwise the HTTP status, MESH_SERVED_MISMATCH or MESH_TRANSPORT_ERROR.
  */
 export async function callMesh(route, prompt, { timeoutMs = 900000, base = meshGateway(),
-  sessionId = `classif-${route.label}-${process.pid}`, fetchImpl = fetch, sleepImpl = sleep, backoffMs = MESH_BACKOFF_MS_DEFAULT } = {}) {
+  sessionId = `classif-${route.label}-${process.pid}`, fetchImpl = fetch, sleepImpl = sleep, backoffMs = meshBackoff() } = {}) {
   const started = Date.now();
   const body = JSON.stringify({ model: route.mesh.model, reasoning: { effort: route.mesh.effort },
     messages: [{ role: 'user', content: prompt }] });
@@ -105,4 +111,38 @@ export async function callMesh(route, prompt, { timeoutMs = 900000, base = meshG
   }
   return { code: last.code, latencyMs: Date.now() - started, timedOut: Boolean(last.timedOut), text: '', usage: null, attempts, served: last.served,
     toolEvents: 0, toolKinds: {}, errorEnvelope: last.why, stderrTail: last.why };
+}
+
+/** A mesh call that ended unavailable after its retries (429, 5xx, transport, served mismatch). */
+export function meshUnavailable(r) {
+  return Boolean(r) && r.code !== 0 && (r.code === 429 || r.code >= 500 || r.code === MESH_TRANSPORT_ERROR || r.code === MESH_SERVED_MISMATCH);
+}
+
+export class MeshPause extends Error {
+  constructor(message, details) {
+    super(message);
+    this.name = 'MeshPause';
+    Object.assign(this, details);
+  }
+}
+
+/**
+ * Mesh availability pause (owner 15/11: a 503 in the middle pauses, never consumes the one-shot
+ * blind run): the first mesh call still unavailable after its retries stops every further launch;
+ * the run stops before any aggregate or audit, answered items stay cached, and the same command
+ * resumes. An unavailable call is never a scored failure.
+ */
+export function createMeshPauseGuard(isMesh) {
+  let tripped = null;
+  return {
+    get tripped() { return tripped; },
+    blocks: () => Boolean(tripped),
+    observe(route, r) {
+      if (!tripped && isMesh(route) && meshUnavailable(r)) tripped = { route, at: new Date().toISOString(), code: r.code };
+      return tripped;
+    },
+    error(resumeCommand) {
+      return new MeshPause(`mesh pause: ${tripped.route} unavailable (code ${tripped.code}) at ${tripped.at} after its retries; no further call launched, run stopped before any aggregate or audit (answered items are cached). Resume with \`${resumeCommand}\` once the model answers.`, { ...tripped });
+    },
+  };
 }

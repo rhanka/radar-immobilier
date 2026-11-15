@@ -24,6 +24,7 @@ import { check as budgetCheck } from '../lib/budget.mjs';
 import { assertNoVerbatim } from '../lib/freeze.mjs';
 import { loadCodes } from '../l2/run.mjs';
 import { createAccountGuard } from '../lib/account-guard.mjs';
+import { createMeshPauseGuard } from '../lib/mesh-seat.mjs';
 import { assertBlindRunAllowed, audit, blindDir, openBlindSet, readAudit } from '../lib/blind.mjs';
 import { assertEvalRunAllowed, audit as auditEval, openEvalSet, readAudit as readEvalAudit } from '../guard/evalset.mjs';
 import { assertSeriesHalves, assertSeriesRoutes, gepaSeriesRoutes, loadSeriesManifest, seriesMethod } from './series.mjs';
@@ -202,6 +203,15 @@ export function gepaBlindRouteGate(blind, rows, ceiling) {
   return gepaRouteVerdict({ misses, failures: resolved.filter((r) => r.failed).length, items: resolved.length }, ceiling);
 }
 
+/** Typed stop of a pilot run (--pilot N): infrastructure counts only, never a score. */
+export class BlindPilotStop extends Error {
+  constructor(summary) {
+    super('blind pilot stop');
+    this.name = 'BlindPilotStop';
+    this.summary = summary;
+  }
+}
+
 export function buildBlindManifest({ k, promptSha, routes, blindItems, aggregatesSha256, infraReruns = [], recallNonRegression = null, method = null }) {
   return { kind: 'l4-blind', series: k, createdAt: new Date().toISOString(), promptSha256: promptSha,
     ...(method ? { method } : {}),
@@ -337,6 +347,14 @@ function readdirSyncSafe(dir) {
   // Account-refusal guard (owner 12/11): the first refused account stops every launch, blind
   // and S113, before any blind-run or eval-run audit (the one-shot run is never consumed).
   const accountGuard = createAccountGuard();
+  // Mesh availability pause (owner 15/11): a mesh route still unavailable after its retries stops
+  // the run before any audit; answered items stay cached and the same command resumes.
+  const meshGuard = createMeshPauseGuard((route) => ROUTES[route]?.transport === 'mesh');
+  // Pilot (--pilot N): at most N new seat calls, then a stop that reports infrastructure counts
+  // only (launched, answered, failures by reason); answered items stay cached for the full run.
+  const pilot = argv.includes('--pilot') ? Number(argv[argv.indexOf('--pilot') + 1]) : 0;
+  if (argv.includes('--pilot') && !(Number.isInteger(pilot) && pilot > 0)) throw new Error('--pilot needs a positive integer');
+  const pilotStats = { launched: 0, answered: 0, infraFailed: 0, answerFailed: 0, why: {} };
   const runBlindRoute = async (route) => {
     const { model, effort } = ROUTES[route];
     const routeFile = path.join(outDir, `series-${k}-${route}.json`);
@@ -382,14 +400,23 @@ function readdirSyncSafe(dir) {
     const rows = await pool(blind.map((item) => async () => {
       const hit = loadBlindCached(item.itemId);
       if (hit) return hit;
-      if (quotaGuard.blocks(route) || accountGuard.blocks()) return null;
+      if (quotaGuard.blocks(route) || accountGuard.blocks() || meshGuard.blocks()) return null;
+      if (pilot && pilotStats.launched >= pilot) return null;
+      pilotStats.launched++;
       appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: true, phase: `l4-blind-s${k}`, route, itemId: item.itemId });
       const r = await callSeat(route, devPrompt(frozen, item), { base: seatTmp, timeoutMs: 1800000 });
       appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: `l4-blind-s${k}`, route, itemId: item.itemId,
         exitCode: r.code, latencyMs: r.latencyMs, usage: r.usage ?? null, costUsd: r.costUsd ?? r.costUsdApiEquivalent ?? null, toolEvents: r.toolEvents ?? null, ...(r.toolEvents && r.toolKinds ? { toolKinds: r.toolKinds } : {}), ...quotaFields(r) });
       quotaGuard.observe(route, r.rateLimits);
       accountGuard.observe(route, r);
+      meshGuard.observe(route, r);
       const parsed = parseSeatResult(r, codes);
+      if (!parsed.failed) pilotStats.answered++;
+      else {
+        if (parsed.infra) pilotStats.infraFailed++; else pilotStats.answerFailed++;
+        const why = parsed.why ?? 'answer';
+        pilotStats.why[why] = (pilotStats.why[why] ?? 0) + 1;
+      }
       const row = { itemId: item.itemId, failed: parsed.failed, why: parsed.why ?? null,
         pred: parsed.failed ? null : { verdict: parsed.verdict, code: parsed.code } };
       // Review N4: failures are never cached — a transient seat failure is retried on
@@ -403,6 +430,8 @@ function readdirSyncSafe(dir) {
     // Answered items are cached above; a paused codex route stops before its blind-run audit.
     if (quotaGuard.paused && isCodexSeat(route)) throw quotaGuard.error(resumeCommand);
     if (accountGuard.tripped) throw accountGuard.error(resumeCommand);
+    if (meshGuard.tripped) throw meshGuard.error(resumeCommand);
+    if (pilot) throw new BlindPilotStop({ route, ...pilotStats });
     // Review §9a: indeterminate supports come from the pre-registered series manifest.
     const supports = seriesSpec.supports ?? {};
     const stats = shownStats(blind.map((b, i) => ({ ref: b.verdict, pred: rows[i].failed ? { failed: true } : rows[i].pred, unresolved: b.status === 'unresolved' })),
@@ -467,13 +496,14 @@ function readdirSyncSafe(dir) {
     const rows = await pool(inputs.map((item) => async () => {
       const hit = loadS113Cached(item.evalId);
       if (hit) return hit;
-      if (quotaGuard.blocks(route) || accountGuard.blocks()) return null;
+      if (quotaGuard.blocks(route) || accountGuard.blocks() || meshGuard.blocks()) return null;
       appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: true, phase: `l4-s113-s${k}`, route, itemId: item.evalId });
       const r = await callSeat(route, devPrompt(frozen, item), { base: seatTmp, timeoutMs: 1800000 });
       appendJsonlRecord(callsLog, { at: new Date().toISOString(), intent: false, phase: `l4-s113-s${k}`, route, itemId: item.evalId,
         exitCode: r.code, latencyMs: r.latencyMs, toolEvents: r.toolEvents ?? null, ...(r.toolEvents && r.toolKinds ? { toolKinds: r.toolKinds } : {}), ...quotaFields(r) });
       quotaGuard.observe(route, r.rateLimits);
       accountGuard.observe(route, r);
+      meshGuard.observe(route, r);
       const parsed = parseSeatResult(r, codes);
       const row = { failed: parsed.failed, pred: parsed.failed ? null : { verdict: parsed.verdict, code: parsed.code } };
       // Review N4: failures are never cached — retried on resume.
@@ -484,6 +514,7 @@ function readdirSyncSafe(dir) {
       return row;
     }), concurrency);
     if (accountGuard.tripped) throw accountGuard.error(resumeCommand);
+    if (meshGuard.tripped) throw meshGuard.error(resumeCommand);
     if (quotaGuard.paused && isCodexSeat(route)) throw quotaGuard.error(resumeCommand);
     const exp = inputs.map((i) => expById.get(i.evalId));
     const s113supports = seriesSpec.supports ?? {};
@@ -531,5 +562,9 @@ function readdirSyncSafe(dir) {
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]).endsWith(path.join('l4', 'blind.mjs'))) {
-  main().catch((err) => { process.stderr.write(`classif-l4-blind: ${err.stack}\n`); process.exit(1); });
+  main().catch((err) => {
+    if (err?.name === 'BlindPilotStop') { process.stdout.write(`${JSON.stringify({ pilot: err.summary })}\n`); process.exit(0); }
+    if (err?.name === 'MeshPause') { process.stderr.write(`classif-l4-blind: ${err.message}\n`); process.exit(75); }
+    process.stderr.write(`classif-l4-blind: ${err.stack}\n`); process.exit(1);
+  });
 }
