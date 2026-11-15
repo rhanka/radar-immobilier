@@ -294,12 +294,14 @@ async function completeStage(store: ObjectStore, handle: RefreshStateHandle,
 }
 
 /**
- * The error a refused projection throws. Its code (`REFRESH_POSTGRES_REGRESSION_REFUSED`,
- * `REFRESH_ABORTED_BEFORE_PROJECTION`, ...) is what the redacted diagnostic logs; the
- * message, which may name nodes, is never logged.
+ * The error a refused projection throws. Its code (`PROJECTION_POSTGRES_REGRESSION_REFUSED`,
+ * `PROJECTION_ABORTED_BEFORE_PROJECTION`, ...) is what the redacted diagnostic logs; the
+ * message, which may name nodes, is never logged. The prefix is deliberately NOT
+ * `REFRESH_`: that namespace drives the sweep outcomes and the ledger failure reasons
+ * ({@link refreshDocumentFailureReason}); this code is diagnostic only.
  */
 export function refreshProjectionFailure(reason: string, message: string): Error & { code: string } {
-  return Object.assign(new Error(message), { code: `REFRESH_${reason.toUpperCase().replace(/-/g, "_")}` });
+  return Object.assign(new Error(message), { code: `PROJECTION_${reason.toUpperCase().replace(/-/g, "_")}` });
 }
 
 function requireRunning(signal: AbortSignal | undefined, where: string): void {
@@ -633,6 +635,8 @@ export async function recoverRefreshDocumentDates(store: ObjectStore,
 /**
  * The redacted reason code kept against a failing document. Model-side reasons
  * come from the policy's own closed vocabulary; everything else is `error`.
+ * Only `REFRESH_*` codes are read here; `PROJECTION_*` codes (refreshProjectionFailure)
+ * are diagnostic only and never become a ledger reason.
  */
 export function refreshDocumentFailureReason(error: unknown): string {
   const code = error && typeof error === "object" ? (error as { code?: unknown }).code : undefined;
