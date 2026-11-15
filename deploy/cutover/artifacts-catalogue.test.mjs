@@ -228,7 +228,7 @@ test('union rule: prod wins on unique keys, every dropped preprod row is journal
   assert.doesNotMatch(body, /DISABLE TRIGGER ALL/, 'no load path bypasses foreign keys');
 });
 
-test('artifact blobs in S3 are additive on restore: never mirrored, never pruned', async () => {
+test('docs restore mirror never touches an artifacts/ prefix (artifact blobs live in their own buckets)', async () => {
   const { createRequire } = await import('node:module');
   const require = createRequire(import.meta.url);
   const { LAYOUT, isMirrored } = require(path.join(root, 'deploy/ci/bascule-preprod/backup-restore.cjs'));
