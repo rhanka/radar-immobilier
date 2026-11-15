@@ -100,11 +100,26 @@ and the sealed preprod export. The import is a union, not a replacement:
   catalogue is empty.
 
 S3 blobs: keys are `artifacts/<scope>/blobs/sha256/<digest>` (content
-addressed). The docs restore Job (#1113) mirrors only `graph/` and
-`refresh/018/`; `artifacts/` is additive: preprod blobs are never deleted and
-prod blobs present in the backup inventory are copied in. The same key always
-holds the same bytes, so the two catalogues stay coherent with the bucket.
-The hermetic test pins `artifacts/` outside the mirror prefixes.
+addressed). They do NOT live in the docs bucket: source-declared config gives
+prod `ARTIFACTS_S3_BUCKET=radar-immobilier-artifacts`, scope `radar-immobilier`
+(`deploy/k8s/30-api.yaml`) and preprod `radar-immobilier-artifacts-preprod`,
+scope `radar-immobilier-preprod` (`deploy/overlays/preprod/patch-artifacts-control.yaml`).
+Consequences:
+
+- Preprod blobs: no restore step writes or deletes in the preprod artifacts
+  bucket, so preprod-own rows keep their blobs.
+- Prod rows imported by the union keep scope `radar-immobilier`; their blobs
+  are in the PROD artifacts bucket. No step copies them to the preprod bucket,
+  and the preprod API serves scope `radar-immobilier-preprod` only. GAP, owner
+  decision needed: copy prod blobs into the preprod bucket and/or rewrite the
+  scope of imported prod rows, or accept prod rows as catalogue-only in preprod.
+  This was already the state before this change (a restore replaced the
+  preprod catalogue with prod-scope rows).
+- Distinct scopes mean a slug collision `(storage_scope_id, owner_id,
+  binding_name)` cannot occur between a prod row and a preprod-own row; UUID
+  collisions and prod rows carried by an earlier restore remain the cases.
+- The docs restore Job (#1113) mirrors only `graph/` and `refresh/018/` of the
+  docs bucket; a hermetic test pins `artifacts/` outside its mirror prefixes.
 
 Coherence gate (#1113): the import only adds rows under `artifacts.*`; it
 writes nothing in S3 and nothing the gate reads (pinned dump, docs, recon of
@@ -114,9 +129,14 @@ writes nothing in S3 and nothing the gate reads (pinned dump, docs, recon of
 
 Opt-in via `CATALOGUE_DIR` (+ `CATALOGUE_SCRIPT`, optional `CATALOGUE_MAP`).
 Unset keeps the historical behavior byte-for-byte.
-Status 2026-11-15: no Job template sets `CATALOGUE_DIR` yet (`db-restore-backup`
-and the cutover render embed `atomic-restore.sh` without the catalogue
-script), so live restores do not run the union until that wiring lands.
+Wiring (2026-11-15, preprod only): the `restore` Job embeds the catalogue
+script and sets `CATALOGUE_DIR`, `CATALOGUE_STASH=1`; the export is stashed in
+schema `catalogue_stash` of the restored database; the `catalogue` Job
+(`deploy/cutover/catalogue-import-job.tmpl.yaml`) imports it in union after the
+coherence gate and the migrations (`ddl`, `data`), in `MODE=restore` and in
+`prepare`. A target newer than the export (journal superset) is accepted:
+export columns must exist, new columns take defaults. Conflicts persist in
+`catalogue_journal`. Operator guide: `deploy/cutover/README.md`.
 
 - Live restore: fresh export before the schema reset, import after the
   replay, before any reopening.
