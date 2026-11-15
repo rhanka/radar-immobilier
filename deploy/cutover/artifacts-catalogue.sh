@@ -15,7 +15,7 @@
 #   artifacts-catalogue.sh gate   --target-db NAME [--max-bytes N] [--max-rows N] [--map FILE]
 #   artifacts-catalogue.sh export --out-dir DIR [--scope SCOPE]
 #   artifacts-catalogue.sh import --in-dir DIR [--map FILE] [--report FILE] [--allow-same-db]
-#   artifacts-catalogue.sh verify --in-dir DIR
+#   artifacts-catalogue.sh verify --in-dir DIR [--union]
 #   artifacts-catalogue.sh archive --in-dir DIR --bucket NAME --prefix PATH --endpoint-url URL [--s5cmd BIN]
 #   artifacts-catalogue.sh manifest-check --in-dir DIR
 #   artifacts-catalogue.sh map-check --map FILE --subjects FILE
@@ -234,7 +234,7 @@ cmd_export() {
   local external_fk seqs
   external_fk=$(catalogue_psql -At -c "SELECT count(*) FROM pg_constraint c JOIN pg_class r ON r.oid = c.conrelid JOIN pg_namespace n ON n.oid = r.relnamespace JOIN pg_class f ON f.oid = c.confrelid JOIN pg_namespace fn ON fn.oid = f.relnamespace WHERE c.contype = 'f' AND n.nspname = 'artifacts' AND fn.nspname <> 'artifacts' AND r.relname IN ($(printf "'%s'," $tables | sed 's/,$//'))")
   ((external_fk == 0)) || catalogue_fail "export: catalogue has $external_fk foreign key(s) outside artifacts.*, refusing"
-  seqs=$(catalogue_psql -At -c "SELECT count(*) FROM pg_class s JOIN pg_namespace n ON n.oid = s.relnamespace WHERE s.relkind = 'S' AND n.nspname = 'artifacts'")
+  seqs=$(catalogue_psql -At -c "SELECT count(*) FROM pg_class s JOIN pg_namespace n ON n.oid = s.relnamespace WHERE s.relkind = 'S' AND n.nspname = 'artifacts' AND NOT EXISTS (SELECT 1 FROM pg_depend d WHERE d.objid = s.oid AND d.deptype = 'i')")
   ((seqs == 0)) || catalogue_fail "export: $seqs sequence(s) in artifacts.*, refusing (unhandled)"
   src_server=$(catalogue_psql -At -c "SELECT version()")
   generation=$(cat /proc/sys/kernel/random/uuid 2>/dev/null || catalogue_psql -At -c 'SELECT gen_random_uuid()')
@@ -424,15 +424,17 @@ cmd_archive() {
 
 # Byte-level proof that the live catalogue matches the manifest.
 cmd_verify() {
-  local in_dir=""
+  local in_dir="" union=0
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --in-dir) in_dir="$2"; shift 2 ;;
+      --union) union=1; shift ;;
       *) catalogue_fail "verify: unknown argument '$1'" ;;
     esac
   done
   [[ -n "$in_dir" ]] || catalogue_fail 'verify: --in-dir is required'
   cmd_manifest_check --in-dir "$in_dir" >/dev/null
+  if ((union)); then catalogue_union_verify "$in_dir"; return; fi
   local failures=0 table rows fp want_rows want_fp tmp
   tmp=$(mktemp -d)
   catalogue_psql -At -c "SELECT to_regclass('artifacts.artifacts')" | grep -q artifacts \
@@ -505,7 +507,7 @@ cmd_import() {
   [[ $(catalogue_psql -At -c "SELECT count(*) FROM pg_extension WHERE extname = 'pgcrypto'") != 0 ]] \
     || catalogue_fail 'import: pgcrypto extension absent (identity remap needs it)'
   catalogue_import_session "$in_dir" "$map" "$report" "$generation"
-  cmd_verify --in-dir "$in_dir" >/dev/null
+  catalogue_union_verify "$in_dir" >/dev/null
   catalogue_log "imported generation $generation into $db, report $report"
 }
 
@@ -528,9 +530,118 @@ catalogue_coproc_read_value() {
   return 1
 }
 
+# ── Union import (owner rule 2026-11-15) ───────────────────────────────────
+# The restore replays the PROD catalogue; the sealed export holds the PREPROD
+# catalogue. The result is their union:
+#   - a preprod row identical to a live row (same values; identity columns
+#     ignored) is already there: skipped as "same" (prod rows that came in
+#     with an earlier restore, so repeated restores never duplicate);
+#   - a preprod-only row is inserted; identity columns (event logs) take a
+#     fresh value after the prod sequence, never a prod id;
+#   - a preprod row that hits ANY unique key of a different live row (same
+#     artifact UUID, same scope/owner/binding name, same release id...) is a
+#     collision: PROD WINS, the preprod row is not loaded and is journaled in
+#     conflicts.tsv (table, reason, full row as JSON);
+#   - a preprod row whose catalogue parent is absent from the live database
+#     (parent lost a collision, or lives in an ephemeral table) is journaled
+#     as orphan: never loaded dangling.
+# Invariant per table, checked before COMMIT: exported = same + inserted +
+# collisions + orphans. Nothing is dropped without a journal line.
+
+catalogue_value_cols() {
+  # Non-identity columns: the comparison and insert key of the union.
+  catalogue_psql -At -c "SELECT a.attname FROM pg_attribute a JOIN pg_class c ON c.oid = a.attrelid JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'artifacts' AND c.relname = '$1' AND a.attnum > 0 AND NOT a.attisdropped AND a.attidentity = '' ORDER BY a.attnum"
+}
+
+catalogue_fk_specs() {
+  # parent|child columns|parent columns, for foreign keys to another table.
+  catalogue_psql -At -c "SELECT pn.nspname || '.' || pc.relname || '|' || string_agg(quote_ident(a.attname), ',' ORDER BY k.ord) || '|' || string_agg(quote_ident(pa.attname), ',' ORDER BY k.ord)
+    FROM pg_constraint co
+    JOIN pg_class c ON c.oid = co.conrelid JOIN pg_namespace n ON n.oid = c.relnamespace
+    JOIN pg_class pc ON pc.oid = co.confrelid JOIN pg_namespace pn ON pn.oid = pc.relnamespace
+    CROSS JOIN LATERAL unnest(co.conkey, co.confkey) WITH ORDINALITY AS k(ck, pk, ord)
+    JOIN pg_attribute a ON a.attrelid = co.conrelid AND a.attnum = k.ck
+    JOIN pg_attribute pa ON pa.attrelid = co.confrelid AND pa.attnum = k.pk
+    WHERE co.contype = 'f' AND n.nspname = 'artifacts' AND c.relname = '$1' AND co.conrelid <> co.confrelid
+    GROUP BY co.oid, pn.nspname, pc.relname ORDER BY 1"
+}
+
+catalogue_row_expr() {
+  # ROW(alias."c1", ...)::text over the value columns.
+  local alias="$1" cols="$2" c out=""
+  for c in $cols; do out="${out}${out:+, }$alias.\"$c\""; done
+  printf 'ROW(%s)::text' "$out"
+}
+
+# One table of the union, inside the import transaction.
+catalogue_union_table() {
+  local in_dir="$1" table="$2" want_rows="$3" out="$4" in="$5"
+  local stg="cat_stg_$table" cols collist srow trow spec parent ccols pcols cond i
+  local staged same inserted collisions orphans=0 n
+  cols=$(catalogue_value_cols "$table" | tr '\n' ' ')
+  [[ -n "$cols" ]] || { catalogue_rollback "$in"; catalogue_fail "import: no value columns for $table, rolled back"; }
+  collist=$(for c in $cols; do printf '"%s",' "$c"; done | sed 's/,$//')
+  srow=$(catalogue_row_expr s "$cols"); trow=$(catalogue_row_expr x "$cols")
+  cat_send "CREATE TEMP TABLE \"$stg\" (LIKE artifacts.\"$table\") ON COMMIT DROP;" "CAT-STAGE-$table"
+  printf '%s\n' "\\copy pg_temp.\"$stg\" FROM '$in_dir/data/$table.copy'" "SELECT 'CAT-LOAD-$table';" >&"$in"
+  catalogue_coproc_read_until "$out" "CAT-LOAD-$table" || catalogue_fail "import: database session aborted loading $table"
+  printf '%s\n' "SELECT count(*) FROM \"$stg\";" "SELECT 'CAT-COUNT-$table';" >&"$in"
+  staged=$(catalogue_coproc_read_value "$out" "CAT-COUNT-$table") \
+    || { catalogue_rollback "$in"; catalogue_fail "import: count marker missing for $table, rolled back"; }
+  [[ "$staged" == "$want_rows" ]] || { catalogue_rollback "$in"; catalogue_fail "import: $table rows=$staged want=$want_rows, rolled back"; }
+  while IFS='|' read -r parent ccols pcols; do
+    [[ -n "$parent" ]] || continue
+    cond=""
+    IFS=',' read -ra cc <<< "$ccols"; IFS=',' read -ra pp <<< "$pcols"
+    for i in "${!cc[@]}"; do cond="${cond}${cond:+ AND }s.${cc[$i]} IS NOT NULL"; done
+    local join=""
+    for i in "${!cc[@]}"; do join="${join}${join:+ AND }p.${pp[$i]} = s.${cc[$i]}"; done
+    cond="$cond AND NOT EXISTS (SELECT 1 FROM $parent p WHERE $join)"
+    printf '%s\n' "WITH o AS (DELETE FROM \"$stg\" s WHERE $cond RETURNING s.*) INSERT INTO cat_conflicts SELECT '$table', 'orphan:$parent', row_to_json(o)::text FROM o;" \
+      "SELECT count(*) FROM cat_conflicts WHERE tbl = '$table';" "SELECT 'CAT-ORPHAN-$table';" >&"$in"
+    orphans=$(catalogue_coproc_read_value "$out" "CAT-ORPHAN-$table") \
+      || { catalogue_rollback "$in"; catalogue_fail "import: orphan marker missing for $table, rolled back"; }
+  done < <(catalogue_fk_specs "$table")
+  printf '%s\n' "WITH d AS (DELETE FROM \"$stg\" s WHERE $srow IN (SELECT $trow FROM artifacts.\"$table\" x) RETURNING 1) SELECT count(*) FROM d;" "SELECT 'CAT-SAME-$table';" >&"$in"
+  same=$(catalogue_coproc_read_value "$out" "CAT-SAME-$table") \
+    || { catalogue_rollback "$in"; catalogue_fail "import: same marker missing for $table, rolled back"; }
+  printf '%s\n' "WITH i AS (INSERT INTO artifacts.\"$table\" ($collist) SELECT $collist FROM \"$stg\" ON CONFLICT DO NOTHING RETURNING 1) SELECT count(*) FROM i;" "SELECT 'CAT-INS-$table';" >&"$in"
+  inserted=$(catalogue_coproc_read_value "$out" "CAT-INS-$table") \
+    || { catalogue_rollback "$in"; catalogue_fail "import: insert marker missing for $table, rolled back"; }
+  printf '%s\n' "WITH c AS (INSERT INTO cat_conflicts SELECT '$table', 'collision:prod-wins', row_to_json(s)::text FROM \"$stg\" s WHERE $srow NOT IN (SELECT $trow FROM artifacts.\"$table\" x) RETURNING 1) SELECT count(*) FROM c;" "SELECT 'CAT-COLL-$table';" >&"$in"
+  collisions=$(catalogue_coproc_read_value "$out" "CAT-COLL-$table") \
+    || { catalogue_rollback "$in"; catalogue_fail "import: collision marker missing for $table, rolled back"; }
+  n=$((same + inserted + collisions + orphans))
+  [[ "$n" == "$want_rows" ]] || { catalogue_rollback "$in"; catalogue_fail "import: $table union does not add up (exported=$want_rows accounted=$n), rolled back"; }
+  printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$table" "$want_rows" "$same" "$inserted" "$collisions" "$orphans" >> "$in_dir/union.tsv"
+  ((collisions + orphans == 0)) || catalogue_log "union $table: $collisions collision(s) prod-wins, $orphans orphan(s), journaled in conflicts.tsv"
+}
+
+# Post-commit proof of the union: every exported row is live (same values,
+# identity columns ignored) or journaled in conflicts.tsv. Read-only.
+catalogue_union_verify() {
+  local in_dir="$1" table cols srow trow missing journaled failures=0
+  [[ -f "$in_dir/conflicts.tsv" ]] || catalogue_fail 'verify: union journal conflicts.tsv missing'
+  while read -r table; do
+    [[ -n "$table" ]] || continue
+    cols=$(catalogue_value_cols "$table" | tr '\n' ' ')
+    srow=$(catalogue_row_expr s "$cols"); trow=$(catalogue_row_expr x "$cols")
+    missing=$(catalogue_psql -At -c "CREATE TEMP TABLE cat_v (LIKE artifacts.\"$table\")" \
+      -c "\\copy cat_v FROM '$in_dir/data/$table.copy'" \
+      -c "SELECT count(*) FROM cat_v s WHERE $srow NOT IN (SELECT $trow FROM artifacts.\"$table\" x)")
+    journaled=$(awk -F'\t' -v t="$table" '$1 == t' "$in_dir/conflicts.tsv" | wc -l | tr -d ' ')
+    if [[ "$missing" != "$journaled" ]]; then
+      printf '[catalogue] UNION GAP %s missing=%s journaled=%s\n' "$table" "$missing" "$journaled" >&2
+      failures=$((failures + 1))
+    fi
+  done < "$in_dir/order.tsv"
+  ((failures == 0)) || catalogue_fail "verify: $failures table(s) lose rows outside the journal"
+  catalogue_log 'verify ok — union holds every exported row or its journal line'
+}
+
 # The whole load runs in ONE transaction driven over a coprocess: any error
-# aborts the session, which rolls everything back. COMMIT only after counts,
-# trigger state and fingerprints all match the manifest.
+# aborts the session, which rolls everything back. COMMIT only after the union
+# accounting and the trigger state hold.
 catalogue_import_session() {
   local in_dir="$1" map="$2" report="$3" generation="$4"
   local table rows want_rows disabled_before
@@ -544,40 +655,31 @@ catalogue_import_session() {
   # the server side on disconnect. A trap would clobber the caller's cleanup.
   cat_send() { printf '%s\n' "$1" "SELECT '$2';" >&"$in"; catalogue_coproc_read_until "$out" "$2" || catalogue_fail "import: database session aborted during $2"; }
   cat_send 'BEGIN; SET timezone = '"'"'UTC'"'"'; SET datestyle = '"'"'ISO'"'"';' 'CAT-BEGIN'
+  # User triggers only (publication guards, updated_at): foreign keys stay
+  # enforced, so a row whose parent lost a collision can never land dangling.
   while read -r table; do
     [[ -n "$table" ]] || continue
-    cat_send "ALTER TABLE artifacts.\"$table\" DISABLE TRIGGER ALL;" "CAT-DISABLE-$table"
+    cat_send "ALTER TABLE artifacts.\"$table\" DISABLE TRIGGER USER;" "CAT-DISABLE-$table"
   done < "$in_dir/order.tsv"
+  cat_send 'CREATE TEMP TABLE cat_conflicts (tbl text NOT NULL, reason text NOT NULL, payload text NOT NULL) ON COMMIT DROP;' 'CAT-JOURNAL'
+  printf 'table\texported\tsame\tinserted\tcollisions\torphans\n' > "$in_dir/union.tsv"
   while read -r table; do
     [[ -n "$table" ]] || continue
-    printf '%s\n' "\\copy artifacts.\"$table\" FROM '$in_dir/data/$table.copy'" "SELECT 'CAT-LOAD-$table';" >&"$in"
-    catalogue_coproc_read_until "$out" "CAT-LOAD-$table" || catalogue_fail "import: database session aborted loading $table"
     want_rows=$(catalogue_manifest_table_field "$in_dir" "$table" rows)
-    printf '%s\n' "SELECT count(*) FROM artifacts.\"$table\";" "SELECT 'CAT-COUNT-$table';" >&"$in"
-    rows=$(catalogue_coproc_read_value "$out" "CAT-COUNT-$table") \
-      || { catalogue_rollback "$in"; catalogue_fail "import: count marker missing for $table, rolled back"; }
-    [[ "$rows" == "$want_rows" ]] || { catalogue_rollback "$in"; catalogue_fail "import: $table rows=$rows want=$want_rows, rolled back"; }
+    catalogue_union_table "$in_dir" "$table" "$want_rows" "$out" "$in"
   done < "$in_dir/order.tsv"
+  printf '%s\n' "\\copy (SELECT tbl, reason, payload FROM cat_conflicts ORDER BY 1, 2, 3) TO '$in_dir/conflicts.tsv'" "SELECT 'CAT-CONFLICTS';" >&"$in"
+  catalogue_coproc_read_until "$out" 'CAT-CONFLICTS' || { catalogue_rollback "$in"; catalogue_fail 'import: session aborted writing the conflict journal'; }
   catalogue_import_identities "$in_dir" "$map" "$report" "$out" "$in"
   while read -r table; do
     [[ -n "$table" ]] || continue
-    cat_send "ALTER TABLE artifacts.\"$table\" ENABLE TRIGGER ALL;" "CAT-ENABLE-$table"
+    cat_send "ALTER TABLE artifacts.\"$table\" ENABLE TRIGGER USER;" "CAT-ENABLE-$table"
   done < "$in_dir/order.tsv"
   local disabled_after
   printf '%s\n' "SELECT count(*) FROM pg_trigger t JOIN pg_class c ON c.oid = t.tgrelid JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'artifacts' AND NOT t.tgisinternal AND t.tgenabled = 'D';" "SELECT 'CAT-TRG';" >&"$in"
   disabled_after=$(catalogue_coproc_read_value "$out" 'CAT-TRG') \
     || { catalogue_rollback "$in"; catalogue_fail 'import: trigger marker missing, rolled back'; }
   [[ "$disabled_after" == "$disabled_before" ]] || { catalogue_rollback "$in"; catalogue_fail 'import: trigger state not restored, rolled back'; }
-  local fp want_fp
-  while IFS="$(printf '\t')" read -r table _rows fp; do
-    [[ "$table" == table ]] && continue
-    [[ -n "$table" ]] || continue
-    want_fp=$(catalogue_manifest_table_field "$in_dir" "$table" fingerprint)
-    printf '%s\n' "\\copy ($(catalogue_select_sql "$table")) TO '$in_dir/fp.$table'" "SELECT 'CAT-FP-$table';" >&"$in"
-    catalogue_coproc_read_until "$out" "CAT-FP-$table" || { catalogue_rollback "$in"; catalogue_fail "import: session aborted fingerprinting $table"; }
-    fp=$(sha256sum "$in_dir/fp.$table" | awk '{print $1}'); rm -f "$in_dir/fp.$table"
-    [[ "$fp" == "$want_fp" ]] || { catalogue_rollback "$in"; catalogue_fail "import: $table fingerprint differs, rolled back"; }
-  done < "$in_dir/fingerprints.tsv"
   cat_send 'COMMIT;' 'CAT-COMMIT'
   exec {in}>&-; wait "${CATPSQL_PID}" 2>/dev/null || true
 }

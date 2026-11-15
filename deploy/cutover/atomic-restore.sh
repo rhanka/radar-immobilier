@@ -66,8 +66,9 @@ catalogue_import() {
   [ -n "$catalogue_export_dir" ] || return 0
   set -- --in-dir "$catalogue_export_dir/export"
   # Live path: the database was reset and replayed after the export, so the
-  # export source name matches by construction; re-import is restoration, not
-  # a double load (a surviving duplicate key aborts the single transaction).
+  # export source name matches by construction. The import is a UNION with the
+  # replayed prod catalogue: prod wins on any unique key, the preprod row is
+  # journaled in conflicts.tsv (never dropped silently), see artifacts-catalogue.sh.
   # Prepared path keeps the strict guard: the export must come from live.
   [ -z "${TARGET_DB:-}" ] && set -- "$@" --allow-same-db
   [ -n "$catalogue_map" ] && set -- "$@" --map "$catalogue_map"
