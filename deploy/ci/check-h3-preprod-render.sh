@@ -16,6 +16,15 @@ elif [ -d "$TARGET" ]; then
     echo "FAIL: cannot render $TARGET" >&2; exit 1;
   }
   PROD="$("${KUBECTL:-kubectl}" kustomize "$TARGET/deploy/k8s")"
+  # Prod ConfigMap data keys reviewed in deploy/k8s/prod-configmap-keys.json
+  # (artifacts activated in prod by the v1.2.20 cutover) are the only
+  # ARTIFACTS_ lines allowed in the production base; anything else leaks.
+  KEYS_FILE="$TARGET/deploy/k8s/prod-configmap-keys.json"
+  ALLOWED=""
+  if [ -f "$KEYS_FILE" ]; then
+    ALLOWED="$(jq -r '[.["radar-api"][], .["immo-mcp-config"][]] | unique | map(select(test("ARTIFACTS_"))) | join("|")' "$KEYS_FILE")"
+  fi
+  [ -z "$ALLOWED" ] || PROD="$(grep -vE "^  ($ALLOWED): " <<<"$PROD" || true)"
   if grep -Eq 'ARTIFACTS_|radar-artifact' <<<"$PROD"; then
     echo 'FAIL: H3 configuration leaked into the production base' >&2; exit 1
   fi
