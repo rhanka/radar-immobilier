@@ -26,7 +26,7 @@ READER=witness-reader
 
 work=$(mktemp -d)
 cleanup() {
-  for db in cat_src cat_prodd cat_prodrej cat_dst cat_dst_map cat_dst2 cat_dst29 cat_src29 cat_prep cat_pu1 cat_pu2 cat_dstu tmp-prod-x; do
+  for db in cat_src cat_prodd cat_prodrej cat_dst cat_dst_map cat_dst2 cat_dst29 cat_src29 cat_prep cat_pu1 cat_pu2 cat_dstu cat_dsts cat_preps tmp-prod-x; do
     dropdb --if-exists --force "$db" >/dev/null 2>&1 || true
   done
   rm -rf "$work"
@@ -298,6 +298,7 @@ INSERT INTO artifacts.releases (id, artifact_id, manifest_digest, manifest, stat
 INSERT INTO artifacts.blobs (storage_scope_id, digest, size) VALUES
   ('$SCOPE', 'dq1', 1), ('$SCOPE', 'dq2', 1), ('$SCOPE', 'dq3', 1), ('$SCOPE', 'dcq', 1);
 SQL
+pg_dump --format=custom --dbname=cat_dstu --file="$work/preprod-live.dump"
 if ! restore_with_catalogue cat_dstu "$work/prod-v2.dump" "$work/cat-union" > "$work/restore-union.out" 2>&1; then
   cat "$work/restore-union.out"; fail 'union restore refused'
 fi
@@ -327,4 +328,51 @@ restore_with_catalogue cat_dstu "$work/prod-v2.dump" "$work/cat-union2" > "$work
 grep -qx $'artifacts\t5\t3\t2\t0\t0' "$work/cat-union2/export/union.tsv" || { cat "$work/cat-union2/export/union.tsv"; fail 'union: repeated accounting'; }
 [[ $(q cat_pu2 'SELECT count(*) FROM artifacts.artifacts') == 3 ]] || fail 'union: prod origin mutated'
 printf 'Union green: 3 prod + 2 preprod-own artifacts, 2 collisions prod-wins journaled, 1 orphan journaled, repeat idempotent\n'
+
+# ── Job wiring: stash in the restore Job, union import after the migrations ──
+# Same preprod state as above; CATALOGUE_STASH=1 is what the restore Job sets.
+stash_restore() {
+  local db="$1" dump="$2" catdir="$3" target="${4:-}" live="${5:-}" toc
+  toc=$(pg_restore --list "$dump" | grep -c '^[0-9]' || true)
+  PGDATABASE=$db EXPECTED_DATABASE=$db TARGET_DB="$target" LIVE_DB="$live" RESTORE_DUMP="$dump" EXPECTED_TOC_ENTRIES=$toc \
+    RESTORE_ASSERT_DB=0 DUMP_DATABASE=x CATALOGUE_DIR="$catdir" CATALOGUE_SCRIPT="$CATALOGUE" CATALOGUE_STASH=1 bash "$RESTORE"
+}
+createdb --template=template0 cat_dsts
+pg_restore --no-owner --no-privileges --exit-on-error --dbname=cat_dsts "$work/preprod-live.dump"
+stash_restore cat_dsts "$work/prod-v2.dump" "$work/stash1" > "$work/stash1.out" 2>&1 || { cat "$work/stash1.out"; fail 'stash restore refused'; }
+[[ $(q cat_dsts 'SELECT count(*) FROM artifacts.artifacts') == 3 ]] || fail 'stash: restore must leave the prod catalogue only until the import'
+PGDATABASE=cat_dsts bash "$CATALOGUE" stash-exists || fail 'stash: missing after restore'
+gen1=$(q cat_dsts "SELECT convert_from(decode(b64, 'base64'), 'UTF8') FROM catalogue_stash.files WHERE path = 'manifest.json'" | grep -o '"generation":"[^"]*"')
+# Relaunch after the replay: the stash (pre-restore preprod state) is reused, never re-exported from prod rows.
+stash_restore cat_dsts "$work/prod-v2.dump" "$work/stash2" > "$work/stash2.out" 2>&1 || { cat "$work/stash2.out"; fail 'stash relaunch refused'; }
+grep -q 'stash already present' "$work/stash2.out" || fail 'stash: relaunch did not reuse the stash'
+[[ $(q cat_dsts "SELECT convert_from(decode(b64, 'base64'), 'UTF8') FROM catalogue_stash.files WHERE path = 'manifest.json'" | grep -o '"generation":"[^"]*"') == "$gen1" ]] || fail 'stash: relaunch replaced the stash'
+# Simulated ddl of a newer release: one more migration and a defaulted column.
+q cat_dsts "ALTER TABLE artifacts.artifacts ADD COLUMN union_next_release TEXT NOT NULL DEFAULT 'next'" >/dev/null
+q cat_dsts "INSERT INTO drizzle.__drizzle_migrations (hash, created_at) VALUES ('simulated-next-release', now())" >/dev/null
+PGDATABASE=cat_dsts bash "$CATALOGUE" import-stash --work "$work/stash-import" > "$work/stash-import.out" 2>&1 || { cat "$work/stash-import.out"; fail 'stash import refused'; }
+[[ $(q cat_dsts 'SELECT string_agg(id::text, $$ $$ ORDER BY id) FROM artifacts.artifacts') == "$P1 $P2 $CC $Q1 $Q2" ]] || fail 'stash: union artifact set'
+[[ $(q cat_dsts "SELECT count(*) FROM catalogue_journal.conflicts WHERE tbl = 'artifacts' AND reason = 'collision:prod-wins'") == 2 ]] || fail 'stash: collisions not journaled in the database'
+[[ $(q cat_dsts "SELECT count(*) FROM catalogue_journal.conflicts WHERE reason LIKE 'orphan:%'") == 1 ]] || fail 'stash: orphan not journaled in the database'
+[[ $(q cat_dsts "SELECT inserted FROM catalogue_journal.imports WHERE tbl = 'artifacts'") == 2 ]] || fail 'stash: import summary missing'
+if PGDATABASE=cat_dsts bash "$CATALOGUE" stash-exists; then fail 'stash: not dropped after import'; fi
+PGDATABASE=cat_dsts bash "$CATALOGUE" import-stash --work "$work/stash-import2" >/dev/null 2>&1 || fail 'stash: second import must be a no-op'
+[[ $(q cat_dsts 'SELECT count(*) FROM artifacts.artifacts') == 5 ]] || fail 'stash: no-op import changed the catalogue'
+# The next restore keeps the conflict journal (schema reset spares it).
+stash_restore cat_dsts "$work/prod-v2.dump" "$work/stash3" > "$work/stash3.out" 2>&1 || { cat "$work/stash3.out"; fail 'stash restore 2 refused'; }
+[[ $(q cat_dsts 'SELECT count(*) FROM catalogue_journal.conflicts') == 3 ]] || fail 'stash: journal lost by the next restore'
+PGDATABASE=cat_dsts bash "$CATALOGUE" import-stash --work "$work/stash-import3" >/dev/null 2>&1 || fail 'stash: import after the second restore refused'
+[[ $(q cat_dsts 'SELECT count(*) FROM artifacts.artifacts') == 5 ]] || fail 'stash: second restore lost the union'
+[[ $(q cat_dsts 'SELECT count(*) FROM catalogue_journal.conflicts') == 3 ]] || fail 'stash: conflict-free import added journal lines'
+# Prepared database: export from LIVE_DB only, stash in the candidate.
+createdb --template=template0 cat_preps
+if stash_restore cat_preps "$work/prod-v2.dump" "$work/stashp0" cat_preps "" >/dev/null 2>&1; then fail 'stash: prepared restore without LIVE_DB accepted'; fi
+if stash_restore cat_preps "$work/prod-v2.dump" "$work/stashp0" cat_preps cat_preps >/dev/null 2>&1; then fail 'stash: prepared restore from the candidate accepted'; fi
+stash_restore cat_preps "$work/prod-v2.dump" "$work/stashp" cat_preps cat_dsts > "$work/stashp.out" 2>&1 || { cat "$work/stashp.out"; fail 'stash: prepared restore refused'; }
+[[ $(q cat_dsts 'SELECT count(*) FROM artifacts.artifacts') == 5 ]] || fail 'stash: live source mutated by the prepared restore'
+q cat_preps "ALTER TABLE artifacts.artifacts ADD COLUMN union_next_release TEXT NOT NULL DEFAULT 'next'" >/dev/null
+q cat_preps "INSERT INTO drizzle.__drizzle_migrations (hash, created_at) VALUES ('simulated-next-release', now())" >/dev/null
+PGDATABASE=cat_preps bash "$CATALOGUE" import-stash --work "$work/stashp-import" > "$work/stashp-import.out" 2>&1 || { cat "$work/stashp-import.out"; fail 'stash: prepared import refused'; }
+[[ $(q cat_preps 'SELECT count(*) FROM artifacts.artifacts') == 5 ]] || fail 'stash: prepared union artifact count'
+printf 'Stash wiring green: restore stashes, relaunch reuses, union after a newer schema, journal kept, prepared exports from live only\n'
 printf 'Catalogue preservation round-trip green: witness byte-identical, identities remapped, prod untouched\n'
