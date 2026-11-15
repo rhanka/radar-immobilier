@@ -16,15 +16,32 @@ elif [ -d "$TARGET" ]; then
     echo "FAIL: cannot render $TARGET" >&2; exit 1;
   }
   PROD="$("${KUBECTL:-kubectl}" kustomize "$TARGET/deploy/k8s")"
-  # Prod ConfigMap data keys reviewed in deploy/k8s/prod-configmap-keys.json
-  # (artifacts activated in prod by the v1.2.20 cutover) are the only
-  # ARTIFACTS_ lines allowed in the production base; anything else leaks.
+  # The only ARTIFACTS_ entries allowed in the production base: the data keys
+  # of ConfigMap radar-api listed in deploy/k8s/prod-configmap-keys.json
+  # (artifacts activated in prod by the v1.2.20 cutover). Only the KEY NAME of
+  # those lines is masked, inside that one document: the value is still
+  # checked for radar-artifact, and the same key anywhere else still leaks.
   KEYS_FILE="$TARGET/deploy/k8s/prod-configmap-keys.json"
   ALLOWED=""
   if [ -f "$KEYS_FILE" ]; then
-    ALLOWED="$(jq -r '[.["radar-api"][], .["immo-mcp-config"][]] | unique | map(select(test("ARTIFACTS_"))) | join("|")' "$KEYS_FILE")"
+    ALLOWED="$(jq -r '.["radar-api"] // [] | map(select(test("ARTIFACTS_"))) | join("|")' "$KEYS_FILE")"
   fi
-  [ -z "$ALLOWED" ] || PROD="$(grep -vE "^  ($ALLOWED): " <<<"$PROD" || true)"
+  if [ -n "$ALLOWED" ]; then
+    PROD="$(awk -v allowed="$ALLOWED" '
+      function flush(  i, cm, l) {
+        cm = doc ~ /\nkind: ConfigMap(\n|$)/ && doc ~ /\n  name: radar-api(\n|$)/
+        for (i = 1; i <= n; i++) {
+          l = lines[i]
+          if (cm && indata[i] && l ~ ("^  (" allowed "): ")) sub(/^  [A-Z0-9_]+:/, "  listed-prod-key:", l)
+          print l
+        }
+        n = 0; doc = ""; d = 0
+      }
+      /^---$/ { flush(); print; next }
+      { if ($0 ~ /^data:$/) d = 1; else if ($0 ~ /^[^ ]/) d = 0
+        lines[++n] = $0; doc = doc "\n" $0; indata[n] = d && $0 ~ /^  [^ ]/ }
+      END { flush() }' <<<"$PROD")"
+  fi
   if grep -Eq 'ARTIFACTS_|radar-artifact' <<<"$PROD"; then
     echo 'FAIL: H3 configuration leaked into the production base' >&2; exit 1
   fi
