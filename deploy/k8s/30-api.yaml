@@ -88,8 +88,10 @@ data:
   # a client-side `kubectl apply -f deploy/k8s/30-api.yaml` (k8s-apply-mcp.yaml)
   # keeps them instead of pruning them. Non-secret only: the matching
   # credentials (ARTIFACTS_S3_*_KEY, ARTIFACTS_READER_*_SECRET,
-  # ARTIFACTS_UPLOAD_PAGE_SECRET, CLASSIFICATION_CURSOR_SECRET) stay
-  # secretKeyRef entries on the Deployment, never ConfigMap data.
+  # ARTIFACTS_UPLOAD_PAGE_SECRET, CLASSIFICATION_CURSOR_SECRET) are never
+  # ConfigMap data and are NOT in this source either: they exist only on the
+  # live Deployment, as secretKeyRef env entries bound by
+  # deploy/prod-cutover/prod-bindings.sh (PR #1100).
   # The preprod overlay overrides every key below
   # (deploy/overlays/preprod/patch-artifacts-control.yaml).
   # Required key list: deploy/k8s/prod-configmap-keys.json

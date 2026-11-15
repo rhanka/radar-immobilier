@@ -282,7 +282,8 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
   // FOLLOW-UP (not implemented here): persist the session routing (external
   // store for `sessionId -> pod`, or SDK stateless mode) so rolling restarts
   // no longer force re-initialize. Until then, silent recovery relies on
-  // refresh tokens (preprod `offline_access`) + 404-triggered re-initialize.
+  // refresh tokens (`offline_access`, advertised in preprod and, since
+  // v1.2.20, in prod) + 404-triggered re-initialize.
   const sessions = new Map<string, SessionEntry>();
   sessionStores.set(app, sessions);
   const clock = deps.clock ?? (() => Date.now());
