@@ -72,6 +72,14 @@ export function refreshErrorDiagnostic(error: unknown): Record<string, string | 
   const record = error && typeof error === "object" ? error as Record<string, unknown> : {};
   const cause = record["cause"] && typeof record["cause"] === "object"
     ? record["cause"] as Record<string, unknown> : {};
+  // A wrapper (Graphify34ApplyInterrupted) around a DrizzleQueryError keeps the
+  // database code two levels down: follow the chain, bounded, to its last object.
+  let root = cause;
+  for (let depth = 0; depth < 8; depth++) {
+    const next = root["cause"];
+    if (!next || typeof next !== "object" || next === root) break;
+    root = next as Record<string, unknown>;
+  }
   const token = (value: unknown) => typeof value === "string" && /^[A-Za-z0-9_.:-]{1,120}$/.test(value)
     ? value : undefined;
   const status = (value: unknown) => typeof value === "number" && Number.isInteger(value) ? value : undefined;
@@ -85,6 +93,9 @@ export function refreshErrorDiagnostic(error: unknown): Record<string, string | 
     statusCode: status(record["statusCode"] ?? record["status"]), requestId: token(record["requestId"]),
     causeName: token(cause["name"]), causeCode: token(cause["code"]),
     causeStatusCode: status(cause["statusCode"] ?? cause["status"]),
+    // Closed vocabulary only: the interrupted apply stage, never a message.
+    stage: token(record["stage"]),
+    rootCauseName: token(root["name"]), rootCauseCode: token(root["code"]),
     routeDiagnosticCode: token(route["code"]), routeTransportProviderId: token(route["transportProviderId"]),
     stackOrigin: internalFrame };
 }

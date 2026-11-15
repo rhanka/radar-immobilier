@@ -22,6 +22,7 @@ import {
   bindRefreshAbortSignal, bindRefreshFetchSignal, createRefreshMesh,
   createRefreshRoutePolicyProfiles, refreshErrorDiagnostic,
 } from "./refresh-mesh.js";
+import { Graphify34ApplyInterrupted } from "./graphify-34-snapshot.js";
 
 const response = {
   id: "response-1",
@@ -269,6 +270,30 @@ describe("refresh mesh", () => {
     expect(diagnostic).toMatchObject({ errorName: "TypeError", statusCode: 502,
       requestId: "req:test-1", causeName: "Error", causeCode: "UND_ERR_SOCKET" });
     expect(JSON.stringify(diagnostic)).not.toContain(secret);
+  });
+
+  it("should log the root cause and the apply stage of a three-level chain, never a message", () => {
+    const secret = "duplicate key value violates unique constraint on node secret-node-id";
+    // pg DatabaseError -> DrizzleQueryError (name left as "Error", no code) -> apply wrapper.
+    const database = Object.assign(new Error(secret), { name: "DatabaseError", code: "23505" });
+    const query = Object.assign(new Error(`Failed query: ${secret}`), { cause: database });
+    const error = new Graphify34ApplyInterrupted({ backupId: "refresh-018-test", applied: [],
+      interruptedCity: "mont-tremblant", restoreFrom: "graph-backups/test/", stage: "projection",
+      remaining: [], cause: query });
+    const diagnostic = refreshErrorDiagnostic(error);
+    expect(diagnostic).toMatchObject({ errorName: "Graphify34ApplyInterrupted", stage: "projection",
+      causeName: "Error", rootCauseName: "DatabaseError", rootCauseCode: "23505" });
+    expect(diagnostic.causeCode).toBeUndefined();
+    expect(JSON.stringify(diagnostic)).not.toContain(secret);
+  });
+
+  it("should stop on a cyclic cause chain", () => {
+    const first = new Error("first") as Error & { cause?: unknown };
+    const second = Object.assign(new Error("second"), { code: "LOOP", cause: first });
+    first.cause = second;
+    const diagnostic = refreshErrorDiagnostic(Object.assign(new Error("top"), { cause: first }));
+    expect(diagnostic.causeName).toBe("Error");
+    expect(["LOOP", undefined]).toContain(diagnostic.rootCauseCode);
   });
 
   it("should expose the route diagnostic code of a no-route error, never its message", () => {
