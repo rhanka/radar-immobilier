@@ -3,8 +3,9 @@
 # deploy/k8s/40-immo-mcp-http-deploy.yaml, which carries the PROD values).
 # Strategic-merge patch: only the keys that name an environment are changed;
 # every other key (data mode, port, api wiring) is inherited from the base so
-# preprod and prod stay aligned by construction (GH #835). Exception: the
-# artifact scopes below, because the artifact tools are active in preprod only.
+# preprod and prod stay aligned by construction (GH #835). The artifact keys
+# below are overridden because their values name the environment; prod
+# carries its own values in the base since the v1.2.20 cutover.
 #
 # - IMMO_MCP_OAUTH_RESOURCE: the canonical resource = token audience, advertised
 #   in the RFC 9728 PRM at <resource>/.well-known/oauth-protected-resource and in
@@ -26,10 +27,8 @@
 #   or pod restart. PRECONDITION: the preprod IdP catalogue and the
 #   immo-mcp client must know these scopes before this value rolls out,
 #   otherwise an authorization request carrying them can be refused.
-#   PROD deliberately keeps the base three scopes (no offline_access): the
-#   prod immo-mcp client row is not refresh-eligible, so advertising it
-#   there would only produce invalid_scope errors. Enabling it in prod is
-#   an owner decision (client row upsert first, advertisement second).
+#   PROD advertises the same list since the v1.2.20 cutover (base value),
+#   under the same precondition on the prod IdP (see the base comment).
 # - IMMO_MCP_ARTIFACTS_LEGACY_READ_SCOPE: transition flag. "true" lets immo:read
 #   still satisfy the READ artifact tools for clients consented before the
 #   explicit scopes existed; writes always require immo:artifacts:write. Remove
