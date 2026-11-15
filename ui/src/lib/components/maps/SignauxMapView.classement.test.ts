@@ -7,12 +7,36 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { render, cleanup, waitFor, screen, fireEvent, within } from "@testing-library/svelte";
 import { buildCityMapEntries } from "$lib/maps/maps-data.js";
+import { createMockGeoMap } from "$lib/maps/geo-engine-mock.js";
 import { parseGeoQuery, type GeoRoute } from "$lib/router/geo-route.js";
 import { countVivierClassifications } from "@radar/domain";
 
+let lastMapProps: Record<string, unknown> = {};
+let lastGeoEngineProps: Record<string, unknown> = {};
+let geoEngineEnabled = false;
+
+vi.mock("$lib/maps/geo-engine-flag.js", () => ({
+  get GEO3D_ENGINE_ENABLED() {
+    return geoEngineEnabled;
+  },
+}));
+vi.mock("$lib/components/maps/SignauxGeoEngineCanvas.svelte", async () => {
+  const actual = await import("./SignauxGeoEngineCanvas.svelte");
+  return {
+    default: function SignauxGeoEngineCanvasSpy(internals: unknown, props: Record<string, unknown>) {
+      lastGeoEngineProps = props;
+      return (actual.default as (i: unknown, p: unknown) => unknown)(internals, props);
+    },
+  };
+});
 vi.mock("$lib/components/maps/GeoCityMapBase.svelte", async () => {
   const stub = await import("./test-stubs/GeoCityMapBaseStub.svelte");
-  return { default: stub.default };
+  return {
+    default: function GeoCityMapBaseSpy(internals: unknown, props: Record<string, unknown>) {
+      lastMapProps = props;
+      return (stub.default as (i: unknown, p: unknown) => unknown)(internals, props);
+    },
+  };
 });
 vi.mock("$lib/maps/geo-sat-basemap.js", async (importOriginal) => {
   const actual = await importOriginal<typeof import("$lib/maps/geo-sat-basemap.js")>();
@@ -131,10 +155,19 @@ function card(id: string): HTMLElement {
   expect(el, `card ${id}`).toBeTruthy();
   return el!;
 }
+function cityColorInExpression(citySlug: string): string | undefined {
+  const expr = lastMapProps.fillColorExpression as unknown[] | undefined;
+  if (!Array.isArray(expr)) return undefined;
+  const idx = expr.indexOf(citySlug);
+  return idx >= 2 && typeof expr[idx + 1] === "string" ? (expr[idx + 1] as string) : undefined;
+}
 
 beforeEach(() => {
   // jsdom has no scrollIntoView; SelPanel scrolls the hovered fiche into view.
   HTMLElement.prototype.scrollIntoView = vi.fn();
+  lastMapProps = {};
+  lastGeoEngineProps = {};
+  geoEngineEnabled = false;
   discarded = false;
   surveille = false;
   includeLate = false;
@@ -241,7 +274,7 @@ describe("SignauxMapView classement behaviour", () => {
         classification: { ...SIG1.classification, instrument: "derogation" },
       }],
     }) as never);
-    const [cityA, cityB] = buildCityMapEntries([]).map((entry) => entry.municipality.slug);
+    const [cityA, cityB, cityC] = buildCityMapEntries([]).map((entry) => entry.municipality.slug);
     const stages = (early: number, late = 0) => ({
       avis_motion: early, projet_reglement: 0, consultation_publique: 0, second_projet: 0,
       adoption: late, entree_vigueur: 0, inconnu: 0,
@@ -277,6 +310,9 @@ describe("SignauxMapView classement behaviour", () => {
     await waitFor(() => expect([...document.querySelectorAll(".rail-count-strong")]
       .map((el) => el.textContent)).toEqual(["3", "2"]));
     if (!selected) expect(vi.mocked(fetchGraphSignalDetail)).not.toHaveBeenCalled();
+    expect(cityColorInExpression(cityA!)).toBe("#fbbf24");
+    expect(cityColorInExpression(cityB!)).toBe("#fbbf24");
+    expect(cityColorInExpression(cityC!)).toBe("#e2e8f0");
 
     await fireEvent.click(screen.getByTestId("filtre-trigger"));
     const pills = () => [...screen.getByTestId("filtre-panel").querySelectorAll(".st-badge")]
@@ -286,6 +322,9 @@ describe("SignauxMapView classement behaviour", () => {
     // The counts follow the other active criteria: without Précoce, the late signal joins.
     await fireEvent.click(screen.getByLabelText(/Précoce/));
     await waitFor(() => expect(pills()).toEqual(["4", "4", "3", "2", "1"]));
+    expect(cityColorInExpression(cityA!)).toBe("#f97316");
+    expect(cityColorInExpression(cityB!)).toBe("#fbbf24");
+    expect(cityColorInExpression(cityC!)).toBe("#e2e8f0");
     await fireEvent.click(screen.getByTestId("classement-filter-trigger"));
     const panel = within(screen.getByTestId("classement-filter-panel"));
     for (const box of panel.getAllByRole("checkbox")) {
@@ -293,11 +332,63 @@ describe("SignauxMapView classement behaviour", () => {
     }
     await fireEvent.click(screen.getByTestId("filtre-trigger"));
     await waitFor(() => expect(pills()).toEqual(["0", "0", "0", "0", "0"]));
+    expect(cityColorInExpression(cityA!)).toBe("#e2e8f0");
+    expect(cityColorInExpression(cityB!)).toBe("#e2e8f0");
+    expect(cityColorInExpression(cityC!)).toBe("#e2e8f0");
     // A non-empty Pertinence selection must also filter the other cities.
     await fireEvent.click(screen.getByTestId("classement-filter-trigger"));
     await fireEvent.click(within(screen.getByTestId("classement-filter-panel")).getByLabelText(/^Pertinent/));
     await fireEvent.click(screen.getByTestId("filtre-trigger"));
     expect(pills()).toEqual(["0", "0", "0", "0", "0"]);
+    expect(cityColorInExpression(cityA!)).toBe("#e2e8f0");
+    expect(cityColorInExpression(cityB!)).toBe("#e2e8f0");
+    expect(cityColorInExpression(cityC!)).toBe("#e2e8f0");
+  });
+
+  it("keeps zero-signal cities in map features with neutral color and allows selecting them", async () => {
+    const allSlugs = buildCityMapEntries([]).map((entry) => entry.municipality.slug);
+    const [cityA, cityZero] = allSlugs;
+    vi.mocked(fetchGraphSignalsByCity).mockResolvedValue({
+      ok: true,
+      totalCount: 2,
+      cities: [{
+        citySlug: cityA!,
+        signalCount: 2,
+        subsetCounts: {},
+        filtreCube: { "11100": 2 },
+        filtreCubesByClassement: { pertinent: {}, a_surveiller: {}, non_classe: { "11100": 2 }, ecarte: {} },
+      }],
+    } as never);
+    window.history.replaceState({}, "", "/geo/region/quebec?mode=signal&filter.period=all&filter.zonage=1&filter.residentiel=1&filter.precoce=1&filter.excludePiia=1&filter.excludeDerogations=1");
+    const view = render(SignauxMapView, {
+      props: { geoRoute: { level: "region", region: "quebec", state: parseGeoQuery(window.location.search) } },
+    });
+    await waitFor(() => expect(cityColorInExpression(cityA!)).toBe("#fbbf24"));
+    expect(cityColorInExpression(cityZero!)).toBe("#e2e8f0");
+    expect("visibleCitySlugs" in lastMapProps).toBe(false);
+
+    (lastMapProps.onCityClick as (slug: string) => void)(cityZero!);
+    await waitFor(() => expect(lastMapProps.activeCitySlug).toBe(cityZero));
+    expect(vi.mocked(fetchGraphSignalDetail)).toHaveBeenCalledWith(expect.anything(), cityZero, expect.anything());
+    view.unmount();
+
+    geoEngineEnabled = true;
+    const { mount } = createMockGeoMap();
+    render(SignauxMapView, {
+      props: {
+        geoRoute: { level: "region", region: "quebec", state: parseGeoQuery(window.location.search) },
+        geoEngineMount: mount,
+      },
+    });
+    await waitFor(() => {
+      const layers = lastGeoEngineProps.layers as Array<{
+        data: { features: Array<{ properties: { citySlug: string; signalCount: number } }> };
+      }> | undefined;
+      const features = layers?.[0]?.data.features ?? [];
+      expect(features.find((f) => f.properties.citySlug === cityA)?.properties.signalCount).toBe(2);
+      expect(features.find((f) => f.properties.citySlug === cityZero)?.properties.signalCount).toBe(0);
+      expect(features.map((f) => f.properties.citySlug)).toEqual(allSlugs);
+    });
   });
 
   it("a failed write marks only the concerned card with an exclamation icon, no big panel", async () => {
