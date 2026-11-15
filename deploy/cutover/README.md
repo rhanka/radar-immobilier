@@ -218,6 +218,43 @@ release, original schedule states are restored, and the sanitized receipt is
 saved in `radar-cutover-receipt` before releasing the lock. ACME solver ingresses
 are excluded. Originally suspended CronJobs stay suspended.
 
+### Preprod artifact catalogue (union, preprod only)
+
+A prod-to-preprod restore (daily `MODE=restore` and `prepare`) keeps the
+preprod artifacts and imports the prod ones. Spec:
+`docs/spec/SPEC_EVOL_ARTIFACTS_RESTORE_PERSIST.md` §2b.
+
+1. The `restore` Job writes `deploy/cutover/artifacts-catalogue.sh` to `/work`
+   and, before the schema reset, exports the live preprod catalogue
+   (`artifacts.*`) and stashes it in schema `catalogue_stash` of the database
+   it restores. The reset spares `catalogue_stash` and `catalogue_journal`.
+   `prepare` exports from the live database (`LIVE_DB`), never from the
+   candidate. A relaunched daily restore reuses an existing stash.
+2. The coherence gate runs, then the migrations (`ddl`, `data`).
+3. The `catalogue` Job runs `import-stash`: union with the replayed prod
+   catalogue, then drops the stash. Prod wins on any unique key; the preprod
+   row is kept in `catalogue_journal.conflicts`, a row whose parent is gone is
+   kept there as `orphan:<parent>`. Per-table counts land in
+   `catalogue_journal.imports`. No stash = nothing to do (exit 0).
+
+Refusals (the run fails, nothing is imported, the stash stays for a rerun):
+
+- In-flight publishes: the export refuses while `artifacts.object_intents`
+  holds `pending` rows. Wait for them to drain (or let them expire), then
+  relaunch. Closure (`MODE=restore`) and the writer drain (`prepare`) stop new
+  publishes before the export.
+- Schema: the restored database after the migrations must carry every
+  migration the export was taken with (same release or newer).
+- Identity: a subject `rejected` in prod but `approved` in preprod refuses.
+
+Prod never runs either side: `CATALOGUE_DIR` is empty outside preprod.
+
+Journal of the last imports (read-only SQL on the preprod database):
+
+```sql
+SELECT tbl, exported, same, inserted, collisions, orphans FROM catalogue_journal.imports ORDER BY recorded_at DESC LIMIT 20;
+```
+
 ## Daily and cross-tenant adapters
 
 The scheduled caller remains at 04:00 UTC in `radar-bascule`, with the existing
