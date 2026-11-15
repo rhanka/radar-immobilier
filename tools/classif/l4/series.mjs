@@ -9,6 +9,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { classifDir, repoRoot } from '../lib/paths.mjs';
 import { GEPA_FAILURE_CEILING, GEPA_METHOD, GEPA_SERIES_ROUTES } from './gepa-common.mjs';
+import { passPlan } from './passes.mjs';
 
 export const SERIES_MANIFEST_KIND = 'l4-series';
 
@@ -57,6 +58,8 @@ export function loadSeriesManifest(k, env = process.env) {
     throw new Error(`series ${k} refused: ${rel} halves.{tuningSha256,blindSha256} must be 64-hex shas (freeze the halves before dev)`);
   }
   if (m.recallNonRegression !== undefined) assertRecallNonRegressionShape(m.recallNonRegression, k, rel);
+  // Multi-pass series (owner 15/11): the pass plan must be well formed (decision + information rules).
+  try { passPlan(m); } catch (e) { throw new Error(`series ${k} refused: ${rel} ${e.message}`); }
   return m;
 }
 
