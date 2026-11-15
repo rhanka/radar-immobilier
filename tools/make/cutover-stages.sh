@@ -40,6 +40,16 @@ restore_stage() {
   fi
   close_once
   run_job restore 3600 3900
+  coherence_gate
+}
+# The restored database and the mirrored PG-coupled prefixes share one pinned snapshot.
+coherence_gate() {
+  jq -c -f tools/make/cutover-coherence.jq "$WORK/record.json" > "$WORK/coherence.json"
+  jq --slurpfile c "$WORK/coherence.json" '.coherence=$c[0]' "$WORK/record.json" > "$WORK/next.json"
+  mv "$WORK/next.json" "$WORK/record.json"; record_save
+  jq -e '.ok==true' "$WORK/coherence.json" >/dev/null ||
+    fail "INCOHERENT restore (database vs documents): $(jq -r '.reasons|join("; ")' "$WORK/coherence.json")"
+  printf 'Coherence OK: database and mirrored documents from backup %s\n' "$(jq -r .pin.date "$WORK/record.json")"
 }
 migrate_stage() {
   run_job backup 840 900
