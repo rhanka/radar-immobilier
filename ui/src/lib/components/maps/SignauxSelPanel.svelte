@@ -95,6 +95,9 @@
     type ZoneMillesimeFilter,
   } from "$lib/maps/zone-millesime-filter.js";
   import SignalClassementMenu from "$lib/components/maps/SignalClassementMenu.svelte";
+  import SignalClassFeedback from "$lib/components/maps/SignalClassFeedback.svelte";
+  import type { FeedbackChoice } from "$lib/signals/class-feedback-client.js";
+  import { classAnnotationLabel } from "$lib/signals/class-annotation-label.js";
   import {
     classementKey,
     EMPTY_CLASSEMENT_ENTRY,
@@ -134,6 +137,7 @@
    * masqués par la plage de dates / les filtres).
    */
   export let unfilteredSignalCount = 0;
+  export let onClassFeedback: (node: GraphSignalNode, choice: FeedbackChoice) => Promise<boolean> = async () => false;
   export let detailLoading = false;
   export let detailError: string | null = null;
   // Waiters PAR COUCHE : zones et lots ont chacun leur propre état
@@ -1201,6 +1205,7 @@
                 {@const classementEntry = classementMap.get(classementKey(node.type, node.id, node.citySlug)) ?? EMPTY_CLASSEMENT_ENTRY}
                 {@const cardClassementKey = classementKey(node.type, node.id, node.citySlug)}
                 {@const cardClassementError = classementErrors.get(cardClassementKey)}
+                {@const hasManualClass = classementEntry.annotationSource === "manual" || !!(classementEntry.pertinentExpectedHeadId || classementEntry.aSurveillerExpectedHeadId || classementEntry.archiveHeadId || classementEntry.archiveRestores.length)}
                 <!-- #86 — fiche : ancre de scroll (data-signal-node) + état
                      cross-survolé quand le viewer survole ce signal. Survoler
                      la fiche notifie le parent (→ le surlignage PDF pulse). -->
@@ -1227,6 +1232,9 @@
                     on:click={() => toggleEntity(key)}
                   >
                     <span class="sel-entity-label">{node.label}</span>
+                    <span class="signal-stage-badge" title={node.classAnnotation?.source === "ai" && !hasManualClass ? node.classAnnotation.reason : undefined}>
+                      {classAnnotationLabel(node, hasManualClass)}
+                    </span>
                     {#if isPiiaLie(node)}
                       <!-- PIIA porteur d'un projet résidentiel prouvé : gardé,
                            mais annoncé comme instrument indirect (confiance
@@ -1250,6 +1258,17 @@
                       </span>
                     {/if}
                   </button>
+                  {#if node.classAnnotation?.source === "ai" && !hasManualClass && !node.classFeedback}
+                    <div class="signal-feedback-control">
+                      <SignalClassFeedback classe={node.classAnnotation.classe} reasonCodes={classementReasonCodes}
+                        disabled={classementInFlight.has(cardClassementKey)} restoreBlockedReason={classementEntry.restoreBlockedReason}
+                        onBeginCorrection={() => {
+                          const judgedNode = { ...node };
+                          return (choice) => onClassFeedback(judgedNode, choice);
+                        }}
+                        onSubmit={(choice) => onClassFeedback(node, choice)} />
+                    </div>
+                  {/if}
                   <span class="sel-entity-classement">
                     <SignalClassementMenu
                       classe={classementMap.get(classementKey(node.type, node.id, node.citySlug))?.classe ?? EMPTY_CLASSEMENT_ENTRY.classe}
@@ -1274,6 +1293,9 @@
                     </span>
                   {/if}
                   </div>
+                  {#if node.classAnnotation?.source === "ai" && !hasManualClass && node.classAnnotation.reason}
+                    <p class="classement-error-detail">{node.classAnnotation.reason}</p>
+                  {/if}
                   {#if cardClassementError && openClassementErrorKey === cardClassementKey}
                     <p class="classement-error-detail" data-testid="classement-error-detail">{cardClassementError}</p>
                   {/if}

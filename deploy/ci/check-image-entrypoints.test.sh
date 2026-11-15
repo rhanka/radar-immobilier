@@ -79,8 +79,8 @@ run_ok "$ROOT" 'accepts the released manifests and api/Dockerfile'
 released="$(bash "$CHECK" "$ROOT" 2>&1)"
 # The 25 existing API entrypoints plus the refresh requeue operator and
 # recurrent scripts, plus the Chaperon triage reprise operator.
-grep -Fq ', 28 entrypoint(s))' <<<"$released" && ok 'counts the 28 active API entrypoints of api/Dockerfile' \
-  || bad "counts the 28 active API entrypoints of api/Dockerfile (got: $released)"
+grep -Fq ', 29 entrypoint(s))' <<<"$released" && ok 'counts the 29 active API entrypoints of api/Dockerfile' \
+  || bad "counts the 29 active API entrypoints of api/Dockerfile (got: $released)"
 
 for script in init-workspace-authority attach-personal-history base-api-personal-activation base-preprod-job chaperon-reprise-apply; do
   fixture
