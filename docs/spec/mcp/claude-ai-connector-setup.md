@@ -29,12 +29,12 @@ Guide utilisateur — 5 minutes. Prérequis : un compte claude.ai **Pro, Max, Te
   `immo:artifacts:write` **et `offline_access`** en plus des trois scopes de
   données. Prérequis : le catalogue de l'IdP préprod et le client `immo-mcp`
   déclarent ces scopes (la ligne `immo-mcp` préprod est éligible au
-  rafraîchissement ; la ligne prod ne l'est pas — ne pas cocher
-  `offline_access` en production, la demande serait refusée).
-- En production, ne demander que les trois scopes de données. Activer le
-  maintien de connexion en prod exige d'abord une décision du Product Owner
-  (rendre la ligne client `immo-mcp` éligible côté IdP), puis une mise à jour
-  de ce guide.
+  rafraîchissement).
+- En production, depuis la bascule v1.2.20 (2026-11-14), le serveur annonce la
+  même liste (scopes de données, scopes artefacts, `offline_access`).
+  Prérequis identique : le catalogue de l'IdP prod et la ligne client
+  `immo-mcp` prod déclarent ces scopes et autorisent `refresh_token`. Si une
+  demande est refusée (`invalid_scope`), vérifier d'abord ce prérequis.
 
 ## Étapes
 
