@@ -242,7 +242,11 @@ preprod artifacts and imports the prod ones. Spec:
    (`artifacts.*`) and stashes it in schema `catalogue_stash` of the database
    it restores. The reset spares `catalogue_stash` and `catalogue_journal`.
    `prepare` exports from the live database (`LIVE_DB`), never from the
-   candidate. A relaunched daily restore reuses an existing stash.
+   candidate. Each stash generation is tagged with the run and backup pin: the
+   same run relaunched reuses its own; a pending stash of another run is never
+   imported alone: the live database is exported again as a newer generation
+   and every generation is imported, newest first. `prepare` also carries the
+   pending generations of the live stash into the candidate.
 2. The coherence gate runs, then the migrations (`ddl`, `data`).
 3. The `catalogue` Job first copies the prod artifact blobs (init container
    `blobs`, `deploy/cutover/artifacts-blobs.sh`): prod bucket
@@ -256,6 +260,11 @@ preprod artifacts and imports the prod ones. Spec:
    kept there as `orphan:<parent>`. Per-table counts land in
    `catalogue_journal.imports`. No stash = nothing to do (exit 0).
 
+Hold: when a daily restore fails after its restore Job ran, the automatic
+reopening first imports the catalogue (`catalogue` Job). If that import fails,
+the site stays closed (`Automatic reopening refused`); fix the cause, then
+`resume RUN`. Preprod never reopens on the prod replay without its artifacts.
+
 Refusals (the run fails, nothing is imported, the stash stays for a rerun):
 
 - Missing blob: a visible release references a `sha256:` digest absent from
@@ -264,13 +273,17 @@ Refusals (the run fails, nothing is imported, the stash stays for a rerun):
   `S3_SECRET_KEY`) must exist in the preprod namespace with `s3:ListBucket` and
   `s3:GetObject` on `radar-immobilier-artifacts` (read only) and
   `s3:ListBucket`, `s3:GetObject`, `s3:PutObject` on
-  `radar-immobilier-artifacts-preprod`. No delete right is needed.
+  `radar-immobilier-artifacts-preprod`. No delete right, no multipart right:
+  each blob is one single-part copy (`-p 64` MiB); a blob above
+  `RELEASE_FILE_BYTES_MAX` (16 MiB) is refused before any copy.
 - In-flight publishes: the export refuses while `artifacts.object_intents`
   holds `pending` rows. Wait for them to drain (or let them expire), then
   relaunch. Closure (`MODE=restore`) and the writer drain (`prepare`) stop new
   publishes before the export.
 - Schema: the restored database after the migrations must carry every
-  migration the export was taken with (same release or newer).
+  migration the export was taken with (same release or newer). Refused before
+  any load: a target column `NOT NULL` without default that the export lacks,
+  or a common column whose type differs.
 - Identity: a subject `rejected` in prod but `approved` in preprod refuses.
 
 Prod never runs either side: `CATALOGUE_DIR` is empty outside preprod.
