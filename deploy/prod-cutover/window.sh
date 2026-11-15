@@ -46,6 +46,7 @@ if [[ $1 == window-recover ]]; then
     and .checkpoints.reopen=="completed" and .checkpoints["manual-inventory"]=="completed"
     and .previousRelease!=null and .manualEnvironments!=null and .manualConfigmaps!=null' \
     "$WORK/record.json" >/dev/null || fail 'Reçu historique incompatible'
+  mcp_prm_route_recorded "$WORK/record.json"
   validate_release "${PREVIOUS_RELEASE:-}"
   jq -e --slurpfile p "$PREVIOUS_RELEASE" '.previousRelease as $h|
     all(["gitSha","apiImage","uiImage"][]; . as $key|$h[$key]==$p[0][$key])' \
@@ -83,7 +84,9 @@ if [[ $1 == window-start ]]; then
   jq '.previousRelease=.release' "$WORK/record.json" > "$WORK/next.json"
   mv "$WORK/next.json" "$WORK/record.json"; record_save
   # Inventory the live release before installing the candidate's 6H ConfigMap.
+  mcp_network_preflight
   inventory
+  mcp_prm_route_recorded "$WORK/record.json"
   manual_configuration_snapshot
   jq -e '.consumers|length>0' "$WORK/record.json" >/dev/null || fail 'Consommateurs initiaux requis'
   save_release "$RELEASE"
@@ -121,8 +124,10 @@ case $1 in
       r.fs.writeFileSync(r.env.EVIDENCE,JSON.stringify({run:record.run,release:r.SHA,
         instances:record.consumers,completedAt:record.closedAt})+"\n",{mode:0o600});' "$WORK/record.json";;
   window-configure)
-    ENV=execution-prod node deploy/prod-cutover/cli.cjs configuration-check
-    "${k[@]}" apply -f "$CONFIGURATION" >/dev/null
+    # Never apply the partial render: merge key by key into the live maps.
+    manual_live_configmaps
+    LIVE_CONFIGMAPS="$WORK/live-configmaps.json" ENV=execution-prod node deploy/prod-cutover/cli.cjs configuration-check
+    manual_configure_maps
     checkpoint manual-configuration completed;;
   window-close)
     jq -e '.checkpoints["manual-configuration"]=="completed"' "$WORK/record.json" >/dev/null || fail 'Configuration approuvée requise'
@@ -137,6 +142,7 @@ case $1 in
     else ENV=execution-prod node deploy/prod-cutover/cli.cjs "$1"; fi;;
   window-deploy)
     ENV=execution-prod node deploy/prod-cutover/cli.cjs verify
+    mcp_network_preflight
     manual_bindings candidate
     restart_services
     private_smoke
