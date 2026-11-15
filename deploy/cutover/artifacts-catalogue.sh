@@ -20,7 +20,9 @@
 #   artifacts-catalogue.sh manifest-check --in-dir DIR
 #   artifacts-catalogue.sh map-check --map FILE --subjects FILE
 #   artifacts-catalogue.sh stash --in-dir DIR | stash-exists | stash-drop
-#   artifacts-catalogue.sh import-stash --work DIR [--map FILE]
+#   artifacts-catalogue.sh import-stash --work DIR [--map FILE] [--rewrite-from S --rewrite-to T [--blob-keys FILE]]
+#   artifacts-catalogue.sh rewrite-scope --from S --to T [--export DIR]
+#   artifacts-catalogue.sh blob-check --scope T --keys FILE
 #
 # Connection through libpq PG* env (PGHOST, PGUSER, PGPASSWORD, PGDATABASE,
 # PGPORT). Exit 0 on success (gate: GO), 1 on refusal/failure (gate: NO-GO).
@@ -802,28 +804,120 @@ cmd_stash_drop() {
   catalogue_psql -c "DROP SCHEMA IF EXISTS $CATALOGUE_STASH_SCHEMA CASCADE" >/dev/null
 }
 
-# Unstash into WORK/export, import in union, journal conflicts, drop the stash.
-# No stash means nothing to do (already imported, or the restore was skipped).
-# A rerun after a lost drop is safe: the union counts every row as "same".
+# ── Scope rewrite (owner decision 2026-11-15) ─────────────────────────────
+# Prod rows replayed into preprod carry the prod storage scope; preprod serves
+# its own scope only. rewrite-scope moves every artifacts.* row of scope FROM
+# to scope TO, in one transaction, BEFORE the union import (so the union rule
+# also covers slug collisions under the preprod scope). Blob keys follow the
+# scope (artifacts/<scope>/blobs/sha256/<hex>); the blob Job copies them first.
+# Scope-level environment configuration (host_policy, host_quotas) of the prod
+# scope is dropped: the preprod rows come back with the union. The preprod
+# storage_scopes row is taken from the export when present. Foreign keys that
+# involve storage_scope_id are dropped and re-created (validated) around the
+# update. Values embedded in JSON (receipts, signed bodies) are left as is.
+CATALOGUE_SCOPE_CONFIG_TABLES="host_policy host_quotas"
+
+cmd_rewrite_scope() {
+  local from="" to="" export_dir="" t
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --from) from="$2"; shift 2 ;;
+      --to) to="$2"; shift 2 ;;
+      --export) export_dir="$2"; shift 2 ;;
+      *) catalogue_fail "rewrite-scope: unknown argument '$1'" ;;
+    esac
+  done
+  [[ -n "$from" && -n "$to" && "$from" != "$to" ]] || catalogue_fail 'rewrite-scope: --from and --to are required and must differ'
+  [[ "$from$to" =~ ^[a-z0-9.-]+$ ]] || catalogue_fail 'rewrite-scope: scope ids must be [a-z0-9.-]'
+  catalogue_refuse_prod "$(catalogue_current_db)"
+  local tables
+  tables=$(catalogue_psql -At -c "SELECT c.relname FROM pg_attribute a JOIN pg_class c ON c.oid = a.attrelid JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'artifacts' AND c.relkind = 'r' AND a.attname = 'storage_scope_id' AND NOT a.attisdropped ORDER BY 1")
+  {
+    printf 'BEGIN;\n'
+    printf 'CREATE TEMP TABLE cat_fk ON COMMIT DROP AS SELECT co.conrelid::regclass::text AS tbl, co.conname, pg_get_constraintdef(co.oid) AS def FROM pg_constraint co JOIN pg_namespace n ON n.oid = co.connamespace WHERE co.contype = %s AND n.nspname = %s AND (EXISTS (SELECT 1 FROM unnest(co.conkey) k JOIN pg_attribute a ON a.attrelid = co.conrelid AND a.attnum = k WHERE a.attname = %s) OR co.confrelid = %s::regclass);\n' \
+      "'f'" "'artifacts'" "'storage_scope_id'" "'artifacts.storage_scopes'"
+    printf "DO \$fk\$ DECLARE r record; BEGIN FOR r IN SELECT * FROM cat_fk LOOP EXECUTE format('ALTER TABLE %%s DROP CONSTRAINT %%I', r.tbl, r.conname); END LOOP; END \$fk\$;\n"
+    if [[ -n "$export_dir" && -f "$export_dir/data/storage_scopes.copy" ]]; then
+      printf 'CREATE TEMP TABLE cat_scope ON COMMIT DROP AS SELECT %s FROM artifacts.storage_scopes WITH NO DATA;\n' \
+        "$(sed 's/.*/"&"/' "$export_dir/data/storage_scopes.columns" | paste -sd, -)"
+      printf '\\copy cat_scope FROM %s\n' "'$export_dir/data/storage_scopes.copy'"
+      printf 'INSERT INTO artifacts.storage_scopes (%s) SELECT * FROM cat_scope WHERE id = %s ON CONFLICT DO NOTHING;\n' \
+        "$(sed 's/.*/"&"/' "$export_dir/data/storage_scopes.columns" | paste -sd, -)" "'$to'"
+    fi
+    printf "INSERT INTO artifacts.storage_scopes SELECT (jsonb_populate_record(NULL::artifacts.storage_scopes, to_jsonb(s) || jsonb_build_object('id', '%s', 'org_id', '%s'))).* FROM artifacts.storage_scopes s WHERE s.id = '%s' ON CONFLICT DO NOTHING;\n" "$to" "$to" "$from"
+    for t in $CATALOGUE_SCOPE_CONFIG_TABLES; do
+      grep -qx "$t" <<< "$tables" && printf "DELETE FROM artifacts.\"%s\" WHERE storage_scope_id = '%s';\n" "$t" "$from"
+    done
+    while read -r t; do
+      [[ -n "$t" ]] || continue
+      printf "UPDATE artifacts.\"%s\" SET storage_scope_id = '%s' WHERE storage_scope_id = '%s';\n" "$t" "$to" "$from"
+    done <<< "$tables"
+    printf "DELETE FROM artifacts.storage_scopes WHERE id = '%s';\n" "$from"
+    printf "DO \$fk\$ DECLARE r record; BEGIN FOR r IN SELECT * FROM cat_fk LOOP EXECUTE format('ALTER TABLE %%s ADD CONSTRAINT %%I %%s', r.tbl, r.conname, r.def); END LOOP; END \$fk\$;\n"
+    printf 'COMMIT;\n'
+  } | catalogue_psql --file=- >/dev/null
+  local left
+  left=$(catalogue_psql -At -c "SELECT count(*) FROM artifacts.storage_scopes WHERE id = '$from'")
+  [[ "$left" == 0 ]] || catalogue_fail "rewrite-scope: scope $from still present"
+  catalogue_log "rewrite-scope: rows of scope $from now under $to"
+}
+
+# Every blob referenced by a visible release of scope SCOPE must be present in
+# the preprod artifacts bucket. KEYS lists the object names (sha256 hex) under
+# artifacts/<SCOPE>/blobs/sha256/, as listed by the blob Job. Read-only.
+cmd_blob_check() {
+  local scope="" keys="" missing
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --scope) scope="$2"; shift 2 ;;
+      --keys) keys="$2"; shift 2 ;;
+      *) catalogue_fail "blob-check: unknown argument '$1'" ;;
+    esac
+  done
+  [[ -n "$scope" && -f "$keys" ]] || catalogue_fail 'blob-check: --scope and a readable --keys file are required'
+  missing=$(LC_ALL=C comm -23 \
+    <(catalogue_psql -At -c "SELECT DISTINCT m[1] FROM artifacts.releases r JOIN artifacts.artifacts a ON a.id = r.artifact_id CROSS JOIN LATERAL regexp_matches(r.manifest, 'sha256:([0-9a-f]+)', 'g') m WHERE a.storage_scope_id = '${scope//\'/}' AND a.lifecycle_state NOT IN ('deleted', 'purged') AND a.terminal_deleted_at IS NULL AND r.state <> 'purged'" | LC_ALL=C sort -u) \
+    <(LC_ALL=C sort -u "$keys") | grep -c . || true)
+  ((missing == 0)) || catalogue_fail "blob-check: $missing blob(s) referenced by visible releases of $scope are absent from the bucket, refusing"
+  catalogue_log "blob-check ok — every visible release of $scope has its blobs"
+}
+
+# Unstash into WORK/export, rewrite the prod scope, import in union, check the
+# blobs, journal conflicts, drop the stash. No stash: only the scope rewrite and
+# the blob check run (relaunch after a completed import). A rerun after a lost
+# drop is safe: the union counts every row as "same".
 cmd_import_stash() {
-  local work="" map="" path dir generation
+  local work="" map="" path dir generation from="" to="" keys=""
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --work) work="$2"; shift 2 ;;
       --map) map="$2"; shift 2 ;;
+      --rewrite-from) from="$2"; shift 2 ;;
+      --rewrite-to) to="$2"; shift 2 ;;
+      --blob-keys) keys="$2"; shift 2 ;;
       *) catalogue_fail "import-stash: unknown argument '$1'" ;;
     esac
   done
   [[ -n "$work" ]] || catalogue_fail 'import-stash: --work is required'
+  [[ -z "$from$to" || ( -n "$from" && -n "$to" ) ]] || catalogue_fail 'import-stash: --rewrite-from and --rewrite-to go together'
+  [[ -z "$keys" || -n "$to" ]] || catalogue_fail 'import-stash: --blob-keys needs --rewrite-to (the preprod scope)'
   catalogue_refuse_prod "$(catalogue_current_db)"
-  if ! cmd_stash_exists; then catalogue_log 'import-stash: no stash, nothing to import'; return 0; fi
-  dir="$work/export"; rm -rf "$dir"; mkdir -p "$dir/data"
-  while read -r path; do
-    [[ -n "$path" ]] || continue
-    case "$path" in /*|*..*) catalogue_fail "import-stash: unsafe path in stash" ;; esac
-    catalogue_psql -At -c "SELECT b64 FROM $CATALOGUE_STASH_SCHEMA.files WHERE path = '${path//\'/\'\'}'" | base64 -d > "$dir/$path"
-  done < <(catalogue_psql -At -c "SELECT path FROM $CATALOGUE_STASH_SCHEMA.files ORDER BY 1")
-  cmd_manifest_check --in-dir "$dir" >/dev/null
+  dir="$work/export"; rm -rf "$dir"
+  if cmd_stash_exists; then
+    mkdir -p "$dir/data"
+    while read -r path; do
+      [[ -n "$path" ]] || continue
+      case "$path" in /*|*..*) catalogue_fail "import-stash: unsafe path in stash" ;; esac
+      catalogue_psql -At -c "SELECT b64 FROM $CATALOGUE_STASH_SCHEMA.files WHERE path = '${path//\'/\'\'}'" | base64 -d > "$dir/$path"
+    done < <(catalogue_psql -At -c "SELECT path FROM $CATALOGUE_STASH_SCHEMA.files ORDER BY 1")
+    cmd_manifest_check --in-dir "$dir" >/dev/null
+  fi
+  if [[ -n "$from" ]]; then
+    if [[ -d "$dir" ]]; then cmd_rewrite_scope --from "$from" --to "$to" --export "$dir"; else cmd_rewrite_scope --from "$from" --to "$to"; fi
+    # Prod rows are visible only once their blobs are in the preprod bucket.
+    [[ -z "$keys" ]] || cmd_blob_check --scope "$to" --keys "$keys"
+  fi
+  if [[ ! -d "$dir" ]]; then catalogue_log 'import-stash: no stash, nothing to import'; return 0; fi
   generation=$(catalogue_manifest_value "$dir" generation)
   if [[ -n "$map" ]]; then cmd_import --in-dir "$dir" --allow-same-db --map "$map"; else cmd_import --in-dir "$dir" --allow-same-db; fi
   tail -n +2 "$dir/union.tsv" > "$dir/union.rows"
@@ -835,13 +929,15 @@ cmd_import_stash() {
     -c "CREATE TEMP TABLE u (tbl text, exported int, same int, inserted int, collisions int, orphans int)" \
     -c "\\copy u FROM '$dir/union.rows'" \
     -c "INSERT INTO $CATALOGUE_JOURNAL_SCHEMA.imports (generation, tbl, exported, same, inserted, collisions, orphans) SELECT '$generation', * FROM u" >/dev/null
+  # Final control on the union: every visible release has its blobs.
+  [[ -z "$keys" ]] || cmd_blob_check --scope "$to" --keys "$keys"
   cmd_stash_drop
   catalogue_log "import-stash: generation $generation imported in union, journal in $CATALOGUE_JOURNAL_SCHEMA, stash dropped"
 }
 
 cmd_main() {
   local cmd="${1:-}"
-  [[ -n "$cmd" ]] || catalogue_fail 'usage: artifacts-catalogue.sh {gate|export|import|verify|archive|manifest-check|map-check|stash|stash-exists|stash-drop|import-stash} ...'
+  [[ -n "$cmd" ]] || catalogue_fail 'usage: artifacts-catalogue.sh {gate|export|import|verify|archive|manifest-check|map-check|stash|stash-exists|stash-drop|import-stash|rewrite-scope|blob-check} ...'
   shift
   case "$cmd" in
     gate) cmd_gate "$@" ;;
@@ -855,6 +951,8 @@ cmd_main() {
     stash-exists) cmd_stash_exists ;;
     stash-drop) cmd_stash_drop ;;
     import-stash) cmd_import_stash "$@" ;;
+    rewrite-scope) cmd_rewrite_scope "$@" ;;
+    blob-check) cmd_blob_check "$@" ;;
     *) catalogue_fail "unknown command '$cmd'" ;;
   esac
 }
