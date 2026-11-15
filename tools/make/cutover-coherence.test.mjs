@@ -105,14 +105,29 @@ test('prepare holds radar-refresh-pv; the switch to the prepared snapshot releas
     assert.equal(held(refresh(f)), undefined);
   } finally { f.cleanup(); }
 });
-test('daily restore releases a manual hold whose annotation is free text', () => {
+const preHeld = (f, value) => {
+  const state = f.state();
+  const cronjob = state.objects.find((o) => o.kind === 'CronJob' && o.metadata.name === 'radar-refresh-pv');
+  cronjob.spec.suspend = true;
+  cronjob.metadata.annotations = { 'sentropic.io/held-until-coherent': value };
+  writeFileSync(join(f.dir, 'state.json'), JSON.stringify(state));
+};
+test('daily restore keeps a free-text human hold (never released automatically)', () => {
+  const f = fixture();
+  const text = 'i-cond 2026-11-15: preprod PG/S3 incoherent, held until #1113 restore';
+  try {
+    preHeld(f, text);
+    const result = f.run();
+    assert.equal(result.status, 0, result.stdout + result.stderr);
+    assert.ok(result.stdout.includes('human hold kept, not released'), result.stdout);
+    assert.equal(refresh(f).spec.suspend, true);
+    assert.equal(held(refresh(f)), text);
+  } finally { f.cleanup(); }
+});
+test('daily restore releases a hold written as <run>:false', () => {
   const f = fixture();
   try {
-    const state = f.state();
-    const cronjob = state.objects.find((o) => o.kind === 'CronJob' && o.metadata.name === 'radar-refresh-pv');
-    cronjob.spec.suspend = true;
-    cronjob.metadata.annotations = { 'sentropic.io/held-until-coherent': 'i-cond 2026-11-15: preprod PG/S3 incoherent, held until #1113 restore' };
-    writeFileSync(join(f.dir, 'state.json'), JSON.stringify(state));
+    preHeld(f, 'i-cond-20261115:false');
     const result = f.run();
     assert.equal(result.status, 0, result.stdout + result.stderr);
     assert.ok(result.stdout.includes('RELEASED radar-refresh-pv'), result.stdout);

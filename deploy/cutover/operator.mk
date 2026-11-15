@@ -11,7 +11,9 @@ override CYCLE_ID := $(value CYCLE_ID)
 override OUTPUT := $(value OUTPUT)
 override BUILD_RUN := $(value BUILD_RUN)
 override SHA := $(value SHA)
-export ENV RELEASE RUN MODE BACKUP_ID CYCLE_ID OUTPUT BUILD_RUN SHA TEST_PATTERN
+override MIRROR_FORCE := $(value MIRROR_FORCE)
+override MIRROR_MAX_DELETE_RATIO := $(value MIRROR_MAX_DELETE_RATIO)
+export ENV RELEASE RUN MODE BACKUP_ID CYCLE_ID OUTPUT BUILD_RUN SHA TEST_PATTERN MIRROR_FORCE MIRROR_MAX_DELETE_RATIO
 # UIDFIX-EX2: standalone makefile (never includes the root Makefile);
 # export the real host ids so test.compose.yml renders the host user.
 export UID := $(shell id -u)
