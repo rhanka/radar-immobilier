@@ -96,8 +96,11 @@ document work; prepare drains active refresh Jobs for up to ten minutes,
 cutover deletes them immediately by UID. Sweep cursors under
 `refresh/018/sweep/` are excluded from copy and reconciliation.
 
-The `prepare-preprod-db` CI job blocks deployment on restore, DDL, 6H or smoke
-failure. Its runner polls cluster Jobs for up to 240 minutes, aligned with the
+The `prepare-preprod-db` CI job runs only when the repository variable
+`PREPROD_PREPARE_ENABLED` is `true` (absent = off). It is a rehearsal: its failure
+on restore, DDL, 6H or smoke is reported as a warning and never gates the preprod
+rollout. Releases carry `dataMigration: null` since production applied 6H on
+2026-11-14. Its runner polls cluster Jobs for up to 240 minutes, aligned with the
 sum of the preparation stage budgets (about 12 390 s after the preparing
 stamp). This is incompatible
 with the design's simultaneous five-minute runner wall-time budget; no long work

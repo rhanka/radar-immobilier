@@ -260,8 +260,9 @@ jobs:
   prepare-preprod-db:
     name: Prepare preprod database for cutover
     needs: [build-push, cutover-release]
-    # Same arming as deploy-preprod: a disarmed preprod CD never prepares (variable read only).
-    if: github.ref == 'refs/heads/main' && vars.PREPROD_CD_ENABLED == 'true'
+    # Same arming as deploy-preprod, plus its own switch: PREPROD_PREPARE_ENABLED must be
+    # 'true' (absent = off). The preprod rollout does not depend on it (variables read only).
+    if: github.ref == 'refs/heads/main' && vars.PREPROD_CD_ENABLED == 'true' && vars.PREPROD_PREPARE_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 240
     permissions:
@@ -1255,7 +1256,7 @@ jobs:
           [[ $build_run =~ ^[0-9]+$ ]]
           mkdir -p cutover-release
           gh run download "$build_run" --name "cutover-release-$GITHUB_SHA" --dir cutover-release
-          jq -e --arg sha "$GITHUB_SHA" '.gitSha==$sha and .dataMigration=="6h"' cutover-release/release.json >/dev/null
+          jq -e --arg sha "$GITHUB_SHA" '.gitSha==$sha and .dataMigration==null' cutover-release/release.json >/dev/null
           echo "Promoting immutable release from build run $build_run"
       - name: Configure namespace-scoped production identity
         env:
