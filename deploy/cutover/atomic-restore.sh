@@ -11,6 +11,13 @@
 # any reopening. CATALOGUE_SCRIPT points at deploy/cutover/artifacts-catalogue.sh
 # and CATALOGUE_MAP optionally at an explicit subject correspondence file.
 # Unset CATALOGUE_DIR keeps the historical behavior byte-for-byte.
+# CATALOGUE_STASH=1 (restore Jobs, preprod only): the export is stashed in schema
+# catalogue_stash of the restored database instead of being imported here; the
+# catalogue Job imports it in union AFTER the migrations (ddl, data), so a prod
+# dump older than the preprod release never blocks it. Live path: an existing
+# stash is reused (a rerun after the replay must never re-export prod rows).
+# Prepared path: always a fresh export from LIVE_DB, never from the candidate.
+# The schema reset keeps catalogue_stash and catalogue_journal.
 #
 # A snapshot older than the destination schema (fewer migrations) cannot be
 # restored with `pg_restore --clean`: dropping a primary key that newer foreign
@@ -51,7 +58,21 @@ if [ -n "$catalogue_export_dir" ]; then
   [ -n "$catalogue_script" ] || { echo "[restore] ERROR — CATALOGUE_DIR without CATALOGUE_SCRIPT"; exit 1; }
   [ -f "$catalogue_script" ] || { echo "[restore] ERROR — catalogue script missing"; exit 1; }
   mkdir -p "$catalogue_export_dir/export"
-  if [ -f "$catalogue_export_dir/export/manifest.json" ] \
+  if [ "${CATALOGUE_STASH:-0}" = 1 ]; then
+    if [ -n "$TARGET_DB" ]; then
+      [ -n "${LIVE_DB:-}" ] && [ "$LIVE_DB" != "$TARGET_DB" ] || { echo "[restore] ERROR — prepared-database restore needs LIVE_DB as catalogue source (never the candidate)" >&2; exit 1; }
+      rm -rf "$catalogue_export_dir/export"
+      PGDATABASE="$LIVE_DB" bash "$catalogue_script" export --out-dir "$catalogue_export_dir/export" || exit 1
+      bash "$catalogue_script" stash-drop || exit 1
+      bash "$catalogue_script" stash --in-dir "$catalogue_export_dir/export" || exit 1
+    elif bash "$catalogue_script" stash-exists; then
+      echo "[restore] catalogue stash already present, reusing it"
+    else
+      rm -rf "$catalogue_export_dir/export"
+      bash "$catalogue_script" export --out-dir "$catalogue_export_dir/export" || exit 1
+      bash "$catalogue_script" stash --in-dir "$catalogue_export_dir/export" || exit 1
+    fi
+  elif [ -f "$catalogue_export_dir/export/manifest.json" ] \
     && bash "$catalogue_script" manifest-check --in-dir "$catalogue_export_dir/export" >/dev/null 2>&1; then
     echo "[restore] catalogue export already sealed, reusing $catalogue_export_dir/export"
   elif [ -n "$TARGET_DB" ]; then
@@ -64,6 +85,7 @@ if [ -n "$catalogue_export_dir" ]; then
 fi
 catalogue_import() {
   [ -n "$catalogue_export_dir" ] || return 0
+  [ "${CATALOGUE_STASH:-0}" = 1 ] && return 0
   set -- --in-dir "$catalogue_export_dir/export"
   # Live path: the database was reset and replayed after the export, so the
   # export source name matches by construction. The import is a UNION with the
@@ -77,7 +99,7 @@ catalogue_import() {
 reset_schemas() {
   printf '%s\n' \
     'DO $reset$ DECLARE s name; BEGIN' \
-    "  FOR s IN SELECT nspname FROM pg_namespace WHERE nspname <> 'information_schema' AND nspname !~ '^pg_' LOOP" \
+    "  FOR s IN SELECT nspname FROM pg_namespace WHERE nspname NOT IN ('information_schema', 'catalogue_stash', 'catalogue_journal') AND nspname !~ '^pg_' LOOP" \
     "    EXECUTE format('DROP SCHEMA %I CASCADE', s);" \
     '  END LOOP;' \
     'END $reset$;' \
