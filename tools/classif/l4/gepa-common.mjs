@@ -25,7 +25,9 @@ export const GEPA_ROUTES = ['opus-5.5-low', 'sol-6.1-low'];
  * and max). Optimisation (gepa.mjs) still uses GEPA_ROUTES only (sol, not luna).
  */
 export const GEPA_SERIES_ROUTES = [...GEPA_ROUTES, 'sol-6.1-medium', 'astra-low', 'astra-medium', 'luna-6-low', 'luna-6-medium',
-  'gemini-4-argon-low', 'gemini-4-carbon-low', 'gemini-3.8-flash-low', 'muse-ember-1.0-xhigh', 'muse-ember-1.0-max'];
+  'gemini-4-argon-low', 'gemini-4-carbon-low', 'gemini-3.8-flash-low', 'muse-ember-1.0-xhigh', 'muse-ember-1.0-max',
+  // Owner 15/11: Fable 5.2 low (Claude seat), Muse Ember 1.0 low (Meta API), Muse Wonder 1.0 and Wonder Full 1.0 low (Muse subscription).
+  'fable-5.2-low', 'muse-ember-1.0-low-api', 'muse-wonder-1.0-low', 'muse-wonder-full-1.0-low'];
 /** Reflective mutation / crossover seat, and its reconciliation + fallback seat. */
 export const GEPA_MUTATOR = 'astra-max';
 export const GEPA_RECONCILER = 'opus-5.5-max';

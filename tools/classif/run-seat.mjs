@@ -13,6 +13,7 @@ import { classifHome, testOnlyEnv } from './lib/paths.mjs';
 import { privateDir } from './lib/paths.mjs';
 import { extractCodexRateLimits } from './lib/codex-quota.mjs';
 import { callMesh } from './lib/mesh-seat.mjs';
+import { callMetaApi } from './lib/meta-api-seat.mjs';
 
 const SCRUB = /(_API_KEY|_AUTH_TOKEN|_API_BASE|_BASE_URL|_SECRET_KEY|_ACCESS_KEY)$|^(ANTHROPIC_|OPENAI_|GEMINI_|CLAUDE_CODE_USE_|AWS_|GOOGLE_CLOUD_|GOOGLE_APPLICATION_CREDENTIALS|GOOGLE_GENAI_USE_VERTEXAI|VERTEX|SCRAPE_S3_|REFERENCE_C_KEY|CLASSIF_EVAL_KEY|CLASSIF_BLIND_KEY|MISTRAL_|VIBE_ACTIVE_MODEL)/;
 /**
@@ -65,6 +66,26 @@ export const ROUTES = {
       '--disable-web-tools', '--disable-reminders', '--disable-request-user-input', '--no-foreign-personal-context', '--no-session-log', '--workspace', dir] }),
     parse: parseMuse,
   }])),
+  // Owner 15/11: Muse Wonder 1.0 and Muse Wonder Full 1.0 in low, on the owner's Muse subscription
+  // (muse exec, same isolated route as Ember, contributor mode off: the catalog of 15/11 lists a
+  // hidden -contributor variant for both). Ids from the local muse model catalog of 15/11. The
+  // model named by the run.model.configured event must be the requested one (expectServed).
+  ...Object.fromEntries([['muse-wonder-1.0-low', 'Muse Wonder 1.0', 'muse-wonder-1.0'], ['muse-wonder-full-1.0-low', 'Muse Wonder Full 1.0', 'muse-wonder-full-1.0']]
+    .map(([label, family, model]) => [label, {
+      family, model, effort: 'low', evalOnly: true, expectServed: model, pauseOnUnavailable: true,
+      route: 'muse exec --prompt-file, preset empty, contributor mode off, no web tools, no session log, served model checked',
+      build: (dir, file) => ({ cmd: 'muse', args: ['exec', '--model', model, '--reasoning-effort', 'low', '--contributor-mode', 'off', '--preset', 'empty', '--prompt-file', file, '--json',
+        '--disable-web-tools', '--disable-reminders', '--disable-request-user-input', '--no-foreign-personal-context', '--no-session-log', '--workspace', dir] }),
+      parse: parseMuse,
+    }])),
+  // Owner 15/11: Muse Ember 1.0 low on the Meta API (OpenAI compatible chat completions, owner API
+  // key read from ~/.config/radar-classif/meta-api-key, memory only). lib/meta-api-seat.mjs checks
+  // the served model and retries 429 and 5xx.
+  'muse-ember-1.0-low-api': {
+    family: 'Muse Ember 1.0', model: 'muse-ember-1.0', effort: 'low', evalOnly: true, transport: 'meta-api', pauseOnUnavailable: true,
+    api: { model: 'muse-ember-1.0', effort: 'low' },
+    route: 'Meta API POST /v1/chat/completions, one user message, no tools, no system prompt, reasoning_effort low, served model checked',
+  },
   // Owner 15/11 12:05: the series 9 blind of Argon low runs on the agy route of its tuning run
   // (explicitly allowed for this measure). The llm-mesh client (lib/mesh-seat.mjs, transport 'mesh')
   // stays in code, used by no route.
@@ -88,9 +109,19 @@ export const ROUTES = {
     build: (_dir, _file, prompt) => ({ cmd: 'claude', args: ['-p', '--model', 'claude-opus-5-5', '--effort', e, '--output-format', 'json',
       '--tools', '', '--setting-sources', 'project', '--no-session-persistence', '--system-prompt', NEUTRAL_SYSTEM,
       '--strict-mcp-config', '--mcp-config', '{"mcpServers":{}}'], stdin: prompt, env: { CLAUDE_CODE_DISABLE_CLAUDE_MDS: '1' } }),
-    parse: (stdout) => { const j = lastJson(stdout); return { text: j?.result ?? '', usage: j?.usage ?? null, costUsdApiEquivalent: j?.total_cost_usd ?? null, isError: j?.is_error ?? false,
-      errorEnvelope: j?.is_error ? String(j?.result ?? j?.error ?? '') : '' }; },
+    parse: parseClaude,
   }])),
+  // Owner 15/11: Fable 5.2 low on the owner's Claude seat, same isolated claude -p route as Opus
+  // (no tools, no MCP, no CLAUDE.md, skills and slash commands disabled, prompt on stdin, no API
+  // key: the seat env scrubs ANTHROPIC_*). The JSON result must name claude-fable-5-2.
+  'fable-5.2-low': {
+    family: 'Fable 5.2', model: 'claude-fable-5-2', effort: 'low', evalOnly: true, expectServed: 'claude-fable-5-2', pauseOnUnavailable: true,
+    route: 'isolated claude -p: no tools, no CLAUDE.md (CLAUDE_CODE_DISABLE_CLAUDE_MDS=1), slash commands and skills disabled, project settings only, neutral system prompt, empty MCP config, no session persistence, empty cwd, served model checked',
+    build: (_dir, _file, prompt) => ({ cmd: 'claude', args: ['-p', '--model', 'claude-fable-5-2', '--effort', 'low', '--output-format', 'json',
+      '--tools', '', '--disable-slash-commands', '--setting-sources', 'project', '--no-session-persistence', '--system-prompt', NEUTRAL_SYSTEM,
+      '--strict-mcp-config', '--mcp-config', '{"mcpServers":{}}'], stdin: prompt, env: { CLAUDE_CODE_DISABLE_CLAUDE_MDS: '1' } }),
+    parse: parseClaude,
+  },
   // Astra (ChatGPT seat, plan v3 owner decision 04/11): conductor-verified route
   // `codex exec -m gpt-6-astra -c model_reasoning_effort=max -s read-only`, empty cwd, scrubbed
   // env, isolated CODEX_HOME ($CLASSIF_HOME/seat-homes/astra, mode 700, config with NO
@@ -580,6 +611,30 @@ export function parseAgyStream(stdout) {
     errorEnvelope: result?.error ? (typeof result.error === 'string' ? result.error : JSON.stringify(result.error)) : '' };
 }
 
+/**
+ * claude -p --output-format json: one result object. `served` lists the models the CLI reports
+ * (the `model` field when present, else the keys of `modelUsage`), for the expectServed check.
+ */
+export function parseClaude(stdout) {
+  const j = lastJson(stdout);
+  const served = typeof j?.model === 'string' ? [j.model] : Object.keys(j?.modelUsage ?? {});
+  return { text: j?.result ?? '', usage: j?.usage ?? null, costUsdApiEquivalent: j?.total_cost_usd ?? null, isError: j?.is_error ?? false,
+    served, errorEnvelope: j?.is_error ? String(j?.result ?? j?.error ?? '') : '' };
+}
+
+/** Synthetic exit code of an answer served by another model than the requested one (as the mesh client). */
+export const SERVED_MISMATCH = 98;
+
+/**
+ * True when the served model(s) of a parsed answer name the expected model: exact id, or the id
+ * followed by a context or date suffix (`claude-fable-5-2[1m]`, `<id>-20261101`). Null or empty
+ * served = false (fail closed).
+ */
+export function servedMatches(served, expected) {
+  const list = (Array.isArray(served) ? served : [served]).filter((s) => typeof s === 'string' && s);
+  return list.some((s) => s === expected || s.startsWith(`${expected}[`) || new RegExp(`^${expected.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}-\\d{8}$`).test(s));
+}
+
 // muse exec --json emits JSONL events; the final answer is the "text" of the completed
 // run_terminal payload (nested), usage objects may appear at any depth.
 // Fail closed (owner 12/11, same rule as codex and agy): only the payload types of a plain
@@ -597,6 +652,9 @@ export function parseMuse(stdout) {
   let toolEvents = 0;
   const toolKinds = {};
   const errors = [];
+  // Served model: the model id named by the run.model.configured payload (model_id, model or
+  // display_label), null when absent.
+  let served = null;
   const walk = (o) => {
     if (!o || typeof o !== 'object') return;
     if (o.terminal === 'completed' && typeof o.text === 'string') text = o.text;
@@ -611,6 +669,11 @@ export function parseMuse(stdout) {
     try { e = JSON.parse(line); } catch { toolEvents++; toolKinds['<non-json>'] = (toolKinds['<non-json>'] ?? 0) + 1; continue; }
     const pt = e?.payload_type;
     if (typeof pt === 'string' && !MUSE_BENIGN_PAYLOADS.has(pt)) { toolEvents++; toolKinds[pt] = (toolKinds[pt] ?? 0) + 1; }
+    if (pt === 'run.model.configured') {
+      const p = e.payload ?? {};
+      const m = [p.model_id, p.modelId, p.model, p.display_label, p.displayLabel].find((v) => typeof v === 'string' && v);
+      if (m && served === null) served = m;
+    }
     if (typeof pt === 'string' && pt.endsWith('.failed')) {
       const p = e.payload ?? {};
       const why = p.reason ?? p.error?.message ?? p.error ?? p.message ?? null;
@@ -618,7 +681,7 @@ export function parseMuse(stdout) {
     }
     walk(e);
   }
-  return { text: text || String(stdout ?? '').slice(-4000), usage, toolEvents, toolKinds, errorEnvelope: [...new Set(errors)].join('\n') };
+  return { text: text || String(stdout ?? '').slice(-4000), usage, toolEvents, toolKinds, served, errorEnvelope: [...new Set(errors)].join('\n') };
 }
 
 /**
@@ -640,6 +703,12 @@ export function callSeat(label, prompt, { timeoutMs = 900000, base = process.env
   if (!r) throw new Error(`unknown route ${label}`);
   // llm-mesh route: no child process, no seat dir; the prompt goes over HTTP to the local gateway.
   if (r.transport === 'mesh') return callMesh({ ...r, label }, prompt, { timeoutMs });
+  // Meta API route: HTTP, no child process (lib/meta-api-seat.mjs refuses a test without a fake server).
+  if (r.transport === 'meta-api') return callMetaApi({ ...r, label }, prompt, { timeoutMs });
+  // Served-checked seat routes (owner 15/11): a test never spawns the real CLI (fail closed).
+  if (r.expectServed && spawnImpl === spawn && (process.env.CLASSIF_TEST_MODE === '1' || process.env.NODE_TEST_CONTEXT)) {
+    throw new Error(`${label} refused in test mode: pass a fake spawnImpl (no real seat call from a test)`);
+  }
   // Codex seats can run commands: their cwd is an empty per-call dir OUTSIDE $CLASSIF_HOME,
   // whatever base the caller passed (review GEPA B1b).
   const codex = r.parse === parseCodex;
@@ -681,6 +750,13 @@ export function callSeat(label, prompt, { timeoutMs = 900000, base = process.env
       let parsed = { text: '', usage: null };
       try { parsed = r.parse(out, work); } catch { /* keep empty */ }
       cleanup();
+      // Served model check (owner 15/11): an answer of another model is a failed call, never scored.
+      if (r.expectServed && code === 0 && !servedMatches(parsed.served, r.expectServed)) {
+        const why = `served model ${JSON.stringify(parsed.served ?? null)} instead of ${r.expectServed}`;
+        code = SERVED_MISMATCH;
+        parsed = { ...parsed, text: '', errorEnvelope: [parsed.errorEnvelope, why].filter(Boolean).join('\n') };
+        err += `\n${why}`;
+      }
       // Quota source: the session file of this call (stdout stays the secondary source); the
       // file is deleted whatever happens.
       if (codex) {

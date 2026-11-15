@@ -350,7 +350,8 @@ function readdirSyncSafe(dir) {
   // Availability pause (owner 15/11): a mesh or agy call that reads as a transient unavailability
   // (429, 5xx, exhausted, timeout) stops the run before any audit; answered items stay cached and
   // the same command resumes after a delay. An account refusal stays with the account guard.
-  const meshGuard = createMeshPauseGuard((route) => ROUTES[route]?.transport === 'mesh' || ROUTES[route]?.parse === parseAgyStream);
+  const meshGuard = createMeshPauseGuard((route) => ROUTES[route]?.transport === 'mesh' || ROUTES[route]?.parse === parseAgyStream
+    || ROUTES[route]?.pauseOnUnavailable === true); // owner 15/11: Fable, Ember API and Wonder routes pause too
   // Pilot (--pilot N): at most N new seat calls, then a stop that reports infrastructure counts
   // only (launched, answered, failures by reason); answered items stay cached for the full run.
   const pilot = argv.includes('--pilot') ? Number(argv[argv.indexOf('--pilot') + 1]) : 0;
