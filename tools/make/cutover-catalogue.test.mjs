@@ -22,6 +22,7 @@ function assertRestoreStashes(j) {
   assert.equal(env(restore, 'CATALOGUE_DIR').value, '/work/catalogue');
   assert.equal(env(restore, 'CATALOGUE_SCRIPT').value, '/work/artifacts-catalogue.sh');
   assert.equal(env(restore, 'CATALOGUE_STASH').value, '1');
+  assert.match(env(restore, 'CATALOGUE_STASH_TAG').value, /^[0-9a-f-]{36}:[0-9a-f]{16}$/, 'stash bound to the run and its backup pin');
   const body = script(restore);
   const embedded = body.match(/cat > \/work\/artifacts-catalogue\.sh <<'ARTIFACTS_CATALOGUE_EOF'\n([\s\S]*?)\nARTIFACTS_CATALOGUE_EOF\n/);
   assert.ok(embedded, 'catalogue script written before the atomic restore');
@@ -92,4 +93,18 @@ test('prod never stashes nor imports a catalogue', () => {
   assert.match(render, /if \[\[ \$ENV == preprod \]\]; then CATALOGUE_DIR=\/work\/catalogue; fi/, 'only preprod enables the hook');
   const hook = readFileSync('deploy/cutover/catalogue-import-job.tmpl.yaml', 'utf8');
   assert.match(hook, /\[ -n "\$CATALOGUE_DIR" \] \|\| exit 2/, 'the catalogue Job refuses without CATALOGUE_DIR');
+});
+
+test('daily restore: a failed catalogue import keeps preprod closed (no reopening without the preprod artifacts)', () => {
+  const f = fixture({ failJob: 'catalogue' });
+  try {
+    const result = f.run('run');
+    assert.notEqual(result.status, 0);
+    const out = result.stdout + result.stderr;
+    assert.doesNotMatch(out, /REOPENED WITHOUT RESTORE/, out);
+    assert.match(out, /Automatic reopening refused/, out);
+    const steps = f.state().jobCreation.map(j => j.step);
+    assert.equal(steps.filter(s => s === 'catalogue').length, 2, `import retried once by the reopening, then held: ${steps.join(',')}`);
+    assert.ok(f.state().objects.some(o => o.metadata.name === 'radar-change-lock'), 'recovery lock retained');
+  } finally { f.cleanup(); }
 });
