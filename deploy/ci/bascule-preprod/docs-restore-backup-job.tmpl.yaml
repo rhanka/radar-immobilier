@@ -10,8 +10,10 @@
 #                 (COPY_CONCURRENCY default 48, bounded 1–64; CopyObject,
 #                 0 byte through the pod) from <backup>/docs/<key>?versionId=<v>, v =
 #                 the recorded version, else the version whose ETag is the inventory's
-#                 (object rewritten since D). ADDITIVE (no delete). Then recon
-#                 dest ⊇ inventory(D) (Key + Size). DOCS_DRY=1 = plan only, no copy.
+#                 (object rewritten since D). Additive outside graph/ and
+#                 refresh/018/; those two prefixes are MIRRORED (extras deleted,
+#                 refresh/018/sweep/ preserved). Then recon dest ⊇ inventory(D)
+#                 and no mirror extra. DOCS_DRY=1 = plan only, no copy, no delete.
 #                 Any inventory object not in the backup or without a restorable
 #                 version ⇒ refusal (exit 2) before the first copy. Size drift with
 #                 matching backup ETag is reported by hash; recon uses actual size.
@@ -29,7 +31,9 @@
 #          others checked by HEAD), SIGNS the server-side CopyObject (GetObject on
 #          <backup>/docs/* — on OVH a read with versionId is a GetObject, there is no
 #          distinct GetObjectVersion permission) and lists/writes the preprod docs
-#          bucket (ListBucket + PutObject + PutObjectAcl, no delete).
+#          bucket (ListBucket + PutObject + PutObjectAcl) and deletes in the
+#          PG-coupled mirror prefixes only (DeleteObject on graph/* and
+#          refresh/018/*; probed before the first write, refusal otherwise).
 # GrantFullControl id=${COPY_GRANTEE} (preprod API canonical id) keeps the copied
 # objects readable by the preprod API, as in docs-sync.
 #
