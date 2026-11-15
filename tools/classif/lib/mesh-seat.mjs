@@ -118,6 +118,17 @@ export function meshUnavailable(r) {
   return Boolean(r) && r.code !== 0 && (r.code === 429 || r.code >= 500 || r.code === MESH_TRANSPORT_ERROR || r.code === MESH_SERVED_MISMATCH);
 }
 
+const TRANSIENT = /\b(?:429|500|502|503|504)\b|resource[_ ]exhausted|\bunavailable\b|overloaded|temporarily|rate[ _-]?limit|too many requests|quota|deadline[_ ]exceeded/i;
+/**
+ * A failed seat call that reads as a transient unavailability: a mesh one (codes), a timeout, or a
+ * CLI error text (stderr or error envelope, never the answer) naming 429, 5xx, exhausted or
+ * unavailable resources, a rate limit or a quota.
+ */
+export function seatUnavailable(r) {
+  if (!r || r.code === 0) return false;
+  return meshUnavailable(r) || Boolean(r.timedOut) || TRANSIENT.test(`${r.stderrTail ?? ''}\n${r.errorEnvelope ?? ''}`);
+}
+
 export class MeshPause extends Error {
   constructor(message, details) {
     super(message);
@@ -132,13 +143,13 @@ export class MeshPause extends Error {
  * the run stops before any aggregate or audit, answered items stay cached, and the same command
  * resumes. An unavailable call is never a scored failure.
  */
-export function createMeshPauseGuard(isMesh) {
+export function createMeshPauseGuard(isMesh) { // isMesh: routes the pause applies to (mesh and agy)
   let tripped = null;
   return {
     get tripped() { return tripped; },
     blocks: () => Boolean(tripped),
     observe(route, r) {
-      if (!tripped && isMesh(route) && meshUnavailable(r)) tripped = { route, at: new Date().toISOString(), code: r.code };
+      if (!tripped && isMesh(route) && seatUnavailable(r)) tripped = { route, at: new Date().toISOString(), code: r.code };
       return tripped;
     },
     error(resumeCommand) {
