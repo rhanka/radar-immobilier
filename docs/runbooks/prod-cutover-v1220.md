@@ -303,6 +303,26 @@ Recette artefacts obligatoire avant GO de réouverture :
 
 Ce smoke artefacts complète le smoke de santé. Son résultat doit être consigné séparément.
 
+## Incident 14/11 : ConfigMaps tronquées
+
+- Cause : `window-configure` faisait `kubectl apply -f` sur le rendu partiel.
+  L'apply côté client a supprimé les clés de l'ancienne annotation last-applied absentes du rendu.
+  radar-api a perdu 13 clés, dont POSTGRES_HOST. immo-mcp-config en a perdu 5.
+  radar-refresh-pv a échoué sur 34 villes (ENOTFOUND `postgres`). i-cond a restauré les clés à la main.
+- Correctif : `window-configure` fusionne clé par clé (`kubectl patch configmap --type=merge`).
+  Une ConfigMap absente est créée. Seule radar-cutover-6h reste appliquée en entier.
+  Après chaque patch, une relecture refuse toute clé perdue ou toute valeur divergente.
+- Garde-fou : `cli.cjs configuration-check` lit les ConfigMaps live (LIVE_CONFIGMAPS, lues par window.sh).
+  Il refuse une valeur non chaîne, une clé live perdue après fusion,
+  et l'absence d'une clé de `prod-settings.json#retained` (les 18 clés de l'incident).
+- Codifié : clés d'auth OIDC de radar-api dans le rendu. Valeurs de radar-mcp-receiver vérifiées par test.
+  `window-start` et `window-deploy` exigent la NetworkPolicy allow-immo-mcp-to-postgres (deploy/k8s/71).
+  `window-start` et `window-recover` exigent la route Exact `/.well-known/oauth-protected-resource/mcp`
+  dans l'ingress radar-immo-mcp de l'enregistrement de restauration.
+- Limites : la route PRM n'est vérifiée que si l'ingress radar-immo-mcp figure dans l'enregistrement.
+  Les annotations last-applied laissées en prod ne sont pas réécrites par cet outil.
+- Tests : `configmap-merge.test.cjs` et `window-configure.test.mjs` reproduisent l'incident.
+
 ## Ordre de bascule
 
 | Ordre | Acteur | Acte et porte |

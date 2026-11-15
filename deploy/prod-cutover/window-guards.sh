@@ -46,3 +46,21 @@ manual_cd_idle() {
     any(.status.conditions[]?;(.type=="Complete" or .type=="Failed") and .status=="True"))' \
     >/dev/null || fail 'Unscheduled CD Job has not terminated'
 }
+# Production prerequisites restored by hand on 2026-11-14 (deploy/k8s/71 and 41).
+mcp_network_preflight() {
+  "${k[@]}" get networkpolicy allow-immo-mcp-to-postgres -o json > "$WORK/mcp-network.json" 2>/dev/null \
+    || fail 'MCP PostgreSQL NetworkPolicy allow-immo-mcp-to-postgres is absent'
+  jq -e '.spec.podSelector.matchLabels as $to|
+    $to["app.kubernetes.io/component"]=="postgres" and $to["app.kubernetes.io/name"]=="radar-immobilier"
+    and any(.spec.ingress[]?; any(.ports[]?; .port==5432)
+      and any(.from[]?; .podSelector.matchLabels["app.kubernetes.io/component"]=="mcp"
+        and .podSelector.matchLabels["app.kubernetes.io/name"]=="radar-immobilier"))' \
+    "$WORK/mcp-network.json" >/dev/null || fail 'MCP PostgreSQL NetworkPolicy is conflicting'
+}
+# The restoration record must carry the exact RFC 9728 route of radar-immo-mcp.
+mcp_prm_route_recorded() {
+  jq -e '[.ingresses[]?|select(.name=="radar-immo-mcp")] as $mcp|($mcp|length)==0 or
+    any($mcp[].spec.rules[]?.http.paths[]?; .path=="/.well-known/oauth-protected-resource/mcp"
+      and .pathType=="Exact" and .backend.service.name=="radar-immo-mcp")' "$1" >/dev/null \
+    || fail 'radar-immo-mcp ingress lacks the Exact /.well-known/oauth-protected-resource/mcp route'
+}
