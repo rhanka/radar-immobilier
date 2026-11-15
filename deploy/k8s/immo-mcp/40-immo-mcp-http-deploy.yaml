@@ -67,8 +67,15 @@ data:
   IMMO_MCP_OAUTH_RESOURCE: "https://immo.sent-tech.ca/mcp"
   # Space-separated, advertised verbatim in the RFC 9728 PRM `scopes_supported`.
   # PROD value set by the v1.2.20 cutover (2026-11-14, PR #1100,
-  # prod-settings.json `mcp`): the three data scopes plus the artifact scopes
-  # and offline_access, the same list as preprod. Codified from live.
+  # deploy/prod-cutover/prod-settings.json `mcp`): the three data scopes plus
+  # the artifact scopes and offline_access, the same list as preprod.
+  # Codified from live. PRECONDITION (PR #1100,
+  # deploy/prod-cutover/PREPARATION.md): the prod IdP catalogue lists the
+  # artifact scopes and the prod immo-mcp client row is refresh-eligible
+  # (grant_types with refresh_token, allowed_scopes with offline_access)
+  # before these scopes are advertised. This change does not prove that
+  # state; without it an authorization request carrying them gets
+  # invalid_scope.
   IMMO_MCP_OAUTH_SCOPES_SUPPORTED: "immo:read immo:search immo:documents:read immo:artifacts:read immo:artifacts:write offline_access"
   IMMO_MCP_ARTIFACTS_LEGACY_READ_SCOPE: "true"
   # Left UNSET on purpose: @sentropic/mcp-auth defaults to
@@ -107,8 +114,10 @@ data:
   RADAR_PUBLIC_BASE_URL: "https://immo.sent-tech.ca"
   # ── Artifacts (PROD, codified from live) ──────────────────────────────────
   # Activated in prod by the v1.2.20 cutover (prod-settings.json `shared`).
-  # Codified so a client-side apply of this file keeps them. Non-secret only:
-  # credentials stay secretKeyRef entries on the Deployment. The preprod
+  # Codified so a client-side apply of this file keeps them. Non-secret only.
+  # The matching credentials are NOT in this source: they exist only on the
+  # live Deployment, as secretKeyRef env entries bound by
+  # deploy/prod-cutover/prod-bindings.sh (PR #1100). The preprod
   # overlay overrides every key below (patch-immo-mcp-config.yaml).
   # Required key list: deploy/k8s/prod-configmap-keys.json.
   ARTIFACTS_CONTROL_MODE: "general"
