@@ -274,26 +274,33 @@ describe("refresh mesh", () => {
 
   it("should log the root cause and the apply stage of a three-level chain, never a message", () => {
     const secret = "duplicate key value violates unique constraint on node secret-node-id";
-    // pg DatabaseError -> DrizzleQueryError (name left as "Error", no code) -> apply wrapper.
-    const database = Object.assign(new Error(secret), { name: "DatabaseError", code: "23505" });
+    // pg DatabaseError (node-postgres sets name "error") -> DrizzleQueryError (name left
+    // as "Error", no code) -> apply wrapper.
+    const database = Object.assign(new Error(secret), { name: "error", code: "23505" });
     const query = Object.assign(new Error(`Failed query: ${secret}`), { cause: database });
     const error = new Graphify34ApplyInterrupted({ backupId: "refresh-018-test", applied: [],
       interruptedCity: "mont-tremblant", restoreFrom: "graph-backups/test/", stage: "projection",
       remaining: [], cause: query });
     const diagnostic = refreshErrorDiagnostic(error);
     expect(diagnostic).toMatchObject({ errorName: "Graphify34ApplyInterrupted", stage: "projection",
-      causeName: "Error", rootCauseName: "DatabaseError", rootCauseCode: "23505" });
+      causeName: "Error", rootCauseName: "error", rootCauseCode: "23505" });
     expect(diagnostic.causeCode).toBeUndefined();
     expect(JSON.stringify(diagnostic)).not.toContain(secret);
   });
 
-  it("should stop on a cyclic cause chain", () => {
-    const first = new Error("first") as Error & { cause?: unknown };
-    const second = Object.assign(new Error("second"), { code: "LOOP", cause: first });
+  it("should stop a two-link cause cycle on its last new link", () => {
+    const first = Object.assign(new Error("first"), { name: "FirstError", code: "FIRST" }) as Error & { cause?: unknown };
+    const second = Object.assign(new Error("second"), { name: "SecondError", code: "SECOND", cause: first });
     first.cause = second;
     const diagnostic = refreshErrorDiagnostic(Object.assign(new Error("top"), { cause: first }));
-    expect(diagnostic.causeName).toBe("Error");
-    expect(["LOOP", undefined]).toContain(diagnostic.rootCauseCode);
+    expect(diagnostic).toMatchObject({ causeName: "FirstError", causeCode: "FIRST",
+      rootCauseName: "SecondError", rootCauseCode: "SECOND" });
+  });
+
+  it("should stop a cycle back to the logged error itself", () => {
+    const top = new Error("top") as Error & { cause?: unknown };
+    top.cause = Object.assign(new Error("cause"), { code: "ONLY", cause: top });
+    expect(refreshErrorDiagnostic(top)).toMatchObject({ causeCode: "ONLY", rootCauseCode: "ONLY" });
   });
 
   it("should expose the route diagnostic code of a no-route error, never its message", () => {

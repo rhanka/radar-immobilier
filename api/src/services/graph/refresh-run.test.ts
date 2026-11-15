@@ -298,23 +298,27 @@ describe("documentary dates in the existing refresh", () => {
 });
 
 describe("refreshProjectionFailure", () => {
-  it("should carry the receipt reason as a REFRESH_ code the diagnostic logs", () => {
+  it("should carry the receipt reason as a PROJECTION_ code the diagnostic logs", () => {
     const secret = "business-property regression for mont-tremblant: node-secret: valeur";
     const error = refreshProjectionFailure("postgres-regression-refused", `Postgres projection refused: ${secret}`);
-    expect(error.code).toBe("REFRESH_POSTGRES_REGRESSION_REFUSED");
+    expect(error.code).toBe("PROJECTION_POSTGRES_REGRESSION_REFUSED");
     expect(error.message).toContain(secret);
     const wrapped = Object.assign(new Error("apply interrupted"), { name: "Graphify34ApplyInterrupted",
       stage: "projection", cause: error });
     const diagnostic = refreshErrorDiagnostic(wrapped);
-    expect(diagnostic).toMatchObject({ causeCode: "REFRESH_POSTGRES_REGRESSION_REFUSED", stage: "projection",
-      rootCauseCode: "REFRESH_POSTGRES_REGRESSION_REFUSED" });
+    expect(diagnostic).toMatchObject({ causeCode: "PROJECTION_POSTGRES_REGRESSION_REFUSED", stage: "projection",
+      rootCauseCode: "PROJECTION_POSTGRES_REGRESSION_REFUSED" });
     expect(JSON.stringify(diagnostic)).not.toContain(secret);
   });
 
   it("should map every projection receipt reason to its code", () => {
-    expect(refreshProjectionFailure("aborted-before-projection", "x").code).toBe("REFRESH_ABORTED_BEFORE_PROJECTION");
-    expect(refreshProjectionFailure("aborted-after-projection", "x").code).toBe("REFRESH_ABORTED_AFTER_PROJECTION");
-    expect(refreshDocumentFailureReason(refreshProjectionFailure("postgres-regression-refused", "x")))
-      .toBe("refresh-postgres-regression-refused");
+    expect(refreshProjectionFailure("aborted-before-projection", "x").code).toBe("PROJECTION_ABORTED_BEFORE_PROJECTION");
+    expect(refreshProjectionFailure("aborted-after-projection", "x").code).toBe("PROJECTION_ABORTED_AFTER_PROJECTION");
+  });
+
+  it("should keep projection codes out of the REFRESH_ ledger-reason namespace", () => {
+    const reason = refreshDocumentFailureReason(refreshProjectionFailure("postgres-regression-refused", "x"));
+    expect(reason).not.toMatch(/^refresh-/);
+    expect(reason).toBe(refreshDocumentFailureReason(new Error("x")));
   });
 });

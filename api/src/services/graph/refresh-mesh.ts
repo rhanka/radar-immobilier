@@ -73,11 +73,12 @@ export function refreshErrorDiagnostic(error: unknown): Record<string, string | 
   const cause = record["cause"] && typeof record["cause"] === "object"
     ? record["cause"] as Record<string, unknown> : {};
   // A wrapper (Graphify34ApplyInterrupted) around a DrizzleQueryError keeps the
-  // database code two levels down: follow the chain, bounded, to its last object.
+  // database code two levels down: follow the chain to its last object. A cause
+  // already visited ends the walk, so a cyclic chain stops on its last new link.
   let root = cause;
-  for (let depth = 0; depth < 8; depth++) {
-    const next = root["cause"];
-    if (!next || typeof next !== "object" || next === root) break;
+  const visited = new Set<unknown>([record, cause]);
+  for (let next = root["cause"]; next && typeof next === "object" && !visited.has(next); next = root["cause"]) {
+    visited.add(next);
     root = next as Record<string, unknown>;
   }
   const token = (value: unknown) => typeof value === "string" && /^[A-Za-z0-9_.:-]{1,120}$/.test(value)
