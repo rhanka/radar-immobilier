@@ -37,7 +37,9 @@ async function main(operation = process.argv[2]) {
       const plan = items.find(x => x.metadata.name === 'radar-cutover-6h');
       if (!plan || r.crypto.createHash('sha256').update(plan.data?.['plan.json'] || '').digest('hex')
         !== r.approvedPlan().planSha256) r.fail('configuration_plan_mismatch');
-      result = { ok: true }; break;
+      // LIVE_CONFIGMAPS: live maps read by window.sh just before the merge patch.
+      const live = r.json(r.env.LIVE_CONFIGMAPS || r.fail('live_configuration_required'));
+      result = { ok: true, maps: require('./configmap-merge.cjs').retention(items, live) }; break;
     }
     case 'reopen-authorize': {
       r.destination(); r.mutationGuard();
