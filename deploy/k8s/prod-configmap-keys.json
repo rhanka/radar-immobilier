@@ -1,5 +1,5 @@
 {
-  "_comment": "Keys the PROD ConfigMaps must carry in the source the prod CD applies (deploy/k8s/30-api.yaml, deploy/k8s/40-immo-mcp-http-deploy.yaml). Captured from live prod on 2026-11-15 after the v1.2.20 cutover. Gate: deploy/ci/check-prod-configmap-keys.sh. Non-secret keys only.",
+  "_comment": "Keys the PROD ConfigMaps must carry in the source the prod CD applies (deploy/k8s/30-api.yaml, deploy/k8s/40-immo-mcp-http-deploy.yaml). Captured from live prod on 2026-11-15 after the v1.2.20 cutover. Gate: deploy/ci/check-prod-configmap-keys.sh. Non-secret keys only. radar-api-deployment-env: literal env entries Deployment radar-api must carry in the prod source (live values, in its last-applied annotation).",
   "radar-api": [
     "ARTIFACTS_CONTENT_BASE",
     "ARTIFACTS_CONTROL_MODE",
@@ -73,5 +73,9 @@
     "NODE_OPTIONS",
     "RADAR_API_BASE_URL",
     "RADAR_PUBLIC_BASE_URL"
+  ],
+  "radar-api-deployment-env": [
+    "NODE_OPTIONS",
+    "POSTGRES_HOST"
   ]
 }

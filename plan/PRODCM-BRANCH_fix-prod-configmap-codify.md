@@ -22,6 +22,7 @@ Make the sources the prod CD applies (deploy/k8s/30-api.yaml, deploy/k8s/40-immo
   - `deploy/ci/h3-disabled-fixture.sh`
   - `plan/PRODCM-BRANCH_fix-prod-configmap-codify.md`
   - `deploy/overlays/preprod/patch-immo-mcp-config.yaml` (comments only)
+  - `deploy/overlays/preprod/kustomization.yaml` (delete patch for the two PROD env literals)
   - `docs/spec/mcp/claude-ai-connector-setup.md`
   - `packages/immo-mcp/src/server-http.ts` (comment only)
 - **Forbidden Paths (must not change in this branch)**:
@@ -38,6 +39,7 @@ Make the sources the prod CD applies (deploy/k8s/30-api.yaml, deploy/k8s/40-immo
 
 ## Feedback Loop
 - [x] `attention`: the production base now carries artifact keys; `check-h3-preprod-render.sh` masks only the key names of the listed radar-api keys, inside ConfigMap radar-api data; values are still checked and the same key elsewhere still fails (review #1114).
+- [x] `clarification` (i-cond): Deployment radar-api carries the live PROD env literals POSTGRES_HOST and NODE_OPTIONS=--max-old-space-size=640; the preprod overlay deletes them (preprod render unchanged).
 - [ ] `attention`: preprod render gains `IMMO_ARTIFACTS_LIVE_REDRIVE_ENABLED: "false"` on radar-api (inherited, equals the code default).
 
 ## Plan / Todo (lot-based)
