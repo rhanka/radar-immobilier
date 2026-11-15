@@ -253,9 +253,12 @@ case "$1" in
     for f in "$ROOT/$p"*; do [ -f "$f" ] || continue; found=1; printf '2026/11/15 00:00:00 %s %s\\n' "$(wc -c < "$f")" "$(basename "$f")"; done
     [ "$found" = 1 ] || { echo 'ERROR "ls": no object found' >&2; exit 1; } ;;
   run)
-    while read -r op flag s d; do
-      [ "$op $flag" = "cp -n" ] || exit 9
-      s=$(key "$(echo "$s" | tr -d '"')"); d=$(key "$(echo "$d" | tr -d '"')")
+    while read -r line; do
+      set -- $(echo "$line" | tr -d '"')
+      [ "$1 $2 $3" = "cp -n -p" ] || exit 9
+      s=$(key "$5"); d=$(key "$6")
+      # No multipart right: a source larger than one part would fail.
+      [ "$(wc -c < "$ROOT/$s")" -le $(($4 * 1048576)) ] || { echo MULTIPART >> "$ROOT/calls.log"; exit 7; }
       echo "WRITE $d" >> "$ROOT/calls.log"
       [ -e "$ROOT/$d" ] || { mkdir -p "$(dirname "$ROOT/$d")"; cp "$ROOT/$s" "$ROOT/$d"; }
     done < "$2" ;;
@@ -316,5 +319,29 @@ test('blob copy: empty prod prefix is a no-op; guards refuse any non-preprod or 
       assert.equal(w.run(extra).status, 2, JSON.stringify(extra));
       assert.equal(w.calls(), '', 'refused before any S3 call');
     }
+  } finally { fs.rmSync(w.root, { recursive: true, force: true }); }
+});
+
+test('blob copy is single-part only: part size above the largest release file, larger blobs refused before any copy', () => {
+  const profile = fs.readFileSync(path.join(root, 'packages/artifacts-host/src/p0b-profile.ts'), 'utf8');
+  assert.match(profile, /export const RELEASE_FILE_BYTES_MAX = 16 \* 1024 \* 1024;/, 'largest blob a release may hold');
+  const body = fs.readFileSync(blobsScript, 'utf8');
+  assert.match(body, /MAX_BLOB_BYTES=\$\{MAX_BLOB_BYTES:-16777216\}/, 'default cap = RELEASE_FILE_BYTES_MAX');
+  assert.match(body, /PART_SIZE_MIB=\$\{PART_SIZE_MIB:-64\}/, 'default part size 64 MiB > 16 MiB: one part per blob');
+  assert.match(body, /cp -n -p %s/, 'every copy passes the part size explicitly');
+  const w = blobWorld();
+  try {
+    w.put('radar-immobilier-artifacts', 'radar-immobilier', hex('d'), 'x'.repeat(10));
+    w.put('radar-immobilier-artifacts', 'radar-immobilier', hex('e'), 'y'.repeat(11));
+    const over = w.run({ MAX_BLOB_BYTES: '10', PART_SIZE_MIB: '1' });
+    assert.equal(over.status, 3, over.stderr);
+    assert.match(over.stderr, /1 blob\(s\) over the single-part limit of 10 bytes/);
+    assert.doesNotMatch(w.calls(), /WRITE |\brun\b|MULTIPART/, 'refused before any copy');
+    fs.rmSync(path.join(w.root, 'radar-immobilier-artifacts/artifacts/radar-immobilier/blobs/sha256', hex('e')));
+    const ok = w.run({ MAX_BLOB_BYTES: '10', PART_SIZE_MIB: '1' });
+    assert.equal(ok.status, 0, ok.stderr);
+    assert.match(fs.readFileSync(path.join(w.work, 'copy.cmds'), 'utf8'), new RegExp(`^cp -n -p 1 "s3://radar-immobilier-artifacts/artifacts/radar-immobilier/blobs/sha256/${hex('d')}"`));
+    assert.doesNotMatch(w.calls(), /MULTIPART/);
+    assert.equal(w.run({ MAX_BLOB_BYTES: '1048576', PART_SIZE_MIB: '1' }).status, 2, 'part size must exceed the cap');
   } finally { fs.rmSync(w.root, { recursive: true, force: true }); }
 });
