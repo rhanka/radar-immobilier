@@ -55,8 +55,13 @@ export function openEvalSet({ purpose, promptSha256 = null, model = null, effort
 
 /** Guard before a run on the evaluation set.
     Review D1/D2: CLASSIF_EVAL_DIR and CLASSIF_REPO overrides are test-only
-    (production refuses them); hermetic tests run against a temp repo and dir. */
-export function assertEvalRunAllowed({ promptFile, promptSha256, model, effort, evalDir = null, repo = null }) {
+    (production refuses them); hermetic tests run against a temp repo and dir.
+    Owner 15/11: `aggregation` (multi-pass key, l4/passes.mjs aggregationKey; null = single pass)
+    joins the tuple, so a multi-pass run is distinct from the single pass of the same prompt,
+    model and effort. That distinction is refused unless the series carries an owner decision
+    (`ownerDecision`) when the single pass (or another aggregation) already ran: the guard is
+    lifted narrowly, each (prompt, model, effort, aggregation) still runs once. */
+export function assertEvalRunAllowed({ promptFile, promptSha256, model, effort, evalDir = null, repo = null, aggregation = null, ownerDecision = null }) {
   const dir = evalDir ?? testOnlyEnv(process.env, 'CLASSIF_EVAL_DIR') ?? EVAL_DIR_DEFAULT;
   const root = repo ?? repoRoot(process.env);
   const git = (...a) => spawnSync('git', a, { cwd: root, encoding: 'utf8' });
@@ -65,8 +70,15 @@ export function assertEvalRunAllowed({ promptFile, promptSha256, model, effort, 
   if (sha256(readFileSync(path.join(root, rel))) !== promptSha256) throw new Error('evaluation run refused: prompt sha256 differs from the frozen prompt');
   if (git('ls-files', '--error-unmatch', rel).status !== 0) throw new Error(`evaluation run refused: ${rel} is not committed`);
   if (git('diff', '--quiet', 'HEAD', '--', rel).status !== 0) throw new Error(`evaluation run refused: ${rel} differs from the committed version`);
-  const previous = readAudit(dir).filter((e) => e.action === 'eval-run' && e.promptSha256 === promptSha256 && e.model === model && e.effort === effort);
-  if (previous.length) throw new Error(`evaluation run refused: prompt ${promptSha256.slice(0, 12)} already run with ${model}/${effort} (${previous[0].at})`);
+  const same = (e) => e.action === 'eval-run' && e.promptSha256 === promptSha256 && e.model === model && e.effort === effort;
+  const log = readAudit(dir);
+  const previous = log.filter((e) => same(e) && (e.aggregation ?? null) === aggregation);
+  const tag = aggregation ? ` (${aggregation})` : '';
+  if (previous.length) throw new Error(`evaluation run refused: prompt ${promptSha256.slice(0, 12)} already run with ${model}/${effort}${tag} (${previous[0].at})`);
+  const siblings = aggregation ? log.filter((e) => same(e) && (e.aggregation ?? null) !== aggregation) : [];
+  if (siblings.length && !(typeof ownerDecision === 'string' && ownerDecision.trim())) {
+    throw new Error(`evaluation run refused: prompt ${promptSha256.slice(0, 12)} already run with ${model}/${effort} (${siblings[0].at}); ${aggregation} needs an ownerDecision in the series manifest`);
+  }
   return { frozenIn: git('log', '-1', '--format=%H %cI', '--', rel).stdout.trim() };
 }
 

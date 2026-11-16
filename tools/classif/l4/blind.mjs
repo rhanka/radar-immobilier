@@ -25,7 +25,7 @@ import { assertNoVerbatim } from '../lib/freeze.mjs';
 import { loadCodes } from '../l2/run.mjs';
 import { createAccountGuard } from '../lib/account-guard.mjs';
 import { createMeshPauseGuard } from '../lib/mesh-seat.mjs';
-import { combinePasses, passPlan, planRules } from './passes.mjs';
+import { aggregationKey, combinePasses, passPlan, planRules } from './passes.mjs';
 import { assertBlindRunAllowed, audit, blindDir, openBlindSet, readAudit } from '../lib/blind.mjs';
 import { assertEvalRunAllowed, audit as auditEval, openEvalSet, readAudit as readEvalAudit } from '../guard/evalset.mjs';
 import { assertSeriesHalves, assertSeriesRoutes, gepaSeriesRoutes, loadSeriesManifest, seriesMethod } from './series.mjs';
@@ -85,10 +85,10 @@ export const INFRA_RERUN_MAX_ANSWERED_RATE = 0.01;
  * One re-run per route: an audited allowance already consumed refuses; an allowance not
  * yet consumed (interrupted re-run) resumes. Exported for the re-run tests.
  */
-export function assessInfraRerun({ home, outDir, k, promptSha, route, blindIds, callsLog }) {
+export function assessInfraRerun({ home, outDir, k, promptSha, route, blindIds, callsLog, aggregation = null }) {
   const { model, effort } = ROUTES[route];
   const log = readAudit(home);
-  const tuple = (e) => e.promptSha256 === promptSha && e.model === model && e.effort === effort;
+  const tuple = (e) => e.promptSha256 === promptSha && e.model === model && e.effort === effort && (e.aggregation ?? null) === aggregation;
   const runs = log.filter((e) => e.action === 'blind-run' && tuple(e));
   const allowances = log.filter((e) => e.action === 'blind-rerun-infra' && tuple(e));
   if (allowances.length) {
@@ -213,9 +213,12 @@ export class BlindPilotStop extends Error {
   }
 }
 
-export function buildBlindManifest({ k, promptSha, routes, blindItems, aggregatesSha256, infraReruns = [], recallNonRegression = null, method = null }) {
+export function buildBlindManifest({ k, promptSha, routes, blindItems, aggregatesSha256, infraReruns = [], recallNonRegression = null, method = null,
+  aggregation = null, bias = null, ownerDecision = null }) {
   return { kind: 'l4-blind', series: k, createdAt: new Date().toISOString(), promptSha256: promptSha,
     ...(method ? { method } : {}),
+    // Owner 15/11: a multi-pass series names its aggregation and carries its bias and owner decision.
+    ...(aggregation ? { aggregation } : {}), ...(bias ? { bias } : {}), ...(ownerDecision ? { ownerDecision } : {}),
     routes, blindItems, aggregatesSha256,
     ...(infraReruns.length ? { infraReruns: infraReruns.map(({ route, previousAnswered, reason }) => ({ route, previousAnswered, reason })) } : {}),
     ...(recallNonRegression ? { recallNonRegression: { baselineSeries: recallNonRegression.baselineSeries, tolerance: recallNonRegression.tolerance } } : {}),
@@ -261,6 +264,11 @@ export async function main(argv = process.argv.slice(2)) {
   // (plain split read — L2 already enforced committed).
   assertSeriesRoutes(seriesSpec, routes, k);
   const gepa = seriesSpec.method === GEPA_METHOD;
+  // One-shot guard key (owner 15/11): a multi-pass series runs under its own aggregation key, and
+  // only with the owner decision of its manifest when the single pass already ran.
+  const aggregation = aggregationKey(passPlan(seriesSpec));
+  const guardExtra = aggregation ? { aggregation, ownerDecision: seriesSpec.ownerDecision ?? null } : {};
+  const auditExtra = aggregation ? { aggregation } : {};
   try {
     const splitFile = path.join(classifDir(process.env), 'l3', 'manifests', 'split.json');
     if (existsSync(splitFile)) {
@@ -290,8 +298,8 @@ export async function main(argv = process.argv.slice(2)) {
   // re-run audit and archives nothing (only the audited blind-set open precedes it).
   const rerun = new Map();
   for (const route of rerunRoutes) {
-    const a = assessInfraRerun({ home, outDir, k, promptSha, route, blindIds: blind.map((b) => b.itemId), callsLog });
-    assertBlindRunAllowed({ promptFile: promptRel, promptSha256: promptSha, model: a.model, effort: a.effort, home, extraAllowance: a.resume ? 0 : 1 });
+    const a = assessInfraRerun({ home, outDir, k, promptSha, route, blindIds: blind.map((b) => b.itemId), callsLog, aggregation });
+    assertBlindRunAllowed({ promptFile: promptRel, promptSha256: promptSha, model: a.model, effort: a.effort, home, extraAllowance: a.resume ? 0 : 1, ...guardExtra });
     rerun.set(route, a);
   }
   // Review §5 (D5): planned counts only non-cached items — blind + S113 caches deducted.
@@ -382,7 +390,7 @@ function readdirSyncSafe(dir) {
       // allowance and only archives a route file still in place.
       const archived = `series-${k}-${route}.infra-failed.${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
       if (!infra.resume) {
-        audit({ action: 'blind-rerun-infra', purpose: `l4-blind-s${k}`, promptSha256: promptSha, model, effort, route,
+        audit({ action: 'blind-rerun-infra', purpose: `l4-blind-s${k}`, promptSha256: promptSha, model, effort, ...auditExtra, route,
           previousAnswered: infra.previousAnswered, maxAnswered: infra.maxAnswered, reason: infra.reason, counts: infra.counts, archivedTo: archived },
         { home, env: process.env });
       }
@@ -392,8 +400,8 @@ function readdirSyncSafe(dir) {
       }
     }
     // Review N7: guard before the start audit — a refused run leaves no started trace.
-    assertBlindRunAllowed({ promptFile: promptRel, promptSha256: promptSha, model, effort, home });
-    audit({ action: 'blind-run-started', purpose: `l4-blind-s${k}`, promptSha256: promptSha, model, effort, items: blind.length,
+    assertBlindRunAllowed({ promptFile: promptRel, promptSha256: promptSha, model, effort, home, ...guardExtra });
+    audit({ action: 'blind-run-started', purpose: `l4-blind-s${k}`, promptSha256: promptSha, model, effort, ...auditExtra, items: blind.length,
       ...(infra ? { infraRerun: true } : {}) }, { home, env: process.env });
     // Review §8: per-item cache keyed (series,promptSha,route,itemId), written on return.
     // Review §9: the predicted code is kept.
@@ -458,7 +466,7 @@ function readdirSyncSafe(dir) {
       : blindRouteVerdict({ stats, failures, items: rows.length }, seriesSpec, recallBaseline, route);
     writeFileSync(routeFile, JSON.stringify({ series: k, route, model, effort, promptSha256: promptSha, stats, withUnresolved: statsWithUnresolved, failures, ...gate,
       ...(passesInfo ? { passes: passesInfo } : {}) }, null, 1), { mode: 0o600 });
-    audit({ action: 'blind-run', purpose: `l4-blind-s${k}`, promptSha256: promptSha, model, effort, items: rows.length, failures,
+    audit({ action: 'blind-run', purpose: `l4-blind-s${k}`, promptSha256: promptSha, model, effort, ...auditExtra, items: rows.length, failures,
       ...(infra ? { infraRerun: true } : {}) }, { home, env: process.env });
     return { ...stats, withUnresolved: statsWithUnresolved, failures, ...gate, ...(passesInfo ? { passes: passesInfo } : {}) };
   };
@@ -480,7 +488,7 @@ function readdirSyncSafe(dir) {
   for (const route of routes) {
     if (s113Done(route)) continue;
     const { model, effort } = ROUTES[route];
-    assertEvalRunAllowed({ promptFile: promptRel, promptSha256: promptSha, model, effort, evalDir });
+    assertEvalRunAllowed({ promptFile: promptRel, promptSha256: promptSha, model, effort, evalDir, ...guardExtra });
     s113Remaining.push(route);
   }
   const { inputs, expected } = s113Remaining.length ? openEvalSet({ purpose: `l4-s113-s${k}`, env: process.env, evalDir }) : { inputs: [], expected: [] };
@@ -546,7 +554,7 @@ function readdirSyncSafe(dir) {
     const masked = pRows.filter(({ r }) => r.failed || r.pred?.verdict === 'non_pertinent').length;
     const value = { ...s113stats, pertinentMasked: pertinentMasked(masked, pRows.length), flag: 'golden-exposed', selection: 'excluded (secondary diagnostic)' };
     writeFileSync(s113File, JSON.stringify({ series: k, route, promptSha256: promptSha, stats: s113stats, s113: value }, null, 1), { mode: 0o600 });
-    auditEval({ action: 'eval-run', purpose: `l4-s113-s${k}`, promptSha256: promptSha, model, effort, items: rows.length }, { evalDir, env: process.env });
+    auditEval({ action: 'eval-run', purpose: `l4-s113-s${k}`, promptSha256: promptSha, model, effort, ...auditExtra, items: rows.length }, { evalDir, env: process.env });
     return value;
   };
   if (sequential) {
@@ -576,7 +584,7 @@ function readdirSyncSafe(dir) {
   const infraReruns = readAudit(home).filter((e) => e.action === 'blind-rerun-infra' && e.promptSha256 === promptSha
     && String(e.purpose ?? '').includes(`l4-blind-s${k}`) && routes.includes(e.route));
   const manifest = buildBlindManifest({ k, promptSha, routes, blindItems: blind.length, aggregatesSha256, infraReruns, recallNonRegression: recallBaseline,
-    method: gepa ? GEPA_METHOD : null });
+    method: gepa ? GEPA_METHOD : null, aggregation, bias: seriesSpec.bias ?? null, ownerDecision: seriesSpec.ownerDecision ?? null });
   mkdirSync(path.join(classifDir(process.env), 'l4', 'manifests'), { recursive: true });
   writeFileSync(path.join(classifDir(process.env), 'l4', 'manifests', `series-${k}-blind.json`), `${JSON.stringify(manifest, null, 1)}\n`);
   process.stdout.write(`${JSON.stringify(manifest, null, 2)}\n`);

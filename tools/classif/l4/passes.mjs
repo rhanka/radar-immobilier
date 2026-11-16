@@ -49,6 +49,13 @@ export function combinePasses(passRows, rule) {
   return { ...base, failed: false, why: null, pred: pick.pred };
 }
 
+/**
+ * Aggregation key of a plan for the one-shot blind and evaluation guards (owner 15/11): null for a
+ * single-pass series (the legacy tuple), else `passes=<count>/<decision rule><of>` (e.g.
+ * `passes=3/union2`), so a multi-pass run is a distinct tuple from the single pass.
+ */
+export const aggregationKey = (plan) => (plan ? `passes=${plan.count}/${plan.decision.rule}${plan.decision.of}` : null);
+
 /** Every rule of the plan (decision first) with its label: [{ label, rule, decision }]. */
 export function planRules(plan) {
   return [{ label: ruleLabel(plan.decision), rule: plan.decision, decision: true },
