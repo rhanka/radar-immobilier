@@ -471,6 +471,21 @@ cmd_verify() {
 
 # Controlled re-import into the current database (restored candidate).
 # Unattended path (no --map) never mints approvals: created rows land pending.
+catalogue_count_list() {
+  if [[ -z "$1" ]]; then printf 0; else tr ',' '\n' <<< "$1" | grep -c .; fi
+}
+
+# Journal a migration-journal difference between the export and the target
+# (migration hashes only, no data), in catalogue_journal.schema_drift.
+catalogue_record_schema_drift() {
+  local generation="$1" export_only="$2" target_only="$3"
+  printf '%s\n' \
+    "CREATE SCHEMA IF NOT EXISTS catalogue_journal;" \
+    "CREATE TABLE IF NOT EXISTS catalogue_journal.schema_drift (recorded_at timestamptz NOT NULL DEFAULT now(), generation text NOT NULL, export_only text NOT NULL, target_only text NOT NULL);" \
+    "INSERT INTO catalogue_journal.schema_drift (generation, export_only, target_only) VALUES (:'gen', :'eo', :'to');" \
+    | catalogue_psql -v gen="$generation" -v eo="$export_only" -v to="$target_only" --file=- >/dev/null
+}
+
 cmd_import() {
   local in_dir="" map="" report="" allow_same_db=0
   while [[ $# -gt 0 ]]; do
@@ -496,18 +511,24 @@ cmd_import() {
   if [[ -n "$map" ]]; then
     cmd_map_check --map "$map" --subjects "$in_dir/subjects.tsv" >/dev/null
   fi
-  # Schema-version awareness. Same journal: the target must carry exactly the
-  # export columns (drift outside migrations refuses). Newer target (journal is
-  # a strict superset, e.g. a prepared candidate migrated to the next release):
-  # every export column must exist in the target; new columns take their
-  # defaults. An older target, or any other journal difference, refuses.
-  local table want_cols have_cols newer=0 extra
+  # Schema awareness, decided on the REAL shape of every catalogue table.
+  # Same migration journal: the target must carry exactly the export columns
+  # (drift outside migrations refuses). Different journal (newer target, or a
+  # migration file edited after it was applied, which changes its hash without
+  # changing the schema, e.g. 0038 in operation e776ee55): every export column
+  # must exist in the target with the same type and every target NOT NULL
+  # column without default must be in the export; otherwise refused before any
+  # load. The journal difference itself is reported and journaled, never a
+  # refusal on its own: constraints (CHECK, UNIQUE, FK) still apply at INSERT
+  # time and any failure rolls the whole load back.
+  local table want_cols have_cols newer=0 extra export_only target_only
   if [[ $(catalogue_journal_signature | sha256sum | awk '{print $1}') != \
         $(sha256sum "$in_dir/journal.tsv" | awk '{print $1}') ]]; then
-    extra=$(LC_ALL=C comm -23 <(LC_ALL=C sort -u "$in_dir/journal.tsv") <(catalogue_journal_signature | LC_ALL=C sort -u))
-    [[ -z "$extra" ]] || catalogue_fail 'import: migration journal differs from manifest (schema version mismatch)'
+    export_only=$(LC_ALL=C comm -23 <(LC_ALL=C sort -u "$in_dir/journal.tsv" | grep .) <(catalogue_journal_signature | LC_ALL=C sort -u) | paste -sd, -)
+    target_only=$(LC_ALL=C comm -13 <(LC_ALL=C sort -u "$in_dir/journal.tsv" | grep .) <(catalogue_journal_signature | LC_ALL=C sort -u) | paste -sd, -)
     newer=1
-    catalogue_log 'import: target schema is newer than the export (journal superset), column superset accepted'
+    catalogue_log "import: migration journal differs from the export (export-only $(catalogue_count_list "$export_only"), target-only $(catalogue_count_list "$target_only")): schema shape gate applies"
+    catalogue_record_schema_drift "$generation" "$export_only" "$target_only"
   fi
   while read -r table; do
     [[ -n "$table" ]] || continue
