@@ -98,7 +98,8 @@ test('prod never stashes nor imports a catalogue', () => {
 test('daily restore: a failed catalogue import keeps preprod closed (no reopening without the preprod artifacts)', () => {
   const f = fixture({ failJob: 'catalogue' });
   try {
-    const result = f.run('run');
+    // Deployed release: no protected data migration, so only the catalogue can hold the site.
+    const result = f.run('run', ['RELEASE=deployed', 'MODE=restore']);
     assert.notEqual(result.status, 0);
     const out = result.stdout + result.stderr;
     assert.doesNotMatch(out, /REOPENED WITHOUT RESTORE/, out);
