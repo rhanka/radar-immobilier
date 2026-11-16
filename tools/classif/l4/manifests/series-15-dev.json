@@ -1,0 +1,124 @@
+{
+ "kind": "l4-dev",
+ "series": "15",
+ "createdAt": "2026-11-16T00:03:55.725Z",
+ "promptSha256": "a60713366128ae4348a45a7323d0b0984cef87ca6cb33eda15073c045235b016",
+ "routes": [
+  "muse-ember-1.0-low-api"
+ ],
+ "deferred": [],
+ "tuningItems": 252,
+ "aggregates": {
+  "muse-ember-1.0-low-api": {
+   "scored": 252,
+   "refShown": 95,
+   "predShown": 153,
+   "recall": 1,
+   "recallLB": 0.968957988132045,
+   "precision": 0.6209150326797386,
+   "precisionLB": 0.5517706922844893,
+   "indeterminate": {
+    "recall": false,
+    "precision": false
+   },
+   "failures": 0,
+   "withUnresolved": {
+    "scored": 252,
+    "refShown": 95,
+    "predShown": 153,
+    "recall": 1,
+    "recallLB": 0.968957988132045,
+    "precision": 0.6209150326797386,
+    "precisionLB": 0.5517706922844893,
+    "indeterminate": {
+     "recall": false,
+     "precision": false
+    }
+   },
+   "misses": 0,
+   "verdict": "pass",
+   "costUsd": 0,
+   "items": 252
+  }
+ },
+ "passes": {
+  "count": 3,
+  "decision": {
+   "rule": "union",
+   "of": 2
+  },
+  "info": {
+   "muse-ember-1.0-low-api": {
+    "pass-1": {
+     "scored": 252,
+     "refShown": 95,
+     "predShown": 142,
+     "recall": 1,
+     "recallLB": 0.968957988132045,
+     "precision": 0.6690140845070423,
+     "precisionLB": 0.5982906265811736,
+     "indeterminate": {
+      "recall": false,
+      "precision": false
+     },
+     "failures": 0,
+     "misses": 0,
+     "verdict": "pass",
+     "items": 252
+    },
+    "pass-2": {
+     "scored": 252,
+     "refShown": 95,
+     "predShown": 144,
+     "recall": 1,
+     "recallLB": 0.968957988132045,
+     "precision": 0.6597222222222222,
+     "precisionLB": 0.5892388338748624,
+     "indeterminate": {
+      "recall": false,
+      "precision": false
+     },
+     "failures": 0,
+     "misses": 0,
+     "verdict": "pass",
+     "items": 252
+    },
+    "majority-3": {
+     "scored": 252,
+     "refShown": 95,
+     "predShown": 145,
+     "recall": 1,
+     "recallLB": 0.968957988132045,
+     "precision": 0.6551724137931034,
+     "precisionLB": 0.5848183238082473,
+     "indeterminate": {
+      "recall": false,
+      "precision": false
+     },
+     "failures": 0,
+     "misses": 0,
+     "verdict": "pass",
+     "items": 252
+    }
+   }
+  },
+  "decisionLabel": "union-2",
+  "note": "aggregates[route] = the decision rule; info = information rules only, never used for the verdict"
+ },
+ "method": "gepa",
+ "gepa": {
+  "verdict": "pass",
+  "missing": [],
+  "failing": [],
+  "rule": "pass only when every GEPA route has 0 miss (P/S predicted non_pertinent) and a failure share within the ceiling; precision reported, no floor"
+ },
+ "selection": {
+  "order": [
+   "muse-ember-1.0-low-api"
+  ],
+  "best": "muse-ember-1.0-low-api",
+  "excluded": [],
+  "criterion": "M.3 lexicographic (tuning half only, failing routes excluded)"
+ },
+ "trackNote": "per-item tuning outputs stay private (optimiser input); this manifest carries metrics only"
+}
