@@ -177,6 +177,13 @@ restore_reopen() {
   if jq -e '.checkpoints.close=="completed"' "$WORK/record.json" >/dev/null; then close_once; fi
   run_job verify 60 90
   jq -e --slurpfile r "$WORK/record.json" '.ok==true and .database==$r[0].liveDb' "$WORK/verdict.json" >/dev/null || fail 'Live database verification refused; remain closed'
+  # A restore Job ran (committed or not): the live database may hold the prod
+  # replay without the preprod artifact catalogue. Import the stash (blob copy,
+  # scope rewrite, union; all rows "same" when the restore never committed)
+  # before any reopening. A failed import keeps the site closed and the stash.
+  if jq -e '((.jobs.restore!=null) or any(.jobHistory[]?; .name|endswith("-restore"))) and .jobs.catalogue==null' "$WORK/record.json" >/dev/null; then
+    run_job catalogue 840 900 || fail 'Preprod artifact catalogue not imported; remain closed'
+  fi
   restart_services
   private_smoke
   jq '.restoreAborted=true' "$WORK/record.json" > "$WORK/next.json"
