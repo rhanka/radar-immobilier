@@ -529,8 +529,10 @@ cmd_import() {
       [[ -z "$extra" ]] || catalogue_fail "import: column type mismatch on $table (${extra//$'\n'/ })"
     fi
   done < "$in_dir/order.tsv"
-  [[ $(catalogue_psql -At -c "SELECT count(*) FROM pg_extension WHERE extname = 'pgcrypto'") != 0 ]] \
-    || catalogue_fail 'import: pgcrypto extension absent (identity remap needs it)'
+  # Identity remap uses gen_random_uuid(), built into PostgreSQL since 13 (no
+  # extension: the live preprod database has no pgcrypto).
+  (($(catalogue_psql -At -c 'SHOW server_version_num') >= 130000)) \
+    || catalogue_fail 'import: PostgreSQL 13 or later required (gen_random_uuid)'
   catalogue_import_session "$in_dir" "$map" "$report" "$generation"
   catalogue_union_verify "$in_dir" >/dev/null
   catalogue_log "imported generation $generation into $db, report $report"
@@ -896,10 +898,15 @@ catalogue_missing_blobs_sql() {
 # catalogue_journal.failures (spared by the schema reset) before exiting, so a
 # diagnosis needs neither pod logs nor the PostgreSQL server log. Only ERROR
 # lines are kept (never DETAIL, which may quote row values), 1000 chars max.
+# Literal values are masked in what is kept.
 catalogue_record_failure() {
   local step="$1" err="$2" msg
-  msg=$(grep -aE 'ERROR' "$err" | grep -av 'DETAIL' | tail -n 5 | cut -c1-300 | paste -sd' ' - | cut -c1-1000)
-  [[ -n "$msg" ]] || msg="exit without ERROR line ($(tail -n 1 "$err" | cut -c1-200))"
+  # Literal values are masked: single-quoted strings, key=(value) pairs and
+  # the quoted input of a syntax error; identifiers and counts stay readable.
+  msg=$(grep -aE 'ERROR' "$err" | grep -av 'DETAIL' | tail -n 5 \
+    | sed -E "s/'[^']*'/'…'/g; s/\\([^)]*\\)=\\([^)]*\\)/(…)=(…)/g; s/(syntax for type [a-z ]+: )\"[^\"]*\"/\\1\"…\"/g" \
+    | cut -c1-300 | paste -sd' ' - | cut -c1-1000)
+  [[ -n "$msg" ]] || msg="failed without an ERROR line"
   printf '%s\n' \
     "CREATE SCHEMA IF NOT EXISTS $CATALOGUE_JOURNAL_SCHEMA;" \
     "CREATE TABLE IF NOT EXISTS $CATALOGUE_JOURNAL_SCHEMA.failures (recorded_at timestamptz NOT NULL DEFAULT now(), stash_tag text, step text NOT NULL, cause text NOT NULL);" \
@@ -943,6 +950,8 @@ catalogue_rewrite_rows_sql() {
   config=$(printf '%s\n' $CATALOGUE_SCOPE_CONFIG_TABLES | sed "s/.*/'&'/" | paste -sd, -)
   [[ -n "$list" ]] || return 0
   cat <<SQL
+CREATE SCHEMA IF NOT EXISTS $CATALOGUE_JOURNAL_SCHEMA;
+CREATE TABLE IF NOT EXISTS $CATALOGUE_JOURNAL_SCHEMA.rewrites (recorded_at timestamptz NOT NULL DEFAULT now(), from_scope text NOT NULL, to_scope text NOT NULL, tbl text NOT NULL, action text NOT NULL, row_count bigint NOT NULL);
 DO \$rw\$
 DECLARE t text; n bigint; guarded boolean;
 BEGIN
@@ -957,8 +966,11 @@ BEGIN
     END IF;
     IF t = ANY (ARRAY[$config]::text[]) THEN
       EXECUTE format('DELETE FROM artifacts.%I WHERE storage_scope_id = %L', t, '$from');
+      INSERT INTO $CATALOGUE_JOURNAL_SCHEMA.rewrites (from_scope, to_scope, tbl, action, row_count) VALUES ('$from', '$to', t, 'deleted (scope configuration)', n);
+      RAISE NOTICE 'rewrite-scope: deleted % prod-scope row(s) from % (scope configuration)', n, t;
     ELSE
       EXECUTE format('UPDATE artifacts.%I SET storage_scope_id = %L WHERE storage_scope_id = %L', t, '$to', '$from');
+      INSERT INTO $CATALOGUE_JOURNAL_SCHEMA.rewrites (from_scope, to_scope, tbl, action, row_count) VALUES ('$from', '$to', t, 'updated', n);
     END IF;
   END LOOP;
 END \$rw\$;
