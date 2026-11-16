@@ -40,12 +40,15 @@ export function fixture(changes = {}) {
   objects.push(object('NetworkPolicy', 'allow-bascule-to-postgres', { podSelector: { matchLabels: { 'app.kubernetes.io/component': 'postgres' } },
     ingress: [{ ports: [{ port: 5432 }], from: [{ podSelector: { matchLabels: { 'app.kubernetes.io/name': 'radar-immobilier' },
       matchExpressions: [{ key: 'sentropic.io/bascule', operator: 'Exists' }] } }] }] }));
+  objects.push(object('NetworkPolicy', 'allow-immo-mcp-to-postgres', { podSelector: { matchLabels: { 'app.kubernetes.io/name': 'radar-immobilier', 'app.kubernetes.io/component': 'postgres' } },
+    ingress: [{ ports: [{ protocol: 'TCP', port: 5432 }], from: [{ podSelector: { matchLabels: { 'app.kubernetes.io/name': 'radar-immobilier', 'app.kubernetes.io/component': 'mcp' } } }] }] }));
   writeFileSync(join(dir, 'state.json'), JSON.stringify({ objects, release, url: 'https://preprod.immo.sent-tech.ca', ...changes }));
   writeFileSync(join(dir, 'release.json'), JSON.stringify(release));
   const env = { ...process.env, PATH: `${bin}:${process.env.PATH}`, CUTOVER_TEST_STATE: dir };
   delete env.NAMESPACE; delete env.PREPROD_NAMESPACE; delete env.GITHUB_RUN_ID;
   delete env.GITHUB_ENV; delete env.GITHUB_OUTPUT;
   env.GITHUB_ACTIONS = 'false';
+  env.KUBECONFIG = join(dir, 'tenant.kubeconfig');
   if (changes.fastClock) env['BASH_FUNC_sleep%%'] = '() { if [ "$1" = 2 ]; then SECONDS=$((SECONDS+31)); else command sleep "$@"; fi; }';
   const run = (action = 'run', extra = [], environment = 'preprod') => {
     const result = spawnSync('make', ['-s', '-f', 'deploy/cutover/operator.mk', action,

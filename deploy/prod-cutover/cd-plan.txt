@@ -1,0 +1,22 @@
+PLAN UNIQUEMENT. Aucun tag ni workflow lancé par cette cible.
+
+1. Ne pas lancer promote-prod pendant le drain, les DDL ou 6H.
+   prepare/run exigent des consommateurs. run exige API Ready et URL publiques.
+   Son budget peut rouvrir automatiquement. Il ne pilote pas cette fenêtre.
+2. window-start capture ancienne release et inventaire avant fermeture.
+   Chaque acte reprend radar-change-lock, type cutover, avec le RUN original.
+   Aucun nouveau verrou. Aucune expiration. CAS et preuve de fin existants.
+3. window-close ; backup final ; restauration de contrôle ; GO ; migrate ; transition.
+   Le GO porte planSha256 et rosterSha256. Les reçus gardent ces empreintes.
+4. window-deploy réutilise restart_services et private_smoke.
+   Digests épinglés du build 43506353942. Aucune reconstruction.
+   Routes fermées. Schedules suspendus. Verrou conservé.
+5. Recette privée. GO distinct. window-reopen restaure routes et schedules.
+   Smoke public avant libération du verrou. Aucun blocage externe permanent.
+6. Après acceptation et réouverture : GO tag v1.2.20 au SHA
+   b7724bdd9015a4f26319897bf240baaf9ee636ae. Ne pas taguer cette branche.
+   promote-prod fait prepare puis run sur une API candidate Ready.
+   La base est déjà migrée. Le manifeste immuable porte dataMigration=6h.
+7. Reprise vers le schéma 13 : backup final de la fenêtre manuelle.
+   Drain ; rollback DB ; window-rollback-services ; recette privée ; GO réouverture.
+   Ne pas cumuler avec le rollback du CD.

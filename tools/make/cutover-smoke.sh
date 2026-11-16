@@ -21,11 +21,17 @@ http_check() {
         metadata) [[ $type == application/json* ]] && jq -e --arg url "$URL/mcp" '.resource==$url' "$WORK/body" >/dev/null 2>&1 && return 0;;
         auth) return 0;;
       esac
+      # Public routes converge after the ingress patch: retry a content mismatch on the
+      # public URL until the same deadline, then fail as before.
+      if [[ $base == "${URL:-}" ]] && ((SECONDS+1<deadline)); then sleep 1; continue; fi
       fail "Smoke identity/content mismatch: $path"
     fi
     # Public routes converge after the ingress patch: a transient SPA fallback (200 on /mcp)
     # is retried until the existing deadline; a persistent 200 still fails.
     if [[ $base == "${URL:-}" && $path == /mcp && $code == 200 ]]; then sleep 1; continue; fi
+    # Right after the ingress patch, Traefik may still serve the maintenance 404 for a few
+    # seconds: retry it on the public URL only, within the same deadline.
+    if [[ $base == "${URL:-}" && $code == 404 ]]; then sleep 1; continue; fi
     case $code in 000|429|5??) sleep 1;; *) fail "Smoke authentication/status mismatch: $path ($code)";; esac
   done
 }
@@ -68,7 +74,7 @@ start_forward() {
   [[ $resource == */* ]] || resource=service/$resource
   start=$(awk '{print $22}' "/proc/$parent/stat")
   (
-    command kubectl --request-timeout=0 -n "$NS" port-forward --address=127.0.0.1 "$resource" "$2" > "$3" 2>&1 &
+    command kubectl --kubeconfig "$KUBECONFIG" --request-timeout=0 -n "$NS" port-forward --address=127.0.0.1 "$resource" "$2" > "$3" 2>&1 &
     child=$!
     trap 'kill "$child" 2>/dev/null || true; wait "$child" 2>/dev/null || true' EXIT
     trap 'exit 143' TERM INT

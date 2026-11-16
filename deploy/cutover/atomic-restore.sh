@@ -34,6 +34,8 @@
 #  - disposable prepared database (TARGET_DB): the reset commits first, then
 #    `pg_restore -j 4` loads the now-empty database in parallel.
 set -euo pipefail
+owner_args=(--no-owner)
+[[ ${RESTORE_KEEP_OWNER:-0} != 1 ]] || owner_args=()
 dump=$RESTORE_DUMP
 [ -n "$PGDATABASE" ] && [ "$PGDATABASE" = "$EXPECTED_DATABASE" ] || { echo "[restore] ERROR — unexpected database"; exit 2; }
 if [ -n "$TARGET_DB" ]; then
@@ -111,13 +113,16 @@ catalogue_import() {
   bash "$catalogue_script" import "$@" || exit 1
 }
 reset_schemas() {
+  local public_owner=''
+  # PostgreSQL 16 omits the unchanged default public schema from pg_dump.
+  [[ ${RESTORE_KEEP_OWNER:-0} != 1 ]] || public_owner=' AUTHORIZATION pg_database_owner'
   printf '%s\n' \
     'DO $reset$ DECLARE s name; BEGIN' \
     "  FOR s IN SELECT nspname FROM pg_namespace WHERE nspname NOT IN ('information_schema', 'catalogue_stash', 'catalogue_journal') AND nspname !~ '^pg_' LOOP" \
     "    EXECUTE format('DROP SCHEMA %I CASCADE', s);" \
     '  END LOOP;' \
     'END $reset$;' \
-    'CREATE SCHEMA public;' \
+    "CREATE SCHEMA public${public_owner};" \
     'GRANT USAGE ON SCHEMA public TO PUBLIC;'
 }
 if [ -n "$TARGET_DB" ]; then
@@ -130,7 +135,7 @@ fi
 {
   printf 'BEGIN;\n'
   reset_schemas
-  if pg_restore --no-owner --no-privileges --exit-on-error --file=- "$dump"; then
+  if pg_restore "${owner_args[@]}" --no-privileges --exit-on-error --file=- "$dump"; then
     printf '\nCOMMIT;\n'
   else
     printf '\nROLLBACK;\n'
