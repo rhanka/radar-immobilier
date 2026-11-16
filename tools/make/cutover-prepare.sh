@@ -34,6 +34,8 @@ prepare_database() {
       run_job data 540 600
       verify_data_migration
     fi
+    # Preprod artifact catalogue: union import into the prepared database.
+    run_job catalogue 840 900
   else
     run_job backup 840 900
     # Production preparation verifies the live schema; it never restores it.
