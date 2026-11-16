@@ -109,3 +109,21 @@ test('daily restore: a failed catalogue import keeps preprod closed (no reopenin
     assert.ok(f.state().objects.some(o => o.metadata.name === 'radar-change-lock'), 'recovery lock retained');
   } finally { f.cleanup(); }
 });
+
+test('resume after a held catalogue failure retries the import under a new Job name and reopens', () => {
+  const f = fixture({ failJob: 'catalogue' });
+  try {
+    assert.notEqual(f.run('run', ['RELEASE=deployed', 'MODE=restore']).status, 0);
+    const lockMap = f.state().objects.find(o => o.metadata.name === 'radar-change-lock');
+    assert.ok(lockMap, 'held after the failed import');
+    const run = JSON.parse(lockMap.data.record).run;
+    const state = f.state(); state.failJob = null; save(f, state);
+    const resumed = f.run('resume', [`RUN=${run}`]);
+    assert.equal(resumed.status, 0, resumed.stdout + resumed.stderr);
+    const names = f.state().objects.filter(o => o.kind === 'Job' && /-catalogue$/.test(o.metadata.name)).map(o => o.metadata.name);
+    assert.equal(new Set(names).size, names.length, 'a failed catalogue Job name is never reused');
+    assert.ok(names.length >= 3, `first import, reopening retry, resume retry: ${names.join(',')}`);
+    assert.equal(f.state().objects.some(o => o.metadata.name === 'radar-change-lock'), false, 'lock released after reopening');
+    assert.equal(f.state().objects.filter(o => o.kind === 'Job' && o.metadata.name.endsWith('-restore')).length, 1, 'never restores twice');
+  } finally { f.cleanup(); }
+});
