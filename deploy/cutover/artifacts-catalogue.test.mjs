@@ -357,4 +357,7 @@ test('scope rewrite never disables a trigger and refuses append-only prod rows e
   assert.match(rewrite, /append-only table % holds % prod-scope rows: decision required/);
   assert.match(body, /catalogue_journal\.failures|\$CATALOGUE_JOURNAL_SCHEMA\.failures/, 'failure cause journaled in the database');
   assert.match(body, /catalogue_step rewrite-scope /, 'the rewrite runs as a journaled step');
+  assert.doesNotMatch(body, /extname = 'pgcrypto'/, 'no pgcrypto requirement: the live preprod database has none');
+  assert.match(body, /SHOW server_version_num/, 'gen_random_uuid() needs PostgreSQL 13+ only');
+  assert.match(body, /catalogue_journal\.rewrites|\$CATALOGUE_JOURNAL_SCHEMA\.rewrites/, 'scope rewrite counts are journaled');
 });
