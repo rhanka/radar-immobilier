@@ -151,8 +151,13 @@ script and sets `CATALOGUE_DIR`, `CATALOGUE_STASH=1`; the export is stashed in
 schema `catalogue_stash` of the restored database; the `catalogue` Job
 (`deploy/cutover/catalogue-import-job.tmpl.yaml`) imports it in union after the
 coherence gate and the migrations (`ddl`, `data`), in `MODE=restore` and in
-`prepare`. A target newer than the export (journal superset) is accepted:
-export columns must exist, new columns take defaults. Conflicts persist in
+`prepare`. The schema gate decides on the real table shape: with the same
+migration journal the columns must match exactly; with a different journal
+(newer target, or a migration file edited after it was applied: 0038 in
+operation e776ee55) every export column must exist with the same type and every
+target NOT NULL column without default must be exported. The journal
+difference is journaled in `catalogue_journal.schema_drift`, never a refusal
+on its own. Conflicts persist in
 `catalogue_journal`. Operator guide: `deploy/cutover/README.md`.
 
 - Live restore: fresh export before the schema reset, import after the
