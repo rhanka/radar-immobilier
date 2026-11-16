@@ -58,8 +58,13 @@ export function openBlindSet({ purpose, promptSha256 = null, model = null, effor
     Review D2: in test mode the temp repo applies (never the real checkout).
     One run per (prompt sha, model, effort), plus exactly one more per audited
     `blind-rerun-infra` allowance (l4/blind.mjs --rerun-infra-failed). `extraAllowance`
-    lets the re-run eligibility check run this guard before its allowance is written. */
-export function assertBlindRunAllowed({ promptFile, promptSha256, model, effort, home = classifHome(), repo = null, extraAllowance = 0 }) {
+    lets the re-run eligibility check run this guard before its allowance is written.
+    Owner 15/11: `aggregation` (multi-pass key, l4/passes.mjs aggregationKey; null = single pass)
+    joins the tuple, so a multi-pass run is distinct from the single pass of the same prompt,
+    model and effort. That distinction is refused unless the series carries an owner decision
+    (`ownerDecision`) when the single pass (or another aggregation) already ran: the guard is
+    lifted narrowly, each (prompt, model, effort, aggregation) still runs once. */
+export function assertBlindRunAllowed({ promptFile, promptSha256, model, effort, home = classifHome(), repo = null, extraAllowance = 0, aggregation = null, ownerDecision = null }) {
   const root = repo ?? repoRoot(process.env);
   const git = (...a) => spawnSync('git', a, { cwd: root, encoding: 'utf8' });
   const rel = path.relative(root, path.resolve(root, promptFile));
@@ -68,10 +73,16 @@ export function assertBlindRunAllowed({ promptFile, promptSha256, model, effort,
   if (git('ls-files', '--error-unmatch', rel).status !== 0) throw new Error(`blind run refused: ${rel} is not committed`);
   if (git('diff', '--quiet', 'HEAD', '--', rel).status !== 0) throw new Error(`blind run refused: ${rel} differs from the committed version`);
   const log = readAudit(home);
-  const tuple = (e) => e.promptSha256 === promptSha256 && e.model === model && e.effort === effort;
+  const same = (e) => e.promptSha256 === promptSha256 && e.model === model && e.effort === effort;
+  const tuple = (e) => same(e) && (e.aggregation ?? null) === aggregation;
   const previous = log.filter((e) => e.action === 'blind-run' && tuple(e));
   const allowances = log.filter((e) => e.action === 'blind-rerun-infra' && tuple(e)).length + extraAllowance;
-  if (previous.length > allowances) throw new Error(`blind run refused: prompt ${promptSha256.slice(0, 12)} already run with ${model}/${effort} (${previous[0].at})`);
+  const tag = aggregation ? ` (${aggregation})` : '';
+  if (previous.length > allowances) throw new Error(`blind run refused: prompt ${promptSha256.slice(0, 12)} already run with ${model}/${effort}${tag} (${previous[0].at})`);
+  const siblings = aggregation ? log.filter((e) => e.action === 'blind-run' && same(e) && (e.aggregation ?? null) !== aggregation) : [];
+  if (siblings.length && !(typeof ownerDecision === 'string' && ownerDecision.trim())) {
+    throw new Error(`blind run refused: prompt ${promptSha256.slice(0, 12)} already run with ${model}/${effort} (${siblings[0].at}); ${aggregation} needs an ownerDecision in the series manifest`);
+  }
   return { frozenIn: git('log', '-1', '--format=%H %cI', '--', rel).stdout.trim() };
 }
 
