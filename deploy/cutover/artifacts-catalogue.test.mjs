@@ -361,3 +361,13 @@ test('scope rewrite never disables a trigger and refuses append-only prod rows e
   assert.match(body, /SHOW server_version_num/, 'gen_random_uuid() needs PostgreSQL 13+ only');
   assert.match(body, /catalogue_journal\.rewrites|\$CATALOGUE_JOURNAL_SCHEMA\.rewrites/, 'scope rewrite counts are journaled');
 });
+
+test('migration journal difference is journaled, never a refusal on its own (shape gate decides)', () => {
+  const body = fs.readFileSync(script, 'utf8');
+  assert.doesNotMatch(body, /migration journal differs from manifest \(schema version mismatch\)/, 'no refusal on hashes alone');
+  assert.match(body, /schema shape gate applies/);
+  assert.match(body, /catalogue_journal\.schema_drift/);
+  assert.match(body, /export columns missing on/, 'a real shape gap still refuses');
+  assert.match(body, /NOT NULL without default absent from the export/);
+  assert.match(body, /column type mismatch on/);
+});
