@@ -30,13 +30,14 @@ done
 "${compose[@]}" build api
 "${compose[@]}" run --rm --no-deps -T -u 0:0 --entrypoint sh api -c "[ \"\$(stat -c %u /workspace/node_modules)\" = \"$UID\" ] || chown -R $UID:$GID /workspace/node_modules /workspace/api/node_modules"
 case ${1:-} in
-  test) command='npm ci --ignore-scripts --silent && HOME=$(mktemp -d) node --test --test-name-pattern="${TEST_PATTERN:-.}" tools/make/cutover*.test.mjs && node deploy/ci/bascule-preprod/backup.selftest.mjs && node deploy/ci/backup/backup-daily.selftest.mjs && node deploy/ci/bascule-2tenants/orchestrator.selftest.mjs';;
+  test) command='npm ci --ignore-scripts --silent && HOME=$(mktemp -d) node --test --test-name-pattern="${TEST_PATTERN:-.}" tools/make/cutover*.test.mjs && node --test deploy/cutover/artifacts-catalogue.test.mjs && node deploy/ci/bascule-preprod/backup.selftest.mjs && node deploy/ci/backup/backup-daily.selftest.mjs && node deploy/ci/bascule-2tenants/orchestrator.selftest.mjs';;
   lint) command='npm ci --ignore-scripts --silent && npx eslint .';;
   typecheck) command='npm ci --ignore-scripts --silent && npm run typecheck --workspaces --if-present';;
   test-api)
     "${compose[@]}" up -d --wait postgres
     "${compose[@]}" exec -T postgres bash -s < deploy/cutover/parallel-restore.test.sh
     "${compose[@]}" exec -T postgres bash /cutover/atomic-restore.test.sh
+    "${compose[@]}" exec -T postgres bash /workspace/deploy/cutover/artifacts-catalogue-persist.test.sh
     command='npm ci --ignore-scripts --silent && npm run db:migrate --workspace=api && node --test deploy/cutover/database.test.cjs && npm run test --workspace=api -- tests/integration/database-cutover.spec.ts src/services/facets/activation src/services/facets/attachment src/services/facets/base-api-personal-activation src/services/facets/base-api-activation src/services/facets/lots/lot-cutover --maxWorkers=2';;
   *) exit 2;;
 esac

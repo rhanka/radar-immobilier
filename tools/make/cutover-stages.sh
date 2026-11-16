@@ -63,6 +63,8 @@ migrate_stage() {
     jq -e '.ok==true and .status=="open-success" and .epoch=="scoped"
       and .sealedUnresolved==0 and .maintenanceBarrier==false' "$WORK/verdict.json" >/dev/null || fail 'Protected data migration has not opened'
   fi
+  # Preprod artifact catalogue: union import of the stash, after the migrations.
+  [[ $ENV != preprod ]] || run_job catalogue 840 900
 }
 execute_stages() {
   if [[ ${MODE:-run} != restore ]]; then
