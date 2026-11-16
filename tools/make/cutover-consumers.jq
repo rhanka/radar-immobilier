@@ -2,8 +2,10 @@ def controller($object;$kind):
   [$object.metadata.ownerReferences[]? | select(.controller==true and .kind==$kind)] | first;
 def terminal:
   any(.status.conditions[]?; (.type=="Complete" or .type=="Failed") and .status=="True");
+# Jobs of this run: current ones and the ones moved to history (a retried or
+# stopped Job keeps its pods until they terminate).
 def operationJob($record;$job):
-  any($record.jobs[]; .name==$job.metadata.name and
+  any(($record.jobs[]?, $record.jobHistory[]?); .name==$job.metadata.name and
     (.uid==$job.metadata.uid or (.uid==null and .hash==$job.metadata.annotations["cutover-spec-sha256"])));
 def refreshJob($record;$job):
   controller($job;"CronJob") as $owner |
