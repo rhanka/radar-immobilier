@@ -46,13 +46,13 @@ export const ROUTES = {
   'muse-wonder-max': {
     family: 'Muse Wonder', model: 'muse-wonder-1.0', effort: 'max', route: 'muse exec --prompt-file, preset empty, no web tools, no session log',
     build: (dir, file) => ({ cmd: 'muse', args: ['exec', '--model', 'muse-wonder-1.0', '--reasoning-effort', 'max', '--preset', 'empty', '--prompt-file', file, '--json',
-      '--disable-web-tools', '--disable-reminders', '--disable-request-user-input', '--no-foreign-personal-context', '--no-session-log', '--workspace', dir] }),
+      '--disable-web-tools', '--disable-reminders', '--disable-request-user-input', '--no-foreign-personal-context', '--no-session-log', '--workspace', dir], env: museEnv() }),
     parse: parseMuse,
   },
   ...Object.fromEntries(['low', 'medium'].map((e) => [`muse-spark-1.3-${e}`, {
     family: 'Muse 1.3', model: 'muse-spark-1.3', effort: e, route: 'muse exec --prompt-file, preset empty, no web tools, no session log',
     build: (dir, file) => ({ cmd: 'muse', args: ['exec', '--model', 'muse-spark-1.3', '--reasoning-effort', e, '--preset', 'empty', '--prompt-file', file, '--json',
-      '--disable-web-tools', '--disable-reminders', '--disable-request-user-input', '--no-foreign-personal-context', '--no-session-log', '--workspace', dir] }),
+      '--disable-web-tools', '--disable-reminders', '--disable-request-user-input', '--no-foreign-personal-context', '--no-session-log', '--workspace', dir], env: museEnv() }),
     parse: parseMuse,
   }])),
   // Owner 12/11: Muse Ember 1.0 in xhigh and max. Same isolated muse route as Spark, plus
@@ -63,7 +63,7 @@ export const ROUTES = {
     // evalOnly: an evaluated classifier route, never an optimiser seat (optimise.mjs MAX_SEATS).
     family: 'Muse Ember 1.0', model: 'muse-ember-1.0', effort: e, evalOnly: true, route: 'muse exec --prompt-file, preset empty, contributor mode off, no web tools, no session log',
     build: (dir, file) => ({ cmd: 'muse', args: ['exec', '--model', 'muse-ember-1.0', '--reasoning-effort', e, '--contributor-mode', 'off', '--preset', 'empty', '--prompt-file', file, '--json',
-      '--disable-web-tools', '--disable-reminders', '--disable-request-user-input', '--no-foreign-personal-context', '--no-session-log', '--workspace', dir] }),
+      '--disable-web-tools', '--disable-reminders', '--disable-request-user-input', '--no-foreign-personal-context', '--no-session-log', '--workspace', dir], env: museEnv() }),
     parse: parseMuse,
   }])),
   // Owner 15/11: Muse Wonder 1.0 and Muse Wonder Full 1.0 in low, on the owner's Muse subscription
@@ -75,7 +75,7 @@ export const ROUTES = {
       family, model, effort: 'low', evalOnly: true, expectServed: model, pauseOnUnavailable: true,
       route: 'muse exec --prompt-file, preset empty, contributor mode off, no web tools, no session log, served model checked',
       build: (dir, file) => ({ cmd: 'muse', args: ['exec', '--model', model, '--reasoning-effort', 'low', '--contributor-mode', 'off', '--preset', 'empty', '--prompt-file', file, '--json',
-        '--disable-web-tools', '--disable-reminders', '--disable-request-user-input', '--no-foreign-personal-context', '--no-session-log', '--workspace', dir] }),
+        '--disable-web-tools', '--disable-reminders', '--disable-request-user-input', '--no-foreign-personal-context', '--no-session-log', '--workspace', dir], env: museEnv() }),
       parse: parseMuse,
     }])),
   // Owner 15/11: Muse Ember 1.0 low on the Meta API (OpenAI compatible chat completions, owner API
@@ -182,6 +182,27 @@ export const ROUTES = {
 // user's ~/.codex/config.toml MCP servers. The former homes ($CLASSIF_HOME/seat-homes/<dir>,
 // astra in 'astra') are only read once, to migrate their auth.json.
 const LEGACY_CODEX_HOME_DIRS = { 'astra-max': 'astra' };
+
+/**
+ * TMPDIR of every muse seat (owner 15/11): a private directory under the seat homes root
+ * (~/.local/share/radar-classif-seats/muse-tmp, mode 700). With --no-session-log, muse 1.4.20
+ * puts its process-lifetime tool-output root under TMPDIR and refuses to start when that root
+ * sits inside a repository: ~/.cache-tmp and ~/.cache both hold a (empty) .git directory, so a
+ * TMPDIR there made the runtime host fail before any model call. The seat homes root has no
+ * .git above it. In test mode without the CLASSIF_SEAT_HOMES hook, a directory under the test
+ * TMPDIR is used (no real seat home is ever written by a test).
+ */
+export function museTmpDir(env = process.env) {
+  let root;
+  try { root = seatHomesRoot(env); } catch (e) {
+    if (env.CLASSIF_TEST_MODE !== '1') throw e;
+    root = path.join(os.tmpdir(), 'classif-seat-homes-test');
+  }
+  const dir = path.join(root, 'muse-tmp');
+  fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+  return dir;
+}
+const museEnv = () => ({ TMPDIR: museTmpDir() });
 
 /**
  * Root of the isolated codex homes. The CLASSIF_SEAT_HOMES hook is test-only, and REQUIRED in

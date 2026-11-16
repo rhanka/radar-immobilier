@@ -152,3 +152,17 @@ test('a seat usage limit (claude CLI « hit your Fable limit ») pauses the blin
   assert.equal(seatUnavailable(r), true);
   assert.equal(seatUnavailable({ code: 1, stderrTail: '', errorEnvelope: 'invalid json answer' }), false);
 });
+
+test('muse seats run with a private TMPDIR under the seat homes root (muse refuses a TMPDIR inside a repository)', async () => {
+  const { swapEnv } = await import('./hermetic-helpers.mjs');
+  const homes = tmp('seat-homes-');
+  const restores = [swapEnv('CLASSIF_TEST_MODE', '1'), swapEnv('CLASSIF_SEAT_HOMES', homes)];
+  try {
+    for (const label of ['muse-wonder-1.0-low', 'muse-wonder-full-1.0-low', 'muse-ember-1.0-xhigh', 'muse-spark-1.3-low']) {
+      const f = fakeSpawn(museOut(ROUTES[label].model));
+      await callSeat(label, 'p', { spawnImpl: f.spawnImpl });
+      assert.equal(f.seen.env.TMPDIR, path.join(homes, 'muse-tmp'), label);
+      assert.equal(fs.statSync(f.seen.env.TMPDIR).mode & 0o777, 0o700);
+    }
+  } finally { while (restores.length) restores.pop()(); }
+});
