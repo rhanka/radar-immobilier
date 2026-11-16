@@ -26,7 +26,7 @@ READER=witness-reader
 
 work=$(mktemp -d)
 cleanup() {
-  for db in cat_src cat_prodd cat_prodrej cat_dst cat_dst_map cat_dst2 cat_dst29 cat_src29 cat_prep cat_pu1 cat_pu2 cat_dstu cat_dsts cat_preps cat_sc_src cat_sc cat_sc_miss cat_stale cat_gate1 cat_gate2 cat_full_ok cat_full_ro cat_full_src cat_full_un tmp-prod-x; do
+  for db in cat_src cat_prodd cat_prodrej cat_dst cat_dst_map cat_dst2 cat_dst29 cat_src29 cat_prep cat_pu1 cat_pu2 cat_dstu cat_dsts cat_preps cat_sc_src cat_sc cat_sc_miss cat_stale cat_gate1 cat_gate2 cat_full_ok cat_full_ro cat_full_src cat_full_un cat_hash cat_hash2 tmp-prod-x; do
     dropdb --if-exists --force "$db" >/dev/null 2>&1 || true
   done
   rm -rf "$work"
@@ -482,6 +482,24 @@ if PGDATABASE=cat_gate2 bash "$CATALOGUE" import --in-dir "$work/gate-export" > 
 grep -q 'column type mismatch on artifacts (binding_name)' "$work/gate2.out" || { cat "$work/gate2.out"; fail 'gate: type refusal not raised by the gate'; }
 for db in cat_gate1 cat_gate2; do [[ $(q $db "SELECT count(*) FROM artifacts.artifacts") == 3 ]] || fail "gate: $db catalogue touched by a refused import"; done
 printf 'Schema gate green: NOT NULL without default and type change refused before any load\n'
+
+# ── Edited migration (operation e776ee55, 2026-11-16) ─────────────────────────
+# A migration file edited after it was applied gives preprod and prod different
+# hashes for the same migration (0038). Same schema shape: accepted, the drift
+# journaled. A real shape gap with a differing journal: still refused.
+createdb --template=template0 cat_hash; createdb --template=template0 cat_hash2
+for db in cat_hash cat_hash2; do
+  pg_restore --no-owner --no-privileges --exit-on-error --dbname=$db "$work/prod-v2.dump"
+  q $db "UPDATE drizzle.__drizzle_migrations SET hash = 'edited-after-apply' WHERE id = (SELECT max(id) FROM drizzle.__drizzle_migrations)" >/dev/null
+done
+PGDATABASE=cat_hash bash "$CATALOGUE" import --in-dir "$work/gate-export" > "$work/hash.out" 2>&1 || { cat "$work/hash.out"; fail 'hash: edited migration with the same shape refused'; }
+grep -q 'migration journal differs from the export (export-only 1, target-only 1): schema shape gate applies' "$work/hash.out" || { cat "$work/hash.out"; fail 'hash: drift not reported'; }
+[[ $(q cat_hash "SELECT target_only FROM catalogue_journal.schema_drift") == edited-after-apply ]] || fail 'hash: drift not journaled'
+q cat_hash2 "ALTER TABLE artifacts.artifacts DROP COLUMN metadata" >/dev/null
+if PGDATABASE=cat_hash2 bash "$CATALOGUE" import --in-dir "$work/gate-export" > "$work/hash2.out" 2>&1; then fail 'hash: shape gap accepted with a differing journal'; fi
+grep -q 'export columns missing on artifacts (metadata)' "$work/hash2.out" || { cat "$work/hash2.out"; fail 'hash: shape refusal not raised'; }
+[[ $(q cat_hash2 "SELECT count(*) FROM artifacts.artifacts") == 3 ]] || fail 'hash: refused import touched the catalogue'
+printf 'Edited migration green: same shape accepted and journaled, real shape gap refused\n'
 
 # ── Full schema (every migration): scope rewrite vs append-only tables ───────
 # Regression of operation e776ee55 (2026-11-16): the 0036 statement-level
