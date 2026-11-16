@@ -26,7 +26,7 @@ READER=witness-reader
 
 work=$(mktemp -d)
 cleanup() {
-  for db in cat_src cat_prodd cat_prodrej cat_dst cat_dst_map cat_dst2 cat_dst29 cat_src29 cat_prep cat_pu1 cat_pu2 cat_dstu cat_dsts cat_preps cat_sc_src cat_sc cat_sc_miss cat_stale cat_gate1 cat_gate2 tmp-prod-x; do
+  for db in cat_src cat_prodd cat_prodrej cat_dst cat_dst_map cat_dst2 cat_dst29 cat_src29 cat_prep cat_pu1 cat_pu2 cat_dstu cat_dsts cat_preps cat_sc_src cat_sc cat_sc_miss cat_stale cat_gate1 cat_gate2 cat_full_ok cat_full_ro tmp-prod-x; do
     dropdb --if-exists --force "$db" >/dev/null 2>&1 || true
   done
   rm -rf "$work"
@@ -482,4 +482,57 @@ if PGDATABASE=cat_gate2 bash "$CATALOGUE" import --in-dir "$work/gate-export" > 
 grep -q 'column type mismatch on artifacts (binding_name)' "$work/gate2.out" || { cat "$work/gate2.out"; fail 'gate: type refusal not raised by the gate'; }
 for db in cat_gate1 cat_gate2; do [[ $(q $db "SELECT count(*) FROM artifacts.artifacts") == 3 ]] || fail "gate: $db catalogue touched by a refused import"; done
 printf 'Schema gate green: NOT NULL without default and type change refused before any load\n'
+
+# ── Full schema (every migration): scope rewrite vs append-only tables ───────
+# Regression of operation e776ee55 (2026-11-16): the 0036 statement-level
+# append-only guards fired on an UPDATE of an EMPTY git_binding_events and the
+# rewrite failed with psql exit 3, cause visible only in the server log.
+apply_full_schema() {
+  local db="$1" tag hash i=0
+  createdb --template=template0 "$db"
+  psql -X -q -v ON_ERROR_STOP=1 --dbname="$db" -c 'CREATE SCHEMA IF NOT EXISTS drizzle' \
+    -c 'CREATE TABLE IF NOT EXISTS drizzle.__drizzle_migrations (id serial PRIMARY KEY, hash text NOT NULL, created_at timestamptz NOT NULL)'
+  for tag in $(grep -o '"tag": *"[^"]*"' "$MIG_DIR/meta/_journal.json" | sed 's/.*"\([^"]*\)"$/\1/'); do
+    i=$((i + 1))
+    psql -X -q -v ON_ERROR_STOP=1 --single-transaction --dbname="$db" -f "$MIG_DIR/$tag.sql" >/dev/null 2>&1 \
+      || { psql -X -v ON_ERROR_STOP=1 --single-transaction --dbname="$db" -f "$MIG_DIR/$tag.sql" 2>&1 | tail -n 5; fail "full schema: migration $tag refused"; }
+    hash=$(sha256sum "$MIG_DIR/$tag.sql" | awk '{print $1}')
+    q "$db" "INSERT INTO drizzle.__drizzle_migrations (hash, created_at) VALUES ('$hash', to_timestamp(1792000001 + $i))" >/dev/null
+  done
+}
+FS=radar-immobilier; FT=radar-immobilier-preprod; FA=f9000000-0000-0000-0000-00000000000a
+seed_full_prod() {
+  psql -X -q -v ON_ERROR_STOP=1 --dbname="$1" <<SQL
+INSERT INTO artifacts.storage_scopes (id, org_id) VALUES ('$FS', 'org-prod');
+INSERT INTO artifacts.artifacts (id, storage_scope_id, owner_id, binding_name, profile) VALUES ('$FA', '$FS', 'prod-user', 'full', '{}');
+SQL
+}
+guards() { q "$1" "SELECT count(*) FROM pg_trigger g JOIN pg_class c ON c.oid = g.tgrelid JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'artifacts' AND c.relname IN ('git_binding_events', 'git_release_index') AND NOT g.tgisinternal AND g.tgenabled = 'O'"; }
+apply_full_schema cat_full_ok
+[[ $(guards cat_full_ok) == 2 ]] || fail 'full schema: append-only guards of 0036 absent'
+# Case 1+3: append-only tables without prod-scope rows are not touched; an
+# ordinary table holding prod-scope rows is updated.
+seed_full_prod cat_full_ok
+PGDATABASE=cat_full_ok bash "$CATALOGUE" import-stash --work "$work/full-ok" --rewrite-from "$FS" --rewrite-to "$FT" > "$work/full-ok.out" 2>&1 \
+  || { cat "$work/full-ok.out"; fail 'full schema: rewrite refused with empty append-only tables'; }
+[[ $(q cat_full_ok "SELECT storage_scope_id FROM artifacts.artifacts WHERE id = '$FA'") == "$FT" ]] || fail 'full schema: ordinary table not rewritten'
+[[ $(q cat_full_ok "SELECT count(*) FROM artifacts.storage_scopes WHERE id = '$FS'") == 0 ]] || fail 'full schema: prod scope row left'
+[[ $(guards cat_full_ok) == 2 ]] || fail 'full schema: append-only guards disabled by the rewrite'
+[[ $(q cat_full_ok "SELECT count(*) FROM pg_namespace WHERE nspname = 'catalogue_journal'") == 0 ]] || \
+  [[ $(q cat_full_ok "SELECT count(*) FROM catalogue_journal.failures") == 0 ]] || fail 'full schema: failure journaled on success'
+# Case 2: an append-only table holding prod-scope rows refuses, writes nothing,
+# and the cause lands in catalogue_journal.failures (no server log needed).
+apply_full_schema cat_full_ro; seed_full_prod cat_full_ro
+q cat_full_ro "INSERT INTO artifacts.git_binding_events (artifact_id, storage_scope_id, actor_id, action, created_at) VALUES ('$FA', '$FS', 'prod-user', 'attach', now())" >/dev/null
+if PGDATABASE=cat_full_ro bash "$CATALOGUE" import-stash --work "$work/full-ro" --rewrite-from "$FS" --rewrite-to "$FT" > "$work/full-ro.out" 2>&1; then
+  fail 'full schema: append-only rows rewritten'
+fi
+grep -q 'append-only table git_binding_events holds 1 prod-scope rows: decision required' "$work/full-ro.out" || { cat "$work/full-ro.out"; fail 'full schema: refusal not explicit'; }
+[[ $(q cat_full_ro "SELECT step FROM catalogue_journal.failures") == rewrite-scope ]] || fail 'full schema: failure step not journaled'
+q cat_full_ro "SELECT cause FROM catalogue_journal.failures" | grep -q 'append-only table git_binding_events holds 1 prod-scope rows: decision required' || fail 'full schema: failure cause not journaled'
+[[ $(q cat_full_ro "SELECT storage_scope_id FROM artifacts.artifacts WHERE id = '$FA'") == "$FS" ]] || fail 'full schema: refused rewrite wrote an ordinary table'
+[[ $(q cat_full_ro "SELECT storage_scope_id FROM artifacts.git_binding_events") == "$FS" ]] || fail 'full schema: refused rewrite touched the audit row'
+[[ $(q cat_full_ro "SELECT count(*) FROM artifacts.storage_scopes WHERE id = '$FS'") == 1 ]] || fail 'full schema: refused rewrite lost the prod scope'
+[[ $(guards cat_full_ro) == 2 ]] || fail 'full schema: append-only guards disabled by the refusal'
+printf 'Full schema green: empty append-only tables untouched, ordinary rows rewritten, append-only prod rows refused and journaled\n'
 printf 'Catalogue preservation round-trip green: witness byte-identical, identities remapped, prod untouched\n'
