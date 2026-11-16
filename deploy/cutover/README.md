@@ -297,10 +297,12 @@ Refusals (the run fails, nothing is imported, the stash stays for a rerun):
   holds `pending` rows. Wait for them to drain (or let them expire), then
   relaunch. Closure (`MODE=restore`) and the writer drain (`prepare`) stop new
   publishes before the export.
-- Schema: the restored database after the migrations must carry every
-  migration the export was taken with (same release or newer). Refused before
-  any load: a target column `NOT NULL` without default that the export lacks,
-  or a common column whose type differs.
+- Schema (decided on the real shape of each catalogue table, before any load):
+  same migration journal = exact columns; different journal = every export
+  column present with the same type, every target `NOT NULL` column without
+  default exported. A different journal alone (newer target, migration file
+  edited after it was applied) is accepted and recorded in
+  `catalogue_journal.schema_drift` (migration hashes only).
 - Identity: a subject `rejected` in prod but `approved` in preprod refuses.
 
 Prod never runs either side: `CATALOGUE_DIR` is empty outside preprod.
