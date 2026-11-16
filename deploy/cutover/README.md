@@ -260,6 +260,23 @@ preprod artifacts and imports the prod ones. Spec:
    kept there as `orphan:<parent>`. Per-table counts land in
    `catalogue_journal.imports`. No stash = nothing to do (exit 0).
 
+Triggers and journals:
+
+- Scope rewrite: no trigger is ever disabled. A table without prod-scope rows
+  gets no statement at all; an append-only table (statement-level `BEFORE
+  UPDATE/DELETE` guard, e.g. `git_binding_events`, `git_release_index` of 0036)
+  holding prod-scope rows refuses with `append-only table <t> holds N
+  prod-scope rows: decision required`, nothing written, stash intact.
+  Every update and every deleted scope-configuration row (`host_policy`,
+  `host_quotas`) is counted in `catalogue_journal.rewrites`.
+- Union import: `DISABLE TRIGGER USER` on the catalogue tables for the duration
+  of its INSERTs (foreign keys stay enforced), then `ENABLE TRIGGER USER` with a
+  parity check of the disabled-trigger count before COMMIT; it never updates
+  nor deletes an existing row.
+- Failures: each `import-stash` step that fails writes its ERROR lines (no
+  DETAIL, literal values masked) to `catalogue_journal.failures`:
+  `SELECT recorded_at, stash_tag, step, cause FROM catalogue_journal.failures ORDER BY 1 DESC LIMIT 5;`
+
 Hold: when a daily restore fails after its restore Job ran, the automatic
 reopening first imports the catalogue (`catalogue` Job). If that import fails,
 the site stays closed (`Automatic reopening refused`); fix the cause, then
