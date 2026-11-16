@@ -345,3 +345,19 @@ test('blob copy is single-part only: part size above the largest release file, l
     assert.equal(w.run({ MAX_BLOB_BYTES: '1048576', PART_SIZE_MIB: '1' }).status, 2, 'part size must exceed the cap');
   } finally { fs.rmSync(w.root, { recursive: true, force: true }); }
 });
+
+test('scope rewrite never disables a trigger and refuses append-only prod rows explicitly', () => {
+  const body = fs.readFileSync(script, 'utf8');
+  const start = body.indexOf('catalogue_rewrite_rows_sql() {');
+  const end = body.indexOf('\n}\n', body.indexOf('cmd_rewrite_scope() {'));
+  const rewrite = body.slice(start, end);
+  assert.ok(start > 0 && end > start, 'rewrite functions found');
+  assert.doesNotMatch(rewrite, /DISABLE TRIGGER|session_replication_role/, 'the append-only audit contract is never bypassed');
+  assert.match(rewrite, /CONTINUE WHEN n = 0;/, 'no statement on a table without prod-scope rows');
+  assert.match(rewrite, /append-only table % holds % prod-scope rows: decision required/);
+  assert.match(body, /catalogue_journal\.failures|\$CATALOGUE_JOURNAL_SCHEMA\.failures/, 'failure cause journaled in the database');
+  assert.match(body, /catalogue_step rewrite-scope /, 'the rewrite runs as a journaled step');
+  assert.doesNotMatch(body, /extname = 'pgcrypto'/, 'no pgcrypto requirement: the live preprod database has none');
+  assert.match(body, /SHOW server_version_num/, 'gen_random_uuid() needs PostgreSQL 13+ only');
+  assert.match(body, /catalogue_journal\.rewrites|\$CATALOGUE_JOURNAL_SCHEMA\.rewrites/, 'scope rewrite counts are journaled');
+});
