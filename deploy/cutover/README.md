@@ -231,6 +231,69 @@ release, original schedule states are restored, and the sanitized receipt is
 saved in `radar-cutover-receipt` before releasing the lock. ACME solver ingresses
 are excluded. Originally suspended CronJobs stay suspended.
 
+### Preprod artifact catalogue (union, preprod only)
+
+A prod-to-preprod restore (daily `MODE=restore` and `prepare`) keeps the
+preprod artifacts and imports the prod ones. Spec:
+`docs/spec/SPEC_EVOL_ARTIFACTS_RESTORE_PERSIST.md` §2b.
+
+1. The `restore` Job writes `deploy/cutover/artifacts-catalogue.sh` to `/work`
+   and, before the schema reset, exports the live preprod catalogue
+   (`artifacts.*`) and stashes it in schema `catalogue_stash` of the database
+   it restores. The reset spares `catalogue_stash` and `catalogue_journal`.
+   `prepare` exports from the live database (`LIVE_DB`), never from the
+   candidate. Each stash generation is tagged with the run and backup pin: the
+   same run relaunched reuses its own; a pending stash of another run is never
+   imported alone: the live database is exported again as a newer generation
+   and every generation is imported, newest first. `prepare` also carries the
+   pending generations of the live stash into the candidate.
+2. The coherence gate runs, then the migrations (`ddl`, `data`).
+3. The `catalogue` Job first copies the prod artifact blobs (init container
+   `blobs`, `deploy/cutover/artifacts-blobs.sh`): prod bucket
+   `radar-immobilier-artifacts`, prefix `artifacts/radar-immobilier/blobs/sha256/`,
+   read only; destination `radar-immobilier-artifacts-preprod`, prefix
+   `artifacts/radar-immobilier-preprod/blobs/sha256/`; missing names only, no
+   delete. Then `import-stash` moves the prod rows to the preprod scope, checks
+   that every visible release has its blobs, runs the union with the replayed
+   prod catalogue, checks the blobs again, then drops the stash. Prod wins on any unique key; the preprod
+   row is kept in `catalogue_journal.conflicts`, a row whose parent is gone is
+   kept there as `orphan:<parent>`. Per-table counts land in
+   `catalogue_journal.imports`. No stash = nothing to do (exit 0).
+
+Hold: when a daily restore fails after its restore Job ran, the automatic
+reopening first imports the catalogue (`catalogue` Job). If that import fails,
+the site stays closed (`Automatic reopening refused`); fix the cause, then
+`resume RUN`. Preprod never reopens on the prod replay without its artifacts.
+
+Refusals (the run fails, nothing is imported, the stash stays for a rerun):
+
+- Missing blob: a visible release references a `sha256:` digest absent from
+  the preprod bucket listing (blob check before and after the union).
+- Copy identity: Secret `radar-artifacts-restore-copy` (keys `S3_ACCESS_KEY`,
+  `S3_SECRET_KEY`) must exist in the preprod namespace with `s3:ListBucket` and
+  `s3:GetObject` on `radar-immobilier-artifacts` (read only) and
+  `s3:ListBucket`, `s3:GetObject`, `s3:PutObject` on
+  `radar-immobilier-artifacts-preprod`. No delete right, no multipart right:
+  each blob is one single-part copy (`-p 64` MiB); a blob above
+  `RELEASE_FILE_BYTES_MAX` (16 MiB) is refused before any copy.
+- In-flight publishes: the export refuses while `artifacts.object_intents`
+  holds `pending` rows. Wait for them to drain (or let them expire), then
+  relaunch. Closure (`MODE=restore`) and the writer drain (`prepare`) stop new
+  publishes before the export.
+- Schema: the restored database after the migrations must carry every
+  migration the export was taken with (same release or newer). Refused before
+  any load: a target column `NOT NULL` without default that the export lacks,
+  or a common column whose type differs.
+- Identity: a subject `rejected` in prod but `approved` in preprod refuses.
+
+Prod never runs either side: `CATALOGUE_DIR` is empty outside preprod.
+
+Journal of the last imports (read-only SQL on the preprod database):
+
+```sql
+SELECT tbl, exported, same, inserted, collisions, orphans FROM catalogue_journal.imports ORDER BY recorded_at DESC LIMIT 20;
+```
+
 ## Daily and cross-tenant adapters
 
 The scheduled caller remains at 04:00 UTC in `radar-bascule`, with the existing

@@ -1,0 +1,130 @@
+# =============================================================================
+# catalogue-import-job.tmpl.yaml — preprod artifact catalogue, union import.
+#
+# Init container `blobs` (s5cmd): additive copy of the prod artifact blobs into
+# the preprod artifacts bucket under the preprod scope, BEFORE any row becomes
+# visible; it lists the preprod blobs into /work/preprod-blob-keys.txt for the
+# blob check. Copy identity: Secret named by the ARTIFACTS_COPY_SECRET
+# placeholder (deploy/cutover/config.json storage.artifactsCopySecret).
+#
+# Runs AFTER the restore Job and the migrations (ddl, data), preprod only. The
+# restore Job stashed the live preprod catalogue in schema catalogue_stash of
+# the restored database (live database for MODE=restore, prepared database for
+# prepare). This Job writes deploy/cutover/artifacts-catalogue.sh to /work and
+# runs `import-stash`: union with the replayed prod catalogue (prod wins on
+# any unique key, the preprod row is journaled in catalogue_journal.conflicts),
+# then drops the stash. No stash = nothing to import (exit 0). Relaunchable:
+# a rerun after a lost drop finds every row "same".
+#
+# Image: the same postgis image as the restore container (native pg client
+# tools, bash, coreutils). No other runtime. DB creds = ${DB_SECRET} as libpq
+# PG*; PGDATABASE/EXPECTED_DATABASE are pinned to the prepared database by
+# tools/make/cutover-sanitize.jq when the run prepares one.
+# =============================================================================
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: radar-catalogue-import
+  namespace: ${NAMESPACE}
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: db-restore
+    sentropic.io/bascule: catalogue-import
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: ${TTL_SECONDS}
+  activeDeadlineSeconds: 900
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/part-of: sentropic
+        app.kubernetes.io/component: db-restore
+        sentropic.io/bascule: catalogue-import
+    spec:
+      restartPolicy: Never
+      serviceAccountName: radar-app
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+        - name: work
+          emptyDir: { sizeLimit: 1Gi }
+        - name: tmp
+          emptyDir: { sizeLimit: 128Mi }
+      initContainers:
+        # Additive copy of the prod artifact blobs to the preprod bucket under the
+        # preprod scope, BEFORE the union import makes any row visible. Reads the
+        # prod bucket, writes only the preprod bucket (deploy/cutover/artifacts-blobs.sh).
+        - name: blobs
+          image: ${UPLOAD_IMAGE}
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+${BLOBS_SCRIPT}
+          env:
+            - { name: ENDPOINT, value: "${S3_ENDPOINT}" }
+            - { name: SRC_BUCKET, value: "${ARTIFACTS_SRC_BUCKET}" }
+            - { name: SRC_SCOPE, value: "${ARTIFACTS_SRC_SCOPE}" }
+            - { name: DST_BUCKET, value: "${ARTIFACTS_DST_BUCKET}" }
+            - { name: DST_SCOPE, value: "${ARTIFACTS_DST_SCOPE}" }
+            - { name: FORBIDDEN_DST_BUCKETS, value: "${ARTIFACTS_FORBIDDEN_DST_BUCKETS}" }
+            - { name: WORK, value: "/work" }
+            - { name: AWS_REGION, value: "${S3_REGION}" }
+            - { name: AWS_ACCESS_KEY_ID, valueFrom: { secretKeyRef: { name: ${ARTIFACTS_COPY_SECRET}, key: S3_ACCESS_KEY } } }
+            - { name: AWS_SECRET_ACCESS_KEY, valueFrom: { secretKeyRef: { name: ${ARTIFACTS_COPY_SECRET}, key: S3_SECRET_KEY } } }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests: { cpu: 50m, memory: 64Mi }
+            limits: { cpu: 500m, memory: 256Mi }
+          volumeMounts:
+            - { name: work, mountPath: /work }
+            - { name: tmp, mountPath: /tmp }
+      containers:
+        - name: catalogue
+          image: ${DUMP_IMAGE}
+          imagePullPolicy: IfNotPresent
+          command: ["bash", "-c"]
+          args:
+            - |
+              set -euo pipefail
+              [ -n "$CATALOGUE_DIR" ] || exit 2
+              [ "$PGDATABASE" = "$EXPECTED_DATABASE" ] || exit 2
+              cat > /work/artifacts-catalogue.sh <<'ARTIFACTS_CATALOGUE_EOF'
+${CATALOGUE_SCRIPT}
+              ARTIFACTS_CATALOGUE_EOF
+              bash /work/artifacts-catalogue.sh import-stash --work "$CATALOGUE_DIR" \
+                --rewrite-from "${ARTIFACTS_SRC_SCOPE}" --rewrite-to "${ARTIFACTS_DST_SCOPE}" \
+                --blob-keys /work/preprod-blob-keys.txt
+          env:
+            - { name: PGHOST, value: "${PGHOST}" }
+            - { name: EXPECTED_DATABASE, value: "${EXPECTED_DATABASE}" }
+            - { name: CATALOGUE_DIR, value: "${CATALOGUE_DIR}" }
+            - { name: PGUSER, valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_USER } } }
+            - { name: PGPASSWORD, valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_PASSWORD } } }
+            - { name: PGDATABASE, valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_DB } } }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits: { cpu: 500m, memory: 512Mi }
+          volumeMounts:
+            - { name: work, mountPath: /work }
+            - { name: tmp, mountPath: /tmp }
