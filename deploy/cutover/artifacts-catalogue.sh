@@ -529,8 +529,10 @@ cmd_import() {
       [[ -z "$extra" ]] || catalogue_fail "import: column type mismatch on $table (${extra//$'\n'/ })"
     fi
   done < "$in_dir/order.tsv"
-  [[ $(catalogue_psql -At -c "SELECT count(*) FROM pg_extension WHERE extname = 'pgcrypto'") != 0 ]] \
-    || catalogue_fail 'import: pgcrypto extension absent (identity remap needs it)'
+  # Identity remap uses gen_random_uuid(), built into PostgreSQL since 13 (no
+  # extension: the live preprod database has no pgcrypto).
+  (($(catalogue_psql -At -c 'SHOW server_version_num') >= 130000)) \
+    || catalogue_fail 'import: PostgreSQL 13 or later required (gen_random_uuid)'
   catalogue_import_session "$in_dir" "$map" "$report" "$generation"
   catalogue_union_verify "$in_dir" >/dev/null
   catalogue_log "imported generation $generation into $db, report $report"
@@ -890,6 +892,91 @@ catalogue_missing_blobs_sql() {
   printf "SELECT count(DISTINCT m[1]) FROM artifacts.releases r JOIN artifacts.artifacts a ON a.id = r.artifact_id CROSS JOIN LATERAL regexp_matches(r.manifest, 'sha256:([0-9a-f]+)', 'g') m WHERE a.storage_scope_id = '%s' AND a.lifecycle_state NOT IN ('deleted', 'purged') AND a.terminal_deleted_at IS NULL AND r.state <> 'purged' AND m[1] NOT IN (SELECT hex FROM cat_keys)" "$1"
 }
 
+# ── Failure journal ────────────────────────────────────────────────────────
+# The Job wrapper suppresses output and its termination message is only
+# {"ok":false}. A failed import-stash step therefore records its cause in
+# catalogue_journal.failures (spared by the schema reset) before exiting, so a
+# diagnosis needs neither pod logs nor the PostgreSQL server log. Only ERROR
+# lines are kept (never DETAIL, which may quote row values), 1000 chars max.
+# Literal values are masked in what is kept.
+catalogue_record_failure() {
+  local step="$1" err="$2" msg
+  # Literal values are masked: single-quoted strings, key=(value) pairs and
+  # the quoted input of a syntax error; identifiers and counts stay readable.
+  msg=$(grep -aE 'ERROR' "$err" | grep -av 'DETAIL' | tail -n 5 \
+    | sed -E "s/'[^']*'/'…'/g; s/\\([^)]*\\)=\\([^)]*\\)/(…)=(…)/g; s/(syntax for type [a-z ]+: )\"[^\"]*\"/\\1\"…\"/g" \
+    | cut -c1-300 | paste -sd' ' - | cut -c1-1000)
+  [[ -n "$msg" ]] || msg="failed without an ERROR line"
+  printf '%s\n' \
+    "CREATE SCHEMA IF NOT EXISTS $CATALOGUE_JOURNAL_SCHEMA;" \
+    "CREATE TABLE IF NOT EXISTS $CATALOGUE_JOURNAL_SCHEMA.failures (recorded_at timestamptz NOT NULL DEFAULT now(), stash_tag text, step text NOT NULL, cause text NOT NULL);" \
+    "INSERT INTO $CATALOGUE_JOURNAL_SCHEMA.failures (stash_tag, step, cause) VALUES (:'tag', :'step', :'cause');" \
+    | catalogue_psql -v tag="$(cmd_stash_tag 2>/dev/null || true)" -v step="$step" -v cause="$msg" --file=- >/dev/null 2>&1 || true
+  printf '[catalogue] FAILED %s: %s\n' "$step" "$msg" >&2
+}
+
+# Run one import-stash step in a subshell (errexit on), keep its stderr and
+# journal the cause on failure. Never call it from a condition (errexit would
+# be ignored inside).
+catalogue_step() {
+  local step="$1" work="$2" rc=0 err
+  shift 2
+  mkdir -p "$work"; err="$work/step-$(printf '%s' "$step" | tr -c 'A-Za-z0-9_-' '_').err"
+  set +e
+  ( set -e; "$@" ) 2> "$err"
+  rc=$?
+  set -e
+  cat "$err" >&2
+  if ((rc != 0)); then
+    catalogue_record_failure "$step" "$err"
+    exit "$rc"
+  fi
+}
+
+# SQL (one DO block, inside the rewrite transaction) moving the rows of scope
+# FROM to scope TO, table by table:
+#   - no row of scope FROM: nothing is executed (a statement-level trigger,
+#     such as the append-only guards of 0036, never fires on an empty move);
+#   - append-only table (enabled statement-level BEFORE UPDATE/DELETE user
+#     trigger) holding rows of scope FROM: refused, nothing written. Its rows
+#     are an audit contract (git_binding_events, git_release_index): rewriting
+#     them is an owner decision, never an automatic step;
+#   - scope configuration tables (host_policy, host_quotas): prod rows deleted,
+#     the preprod rows come back with the union;
+#   - any other table: UPDATE.
+catalogue_rewrite_rows_sql() {
+  local tables="$1" from="$2" to="$3" list config
+  list=$(printf '%s\n' $tables | sed "s/.*/'&'/" | paste -sd, -)
+  config=$(printf '%s\n' $CATALOGUE_SCOPE_CONFIG_TABLES | sed "s/.*/'&'/" | paste -sd, -)
+  [[ -n "$list" ]] || return 0
+  cat <<SQL
+CREATE SCHEMA IF NOT EXISTS $CATALOGUE_JOURNAL_SCHEMA;
+CREATE TABLE IF NOT EXISTS $CATALOGUE_JOURNAL_SCHEMA.rewrites (recorded_at timestamptz NOT NULL DEFAULT now(), from_scope text NOT NULL, to_scope text NOT NULL, tbl text NOT NULL, action text NOT NULL, row_count bigint NOT NULL);
+DO \$rw\$
+DECLARE t text; n bigint; guarded boolean;
+BEGIN
+  FOREACH t IN ARRAY ARRAY[$list]::text[] LOOP
+    EXECUTE format('SELECT count(*) FROM artifacts.%I WHERE storage_scope_id = %L', t, '$from') INTO n;
+    CONTINUE WHEN n = 0;
+    SELECT EXISTS (SELECT 1 FROM pg_trigger g WHERE g.tgrelid = format('artifacts.%I', t)::regclass
+      AND NOT g.tgisinternal AND g.tgenabled <> 'D' AND (g.tgtype & 1) = 0 AND (g.tgtype & 2) = 2
+      AND (g.tgtype & 24) <> 0) INTO guarded;
+    IF guarded THEN
+      RAISE EXCEPTION 'append-only table % holds % prod-scope rows: decision required', t, n;
+    END IF;
+    IF t = ANY (ARRAY[$config]::text[]) THEN
+      EXECUTE format('DELETE FROM artifacts.%I WHERE storage_scope_id = %L', t, '$from');
+      INSERT INTO $CATALOGUE_JOURNAL_SCHEMA.rewrites (from_scope, to_scope, tbl, action, row_count) VALUES ('$from', '$to', t, 'deleted (scope configuration)', n);
+      RAISE NOTICE 'rewrite-scope: deleted % prod-scope row(s) from % (scope configuration)', n, t;
+    ELSE
+      EXECUTE format('UPDATE artifacts.%I SET storage_scope_id = %L WHERE storage_scope_id = %L', t, '$to', '$from');
+      INSERT INTO $CATALOGUE_JOURNAL_SCHEMA.rewrites (from_scope, to_scope, tbl, action, row_count) VALUES ('$from', '$to', t, 'updated', n);
+    END IF;
+  END LOOP;
+END \$rw\$;
+SQL
+}
+
 cmd_rewrite_scope() {
   local from="" to="" export_dir="" keys="" t
   while [[ $# -gt 0 ]]; do
@@ -920,13 +1007,7 @@ cmd_rewrite_scope() {
         "$(sed 's/.*/"&"/' "$export_dir/data/storage_scopes.columns" | paste -sd, -)" "'$to'"
     fi
     printf "INSERT INTO artifacts.storage_scopes SELECT (jsonb_populate_record(NULL::artifacts.storage_scopes, to_jsonb(s) || jsonb_build_object('id', '%s', 'org_id', '%s'))).* FROM artifacts.storage_scopes s WHERE s.id = '%s' ON CONFLICT DO NOTHING;\n" "$to" "$to" "$from"
-    for t in $CATALOGUE_SCOPE_CONFIG_TABLES; do
-      grep -qx "$t" <<< "$tables" && printf "DELETE FROM artifacts.\"%s\" WHERE storage_scope_id = '%s';\n" "$t" "$from"
-    done
-    while read -r t; do
-      [[ -n "$t" ]] || continue
-      printf "UPDATE artifacts.\"%s\" SET storage_scope_id = '%s' WHERE storage_scope_id = '%s';\n" "$t" "$to" "$from"
-    done <<< "$tables"
+    catalogue_rewrite_rows_sql "$tables" "$from" "$to"
     printf "DELETE FROM artifacts.storage_scopes WHERE id = '%s';\n" "$from"
     printf "DO \$fk\$ DECLARE r record; BEGIN FOR r IN SELECT * FROM cat_fk LOOP EXECUTE format('ALTER TABLE %%s ADD CONSTRAINT %%I %%s', r.tbl, r.conname, r.def); END LOOP; END \$fk\$;\n"
     if [[ -n "$keys" ]]; then
@@ -994,13 +1075,13 @@ cmd_import_stash() {
     set -- --from "$from" --to "$to"
     [[ -z "$newest" ]] || set -- "$@" --export "$work/export-$newest"
     [[ -z "$keys" ]] || set -- "$@" --blob-keys "$keys"
-    cmd_rewrite_scope "$@"
+    catalogue_step rewrite-scope "$work" cmd_rewrite_scope "$@"
   fi
   if [[ -z "$seqs" ]]; then catalogue_log 'import-stash: no stash, nothing to import'; return 0; fi
   for seq in $seqs; do
     dir="$work/export-$seq"
     generation=$(catalogue_manifest_value "$dir" generation)
-    if [[ -n "$map" ]]; then cmd_import --in-dir "$dir" --allow-same-db --map "$map"; else cmd_import --in-dir "$dir" --allow-same-db; fi
+    if [[ -n "$map" ]]; then catalogue_step "import:$generation" "$work" cmd_import --in-dir "$dir" --allow-same-db --map "$map"; else catalogue_step "import:$generation" "$work" cmd_import --in-dir "$dir" --allow-same-db; fi
     tail -n +2 "$dir/union.tsv" > "$dir/union.rows"
     catalogue_psql -c "CREATE SCHEMA IF NOT EXISTS $CATALOGUE_JOURNAL_SCHEMA" \
       -c "CREATE TABLE IF NOT EXISTS $CATALOGUE_JOURNAL_SCHEMA.conflicts (generation text NOT NULL, recorded_at timestamptz NOT NULL DEFAULT now(), tbl text NOT NULL, reason text NOT NULL, payload text NOT NULL)" \
@@ -1014,7 +1095,7 @@ cmd_import_stash() {
   done
   # Final control on the union: every visible release has its blobs. On a
   # refusal the stash stays and the controller keeps the site closed.
-  [[ -z "$keys" ]] || cmd_blob_check --scope "$to" --keys "$keys"
+  if [[ -n "$keys" ]]; then catalogue_step blob-check "$work" cmd_blob_check --scope "$to" --keys "$keys"; fi
   cmd_stash_drop
   catalogue_log "import-stash: $(wc -w <<< "$seqs" | tr -d ' ') generation(s) imported, journal in $CATALOGUE_JOURNAL_SCHEMA, stash dropped"
 }
