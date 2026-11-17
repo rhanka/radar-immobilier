@@ -30,11 +30,20 @@
 - No production request path reaches it: the API and UI production images do
   not ship vite, vitest or svelte-check.
 
-## Proposed disposition
+## Disposition
 
-- Register rows `EXC-2026-11-17-picomatch-*` are PROPOSED and UNSIGNED.
-  They suppress nothing until the owner accepts them (status `accepted`,
-  `accepted_by`, `accepted_on`, `expires` filled in by the owner).
-- Removal: upgrade the chain as soon as a picomatch release fixing
-  GHSA-fc5q-39xc-vjpf is published and consumed by vite/vitest, rescan
-  through `make audit-security`, delete the rows.
+- Owner decision of 2026-11-17, relayed by i-cond: sign for 30 days and
+  engage the upgrade, not today (end of week).
+- Register rows `EXC-2026-11-17-picomatch-*` are `accepted`:
+  `accepted_by: rhanka`, `accepted_on: 2026-11-17`, `expires: 2026-12-17`.
+- The affected chain is dev/build tooling only; no served code path.
+
+## Plan
+
+- Upgrade the dev dependencies (picomatch, vite, vitest, svelte-check,
+  tinyglobby, fdir, `@typescript-eslint/typescript-estree`) as soon as a
+  release fixing GHSA-fc5q-39xc-vjpf exists and is consumed by the chain.
+- At the latest, re-evaluate on 2026-11-21 (end of the week of 2026-11-17,
+  per the owner decision).
+- When the upgrade lands: rescan through `make audit-security` and delete
+  the `EXC-2026-11-17-picomatch-*` rows.
