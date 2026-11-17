@@ -994,9 +994,10 @@ export async function readGraphSignalCards(
     console.warn(`[graph-signals] doc enrichment budget exceeded (city=${city}, nodes=${nodes.length}): responded with degraded doc refs`);
   }
   const annotations = await readClassAnnotations(deps.db, city);
-  return mapped.map((card) => ({ ...card,
-    ...(annotations.has(`${card.type}:${card.id}`) ? { classAnnotation: annotations.get(`${card.type}:${card.id}`)! } : {}),
-  }));
+  return mapped.map((card) => {
+    const classAnnotation = annotations.get(`${card.type}:${card.id}`);
+    return classAnnotation ? { ...card, classAnnotation } : card;
+  });
 }
 
 export function graphSignalsRoute(deps: GraphSignalsDeps): Hono {

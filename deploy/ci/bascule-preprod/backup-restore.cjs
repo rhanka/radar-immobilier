@@ -25,9 +25,16 @@
 //               docs bucket the docs state AT DAY D from docs-inventory/D.json by
 //               server-side CopyObject from <backup>/docs/<key>?versionId=<v> (the
 //               version whose ETag is the inventory's when the key was rewritten
-//               since), ADDITIVE (no delete), then recon dest ⊇ inventory(D).
-//               DOCS_DRY=1 = plan only (versions resolvable?), no copy.
-//   recon       same Job template, recon only (G4 re-check before the flip).
+//               since). Outside the PG-coupled prefixes the copy is ADDITIVE.
+//               The PG-coupled prefixes (LAYOUT.mirrorPrefixes: canonical graph,
+//               refresh/018 run states, receipts and ledgers) are MIRRORED: every
+//               destination object there that is not in inventory(D) is deleted,
+//               so they come from the same snapshot D as the restored database.
+//               LAYOUT.preservedPrefixes (preprod sweep cursor) are never touched.
+//               Then recon dest ⊇ inventory(D) and dest(mirror) == inventory(D).
+//               DOCS_DRY=1 = plan only (copies + deletions counted), no write.
+//   recon       same Job template, recon only (G4 re-check before the flip);
+//               fails on any mirror extra (coherence with the restored database).
 //
 // VERDICT ONLY: logs and the termination message (/dev/termination-log, read by
 // the runner from the pod .status — never `kubectl logs`) carry dates, statuses,
@@ -67,7 +74,20 @@ const LAYOUT = Object.freeze({
   latestKey: 'manifests/latest.json',
   manifestFormat: 'radar-backup-manifest/v1',
   inventoryFormat: 'radar-backup-docs-inventory/v1',
+  // State whose meaning depends on the database rows: replaced, never merged.
+  mirrorPrefixes: Object.freeze(['graph/', 'refresh/018/']),
+  // Preprod-only state inside a mirror prefix that survives every restore.
+  preservedPrefixes: Object.freeze(['refresh/018/sweep/']),
+  // One per mirror prefix, never in the backup: a refused delete proves the missing right.
+  deleteProbeKeys: Object.freeze(['graph/.restore-delete-probe', 'refresh/018/.restore-delete-probe']),
+  // Default ceiling of deletions per mirror prefix (share of its destination objects).
+  maxDeleteRatio: 0.5,
 });
+const isPreserved = (key) => LAYOUT.preservedPrefixes.some((p) => key.startsWith(p));
+const isMirrored = (key) => !isPreserved(key) && LAYOUT.mirrorPrefixes.some((p) => key.startsWith(p));
+// A '.', '..' or empty inner segment: never deleted (a server may normalize it elsewhere).
+const isNonCanonical = (key) => key.split('/').some((seg, i, all) => seg === '.' || seg === '..' || (seg === '' && i < all.length - 1));
+const mirrorPrefixOf = (key) => LAYOUT.mirrorPrefixes.find((p) => key.startsWith(p)) || null;
 
 // ── pure helpers ─────────────────────────────────────────────────────────────
 function isValidDate(date) {
@@ -279,7 +299,9 @@ function planDocsRestore({ inventory, destIndex, verifyCandidates = false }) {
   const entries = new Map();
   for (const e of inventory.objects) {
     plan.objects += 1;
-    if (e.state === 'excluded' || e.key.startsWith('refresh/018/sweep/')) { plan.excluded += 1; continue; }
+    if (isPreserved(e.key)) { plan.excluded += 1; continue; }
+    if (e.state === 'excluded' && isMirrored(e.key)) { plan.notInBackup += 1; continue; }
+    if (e.state === 'excluded') { plan.excluded += 1; continue; }
     if (e.state !== 'backed-up') { plan.notInBackup += 1; continue; }
     entries.set(e.key, { ...e, size: Number(e.size), backupEtag: normEtag(e.backupEtag) });
   }
@@ -305,24 +327,63 @@ function planDocsRestore({ inventory, destIndex, verifyCandidates = false }) {
   return plan;
 }
 
+// Destination objects of the mirror prefixes that inventory(D) does not hold:
+// what the docs step deletes. Pure; keys stay in the pod, only counts leave it.
+// Volume guard: refuse when snapshot D holds nothing in a mirror prefix that the
+// destination fills, or when deletions exceed maxDeleteRatio of the prefix; `force`
+// (MIRROR_FORCE=1) overrides both. Non-canonical keys are anomalies, never deleted.
+function planMirrorPrune({ inventory, destIndex, maxDeleteRatio = LAYOUT.maxDeleteRatio, force = false }) {
+  const wanted = new Set(inventory.objects.filter((e) => e.state === 'backed-up').map((e) => e.key));
+  const toDelete = [];
+  const zero = () => Object.fromEntries(LAYOUT.mirrorPrefixes.map((p) => [p, 0]));
+  const byPrefix = zero(); const destByPrefix = zero(); const snapshotByPrefix = zero();
+  let anomalies = 0;
+  for (const key of wanted) if (isMirrored(key)) snapshotByPrefix[mirrorPrefixOf(key)] += 1;
+  for (const key of destIndex.keys()) {
+    if (!isMirrored(key)) continue;
+    destByPrefix[mirrorPrefixOf(key)] += 1;
+    if (wanted.has(key)) continue;
+    if (isNonCanonical(key)) { anomalies += 1; continue; }
+    toDelete.push(key);
+    byPrefix[mirrorPrefixOf(key)] += 1;
+  }
+  toDelete.sort();
+  const guard = [];
+  for (const p of LAYOUT.mirrorPrefixes) {
+    if (snapshotByPrefix[p] === 0 && destByPrefix[p] > 0) guard.push(`snapshot-empty:${p}`);
+    else if (destByPrefix[p] > 0 && byPrefix[p] / destByPrefix[p] > maxDeleteRatio) guard.push(`ratio:${p}`);
+  }
+  return { toDelete, byPrefix, destByPrefix, snapshotByPrefix, anomalies, guard, guardRefused: guard.length > 0 && !force };
+}
+
 // dest ⊇ inventory(D), Key + Size (same rule as the chain recon; ETag ignored:
-// a server-side copy of a multipart object may re-chunk). Extra preprod objects
-// (newer than D) are tolerated and counted: the restore is additive. `excluded`
-// entries are not required (counted apart), as in planDocsRestore.
+// a server-side copy of a multipart object may re-chunk). Outside the mirror
+// prefixes, extra preprod objects are tolerated and counted (`extra`). Inside
+// them, any extra (`mirrorExtra`) means the S3 state is not the snapshot of the
+// restored database: recon fails. `excluded` entries are not required.
 function reconInventory(inventory, destIndex, expectedSizes = new Map()) {
-  const r = { checked: 0, missing: 0, sizeMismatch: 0, excluded: 0, notInBackup: 0, extra: 0 };
+  const r = { checked: 0, missing: 0, sizeMismatch: 0, excluded: 0, notInBackup: 0, extra: 0, mirrorExtra: 0, mirrorAnomalies: 0 };
   const keys = new Set();
   for (const e of inventory.objects) {
-    keys.add(e.key);
-    if (e.state === 'excluded' || e.key.startsWith('refresh/018/sweep/')) { r.excluded += 1; continue; }
+    if (e.state === 'backed-up') keys.add(e.key);
+    if (isPreserved(e.key)) { r.excluded += 1; continue; }
+    if (e.state === 'excluded' && isMirrored(e.key)) { r.notInBackup += 1; continue; }
+    if (e.state === 'excluded') { r.excluded += 1; keys.add(e.key); continue; }
     if (e.state !== 'backed-up') { r.notInBackup += 1; continue; }
     r.checked += 1;
     const d = destIndex.get(e.key);
     if (!d) r.missing += 1;
     else if (Number(d.Size) !== (expectedSizes.get(e.key) ?? Number(e.size))) r.sizeMismatch += 1;
   }
-  for (const k of destIndex.keys()) if (!keys.has(k)) r.extra += 1;
-  r.ok = r.missing === 0 && r.sizeMismatch === 0 && r.notInBackup === 0;
+  for (const k of destIndex.keys()) {
+    if (keys.has(k)) continue;
+    if (isMirrored(k) && isNonCanonical(k)) r.mirrorAnomalies += 1;
+    else if (isMirrored(k)) r.mirrorExtra += 1;
+    else r.extra += 1;
+  }
+  // Non-canonical keys are never deleted, but listing readers (refresh-state.ts
+  // readRefreshStates) would still read them: they keep the mirror incoherent.
+  r.ok = r.missing === 0 && r.sizeMismatch === 0 && r.notInBackup === 0 && r.mirrorExtra === 0 && r.mirrorAnomalies === 0;
   return r;
 }
 
@@ -404,6 +465,10 @@ function readConfig(env, step) {
     cfg.dstBucket = req('DST_BUCKET');
     cfg.grantee = String(env.COPY_GRANTEE || '').trim();
     cfg.dry = String(env.DOCS_DRY || '0').trim() === '1';
+    cfg.mirrorForce = String(env.MIRROR_FORCE || '0').trim() === '1';
+    const ratio = Number(String(env.MIRROR_MAX_DELETE_RATIO || String(LAYOUT.maxDeleteRatio)).trim());
+    if (!Number.isFinite(ratio) || ratio < 0 || ratio > 1) throw refused('invalid MIRROR_MAX_DELETE_RATIO (0..1)');
+    cfg.maxDeleteRatio = ratio;
     const c = Math.floor(Number(env.COPY_CONCURRENCY || '48'));
     cfg.concurrency = Number.isFinite(c) ? Math.max(1, Math.min(64, c)) : 48;
     const forbidden = String(env.FORBIDDEN_DST_BUCKETS || '').split(',').map((s) => s.trim()).filter(Boolean);
@@ -682,11 +747,20 @@ async function runDocs({ cfg, reader, copier, log }) {
   const destIndex = await listDestSharded(copier, cfg.dstBucket, sortedKeys, counters, cfg.concurrency);
   const plan = planDocsRestore({ inventory, destIndex });
   if (plan.needsHead.length) await resolveCandidates(copier, cfg, plan, destIndex, { resolveVersions: true, createdAtMs: Date.parse(inventory.createdAt), log, counters });
+  // Copies only add inventory keys: the prune set of this listing stays valid after them.
+  const prune = planMirrorPrune({ inventory, destIndex, maxDeleteRatio: cfg.maxDeleteRatio, force: cfg.mirrorForce });
+  log(`MIRROR date=${cfg.date} to_delete=${prune.toDelete.length} by_prefix=${JSON.stringify(prune.byPrefix)} ` +
+    `dest_by_prefix=${JSON.stringify(prune.destByPrefix)} snapshot_by_prefix=${JSON.stringify(prune.snapshotByPrefix)} ` +
+    `non_canonical_kept=${prune.anomalies} guard=${JSON.stringify(prune.guard)} max_ratio=${cfg.maxDeleteRatio} force=${cfg.mirrorForce} ` +
+    `preserved=${JSON.stringify(LAYOUT.preservedPrefixes)}`);
+  if (prune.anomalies > 0) log(`WARN ${prune.anomalies} non-canonical key(s) ('.', '..' or empty segment) in the mirror prefixes: counted, never deleted`);
   log(`PLAN date=${cfg.date} inventory=${plan.objects} up_to_date=${plan.upToDate} to_copy=${plan.toCopy.length} ` +
     `bytes_to_copy=${plan.bytesToCopy} excluded=${plan.excluded} not_in_backup=${plan.notInBackup} unresolved=${plan.unresolved} ` +
     `reasons=${JSON.stringify(plan.unresolvedReasons)} how=${JSON.stringify(plan.how)} dest_objects=${destIndex.size} ` +
     `dry=${cfg.dry}`);
-  const base = { step: 'docs', date: cfg.date, dry: cfg.dry, inventory: plan.objects, upToDate: plan.upToDate, toCopy: plan.toCopy.length,
+  const base = { step: 'docs', date: cfg.date, manifestSha256: cfg.pinManifestSha256, dry: cfg.dry, inventory: plan.objects,
+    upToDate: plan.upToDate, toCopy: plan.toCopy.length, toDelete: prune.toDelete.length, mirrorByPrefix: prune.byPrefix,
+    mirrorDestByPrefix: prune.destByPrefix, mirrorAnomalies: prune.anomalies, mirrorGuard: prune.guard,
     bytesToCopy: plan.bytesToCopy, excluded: plan.excluded, notInBackup: plan.notInBackup, unresolved: plan.unresolved, unresolvedReasons: plan.unresolvedReasons,
     ...anomalyReport(plan, log), ...counters };
   if (plan.excluded > 0) log(`NOTE ${plan.excluded} inventory object(s) excluded by the backup itself (excluded prefixes): not required, not restored`);
@@ -694,9 +768,27 @@ async function runDocs({ cfg, reader, copier, log }) {
     log(`DOCS REFUSED — ${plan.notInBackup} inventory object(s) not in the backup of ${cfg.date}, ${plan.unresolved} without a restorable version (fail-closed)`);
     return { exitCode: EXIT.REFUSED, termination: { ok: false, ...base } };
   }
+  // Volume guard before any write (dry runs report it too).
+  if (prune.guardRefused) {
+    log(`DOCS REFUSED — mirror volume guard ${JSON.stringify(prune.guard)}: snapshot empty in a filled prefix or more than ` +
+      `${cfg.maxDeleteRatio * 100} % of a prefix to delete; review the plan, then set MIRROR_FORCE=1 (no write done)`);
+    return { exitCode: EXIT.REFUSED, termination: { ok: false, ...base, reason: 'mirror-volume-guard' } };
+  }
   if (cfg.dry) {
-    log('DOCS DRY OK — every object of the inventory is restorable (no copy done)');
-    return { exitCode: EXIT.OK, termination: { ok: true, ...base, copied: 0 } };
+    log('DOCS DRY OK — every object of the inventory is restorable (no copy, no delete done)');
+    return { exitCode: EXIT.OK, termination: { ok: true, ...base, copied: 0, deleted: 0 } };
+  }
+  // Fail before the first write when the copy identity cannot delete in EVERY mirror prefix.
+  if (prune.toDelete.length) {
+    for (const Key of LAYOUT.deleteProbeKeys) {
+      try {
+        await copier.s3.send(new copier.sdk.DeleteObjectCommand({ Bucket: cfg.dstBucket, Key }));
+      } catch (e) {
+        log(`DOCS REFUSED — the copy identity cannot delete in ${Key.slice(0, Key.lastIndexOf('/') + 1)} (${errName(e)}): ` +
+          'grant DeleteObject on graph/* and refresh/018/* of the destination bucket (no write done)');
+        return { exitCode: EXIT.REFUSED, termination: { ok: false, ...base, reason: 'mirror-delete-denied' } };
+      }
+    }
   }
   const grant = cfg.grantee ? { GrantFullControl: 'id=' + cfg.grantee } : {};
   if (!cfg.grantee) log('WARN COPY_GRANTEE empty: copied objects may be unreadable by the preprod API (403)');
@@ -721,11 +813,32 @@ async function runDocs({ cfg, reader, copier, log }) {
     }
   };
   await Promise.all(Array.from({ length: Math.min(cfg.concurrency, plan.toCopy.length) }, () => worker()));
+  // Deletions only after every copy succeeded: a copy error leaves the superset (no delete).
+  let nextDelete = 0; let deleted = 0; let deleteErrors = 0;
+  const deleteSkipped = copyErrors > 0 && prune.toDelete.length > 0;
+  if (deleteSkipped) log(`DOCS FAIL — ${copyErrors} copy error(s): deletions skipped (deleted=0, ${prune.toDelete.length} planned)`);
+  if (copyErrors > 0) nextDelete = prune.toDelete.length;
+  const deleter = async () => {
+    while (nextDelete < prune.toDelete.length) {
+      const Key = prune.toDelete[nextDelete++];
+      try {
+        await copier.s3.send(new copier.sdk.DeleteObjectCommand({ Bucket: cfg.dstBucket, Key }));
+        deleted += 1;
+      } catch (e) {
+        deleteErrors += 1;
+        if (errorsLogged < 5) { errorsLogged += 1; log(`delete error ${errName(e)} (object key not logged)`); }
+      }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(cfg.concurrency, prune.toDelete.length) }, () => deleter()));
   const recon = reconInventory(inventory, await listDestSharded(copier, cfg.dstBucket, sortedKeys, counters, cfg.concurrency), plan.expectedSizes);
-  const ok = copyErrors === 0 && recon.ok;
-  log(`${ok ? 'DOCS OK' : 'DOCS FAIL'} date=${cfg.date} copied=${copied} copy_errors=${copyErrors} recon.checked=${recon.checked} ` +
-    `recon.missing=${recon.missing} recon.size_mismatch=${recon.sizeMismatch} dest_extra=${recon.extra} (additive: extra objects kept)`);
-  return { exitCode: ok ? EXIT.OK : EXIT.ERROR, termination: { ok, ...base, ...counters, copied, copyErrors, recon } };
+  const ok = copyErrors === 0 && deleteErrors === 0 && recon.ok;
+  log(`${ok ? 'DOCS OK' : 'DOCS FAIL'} date=${cfg.date} copied=${copied} copy_errors=${copyErrors} deleted=${deleted} ` +
+    `delete_errors=${deleteErrors} delete_skipped=${deleteSkipped} recon.checked=${recon.checked} recon.missing=${recon.missing} ` +
+    `recon.size_mismatch=${recon.sizeMismatch} mirror_extra=${recon.mirrorExtra} mirror_anomalies=${recon.mirrorAnomalies} ` +
+    `dest_extra=${recon.extra} (outside mirror prefixes: kept)`);
+  return { exitCode: ok ? EXIT.OK : EXIT.ERROR, termination: { ok, ...base, ...counters, copied, copyErrors, deleted, deleteErrors,
+    deleteSkipped, mirrorExtra: recon.mirrorExtra, recon } };
 }
 
 async function runRecon({ cfg, reader, copier, log }) {
@@ -745,8 +858,13 @@ async function runRecon({ cfg, reader, copier, log }) {
   const recon = reconInventory(inventory, destIndex, plan.expectedSizes);
   recon.ok = recon.ok && plan.unresolved === 0;
   log(`${recon.ok ? 'RECON OK' : 'RECON FAIL'} date=${cfg.date} checked=${recon.checked} missing=${recon.missing} ` +
-    `size_mismatch=${recon.sizeMismatch} excluded=${recon.excluded} not_in_backup=${recon.notInBackup} dest_extra=${recon.extra}`);
-  return { exitCode: recon.ok ? EXIT.OK : EXIT.ERROR, termination: { ok: recon.ok, step: 'recon', date: cfg.date, ...recon, ...anomalyReport(plan, log), ...counters } };
+    `size_mismatch=${recon.sizeMismatch} excluded=${recon.excluded} not_in_backup=${recon.notInBackup} ` +
+    `mirror_extra=${recon.mirrorExtra} mirror_anomalies=${recon.mirrorAnomalies} dest_extra=${recon.extra}`);
+  if (recon.mirrorExtra > 0) log(`RECON FAIL — ${recon.mirrorExtra} object(s) in the mirror prefixes are not in the snapshot ${cfg.date}: S3 and the restored database are not aligned`);
+  if (recon.mirrorAnomalies > 0) log(`RECON FAIL — ${recon.mirrorAnomalies} non-canonical object(s) ('.', '..' or empty segment) in the mirror prefixes: ` +
+    'never deleted by this tool but readable by listing readers; remove them by hand after review, then re-run');
+  return { exitCode: recon.ok ? EXIT.OK : EXIT.ERROR, termination: { ok: recon.ok, step: 'recon', date: cfg.date,
+    manifestSha256: cfg.pinManifestSha256, ...recon, ...anomalyReport(plan, log), ...counters } };
 }
 
 const STEPS = { resolve: runResolve, list: runList, 'fetch-dump': runFetchDump, docs: runDocs, recon: runRecon };
@@ -783,7 +901,7 @@ async function runStep({ env, sdk, clients, now = Date.now, log }) {
 module.exports = {
   EXIT, RestoreError, LAYOUT, TERMINATION_MAX_BYTES, isValidDate, keysFor, withScheme, encodeKey, normEtag, parseSha256Line,
   parseBackupId, chooseDate, checkManifest, backupReferenceTime, staleGuard, checkInventory, indexVersions, chooseVersion,
-  destUpToDate, planDocsRestore, reconInventory, copySourceFor, buildListing, readConfig, runStep,
+  destUpToDate, planDocsRestore, planMirrorPrune, isMirrored, isPreserved, isNonCanonical, reconInventory, copySourceFor, buildListing, readConfig, runStep,
 };
 
 if (require.main === module || module.id === '[eval]') {

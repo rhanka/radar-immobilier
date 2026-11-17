@@ -7,6 +7,10 @@ DEST="${1:?disposable fixture directory required}"
 mkdir -p "$DEST"
 (cd "$ROOT" && cp -r --parents deploy/k8s deploy/overlays/preprod "$DEST")
 OVERLAY="$DEST/deploy/overlays/preprod"
+# The legacy H3 state predates the prod activation (v1.2.20): its base carried
+# no artifact key, so drop the prod artifact ConfigMap keys codified since.
+sed -i -E '/^  (IMMO_)?ARTIFACTS_[A-Z0-9_]+: /d; /^  CLASSIFICATION_CURSOR_KEY_ID: /d' \
+  "$DEST/deploy/k8s/30-api.yaml" "$DEST/deploy/k8s/immo-mcp/40-immo-mcp-http-deploy.yaml"
 cat >"$OVERLAY/patch-artifacts-control.yaml" <<'YAML'
 apiVersion: v1
 kind: ConfigMap

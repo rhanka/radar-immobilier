@@ -60,7 +60,46 @@ restore_schedules() {
       change='[{"op":"remove","path":"/spec/suspend"}]'
     fi
     patch_uid cronjob "$(jq -r .name <<< "$row")" "$(jq -r .uid <<< "$row")" "$change"
-  done < <(jq -c '.cronjobs[]' "$WORK/record.json")
+  done < <(jq -c '(.hold//[]) as $hold|.cronjobs[]|if (.name as $n|$hold|index($n)) then .suspend=true else . end' "$WORK/record.json")
+}
+# PG-coupled schedules (config preprod.coherenceSchedules): decided before
+# restore_schedules (tools/make/cutover-coupled.jq), annotated after the readback.
+coupled_schedules_decide() {
+  jq --argjson cfg "$(cat "$CONFIG")" --arg env "$ENV" -f tools/make/cutover-coupled.jq "$WORK/record.json" > "$WORK/coupled.json"
+  jq --slurpfile c "$WORK/coupled.json" '.coupledSchedules=$c[0].decision|.hold=$c[0].hold' "$WORK/record.json" > "$WORK/next.json"
+  mv "$WORK/next.json" "$WORK/record.json"; record_save
+}
+coupled_schedules_apply() {
+  local decision name live original change key=sentropic.io/held-until-coherent
+  decision=$(jq -r '.coupledSchedules//"keep"' "$WORK/record.json")
+  [[ $decision != keep ]] || return 0
+  while read -r name; do
+    live=$("${k[@]}" get cronjob "$name" -o json) || fail "Coupled schedule unreadable: $name"
+    if [[ $decision == hold ]]; then
+      # The first hold records the original state; a later hold never overwrites it.
+      if jq -e --arg key "$key" '.metadata.annotations[$key]==null' <<< "$live" >/dev/null; then
+        original=$(jq -r --arg n "$name" '[.cronjobs[]|select(.name==$n)|.suspend==true]|first//false' "$WORK/record.json")
+        change=$(jq -c --arg key "$key" --arg v "$RUN:$original" '[{op:"add",path:"/spec/suspend",value:true}]+
+          if .metadata.annotations==null then [{op:"add",path:"/metadata/annotations",value:{($key):$v}}]
+          else [{op:"add",path:("/metadata/annotations/"+($key|gsub("/";"~1"))),value:$v}] end' <<< "$live")
+        patch_uid cronjob "$name" "$(jq -r .metadata.uid <<< "$live")" "$change"
+      fi
+      printf 'HELD %s suspended: live database and mirrored documents not proven coherent (%s)\n' "$name" "$RUN"
+    else
+      original=$(jq -r --arg key "$key" '.metadata.annotations[$key]//""' <<< "$live")
+      [[ -n $original ]] || continue
+      # Only `<run>:(true|false)` records an original state; any other value is a human
+      # hold and is never released automatically (remove or rewrite it by hand).
+      if [[ ! $original =~ ^[A-Za-z0-9._-]{1,64}:(true|false)$ ]]; then
+        printf 'HELD %s: annotation %s is not <run>:(true|false); human hold kept, not released (%s)\n' "$name" "$key" "$RUN"
+        continue
+      fi
+      change=$(jq -nc --arg key "$key" --argjson s "$([[ ${original##*:} == true ]] && echo true || echo false)" \
+        '[{op:"remove",path:("/metadata/annotations/"+($key|gsub("/";"~1")))},{op:"add",path:"/spec/suspend",value:$s}]')
+      patch_uid cronjob "$name" "$(jq -r .metadata.uid <<< "$live")" "$change"
+      printf 'RELEASED %s: live database and mirrored documents share one snapshot (%s)\n' "$name" "$RUN"
+    fi
+  done < <(jq -r '.preprod.coherenceSchedules//[]|.[]' "$CONFIG")
 }
 verify_restored() {
   local row
@@ -77,14 +116,16 @@ verify_restored() {
         all(.spec.jobTemplate.spec.template.spec|.containers[]?,.initContainers[]?;
           (.image|test("^ghcr.io/rhanka/radar-api[:@]")|not) or .image==$r[0].release.apiImage)' >/dev/null || fail 'CronJob release readback conflict'
     fi
-  done < <(jq -c '.cronjobs[]' "$WORK/record.json")
+  done < <(jq -c '(.hold//[]) as $hold|.cronjobs[]|if (.name as $n|$hold|index($n)) then .suspend=true else . end' "$WORK/record.json")
 }
 reopen() {
   checkpoint reopen started
   restore_routes
   smoke_pass "$URL" "$URL"
+  coupled_schedules_decide
   restore_schedules
   verify_restored
+  coupled_schedules_apply
   local job uid name
   # Reopening needs every operation Job terminated without live consumers. A Failed
   # Job is terminal too: a rollback after a refused step must still reopen.
@@ -136,6 +177,13 @@ restore_reopen() {
   if jq -e '.checkpoints.close=="completed"' "$WORK/record.json" >/dev/null; then close_once; fi
   run_job verify 60 90
   jq -e --slurpfile r "$WORK/record.json" '.ok==true and .database==$r[0].liveDb' "$WORK/verdict.json" >/dev/null || fail 'Live database verification refused; remain closed'
+  # A restore Job ran (committed or not): the live database may hold the prod
+  # replay without the preprod artifact catalogue. Import the stash (blob copy,
+  # scope rewrite, union; all rows "same" when the restore never committed)
+  # before any reopening. A failed import keeps the site closed and the stash.
+  if jq -e '((.jobs.restore!=null) or any(.jobHistory[]?; .name|endswith("-restore"))) and .jobs.catalogue==null' "$WORK/record.json" >/dev/null; then
+    run_job catalogue 840 900 || fail 'Preprod artifact catalogue not imported; remain closed'
+  fi
   restart_services
   private_smoke
   jq '.restoreAborted=true' "$WORK/record.json" > "$WORK/next.json"

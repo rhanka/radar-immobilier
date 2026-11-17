@@ -25,6 +25,9 @@ render_template() {
   export RECOVERY_BUCKET
   RECOVERY_BUCKET=$(jq -er --arg e "$ENV" '.[$e].recoveryBucket|select(test("^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$"))' "$CONFIG") || fail 'Missing recovery backup bucket'
   export DST_BUCKET FORBIDDEN_DST_BUCKETS COPY_GRANTEE COPY_CONCURRENCY=${COPY_CONCURRENCY:-48} DOCS_DRY=0
+  # Mirror volume guard (backup-restore.cjs planMirrorPrune): explicit operator override only.
+  export MIRROR_FORCE=${MIRROR_FORCE:-0} MIRROR_MAX_DELETE_RATIO=${MIRROR_MAX_DELETE_RATIO:-0.5}
+  [[ $MIRROR_FORCE =~ ^[01]$ && $MIRROR_MAX_DELETE_RATIO =~ ^(0(\.[0-9]+)?|1(\.0+)?)$ ]] || fail 'Invalid mirror guard settings'
   COPY_GRANTEE=$(jq -r .storage.copyGrantee "$CONFIG")
   DST_BUCKET=$(jq -r --arg e "$ENV" '.[$e].documents' "$CONFIG")
   FORBIDDEN_DST_BUCKETS="$(jq -r .prod.documents "$CONFIG"),$EXPECTED_BACKUP_BUCKET"
@@ -32,6 +35,17 @@ render_template() {
   case $step in
     resolve|list) template=deploy/ci/bascule-preprod/backup-read-job.tmpl.yaml;;
     docs|recon) template=deploy/ci/bascule-preprod/docs-restore-backup-job.tmpl.yaml;;
+    catalogue)
+      # Preprod only: read the prod artifacts bucket, write only the preprod one.
+      [[ $ENV == preprod ]] || fail 'Catalogue import is preprod only'
+      template=deploy/cutover/catalogue-import-job.tmpl.yaml
+      export UPLOAD_IMAGE=peakcom/s5cmd:v2.2.2 ARTIFACTS_COPY_SECRET ARTIFACTS_SRC_BUCKET ARTIFACTS_SRC_SCOPE ARTIFACTS_DST_BUCKET ARTIFACTS_DST_SCOPE ARTIFACTS_FORBIDDEN_DST_BUCKETS
+      ARTIFACTS_COPY_SECRET=$(jq -er .storage.artifactsCopySecret "$CONFIG") || fail 'Missing artifacts copy Secret'
+      ARTIFACTS_SRC_BUCKET=$(jq -er .prod.artifacts.bucket "$CONFIG"); ARTIFACTS_SRC_SCOPE=$(jq -er .prod.artifacts.scope "$CONFIG")
+      ARTIFACTS_DST_BUCKET=$(jq -er .preprod.artifacts.bucket "$CONFIG"); ARTIFACTS_DST_SCOPE=$(jq -er .preprod.artifacts.scope "$CONFIG")
+      ARTIFACTS_FORBIDDEN_DST_BUCKETS=$(jq -r '[.prod.artifacts.bucket, .prod.documents, .prod.recoveryBucket, .storage.backupBucket]|join(",")' "$CONFIG")
+      [[ $ARTIFACTS_DST_BUCKET != "$ARTIFACTS_SRC_BUCKET" && $ARTIFACTS_DST_BUCKET == *-preprod && ,$ARTIFACTS_FORBIDDEN_DST_BUCKETS, != *,$ARTIFACTS_DST_BUCKET,* ]] || fail 'Artifacts destination bucket overlaps a protected bucket'
+      [[ $ARTIFACTS_SRC_SCOPE != "$ARTIFACTS_DST_SCOPE" ]] || fail 'Artifacts scopes must differ';;
     restore)
       template=deploy/ci/bascule-preprod/db-restore-backup-job.tmpl.yaml
       # Per-environment sizing that fits the namespace ResourceQuota; pg_restore keeps -j 4.
@@ -61,9 +75,18 @@ render_template() {
   BR_SCRIPT=$(sed 's/^/              /' deploy/ci/bascule-preprod/backup-restore.cjs)
   export RESTORE_SCRIPT
   RESTORE_SCRIPT=$(sed 's/^/              /' deploy/cutover/atomic-restore.sh)
+  # Preprod artifact catalogue union (restore stash + catalogue import). Empty
+  # CATALOGUE_DIR outside preprod disables the hook: prod is never touched.
+  export CATALOGUE_SCRIPT CATALOGUE_DIR=
+  CATALOGUE_SCRIPT=$(sed 's/^/              /' deploy/cutover/artifacts-catalogue.sh)
+  export BLOBS_SCRIPT
+  BLOBS_SCRIPT=$(sed 's/^/              /' deploy/cutover/artifacts-blobs.sh)
+  if [[ $ENV == preprod ]]; then CATALOGUE_DIR=/work/catalogue; fi
+  # The stash is bound to this run and its backup pin (atomic-restore.sh).
+  export CATALOGUE_STASH_TAG="$RUN:${PIN_MANIFEST_SHA256:0:16}"
   if [[ $step == refs ]]; then BR_SCRIPT=$(sed 's/^/              /' deploy/ci/bascule-preprod/served-refs.cjs); fi
   # Only known placeholders; runtime libpq variables remain in the original script.
-  envsubst '${JOB_NAME} ${NAMESPACE} ${IMAGE} ${DUMP_IMAGE} ${TTL_SECONDS} ${PGHOST} ${DB_SECRET} ${S3_ENDPOINT} ${S3_REGION} ${EXPECTED_BACKUP_BUCKET} ${READER_SECRET} ${COPY_SECRET} ${BR_STEP} ${BACKUP_ID} ${ALLOW_STALE_BACKUP} ${MAX_AGE_HOURS} ${S3_FORCE_PATH_STYLE} ${BACKUP_DATE} ${PIN_MANIFEST_SHA256} ${PIN_PG_SHA256} ${EXPECTED_DATABASE} ${RESTORE_ASSERT_DB} ${DST_BUCKET} ${FORBIDDEN_DST_BUCKETS} ${COPY_GRANTEE} ${COPY_CONCURRENCY} ${DOCS_DRY} ${BR_SCRIPT} ${RESTORE_SCRIPT} ${RESTORE_REQUEST_CPU} ${RESTORE_REQUEST_MEMORY} ${RESTORE_LIMIT_CPU} ${RESTORE_LIMIT_MEMORY} ${UPLOAD_IMAGE} ${BACKUP_S3_ENDPOINT} ${BACKUP_S3_REGION} ${BACKUP_S3_BUCKET} ${S3_SECRET} ${KEY} ${CYCLE_ID} ${REFS_CONFIGMAP_PREFIX} ${REFS_CONFIGMAP_COUNT} ${REFS_WRITER_SA}' < "$template"
+  envsubst '${JOB_NAME} ${NAMESPACE} ${IMAGE} ${DUMP_IMAGE} ${TTL_SECONDS} ${PGHOST} ${DB_SECRET} ${S3_ENDPOINT} ${S3_REGION} ${EXPECTED_BACKUP_BUCKET} ${READER_SECRET} ${COPY_SECRET} ${BR_STEP} ${BACKUP_ID} ${ALLOW_STALE_BACKUP} ${MAX_AGE_HOURS} ${S3_FORCE_PATH_STYLE} ${BACKUP_DATE} ${PIN_MANIFEST_SHA256} ${PIN_PG_SHA256} ${EXPECTED_DATABASE} ${RESTORE_ASSERT_DB} ${DST_BUCKET} ${FORBIDDEN_DST_BUCKETS} ${COPY_GRANTEE} ${COPY_CONCURRENCY} ${DOCS_DRY} ${MIRROR_FORCE} ${MIRROR_MAX_DELETE_RATIO} ${BR_SCRIPT} ${RESTORE_SCRIPT} ${CATALOGUE_SCRIPT} ${CATALOGUE_DIR} ${CATALOGUE_STASH_TAG} ${BLOBS_SCRIPT} ${ARTIFACTS_COPY_SECRET} ${ARTIFACTS_SRC_BUCKET} ${ARTIFACTS_SRC_SCOPE} ${ARTIFACTS_DST_BUCKET} ${ARTIFACTS_DST_SCOPE} ${ARTIFACTS_FORBIDDEN_DST_BUCKETS} ${RESTORE_REQUEST_CPU} ${RESTORE_REQUEST_MEMORY} ${RESTORE_LIMIT_CPU} ${RESTORE_LIMIT_MEMORY} ${UPLOAD_IMAGE} ${BACKUP_S3_ENDPOINT} ${BACKUP_S3_REGION} ${BACKUP_S3_BUCKET} ${S3_SECRET} ${KEY} ${CYCLE_ID} ${REFS_CONFIGMAP_PREFIX} ${REFS_CONFIGMAP_COUNT} ${REFS_WRITER_SA}' < "$template"
 }
 sanitize_job() {
   jq --rawfile wrapper deploy/cutover/job-wrapper.cjs --rawfile shellWrapper deploy/cutover/shell-wrapper.sh \

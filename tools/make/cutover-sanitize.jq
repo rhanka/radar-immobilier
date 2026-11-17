@@ -10,6 +10,10 @@ else . end
         [{name:"PGDATABASE",value:$r[0].targetDb},{name:"TARGET_DB",value:$r[0].targetDb},
          {name:"POSTGRES_DB",value:$r[0].targetDb},{name:"LIVE_DB",value:($r[0].liveDb//"")}])
   else . end
+| if $step=="catalogue" and $r[0].targetDb!=null then
+    .spec.template.spec.containers[0].env |=
+      (map(select(.name!="PGDATABASE")) + [{name:"PGDATABASE",value:$r[0].targetDb}])
+  else . end
 | (.spec.template.spec.containers[],.spec.template.spec.initContainers[]?) |= (
   .terminationMessagePolicy="File"|.terminationMessagePath="/dev/termination-log"|
   if (.command[0]=="node") then
