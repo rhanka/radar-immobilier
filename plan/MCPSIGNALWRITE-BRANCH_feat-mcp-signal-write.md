@@ -4,7 +4,7 @@
 - [x] Expose classification, human feedback and free notes through MCP and the signal UI.
 
 ## Scope / Guardrails
-- [x] Base: feat/class-feedback (#1104). Target the preprod train; exclude production v1.2.20.
+- [x] Base: main (PR retargeted after #1104 merged). Owner decision: target production; the preprod-only exclusion is lifted. Prod prerequisites are listed in docs/spec/SPEC_EVOL_MCP_SIGNAL_WRITE.md (Activation); manifests are prepared in-repo, nothing applied.
 - [x] Worktree: tmp/mcp-signal-write; branch feat/mcp-signal-write.
 - [x] No environment files, Python, kubeconfig, merges or generated commit trailers.
 - [x] Make-only commands; ENV last; isolated stacks removed with down -v.
@@ -52,3 +52,4 @@
 - [x] Corrective gates: typecheck/lint pass; API/PostgreSQL 30 default and 44 with shared-archive suites; MCP 613 pass/9 unrelated skips; SDK 5; UI 37; browser 2. All isolated stacks removed with down -v.
 - [x] Idempotence correction: guard 0048 tables, indexes, constraints and triggers; replace functions; no migration backfill exists. Add populated replay coverage preserving audit, events and append-only protections.
 - [x] Start the isolated object store for API tests so artifacts-migrations.spec.ts can run through the standalone runner.
+- [x] Review correction 5 (blocking review, prod target): spec/plan target prod with prerequisites and prepared manifests; set-based city read with history index; split SECURITY DEFINER writers with function-only grants; workspace MCP effective only after linked browser confirmation; browser motif via FACET_PROFILE; by-city on the same effective state; audit carries workspace and target; five tools registered only with an active binding.
