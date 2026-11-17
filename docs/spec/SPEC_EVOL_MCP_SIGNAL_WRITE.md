@@ -59,11 +59,13 @@ Production prerequisites, in order:
    Same database name as the API.
 3. Scope `immo:signals:write` declared in the production IdP catalogue and on
    the immo-mcp client row before it is advertised, otherwise authorization
-   requests carrying it are refused with `invalid_scope`. The base ConfigMap
-   advertises it in `IMMO_MCP_OAUTH_SCOPES_SUPPORTED` and sets
-   `IMMO_MCP_SIGNALS_WRITE_ENABLED=1` (also listed in
-   `deploy/k8s/prod-configmap-keys.json`); the preprod overlay carries the
-   same two keys for qualification first.
+   requests carrying it are refused with `invalid_scope`. The prod base
+   stays inert (`IMMO_MCP_SIGNALS_WRITE_ENABLED="0"`, scope not announced,
+   optional Secret reference); activation is the separate
+   `deploy/overlays/prod-signal-write` overlay, applied by an operator after
+   the prerequisites. The preprod overlay carries the activation values for
+   qualification first. Commissioning order and the exact 0048 rollback SQL
+   live in `docs/operator/mcp-signal-write-runbook.md`.
 4. Default consent selection stays read-only. Users explicitly grant the new
    scope and reconnect. Read-only OAuth tokens still cannot write with the
    binding enabled.
