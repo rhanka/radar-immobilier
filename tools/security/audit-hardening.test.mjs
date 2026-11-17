@@ -19,13 +19,18 @@ test("historical fixture covers affected Zod through the final UTC acceptance da
   assert.equal(run({ now: "2026-11-09" }).ok, false);
 });
 
-test("remediated checked-in register cannot suppress a Zod high", () => {
+test("checked-in register cannot suppress a Zod high", () => {
   const current = parseRegister(readFileSync(new URL("../../.security/vulnerability-register.yaml", import.meta.url), "utf8"));
   const installed = JSON.parse(readFileSync(new URL("../../package-lock.json", import.meta.url))).packages;
-  assert.equal(current.filter((row) => row.status === "accepted").length, 0);
+  // The only checked-in acceptances are the owner-signed picomatch rows
+  // (2026-11-17, 30 days): exact advisory, expiring 2026-12-17.
+  const accepted = current.filter((row) => row.status === "accepted");
+  assert.equal(accepted.length, 8);
+  assert.equal(accepted.every((row) => row.advisory === "GHSA-fc5q-39xc-vjpf" && row.expires === "2026-12-17"), true);
   assert.equal(current.some((row) => row.id.startsWith("EXC-2026-10-25-zod")), false);
-  assert.equal(evaluateAudit({ audit, packages: installed, registerRows: current, now: "2026-10-26" }).ok, false);
-  assert.equal(evaluateAudit({ audit: { vulnerabilities: {} }, packages: installed, registerRows: current, now: "2026-11-09" }).ok, true);
+  assert.equal(evaluateAudit({ audit, packages: installed, registerRows: current, now: "2026-11-20" }).ok, false);
+  assert.equal(evaluateAudit({ audit: { vulnerabilities: {} }, packages: installed, registerRows: current, now: "2026-11-20" }).ok, true);
+  assert.equal(evaluateAudit({ audit: { vulnerabilities: {} }, packages: installed, registerRows: current, now: "2026-12-18" }).ok, false);
 });
 
 test("expired rows fail even when no finding currently matches", () => {
