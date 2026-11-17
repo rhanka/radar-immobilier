@@ -44,7 +44,7 @@ BEGIN
       FROM ${IMMO_MCP_SIGNAL_WRITER_ROLE};
     REVOKE EXECUTE ON FUNCTION signal_mcp_write_core(text,text,text,jsonb,text,text,text,text),
       signal_mcp_write_browser(text,jsonb,text,text) FROM ${IMMO_MCP_SIGNAL_WRITER_ROLE};
-    GRANT SELECT (code,verdict) ON facet_reason_codes TO ${IMMO_MCP_SIGNAL_WRITER_ROLE};
+    GRANT SELECT (profile_id,code,verdict) ON facet_reason_codes TO ${IMMO_MCP_SIGNAL_WRITER_ROLE};
     GRANT EXECUTE ON FUNCTION signal_mcp_read(text,jsonb),
       signal_mcp_write_mcp(text,text,text,jsonb,text,text),
       signal_mcp_result(text,text,text,text,text,jsonb,jsonb)

@@ -5,6 +5,7 @@ import { workspaceFixture, workspaceSignal } from "../facets/workspace-archive-f
 import { writeScopedPersonalFacet } from "../facets/scoped-writer.js";
 import { decideSignalMcp, readSignalMcp, readSignalMcpCity } from "./signal-mcp.js";
 import { initializeWorkspaceStore } from "../workspaces/init-store.js";
+import { readScopedByCity } from "../facets/scoped-by-city.js";
 import { Hono } from "hono";
 import { signalMcpRoute } from "../../routes/signal-mcp.js";
 import { readWorkspaceArchiveCity } from "../facets/workspace-reader.js";
@@ -296,6 +297,18 @@ describe.skipIf(process.env.MCP_SIGNAL_DB_TEST !== "1")("scoped MCP PostgreSQL",
     expect(audit.rows[0]).toMatchObject({ workspace_id: f.workspaceId, city_slug: f.target.citySlug,
       node_type: f.target.type, node_id: f.target.id, result: "written" });
   });
+  it("should let the by-city aggregate follow the detail when AI supersedes an automatic MCP class", async () => {
+    const f = await fixture();
+    await f.write();
+    await writeClassAnnotation(f.db, { citySlug: f.target.citySlug, nodeType: f.target.type, nodeId: f.target.id,
+      classe: "ecarte", reason: "Newer AI archive", source: "ai", model: "ai-model", effort: "low",
+      promptId: "v1", promptSha256: "a".repeat(64), pipelineRunId: "run-1", inputSha256: "b".repeat(64) });
+    expect((await f.read()).current).toMatchObject({ source: "ai", classe: "ecarte" });
+    const result = await readScopedByCity(f.db, f.contributor.sub, f.workspaceId, { showDiscarded: false });
+    const city = result.cities.find((entry) => entry.citySlug === f.target.citySlug)!;
+    expect(city.signalCount).toBe(0);
+    expect(Object.values(city.filtreCubesByClassement!.ecarte).reduce((n, c) => n + c, 0)).toBeGreaterThanOrEqual(1);
+  });
   it("should grant the restricted role only the necessary signal writes", async () => {
     const f = await fixture();
     await f.pool.query("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='immo_mcp_signal_writer') THEN CREATE ROLE immo_mcp_signal_writer; END IF; END $$");
@@ -307,6 +320,11 @@ describe.skipIf(process.env.MCP_SIGNAL_DB_TEST !== "1")("scoped MCP PostgreSQL",
       const rows = await client.query("SELECT signal_mcp_write_mcp($1,'test-client','classify_signal',$2::jsonb,$3,$4) AS result",
         [f.contributor.sub, JSON.stringify(f.body), version, "a".repeat(64)]);
       expect(rows.rows[0].result).toHaveProperty("id");
+      // list_class_reasons filters on profile_id under this same role.
+      const reasons = await client.query("SELECT code,verdict FROM facet_reason_codes WHERE profile_id=$1 ORDER BY code",
+        ["immo-steve-2026-09"]);
+      expect(reasons.rows.length).toBeGreaterThan(0);
+      expect(reasons.rows[0]).toHaveProperty("code");
       await expect(client.query("UPDATE account_users SET status='approved'")).rejects.toThrow(/permission denied/);
       await expect(client.query("DELETE FROM signal_mcp_events")).rejects.toThrow(/permission denied/);
       // No direct table access and no browser/core writer for the MCP role:
