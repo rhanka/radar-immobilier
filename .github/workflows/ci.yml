@@ -28,6 +28,11 @@ jobs:
           bash deploy/ci/check-no-python.sh
           bash deploy/ci/check-no-python.test.sh
 
+      - name: Reject destructive migrations newer than the prod baseline (0044)
+        run: |
+          bash deploy/ci/check-migration-destructive.sh
+          bash deploy/ci/check-migration-destructive.test.sh
+
       - name: Reject retired unscoped signal routes in the UI (6H)
         run: |
           bash deploy/ci/check-ui-scoped-signal-routes.sh
