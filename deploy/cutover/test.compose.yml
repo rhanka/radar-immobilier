@@ -3,7 +3,9 @@ services:
     image: postgis/postgis:16-3.4
     environment: {POSTGRES_USER: radar, POSTGRES_PASSWORD: synthetic-only, POSTGRES_DB: radar}
     tmpfs: [/var/lib/postgresql/data]
-    volumes: [./:/cutover:ro]
+    # Repo read-only for the catalogue persist test, which needs the native
+    # pg 16 client tools of this image and the api/drizzle migrations.
+    volumes: [./:/cutover:ro, ../..:/workspace:ro]
     networks:
       default:
         aliases: [radar-postgres]

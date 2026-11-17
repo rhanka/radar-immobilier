@@ -7,5 +7,5 @@ export function classAnnotationLabel(node: GraphSignalNode, manualOverride = fal
   if (manualOverride || annotation?.source !== "ai") return "Manuel";
   const model = annotation.model?.trim() || "modèle inconnu";
   const date = annotation.updatedAt ? new Date(annotation.updatedAt).toLocaleDateString("fr-CA") : null;
-  return `IA · ${model} ${annotation.effort ?? ""} · prompt ${annotation.promptId ?? "inconnu"}${date ? ` · ${date}` : ""}`;
+  return `IA${annotation.ambiguous ? " · ambigu" : ""} · ${model} ${annotation.effort ?? ""} · prompt ${annotation.promptId ?? "inconnu"}${date ? ` · ${date}` : ""}`;
 }

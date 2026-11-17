@@ -318,6 +318,13 @@
       "breakpoints": true
     },
     {
+      "idx": 45,
+      "version": "7",
+      "when": 1793000000016,
+      "tag": "0046_signal_class_ambiguity",
+      "breakpoints": true
+    },
+    {
       "idx": 46,
       "version": "7",
       "when": 1793000000017,

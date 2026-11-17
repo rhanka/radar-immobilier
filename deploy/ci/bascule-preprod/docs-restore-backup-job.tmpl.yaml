@@ -10,8 +10,10 @@
 #                 (COPY_CONCURRENCY default 48, bounded 1–64; CopyObject,
 #                 0 byte through the pod) from <backup>/docs/<key>?versionId=<v>, v =
 #                 the recorded version, else the version whose ETag is the inventory's
-#                 (object rewritten since D). ADDITIVE (no delete). Then recon
-#                 dest ⊇ inventory(D) (Key + Size). DOCS_DRY=1 = plan only, no copy.
+#                 (object rewritten since D). Additive outside graph/ and
+#                 refresh/018/; those two prefixes are MIRRORED (extras deleted,
+#                 refresh/018/sweep/ preserved). Then recon dest ⊇ inventory(D)
+#                 and no mirror extra. DOCS_DRY=1 = plan only, no copy, no delete.
 #                 Any inventory object not in the backup or without a restorable
 #                 version ⇒ refusal (exit 2) before the first copy. Size drift with
 #                 matching backup ETag is reported by hash; recon uses actual size.
@@ -29,7 +31,9 @@
 #          others checked by HEAD), SIGNS the server-side CopyObject (GetObject on
 #          <backup>/docs/* — on OVH a read with versionId is a GetObject, there is no
 #          distinct GetObjectVersion permission) and lists/writes the preprod docs
-#          bucket (ListBucket + PutObject + PutObjectAcl, no delete).
+#          bucket (ListBucket + PutObject + PutObjectAcl) and deletes in the
+#          PG-coupled mirror prefixes only (DeleteObject on graph/* and
+#          refresh/018/*; probed before the first write, refusal otherwise).
 # GrantFullControl id=${COPY_GRANTEE} (preprod API canonical id) keeps the copied
 # objects readable by the preprod API, as in docs-sync.
 #
@@ -38,6 +42,7 @@
 # ${COPY_SECRET} ${S3_ENDPOINT} ${S3_REGION} ${S3_FORCE_PATH_STYLE}
 # ${EXPECTED_BACKUP_BUCKET} ${BACKUP_DATE} ${PIN_MANIFEST_SHA256} ${DST_BUCKET}
 # ${FORBIDDEN_DST_BUCKETS} ${COPY_GRANTEE} ${COPY_CONCURRENCY} ${DOCS_DRY}
+# ${MIRROR_FORCE} ${MIRROR_MAX_DELETE_RATIO}
 # ${TTL_SECONDS}, plus the BR_SCRIPT placeholder under `args:` (never written in a
 # comment: it spans many lines).
 # =============================================================================
@@ -103,6 +108,8 @@ ${BR_SCRIPT}
             - { name: COPY_GRANTEE, value: "${COPY_GRANTEE}" }
             - { name: COPY_CONCURRENCY, value: "${COPY_CONCURRENCY}" }
             - { name: DOCS_DRY, value: "${DOCS_DRY}" }
+            - { name: MIRROR_FORCE, value: "${MIRROR_FORCE}" }
+            - { name: MIRROR_MAX_DELETE_RATIO, value: "${MIRROR_MAX_DELETE_RATIO}" }
             - { name: READER_ACCESS_KEY, valueFrom: { secretKeyRef: { name: ${READER_SECRET}, key: S3_ACCESS_KEY } } }
             - { name: READER_SECRET_KEY, valueFrom: { secretKeyRef: { name: ${READER_SECRET}, key: S3_SECRET_KEY } } }
             - { name: BACKUP_BUCKET, valueFrom: { secretKeyRef: { name: ${READER_SECRET}, key: BACKUP_BUCKET } } }
