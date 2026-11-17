@@ -1,7 +1,8 @@
 # Scoped MCP signal writes
 
-The preprod train adds MCP classification and free notes after class-feedback (#1104).
-It is excluded from production v1.2.20. Migration 0048 follows the reserved 0047 feedback migration.
+MCP classification and free notes after class-feedback (#1104), retargeted to `main`.
+Owner decision: the target is production (the preprod-first exclusion is lifted).
+Migration 0048 follows the reserved 0047 feedback migration.
 
 ## Contract
 
@@ -42,14 +43,32 @@ Rate limiting is per user. Workspace membership is checked inside each write tra
 
 ## Activation
 
-Apply the migration and replay service-role grants on preprod only after the stacked dependencies.
-Enable the signal binding, advertise immo:signals:write and register that scope at the IdP.
-Keep the default consent selection read-only. Users must explicitly grant the new scope and reconnect.
-No production manifests or release version change is part of this branch.
-The dedicated PostgreSQL role is `immo_mcp_signal_writer`.
-Provision its connection as `IMMO_MCP_SIGNAL_DATABASE_URL`, with the same database name as the API.
-Set `IMMO_MCP_SIGNALS_WRITE_ENABLED=1` only after the migration and grants are qualified.
-Read-only OAuth tokens still cannot write with that binding enabled.
+Production target (owner decision). The manifests in this branch are prepared
+in the repository only; nothing is applied by the branch itself.
+
+Production prerequisites, in order:
+
+1. Migration 0048 applied on the production database and service-role grants
+   replayed by the migrator (`api/src/db/service-role-grants.ts`). The
+   restricted role executes only `signal_mcp_read`, `signal_mcp_write_mcp`
+   and `signal_mcp_result`; it holds no direct table privilege.
+2. Dedicated PostgreSQL role `immo_mcp_signal_writer` created by the
+   operator, with its connection provisioned as the Secret
+   `immo-mcp-signal-writer` (key `IMMO_MCP_SIGNAL_DATABASE_URL`), bound by the
+   `radar-immo-mcp` Deployment in `deploy/k8s/immo-mcp/40-immo-mcp-http-deploy.yaml`.
+   Same database name as the API.
+3. Scope `immo:signals:write` declared in the production IdP catalogue and on
+   the immo-mcp client row before it is advertised, otherwise authorization
+   requests carrying it are refused with `invalid_scope`. The base ConfigMap
+   advertises it in `IMMO_MCP_OAUTH_SCOPES_SUPPORTED` and sets
+   `IMMO_MCP_SIGNALS_WRITE_ENABLED=1` (also listed in
+   `deploy/k8s/prod-configmap-keys.json`); the preprod overlay carries the
+   same two keys for qualification first.
+4. Default consent selection stays read-only. Users explicitly grant the new
+   scope and reconnect. Read-only OAuth tokens still cannot write with the
+   binding enabled.
+5. Rollout applies `deploy/k8s/immo-mcp/` through the usual prod promotion;
+   no release version change is part of this branch.
 
 ## Verification
 
