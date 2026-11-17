@@ -63,13 +63,20 @@ async function readScopedSignalClassement(
     // linked browser (manual) event confirms it; personal MCP classes and
     // confirmed shared archives count immediately. One set-based query.
     const mcp = await tx.execute(sql`SELECT DISTINCT ON (e.city_slug, e.node_type, e.node_id)
-        e.city_slug, e.node_type, e.node_id, e.classe FROM signal_mcp_events e
+        e.city_slug, e.node_type, e.node_id, e.classe,
+        (e.validation='auto' AND a.updated_at > e.created_at) AS ai_supersedes
+      FROM signal_mcp_events e
+      LEFT JOIN signal_class_annotations a ON a.source='ai' AND a.city_slug=e.city_slug
+        AND a.node_type=e.node_type AND a.node_id=e.node_id
       WHERE e.workspace_id=${workspaceId} AND (e.scope='workspace' OR e.actor_id=${accountId}) AND e.kind IN ('class','feedback')
         AND NOT (e.scope='workspace' AND e.source='mcp' AND NOT EXISTS (
           SELECT 1 FROM signal_mcp_events c WHERE c.linked_event_id=e.id AND c.source='manual'))
       ORDER BY e.city_slug, e.node_type, e.node_id,
         (e.validation='human') DESC, (e.created_at) DESC, e.id DESC`);
     for (const row of mcp.rows) {
+      // Same rule as the detail read: a newer AI annotation erases an
+      // automatic MCP class, so the AI classement computed above stands.
+      if (row.ai_supersedes === true) continue;
       const key = discardedSignalKey(String(row.city_slug), String(row.node_type), String(row.node_id));
       const classe = row.classe as keyof import("@radar/domain").VivierFiltreCubesByClassement;
       if (classe === "ecarte") hidden.add(key);
