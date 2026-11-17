@@ -32,7 +32,7 @@ describeDb("feedback migration ordering", () => {
       const createdAt = (await pool.query(`SELECT created_at FROM signal_class_annotations`)).rows;
       await pool.query(`UPDATE signal_class_annotations SET updated_at = updated_at + interval '1 day'`);
       const historyBefore = (await pool.query(`SELECT * FROM signal_class_annotation_history ORDER BY created_at,id`)).rows;
-      await pool.query(`DELETE FROM drizzle.__drizzle_migrations WHERE created_at=$1`, [feedback.when]);
+      await pool.query(`DELETE FROM drizzle.__drizzle_migrations WHERE created_at>=$1`, [feedback.when]);
       await migrate(db, { migrationsFolder: "drizzle" });
       expect((await pool.query(`SELECT created_at FROM signal_class_annotations`)).rows).toEqual(createdAt);
       expect((await pool.query(`SELECT * FROM signal_class_annotation_history ORDER BY created_at,id`)).rows)
