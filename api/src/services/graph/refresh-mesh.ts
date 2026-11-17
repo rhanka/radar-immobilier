@@ -109,6 +109,15 @@ export function refreshErrorDiagnostic(error: unknown): Record<string, string | 
     stackOrigin: internalFrame };
 }
 
+/** Muse Chat refuses reasoning controls (llm-mesh `unsupported_projection`):
+ *  the effort of a muse route is the provider default, never forwarded. */
+export function refreshRouteReasoning(
+  provider: RefreshProvider,
+  reasoning?: GenerateRequest["reasoning"],
+): GenerateRequest["reasoning"] {
+  return provider === "muse" ? undefined : reasoning;
+}
+
 export function bindRefreshAbortSignal(
   mesh: RefreshRoutedMesh,
   signal: AbortSignal,
@@ -156,10 +165,8 @@ export function createRefreshMesh(options: RefreshMeshOptions): RefreshMeshBundl
       profiles: createRefreshRoutePolicyProfiles(options.maximumAttempts),
     }),
   });
-  // Muse Chat refuses reasoning controls (llm-mesh 0.38 `unsupported_projection`):
-  // the effort of a muse route is the provider default, never forwarded.
-  const reasoning = options.provider === "muse" ? undefined : options.reasoning;
-  const abortable = bindRefreshAbortSignal(mesh, options.signal, reasoning);
+  const abortable = bindRefreshAbortSignal(mesh, options.signal,
+    refreshRouteReasoning(options.provider, options.reasoning));
   return {
     mesh: abortable,
     textClient: refreshTextJsonClient(abortable, {
