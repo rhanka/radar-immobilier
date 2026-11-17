@@ -8,6 +8,7 @@ import {
 import {
   CloudCodeRuntimeClient,
   CodexRuntimeClient,
+  MuseAdapter,
   DEFAULT_ROUTE_POLICY,
   type GenerateRequest,
   type GenerateResponse,
@@ -20,7 +21,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   bindRefreshAbortSignal, bindRefreshFetchSignal, createRefreshMesh,
-  createRefreshRoutePolicyProfiles, refreshErrorDiagnostic,
+  createRefreshRoutePolicyProfiles, refreshErrorDiagnostic, refreshRouteReasoning,
 } from "./refresh-mesh.js";
 import { Graphify34ApplyInterrupted } from "./graphify-34-snapshot.js";
 
@@ -210,6 +211,35 @@ describe("refresh mesh", () => {
     });
     expect(bundle.mesh.listProviders().map((item) => item.providerId)).toContain("gemini");
     expect(bundle.textClient.model).toBe("gemini-3.8-flash");
+  });
+
+  it("should not forward the reasoning effort on a muse route", async () => {
+    // A full createRefreshMesh call needs a routable seat account; the seam
+    // under test is the composition createRefreshMesh performs: MuseAdapter
+    // over the injected client, bound with the route reasoning.
+    const seen: GenerateRequest[] = [];
+    const museAdapter = new MuseAdapter({ client: { async generate(request: GenerateRequest) {
+      seen.push(request);
+      return { ...response, providerId: "muse" as const, modelId: "muse-wonder-1.0" };
+    } } as never });
+    const museMesh: GraphifyMesh = {
+      listProviders: () => [],
+      listModels: () => [],
+      generate: (request) => museAdapter.generate(request),
+      generateValidated: async (request, validate) => {
+        const result = await museAdapter.generate(request);
+        await validate(result);
+        return result;
+      },
+      stream: () => { throw new Error("not used"); },
+    };
+    const bound = bindRefreshAbortSignal(museMesh, new AbortController().signal,
+      refreshRouteReasoning("muse", { effort: "low" }));
+    await bound.generate({ providerId: "muse", modelId: "muse-wonder-1.0", messages: [] });
+    expect(seen).toHaveLength(1);
+    expect(seen[0]?.reasoning).toBeUndefined();
+    // Contrast: a non-muse route keeps the requested effort.
+    expect(refreshRouteReasoning("gemini", { effort: "low" })).toEqual({ effort: "low" });
   });
 
   it("should propagate the run signal through validated generation", async () => {
