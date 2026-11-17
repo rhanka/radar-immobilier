@@ -74,11 +74,14 @@ rules:
     resources: ["configmaps"]
     verbs: ["get", "patch", "update"]
     resourceNames: ["radar-db-ro-role-sql", "radar-backup-daily-script"]
-  # serviceaccounts (SA trigger T1) :
+  # change lock (lock-action of bascule-bundle-cd): create is namespace-wide
+  # above; read/CAS-update/delete stay name-scoped to radar-change-lock so a
+  # failure can always release the lock this run created.
   - apiGroups: [""]
     resources: ["configmaps"]
     verbs: ["get", "update", "delete"]
     resourceNames: ["radar-change-lock"]
+  # serviceaccounts (SA trigger T1) :
   - apiGroups: [""]
     resources: ["serviceaccounts"]
     verbs: ["create"]
