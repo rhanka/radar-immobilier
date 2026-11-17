@@ -102,10 +102,9 @@ subjects:
   - kind: ServiceAccount
     name: radar-ci-deployer
     namespace: radar-immobilier
-  # bascule-bundle-cd lock holder: same lock verbs (get/create/update on
-  # configmaps, delete on radar-change-lock) so its release step can always
-  # drop the lock it created. Its bundle rights stay in
-  # deploy/ci/bascule-preprod/rbac-ci-bascule-prod.yaml.
-  - kind: ServiceAccount
-    name: radar-ci-bascule-prod
-    namespace: radar-immobilier
+# radar-ci-bascule-prod is deliberately NOT a subject here: this Role also
+# grants patch on secret radar-db-credentials, deployments, ingresses,
+# services and pods/portforward, none of which bascule-bundle-cd needs. Its
+# lock verbs (create on configmaps; get/update/delete on radar-change-lock;
+# get/list on jobs and pods for the writer release) already live, name-scoped,
+# in deploy/ci/bascule-preprod/rbac-ci-bascule-prod.yaml.

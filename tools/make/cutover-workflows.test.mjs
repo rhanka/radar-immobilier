@@ -114,8 +114,13 @@ test('bascule-bundle-cd proves lock RBAC before creating the lock and always rel
   assert.ok(lockEngine.includes('created lock released'), 'unreadable created lock is dropped, not orphaned');
   const prod = readFileSync('deploy/cutover/rbac-prod.yaml', 'utf8');
   assert.ok(prod.includes('resourceNames: [radar-change-lock]') && prod.includes('verbs: [delete]'));
-  assert.ok(prod.includes('name: radar-ci-bascule-prod'), 'prod Role binds the bascule lock holder');
+  assert.equal(prod.includes('name: radar-ci-bascule-prod\n    namespace: radar-immobilier'), false,
+    'bascule SA is not a subject of the cutover Role (no secret patch, deployments, ingresses, services, portforward)');
   assert.ok(prod.includes('resources: [pods/log]'), 'prod Role grants Job log reads');
+  const bascule = readFileSync('deploy/ci/bascule-preprod/rbac-ci-bascule-prod.yaml', 'utf8');
+  assert.ok(bascule.includes('resourceNames: ["radar-change-lock"]') && bascule.includes('"get", "update", "delete"'),
+    'bascule lock verbs stay name-scoped in its own Role');
+  assert.equal(bascule.includes('radar-db-credentials'), false, 'bascule Role never touches the DB credentials Secret');
 });
 test('manual migrate target requires a pinned digest and the manifest carries no dated tag', () => {
   const makefile = readFileSync('Makefile', 'utf8');
