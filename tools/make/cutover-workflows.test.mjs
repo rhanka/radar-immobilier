@@ -93,6 +93,25 @@ test('production promotion migrates by release digest before prepare and run', (
   // the promotion gate must require exactly that, never a "6h" hook.
   assert.ok(steps.some(s => (s.run || '').includes('.dataMigration==null')));
 });
+test('bascule-bundle-cd proves lock RBAC before creating the lock and always releases it', () => {
+  const w = workflow('bascule-bundle-cd.yml');
+  for (const name of ['apply-bundle', 'apply-backup']) {
+    const steps = w.jobs[name].steps;
+    const guard = steps.findIndex(s => (s.name || '').startsWith('Assert change-lock RBAC before lock creation'));
+    const acquire = steps.findIndex(s => s.uses === './deploy/cutover/lock-action' && s.with.action === 'lock');
+    const release = steps.findIndex(s => s.uses === './deploy/cutover/lock-action' && s.with.action === 'release-lock');
+    assert.ok(guard >= 0 && guard < acquire, `${name}: RBAC guard precedes lock creation`);
+    assert.ok(steps[guard].run.includes('auth can-i') && steps[guard].run.includes('radar-change-lock'));
+    for (const verb of ['create', 'get', 'update', 'delete']) assert.ok(steps[guard].run.includes(verb), `${name}: can-i ${verb}`);
+    assert.ok(release > acquire && steps[release].if.includes('always()'), `${name}: release runs on failure`);
+  }
+  const lockEngine = readFileSync('tools/make/cutover-cluster.sh', 'utf8');
+  assert.ok(lockEngine.includes('created lock released'), 'unreadable created lock is dropped, not orphaned');
+  const prod = readFileSync('deploy/cutover/rbac-prod.yaml', 'utf8');
+  assert.ok(prod.includes('resourceNames: [radar-change-lock]') && prod.includes('verbs: [delete]'));
+  assert.ok(prod.includes('name: radar-ci-bascule-prod'), 'prod Role binds the bascule lock holder');
+  assert.ok(prod.includes('resources: [pods/log]'), 'prod Role grants Job log reads');
+});
 test('retired executable vehicles have no fallback entry', () => {
   for (const file of ['deploy/base-preprod/operator.mk', 'deploy/ci/bascule-preprod/bascule.mjs',
     'deploy/ci/bascule-preprod/restore-mode.mjs', 'tools/make/base-preprod-maintenance.sh']) assert.equal(existsSync(file), false);
