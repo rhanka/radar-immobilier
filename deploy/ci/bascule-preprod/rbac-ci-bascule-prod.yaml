@@ -76,7 +76,11 @@ rules:
     resourceNames: ["radar-db-ro-role-sql", "radar-backup-daily-script"]
   # change lock (lock-action of bascule-bundle-cd): create is namespace-wide
   # above; read/CAS-update/delete stay name-scoped to radar-change-lock so a
-  # failure can always release the lock this run created.
+  # failure can always release the lock this run created. The writer release
+  # also reads jobs and pods (get/list below). This SA runs no prepare, no
+  # migrate and no suspend_writers: those belong to radar-ci-deployer under
+  # deploy/cutover/rbac-prod.yaml, so no backup-Job, CronJob-patch or
+  # secret-patch verb is added here.
   - apiGroups: [""]
     resources: ["configmaps"]
     verbs: ["get", "update", "delete"]
