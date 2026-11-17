@@ -41,7 +41,10 @@ spec:
             capabilities:
               drop:
                 - ALL
-          image: ghcr.io/rhanka/radar-api:main-8909943-pdfgeo
+          # Placeholder only: every caller pins the release digest
+          # (promote-prod from release.json, preprod by sha tag, the manual
+          # make target by MIGRATE_IMAGE). Never put a dated tag back here.
+          image: ghcr.io/rhanka/radar-api@sha256:0000000000000000000000000000000000000000000000000000000000000000
           imagePullPolicy: Always
           workingDir: /workspace/api
           command: ["node", "dist/db/migrate.js"]

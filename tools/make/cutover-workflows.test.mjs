@@ -112,6 +112,12 @@ test('bascule-bundle-cd proves lock RBAC before creating the lock and always rel
   assert.ok(prod.includes('name: radar-ci-bascule-prod'), 'prod Role binds the bascule lock holder');
   assert.ok(prod.includes('resources: [pods/log]'), 'prod Role grants Job log reads');
 });
+test('manual migrate target requires a pinned digest and the manifest carries no dated tag', () => {
+  const makefile = readFileSync('Makefile', 'utf8');
+  assert.ok(makefile.includes('MIGRATE_IMAGE') && makefile.includes('@sha256:[0-9a-f]{64}'));
+  const manifest = readFileSync('deploy/k8s/36-db-migrate-job.yaml', 'utf8');
+  assert.equal(/radar-api:(main-|[0-9]{7})/.test(manifest), false, 'no dated image tag in the migrate manifest');
+});
 test('retired executable vehicles have no fallback entry', () => {
   for (const file of ['deploy/base-preprod/operator.mk', 'deploy/ci/bascule-preprod/bascule.mjs',
     'deploy/ci/bascule-preprod/restore-mode.mjs', 'tools/make/base-preprod-maintenance.sh']) assert.equal(existsSync(file), false);
