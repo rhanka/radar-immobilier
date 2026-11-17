@@ -5,7 +5,7 @@
 //
 //   node account-import.mjs <transport> <runtime-dir> <import-dir>
 //
-// <transport> is `codex` (target openai) or `cloud-code` (target gemini).
+// <transport> is `codex` (target openai), `cloud-code` (target gemini) or `muse` (target muse).
 // Every runtime account of the SAME transport and owner scope is replaced
 // (public record, envelope and owner claim deleted, index entry dropped), so a
 // re-authorization never leaves a stale, unroutable account behind. Accounts of
@@ -16,7 +16,7 @@ import { createHash } from "node:crypto";
 import { pathToFileURL } from "node:url";
 
 export const ACCOUNT_INDEX_KEY = "sentropic-llm-mesh:accounts:index";
-export const IMPORT_TRANSPORTS = Object.freeze({ codex: "openai", "cloud-code": "gemini" });
+export const IMPORT_TRANSPORTS = Object.freeze({ codex: "openai", "cloud-code": "gemini", muse: "muse" });
 
 const recordKey = (accountId, kind) => `sentropic-llm-mesh:${accountId}:${kind}`;
 

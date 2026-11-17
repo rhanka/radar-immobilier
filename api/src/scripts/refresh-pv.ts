@@ -94,9 +94,11 @@ function rate(name: string, fallback: number): number {
 }
 
 
+const REFRESH_PROVIDER_IDS: readonly string[] = ["openai", "gemini", "muse"];
+
 function selectedModel(prefix: string): RefreshModel {
   const provider = required(`${prefix}_PROVIDER`);
-  if (provider !== "openai" && provider !== "gemini") throw new Error(`${prefix}_PROVIDER must be openai or gemini`);
+  if (!REFRESH_PROVIDER_IDS.includes(provider)) throw new Error(`${prefix}_PROVIDER must be openai, gemini or muse`);
   const effort = required(`${prefix}_REASONING_EFFORT`);
   if (!["minimal", "low", "medium", "high", "xhigh"].includes(effort)) {
     throw new Error(`${prefix}_REASONING_EFFORT is invalid`);
