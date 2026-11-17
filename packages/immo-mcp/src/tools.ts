@@ -36,7 +36,10 @@ export interface ToolContext {
  */
 export function registerTools(server: McpServer, ctx: ToolContext): void {
   const registrations = [];
-  for (const def of ALL_TOOL_DEFINITIONS) {
+  // The five signal tools exist only while the signal binding is active.
+  const definitions = ctx.signals ? ALL_TOOL_DEFINITIONS
+    : ALL_TOOL_DEFINITIONS.filter((def) => !SIGNAL_TOOL_DEFINITIONS.some((signal) => signal.name === def.name));
+  for (const def of definitions) {
     const handler = TOOL_HANDLERS[def.name];
     if (!handler) throw new Error(`missing_handler:${def.name}`);
     const registered = server.registerTool(
