@@ -1286,7 +1286,7 @@ jobs:
             || { echo "::error title=Prod migrate refused::release apiImage is not a pinned digest: ${api_image}"; exit 1; }
           job="radar-db-migrate-${GITHUB_SHA::7}"
           tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
-          sed -e "s|image: ghcr.io/rhanka/radar-api:.*|image: ${api_image}|" \
+          sed -e "s|image: ghcr.io/rhanka/radar-api.*|image: ${api_image}|" \
               -e "s|name: radar-db-migrate$|name: ${job}|" \
               deploy/k8s/36-db-migrate-job.yaml > "$tmp/job.yaml"
           grep -q "image: ${api_image}" "$tmp/job.yaml" \
