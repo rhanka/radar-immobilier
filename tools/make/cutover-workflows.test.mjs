@@ -77,21 +77,26 @@ test('all competing workflows acquire before mutations and release through alway
   assert.equal(promotion.includes('docker/build-push-action'), false);
   assert.equal(build.jobs['promote-prod'].environment, 'production');
 });
-test('production promotion migrates by release digest before prepare and run', () => {
+test('production promotion migrates inside prepare, under lock, after backup and writer drain', () => {
   const w = workflow('build-push-images.yml');
-  const steps = w.jobs['promote-prod'].steps;
-  const migrate = steps.findIndex(s => s.name === 'Migrate production DB before cutover (fail-closed, release digest)');
+  const job = w.jobs['promote-prod'];
+  assert.equal(job.if, "startsWith(github.ref, 'refs/tags/v') && vars.PROMOTE_PROD_ENABLED == 'true'", 'promote-prod stays disarmed until the owner arms it');
+  const steps = job.steps;
+  assert.equal(steps.some(s => (s.name || '').includes('Migrate production DB')), false, 'no standalone migrate step outside the lock');
   const prepare = steps.findIndex(s => s.name === 'Prepare production recovery backup and verify live migrations');
   const run = steps.findIndex(s => s.name === 'Sequential cutover (same manifest as rehearsal)');
-  assert.ok(migrate >= 0 && migrate < prepare && prepare < run, 'migrate precedes prepare and run');
-  const body = steps[migrate].run;
-  assert.ok(body.includes("jq -er '.apiImage' cutover-release/release.json"));
-  assert.ok(body.includes('@sha256:[0-9a-f]{64}'), 'digest pin is enforced, never a tag');
-  assert.ok(body.includes('36-db-migrate-job.yaml') && body.includes('logs "job/$job"'));
-  assert.ok(body.includes('exit 1'), 'a failed migration aborts the promotion');
+  assert.ok(prepare >= 0 && prepare < run, 'prepare precedes run');
   // release.json is generated with dataMigration:null (cutover-release.sh);
   // the promotion gate must require exactly that, never a "6h" hook.
   assert.ok(steps.some(s => (s.run || '').includes('.dataMigration==null')));
+  const flow = readFileSync('tools/make/cutover-prepare.sh', 'utf8');
+  const lock = flow.indexOf('lock_acquire prepare');
+  const drain = flow.indexOf('suspend_writers drain');
+  const backup = flow.indexOf('run_job backup 840 900');
+  const ddl = flow.indexOf('run_job ddl 540 600', backup);
+  const destination = flow.indexOf('run_job destination 60 90');
+  assert.ok(lock >= 0 && lock < drain && drain < backup && backup < ddl && ddl < destination,
+    'prod DDL runs after lock, writer drain and backup, before destination');
 });
 test('bascule-bundle-cd proves lock RBAC before creating the lock and always releases it', () => {
   const w = workflow('bascule-bundle-cd.yml');
