@@ -274,7 +274,7 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
 
   const app = new Hono();
   const host = new ImmoStatefulHost(app);
-  const ready = composeStatefulImmo(host, deps.authorize ?? (async () => !deps.artifacts && data.mode !== "http" && raw.mode !== "http"), deps.artifacts)
+  const ready = composeStatefulImmo(host, deps.authorize ?? (async () => !deps.artifacts && data.mode !== "http" && raw.mode !== "http"), deps.artifacts, { signalTools: !!deps.signals })
     .then(() => true, () => false);
 
   // Preserve the historical discovery URL while 0.2 challenges advertise RFC 9728.

@@ -12,14 +12,22 @@ export async function invokeSignalTool(name: SignalTool, input: Record<string, u
   const hash = createHash("sha256").update(JSON.stringify(input)).digest("hex");
   const audit = async (error: string) => {
     if (isSignalWrite(name) && ctx.signals && ctx.auth.clientId) await ctx.signals.db.query(
-      "SELECT signal_mcp_result($1,$2,$3,$4,$5,$6::jsonb)",
-      [ctx.auth.sub, ctx.auth.clientId, typeof input.model === "string" ? input.model : null, name, hash, JSON.stringify({ error })]);
+      "SELECT signal_mcp_result($1,$2,$3,$4,$5,$6::jsonb,$7::jsonb)",
+      [ctx.auth.sub, ctx.auth.clientId, typeof input.model === "string" ? input.model : null, name, hash,
+        JSON.stringify({ error }), JSON.stringify((input as { signalRef?: unknown }).signalRef ?? null)]);
     return result({ error });
   };
   if (!ctx.auth.scopes.includes(isSignalWrite(name) ? SIGNAL_WRITE_SCOPE : "immo:read")) return audit("scope_denied");
   const parsed = signalSchemas[name].safeParse(input);
   if (!parsed.success) return audit("invalid_signal_command");
   if (!ctx.signals) return result({ error: "signal_binding_unavailable" });
+  // The token's workspace claim bounds every signal tool: a reference to a
+  // workspace the token does not carry is refused before any database read.
+  const claimed = ctx.auth.workspaces.filter((entry) => entry !== "default");
+  const refWorkspace = (parsed.data as { signalRef?: { workspaceId?: string } }).signalRef?.workspaceId;
+  if (refWorkspace && claimed.length > 0 && !claimed.includes(refWorkspace)) {
+    return isSignalWrite(name) ? audit("workspace_membership_required") : result({ error: "workspace_membership_required" });
+  }
   if (name === "list_class_reasons") {
     const codes = await ctx.signals.db.query("SELECT code,verdict FROM facet_reason_codes WHERE profile_id=$1 ORDER BY code", ["immo-steve-2026-09"]);
     return result({ classes: CLASS_DEFINITIONS, reasons: codes.rows.map((row) => ({ ...row,
@@ -43,8 +51,8 @@ export async function invokeSignalTool(name: SignalTool, input: Record<string, u
     catch { accepted = false; }
   }
   if (name === "confirm_classification" && !accepted) return audit("human_confirmation_required");
-  const saved = await ctx.signals.db.query("SELECT signal_mcp_write($1,$2,$3,$4::jsonb,$5,$6,$7) AS result",
-    [ctx.auth.sub, ctx.auth.clientId, name, JSON.stringify({ ...body, pendingHuman: accepted }), "auto", state.version, hash]);
+  const saved = await ctx.signals.db.query("SELECT signal_mcp_write_mcp($1,$2,$3,$4::jsonb,$5,$6) AS result",
+    [ctx.auth.sub, ctx.auth.clientId, name, JSON.stringify({ ...body, pendingHuman: accepted }), state.version, hash]);
   return result(saved.rows[0]?.result as Record<string, unknown>);
 }
 export const SIGNAL_TOOL_HANDLERS = Object.fromEntries(Object.keys(signalSchemas).map((name) => [name,
