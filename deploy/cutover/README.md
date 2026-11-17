@@ -57,9 +57,39 @@ lists the whole preprod bucket (about 100 s), so it runs after writers are
 suspended and before closure, with the preparation deadline (840 s). The
 database switch refuses without that completed evidence.
 
-Preprod preparation copies documents additively into the live preprod document
-bucket before closure (additive copy, no deletion); this is kept
-deliberately so the cutover never waits on document copy.
+Preprod preparation and the daily restore copy the documents of the pinned
+backup into the live preprod document bucket before closure. Outside the
+PG-coupled prefixes the copy is additive. The PG-coupled prefixes (`graph/`,
+`refresh/018/`: canonical graph, run states, receipts and coverage ledgers) are
+MIRRORED from the same snapshot as the restored database: objects absent from
+the snapshot are deleted. `refresh/018/sweep/` (preprod sweep cursor), the
+artifact catalogue (`artifacts.*` schema, `artifacts/` blobs) and every other
+prefix survive. Deletion needs `DeleteObject` on `graph/*` and
+`refresh/018/*` of the preprod bucket for the copy identity; the docs Job probes
+it in both prefixes before the first write and refuses otherwise. Deletions run only
+after every copy succeeded; a copy error skips them all (`deleteSkipped`). Keys
+with a `.`, `..` or empty inner segment are counted (`mirrorAnomalies`) and never
+deleted, but listing readers (`readRefreshStates` lists `refresh/018/<city>/runs/`)
+would still read them: recon and `coherence_gate` refuse while any remains. Remove
+them by hand after review, then re-run; the `Coherence OK` line prints
+`mirror_anomalies=0`. A volume guard refuses before any write when snapshot D holds nothing in a
+mirror prefix that preprod fills, or when more than `MIRROR_MAX_DELETE_RATIO`
+(default 0.5) of a prefix would be deleted; review the logged plan, then pass
+`MIRROR_FORCE=1` (or a higher ratio) to the `make` command. After the restore Job,
+`coherence_gate` (`tools/make/cutover-coherence.jq`) refuses unless the
+database dump, the documents and the recon share the pinned snapshot and the
+mirror prefixes hold nothing outside it. The PG-coupled CronJobs
+(`preprod.coherenceSchedules`: `radar-refresh-pv`) stay suspended from the
+document mirror until the live database is that snapshot: a `prepare` holds
+them (annotation `sentropic.io/held-until-coherent`) until the release switch;
+a successful switch or coherent daily restore releases them to the original state
+recorded as `<run>:(true|false)`. Any other annotation value is a human hold: it is
+kept and never released automatically (remove it, or write `<token>:false`, by hand); a rollback or a restore reopened without restoration keeps them held.
+
+Incident 2026-11-14: the former additive copy left preprod run receipts and
+ledgers next to the production ones; every projection was then refused with
+`postgres-regression-refused`. Remediation is the daily restore below, never a
+manual alignment.
 
 `radar-prepared-db` records preparation ownership, status, backup fingerprints,
 release SHA, migration count and smoke result. Cutover refuses unless the stamp
@@ -76,8 +106,11 @@ document work; prepare drains active refresh Jobs for up to ten minutes,
 cutover deletes them immediately by UID. Sweep cursors under
 `refresh/018/sweep/` are excluded from copy and reconciliation.
 
-The `prepare-preprod-db` CI job blocks deployment on restore, DDL, 6H or smoke
-failure. Its runner polls cluster Jobs for up to 240 minutes, aligned with the
+The `prepare-preprod-db` CI job runs only when the repository variable
+`PREPROD_PREPARE_ENABLED` is `true` (absent = off). It is a rehearsal: its failure
+on restore, DDL, 6H or smoke is reported as a warning and never gates the preprod
+rollout. Releases carry `dataMigration: null` since production applied 6H on
+2026-11-14. Its runner polls cluster Jobs for up to 240 minutes, aligned with the
 sum of the preparation stage budgets (about 12 390 s after the preparing
 stamp). This is incompatible
 with the design's simultaneous five-minute runner wall-time budget; no long work
@@ -197,6 +230,88 @@ On success, API/UI/MCP and all captured routes are available on the selected
 release, original schedule states are restored, and the sanitized receipt is
 saved in `radar-cutover-receipt` before releasing the lock. ACME solver ingresses
 are excluded. Originally suspended CronJobs stay suspended.
+
+### Preprod artifact catalogue (union, preprod only)
+
+A prod-to-preprod restore (daily `MODE=restore` and `prepare`) keeps the
+preprod artifacts and imports the prod ones. Spec:
+`docs/spec/SPEC_EVOL_ARTIFACTS_RESTORE_PERSIST.md` §2b.
+
+1. The `restore` Job writes `deploy/cutover/artifacts-catalogue.sh` to `/work`
+   and, before the schema reset, exports the live preprod catalogue
+   (`artifacts.*`) and stashes it in schema `catalogue_stash` of the database
+   it restores. The reset spares `catalogue_stash` and `catalogue_journal`.
+   `prepare` exports from the live database (`LIVE_DB`), never from the
+   candidate. Each stash generation is tagged with the run and backup pin: the
+   same run relaunched reuses its own; a pending stash of another run is never
+   imported alone: the live database is exported again as a newer generation
+   and every generation is imported, newest first. `prepare` also carries the
+   pending generations of the live stash into the candidate.
+2. The coherence gate runs, then the migrations (`ddl`, `data`).
+3. The `catalogue` Job first copies the prod artifact blobs (init container
+   `blobs`, `deploy/cutover/artifacts-blobs.sh`): prod bucket
+   `radar-immobilier-artifacts`, prefix `artifacts/radar-immobilier/blobs/sha256/`,
+   read only; destination `radar-immobilier-artifacts-preprod`, prefix
+   `artifacts/radar-immobilier-preprod/blobs/sha256/`; missing names only, no
+   delete. Then `import-stash` moves the prod rows to the preprod scope, checks
+   that every visible release has its blobs, runs the union with the replayed
+   prod catalogue, checks the blobs again, then drops the stash. Prod wins on any unique key; the preprod
+   row is kept in `catalogue_journal.conflicts`, a row whose parent is gone is
+   kept there as `orphan:<parent>`. Per-table counts land in
+   `catalogue_journal.imports`. No stash = nothing to do (exit 0).
+
+Triggers and journals:
+
+- Scope rewrite: no trigger is ever disabled. A table without prod-scope rows
+  gets no statement at all; an append-only table (statement-level `BEFORE
+  UPDATE/DELETE` guard, e.g. `git_binding_events`, `git_release_index` of 0036)
+  holding prod-scope rows refuses with `append-only table <t> holds N
+  prod-scope rows: decision required`, nothing written, stash intact.
+  Every update and every deleted scope-configuration row (`host_policy`,
+  `host_quotas`) is counted in `catalogue_journal.rewrites`.
+- Union import: `DISABLE TRIGGER USER` on the catalogue tables for the duration
+  of its INSERTs (foreign keys stay enforced), then `ENABLE TRIGGER USER` with a
+  parity check of the disabled-trigger count before COMMIT; it never updates
+  nor deletes an existing row.
+- Failures: each `import-stash` step that fails writes its ERROR lines (no
+  DETAIL, literal values masked) to `catalogue_journal.failures`:
+  `SELECT recorded_at, stash_tag, step, cause FROM catalogue_journal.failures ORDER BY 1 DESC LIMIT 5;`
+
+Hold: when a daily restore fails after its restore Job ran, the automatic
+reopening first imports the catalogue (`catalogue` Job). If that import fails,
+the site stays closed (`Automatic reopening refused`); fix the cause, then
+`resume RUN`. Preprod never reopens on the prod replay without its artifacts.
+
+Refusals (the run fails, nothing is imported, the stash stays for a rerun):
+
+- Missing blob: a visible release references a `sha256:` digest absent from
+  the preprod bucket listing (blob check before and after the union).
+- Copy identity: Secret `radar-artifacts-restore-copy` (keys `S3_ACCESS_KEY`,
+  `S3_SECRET_KEY`) must exist in the preprod namespace with `s3:ListBucket` and
+  `s3:GetObject` on `radar-immobilier-artifacts` (read only) and
+  `s3:ListBucket`, `s3:GetObject`, `s3:PutObject` on
+  `radar-immobilier-artifacts-preprod`. No delete right, no multipart right:
+  each blob is one single-part copy (`-p 64` MiB); a blob above
+  `RELEASE_FILE_BYTES_MAX` (16 MiB) is refused before any copy.
+- In-flight publishes: the export refuses while `artifacts.object_intents`
+  holds `pending` rows. Wait for them to drain (or let them expire), then
+  relaunch. Closure (`MODE=restore`) and the writer drain (`prepare`) stop new
+  publishes before the export.
+- Schema (decided on the real shape of each catalogue table, before any load):
+  same migration journal = exact columns; different journal = every export
+  column present with the same type, every target `NOT NULL` column without
+  default exported. A different journal alone (newer target, migration file
+  edited after it was applied) is accepted and recorded in
+  `catalogue_journal.schema_drift` (migration hashes only).
+- Identity: a subject `rejected` in prod but `approved` in preprod refuses.
+
+Prod never runs either side: `CATALOGUE_DIR` is empty outside preprod.
+
+Journal of the last imports (read-only SQL on the preprod database):
+
+```sql
+SELECT tbl, exported, same, inserted, collisions, orphans FROM catalogue_journal.imports ORDER BY recorded_at DESC LIMIT 20;
+```
 
 ## Daily and cross-tenant adapters
 

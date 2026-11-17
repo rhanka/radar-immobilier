@@ -24,14 +24,18 @@ const key = kind => ({ configmap: 'ConfigMap', configmaps: 'ConfigMap', deployme
   ingress: 'Ingress', ingresses: 'Ingress', endpoints: 'Endpoints', replicasets: 'ReplicaSet', networkpolicy: 'NetworkPolicy', secret: 'Secret' })[kind];
 const find = (kind, name) => s.objects.find(o => o.kind === key(kind) && o.metadata.name === name);
 const value = flag => args[args.indexOf(flag) + 1];
+// Pin of the synthetic backup: docs, recon and restore verdicts carry it (coherence gate).
+const pin = () => ({ date: '2026-10-29', manifestSha256: 'd'.repeat(64), pgSha256: 'e'.repeat(64), ...s.pinOverride });
 const jobVerdict = (step, job) => ['database', 'destination', 'reset', 'discard', 'verify'].includes(step)
   ? { ok: true, database: job.spec.template.spec.containers[0].env.find(e => e.name === 'POSTGRES_DB')?.value
     || Buffer.from(find('secret', 'radar-db-credentials').data.POSTGRES_DB, 'base64').toString(), migrations: 25 }
   : step === 'resolve' ? { ok: true, date: '2026-10-29', backupId: 'latest', ageHours: 1,
     dumpStartedAt: '2026-10-29T01:00:00Z', migrations: 25,
     manifestSha256: 'd'.repeat(64), pgSha256: 'e'.repeat(64), pgSizeBytes: 1024, ...s.pinOverride } :
-  (step === 'docs' || step === 'recon') && s.inventoryAnomalies ? { ok: true,
-    inventoryAnomalies: s.inventoryAnomalies, inventoryAnomalyCount: s.inventoryAnomalies.length, inventoryAnomaliesTruncated: false } : step === 'data' ?
+  (step === 'docs' || step === 'recon') ? { ok: true, date: pin().date, manifestSha256: pin().manifestSha256, missing: 0, sizeMismatch: 0,
+    copyErrors: 0, deleteErrors: 0, mirrorExtra: s.mirrorExtra ?? 0, mirrorAnomalies: s.mirrorAnomalies ?? 0, ...(s.inventoryAnomalies ? {
+    inventoryAnomalies: s.inventoryAnomalies, inventoryAnomalyCount: s.inventoryAnomalies.length, inventoryAnomaliesTruncated: false } : {}) } :
+  step === 'restore' ? { ok: true, date: pin().date, pgSha256: pin().pgSha256, pgSizeBytes: 1024 } : step === 'data' ?
   { ok: true, status: 'open-success', epoch: 'scoped', sealedUnresolved: 0, maintenanceBarrier: false } : { ok: true };
 // RBAC access log: every API access the controller performs, as {verb, resource, group, name}.
 const RESOURCES = { configmap: ['configmaps', ''], configmaps: ['configmaps', ''], secret: ['secrets', ''], service: ['services', ''],

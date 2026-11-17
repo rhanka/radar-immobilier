@@ -7,6 +7,8 @@
     "url": "https://preprod.immo.sent-tech.ca",
     "database": "radar",
     "documents": "radar-immobilier-docs-preprod",
+    "artifacts": {"bucket": "radar-immobilier-artifacts-preprod", "scope": "radar-immobilier-preprod"},
+    "coherenceSchedules": ["radar-refresh-pv"],
     "recoveryBucket": "sentropic-pgbackup-preprod",
     "restoreResources": {"requests": {"cpu": "250m", "memory": "1Gi"}, "limits": {"cpu": "1500m", "memory": "2Gi"}}
   },
@@ -15,6 +17,7 @@
     "url": "https://immo.sent-tech.ca",
     "database": "radar",
     "documents": "radar-immobilier-docs",
+    "artifacts": {"bucket": "radar-immobilier-artifacts", "scope": "radar-immobilier"},
     "recoveryBucket": "sentropic-pgbackup",
     "restoreResources": {"requests": {"cpu": "250m", "memory": "1Gi"}, "limits": {"cpu": "1500m", "memory": "2Gi"}}
   },
@@ -24,6 +27,7 @@
     "backupBucket": "radar-immobilier-backup",
     "readerSecret": "radar-backup-reader-preprod",
     "copySecret": "radar-backup-restore-docs",
+    "artifactsCopySecret": "radar-artifacts-restore-copy",
     "copyGrantee": "1901410700457444:user-Wq74B63YQum8",
     "dbSecret": "radar-db-credentials",
     "backupSecret": "radar-backup-s3-credentials"

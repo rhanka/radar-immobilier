@@ -81,6 +81,11 @@ jobs:
       - name: Validate preprod auth isolation (offline render, no PROD auth value)
         run: bash deploy/ci/check-preprod-auth-isolation.test.sh
 
+      - name: Validate prod ConfigMap keys (offline render, required key list)
+        run: |
+          bash deploy/ci/check-prod-configmap-keys.sh
+          bash deploy/ci/check-prod-configmap-keys.test.sh
+
       - name: Validate ops recipients wiring (offline render, preprod open / prod inert)
         run: bash deploy/ci/check-ops-recipients-render.test.sh
 

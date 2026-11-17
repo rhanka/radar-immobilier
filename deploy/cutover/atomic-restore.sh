@@ -5,6 +5,23 @@
 # database), LIVE_DB, RESTORE_DUMP, EXPECTED_TOC_ENTRIES, RESTORE_ASSERT_DB,
 # DUMP_DATABASE.
 #
+# Preprod catalogue preservation (D2 = C, opt-in): when CATALOGUE_DIR is set,
+# the preprod-only artifact catalogue (artifacts.* rows, blobs stay in S3) is
+# exported before the schema reset and re-imported after the replay, before
+# any reopening. CATALOGUE_SCRIPT points at deploy/cutover/artifacts-catalogue.sh
+# and CATALOGUE_MAP optionally at an explicit subject correspondence file.
+# Unset CATALOGUE_DIR keeps the historical behavior byte-for-byte.
+# CATALOGUE_STASH=1 (restore Jobs, preprod only): the export is stashed in schema
+# catalogue_stash of the restored database instead of being imported here; the
+# catalogue Job imports it in union AFTER the migrations (ddl, data), so a prod
+# dump older than the preprod release never blocks it. CATALOGUE_STASH_TAG (run
+# and backup pin) binds the stash: the same run reuses it (a relaunch after the
+# replay must never re-export prod rows); a stash of another run is kept and the
+# live database is exported again as a newer generation (no loss). Prepared
+# path: fresh export from LIVE_DB (never the candidate), plus the pending
+# generations of the live stash.
+# The schema reset keeps catalogue_stash and catalogue_journal.
+#
 # A snapshot older than the destination schema (fewer migrations) cannot be
 # restored with `pg_restore --clean`: dropping a primary key that newer foreign
 # keys depend on aborts the whole transaction. Every application schema is
@@ -37,10 +54,66 @@ else
   echo "[restore] dbname check DISABLED (RESTORE_ASSERT_DB=0)"
 fi
 echo "[restore] toc_entries=$toc archive verified"
+catalogue_export_dir=${CATALOGUE_DIR:-}
+catalogue_script=${CATALOGUE_SCRIPT:-}
+catalogue_map=${CATALOGUE_MAP:-}
+if [ -n "$catalogue_export_dir" ]; then
+  [ -n "$catalogue_script" ] || { echo "[restore] ERROR — CATALOGUE_DIR without CATALOGUE_SCRIPT"; exit 1; }
+  [ -f "$catalogue_script" ] || { echo "[restore] ERROR — catalogue script missing"; exit 1; }
+  mkdir -p "$catalogue_export_dir/export"
+  if [ "${CATALOGUE_STASH:-0}" = 1 ]; then
+    catalogue_tag=${CATALOGUE_STASH_TAG:-}
+    [ -n "$catalogue_tag" ] || { echo "[restore] ERROR — CATALOGUE_STASH without CATALOGUE_STASH_TAG (run and backup pin)" >&2; exit 1; }
+    if [ -n "$TARGET_DB" ]; then
+      [ -n "${LIVE_DB:-}" ] && [ "$LIVE_DB" != "$TARGET_DB" ] || { echo "[restore] ERROR — prepared-database restore needs LIVE_DB as catalogue source (never the candidate)" >&2; exit 1; }
+      rm -rf "$catalogue_export_dir/export" "$catalogue_export_dir/carry"
+      bash "$catalogue_script" stash-drop || exit 1
+      # A pending stash of the live database (an import that never completed) follows.
+      bash "$catalogue_script" stash-carry --from-db "$LIVE_DB" --work "$catalogue_export_dir/carry" || exit 1
+      PGDATABASE="$LIVE_DB" bash "$catalogue_script" export --out-dir "$catalogue_export_dir/export" || exit 1
+      bash "$catalogue_script" stash --in-dir "$catalogue_export_dir/export" --tag "$catalogue_tag" || exit 1
+    else
+      catalogue_current=$(bash "$catalogue_script" stash-tag) || exit 1
+      if [ "$catalogue_current" = "$catalogue_tag" ]; then
+        # Same run and pin: the live database may already hold the prod replay.
+        echo "[restore] catalogue stash of this run already present, reusing it"
+      else
+        if [ -n "$catalogue_current" ]; then
+          echo "[restore] pending catalogue stash from another run ($catalogue_current): exporting the live database again as a newer generation, both are imported newest first"
+        fi
+        rm -rf "$catalogue_export_dir/export"
+        bash "$catalogue_script" export --out-dir "$catalogue_export_dir/export" || exit 1
+        bash "$catalogue_script" stash --in-dir "$catalogue_export_dir/export" --tag "$catalogue_tag" || exit 1
+      fi
+    fi
+  elif [ -f "$catalogue_export_dir/export/manifest.json" ] \
+    && bash "$catalogue_script" manifest-check --in-dir "$catalogue_export_dir/export" >/dev/null 2>&1; then
+    echo "[restore] catalogue export already sealed, reusing $catalogue_export_dir/export"
+  elif [ -n "$TARGET_DB" ]; then
+    echo "[restore] ERROR — prepared-database restore requires a pre-sealed catalogue export (export from live first, never from the candidate)" >&2
+    exit 1
+  else
+    rm -rf "$catalogue_export_dir/export"
+    bash "$catalogue_script" export --out-dir "$catalogue_export_dir/export" || exit 1
+  fi
+fi
+catalogue_import() {
+  [ -n "$catalogue_export_dir" ] || return 0
+  [ "${CATALOGUE_STASH:-0}" = 1 ] && return 0
+  set -- --in-dir "$catalogue_export_dir/export"
+  # Live path: the database was reset and replayed after the export, so the
+  # export source name matches by construction. The import is a UNION with the
+  # replayed prod catalogue: prod wins on any unique key, the preprod row is
+  # journaled in conflicts.tsv (never dropped silently), see artifacts-catalogue.sh.
+  # Prepared path keeps the strict guard: the export must come from live.
+  [ -z "${TARGET_DB:-}" ] && set -- "$@" --allow-same-db
+  [ -n "$catalogue_map" ] && set -- "$@" --map "$catalogue_map"
+  bash "$catalogue_script" import "$@" || exit 1
+}
 reset_schemas() {
   printf '%s\n' \
     'DO $reset$ DECLARE s name; BEGIN' \
-    "  FOR s IN SELECT nspname FROM pg_namespace WHERE nspname <> 'information_schema' AND nspname !~ '^pg_' LOOP" \
+    "  FOR s IN SELECT nspname FROM pg_namespace WHERE nspname NOT IN ('information_schema', 'catalogue_stash', 'catalogue_journal') AND nspname !~ '^pg_' LOOP" \
     "    EXECUTE format('DROP SCHEMA %I CASCADE', s);" \
     '  END LOOP;' \
     'END $reset$;' \
@@ -50,6 +123,7 @@ reset_schemas() {
 if [ -n "$TARGET_DB" ]; then
   reset_schemas | psql -X --no-psqlrc -v ON_ERROR_STOP=1 --single-transaction --quiet --file=-
   pg_restore --no-owner --no-privileges --exit-on-error -j 4 --dbname="$PGDATABASE" "$dump"
+  catalogue_import
   echo "[restore] ok — archive loaded into prepared database $PGDATABASE"
   exit 0
 fi
@@ -63,4 +137,5 @@ fi
     exit 1
   fi
 } | psql -X --no-psqlrc -v ON_ERROR_STOP=1 --quiet --file=- > /dev/null
+catalogue_import
 echo "[restore] ok — archive loaded atomically into $PGDATABASE"
