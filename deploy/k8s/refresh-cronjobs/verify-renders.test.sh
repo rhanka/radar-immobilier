@@ -56,6 +56,15 @@ run_bad "classification must default to Astra low" "refresh activation/model con
 fixture; sed -i '/REFRESH_CLASSIFY_FALLBACK_MODEL/s/gemini-3.8-flash/other/' "$CASE_ROOT/$BASE"
 run_bad "classification fallback must stay Gemini Flash" "refresh activation/model contract failed"
 
+fixture; sed -i '/name: REFRESH_FALLBACK_PROVIDER/s/value: "gemini"/value: "muse"/; /name: REFRESH_FALLBACK_MODEL/s/gemini-3.8-flash/muse-wonder-1.0/' "$CASE_ROOT/$BASE"
+run_ok "declared muse fallback (provider and Wonder 1.0 model) passes"
+
+fixture; sed -i '/name: REFRESH_FALLBACK_PROVIDER/s/value: "gemini"/value: "muse"/' "$CASE_ROOT/$BASE"
+run_bad "muse provider without the Wonder 1.0 model" "refresh activation/model contract failed"
+
+fixture; sed -i '/name: REFRESH_FALLBACK_MODEL/s/gemini-3.8-flash/muse-wonder-1.0/' "$CASE_ROOT/$BASE"
+run_bad "Wonder 1.0 model without the muse provider" "refresh activation/model contract failed"
+
 fixture; sed -i '/REFRESH_CLASSIFY_CONCURRENCY/s/value: "2"/value: "200"/' "$CASE_ROOT/$BASE"
 run_bad "classification concurrency must stay bounded" "refresh activation/model contract failed"
 
