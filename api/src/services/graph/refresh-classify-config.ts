@@ -15,7 +15,7 @@ function model(env: NodeJS.ProcessEnv, prefix: string, defaults: RefreshModel): 
   const provider = env[`${prefix}_PROVIDER`] ?? defaults.provider;
   const name = env[`${prefix}_MODEL`] ?? defaults.model;
   const effort = env[`${prefix}_REASONING_EFFORT`] ?? defaults.effort;
-  if ((provider !== "openai" && provider !== "gemini") || !name.trim()
+  if ((provider !== "openai" && provider !== "gemini" && provider !== "muse") || !name.trim()
     || !["minimal", "low", "medium", "high", "xhigh"].includes(effort)) {
     throw new Error(`Invalid ${prefix} model configuration`);
   }
