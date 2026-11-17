@@ -13,35 +13,53 @@ kubectl -n radar-immobilier apply -f deploy/cutover/rbac-prod.yaml
 kubectl -n radar-immobilier apply -f deploy/ci/bascule-preprod/rbac-ci-bascule-prod.yaml
 ```
 
-Then check the lock rights (read-only):
+`radar-ci-bascule-prod` is not a subject of the `radar-cutover` Role: its
+lock verbs live, name-scoped, in its own Role. The `radar-cutover` Role
+stays bound to `radar-ci-deployer` only.
+
+Then check the rights (read-only, every answer must be `yes`):
 
 ```bash
+# Lock, bascule SA (release must always be possible):
+kubectl -n radar-immobilier auth can-i create configmaps --as=system:serviceaccount:radar-immobilier:radar-ci-bascule-prod
 kubectl -n radar-immobilier auth can-i get configmaps/radar-change-lock --as=system:serviceaccount:radar-immobilier:radar-ci-bascule-prod
 kubectl -n radar-immobilier auth can-i update configmaps/radar-change-lock --as=system:serviceaccount:radar-immobilier:radar-ci-bascule-prod
 kubectl -n radar-immobilier auth can-i delete configmaps/radar-change-lock --as=system:serviceaccount:radar-immobilier:radar-ci-bascule-prod
+# Cutover + legacy main->prod deploy, deployer SA (KUBE_CONFIG_DATA):
+kubectl -n radar-immobilier auth can-i get deployments --as=system:serviceaccount:radar-immobilier:radar-ci-deployer
+kubectl -n radar-immobilier auth can-i patch deployments --as=system:serviceaccount:radar-immobilier:radar-ci-deployer
+kubectl -n radar-immobilier auth can-i create jobs --as=system:serviceaccount:radar-immobilier:radar-ci-deployer
+kubectl -n radar-immobilier auth can-i get pods/log --as=system:serviceaccount:radar-immobilier:radar-ci-deployer
 ```
 
-Create or rotate these GitHub secrets from namespace-scoped tokens:
+Renew these GitHub secrets from namespace-scoped tokens, then verify the
+checks above before arming anything:
 
 | Secret | ServiceAccount | Used by |
 | --- | --- | --- |
-| `KUBE_CONFIG_DATA` | `radar-ci-deployer` | `promote-prod` |
-| `KUBE_CONFIG_DATA_PROD` | `radar-ci-bascule-prod` | `bascule-bundle-cd` |
+| `KUBE_CONFIG_DATA` | `radar-ci-deployer` | `promote-prod`, cutover `prepare`/`run`, and the legacy `main` -> prod deploy job (same rights: deployments get/patch, Jobs, ConfigMaps, pods/log) |
+| `KUBE_CONFIG_DATA_PROD` | `radar-ci-bascule-prod` | `bascule-bundle-cd` (bundle apply + change lock only) |
 
-Keep the GitHub Environment `production` on version tags. Keep
-`BASCULE_BUNDLE_CD_ENABLED=false` until the second RBAC file is applied and
-the checks above return `yes`.
+Keep both flags at `false` until the applies and the checks are done:
+
+- `BASCULE_BUNDLE_CD_ENABLED=false`
+- `PROMOTE_PROD_ENABLED=false` (absent counts as `false`)
+
+Arm one at a time: `gh variable set PROMOTE_PROD_ENABLED --body true` only
+after the first successful rehearsed promotion is reviewed.
 
 ## Promote a release
 
 1. Merge to `main`. Wait for the `build-push-images` run to succeed. It
    uploads `cutover-release-<sha>` (`release.json`, `dataMigration: null`).
+   CI also refuses any destructive migration newer than `0044`
+   (`deploy/ci/check-migration-destructive.sh`).
 2. Tag that exact commit: `git tag vX.Y.Z <sha>` then push the tag.
-3. The `promote-prod` job runs in order:
+3. The `promote-prod` job (only when `PROMOTE_PROD_ENABLED == 'true'`) runs:
    - resolve the successful `main` build and check `release.json`;
-   - migrate Job `radar-db-migrate-<sha7>`, pinned to `.apiImage` digest,
-     logs shown, failure or timeout stops the run;
-   - `prepare` (recovery backup, then live-schema verification);
+   - `prepare`: change lock, recovery backup, writer drain, then the
+     release DDL on the live database (`run_job ddl`, release digest),
+     then the destination schema verification;
    - `run` (sequential cutover, same manifest as the preprod rehearsal).
 4. Check the job summary and `https://immo.sent-tech.ca/health`.
 
