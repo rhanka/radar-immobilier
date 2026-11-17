@@ -1,0 +1,76 @@
+# MCP signal writes — commissioning runbook (PR #1107)
+
+Scoped MCP classification writes (`classify_signal`, `confirm_classification`,
+`annotate_signal`, plus the read tools). The prod base manifest stays inert:
+`IMMO_MCP_SIGNALS_WRITE_ENABLED="0"`, the `immo:signals:write` scope is not
+announced, and the signal Secret reference is optional, so the base —
+reapplied on every main push — boots and serves reads with none of the
+steps below done.
+
+## Commissioning, in order
+
+Do preprod first (its overlay already carries the activation values), then
+prod with the same steps.
+
+1. **Role.** Create the dedicated PostgreSQL role with LOGIN:
+   `CREATE ROLE immo_mcp_signal_writer LOGIN;` and set its password through
+   the operator credential cycle. The role holds no direct table privilege;
+   the migrator grants it EXECUTE on `signal_mcp_read`,
+   `signal_mcp_write_mcp` and `signal_mcp_result`, plus
+   `SELECT (profile_id,code,verdict)` on `facet_reason_codes`.
+2. **Migration and grants.** Apply migration `0048_signal_mcp_write` through
+   the usual db-migrate path, which replays
+   `api/src/db/service-role-grants.ts` right after. Verify with a connection
+   as the role: `SELECT signal_mcp_read(...)` works, and a direct
+   `INSERT INTO signal_mcp_events` is refused.
+3. **Secret.** Create Secret `immo-mcp-signal-writer`, key
+   `IMMO_MCP_SIGNAL_DATABASE_URL`, pointing at the same database as the API.
+   Rotation: create the new password on the role, update the Secret value,
+   roll `radar-immo-mcp` (Recreate), verify `tools/list` still answers and a
+   `list_class_reasons` call succeeds, then drop the old password. Keep the
+   value only in the Secret and the `.env` operator record, never in git.
+4. **IdP scope.** Declare `immo:signals:write` in the IdP scope catalogue
+   and on the `immo-mcp` client row (preprod IdP, qualify, then prod IdP).
+   Announcing the scope before this step makes authorization requests fail
+   with `invalid_scope`.
+5. **Activation.** Only now apply the activation overlay, which announces
+   the scope and sets the flag to `"1"`:
+   `kubectl kustomize deploy/overlays/prod-signal-write` (render check), then
+   apply that render. The five signal tools appear in `tools/list` only
+   while the binding is active. Users then grant the new scope explicitly
+   and reconnect; the default consent selection stays read-only.
+
+## Verification at flag "0" (base, no Secret)
+
+The base render must carry `IMMO_MCP_SIGNALS_WRITE_ENABLED: "0"`, no
+`immo:signals:write` in `IMMO_MCP_OAUTH_SCOPES_SUPPORTED`, and
+`optional: true` on the `IMMO_MCP_SIGNAL_DATABASE_URL` secretKeyRef, so the
+pod starts without Secret `immo-mcp-signal-writer` and the twelve read
+tools answer normally.
+
+## Rollback
+
+1. Reapply the base (flag back to `"0"`, scope unannounced) or delete the
+   activation overlay apply. The signal tools disappear from `tools/list`.
+2. Drop the 0048 objects. This destroys the scoped journal and the audit
+   trail; export them first if they must be kept.
+
+```sql
+DROP FUNCTION IF EXISTS signal_mcp_write_mcp(text,text,text,jsonb,text,text);
+DROP FUNCTION IF EXISTS signal_mcp_write_browser(text,jsonb,text,text);
+DROP FUNCTION IF EXISTS signal_mcp_write_core(text,text,text,jsonb,text,text,text,text);
+DROP FUNCTION IF EXISTS signal_mcp_result(text,text,text,text,text,jsonb,jsonb);
+DROP FUNCTION IF EXISTS signal_mcp_read_city(text,uuid,text);
+DROP FUNCTION IF EXISTS signal_mcp_read(text,jsonb);
+DROP TABLE IF EXISTS signal_mcp_events;
+DROP TABLE IF EXISTS signal_mcp_audit;
+DROP INDEX IF EXISTS signal_class_annotation_history_city_idx;
+```
+
+The append-only triggers drop with their tables. The audit columns added
+to `signal_mcp_audit` in 0048 drop with that table. Nothing else in 0048
+widens another table: the `source` CHECKs of `signal_class_annotations`
+and `facet_events` were left untouched, so no constraint rollback is
+needed. Finally delete Secret `immo-mcp-signal-writer` and, if the
+activation was announced, remove `immo:signals:write` from the IdP client
+row after clients have reconnected without it.
