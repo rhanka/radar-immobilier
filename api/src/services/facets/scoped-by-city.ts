@@ -58,6 +58,24 @@ async function readScopedSignalClassement(
       classement.set(key, classe);
       if (classe === "ecarte") hidden.add(key);
     }
+    // MCP classes sit between AI and manual facets, with the same effective
+    // rule as the coherent list: a workspace MCP class counts only once a
+    // linked browser (manual) event confirms it; personal MCP classes and
+    // confirmed shared archives count immediately. One set-based query.
+    const mcp = await tx.execute(sql`SELECT DISTINCT ON (e.city_slug, e.node_type, e.node_id)
+        e.city_slug, e.node_type, e.node_id, e.classe FROM signal_mcp_events e
+      WHERE e.workspace_id=${workspaceId} AND (e.scope='workspace' OR e.actor_id=${accountId}) AND e.kind IN ('class','feedback')
+        AND NOT (e.scope='workspace' AND e.source='mcp' AND NOT EXISTS (
+          SELECT 1 FROM signal_mcp_events c WHERE c.linked_event_id=e.id AND c.source='manual'))
+      ORDER BY e.city_slug, e.node_type, e.node_id,
+        (e.validation='human') DESC, (e.created_at) DESC, e.id DESC`);
+    for (const row of mcp.rows) {
+      const key = discardedSignalKey(String(row.city_slug), String(row.node_type), String(row.node_id));
+      const classe = row.classe as keyof import("@radar/domain").VivierFiltreCubesByClassement;
+      if (classe === "ecarte") hidden.add(key);
+      else if (classe === "pertinent" || classe === "a_surveiller") { classement.set(key, classe); hidden.delete(key); }
+      else if (classe === "non_classe") { classement.delete(key); hidden.delete(key); }
+    }
     for (const { event } of rows) {
       if (event.state !== "active") continue;
       const key = discardedSignalKey(event.citySlug, event.nodeType, event.nodeId);
