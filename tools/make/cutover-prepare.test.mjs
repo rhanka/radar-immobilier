@@ -134,7 +134,7 @@ test('rollback patches the previous database and previous images after failed cu
     assert.equal(f.calls().filter(c => c.includes('patch') && c.includes('secret')).length, 2);
   } finally { f.cleanup(); }
 });
-test('production prepares a recovery backup and cutover changes images without restore or migration', () => {
+test('production prepares a recovery backup, migrates under lock, and cutover changes images without restore', () => {
   const f = fixture({ url: 'https://immo.sent-tech.ca' });
   try {
     const state = f.state();
@@ -152,7 +152,9 @@ test('production prepares a recovery backup and cutover changes images without r
     const prepareRun = JSON.parse(object(f, 'radar-prepared-db').data.record).run;
     assert.equal(JSON.parse(object(f, 'radar-cutover-receipt').data.receipt).recoveryReference,
       `s3://sentropic-pgbackup/db-backups/cutover-prod-${prepareRun}.sql.gz`);
-    assert.ok(steps.every(s => !['restore', 'ddl', 'data', 'docs', 'recon'].includes(s)));
+    assert.equal(steps.filter(s => s === 'ddl').length, 1, 'prod prepare applies the release DDL exactly once');
+    assert.ok(steps.indexOf('backup') < steps.indexOf('ddl'), 'DDL runs after the recovery backup');
+    assert.ok(steps.every(s => !['restore', 'data', 'docs', 'recon'].includes(s)));
     assert.equal(f.calls().some(c => c.includes('patch') && c.includes('secret')), false);
   } finally { f.cleanup(); }
 });
