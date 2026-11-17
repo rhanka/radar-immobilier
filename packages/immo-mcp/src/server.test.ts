@@ -31,7 +31,10 @@ describe("immo-mcp server", () => {
     const client = await connectClient();
     const { tools } = await client.listTools();
     const names = tools.map((t) => t.name).sort();
-    expect(names).toEqual([...ALL_TOOL_NAMES].sort());
+    // No signal binding in the stub env: the five signal tools stay absent.
+    const signalTools = ["list_class_reasons", "get_signal_classification", "classify_signal", "confirm_classification", "annotate_signal"];
+    expect(names).toEqual([...ALL_TOOL_NAMES].filter((name) => !signalTools.includes(name)).sort());
+    expect(names).toHaveLength(12);
     await client.close();
   });
 

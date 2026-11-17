@@ -155,7 +155,9 @@ describe("deployed twelve-tool baseline", () => {
         expect(client.getServerVersion()).toEqual(fixture.serverVersion);
         expect(client.getServerCapabilities()).toEqual(fixture.serverCapabilities);
         const { tools } = await client.listTools();
-        expect(tools).toHaveLength(receipt.toolCount + 5);
+        // No signal binding in this baseline app: the five signal tools
+        // are not registered, so discovery stays at the deployed twelve.
+        expect(tools).toHaveLength(receipt.toolCount);
         expect(tools.filter((tool) => fixture.tools.some((captured) => captured.name === tool.name))).toEqual(expectedTools);
         for (const [name, call] of Object.entries(fixture.captures[mode].calls)) {
           const result = await client.callTool({ name, arguments: call.args }) as ToolResult;

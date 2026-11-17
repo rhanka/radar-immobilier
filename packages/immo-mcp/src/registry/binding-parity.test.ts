@@ -29,7 +29,8 @@ describe("existing handler binding parity", () => {
     const client = new Client({ name: "annotation-test", version: "1" });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     registerTools(server, { auth: resolveAuthContext({}), data: {} as ToolContext["data"],
-      raw: {} as ToolContext["raw"] });
+      raw: {} as ToolContext["raw"],
+      signals: { db: { query: async () => ({ rows: [] }) } } });
     try {
       await server.connect(serverTransport);
       await client.connect(clientTransport);
@@ -57,6 +58,7 @@ describe("existing handler binding parity", () => {
       auth: resolveAuthContext({}),
       data: seam("data") as ToolContext["data"],
       raw: seam("raw") as ToolContext["raw"],
+      signals: { db: { query: async () => ({ rows: [] }) } },
     };
     const handlers = new Map<string, Handler>();
     const server = {
