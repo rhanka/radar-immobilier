@@ -78,8 +78,8 @@ IMPORT_TRANSPORT ?= codex
 
 .PHONY: import-keyring-account
 import-keyring-account:
-	@[[ "$(IMPORT_TRANSPORT)" =~ ^(codex|cloud-code)$$ ]] \
-	  || { echo "IMPORT_TRANSPORT must be codex or cloud-code" >&2; exit 1; }
+	@[[ "$(IMPORT_TRANSPORT)" =~ ^(codex|cloud-code|muse)$$ ]] \
+	  || { echo "IMPORT_TRANSPORT must be codex, cloud-code or muse" >&2; exit 1; }
 	@[[ "$(IMPORT_IMAGE_REF)" =~ ^ghcr\.io/rhanka/radar-api@sha256:[0-9a-f]{64}$$ ]] \
 	  || { echo "IMPORT_IMAGE_REF must be the radar API immutable digest" >&2; exit 1; }
 	@test -d "$(IMPORT_SOURCE_DIR)" -a -f "$(IMPORT_SOURCE_DIR)/.key" \

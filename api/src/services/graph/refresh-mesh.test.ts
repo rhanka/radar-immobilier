@@ -1,10 +1,10 @@
 import { createServer } from "node:http";
 
 import {
-  createGraphifyMesh,
-  meshTextJsonClient,
-  type GraphifyMesh,
-} from "@sentropic/engram/llm-mesh";
+  createRefreshRoutedMesh as createGraphifyMesh,
+  refreshTextJsonClient as meshTextJsonClient,
+  type RefreshRoutedMesh as GraphifyMesh,
+} from "./refresh-routed-mesh.js";
 import {
   CloudCodeRuntimeClient,
   CodexRuntimeClient,
