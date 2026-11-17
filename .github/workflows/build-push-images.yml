@@ -1228,7 +1228,9 @@ jobs:
 
   promote-prod:
     name: Promote rehearsed release through cutover
-    if: startsWith(github.ref, 'refs/tags/v')
+    # ARMING SWITCH: stays skipped until the owner sets PROMOTE_PROD_ENABLED
+    # to 'true' after the RBAC/secret checks of docs/runbooks/prod-promotion.md.
+    if: startsWith(github.ref, 'refs/tags/v') && vars.PROMOTE_PROD_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 330
     environment: production
@@ -1270,48 +1272,9 @@ jobs:
             printf '%s' "$KUBE_CONFIG_DATA" > "$HOME/.kube/config"
           fi
           chmod 600 "$HOME/.kube/config"
-      # MIGRATE DB (fail-closed) — BEFORE prepare/run. The cutover destination
-      # check (deploy/cutover/database.cjs) refuses a live schema missing a
-      # journal migration (migration_missing), and the prod prepare path never
-      # applies DDL: this Job applies it first, pinned to the EXACT api digest
-      # of the release being promoted (release.json .apiImage, never a tag).
-      # Failed or timed-out migration aborts the promotion before prepare.
-      - name: Migrate production DB before cutover (fail-closed, release digest)
-        env:
-          NAMESPACE: radar-immobilier
-        run: |
-          set -euo pipefail
-          api_image="$(jq -er '.apiImage' cutover-release/release.json)"
-          [[ "$api_image" =~ ^ghcr\.io/rhanka/radar-api@sha256:[0-9a-f]{64}$ ]] \
-            || { echo "::error title=Prod migrate refused::release apiImage is not a pinned digest: ${api_image}"; exit 1; }
-          job="radar-db-migrate-${GITHUB_SHA::7}"
-          tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
-          sed -e "s|image: ghcr.io/rhanka/radar-api.*|image: ${api_image}|" \
-              -e "s|name: radar-db-migrate$|name: ${job}|" \
-              deploy/k8s/36-db-migrate-job.yaml > "$tmp/job.yaml"
-          grep -q "image: ${api_image}" "$tmp/job.yaml" \
-            || { echo "::error title=Prod migrate refused::digest pin did not apply to the migrate Job"; exit 1; }
-          kubectl -n "$NAMESPACE" delete job "$job" --ignore-not-found
-          kubectl -n "$NAMESPACE" apply -f "$tmp/job.yaml"
-          deadline=$((SECONDS + 600))
-          while :; do
-            complete="$(kubectl -n "$NAMESPACE" get job "$job" -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}' 2>/dev/null || true)"
-            failed="$(kubectl -n "$NAMESPACE" get job "$job" -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}' 2>/dev/null || true)"
-            if [ "$complete" = "True" ]; then echo "db-migrate prod: Job $job Complete (${api_image})"; kubectl -n "$NAMESPACE" logs "job/$job" --tail=80 || true; break; fi
-            if [ "$failed" = "True" ]; then
-              echo "::error title=Prod DB migrate FAILED::$job — aborting promotion BEFORE prepare/run"
-              kubectl -n "$NAMESPACE" logs "job/$job" --tail=80 || true
-              kubectl -n "$NAMESPACE" delete job "$job" --ignore-not-found || true
-              exit 1
-            fi
-            if [ "$SECONDS" -ge "$deadline" ]; then
-              echo "::error title=Prod DB migrate TIMEOUT::$job did not complete in 600s — aborting BEFORE prepare/run"
-              kubectl -n "$NAMESPACE" logs "job/$job" --tail=80 || true
-              kubectl -n "$NAMESPACE" delete job "$job" --ignore-not-found || true
-              exit 1
-            fi
-            sleep 5
-          done
+      # No standalone migrate step here: DDL runs inside `prepare`
+      # (tools/make/cutover-prepare.sh), after the change lock, the recovery
+      # backup and the writer drain, before the destination verification.
       - name: Prepare production recovery backup and verify live migrations
         run: make -f deploy/cutover/operator.mk prepare RELEASE=cutover-release/release.json ENV=prod
       - name: Sequential cutover (same manifest as rehearsal)
