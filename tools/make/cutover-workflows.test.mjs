@@ -77,6 +77,22 @@ test('all competing workflows acquire before mutations and release through alway
   assert.equal(promotion.includes('docker/build-push-action'), false);
   assert.equal(build.jobs['promote-prod'].environment, 'production');
 });
+test('production promotion migrates by release digest before prepare and run', () => {
+  const w = workflow('build-push-images.yml');
+  const steps = w.jobs['promote-prod'].steps;
+  const migrate = steps.findIndex(s => s.name === 'Migrate production DB before cutover (fail-closed, release digest)');
+  const prepare = steps.findIndex(s => s.name === 'Prepare production recovery backup and verify live migrations');
+  const run = steps.findIndex(s => s.name === 'Sequential cutover (same manifest as rehearsal)');
+  assert.ok(migrate >= 0 && migrate < prepare && prepare < run, 'migrate precedes prepare and run');
+  const body = steps[migrate].run;
+  assert.ok(body.includes("jq -er '.apiImage' cutover-release/release.json"));
+  assert.ok(body.includes('@sha256:[0-9a-f]{64}'), 'digest pin is enforced, never a tag');
+  assert.ok(body.includes('36-db-migrate-job.yaml') && body.includes('logs "job/$job"'));
+  assert.ok(body.includes('exit 1'), 'a failed migration aborts the promotion');
+  // release.json is generated with dataMigration:null (cutover-release.sh);
+  // the promotion gate must require exactly that, never a "6h" hook.
+  assert.ok(steps.some(s => (s.run || '').includes('.dataMigration==null')));
+});
 test('retired executable vehicles have no fallback entry', () => {
   for (const file of ['deploy/base-preprod/operator.mk', 'deploy/ci/bascule-preprod/bascule.mjs',
     'deploy/ci/bascule-preprod/restore-mode.mjs', 'tools/make/base-preprod-maintenance.sh']) assert.equal(existsSync(file), false);

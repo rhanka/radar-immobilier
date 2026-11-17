@@ -39,7 +39,8 @@ prepare_database() {
   else
     run_job backup 840 900
     # Production preparation verifies the live schema; it never restores it.
-    # Rollback references this backup (fast release path has no migrate stage).
+    # Rollback references this backup. DDL is applied before prepare by the
+    # promote-prod migrate Job (release digest); prepare only verifies it.
     jq --arg ref "$(recovery_backup_reference)" '.targetDb=.liveDb|.recoveryReference=$ref' "$WORK/record.json" > "$WORK/next.json"
     mv "$WORK/next.json" "$WORK/record.json"; record_save
   fi
