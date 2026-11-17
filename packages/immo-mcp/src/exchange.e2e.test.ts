@@ -28,7 +28,7 @@ it("exchanges over HTTP across isolated issuer, MCP and synthetic receiver witho
     session = init.headers.get("mcp-session-id");
     expect(session).toBeTruthy();
     const inventory = await (await rpc("tools/list", {})).json();
-    expect(inventory.result.tools).toHaveLength(12);
+    expect(inventory.result.tools).toHaveLength(17);
     const search = await (await call("search_signals", { city: "longueuil" })).json();
     expect(search.result.isError, JSON.stringify(search)).not.toBe(true);
     expect(JSON.stringify(search)).toContain("synthetic-signal");
@@ -70,6 +70,6 @@ it("exchanges over HTTP across isolated issuer, MCP and synthetic receiver witho
     expect(f.issuer.issued).toHaveLength(1);
     expect(f.seen).toHaveLength(1);
     expect(JSON.stringify(audit.mock.calls)).not.toContain(f.subject);
-    console.log("[P4] real loopback HTTP: synthetic issuer, MCP, receiver; 12 tools; no cookies");
+    console.log("[P4] real loopback HTTP: synthetic issuer, MCP, receiver; 17 tools; no cookies");
   } finally { audit.mockRestore(); await f.close(); }
 });
