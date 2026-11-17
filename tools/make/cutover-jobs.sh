@@ -62,7 +62,7 @@ run_job() {
   if [[ $existing == null ]] && jq -e --arg name "$name" 'any(.jobHistory[]?;.name==$name)' "$WORK/record.json" >/dev/null; then
     name="cutover-$RUN-$(jq '.jobHistory|length' "$WORK/record.json")-$step"
   fi
-  if [[ ${RECOVERING:-0} == 1 && $step =~ ^(ddl|data|restore|backup)$ && $existing != null ]]; then
+  if [[ ${RECOVERING:-0} == 1 && $step =~ ^(ddl|data|restore|backup|catalogue)$ && $existing != null ]]; then
     local previous
     previous=$("${k[@]}" get job "$(jq -r .name <<< "$existing")" -o json) || fail 'Migration outcome unknown'
     if jq -e 'any(.status.conditions[]?;.type=="Failed" and .status=="True")' <<< "$previous" >/dev/null; then

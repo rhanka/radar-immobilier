@@ -518,6 +518,7 @@ export interface GraphSignalNode {
   annotationsWorkspaceId?: string;
   classFeedback?: { verdict: "up" | "down"; createdAt: string; reason: string; eventId: string };
   classAnnotation?: {
+    ambiguous?: boolean;
     source: "ai" | "manual";
     classe: "pertinent" | "a_surveiller" | "non_classe" | "ecarte";
     reason: string;
