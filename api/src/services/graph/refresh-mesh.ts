@@ -156,7 +156,10 @@ export function createRefreshMesh(options: RefreshMeshOptions): RefreshMeshBundl
       profiles: createRefreshRoutePolicyProfiles(options.maximumAttempts),
     }),
   });
-  const abortable = bindRefreshAbortSignal(mesh, options.signal, options.reasoning);
+  // Muse Chat refuses reasoning controls (llm-mesh 0.38 `unsupported_projection`):
+  // the effort of a muse route is the provider default, never forwarded.
+  const reasoning = options.provider === "muse" ? undefined : options.reasoning;
+  const abortable = bindRefreshAbortSignal(mesh, options.signal, reasoning);
   return {
     mesh: abortable,
     textClient: refreshTextJsonClient(abortable, {
