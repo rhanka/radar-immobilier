@@ -5,6 +5,7 @@ import { lockWorkspace } from "../workspaces/mutations.js";
 import { approvedAccountId } from "../workspaces/store.js";
 import { lockCityGraph } from "./graph-store.js";
 import { FacetError, type SignalTarget } from "../facets/target.js";
+import { FACET_PROFILE } from "../facets/codebook.js";
 
 export interface SignalMcpRef {
   workspaceId: string; scope: "personal" | "workspace"; citySlug: string;
@@ -20,6 +21,7 @@ export interface SignalMcpState {
   version: string; current: SignalMcpEntry | null; notes: SignalMcpEntry[];
   feedback: unknown[]; mcpHistory: SignalMcpEntry[]; history: unknown[]; error?: string;
   canConfirm?: boolean; moderateArchive?: boolean;
+  pendingShared?: SignalMcpEntry | null;
 }
 
 /** Called under the workspace lock by every personal UI writer. */
@@ -41,7 +43,10 @@ export async function decideSignalMcp(db: Database, sub: string, ref: SignalMcpR
     const state = await readSignalMcp(tx, sub, ref);
     if (state.error) throw new FacetError(403, state.error);
     if (state.version !== version) throw new FacetError(409, "annotation_version_conflict");
-    const current = state.current;
+    // A workspace MCP class stays pending until this browser decision; the
+    // pending event is therefore a valid decision target like a current one.
+    const current = state.current && (state.current.source === "mcp" || state.current.linked_event_id)
+      ? state.current : (state.pendingShared ?? state.current);
     if (!current || (current.source !== "mcp" && !current.linked_event_id)) {
       throw new FacetError(409, "mcp_classification_required");
     }
@@ -50,8 +55,13 @@ export async function decideSignalMcp(db: Database, sub: string, ref: SignalMcpR
     }
     if (current.scope === "workspace" && !state.moderateArchive) throw new FacetError(403, "workspace_capability_required");
     const code = choice.confirm ? current.reason_code : choice.reasonCode;
+    // Like #1104, a browser reclassification requires a registry motif for
+    // the new class; confirmation inherits the judged event's motif.
+    if (!choice.confirm && choice.classe !== "non_classe" && !code) {
+      throw new FacetError(422, "reason_code_required");
+    }
     if (choice.classe !== "non_classe" && code) {
-      const codes = await tx.execute(sql`SELECT code FROM facet_reason_codes WHERE profile_id='immo-steve-2026-09'
+      const codes = await tx.execute(sql`SELECT code FROM facet_reason_codes WHERE profile_id=${FACET_PROFILE}
         AND code=${code} AND verdict=${choice.classe === "ecarte" ? "non_pertinent" : choice.classe}`);
       if (!codes.rows.length) throw new FacetError(422, "invalid_reason_code");
     }
@@ -77,16 +87,16 @@ export async function readSignalMcp(db: Database, sub: string, ref: SignalMcpRef
   const rows = await db.execute(sql`SELECT signal_mcp_read(${sub},${JSON.stringify(ref)}::jsonb) AS state`);
   return rows.rows[0]!.state as unknown as SignalMcpState;
 }
+/** One set-based query for the whole city; never one read per node. */
 export async function readSignalMcpCity(db: Database, sub: string, workspaceId: string, citySlug: string) {
-  const rows = await db.execute(sql`SELECT n.id,n.type,signal_mcp_read(${sub},jsonb_build_object(
-    'workspaceId',${workspaceId}::text,'scope','personal','citySlug',n.city_slug,'type',n.type,'id',n.id)) AS state
-    FROM graph_nodes n WHERE n.city_slug=${citySlug} AND n.type IN ('Signal','DesignationEvent')`);
-  return new Map(rows.rows.map((row) => [JSON.stringify([row.type, row.id]), row.state as unknown as SignalMcpState]));
+  const rows = await db.execute(sql`SELECT signal_mcp_read_city(${sub},${workspaceId}::uuid,${citySlug}) AS states`);
+  const states = (rows.rows[0]!.states ?? []) as unknown as Array<{ type: string; id: string; state: SignalMcpState }>;
+  return new Map(states.map((row) => [JSON.stringify([row.type, row.id]), row.state]));
 }
 export async function addSignalNote(db: Database, sub: string, ref: SignalMcpRef, text: string, version: string) {
   const body = JSON.stringify({ signalRef: ref, text });
   const hash = createHash("sha256").update(body).digest("hex");
-  const rows = await db.execute(sql`SELECT signal_mcp_write(${sub},'browser','annotate_signal',${body}::jsonb,
-    'human',${version},${hash},'manual') AS result`);
+  const rows = await db.execute(sql`SELECT signal_mcp_write_browser(${sub},${body}::jsonb,
+    ${version},${hash}) AS result`);
   return rows.rows[0]!.result as { id?: string; error?: string };
 }
