@@ -50,7 +50,11 @@ spec:
               # The runtime itself may still carry fsGroup modes (0770):
               # normalize it under both locks, before any keyring read.
               chmod 00700 /keyring/runtime
-              find /keyring/runtime -maxdepth 1 -type f \( -name .key -o -name "*.json" \) -exec chmod 0600 {} +
+              # The seed copied a projected Secret volume: .key and *.json
+              # are symlinks into a timestamped directory. A shallow find sees
+              # only the links (type l); follow them recursively, like the
+              # refresh CronJob init does. Lock files keep their mode.
+              find -L /keyring/runtime -type f \( -name .key -o -name "*.json" \) -exec chmod 0600 {} +
               test -f /keyring/runtime/.key
               test -f /import/.key
               cmp -s /keyring/runtime/.key /import/.key \
