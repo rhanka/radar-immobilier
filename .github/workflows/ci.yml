@@ -40,6 +40,11 @@ jobs:
           bash deploy/ci/check-no-python.sh
           bash deploy/ci/check-no-python.test.sh
 
+      - name: Reject destructive migrations newer than the prod baseline (0044)
+        run: |
+          bash deploy/ci/check-migration-destructive.sh
+          bash deploy/ci/check-migration-destructive.test.sh
+
       - name: Reject retired unscoped signal routes in the UI (6H)
         run: |
           bash deploy/ci/check-ui-scoped-signal-routes.sh
@@ -108,7 +113,7 @@ jobs:
         run: node deploy/ci/backup/backup-daily.selftest.mjs
 
       - name: Validate cutover controller and backup adapters (hermetic tests)
-        run: make -f deploy/cutover/operator.mk test TEST_PATTERN='one command restores|long owned radar-refresh-pending-watchdog|failure remains closed.*failJob|daily restoration|daily and inter-tenant interfaces|prepare|prepared|rollback patches|resume reconciles|main deployment' ENV=test-cutover
+        run: make -f deploy/cutover/operator.mk test TEST_PATTERN='one command restores|long owned radar-refresh-pending-watchdog|failure remains closed.*failJob|daily restoration|daily and inter-tenant interfaces|prepare|prepared|rollback patches|resume reconciles|main deployment|production promotion|bascule-bundle-cd proves|manual migrate' ENV=test-cutover
 
       - name: Validate git-artifact guards (descriptor, build env, tag ancestry, pre-flight, workflows)
         run: make -f tools/make/git-artifact.mk test ENV=test-git-artifact

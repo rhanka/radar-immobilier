@@ -31,7 +31,15 @@ lock_acquire() {
   fi
   OWNED=1
   ACQUIRED=1
-  lock_read; record_read
+  if ! lock_read; then
+    # The create above succeeded but the lock cannot be read back (missing
+    # get on configmaps): release what this call created instead of leaving
+    # an orphan lock that no later step can identify or drop.
+    "${k[@]}" delete configmap radar-change-lock --ignore-not-found >/dev/null 2>&1 || true
+    OWNED=0; ACQUIRED=0
+    fail 'Lock acquisition failed; created lock released'
+  fi
+  record_read
   if [[ ${1:-cutover} == writer ]]; then
     "${k[@]}" get jobs -o json > "$WORK/writer-jobs.json"
     jq --slurpfile jobs "$WORK/writer-jobs.json" '.originalJobs=[$jobs[0].items[].metadata.uid]' "$WORK/record.json" > "$WORK/next.json"
