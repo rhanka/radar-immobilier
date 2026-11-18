@@ -904,8 +904,15 @@ const PREV_LATEST = JSON.stringify({ date: '2026-09-25', status: 'complete', pgS
   eq('streamed inventory == buildInventory (parsed)', JSON.parse(fs.readFileSync(file, 'utf8')), lib.buildInventory(args));
   const N = 336830;
   const big = Array.from({ length: N }, (_, i) => ({ Key: `raw/ville-${i % 530}/cas/document-${i}.pdf`, Size: 1000 + i, ETag: `"${md5hex(String(i))}"`, LastModified: t0 }));
-  const bigCounts = await lib.writeInventoryFile(path.join(dir, 'big.json'), { ...args, srcObjs: big, dstIndex: new Map() });
-  eq('streamed inventory at prod scale: counts only, all pending', [bigCounts.objects, bigCounts.pending, Array.isArray(bigCounts.objects)], [N, N, false]);
+  // Simulated destination listing, same shape as listLatestVersions output.
+  const bigDst = new Map(big.map((o) => [o.Key, { ...o, VersionId: `v${o.Size}`, LastModified: new Date('2026-09-21T00:00:00Z') }]));
+  const mem = () => { const m = process.memoryUsage(); return { heap: Math.round(m.heapUsed / 1048576), rss: Math.round(m.rss / 1048576) }; };
+  const afterListings = mem();
+  const bigCounts = await lib.writeInventoryFile(path.join(dir, 'big.json'), { ...args, srcObjs: big, dstIndex: bigDst });
+  const afterWrite = mem();
+  console.log(`  # memory at prod scale (${N} docs, both listings + sort + streamed write): heapUsed ${afterListings.heap} -> ${afterWrite.heap} MiB, rss ${afterListings.rss} -> ${afterWrite.rss} MiB`);
+  ok('memory margin at prod scale: heap after streamed write stays under 512 MiB', afterWrite.heap < 512);
+  eq('streamed inventory at prod scale: counts only, all backed-up', [bigCounts.objects, bigCounts.backedUp, Array.isArray(bigCounts.objects)], [N, N, false]);
   ok('streamed inventory file is complete JSON at prod scale', JSON.parse(fs.readFileSync(path.join(dir, 'big.json'), 'utf8')).counts.objects === N);
   fs.rmSync(dir, { recursive: true, force: true });
 }
