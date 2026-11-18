@@ -10,7 +10,7 @@ const digest = "a".repeat(64);
 describe("inert successor compatibility", () => {
   it("should retain exactly twelve live definitions and the baseline search schema", () => {
     const names = ALL_TOOL_DEFINITIONS.map((tool) => tool.name);
-    expect(names).toHaveLength(12);
+    expect(names).toHaveLength(17);
     expect(names.filter((name) => (STATUS_TOOL_NAMES as readonly string[]).includes(name))).toEqual([]);
     expect(Object.keys(STATUS_TOOL_CONTRACTS)).toEqual([...STATUS_TOOL_NAMES]);
     expect(Object.keys(ALL_TOOL_DEFINITIONS.find((tool) => tool.name === "search_signals")!.inputSchema))

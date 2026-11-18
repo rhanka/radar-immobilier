@@ -10,6 +10,8 @@ import { AccountBindingUnavailable } from "../account-binding.js";
 import { artifactRefusal, artifactScopeDenied, assertArtifactBinding, type ArtifactMcpBinding } from "./artifact-provider.js";
 import { ARTIFACT_STRICT, ARTIFACT_PART1 } from "@radar/artifacts-host";
 import { deferArtifactPrecondition } from "./artifact-transport-modules.js";
+import { isSignalWrite, SIGNAL_WRITE_ANNOTATIONS, SIGNAL_TOOL_DEFINITIONS } from "../signal-contract.js";
+import { auditSignalResult } from "../signal-audit.js";
 
 // GeoJSON may contain 2,000 features; budgets must not impose a smaller semantic limit.
 export const IMMO_WIRE_LIMITS = Object.freeze({
@@ -22,7 +24,7 @@ export const ARTIFACT_WIRE_LIMITS = Object.freeze({ ...IMMO_WIRE_LIMITS,
 export const IMMO_WIRE_TOOLS: readonly Tool[] = ALL_TOOL_DEFINITIONS.map((def) => {
   const schema = normalizeToolJsonSchema(def.name, convertInputShape(def.inputSchema));
   return { name: def.name, title: def.title, description: def.description,
-    annotations: IMMO_READ_ANNOTATIONS,
+    annotations: isSignalWrite(def.name) ? SIGNAL_WRITE_ANNOTATIONS : IMMO_READ_ANNOTATIONS,
     inputSchema: schema as Tool["inputSchema"], execution: { taskSupport: "forbidden" } };
 });
 const manifest: RegistryDefinition["manifest"] = {
@@ -30,7 +32,8 @@ const manifest: RegistryDefinition["manifest"] = {
   tools: IMMO_WIRE_TOOLS.map((tool, index) => ({
     kind: "tool", name: tool.name, description: tool.description!, inputSchema: tool.inputSchema,
     outputSchema: {}, requiredScopes: [ALL_TOOL_DEFINITIONS[index]!.scope], requiredClaims: [],
-    redactionClass: "moderate", mutability: "read-only", mutatesExternalSystem: false,
+    redactionClass: "moderate", mutability: isSignalWrite(tool.name) ? "append" : "read-only",
+    mutatesExternalSystem: isSignalWrite(tool.name),
     idempotency: { required: false }, gates: {
       requiresElicitation: false, requiresHumanConfirmation: false, requiresPrincipalGate: true,
     },
@@ -45,21 +48,28 @@ export async function composeStatefulImmo(
   host: StatefulMcpHost,
   authorize: (tool: string, request: VerifiedMcpRequest) => Promise<boolean>,
   artifacts?: ArtifactMcpBinding,
+  options?: { signalTools?: boolean },
 ) {
   const unavailableAccounts = new WeakSet<VerifiedMcpRequest>();
   if (artifacts) assertArtifactBinding(artifacts);
+  // The five signal tools are registered only while the binding is active.
+  const signalNames = new Set(SIGNAL_TOOL_DEFINITIONS.map((def) => def.name));
+  const wireTools = options?.signalTools ? IMMO_WIRE_TOOLS
+    : IMMO_WIRE_TOOLS.filter((tool) => !signalNames.has(tool.name));
+  const activeManifest = options?.signalTools ? manifest
+    : { ...manifest, tools: manifest.tools.filter((tool) => !signalNames.has(tool.name)) };
   const nativeModules = createClusterMeshModules();
   const modules = artifacts && ARTIFACT_STRICT ? deferArtifactPrecondition(nativeModules, artifacts.tools) : nativeModules;
   const registry = createMcpRegistry({ modules });
   registry.register({
-    manifest, parameterSchema: { properties: {} }, requiredPorts: [],
-    provenance: { approvalRef: "H4-P6-v3", revision: "1", manifestDigest: computeManifestDigest(manifest), reviewedBy: ["owner"] },
-    handlers: Object.fromEntries(manifest.tools.map((tool) => [tool.name, {
+    manifest: activeManifest, parameterSchema: { properties: {} }, requiredPorts: [],
+    provenance: { approvalRef: "H4-P6-v3", revision: "1", manifestDigest: computeManifestDigest(activeManifest), reviewedBy: ["owner"] },
+    handlers: Object.fromEntries(activeManifest.tools.map((tool) => [tool.name, {
       handlerId: tool.name, capabilityRef: tool.name, configSchema: { type: "object", additionalProperties: false },
     }])),
-    toolValues: Object.fromEntries(manifest.tools.map((tool) => [tool.name, { handlerId: tool.name, values: {} }])),
+    toolValues: Object.fromEntries(activeManifest.tools.map((tool) => [tool.name, { handlerId: tool.name, values: {} }])),
     adapter: {
-      appId: manifest.appId, connectorId: "immo", manifest,
+      appId: activeManifest.appId, connectorId: "immo", manifest: activeManifest,
       resolveTenant: unavailable, listCapabilities: unavailable, invokeTool: unavailable,
       readResource: unavailable, validateSecrets: unavailable,
     },
@@ -80,13 +90,13 @@ export async function composeStatefulImmo(
   registry.select(artifacts ? ["immo", artifacts.manifest.providerId] : ["immo"]);
   registry.configure("immo", {});
   if (artifacts) registry.configure(artifacts.manifest.providerId, artifacts.configuration);
-  const compatibility = { immo: { manifestDigest: computeManifestDigest(manifest) },
+  const compatibility = { immo: { manifestDigest: computeManifestDigest(activeManifest) },
     ...(artifacts ? { [artifacts.manifest.providerId]: { manifestDigest: computeManifestDigest(artifacts.manifest) } } : {}) };
   const compiled = await registry.compile({ bindings: {}, compatibility });
   if (!compiled.ok) throw new Error(`composition_invalid:${JSON.stringify(compiled.diagnostics)}`);
   return createStatefulMcpNamespace(modules, {
     host, registry: compiled.registry,
-    tools: artifacts ? [...IMMO_WIRE_TOOLS, ...artifacts.tools] : IMMO_WIRE_TOOLS,
+    tools: artifacts ? [...wireTools, ...artifacts.tools] : wireTools,
     limits: artifacts ? ARTIFACT_WIRE_LIMITS : IMMO_WIRE_LIMITS,
     async authorize(tool, request) {
       try { return await authorize(tool, request); }
@@ -102,6 +112,8 @@ export async function composeStatefulImmo(
       return invokeTool(tool, args, snapshot);
     },
     formatRefusal(tool, refusal, context) {
+      const snapshot = getInvocationContext();
+      if (snapshot) auditSignalResult(snapshot, snapshot.signalAttempt, `refused:${refusal.kind}`);
       // Artifact tools share one typed scope refusal with the binding check.
       if (refusal.kind === "scope" && artifacts?.tools.some((entry) => entry.name === tool)) {
         const denied = artifactScopeDenied(tool);

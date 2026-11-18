@@ -78,6 +78,12 @@ data:
   # invalid_scope.
   IMMO_MCP_OAUTH_SCOPES_SUPPORTED: "immo:read immo:search immo:documents:read immo:artifacts:read immo:artifacts:write offline_access"
   IMMO_MCP_ARTIFACTS_LEGACY_READ_SCOPE: "true"
+  # Scoped MCP signal writes stay OFF in the prod base (PR #1107). The base
+  # is reapplied on every main push, so it must boot and serve reads with no
+  # signal prerequisite in place. Activation (scope announced + flag "1")
+  # lives only in deploy/overlays/prod-signal-write, applied by an operator
+  # after the runbook prerequisites (role, migration, Secret, IdP scope).
+  IMMO_MCP_SIGNALS_WRITE_ENABLED: "0"
   # Left UNSET on purpose: @sentropic/mcp-auth defaults to
   # `${issuer}/.well-known/jwks.json` when absent (see core.js `getKeySource`).
   # Only set IMMO_MCP_OAUTH_JWKS_URI if the IdP publishes its JWKS at a
@@ -192,6 +198,13 @@ spec:
           env:
             - name: IMMO_MCP_ACCOUNT_DATABASE_URL
               valueFrom: { secretKeyRef: { name: immo-mcp-account-reader, key: IMMO_MCP_ACCOUNT_DATABASE_URL } }
+            # Signal writer binding (PR #1107): operator-created Secret for
+            # role immo_mcp_signal_writer. Optional on purpose: the base is
+            # reapplied on every main push and must start (flag "0", reads
+            # only) before the Secret exists. The activation overlay turns
+            # the binding on once the Secret is provisioned.
+            - name: IMMO_MCP_SIGNAL_DATABASE_URL
+              valueFrom: { secretKeyRef: { name: immo-mcp-signal-writer, key: IMMO_MCP_SIGNAL_DATABASE_URL, optional: true } }
             # Live database selected by the cutover (only POSTGRES_DB is patched); role URLs follow it.
             # Optional: without the key, each role URL keeps its own database name (previous behavior).
             - name: IMMO_MCP_DATABASE_NAME
