@@ -138,11 +138,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$HOME/.kube"
-          if printf '%s' "$KUBE_CONFIG_DATA_PROD" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
-            printf '%s' "$KUBE_CONFIG_DATA_PROD" | base64 -d > "$HOME/.kube/config"
-          else
-            printf '%s' "$KUBE_CONFIG_DATA_PROD" > "$HOME/.kube/config"
-          fi
+          bash deploy/ci/write-kubeconfig.sh "$KUBE_CONFIG_DATA_PROD"
           chmod 600 "$HOME/.kube/config"
 
       # POSITIVE pre-flight (same pattern as build-push-images / run-job): assert
@@ -383,11 +379,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$HOME/.kube"
-          if printf '%s' "$KUBE_CONFIG_DATA_PROD" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
-            printf '%s' "$KUBE_CONFIG_DATA_PROD" | base64 -d > "$HOME/.kube/config"
-          else
-            printf '%s' "$KUBE_CONFIG_DATA_PROD" > "$HOME/.kube/config"
-          fi
+          bash deploy/ci/write-kubeconfig.sh "$KUBE_CONFIG_DATA_PROD"
           chmod 600 "$HOME/.kube/config"
 
       - name: Pre-flight — assert PROD cluster
