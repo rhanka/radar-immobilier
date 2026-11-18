@@ -48,7 +48,7 @@ keyring-summary:
 	@test -f "$(KEYRING_SOURCE_DIR)/.key" || { echo "keyring master key is required" >&2; exit 1; }
 	@docker run --rm --entrypoint /bin/sh --user 0:0 -v "$(KEYRING_SOURCE_DIR):/source:ro" \
 	  -v "$(OVERLAY)/keyring-summary.mjs:/workspace/keyring-summary.mjs:ro" "$(LOCAL_IMAGE)" \
-	  /bin/sh -ceu 'mkdir /keyring; cp -a /source/. /keyring/; node /workspace/keyring-summary.mjs'
+	  -ceu 'mkdir /keyring; cp -a /source/. /keyring/; node /workspace/keyring-summary.mjs'
 
 .PHONY: enroll-cloud-code
 enroll-cloud-code:
