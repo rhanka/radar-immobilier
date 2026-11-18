@@ -943,8 +943,12 @@ jobs:
             if [ "$MCP_REPLICAS" = "0" ]; then
               kubectl -n "$NAMESPACE" patch deploy radar-immo-mcp --type=merge -p '{"spec":{"replicas":1}}'
             fi
-            kubectl -n "$NAMESPACE" rollout status deploy/radar-immo-mcp --timeout=180s \
-              || echo "::warning::radar-immo-mcp rollout not complete within 180s (optional connector, deploy continues)"
+            # Blocking (PR #1107 follow-up): a CrashLooping MCP must red
+            # the deploy, not conclude success behind a warning.
+            if ! kubectl -n "$NAMESPACE" rollout status deploy/radar-immo-mcp --timeout=180s; then
+              echo "::error title=radar-immo-mcp rollout failed::radar-immo-mcp did not become Ready within 180s in ${NAMESPACE} — failing the preprod deploy"
+              exit 1
+            fi
           else
             echo "radar-immo-mcp Deployment absent in ${NAMESPACE} — skipping immo-mcp parity set-image"
           fi
