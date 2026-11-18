@@ -1,6 +1,6 @@
 /** Successor-only contracts; the exposed baseline definitions remain unchanged. */
 import { z } from "zod";
-import { ALL_TOOL_DEFINITIONS } from "../tool-definitions.js";
+import { ALL_TOOL_DEFINITIONS, TOOL_DEFINITIONS, RAW_TOOL_DEFINITIONS } from "../tool-definitions.js";
 import { ARTIFACT_TOOL_NAMES } from "../registry/artifact-profile.js";
 import { STATUS_TOOL_NAMES } from "./command-contracts.js";
 import { FingerprintSchema, WorkspaceIdSchema } from "./wire-schemas.js";
@@ -16,7 +16,7 @@ export const SUCCESSOR_SEARCH_RECEIVER = {
   authorityBeforeRevealOrEmpty: true, arbitrary404IsEmpty: false,
 } as const;
 export const SUCCESSOR_TOOL_NAMES = [
-  ...ALL_TOOL_DEFINITIONS.map((tool) => tool.name), ...ARTIFACT_TOOL_NAMES, ...STATUS_TOOL_NAMES,
+  ...[...TOOL_DEFINITIONS, ...RAW_TOOL_DEFINITIONS].map((tool) => tool.name), ...ARTIFACT_TOOL_NAMES, ...STATUS_TOOL_NAMES,
 ] as const;
 const checkpoint = (count: number) => z.object({
   toolCount: z.literal(count), digest: FingerprintSchema,
