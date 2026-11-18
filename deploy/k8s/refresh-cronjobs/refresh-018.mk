@@ -46,9 +46,9 @@ inspect-preprod: guard-preprod
 keyring-summary:
 	@test -n "$(LOCAL_IMAGE)" || { echo "LOCAL_IMAGE is required" >&2; exit 1; }
 	@test -f "$(KEYRING_SOURCE_DIR)/.key" || { echo "keyring master key is required" >&2; exit 1; }
-	@docker run --rm --user 0:0 -v "$(KEYRING_SOURCE_DIR):/source:ro" \
+	@docker run --rm --entrypoint /bin/sh --user 0:0 -v "$(KEYRING_SOURCE_DIR):/source:ro" \
 	  -v "$(OVERLAY)/keyring-summary.mjs:/workspace/keyring-summary.mjs:ro" "$(LOCAL_IMAGE)" \
-	  /bin/sh -ceu 'mkdir /keyring; cp -a /source/. /keyring/; node /workspace/keyring-summary.mjs'
+	  -ceu 'mkdir /keyring; cp -a /source/. /keyring/; node /workspace/keyring-summary.mjs'
 
 .PHONY: enroll-cloud-code
 enroll-cloud-code:
@@ -56,7 +56,7 @@ enroll-cloud-code:
 	@test -n "$(LOCAL_IMAGE)" || { echo "LOCAL_IMAGE is required" >&2; exit 1; }
 	@test -f "$(KEYRING_SOURCE_DIR)/.key" || { echo "keyring master key is required" >&2; exit 1; }
 	@test -n "$(CLOUD_CODE_OWNER_SCOPE_REF)" || { echo "CLOUD_CODE_OWNER_SCOPE_REF is required" >&2; exit 1; }
-	@docker run --rm --network host --user "$$(id -u):$$(id -g)" \
+	@docker run --rm --entrypoint node --network host --user "$$(id -u):$$(id -g)" \
 	  -e CLOUD_CODE_OWNER_SCOPE_REF="$(CLOUD_CODE_OWNER_SCOPE_REF)" \
 	  -v "$(KEYRING_SOURCE_DIR):/keyring" \
 	  -v "$(OVERLAY)/enroll-cloud-code.mjs:/workspace/enroll-cloud-code.mjs:ro" "$(LOCAL_IMAGE)" \
@@ -68,7 +68,7 @@ enroll-codex:
 	@test -n "$(LOCAL_IMAGE)" || { echo "LOCAL_IMAGE is required" >&2; exit 1; }
 	@test -f "$(KEYRING_SOURCE_DIR)/.key" || { echo "keyring master key is required" >&2; exit 1; }
 	@test -n "$(REFRESH_OWNER_SCOPE_REF)" || { echo "REFRESH_OWNER_SCOPE_REF is required" >&2; exit 1; }
-	@docker run --rm --network host --user "$$(id -u):$$(id -g)" \
+	@docker run --rm --entrypoint node --network host --user "$$(id -u):$$(id -g)" \
 	  -e REFRESH_OWNER_SCOPE_REF="$(REFRESH_OWNER_SCOPE_REF)" \
 	  -v "$(KEYRING_SOURCE_DIR):/keyring" \
 	  -v "$(OVERLAY)/enroll-codex.mjs:/workspace/enroll-codex.mjs:ro" "$(LOCAL_IMAGE)" \
@@ -80,7 +80,7 @@ enroll-muse:
 	@test -n "$(LOCAL_IMAGE)" || { echo "LOCAL_IMAGE is required" >&2; exit 1; }
 	@test -f "$(KEYRING_SOURCE_DIR)/.key" || { echo "keyring master key is required" >&2; exit 1; }
 	@test -n "$(REFRESH_OWNER_SCOPE_REF)" || { echo "REFRESH_OWNER_SCOPE_REF is required" >&2; exit 1; }
-	@docker run --rm --network host --user "$$(id -u):$$(id -g)" \
+	@docker run --rm --entrypoint node --network host --user "$$(id -u):$$(id -g)" \
 	  -e REFRESH_OWNER_SCOPE_REF="$(REFRESH_OWNER_SCOPE_REF)" \
 	  -v "$(KEYRING_SOURCE_DIR):/keyring" \
 	  -v "$(OVERLAY)/enroll-muse.mjs:/workspace/enroll-muse.mjs:ro" "$(LOCAL_IMAGE)" \
