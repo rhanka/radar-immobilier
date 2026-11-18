@@ -23,11 +23,21 @@ export const IMMO_TOOL_NAMES = [
   "get_lots_geojson",
   "get_grille_pdf",
   "get_pv_pdf",
+  "list_class_reasons",
+  "get_signal_classification",
+  "classify_signal",
+  "confirm_classification",
+  "annotate_signal",
 ] as const;
 
 export type ImmoToolName = (typeof IMMO_TOOL_NAMES)[number];
 
 export const IMMO_TOOL_SCOPES: Record<ImmoToolName, string> = {
+  list_class_reasons: "immo:read",
+  get_signal_classification: "immo:read",
+  classify_signal: "immo:signals:write",
+  confirm_classification: "immo:signals:write",
+  annotate_signal: "immo:signals:write",
   search_lots: "immo:search",
   get_lot_card: "immo:read",
   search_signals: "immo:search",
@@ -42,7 +52,7 @@ export const IMMO_TOOL_SCOPES: Record<ImmoToolName, string> = {
   get_pv_pdf: "immo:documents:read",
 };
 
-export type ImmoHandlerContext = "data" | "raw";
+export type ImmoHandlerContext = "data" | "raw" | "signals";
 
 export interface ImmoToolBinding {
   readonly context: ImmoHandlerContext;
@@ -50,6 +60,11 @@ export interface ImmoToolBinding {
 }
 
 export const IMMO_TOOL_BINDINGS: Record<ImmoToolName, ImmoToolBinding> = {
+  list_class_reasons: { context: "signals", registeredBy: "registerTools" },
+  get_signal_classification: { context: "signals", registeredBy: "registerTools" },
+  classify_signal: { context: "signals", registeredBy: "registerTools" },
+  confirm_classification: { context: "signals", registeredBy: "registerTools" },
+  annotate_signal: { context: "signals", registeredBy: "registerTools" },
   search_lots: { context: "data", registeredBy: "registerTools" },
   get_lot_card: { context: "data", registeredBy: "registerTools" },
   search_signals: { context: "data", registeredBy: "registerTools" },

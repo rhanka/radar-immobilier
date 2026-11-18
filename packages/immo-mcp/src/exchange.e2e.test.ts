@@ -4,7 +4,7 @@ import { serviceFixture } from "../../../tools/exchange-issuer/service-fixture.j
 import { signSubjectToken, TEST_ISSUER } from "./test-exchange-fixtures.js";
 
 it("exchanges over HTTP across isolated issuer, MCP and synthetic receiver without cookies", async () => {
-  const f = await serviceFixture();
+  const f = await serviceFixture({ signals: true });
   const audit = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
   let session: string | null = null;
   let id = 0;
@@ -28,7 +28,7 @@ it("exchanges over HTTP across isolated issuer, MCP and synthetic receiver witho
     session = init.headers.get("mcp-session-id");
     expect(session).toBeTruthy();
     const inventory = await (await rpc("tools/list", {})).json();
-    expect(inventory.result.tools).toHaveLength(12);
+    expect(inventory.result.tools).toHaveLength(17);
     const search = await (await call("search_signals", { city: "longueuil" })).json();
     expect(search.result.isError, JSON.stringify(search)).not.toBe(true);
     expect(JSON.stringify(search)).toContain("synthetic-signal");
@@ -70,6 +70,31 @@ it("exchanges over HTTP across isolated issuer, MCP and synthetic receiver witho
     expect(f.issuer.issued).toHaveLength(1);
     expect(f.seen).toHaveLength(1);
     expect(JSON.stringify(audit.mock.calls)).not.toContain(f.subject);
-    console.log("[P4] real loopback HTTP: synthetic issuer, MCP, receiver; 12 tools; no cookies");
+    console.log("[P4] real loopback HTTP: synthetic issuer, MCP, receiver; 17 tools; no cookies");
   } finally { audit.mockRestore(); await f.close(); }
+});
+
+it("serves exactly twelve read tools with the signal flag off", async () => {
+  const f = await serviceFixture();
+  let session: string | null = null;
+  let id = 0;
+  const rpc = (method: string, params: unknown) => fetch(`${f.mcpUrl}/mcp`, {
+    method: "POST", headers: { "content-type": "application/json", accept: "application/json, text/event-stream",
+      authorization: `Bearer ${f.subject}`, ...(session ? { "mcp-session-id": session } : {}),
+    }, body: JSON.stringify({ jsonrpc: "2.0", id: ++id, method, params }),
+  });
+  try {
+    const init = await rpc("initialize", { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "flag-off", version: "1" } });
+    expect(init.status).toBe(200);
+    session = init.headers.get("mcp-session-id");
+    expect(session).toBeTruthy();
+    const inventory = await (await rpc("tools/list", {})).json();
+    const names = inventory.result.tools.map((tool: { name: string }) => tool.name);
+    expect(names).toHaveLength(12);
+    for (const signalTool of ["list_class_reasons", "get_signal_classification", "classify_signal",
+      "confirm_classification", "annotate_signal"]) expect(names).not.toContain(signalTool);
+    const search = await (await rpc("tools/call", { name: "search_signals", arguments: { city: "longueuil" } })).json();
+    expect(search.result.isError, JSON.stringify(search)).not.toBe(true);
+    expect(JSON.stringify(search)).toContain("synthetic-signal");
+  } finally { await f.close(); }
 });

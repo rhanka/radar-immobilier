@@ -1,0 +1,16 @@
+# PROD signal-write ACTIVATION overlay (PR #1107). NOT wired into any CD:
+# build-push-images reapplies only the base (deploy/k8s), which stays inert
+# (flag "0", scope not announced, optional Secret). An operator applies THIS
+# overlay by hand, once, after the commissioning runbook prerequisites:
+# role immo_mcp_signal_writer, migration 0048 + migrator grants, Secret
+# immo-mcp-signal-writer, and immo:signals:write declared at the prod IdP.
+# See docs/operator/mcp-signal-write-runbook.md.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../k8s/immo-mcp
+patches:
+  - path: patch-immo-mcp-signal-write.yaml
+    target:
+      kind: ConfigMap
+      name: immo-mcp-config
