@@ -284,11 +284,7 @@ jobs:
           set -euo pipefail
           umask 077
           mkdir -p "$HOME/.kube"
-          if printf '%s' "$KUBE_CONFIG_DATA_PREPROD" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
-            printf '%s' "$KUBE_CONFIG_DATA_PREPROD" | base64 -d > "$HOME/.kube/config"
-          else
-            printf '%s' "$KUBE_CONFIG_DATA_PREPROD" > "$HOME/.kube/config"
-          fi
+          bash deploy/ci/write-kubeconfig.sh "$KUBE_CONFIG_DATA_PREPROD"
       - name: Prepare restore, migrations, 6H and isolated smoke
         run: make -f deploy/cutover/operator.mk prepare RELEASE=cutover-release/release.json ENV=preprod
 
@@ -341,11 +337,7 @@ jobs:
         run: |
           mkdir -p "$HOME/.kube"
           # Accept the secret in either raw YAML or base64-encoded form.
-          if printf '%s' "$KUBE_CONFIG_DATA" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
-            printf '%s' "$KUBE_CONFIG_DATA" | base64 -d > "$HOME/.kube/config"
-          else
-            printf '%s' "$KUBE_CONFIG_DATA" > "$HOME/.kube/config"
-          fi
+          bash deploy/ci/write-kubeconfig.sh "$KUBE_CONFIG_DATA"
           chmod 600 "$HOME/.kube/config"
 
       # PRE-FLIGHT (2026-07-28) — see "PRE-FLIGHT / TARGET CLUSTER" in the file
@@ -700,11 +692,7 @@ jobs:
         run: |
           mkdir -p "$HOME/.kube"
           # Accept the secret in either raw YAML or base64-encoded form.
-          if printf '%s' "$KUBE_CONFIG_DATA_PREPROD" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
-            printf '%s' "$KUBE_CONFIG_DATA_PREPROD" | base64 -d > "$HOME/.kube/config"
-          else
-            printf '%s' "$KUBE_CONFIG_DATA_PREPROD" > "$HOME/.kube/config"
-          fi
+          bash deploy/ci/write-kubeconfig.sh "$KUBE_CONFIG_DATA_PREPROD"
           chmod 600 "$HOME/.kube/config"
 
       # PRE-FLIGHT — identical guard to prod, but the positive proof runs in the
@@ -1270,11 +1258,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$HOME/.kube"
-          if printf '%s' "$KUBE_CONFIG_DATA" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
-            printf '%s' "$KUBE_CONFIG_DATA" | base64 -d > "$HOME/.kube/config"
-          else
-            printf '%s' "$KUBE_CONFIG_DATA" > "$HOME/.kube/config"
-          fi
+          bash deploy/ci/write-kubeconfig.sh "$KUBE_CONFIG_DATA"
           chmod 600 "$HOME/.kube/config"
       # No standalone migrate step here: DDL runs inside `prepare`
       # (tools/make/cutover-prepare.sh), after the change lock, the recovery
