@@ -53,6 +53,11 @@ spec:
               mkdir -p /keyring/runtime/.import
               trap 'rm -rf /keyring/runtime/.import' EXIT
               cp -a /import/. /keyring/runtime/.import/
+              # The Secret volume arrives 0777 and cp -a preserves it; the
+              # encrypted keyring refuses any directory that is not 0700.
+              chmod 0700 /keyring/runtime/.import
+              find /keyring/runtime/.import -type d -exec chmod 0700 {} +
+              find /keyring/runtime/.import -type f -exec chmod 0600 {} +
               node /workspace/account-import.mjs "$IMPORT_TRANSPORT" /keyring/runtime /keyring/runtime/.import
           volumeMounts:
             - { name: keyring, mountPath: /keyring }
