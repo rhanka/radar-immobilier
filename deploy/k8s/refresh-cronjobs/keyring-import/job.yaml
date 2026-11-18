@@ -4,7 +4,7 @@
 # afterwards (success or failure): Job, Secret and the script ConfigMap.
 # ttlSecondsAfterFinished below only removes the Job, never the Secret.
 # IMPORT_TRANSPORT is substituted at render time by refresh-018.mk
-# (import-keyring-account IMPORT_TRANSPORT=codex|cloud-code); the placeholder
+# (import-keyring-account IMPORT_TRANSPORT=codex|cloud-code|muse); the placeholder
 # is fail-loud: the script refuses any transport it does not know.
 apiVersion: batch/v1
 kind: Job
