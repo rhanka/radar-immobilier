@@ -8,9 +8,16 @@ import { HttpDataSource } from "../../packages/immo-mcp/src/data-source.js";
 import { ExchangeCache, SingleFlightExchange } from "../../packages/immo-mcp/src/exchange-cache.js";
 import { signalSearchBody, signalSearchItem } from "../../packages/immo-mcp/src/signal-search-test-fixture.js";
 import { signSubjectToken, TEST_ISSUER, TEST_RESOURCE, TEST_API_AUDIENCE, TEST_WORKLOAD_SECRET } from "../../packages/immo-mcp/src/test-exchange-fixtures.js";
+import { createSignalBinding, type SignalQuery } from "../../packages/immo-mcp/src/signal-store.js";
 
-export async function serviceFixture() {
+export async function serviceFixture(options: { signals?: boolean } = {}) {
   const servers: ReturnType<typeof serve>[] = [];
+  // Explicit test binding: the 17-tool case opts in through the same env
+  // flag production uses; the default stays at flag "0" (twelve tools).
+  const signalBinding = options.signals ? createSignalBinding({
+    IMMO_MCP_SIGNALS_WRITE_ENABLED: "1",
+    IMMO_MCP_SIGNAL_DATABASE_URL: "postgres://synthetic:synthetic@127.0.0.1:1/synthetic",
+  }) : undefined;
   async function listen(app: Hono) {
     const server = serve({ fetch: app.fetch, hostname: "127.0.0.1", port: 0 });
     servers.push(server);
@@ -24,6 +31,7 @@ export async function serviceFixture() {
       server.closeAllConnections();
       server.close((error) => error ? reject(error) : resolve());
     })));
+    await signalBinding?.end().catch(() => undefined);
   }
   try {
     const subject = await generateKeyPair("RS256");
@@ -54,6 +62,7 @@ export async function serviceFixture() {
       requiredScopes: ["immo:read"], scopesSupported: ["immo:read", "immo:search"], port: 0,
       dataMode: "real", sessionIdleTimeoutMs: 1_800_000, sessionMaxLifetimeMs: 28_800_000,
     }, { keySource: { resolveKey: async () => subject.publicKey }, data: new HttpDataSource({ baseUrl: radarUrl }),
+      ...(signalBinding ? { signals: signalBinding as SignalQuery } : {}),
       authorize: async () => true,
       exchange: { clientSecret: TEST_WORKLOAD_SECRET, allowLoopbackHttp: true, config: { issuer: TEST_ISSUER, apiAudience: TEST_API_AUDIENCE, mcpResource: TEST_RESOURCE,
         tokenEndpoint: `${issuerUrl}/token`, workloadSub: "immo-mcp-workload", workloadClientId: "immo-mcp-workload",
