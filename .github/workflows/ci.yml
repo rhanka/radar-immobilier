@@ -40,6 +40,11 @@ jobs:
           bash deploy/ci/check-no-python.sh
           bash deploy/ci/check-no-python.test.sh
 
+      - name: Require automount false on bascule-bundle-cd pod templates
+        run: |
+          bash deploy/ci/check-bascule-automount.sh
+          bash deploy/ci/check-bascule-automount.test.sh
+
       - name: Validate kubeconfig decoding (raw, base64, invalid)
         run: bash deploy/ci/write-kubeconfig.test.sh
 
