@@ -227,5 +227,32 @@ if bash -e "$T/perm-cmds.sh" && [ "$(stat -c %a "$perm_dest")" = 700 ] \
   ok "import copy normalizes a 0777 Secret volume to 0700/0600"
 else bad "import copy left Secret-volume permissions (dest=$(stat -c %a "$perm_dest" 2>/dev/null))"; fi
 
+# --- every runtime reader normalizes fsGroup modes before node --------------
+# fsGroup remounts hand 2770/0660 back at every start; llm-mesh 0.38.2 refuses
+# it (preprod 2026-11-18: 51/51 cities, keyring_insecure_permissions). Replay
+# each manifest's own normalization lines on a 2770 fixture: directories end
+# 0700, keyring files 0600, shared lock files untouched.
+check_normalize() { # $1 = manifest, $2 = label, $3 = subdir expected (yes|no)
+  local root="$T/norm-$2" cmds="$T/norm-$2.sh" sub_ok=1
+  mkdir -p "$root/runtime/sub" "$root/runtime/.import"; chmod 2770 "$root/runtime" "$root/runtime/sub" "$root/runtime/.import"
+  printf 'fixture' >"$root/runtime/.key"; printf 'fixture' >"$root/runtime/account.json"
+  printf 'fixture' >"$root/runtime/.refresh.lock"
+  chmod 0660 "$root/runtime/.key" "$root/runtime/account.json" "$root/runtime/.refresh.lock"
+  grep -E 'chmod 00700 /keyring/runtime|find /keyring/runtime' "$1" \
+    | sed "s#/keyring/runtime#$root/runtime#g" >"$cmds"
+  [ -s "$cmds" ] || { bad "$2: no normalization lines in the manifest"; return; }
+  bash -e "$cmds" || { bad "$2: normalization lines failed"; return; }
+  [ "$3" = yes ] && [ "$(stat -c %a "$root/runtime/sub")" != 700 ] && sub_ok=0
+  if [ "$(stat -c %a "$root/runtime")" = 700 ] && [ "$sub_ok" = 1 ] \
+    && [ "$(stat -c %a "$root/runtime/.key")" = 600 ] && [ "$(stat -c %a "$root/runtime/account.json")" = 600 ] \
+    && [ "$(stat -c %a "$root/runtime/.refresh.lock")" = 660 ]; then
+    ok "$2: 2770 runtime normalizes to 0700/0600, lock untouched"
+  else bad "$2: normalization incomplete (root=$(stat -c %a "$root/runtime" 2>/dev/null))"; fi
+}
+check_normalize "$ROOT/deploy/k8s/34-refresh-cronjob.yaml" refresh-cronjob yes
+check_normalize "$HERE/../requeue-recurrent/cronjob.yaml" requeue-recurrent yes
+check_normalize "$HERE/../requeue-abandoned/job.yaml" requeue-abandoned yes
+check_normalize "$HERE/job.yaml" keyring-import-job no
+
 echo "keyring-import.test.sh: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]
