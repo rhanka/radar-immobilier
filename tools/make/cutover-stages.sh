@@ -15,7 +15,7 @@ deployed_release() {
   sha=$(jq -er .sha "$WORK/health.json"); short=$(jq -er .sha "$WORK/build.json")
   jq -n --arg api "$api" --arg ui "$ui" --arg sha "$sha" --arg short "$short" \
     '{version:1,gitSha:$sha,apiImage:$api,uiImage:$ui,apiServedSha:$sha,uiServedSha:$short,dataMigration:null}' > "$WORK/release.json"
-  validate_release "$WORK/release.json"; save_release "$WORK/release.json"
+  validate_deployed_release "$WORK/release.json"; save_release "$WORK/release.json"
 }
 restore_stage() {
   # Fail before any closure when the recovery backup bucket is not writable.
