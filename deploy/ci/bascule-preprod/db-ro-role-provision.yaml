@@ -125,6 +125,7 @@ spec:
     metadata:
       labels: { app.kubernetes.io/name: radar-immobilier, app.kubernetes.io/component: db-backup, role: pra-backup }
     spec:
+      automountServiceAccountToken: false
       restartPolicy: Never
       securityContext: { runAsNonRoot: true, runAsUser: 1001, runAsGroup: 1001, fsGroup: 1001, seccompProfile: { type: RuntimeDefault } }
       volumes:
