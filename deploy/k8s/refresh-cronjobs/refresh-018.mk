@@ -74,6 +74,18 @@ enroll-codex:
 	  -v "$(OVERLAY)/enroll-codex.mjs:/workspace/enroll-codex.mjs:ro" "$(LOCAL_IMAGE)" \
 	  node /workspace/enroll-codex.mjs
 
+.PHONY: enroll-muse
+enroll-muse:
+	@test "$(ENV)" = "test-refresh-018" || { echo "ENV=test-refresh-018 is required" >&2; exit 1; }
+	@test -n "$(LOCAL_IMAGE)" || { echo "LOCAL_IMAGE is required" >&2; exit 1; }
+	@test -f "$(KEYRING_SOURCE_DIR)/.key" || { echo "keyring master key is required" >&2; exit 1; }
+	@test -n "$(REFRESH_OWNER_SCOPE_REF)" || { echo "REFRESH_OWNER_SCOPE_REF is required" >&2; exit 1; }
+	@docker run --rm --network host --user "$$(id -u):$$(id -g)" \
+	  -e REFRESH_OWNER_SCOPE_REF="$(REFRESH_OWNER_SCOPE_REF)" \
+	  -v "$(KEYRING_SOURCE_DIR):/keyring" \
+	  -v "$(OVERLAY)/enroll-muse.mjs:/workspace/enroll-muse.mjs:ro" "$(LOCAL_IMAGE)" \
+	  node /workspace/enroll-muse.mjs
+
 IMPORT_TRANSPORT ?= codex
 
 .PHONY: import-keyring-account
@@ -197,6 +209,10 @@ cleanup-keyring-import:
 test-keyring-import: ## Hermetic tests of the keyring account import (no cluster)
 	@node --test "$(OVERLAY)/keyring-import/account-import.selftest.mjs"
 	@bash "$(OVERLAY)/keyring-import/keyring-import.test.sh"
+
+.PHONY: test-enroll-targets
+test-enroll-targets: ## Hermetic guard tests of the enroll targets (no cluster, no enrollment run)
+	@bash "$(OVERLAY)/enroll-targets.test.sh"
 
 .PHONY: consent-cloud-code
 consent-cloud-code:
