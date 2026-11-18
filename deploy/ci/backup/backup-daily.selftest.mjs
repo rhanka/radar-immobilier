@@ -900,7 +900,7 @@ const PREV_LATEST = JSON.stringify({ date: '2026-09-25', status: 'complete', pgS
   const args = { date: D0, createdAt: t0.toISOString(), sourceBucket: DOCS, backupBucket: BK, excludePrefixes: [], versionIds: 'list-versions', srcObjs: small, dstIndex: dst, copied: new Map(), failed: new Set() };
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'inv-stream-'));
   const file = path.join(dir, 'inventory.json');
-  const counts = await lib.writeInventoryFile(file, args);
+  await lib.writeInventoryFile(file, args);
   eq('streamed inventory == buildInventory (parsed)', JSON.parse(fs.readFileSync(file, 'utf8')), lib.buildInventory(args));
   const N = 336830;
   const big = Array.from({ length: N }, (_, i) => ({ Key: `raw/ville-${i % 530}/cas/document-${i}.pdf`, Size: 1000 + i, ETag: `"${md5hex(String(i))}"`, LastModified: t0 }));
