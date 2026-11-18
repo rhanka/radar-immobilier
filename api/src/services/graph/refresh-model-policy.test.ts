@@ -8,10 +8,10 @@ const primary: RefreshModel = { provider: "gemini", model: "gemini-3.8-flash", e
 const fallback: RefreshModel = { provider: "openai", model: "gpt-6-astra", effort: "low" };
 const input = { prompt: "Extract", schema: "{}", validateResponse: () => {} };
 function fixture(generate: (model: RefreshModel, signal: AbortSignal) => Promise<string>, forceFallback = false,
-  signal?: AbortSignal, primaryQualityAttempts = 2) {
+  signal?: AbortSignal, primaryQualityAttempts = 2, fallbackModel: RefreshModel = fallback) {
   const calls: string[] = [];
   const receipts: RefreshModelReceipt[] = [];
-  const policy = createRefreshModelPolicy({ primary, fallback, forceFallback, primaryQualityAttempts, timeoutMs: 50,
+  const policy = createRefreshModelPolicy({ primary, fallback: fallbackModel, forceFallback, primaryQualityAttempts, timeoutMs: 50,
     ...(signal ? { signal } : {}),
     createClient(model, attemptSignal): TextJsonGenerationClient {
       return { mode: "mesh", provider: model.provider, model: model.model, async generateJson(request) {
@@ -231,6 +231,27 @@ describe("refresh model policy", () => {
     await expect(run.document("c").generateJson(input)).rejects.toBe(noRoute);
     expect(run.policy.fallbackUnroutable()).toBe(true);
     expect(run.policy.fallbackQuotaExhausted()).toBe(false);
+  });
+
+  it("should declare a muse FALLBACK unroutable after three consecutive no-route refusals", async () => {
+    // A muse seat that was never enrolled (or whose grant died) has no
+    // eligible route: the sweep must stop on fallback-no-route instead of
+    // paying a refused call for every remaining city.
+    const museFallback: RefreshModel = { provider: "muse", model: "muse-wonder-1.0", effort: "low" };
+    const noRoute = Object.assign(new Error("No eligible route"), { name: "RoutePlanError", code: "no-route" });
+    const run = fixture(async (model) => {
+      if (model === museFallback) throw noRoute;
+      throw Object.assign(new Error("limited"), { status: 429 });
+    }, false, undefined, 2, museFallback);
+    for (const id of ["a", "b"]) {
+      await expect(run.document(id).generateJson(input)).rejects.toBe(noRoute);
+    }
+    expect(run.policy.fallbackUnroutable()).toBe(false);
+    await expect(run.document("c").generateJson(input)).rejects.toBe(noRoute);
+    expect(run.policy.fallbackUnroutable()).toBe(true);
+    expect(run.receipts.filter((receipt) => receipt.transition === "fallback")
+      .every((receipt) => receipt.modelUsed?.provider === "muse"
+        && receipt.modelUsed?.effort === "provider-default")).toBe(true);
   });
 
   it("should reset the no-route streak when an extraction succeeds in between", async () => {

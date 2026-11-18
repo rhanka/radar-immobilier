@@ -267,9 +267,13 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
               controller.signal.removeEventListener("abort", rejectDeadline);
             }
             const reason = controller.signal.aborted ? "timeout" : refreshFallbackReason(failure);
+            // A muse route never receives the configured effort (the provider
+            // default applies): receipts name it instead of the configured one.
+            const receiptModel: RefreshModel = model.provider === "muse"
+              ? { ...model, effort: "provider-default" } : model;
             // Persistence errors are deliberately outside the transport catch.
             const modelUsed = result ? result.provider === model.provider && result.model === model.model
-              ? { ...model, model: result.model } : null : model;
+              ? { ...receiptModel, model: result.model } : null : receiptModel;
             await record({ modelUsed, status: qualityRefused ? "quality-refused" : failed ? "failed" : "completed",
               attempt: attemptNumber, transition,
               ...(!failed && (transition === "fallback" || !options.verification)
