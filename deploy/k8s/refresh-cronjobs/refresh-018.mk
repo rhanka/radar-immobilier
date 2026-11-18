@@ -60,7 +60,7 @@ enroll-cloud-code:
 	  -e CLOUD_CODE_OWNER_SCOPE_REF="$(CLOUD_CODE_OWNER_SCOPE_REF)" \
 	  -v "$(KEYRING_SOURCE_DIR):/keyring" \
 	  -v "$(OVERLAY)/enroll-cloud-code.mjs:/workspace/enroll-cloud-code.mjs:ro" "$(LOCAL_IMAGE)" \
-	  node /workspace/enroll-cloud-code.mjs
+	  /workspace/enroll-cloud-code.mjs
 
 .PHONY: enroll-codex
 enroll-codex:
@@ -72,7 +72,7 @@ enroll-codex:
 	  -e REFRESH_OWNER_SCOPE_REF="$(REFRESH_OWNER_SCOPE_REF)" \
 	  -v "$(KEYRING_SOURCE_DIR):/keyring" \
 	  -v "$(OVERLAY)/enroll-codex.mjs:/workspace/enroll-codex.mjs:ro" "$(LOCAL_IMAGE)" \
-	  node /workspace/enroll-codex.mjs
+	  /workspace/enroll-codex.mjs
 
 .PHONY: enroll-muse
 enroll-muse:
@@ -84,7 +84,7 @@ enroll-muse:
 	  -e REFRESH_OWNER_SCOPE_REF="$(REFRESH_OWNER_SCOPE_REF)" \
 	  -v "$(KEYRING_SOURCE_DIR):/keyring" \
 	  -v "$(OVERLAY)/enroll-muse.mjs:/workspace/enroll-muse.mjs:ro" "$(LOCAL_IMAGE)" \
-	  node /workspace/enroll-muse.mjs
+	  /workspace/enroll-muse.mjs
 
 IMPORT_TRANSPORT ?= codex
 
