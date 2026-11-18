@@ -20,3 +20,18 @@ test('environment and namespace overrides reject before kubectl', () => {
     assert.equal(result.status, 42);
   }
 });
+// Production 2026-11-18 (run 44224775634): the served API and UI came from two commits.
+const served = { version: 1, gitSha: 'b7724bdd9015a4f26319897bf240baaf9ee636ae',
+  apiImage: `ghcr.io/rhanka/radar-api@sha256:${'d'.repeat(64)}`, uiImage: `ghcr.io/rhanka/radar-ui@sha256:${'e'.repeat(64)}`,
+  apiServedSha: 'b7724bdd9015a4f26319897bf240baaf9ee636ae', uiServedSha: '8cb2945', dataMigration: null };
+function snapshot(value) {
+  return spawnSync('jq', ['-e', '-f', 'tools/make/cutover-deployed.jq'], { input: JSON.stringify(value) }).status === 0;
+}
+test('served snapshot keeps distinct API and UI commits while promoted manifests stay strict', () => {
+  assert.equal(valid(served), false, 'a promoted manifest still binds the UI to its own commit');
+  assert.ok(snapshot(served));
+  assert.ok(snapshot({ ...manifest, dataMigration: null }));
+  for (const change of [{ apiServedSha: 'a'.repeat(40) }, { uiServedSha: 'stale' }, { uiServedSha: '' },
+    { apiImage: 'ghcr.io/rhanka/radar-api:old' }, { dataMigration: '6h' }, { extra: 'field' }])
+    assert.equal(snapshot({ ...served, ...change }), false, JSON.stringify(change));
+});
