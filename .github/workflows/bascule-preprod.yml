@@ -74,11 +74,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$HOME/.kube"
-          if printf '%s' "$KUBE_CONFIG_DATA_BASCULE_PREPROD" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
-            printf '%s' "$KUBE_CONFIG_DATA_BASCULE_PREPROD" | base64 -d > "$HOME/.kube/config"
-          else
-            printf '%s' "$KUBE_CONFIG_DATA_BASCULE_PREPROD" > "$HOME/.kube/config"
-          fi
+          bash deploy/ci/write-kubeconfig.sh "$KUBE_CONFIG_DATA_BASCULE_PREPROD"
           chmod 600 "$HOME/.kube/config"
       - name: Restore on deployed images (no 6H hook, no refresh)
         id: engine
@@ -128,11 +124,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$HOME/.kube"
-          if printf '%s' "$KUBE_CONFIG_DATA_BASCULE_PREPROD" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
-            printf '%s' "$KUBE_CONFIG_DATA_BASCULE_PREPROD" | base64 -d > "$HOME/.kube/config"
-          else
-            printf '%s' "$KUBE_CONFIG_DATA_BASCULE_PREPROD" > "$HOME/.kube/config"
-          fi
+          bash deploy/ci/write-kubeconfig.sh "$KUBE_CONFIG_DATA_BASCULE_PREPROD"
           chmod 600 "$HOME/.kube/config"
       - name: Reopen a daily restore left closed by this run
         env:
