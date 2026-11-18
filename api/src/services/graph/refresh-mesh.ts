@@ -1,18 +1,21 @@
 import type { TextJsonGenerationClient } from "@sentropic/engram";
 import {
-  createGraphifyMesh,
-  meshTextJsonClient,
-  type GraphifyMesh,
-} from "@sentropic/engram/llm-mesh";
+  createRefreshRoutedMesh,
+  refreshTextJsonClient,
+  type RefreshRoutedMesh,
+} from "./refresh-routed-mesh.js";
 import {
   CloudCodeRuntimeClient,
   CodexRuntimeClient,
   DEFAULT_ROUTE_POLICY,
   GeminiAdapter,
   InMemoryRoutePolicyProfiles,
+  MuseAdapter,
+  MuseRuntimeClient,
   OpenAIAdapter,
   type GenerateRequest,
   type GeminiAdapterClient,
+  type MuseAdapterClient,
   type OpenAIAdapterClient,
   type VerifiedRoutingSubject,
 } from "@sentropic/llm-mesh-refresh";
@@ -22,7 +25,11 @@ import {
   type KeyringAdapter,
 } from "@sentropic/llm-mesh-refresh/facade";
 
-export type RefreshProvider = "gemini" | "openai";
+export type RefreshProvider = "gemini" | "openai" | "muse";
+export const REFRESH_PROVIDERS: readonly RefreshProvider[] = ["openai", "gemini", "muse"];
+export function isRefreshProvider(value: string): value is RefreshProvider {
+  return (REFRESH_PROVIDERS as readonly string[]).includes(value);
+}
 
 export interface RefreshMeshOptions {
   readonly routingSubject: VerifiedRoutingSubject;
@@ -35,11 +42,12 @@ export interface RefreshMeshOptions {
   readonly signal: AbortSignal;
   readonly geminiClient?: GeminiAdapterClient;
   readonly openAiClient?: OpenAIAdapterClient;
+  readonly museClient?: MuseAdapterClient;
   readonly openAiFetch?: typeof fetch;
 }
 
 export interface RefreshMeshBundle {
-  readonly mesh: GraphifyMesh;
+  readonly mesh: RefreshRoutedMesh;
   readonly textClient: TextJsonGenerationClient;
 }
 
@@ -101,11 +109,20 @@ export function refreshErrorDiagnostic(error: unknown): Record<string, string | 
     stackOrigin: internalFrame };
 }
 
+/** Muse Chat refuses reasoning controls (llm-mesh `unsupported_projection`):
+ *  the effort of a muse route is the provider default, never forwarded. */
+export function refreshRouteReasoning(
+  provider: RefreshProvider,
+  reasoning?: GenerateRequest["reasoning"],
+): GenerateRequest["reasoning"] {
+  return provider === "muse" ? undefined : reasoning;
+}
+
 export function bindRefreshAbortSignal(
-  mesh: GraphifyMesh,
+  mesh: RefreshRoutedMesh,
   signal: AbortSignal,
   reasoning?: GenerateRequest["reasoning"],
-): GraphifyMesh {
+): RefreshRoutedMesh {
   return {
     listProviders: mesh.listProviders,
     listModels: mesh.listModels,
@@ -127,11 +144,16 @@ export function createRefreshMesh(options: RefreshMeshOptions): RefreshMeshBundl
     configResolver: options.configResolver,
     ...(options.keyring ? { keyring: options.keyring } : {}),
   });
-  const mesh = createGraphifyMesh({
+  const mesh = createRefreshRoutedMesh({
     routingSubject: options.routingSubject,
     adapters: {
       gemini: new GeminiAdapter({
         client: options.geminiClient ?? new CloudCodeRuntimeClient(bindRefreshFetchSignal(fetch, options.signal)),
+      }),
+      muse: new MuseAdapter({
+        client: options.museClient ?? new MuseRuntimeClient({
+          fetch: bindRefreshFetchSignal(fetch, options.signal),
+        }),
       }),
       openai: new OpenAIAdapter({
         client: options.openAiClient ?? new CodexRuntimeClient({
@@ -143,10 +165,11 @@ export function createRefreshMesh(options: RefreshMeshOptions): RefreshMeshBundl
       profiles: createRefreshRoutePolicyProfiles(options.maximumAttempts),
     }),
   });
-  const abortable = bindRefreshAbortSignal(mesh, options.signal, options.reasoning);
+  const abortable = bindRefreshAbortSignal(mesh, options.signal,
+    refreshRouteReasoning(options.provider, options.reasoning));
   return {
     mesh: abortable,
-    textClient: meshTextJsonClient(abortable, {
+    textClient: refreshTextJsonClient(abortable, {
       provider: options.provider,
       model: options.model,
     }),
