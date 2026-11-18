@@ -238,7 +238,7 @@ check_normalize() { # $1 = manifest, $2 = label, $3 = subdir expected (yes|no)
   printf 'fixture' >"$root/runtime/.key"; printf 'fixture' >"$root/runtime/account.json"
   printf 'fixture' >"$root/runtime/.refresh.lock"
   chmod 0660 "$root/runtime/.key" "$root/runtime/account.json" "$root/runtime/.refresh.lock"
-  grep -E 'chmod 00700 /keyring/runtime|find /keyring/runtime' "$1" \
+  grep -E 'chmod 00700 /keyring/runtime|find (-L )?/keyring/runtime' "$1" \
     | sed "s#/keyring/runtime#$root/runtime#g" >"$cmds"
   [ -s "$cmds" ] || { bad "$2: no normalization lines in the manifest"; return; }
   bash -e "$cmds" || { bad "$2: normalization lines failed"; return; }
@@ -253,6 +253,26 @@ check_normalize "$ROOT/deploy/k8s/34-refresh-cronjob.yaml" refresh-cronjob yes
 check_normalize "$HERE/../requeue-recurrent/cronjob.yaml" requeue-recurrent yes
 check_normalize "$HERE/../requeue-abandoned/job.yaml" requeue-abandoned yes
 check_normalize "$HERE/job.yaml" keyring-import-job no
+
+# --- the runtime seed keeps projected Secret-volume symlinks ----------------
+# The bootstrap seed copied a projected Secret volume: .key and *.json are
+# symlinks into a timestamped directory, whose real files carry 0660. A find
+# bounded to the first level sees only the links and leaves the targets at
+# 0660 (preprod 2026-11-18: master key refused at 0o660 on the RUNTIME).
+link_root="$T/link-runtime"
+mkdir -p "$link_root/..2026_11_18"
+printf 'fixture' >"$link_root/..2026_11_18/.key"; printf 'fixture' >"$link_root/..2026_11_18/account.json"
+printf 'fixture' >"$link_root/.refresh.lock"
+chmod 0660 "$link_root/..2026_11_18/.key" "$link_root/..2026_11_18/account.json" "$link_root/.refresh.lock"
+ln -s "..2026_11_18" "$link_root/..data"
+ln -s "..data/.key" "$link_root/.key"; ln -s "..data/account.json" "$link_root/account.json"
+grep -E 'chmod 00700 /keyring/runtime|find -L? ?/keyring/runtime' "$HERE/job.yaml" | grep -v '.import' \
+  | sed "s#/keyring/runtime#$link_root#g" >"$T/link-cmds.sh"
+if bash -e "$T/link-cmds.sh" && [ "$(stat -c %a "$link_root/..2026_11_18/.key")" = 600 ] \
+  && [ "$(stat -c %a "$link_root/..2026_11_18/account.json")" = 600 ] \
+  && [ "$(stat -c %a "$link_root/.refresh.lock")" = 660 ] && [ -L "$link_root/.key" ]; then
+  ok "runtime symlinks: real key targets normalize to 0600, lock untouched"
+else bad "runtime symlinks: targets left at $(stat -c %a "$link_root/..2026_11_18/.key" 2>/dev/null)"; fi
 
 echo "keyring-import.test.sh: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]
