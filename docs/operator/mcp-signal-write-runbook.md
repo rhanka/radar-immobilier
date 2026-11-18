@@ -21,8 +21,11 @@ default overlay now carries its values, keeping one source. A flag at
 `"1"` with no Secret no longer crashes the server, but it starts read-only
 (twelve tools, explicit `signal binding unavailable` log line) and the five
 signal tools stay unregistered until the Secret and the binding are in
-place; the deploy-preprod pre-flight also fails loudly if the Secret is
-missing.
+place. The CI deployer account cannot read Secrets (0 secrets by design),
+so no kubectl Secret check gates the deploy: after the rollout, CD reads
+the unauthenticated `GET /mcp/.well-known/signal-write` enum
+(`active | read-only | disabled`) on the preprod endpoint and fails the
+deploy unless it reports `active`.
 
 **Prod stays inert.** Remaining prod steps, in order: create role
 `immo_mcp_signal_writer` (step 1), apply migration 0048 + grants (step 2),
