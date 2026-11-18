@@ -1001,6 +1001,33 @@ jobs:
           echo "rollout state: ${state}"
           echo "rollout_state=${state}" >> "$GITHUB_OUTPUT"
 
+      # POST-DEPLOY PROOF (signal writes) — the CI account cannot read
+      # Secrets (0 secrets by design), so the state is proven through the
+      # unauthenticated enum endpoint, never through kubectl. Preprod runs
+      # with the flag at "1": anything but active means the binding Secret
+      # is missing or unusable, and the deploy must fail, not degrade.
+      - name: Post-deploy — prove signal writes active (preprod)
+        env:
+          PREPROD_ENDPOINT_HOST: ${{ vars.PREPROD_ENDPOINT_HOST }}
+        run: |
+          set -euo pipefail
+          host="${PREPROD_ENDPOINT_HOST:-preprod.immo.sent-tech.ca}"
+          state=""
+          for attempt in 1 2 3 4 5 6; do
+            body="$(curl -fsS "https://${host}/mcp/.well-known/signal-write" 2>/dev/null || true)"
+            case "$body" in
+              *'"signalWrite":"active"'*) state=active; break ;;
+              *'"signalWrite":"read-only"'*) state=read-only; break ;;
+              *'"signalWrite":"disabled"'*) state=disabled; break ;;
+            esac
+            sleep 10
+          done
+          echo "signal-write state: ${state:-<unreachable>}"
+          if [ "$state" != "active" ]; then
+            echo "::error title=Signal writes not active::preprod MCP reports '${state:-unreachable}' at https://${host}/mcp/.well-known/signal-write — Secret immo-mcp-signal-writer missing or binding down (runbook step 3). Failing the deploy."
+            exit 1
+          fi
+
       # POST-DEPLOY PROOF (TLS serial) — proves the preprod public endpoint is
       # served by the OVH LB. prod & preprod share the LB IP, so this attests
       # preprod DNS -> LB (NOT prod-vs-preprod); the served-sha step below is what
