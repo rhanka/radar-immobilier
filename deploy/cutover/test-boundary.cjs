@@ -114,6 +114,12 @@ if (tool === 'curl') {
   if (route === '/') { type = 'text/html'; body = '<html></html>'; }
   if (route === '/build.json') body = { sha: s.release.uiServedSha };
   if (route === '/health') body = { sha: s.release.apiServedSha, db: { ok: true }, objectStore: { ok: true } };
+  // A served snapshot (s.deployed) answers while its own digest still runs on that Deployment.
+  const runs = (name, image) => s.objects.some(o => o.kind === 'Deployment' && o.metadata.name === name
+    && o.spec.template.spec.containers.some(c => c.image === image));
+  const prepared = new URL(url).port === '18849';
+  if (s.deployed && !prepared && route === '/build.json' && runs('radar-ui', s.deployed.uiImage)) body.sha = s.deployed.uiServedSha;
+  if (s.deployed && !prepared && route === '/health' && runs('radar-api', s.deployed.apiImage)) body.sha = s.deployed.apiServedSha;
   if (route === '/api/v1/workspaces' || route === '/mcp') { code = 401; headers = 'WWW-Authenticate: Bearer realm="radar"\r\n'; }
   if (route.includes('well-known')) body = { resource: `${s.url}/mcp` };
   if (s.badSha && route === '/build.json') body.sha = 'stale';
@@ -128,7 +134,9 @@ if (tool === 'curl') {
 }
 if (args[0] === 'config') { out(s.server || 'https://hlhedx.c1.bhs5.k8s.ovh.net'); process.exit(); }
 if (args[0] === 'port-forward') {
-  out(`Forwarding from 127.0.0.1:${args.includes('service/radar-ui') ? 18080 : 18848} -> service\n`);
+  // The prepared API gets its own port: it always serves the release under test.
+  const port = args.includes('service/radar-ui') ? 18080 : args.includes('deployment/radar-api-prepared') ? 18849 : 18848;
+  out(`Forwarding from 127.0.0.1:${port} -> service\n`);
   setInterval(() => {}, 1000); return;
 }
 if (args[0] === 'rollout') process.exit(s.missingMcp && args.includes('deployment/radar-immo-mcp') ? 1 : 0);

@@ -342,3 +342,53 @@ test('rollback before the database switch keeps the live database without a reje
     assert.deepEqual(object(f, 'application').spec, ingress);
   } finally { f.cleanup(); }
 });
+// Production 2026-11-18 (run 44224775634): API b7724bd and UI 8cb2945 served from two commits
+// refused the snapshot at 1/6. The promoted release carries no data hook.
+const mixedProduction = () => {
+  const f = fixture({ url: 'https://immo.sent-tech.ca' });
+  const deployed = { apiImage: `ghcr.io/rhanka/radar-api@sha256:${'d'.repeat(64)}`,
+    uiImage: `ghcr.io/rhanka/radar-ui@sha256:${'e'.repeat(64)}`,
+    apiServedSha: 'b7724bdd9015a4f26319897bf240baaf9ee636ae', uiServedSha: '8cb2945' };
+  const state = f.state();
+  state.release.dataMigration = null; f.release.dataMigration = null;
+  writeFileSync(join(f.dir, 'release.json'), JSON.stringify(state.release));
+  const ingress = state.objects.find(o => o.kind === 'Ingress');
+  ingress.spec.rules[0].host = 'immo.sent-tech.ca'; ingress.spec.tls[0].hosts = ['immo.sent-tech.ca'];
+  for (const o of state.objects) {
+    const image = o.metadata.name === 'radar-ui' ? deployed.uiImage : deployed.apiImage;
+    if (o.kind === 'Deployment') o.spec.template.spec.containers[0].image = image;
+    if (o.kind === 'Pod' && o.status?.containerStatuses) o.status.containerStatuses[0].imageID =
+      o.metadata.labels['app.kubernetes.io/component'] === 'ui' ? deployed.uiImage : deployed.apiImage;
+  }
+  state.deployed = deployed; save(f, state);
+  return { f, deployed };
+};
+const image = (f, name) => object(f, name).spec.template.spec.containers[0].image;
+test('production cutover records an API and UI served from two commits as the rollback target', () => {
+  const { f, deployed } = mixedProduction();
+  try {
+    success(f.run('prepare', [], 'prod'));
+    success(f.run('run', ['MODE=run'], 'prod'));
+    const receipt = JSON.parse(object(f, 'radar-cutover-receipt').data.receipt);
+    assert.deepEqual(receipt.previousRelease, { version: 1, gitSha: deployed.apiServedSha, apiImage: deployed.apiImage,
+      uiImage: deployed.uiImage, apiServedSha: deployed.apiServedSha, uiServedSha: deployed.uiServedSha, dataMigration: null });
+    assert.deepEqual(receipt.release, f.release);
+    assert.equal(image(f, 'radar-api'), f.release.apiImage); assert.equal(image(f, 'radar-ui'), f.release.uiImage);
+  } finally { f.cleanup(); }
+});
+test('production rollback restores the API and the UI each to its own photographed digest', () => {
+  const { f, deployed } = mixedProduction();
+  try {
+    success(f.run('prepare', [], 'prod'));
+    const state = f.state(); state.missingMcp = true; save(f, state);
+    assert.notEqual(f.run('run', ['MODE=run'], 'prod').status, 0);
+    const record = JSON.parse(object(f, 'radar-change-lock').data.record);
+    assert.equal(record.previousRelease.uiServedSha, deployed.uiServedSha);
+    const recovery = f.state(); recovery.missingMcp = false; save(f, recovery);
+    success(f.run('rollback', [`RUN=${record.run}`, 'MODE=run'], 'prod'));
+    assert.equal(image(f, 'radar-api'), deployed.apiImage);
+    assert.equal(image(f, 'radar-ui'), deployed.uiImage);
+    assert.equal(image(f, 'radar-immo-mcp'), deployed.apiImage);
+    assert.equal(object(f, 'radar-change-lock'), undefined);
+  } finally { f.cleanup(); }
+});
