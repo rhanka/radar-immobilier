@@ -25,4 +25,10 @@ describe("refresh classification configuration", () => {
     }
     expect(() => refreshClassifyConfig({ REFRESH_CLASSIFY_PROVIDER: "other" })).toThrow("configuration");
   });
+
+  it("should accept a Muse seat as the classification fallback", () => {
+    expect(refreshClassifyConfig({ REFRESH_CLASSIFY_FALLBACK_PROVIDER: "muse",
+      REFRESH_CLASSIFY_FALLBACK_MODEL: "muse-wonder-1.0" }))
+      .toMatchObject({ fallback: { provider: "muse", model: "muse-wonder-1.0", effort: "low" } });
+  });
 });
