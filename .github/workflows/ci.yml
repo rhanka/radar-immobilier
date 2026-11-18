@@ -40,6 +40,9 @@ jobs:
           bash deploy/ci/check-no-python.sh
           bash deploy/ci/check-no-python.test.sh
 
+      - name: Validate kubeconfig decoding (raw, base64, invalid)
+        run: bash deploy/ci/write-kubeconfig.test.sh
+
       - name: Reject destructive migrations newer than the prod baseline (0044)
         run: |
           bash deploy/ci/check-migration-destructive.sh

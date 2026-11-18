@@ -176,11 +176,7 @@ jobs:
           if [ -z "${data}" ]; then
             echo "::error title=Missing credential::secret ${secret} is empty or not visible to this workflow. Nothing was applied."; exit 1
           fi
-          if printf '%s' "${data}" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
-            printf '%s' "${data}" | base64 -d > "$HOME/.kube/config"
-          else
-            printf '%s' "${data}" > "$HOME/.kube/config"
-          fi
+          bash deploy/ci/write-kubeconfig.sh "${data}"
           chmod 600 "$HOME/.kube/config"
           echo "kubeconfig from ${secret}"
 
