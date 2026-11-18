@@ -145,6 +145,7 @@ spec:
             runAsUser: 1001
             runAsGroup: 1001
             fsGroup: 1001
+            fsGroupChangePolicy: OnRootMismatch
             seccompProfile: { type: RuntimeDefault }
           initContainers:
             - name: seed-keyring-once
@@ -162,9 +163,14 @@ spec:
                   flock -x /keyring/runtime/.bootstrap.lock -c '
                     if [ ! -f /keyring/runtime/.key ]; then
                       cp -a /bootstrap/. /keyring/runtime/
-                      chmod 0700 /keyring/runtime
-                      chmod 0600 /keyring/runtime/.key /keyring/runtime/*.json
                     fi
+                    # fsGroup remounts hand group access back at every start
+                    # (0770): the encrypted keyring refuses anything but 0700.
+                    # Normalize on EVERY start, not only at seed time. Lock
+                    # files keep their mode: they are shared on purpose.
+                    chmod 00700 /keyring/runtime
+                    find /keyring/runtime -type d -exec chmod 00700 {} +
+                    find /keyring/runtime -type f \( -name .key -o -name "*.json" \) -exec chmod 0600 {} +
                   '
               resources:
                 requests: { cpu: 5m, memory: 16Mi }
