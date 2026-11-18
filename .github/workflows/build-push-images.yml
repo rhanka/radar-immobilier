@@ -897,6 +897,17 @@ jobs:
       # are excluded (see deploy/ci/reconcile-preprod.sh header + PR follow-ups).
       # Fail-closed: a failed ConfigMap apply exits BEFORE set-image, so radar-ui
       # never rolls onto a Deployment referencing an absent ConfigMap.
+      # Signal writes are active by default in preprod: the binding Secret
+      # must exist or the MCP serves read-only degraded. Fail loudly here,
+      # before any reconcile, instead of concluding success degraded.
+      - name: Pre-flight — assert signal writer Secret (preprod)
+        run: |
+          set -eu
+          if ! kubectl -n "$NAMESPACE" get secret immo-mcp-signal-writer >/dev/null 2>&1; then
+            echo "::error title=Missing signal writer Secret::Secret immo-mcp-signal-writer absent in ${NAMESPACE} — preprod signal writes would run degraded read-only. Create it (runbook step 3) before deploying."
+            exit 1
+          fi
+
       - name: Reconcile preprod manifests (server-side apply — targeted)
         run: bash deploy/ci/reconcile-preprod.sh
 

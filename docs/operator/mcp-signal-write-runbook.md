@@ -11,13 +11,24 @@ steps below done.
 
 Exact order, per environment: role, migration + grants, Secret, IdP scope,
 then activation. Never announce the scope or set the flag before the steps
-above it exist. Do preprod first (activation overlay
-`deploy/overlays/preprod-signal-write`), qualify, then prod the same way
-(overlay `deploy/overlays/prod-signal-write`). For prod in particular, the
-Secret exists BEFORE any activation: a flag at `"1"` with no Secret no
-longer crashes the server, but it starts read-only (twelve tools, explicit
-`signal binding unavailable` log line) and the five signal tools stay
-unregistered until the Secret and the binding are in place.
+above it exist.
+
+**Preprod is active by default** (since 2026-11-18): its prerequisites are
+verified in place, so the preprod overlay itself announces the scope and
+sets the flag to `"1"`, and the CD reapplies it on every main push. The old
+`deploy/overlays/preprod-signal-write` activation overlay was removed: the
+default overlay now carries its values, keeping one source. A flag at
+`"1"` with no Secret no longer crashes the server, but it starts read-only
+(twelve tools, explicit `signal binding unavailable` log line) and the five
+signal tools stay unregistered until the Secret and the binding are in
+place; the deploy-preprod pre-flight also fails loudly if the Secret is
+missing.
+
+**Prod stays inert.** Remaining prod steps, in order: create role
+`immo_mcp_signal_writer` (step 1), apply migration 0048 + grants (step 2),
+create Secret `immo-mcp-signal-writer` (step 3, BEFORE any activation),
+declare `immo:signals:write` at the prod IdP (step 4), then apply the
+activation overlay `deploy/overlays/prod-signal-write` (step 5).
 
 1. **Role.** Create the dedicated PostgreSQL role with LOGIN:
    `CREATE ROLE immo_mcp_signal_writer LOGIN;` and set its password through
@@ -40,10 +51,10 @@ unregistered until the Secret and the binding are in place.
    and on the `immo-mcp` client row (preprod IdP, qualify, then prod IdP).
    Announcing the scope before this step makes authorization requests fail
    with `invalid_scope`.
-5. **Activation.** Only now apply the activation overlay of the
-   environment, which announces the scope and sets the flag to `"1"`
-   (preprod: `deploy/overlays/preprod-signal-write`; prod:
-   `deploy/overlays/prod-signal-write`; render check first, then apply).
+5. **Activation.** Only now activate: preprod is already covered (the
+   default overlay carries scope + flag `"1"` since 2026-11-18); for prod,
+   apply `deploy/overlays/prod-signal-write` (render check first, then
+   apply), which announces the scope and sets the flag to `"1"`.
    The five signal tools appear in `tools/list` only while the binding is
    active, which needs flag `"1"` AND the Secret present: with the flag on
    and the Secret missing, the server starts read-only and logs
