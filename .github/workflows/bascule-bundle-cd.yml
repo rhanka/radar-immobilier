@@ -172,6 +172,19 @@ jobs:
       # create + name-scoped get/patch/update). The in-cluster sealed-secrets
       # controller decrypts them and materializes the core Secrets radar-db-ro-prod
       # + radar-pra-admin-prod. This runner never sees the plaintext.
+      # Fail BEFORE creating the lock when its RBAC is missing: a lock that
+      # cannot be read or deleted can never be released (run 43764713317).
+      - name: Assert change-lock RBAC before lock creation (apply-bundle)
+        run: |
+          set -euo pipefail
+          for verb in create get update delete; do
+            target="configmaps"; [ "$verb" = create ] || target="configmaps/radar-change-lock"
+            kubectl -n "$NAMESPACE" auth can-i "$verb" "$target" >/dev/null \
+              || { echo "::error title=Change-lock RBAC missing::radar-ci-bascule-prod cannot $verb $target in $NAMESPACE — re-apply deploy/ci/bascule-preprod/rbac-ci-bascule-prod.yaml and deploy/cutover/rbac-prod.yaml. No lock was created."; exit 1; }
+          done
+          kubectl -n "$NAMESPACE" auth can-i get jobs >/dev/null && kubectl -n "$NAMESPACE" auth can-i get pods >/dev/null \
+            || { echo "::error title=Change-lock RBAC missing::radar-ci-bascule-prod cannot read jobs/pods for lock release. No lock was created."; exit 1; }
+          echo "change-lock RBAC OK (create/get/update/delete radar-change-lock)"
       - uses: ./deploy/cutover/lock-action
         with:
           action: lock
@@ -414,6 +427,17 @@ jobs:
       # Fail-closed: every check (10 GitHub values present, single-line, keys of the
       # expected charset/length, S3 endpoint/region = the pinned BHS target, bucket
       # variables = the CronJob guards, the 3 Secrets exist) runs before any write.
+      - name: Assert change-lock RBAC before lock creation (apply-backup)
+        run: |
+          set -euo pipefail
+          for verb in create get update delete; do
+            target="configmaps"; [ "$verb" = create ] || target="configmaps/radar-change-lock"
+            kubectl -n "$NAMESPACE" auth can-i "$verb" "$target" >/dev/null \
+              || { echo "::error title=Change-lock RBAC missing::radar-ci-bascule-prod cannot $verb $target in $NAMESPACE — re-apply deploy/ci/bascule-preprod/rbac-ci-bascule-prod.yaml and deploy/cutover/rbac-prod.yaml. No lock was created."; exit 1; }
+          done
+          kubectl -n "$NAMESPACE" auth can-i get jobs >/dev/null && kubectl -n "$NAMESPACE" auth can-i get pods >/dev/null \
+            || { echo "::error title=Change-lock RBAC missing::radar-ci-bascule-prod cannot read jobs/pods for lock release. No lock was created."; exit 1; }
+          echo "change-lock RBAC OK (create/get/update/delete radar-change-lock)"
       - uses: ./deploy/cutover/lock-action
         with:
           action: lock
