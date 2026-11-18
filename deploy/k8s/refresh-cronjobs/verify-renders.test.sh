@@ -65,6 +65,15 @@ run_bad "muse provider without the Wonder 1.0 model" "refresh activation/model c
 fixture; sed -i '/name: REFRESH_FALLBACK_MODEL/s/gemini-3.8-flash/muse-wonder-1.0/' "$CASE_ROOT/$BASE"
 run_bad "Wonder 1.0 model without the muse provider" "refresh activation/model contract failed"
 
+fixture; sed -i '/REFRESH_FALLBACK_MODEL/s/muse-wonder-1.0/other/' "$CASE_ROOT/$PRE"
+run_bad "preprod fallback model drift" "refresh activation/model contract failed"
+
+fixture; sed -i '/REFRESH_FALLBACK_PROVIDER/s/value: "muse"/value: "gemini"/' "$CASE_ROOT/$PRE"
+run_bad "preprod fallback provider without its model" "refresh activation/model contract failed"
+
+fixture; sed -i '/REFRESH_CLASSIFY_FALLBACK_PROVIDER/s/value: "muse"/value: "gemini"/' "$CASE_ROOT/$PRE"
+run_bad "preprod classify fallback provider without its model" "refresh activation/model contract failed"
+
 fixture; sed -i '/REFRESH_CLASSIFY_CONCURRENCY/s/value: "2"/value: "200"/' "$CASE_ROOT/$BASE"
 run_bad "classification concurrency must stay bounded" "refresh activation/model contract failed"
 
