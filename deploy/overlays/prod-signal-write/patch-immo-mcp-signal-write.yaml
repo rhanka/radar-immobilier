@@ -1,0 +1,12 @@
+# Activation values for scoped MCP signal writes (PR #1107). Applied only
+# through this overlay, after the commissioning runbook. Announcing the
+# scope before the IdP declares it makes authorization requests fail with
+# invalid_scope, and enabling the flag without the Secret leaves the five
+# signal tools unregistered (their registration follows the binding).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: immo-mcp-config
+data:
+  IMMO_MCP_OAUTH_SCOPES_SUPPORTED: "immo:read immo:search immo:documents:read immo:artifacts:read immo:artifacts:write immo:signals:write offline_access"
+  IMMO_MCP_SIGNALS_WRITE_ENABLED: "1"

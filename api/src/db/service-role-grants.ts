@@ -12,6 +12,7 @@
  */
 export const IMMO_MCP_ARTIFACT_WRITER_ROLE = "immo_mcp_artifact_writer";
 export const IMMO_MCP_ACCOUNT_READER_ROLE = "immo_mcp_account_reader";
+export const IMMO_MCP_SIGNAL_WRITER_ROLE = "immo_mcp_signal_writer";
 
 /**
  * Migrator flag for the preprod-only people lookup (owner decision 05/11).
@@ -29,6 +30,26 @@ export function isPeopleLookupEnabled(env: NodeJS.ProcessEnv = process.env): boo
 function serviceRoleGrantsSql(peopleLookup: boolean): string {
   return `DO $grants$
 BEGIN
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '${IMMO_MCP_SIGNAL_WRITER_ROLE}')
+    AND to_regclass('public.signal_mcp_events') IS NOT NULL THEN
+    EXECUTE format('GRANT CONNECT ON DATABASE %I TO ${IMMO_MCP_SIGNAL_WRITER_ROLE}', current_database());
+    GRANT USAGE ON SCHEMA public TO ${IMMO_MCP_SIGNAL_WRITER_ROLE};
+    -- Convergence: the MCP role once held direct table privileges. The
+    -- SECURITY DEFINER signal functions are now its only write/read path, so
+    -- every direct privilege is revoked before the exact set is granted.
+    REVOKE SELECT,INSERT,UPDATE,DELETE ON account_users,workspace_memberships,graph_nodes,
+      facet_events,facet_event_bindings,facet_streams,facet_activation_state,
+      signal_class_annotations,signal_class_annotation_history,signal_class_feedback,
+      signal_mcp_events,signal_mcp_audit,personal_projection_revisions,workspace_projection_revisions
+      FROM ${IMMO_MCP_SIGNAL_WRITER_ROLE};
+    REVOKE EXECUTE ON FUNCTION signal_mcp_write_core(text,text,text,jsonb,text,text,text,text),
+      signal_mcp_write_browser(text,jsonb,text,text) FROM ${IMMO_MCP_SIGNAL_WRITER_ROLE};
+    GRANT SELECT (profile_id,code,verdict) ON facet_reason_codes TO ${IMMO_MCP_SIGNAL_WRITER_ROLE};
+    GRANT EXECUTE ON FUNCTION signal_mcp_read(text,jsonb),
+      signal_mcp_write_mcp(text,text,text,jsonb,text,text),
+      signal_mcp_result(text,text,text,text,text,jsonb,jsonb)
+      TO ${IMMO_MCP_SIGNAL_WRITER_ROLE};
+  END IF;
   IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '${IMMO_MCP_ACCOUNT_READER_ROLE}') THEN
     EXECUTE format('GRANT CONNECT ON DATABASE %I TO ${IMMO_MCP_ACCOUNT_READER_ROLE}', current_database());
     GRANT USAGE ON SCHEMA public TO ${IMMO_MCP_ACCOUNT_READER_ROLE};
