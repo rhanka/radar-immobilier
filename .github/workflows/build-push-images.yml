@@ -1114,8 +1114,10 @@ jobs:
       # §6 DEPLOY REFRESH CRONJOBS (preprod) — deploy + un-suspend the two refresh
       # CronJobs in radar-immobilier-preprod, pinned to this release's :<sha>
       # (reused, no 2nd resolution), via the refresh-cronjobs overlay
-      # (namespace->preprod + suspend:false). Production uses its own twin overlay
-      # and independent gate in promote-prod. Gated by
+      # (namespace->preprod + suspend:false). Production applies its own
+      # overlay (deploy/k8s/refresh-cronjobs-prod) in promote-prod, step
+      # "Deploy refresh CronJobs (prod, release digest)", gated by
+      # REFRESH_CRONJOB_PROD_ENABLED. Gated by
       # REFRESH_CRONJOB_PREPROD_ENABLED — armed by the owner AFTER the diag PASS.
       # Needs batch/cronjobs on the preprod deployer
       # (deploy/k8s/11-…rbac.yaml, owner-applied). Once live, radar-refresh-pv runs
@@ -1294,6 +1296,37 @@ jobs:
         run: make -f deploy/cutover/operator.mk prepare RELEASE=cutover-release/release.json ENV=prod
       - name: Sequential cutover (same manifest as rehearsal)
         run: make -f deploy/cutover/operator.mk run RELEASE=cutover-release/release.json ENV=prod
+
+      # REFRESH CRONJOBS (prod) — after the successful cutover, never during
+      # the drain: apply the committed prod overlay (34-refresh-cronjob.yaml
+      # + keyring PVC + pending watchdog) rendered with the promoted release
+      # digest. This render is the single source of truth for the CronJob
+      # spec; no other step pins its image. Gated by
+      # REFRESH_CRONJOB_PROD_ENABLED. Rights: cronjobs create/patch/update
+      # and PVC get/create/patch come from the dedicated Role
+      # radar-ci-deployer-refresh-cronjobs (deploy/k8s/10-rbac.yaml), not
+      # from radar-cutover (no PVC, no cronjobs create/update there).
+      - name: Deploy refresh CronJobs (prod, release digest)
+        if: ${{ vars.REFRESH_CRONJOB_PROD_ENABLED == 'true' }}
+        env:
+          NAMESPACE: radar-immobilier
+        run: |
+          set -euo pipefail
+          api_image="$(jq -er '.apiImage' cutover-release/release.json)"
+          [[ "$api_image" =~ ^ghcr\.io/rhanka/radar-api@sha256:[0-9a-f]{64}$ ]] \
+            || { echo "::error title=Refresh prod refused::release apiImage is not a pinned digest: ${api_image}"; exit 1; }
+          tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
+          make -f deploy/k8s/refresh-cronjobs/refresh-018.mk render-prod \
+            IMAGE_REF="$api_image" RENDER_OUT="$tmp/prod.yaml" ENV=prod
+          kubectl -n "$NAMESPACE" apply -f "$tmp/prod.yaml"
+          live_image="$(kubectl -n "$NAMESPACE" get cronjob radar-refresh-pv -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].image}')"
+          live_policy="$(kubectl -n "$NAMESPACE" get cronjob radar-refresh-pv -o jsonpath='{.spec.jobTemplate.spec.template.spec.securityContext.fsGroupChangePolicy}')"
+          echo "radar-refresh-pv image=${live_image} fsGroupChangePolicy=${live_policy}"
+          [[ "$live_image" == "$api_image" ]] \
+            || { echo "::error title=Refresh prod drift::live CronJob image '${live_image}' != promoted digest '${api_image}'"; exit 1; }
+          [[ "$live_policy" == "OnRootMismatch" ]] \
+            || { echo "::error title=Refresh prod drift::live fsGroupChangePolicy '${live_policy}' != OnRootMismatch"; exit 1; }
+          kubectl -n "$NAMESPACE" get cronjob radar-refresh-pv radar-refresh-pending-watchdog -o wide
 
       # Recurring abandoned-stock requeue (prod) — DISARMED by default:
       # applied only when REFRESH_REQUEUE_CRONJOB_PROD_ENABLED == 'true'
