@@ -31,6 +31,10 @@ validate_release() {
   [[ $path != */.env* ]] || fail 'Environment files are never release inputs'
   jq -e -f tools/make/cutover-release.jq "$1" >/dev/null 2>&1 || fail 'Invalid release manifest'
 }
+# The served snapshot keeps API and UI identities apart; promoted manifests stay strict.
+validate_deployed_release() {
+  jq -e -f tools/make/cutover-deployed.jq "$1" >/dev/null 2>&1 || fail 'Invalid deployed release snapshot'
+}
 # Production applied the protected 6H migration on 2026-11-14 (receipt run 0434e640):
 # every later backup is post-6H, so new releases carry no data hook.
 generate_release() {

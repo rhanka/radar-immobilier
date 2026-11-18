@@ -146,7 +146,10 @@ case ${1:-} in
     if [[ $(jq -r .kind "$WORK/record.json") == writer ]]; then
       writer_release
     else
-      jq .release "$WORK/record.json" | jq -e -f tools/make/cutover-release.jq >/dev/null || fail 'Recovery release is invalid'
+      # A daily restore or a rollback records the served snapshot as the release.
+      jq .release "$WORK/record.json" > "$WORK/recorded-release.json"
+      jq -e -f tools/make/cutover-release.jq "$WORK/recorded-release.json" >/dev/null ||
+        jq -e -f tools/make/cutover-deployed.jq "$WORK/recorded-release.json" >/dev/null || fail 'Recovery release is invalid'
       [[ $(jq -r .environment "$WORK/record.json") == "$ENV" ]] || fail 'Recovery environment mismatch'
       execute_stages
     fi;;
