@@ -154,6 +154,7 @@ test('production prepares a recovery backup, migrates under lock, and cutover ch
       `s3://sentropic-pgbackup/db-backups/cutover-prod-${prepareRun}.sql.gz`);
     assert.equal(steps.filter(s => s === 'ddl').length, 1, 'prod prepare applies the release DDL exactly once');
     assert.ok(steps.indexOf('backup') < steps.indexOf('ddl'), 'DDL runs after the recovery backup');
+    assert.ok(steps.indexOf('ddl') < steps.indexOf('destination'), 'DDL runs before the destination verification');
     assert.ok(steps.every(s => !['restore', 'data', 'docs', 'recon'].includes(s)));
     assert.equal(f.calls().some(c => c.includes('patch') && c.includes('secret')), false);
   } finally { f.cleanup(); }
