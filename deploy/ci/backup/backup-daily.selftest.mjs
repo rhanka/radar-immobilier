@@ -887,6 +887,29 @@ const PREV_LATEST = JSON.stringify({ date: '2026-09-25', status: 'complete', pgS
     buildMs + uploadAtFloorMs + 2 * 5000 < graceMs);
 }
 
+{
+  // Regression (prod OOM 2026-11-18, 336 830 docs): the streamed inventory
+  // writer must equal buildInventory on a small set, and at prod scale it
+  // returns counts only — no materialised objects array, no giant string.
+  const t0 = new Date('2026-09-20T00:00:00Z');
+  const small = [
+    { Key: 'b.pdf', Size: 20, ETag: '"b"', LastModified: t0 },
+    { Key: 'a.pdf', Size: 10, ETag: '"a"', LastModified: t0 },
+  ];
+  const dst = new Map([['a.pdf', { Key: 'a.pdf', Size: 10, ETag: '"a"', VersionId: 'va', LastModified: new Date('2026-09-21T00:00:00Z') }]]);
+  const args = { date: D0, createdAt: t0.toISOString(), sourceBucket: DOCS, backupBucket: BK, excludePrefixes: [], versionIds: 'list-versions', srcObjs: small, dstIndex: dst, copied: new Map(), failed: new Set() };
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'inv-stream-'));
+  const file = path.join(dir, 'inventory.json');
+  const counts = await lib.writeInventoryFile(file, args);
+  eq('streamed inventory == buildInventory (parsed)', JSON.parse(fs.readFileSync(file, 'utf8')), lib.buildInventory(args));
+  const N = 336830;
+  const big = Array.from({ length: N }, (_, i) => ({ Key: `raw/ville-${i % 530}/cas/document-${i}.pdf`, Size: 1000 + i, ETag: `"${md5hex(String(i))}"`, LastModified: t0 }));
+  const bigCounts = await lib.writeInventoryFile(path.join(dir, 'big.json'), { ...args, srcObjs: big, dstIndex: new Map() });
+  eq('streamed inventory at prod scale: counts only, all pending', [bigCounts.objects, bigCounts.pending, Array.isArray(bigCounts.objects)], [N, N, false]);
+  ok('streamed inventory file is complete JSON at prod scale', JSON.parse(fs.readFileSync(path.join(dir, 'big.json'), 'utf8')).counts.objects === N);
+  fs.rmSync(dir, { recursive: true, force: true });
+}
+
 // ═════════════════════════════════════════════════════════════════════════════
 console.log('# static wiring checks');
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
