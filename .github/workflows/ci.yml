@@ -116,7 +116,7 @@ jobs:
         run: node deploy/ci/backup/backup-daily.selftest.mjs
 
       - name: Validate cutover controller and backup adapters (hermetic tests)
-        run: make -f deploy/cutover/operator.mk test TEST_PATTERN='one command restores|long owned radar-refresh-pending-watchdog|failure remains closed.*failJob|daily restoration|daily and inter-tenant interfaces|prepare|prepared|rollback patches|resume reconciles|main deployment|production promotion|bascule-bundle-cd proves|manual migrate' ENV=test-cutover
+        run: make -f deploy/cutover/operator.mk test TEST_PATTERN='one command restores|long owned radar-refresh-pending-watchdog|failure remains closed.*failJob|daily restoration|daily and inter-tenant interfaces|prepare|prepared|rollback patches|resume reconciles|main deployment|production promotion|bascule-bundle-cd proves|manual migrate|promote-prod applies' ENV=test-cutover
 
       - name: Validate git-artifact guards (descriptor, build env, tag ancestry, pre-flight, workflows)
         run: make -f tools/make/git-artifact.mk test ENV=test-git-artifact
