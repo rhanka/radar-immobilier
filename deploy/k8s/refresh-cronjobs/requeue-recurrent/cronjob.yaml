@@ -80,6 +80,7 @@ spec:
             runAsUser: 1001
             runAsGroup: 1001
             fsGroup: 1001
+            fsGroupChangePolicy: OnRootMismatch
             seccompProfile: { type: RuntimeDefault }
           initContainers:
             - name: seed-keyring-once
@@ -97,9 +98,12 @@ spec:
                   flock -x /keyring/runtime/.bootstrap.lock -c '
                     if [ ! -f /keyring/runtime/.key ]; then
                       cp -a /bootstrap/. /keyring/runtime/
-                      chmod 0700 /keyring/runtime
-                      chmod 0600 /keyring/runtime/.key /keyring/runtime/*.json
                     fi
+                    # Same normalization as radar-refresh-pv, on every start:
+                    # fsGroup remounts restore 0770, the keyring wants 0700.
+                    chmod 00700 /keyring/runtime
+                    find /keyring/runtime -type d -exec chmod 00700 {} +
+                    find /keyring/runtime -type f \( -name .key -o -name "*.json" \) -exec chmod 0600 {} +
                   '
               resources:
                 requests: { cpu: 5m, memory: 16Mi }
