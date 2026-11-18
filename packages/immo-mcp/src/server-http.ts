@@ -241,10 +241,19 @@ export interface ImmoHttpDeps {
   authorize?: (tool: string, request: VerifiedMcpRequest) => Promise<boolean>;
 }
 
+export type SignalWriteState = "active" | "read-only" | "disabled";
+
+/** Unauthenticated, leak-free signal-write state for deploy proofs. */
+export function signalWriteState(deps: ImmoHttpDeps, env: NodeJS.ProcessEnv): SignalWriteState {
+  if (deps.signals) return "active";
+  return env.IMMO_MCP_SIGNALS_WRITE_ENABLED === "1" ? "read-only" : "disabled";
+}
+
 /**
  * Build the Hono app exposing:
  *   - GET  /mcp/.well-known/oauth-protected-resource  → RFC 9728 PRM (public)
  *   - GET  /.well-known/oauth-protected-resource/mcp  → canonical PRM (public)
+ *   - GET  /mcp/.well-known/signal-write               → signal-write state (public, no data)
  *   - *    /mcp                                        → OAuth RS guard (401/403 + WWW-Authenticate)
  *   - POST/GET/DELETE /mcp                             → MCP Streamable HTTP transport (stateful)
  */
@@ -281,6 +290,9 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
   app.get("/mcp/.well-known/oauth-protected-resource", (c) => c.json(mcp.metadata(), 200, {
     "Cache-Control": "public, max-age=300",
   }));
+  // Deploy proof without any Secret read: one enum, no identity or data.
+  app.get("/mcp/.well-known/signal-write", (c) => c.json(
+    { signalWrite: signalWriteState(deps, process.env) }, 200, { "Cache-Control": "private, no-store" }));
   app.route("/", mcpAuthRoutes(mcp));
 
   // OAuth Resource Server guard: validates the bearer (issuer/audience/scope), or returns

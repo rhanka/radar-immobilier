@@ -25,6 +25,7 @@ spec:
         runAsUser: 1001
         runAsGroup: 1001
         fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
         seccompProfile: { type: RuntimeDefault }
       containers:
         - name: import-account
@@ -46,6 +47,14 @@ spec:
               flock -x 9
               exec 8>/keyring/runtime/.bootstrap.lock
               flock -x 8
+              # The runtime itself may still carry fsGroup modes (0770):
+              # normalize it under both locks, before any keyring read.
+              chmod 00700 /keyring/runtime
+              # The seed copied a projected Secret volume: .key and *.json
+              # are symlinks into a timestamped directory. A shallow find sees
+              # only the links (type l); follow them recursively, like the
+              # refresh CronJob init does. Lock files keep their mode.
+              find -L /keyring/runtime -type f \( -name .key -o -name "*.json" \) -exec chmod 0600 {} +
               test -f /keyring/runtime/.key
               test -f /import/.key
               cmp -s /keyring/runtime/.key /import/.key \
@@ -53,6 +62,11 @@ spec:
               mkdir -p /keyring/runtime/.import
               trap 'rm -rf /keyring/runtime/.import' EXIT
               cp -a /import/. /keyring/runtime/.import/
+              # The Secret volume arrives 0777 and cp -a preserves it; the
+              # encrypted keyring refuses any directory that is not 0700.
+              chmod 00700 /keyring/runtime/.import
+              find /keyring/runtime/.import -type d -exec chmod 00700 {} +
+              find /keyring/runtime/.import -type f -exec chmod 0600 {} +
               node /workspace/account-import.mjs "$IMPORT_TRANSPORT" /keyring/runtime /keyring/runtime/.import
           volumeMounts:
             - { name: keyring, mountPath: /keyring }

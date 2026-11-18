@@ -46,9 +46,9 @@ inspect-preprod: guard-preprod
 keyring-summary:
 	@test -n "$(LOCAL_IMAGE)" || { echo "LOCAL_IMAGE is required" >&2; exit 1; }
 	@test -f "$(KEYRING_SOURCE_DIR)/.key" || { echo "keyring master key is required" >&2; exit 1; }
-	@docker run --rm --user 0:0 -v "$(KEYRING_SOURCE_DIR):/source:ro" \
+	@docker run --rm --entrypoint /bin/sh --user 0:0 -v "$(KEYRING_SOURCE_DIR):/source:ro" \
 	  -v "$(OVERLAY)/keyring-summary.mjs:/workspace/keyring-summary.mjs:ro" "$(LOCAL_IMAGE)" \
-	  /bin/sh -ceu 'mkdir /keyring; cp -a /source/. /keyring/; node /workspace/keyring-summary.mjs'
+	  -ceu 'mkdir /keyring; cp -a /source/. /keyring/; node /workspace/keyring-summary.mjs'
 
 .PHONY: enroll-cloud-code
 enroll-cloud-code:
@@ -56,7 +56,7 @@ enroll-cloud-code:
 	@test -n "$(LOCAL_IMAGE)" || { echo "LOCAL_IMAGE is required" >&2; exit 1; }
 	@test -f "$(KEYRING_SOURCE_DIR)/.key" || { echo "keyring master key is required" >&2; exit 1; }
 	@test -n "$(CLOUD_CODE_OWNER_SCOPE_REF)" || { echo "CLOUD_CODE_OWNER_SCOPE_REF is required" >&2; exit 1; }
-	@docker run --rm --network host --user "$$(id -u):$$(id -g)" \
+	@docker run --rm --entrypoint node --network host --user "$$(id -u):$$(id -g)" \
 	  -e CLOUD_CODE_OWNER_SCOPE_REF="$(CLOUD_CODE_OWNER_SCOPE_REF)" \
 	  -v "$(KEYRING_SOURCE_DIR):/keyring" \
 	  -v "$(OVERLAY)/enroll-cloud-code.mjs:/workspace/enroll-cloud-code.mjs:ro" "$(LOCAL_IMAGE)" \
@@ -68,7 +68,7 @@ enroll-codex:
 	@test -n "$(LOCAL_IMAGE)" || { echo "LOCAL_IMAGE is required" >&2; exit 1; }
 	@test -f "$(KEYRING_SOURCE_DIR)/.key" || { echo "keyring master key is required" >&2; exit 1; }
 	@test -n "$(REFRESH_OWNER_SCOPE_REF)" || { echo "REFRESH_OWNER_SCOPE_REF is required" >&2; exit 1; }
-	@docker run --rm --network host --user "$$(id -u):$$(id -g)" \
+	@docker run --rm --entrypoint node --network host --user "$$(id -u):$$(id -g)" \
 	  -e REFRESH_OWNER_SCOPE_REF="$(REFRESH_OWNER_SCOPE_REF)" \
 	  -v "$(KEYRING_SOURCE_DIR):/keyring" \
 	  -v "$(OVERLAY)/enroll-codex.mjs:/workspace/enroll-codex.mjs:ro" "$(LOCAL_IMAGE)" \
@@ -80,7 +80,7 @@ enroll-muse:
 	@test -n "$(LOCAL_IMAGE)" || { echo "LOCAL_IMAGE is required" >&2; exit 1; }
 	@test -f "$(KEYRING_SOURCE_DIR)/.key" || { echo "keyring master key is required" >&2; exit 1; }
 	@test -n "$(REFRESH_OWNER_SCOPE_REF)" || { echo "REFRESH_OWNER_SCOPE_REF is required" >&2; exit 1; }
-	@docker run --rm --network host --user "$$(id -u):$$(id -g)" \
+	@docker run --rm --entrypoint node --network host --user "$$(id -u):$$(id -g)" \
 	  -e REFRESH_OWNER_SCOPE_REF="$(REFRESH_OWNER_SCOPE_REF)" \
 	  -v "$(KEYRING_SOURCE_DIR):/keyring" \
 	  -v "$(OVERLAY)/enroll-muse.mjs:/workspace/enroll-muse.mjs:ro" "$(LOCAL_IMAGE)" \
@@ -327,8 +327,6 @@ verify-renders:
 	        || $$0 !~ /name: REFRESH_CLASSIFY_PROVIDER\n[ ]+value: openai\n/ \
 	        || $$0 !~ /name: REFRESH_CLASSIFY_MODEL\n[ ]+value: gpt-6-astra\n/ \
 	        || $$0 !~ /name: REFRESH_CLASSIFY_REASONING_EFFORT\n[ ]+value: low\n/ \
-	        || $$0 !~ /name: REFRESH_CLASSIFY_FALLBACK_PROVIDER\n[ ]+value: gemini\n/ \
-	        || $$0 !~ /name: REFRESH_CLASSIFY_FALLBACK_MODEL\n[ ]+value: gemini-3.8-flash\n/ \
 	        || $$0 !~ /name: REFRESH_CLASSIFY_FALLBACK_REASONING_EFFORT\n[ ]+value: low\n/ \
 	        || $$0 !~ /name: REFRESH_CLASSIFY_CONCURRENCY\n[ ]+value: "2"/ \
 		    || $$0 !~ /name: REFRESH_SINGLE_PASS_PROVIDER\n[ ]+value: openai\n/ \
@@ -343,6 +341,7 @@ verify-renders:
 	        || $$0 !~ /name: REFRESH_VERIFY_REASONING_EFFORT\n[ ]+value: low\n/ \
 	        || $$0 !~ /name: REFRESH_MAX_OUTPUT_TOKENS\n[ ]+value: "32768"/)) exit 1; \
 	      if (!(($$0 ~ /name: REFRESH_FALLBACK_PROVIDER\n[ ]+value: gemini\n/ && $$0 ~ /name: REFRESH_FALLBACK_MODEL\n[ ]+value: gemini-3.8-flash\n/) || ($$0 ~ /name: REFRESH_FALLBACK_PROVIDER\n[ ]+value: muse\n/ && $$0 ~ /name: REFRESH_FALLBACK_MODEL\n[ ]+value: muse-wonder-1.0\n/))) exit 1; \
+	      if (!(($$0 ~ /name: REFRESH_CLASSIFY_FALLBACK_PROVIDER\n[ ]+value: gemini\n/ && $$0 ~ /name: REFRESH_CLASSIFY_FALLBACK_MODEL\n[ ]+value: gemini-3.8-flash\n/) || ($$0 ~ /name: REFRESH_CLASSIFY_FALLBACK_PROVIDER\n[ ]+value: muse\n/ && $$0 ~ /name: REFRESH_CLASSIFY_FALLBACK_MODEL\n[ ]+value: muse-wonder-1.0\n/))) exit 1; \
 	    } END { if (!pv) exit 1 }' "$$render" || { echo "refresh activation/model contract failed: $$render" >&2; exit 1; }; \
 	    awk 'BEGIN{RS="\n---\n"} /kind: CronJob/ && /\n  name: radar-refresh-pv\n/ { pv=1; \
 	      if ($$0 !~ /- dist\/scripts\/refresh-pv\.js\n[ ]+- --all\n[ ]+env:/) exit 1; \
@@ -373,7 +372,7 @@ verify-renders:
 	  awk -f "$(CONTRACT_AWK)" "$$tmp/prod.yaml" | sort > "$$tmp/prod.contract"; \
 	  test -s "$$tmp/prod.contract" || { echo "empty refresh contract projection" >&2; exit 1; }; \
 	  diff -u "$$tmp/preprod.contract" "$$tmp/prod.contract" \
-	    || { echo "refresh overlay parity failed: preprod and prod diverge outside the four intended differences (namespace, memory envelope, S3 binding, refresh hour list) — see the diff above (< preprod, > prod)" >&2; exit 1; }; \
+	    || { echo "refresh overlay parity failed: preprod and prod diverge outside the five intended differences (namespace, memory envelope, S3 binding, refresh hour list, fallback provider) — see the diff above (< preprod, > prod)" >&2; exit 1; }; \
 	  wf="$(ROOT)/.github/workflows/bascule-preprod.yml"; \
 	  awk -v min_minutes=$(REFRESH_STAGGER_MIN_MINUTES) -f "$(STAGGER_AWK)" "$$tmp/preprod.yaml" "$$tmp/prod.yaml" \
 	    || { echo "refresh stagger failed: the closest prod and preprod refresh starts must be at least $(REFRESH_STAGGER_MIN_MINUTES) minutes apart (incident 2026-10-09)" >&2; exit 1; }; \
