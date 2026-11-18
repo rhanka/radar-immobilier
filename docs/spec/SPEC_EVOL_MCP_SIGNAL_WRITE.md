@@ -63,10 +63,11 @@ Production prerequisites, in order:
    stays inert (`IMMO_MCP_SIGNALS_WRITE_ENABLED="0"`, scope not announced,
    optional Secret reference); activation is the separate
    `deploy/overlays/prod-signal-write` overlay, applied by an operator after
-   the prerequisites. Preprod follows the same split: its default overlay
-   stays inert and `deploy/overlays/preprod-signal-write` carries the
-   activation. With the flag on and the Secret missing, the server starts
-   read-only (explicit log) instead of crashing. Commissioning order and
+   the prerequisites. Preprod is active by default since 2026-11-18 (its
+   prerequisites are verified): the default preprod overlay announces the
+   scope and sets the flag to `"1"`. With the flag on and the Secret
+   missing, the server starts read-only (explicit log) instead of
+   crashing. Commissioning order and
    the exact 0048 rollback SQL live in
    `docs/operator/mcp-signal-write-runbook.md`.
 4. Default consent selection stays read-only. Users explicitly grant the new
