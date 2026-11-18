@@ -185,7 +185,8 @@ describe("artifact tool catalogue stability", () => {
       "get_grille_pdf", "get_lot_card", "get_lots_geojson", "get_opportunity_dossier", "get_pv_pdf",
       "get_reglement_provenance", "get_zones_geojson", "list_documents", "query_zoning_events",
       "read_document_excerpt", "search_lots", "search_signals",
-    ]);
+      "list_class_reasons", "get_signal_classification", "classify_signal", "confirm_classification", "annotate_signal",
+    ].sort());
   });
 
   it.each(CAS_GUARDED_TOOLS)("should expose %s concurrency guard as optional in every profile", (name) => {

@@ -7,6 +7,7 @@ import {
   filterNodesByClassement,
   reasonCodesForClass,
   validateClassementChoice,
+  withAiClassement,
   type ReasonCodeEntry,
 } from "./signal-classement.js";
 
@@ -28,6 +29,25 @@ function head(basket: string | null, state = "active", reasonCode: string | null
 }
 
 describe("signal classement — acceptance criteria", () => {
+  it("should keep shared MCP archive authority over personal selections without moderation", () => {
+    const manual = buildClassementMap([head("pertinent")], []);
+    const current = { id: "mcp-1", source: "mcp", model: "client-model", scope: "workspace" as const,
+      validation: "auto" as const, pending_human: true, classe: "ecarte" as const, reason_code: "N-NON-RES" };
+    const nodes = [{ type: "Signal", id: "sig-1", citySlug: "delson",
+      signalAnnotations: { version: "a".repeat(32), notes: [], current, moderateArchive: false } }];
+    expect(withAiClassement(manual, nodes).get("delson:Signal:sig-1"))
+      .toMatchObject({ classe: "ecarte", mcpScope: "workspace", restoreBlockedReason: expect.stringContaining("modérateur") });
+  });
+  it("should show the scoped MCP class while preserving manual UI precedence", () => {
+    const nodes = [{ type: "Signal", id: "sig-1", citySlug: "delson",
+      classAnnotation: { source: "ai" as const, classe: "ecarte" as const },
+      signalAnnotations: { version: "a".repeat(32), notes: [], current: { source: "mcp", model: "client-model",
+        validation: "human" as const, classe: "pertinent" as const, reason: "Residential potential" } } }];
+    expect(withAiClassement(new Map(), nodes).get("delson:Signal:sig-1"))
+      .toMatchObject({ classe: "pertinent", annotationSource: "mcp", discarded: false });
+    const manual = buildClassementMap([head("a_surveiller")], []);
+    expect(withAiClassement(manual, nodes).get("delson:Signal:sig-1")?.classe).toBe("a_surveiller");
+  });
   it("criterion 1: Classement filter exists, checked by default except Écarté, with counts", () => {
     expect(DEFAULT_CLASSEMENT_FILTER).toEqual({
       pertinent: true,
