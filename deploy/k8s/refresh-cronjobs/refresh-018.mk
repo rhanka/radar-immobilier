@@ -78,8 +78,8 @@ IMPORT_TRANSPORT ?= codex
 
 .PHONY: import-keyring-account
 import-keyring-account:
-	@[[ "$(IMPORT_TRANSPORT)" =~ ^(codex|cloud-code)$$ ]] \
-	  || { echo "IMPORT_TRANSPORT must be codex or cloud-code" >&2; exit 1; }
+	@[[ "$(IMPORT_TRANSPORT)" =~ ^(codex|cloud-code|muse)$$ ]] \
+	  || { echo "IMPORT_TRANSPORT must be codex, cloud-code or muse" >&2; exit 1; }
 	@[[ "$(IMPORT_IMAGE_REF)" =~ ^ghcr\.io/rhanka/radar-api@sha256:[0-9a-f]{64}$$ ]] \
 	  || { echo "IMPORT_IMAGE_REF must be the radar API immutable digest" >&2; exit 1; }
 	@test -d "$(IMPORT_SOURCE_DIR)" -a -f "$(IMPORT_SOURCE_DIR)/.key" \
@@ -320,14 +320,13 @@ verify-renders:
 		    || $$0 !~ /name: REFRESH_SINGLE_PASS_REASONING_EFFORT\n[ ]+value: low\n/ \
 	        || $$0 !~ /name: REFRESH_REASONING_EFFORT\n[ ]+value: medium\n/ \
 	        || $$0 !~ /name: REFRESH_PRIMARY_QUALITY_ATTEMPTS\n[ ]+value: "2"/ \
-	        || $$0 !~ /name: REFRESH_FALLBACK_PROVIDER\n[ ]+value: gemini\n/ \
-	        || $$0 !~ /name: REFRESH_FALLBACK_MODEL\n[ ]+value: gemini-3.8-flash\n/ \
 	        || $$0 !~ /name: REFRESH_FALLBACK_REASONING_EFFORT\n[ ]+value: low\n/ \
 	        || $$0 !~ /name: REFRESH_VERIFY_ENABLED\n[ ]+value: "1"/ \
 	        || $$0 !~ /name: REFRESH_VERIFY_PROVIDER\n[ ]+value: gemini\n/ \
 	        || $$0 !~ /name: REFRESH_VERIFY_MODEL\n[ ]+value: gemini-3.8-flash\n/ \
 	        || $$0 !~ /name: REFRESH_VERIFY_REASONING_EFFORT\n[ ]+value: low\n/ \
 	        || $$0 !~ /name: REFRESH_MAX_OUTPUT_TOKENS\n[ ]+value: "32768"/)) exit 1; \
+	      if (!(($$0 ~ /name: REFRESH_FALLBACK_PROVIDER\n[ ]+value: gemini\n/ && $$0 ~ /name: REFRESH_FALLBACK_MODEL\n[ ]+value: gemini-3.8-flash\n/) || ($$0 ~ /name: REFRESH_FALLBACK_PROVIDER\n[ ]+value: muse\n/ && $$0 ~ /name: REFRESH_FALLBACK_MODEL\n[ ]+value: muse-wonder-1.0\n/))) exit 1; \
 	    } END { if (!pv) exit 1 }' "$$render" || { echo "refresh activation/model contract failed: $$render" >&2; exit 1; }; \
 	    awk 'BEGIN{RS="\n---\n"} /kind: CronJob/ && /\n  name: radar-refresh-pv\n/ { pv=1; \
 	      if ($$0 !~ /- dist\/scripts\/refresh-pv\.js\n[ ]+- --all\n[ ]+env:/) exit 1; \
@@ -384,7 +383,7 @@ verify-renders:
 	      if ($$0 !~ /suspend: false/) exit 1; \
 	      if ($$0 !~ /backoffLimit: 0/) exit 1; \
 	      if ($$0 !~ /\/usr\/bin\/flock/ || $$0 !~ /\/keyring\/runtime\/.refresh.lock/) exit 1; \
-	      if ($$0 !~ /name: REFRESH_FALLBACK_MODEL\n[ ]+value: gemini-3.8-flash/) exit 1; \
+	      if ($$0 !~ /name: REFRESH_FALLBACK_MODEL\n[ ]+value: gemini-3.8-flash\n/ && $$0 !~ /name: REFRESH_FALLBACK_MODEL\n[ ]+value: muse-wonder-1.0\n/) exit 1; \
 	      if ($$0 !~ /name: REQUEUE_MAX_AGE_DAYS\n/) exit 1; \
 	      if ($$0 !~ /name: REQUEUE_MAX_PER_RUN\n/) exit 1; \
 	      if ($$0 !~ /name: REQUEUE_MAX_PER_CITY\n/) exit 1; \
