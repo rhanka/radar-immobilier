@@ -194,7 +194,11 @@ spec:
               command: ["node", "/opt/backup/backup-daily.cjs", "backup"]
               env:
                 - { name: NODE_PATH, value: "/workspace/node_modules" }
-                - { name: NODE_OPTIONS, value: "--max-old-space-size=512 --dns-result-order=ipv4first" }
+                # Heap sized from the measured prod-scale peak (336 830 docs, both
+                # S3 listings + sort + streamed inventory write, selftest):
+                # heapUsed 329 MiB, rss 441 MiB. 1024 MiB old-space inside a
+                # 1536 MiB limit keeps ~3x headroom as the docs volume grows.
+                - { name: NODE_OPTIONS, value: "--max-old-space-size=1024 --dns-result-order=ipv4first" }
                 - { name: AWS_EC2_METADATA_DISABLED, value: "true" }
                 # Identity radar-backup-writer (Secret written by the CD from GitHub): read docs prod;
                 # backup bucket Put/Get/List/multipart. NO delete right of any kind.
@@ -243,7 +247,7 @@ spec:
               securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: ["ALL"] } }
               resources:
                 requests: { cpu: 50m, memory: 192Mi }
-                limits: { cpu: 500m, memory: 768Mi }
+                limits: { cpu: 500m, memory: 1536Mi }
               volumeMounts:
                 - { name: work, mountPath: /work }
                 - { name: scratch, mountPath: /tmp }
