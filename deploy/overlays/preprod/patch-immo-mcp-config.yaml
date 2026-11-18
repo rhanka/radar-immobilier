@@ -48,14 +48,17 @@ data:
   IMMO_MCP_EXCHANGE_TOKEN_ENDPOINT: "https://preprod.auth.sent-tech.ca/api/v1/auth/oauth/token"
   IMMO_MCP_EXCHANGE_ENV: "preprod"
   # Must match radar-api: one physical namespace shared by all approved users.
-  IMMO_MCP_OAUTH_SCOPES_SUPPORTED: "immo:read immo:search immo:documents:read immo:artifacts:read immo:artifacts:write offline_access"
+  IMMO_MCP_OAUTH_SCOPES_SUPPORTED: "immo:read immo:search immo:documents:read immo:artifacts:read immo:artifacts:write immo:signals:write offline_access"
   IMMO_MCP_ARTIFACTS_LEGACY_READ_SCOPE: "true"
-  # Signal writes stay OFF in preprod by default, like the prod base
-  # (PR #1107 follow-up): announcing immo:signals:write before the preprod
-  # IdP declares it risks invalid_scope, and flag "1" without Secret
-  # immo-mcp-signal-writer degrades to read-only. Activation lives only in
-  # deploy/overlays/preprod-signal-write, applied after the prerequisites.
-  IMMO_MCP_SIGNALS_WRITE_ENABLED: "0"
+  # Signal writes are ON by default in preprod (activation lane, 2026-11-18):
+  # the prerequisites are verified in place — preprod IdP declares
+  # immo:signals:write and allows it on the immo-mcp client, Secret
+  # immo-mcp-signal-writer exists, role immo_mcp_signal_writer and migration
+  # 0048 are applied. The CD reapplies this overlay on every main push, so
+  # the default carries the activation. If the Secret disappears, the
+  # server still starts read-only (explicit log) and the deploy-preprod
+  # pre-flight fails loudly before reconcile.
+  IMMO_MCP_SIGNALS_WRITE_ENABLED: "1"
   ARTIFACTS_CONTROL_MODE: "general"
   ARTIFACTS_STORAGE_SCOPE: "radar-immobilier-preprod"
   ARTIFACTS_ORG_ID: "radar-immobilier-preprod"
