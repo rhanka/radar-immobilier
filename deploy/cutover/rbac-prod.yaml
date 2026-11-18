@@ -1,4 +1,14 @@
 # Install through the infrastructure owner; never self-apply from the controller.
+# Owner install (once, cluster-admin identity, explicit namespace):
+#   kubectl -n radar-immobilier apply -f deploy/cutover/rbac-prod.yaml
+#   kubectl -n radar-immobilier apply -f deploy/ci/bascule-preprod/rbac-ci-bascule-prod.yaml
+# Then mint/rotate the namespace-scoped tokens into the GitHub secrets
+# KUBE_CONFIG_DATA (promote-prod, SA radar-ci-deployer) and
+# KUBE_CONFIG_DATA_PROD (bascule-bundle-cd, SA radar-ci-bascule-prod).
+# Verify before arming any CD job (read-only):
+#   kubectl -n radar-immobilier auth can-i get configmaps/radar-change-lock --as=system:serviceaccount:radar-immobilier:radar-ci-bascule-prod
+#   kubectl -n radar-immobilier auth can-i update configmaps/radar-change-lock --as=system:serviceaccount:radar-immobilier:radar-ci-bascule-prod
+#   kubectl -n radar-immobilier auth can-i delete configmaps/radar-change-lock --as=system:serviceaccount:radar-immobilier:radar-ci-bascule-prod
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -60,6 +70,11 @@ rules:
   - apiGroups: [""]
     resources: [pods, endpoints]
     verbs: [get, list, watch]
+  # Job logs: the promote-prod migrate step and the cutover engine read
+  # `kubectl logs job/...`, which is get on pods/log (not covered above).
+  - apiGroups: [""]
+    resources: [pods/log]
+    verbs: [get]
   - apiGroups: [""]
     resources: [pods/portforward]
     verbs: [create]
@@ -87,3 +102,9 @@ subjects:
   - kind: ServiceAccount
     name: radar-ci-deployer
     namespace: radar-immobilier
+# radar-ci-bascule-prod is deliberately NOT a subject here: this Role also
+# grants patch on secret radar-db-credentials, deployments, ingresses,
+# services and pods/portforward, none of which bascule-bundle-cd needs. Its
+# lock verbs (create on configmaps; get/update/delete on radar-change-lock;
+# get/list on jobs and pods for the writer release) already live, name-scoped,
+# in deploy/ci/bascule-preprod/rbac-ci-bascule-prod.yaml.
