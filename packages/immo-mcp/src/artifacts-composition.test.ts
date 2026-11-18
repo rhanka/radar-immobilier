@@ -122,6 +122,7 @@ describe("P7 composed transport (contract double; no storage qualification)", ()
       return (await response.json()).result.tools;
     };
     const first = await list(h.session);
+    // No signal binding in this composition: 12 immo tools, not 17.
     expect(first).toHaveLength(12 + profile.selectedCapabilities.length);
     expect(first.filter((tool: { name: string }) => tool.name.startsWith("artifacts_"))
       .map((tool: { name: string }) => tool.name)).toEqual(profile.selectedCapabilities);
@@ -137,10 +138,10 @@ describe("P7 composed transport (contract double; no storage qualification)", ()
       const write = ["artifacts_ensure", "artifacts_publish", "artifacts_set_access", "artifacts_delete",
         "artifacts_create_upload", "artifacts_commit_upload", "artifacts_publish_bundle",
         "artifacts_create_upload_page", "artifacts_publish_bundle_v2",
-        "artifacts_revoke_reader_consent"].includes(tool.name);
+        "artifacts_revoke_reader_consent", "classify_signal", "confirm_classification", "annotate_signal"].includes(tool.name);
       expect(tool.annotations).toEqual({ readOnlyHint: !write, destructiveHint: tool.name === "artifacts_delete",
         openWorldHint: false, idempotentHint: tool.name !== "artifacts_create_upload" &&
-          tool.name !== "artifacts_create_upload_page" });
+          tool.name !== "artifacts_create_upload_page" && !["classify_signal", "confirm_classification", "annotate_signal"].includes(tool.name) });
     }
     const serialized = JSON.stringify(first);
     const readScopes = "immo:read immo:artifacts:read";
