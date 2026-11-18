@@ -98,6 +98,20 @@ test('production promotion migrates inside prepare, under lock, after backup and
   assert.ok(lock >= 0 && lock < drain && drain < backup && backup < ddl && ddl < destination,
     'prod DDL runs after lock, writer drain and backup, before destination');
 });
+test('promote-prod applies the refresh prod overlay at the release digest after the cutover', () => {
+  const w = workflow('build-push-images.yml');
+  const steps = w.jobs['promote-prod'].steps;
+  const run = steps.findIndex(s => s.name === 'Sequential cutover (same manifest as rehearsal)');
+  const refresh = steps.findIndex(s => s.name === 'Deploy refresh CronJobs (prod, release digest)');
+  assert.ok(run >= 0 && refresh > run, 'refresh apply runs after the cutover, never during the drain');
+  const step = steps[refresh];
+  assert.equal(step.if, "${{ vars.REFRESH_CRONJOB_PROD_ENABLED == 'true' }}");
+  assert.ok(step.run.includes("jq -er '.apiImage' cutover-release/release.json"), 'image comes from the release manifest');
+  assert.ok(step.run.includes('refresh-018.mk render-prod') && step.run.includes('IMAGE_REF="$api_image"'), 'render pins the release digest');
+  assert.ok(step.run.includes('kubectl -n "$NAMESPACE" apply -f "$tmp/prod.yaml"'), 'rendered overlay is applied');
+  assert.ok(step.run.includes('fsGroupChangePolicy') && step.run.includes('OnRootMismatch'), 'post-apply control checks fsGroupChangePolicy');
+  assert.ok(step.run.includes('live_image') && step.run.includes('!= promoted digest'), 'post-apply control checks the live image');
+});
 test('bascule-bundle-cd proves lock RBAC before creating the lock and always releases it', () => {
   const w = workflow('bascule-bundle-cd.yml');
   for (const name of ['apply-bundle', 'apply-backup']) {
