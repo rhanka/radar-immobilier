@@ -140,8 +140,8 @@ if [ -s "$T/expected-mcp" ] && [ -f "$A" ] && cmp -s "$T/expected-mcp" "$A" \
   && has "$A" '  RADAR_PUBLIC_BASE_URL: https://preprod.immo.sent-tech.ca' \
   && has "$A" '  RADAR_API_BASE_URL: http://radar-api:3000' \
   && has "$A" '  IMMO_MCP_OAUTH_SCOPES_SUPPORTED: immo:read immo:search immo:documents:read immo:artifacts:read' \
-  && has "$A" '    immo:artifacts:write offline_access' \
-  && has "$A" '  IMMO_MCP_SIGNALS_WRITE_ENABLED: "0"' \
+  && has "$A" '    immo:artifacts:write immo:signals:write offline_access' \
+  && has "$A" '  IMMO_MCP_SIGNALS_WRITE_ENABLED: "1"' \
   && has "$A" '  IMMO_MCP_ARTIFACTS_LEGACY_READ_SCOPE: "true"'; then
   ok 'applied immo-mcp-config = the full rendered preprod document'
 else bad "applied immo-mcp-config differs from the render: $(diff "$T/expected-mcp" "$A" 2>&1 | paste -sd'|' -)"; fi
