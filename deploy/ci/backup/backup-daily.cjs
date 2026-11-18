@@ -332,21 +332,23 @@ function planDocs(srcObjs, dstIndex, excludePrefixes) {
   }
   return { fresh, todo, excluded };
 }
+function inventoryEntry(o, dstIndex, copied, failed, excludePrefixes) {
+  const base = {
+    key: o.Key,
+    size: Number(o.Size),
+    etag: o.ETag || null,
+    lastModified: o.LastModified ? new Date(o.LastModified).toISOString() : null,
+  };
+  const c = copied.get(o.Key);
+  if (c) return { ...base, size: c.size, state: 'backed-up', backupEtag: c.etag, versionId: c.versionId };
+  const d = dstIndex.get(o.Key);
+  if (upToDate(o, d)) return { ...base, size: Number(d.Size), state: 'backed-up', backupEtag: d.ETag || null, versionId: d.VersionId || null };
+  const state = failed.has(o.Key) ? 'failed' : excludePrefixes.some((p) => o.Key.startsWith(p)) ? 'excluded' : 'pending';
+  return { ...base, state, backupEtag: null, versionId: null };
+}
+const byKey = (a, b) => (a.Key < b.Key ? -1 : a.Key > b.Key ? 1 : 0);
 function buildInventory({ date, createdAt, sourceBucket, backupBucket, excludePrefixes, versionIds, srcObjs, dstIndex, copied, failed }) {
-  const objects = [...srcObjs].sort((a, b) => (a.Key < b.Key ? -1 : a.Key > b.Key ? 1 : 0)).map((o) => {
-    const base = {
-      key: o.Key,
-      size: Number(o.Size),
-      etag: o.ETag || null,
-      lastModified: o.LastModified ? new Date(o.LastModified).toISOString() : null,
-    };
-    const c = copied.get(o.Key);
-    if (c) return { ...base, size: c.size, state: 'backed-up', backupEtag: c.etag, versionId: c.versionId };
-    const d = dstIndex.get(o.Key);
-    if (upToDate(o, d)) return { ...base, size: Number(d.Size), state: 'backed-up', backupEtag: d.ETag || null, versionId: d.VersionId || null };
-    const state = failed.has(o.Key) ? 'failed' : excludePrefixes.some((p) => o.Key.startsWith(p)) ? 'excluded' : 'pending';
-    return { ...base, state, backupEtag: null, versionId: null };
-  });
+  const objects = [...srcObjs].sort(byKey).map((o) => inventoryEntry(o, dstIndex, copied, failed, excludePrefixes));
   const counts = { objects: objects.length, totalBytes: 0, backedUp: 0, pending: 0, failed: 0, excluded: 0 };
   for (const o of objects) {
     counts.totalBytes += o.size;
@@ -365,6 +367,47 @@ function buildInventory({ date, createdAt, sourceBucket, backupBucket, excludePr
     counts,
     objects,
   };
+}
+// Streamed twin of buildInventory for the production path: at 336k docs the
+// materialised form (mapped array + JSON.stringify string + upload buffer)
+// is what OOM-killed the backup init container on 2026-11-18 (heap limit
+// 512 MiB). Here entries are built one at a time and written to a file; the
+// upload then streams that file. Only counts are returned, never the array.
+async function writeInventoryFile(file, { date, createdAt, sourceBucket, backupBucket, excludePrefixes, versionIds, srcObjs, dstIndex, copied, failed }) {
+  const sorted = [...srcObjs].sort(byKey);
+  const counts = { objects: sorted.length, totalBytes: 0, backedUp: 0, pending: 0, failed: 0, excluded: 0 };
+  for (const o of sorted) {
+    const e = inventoryEntry(o, dstIndex, copied, failed, excludePrefixes);
+    counts.totalBytes += e.size;
+    if (e.state === 'backed-up') counts.backedUp += 1;
+    else counts[e.state] += 1;
+  }
+  const head = JSON.stringify({
+    format: 'radar-backup-docs-inventory/v1', date, createdAt, sourceBucket, backupBucket,
+    backupPrefix: LAYOUT.docsPrefix, excludedPrefixes: excludePrefixes, versionIds, counts,
+  }).slice(0, -1) + ',"objects":[';
+  const ws = fs.createWriteStream(file);
+  let wsError = null;
+  ws.on('error', (e) => { wsError = e; });
+  const write = async (chunk) => {
+    if (wsError) throw wsError;
+    if (!ws.write(chunk)) await new Promise((res) => ws.once('drain', res));
+    if (wsError) throw wsError;
+  };
+  try {
+    await write(head);
+    let first = true;
+    for (const o of sorted) {
+      await write((first ? '' : ',') + JSON.stringify(inventoryEntry(o, dstIndex, copied, failed, excludePrefixes)));
+      first = false;
+    }
+    await write(']}');
+    await new Promise((res, rej) => { ws.end((e) => (e ? rej(e) : res())); });
+  } catch (e) {
+    ws.destroy();
+    throw e;
+  }
+  return counts;
 }
 
 // ── config ───────────────────────────────────────────────────────────────────
@@ -819,11 +862,12 @@ async function backupDocs(ctx, date, srcObjs) {
   }
   const stopReason = stop.signal.aborted ? stop.signal.reason.stop : null;
   if (stopReason) log(`docs copy stopped reason=${stopReason} copied=${copied.size} failed=${failed.size} timed_out=${timedOut} interrupted=${interrupted} not_started=${plan.todo.length - next}`);
-  const inventory = buildInventory({
+  const inventoryFile = path.join(cfg.workDir, `inventory-${date}.json`);
+  const inventoryCounts = await writeInventoryFile(inventoryFile, {
     date, createdAt: new Date(ctx.now()).toISOString(), sourceBucket: cfg.sourceBucket, backupBucket: cfg.backupBucket,
     excludePrefixes: cfg.excludePrefixes, versionIds, srcObjs, dstIndex, copied, failed,
   });
-  return { inventory, copied: copied.size, alreadyUpToDate: plan.fresh.length, budgetHit: stopReason === 'budget', stopReason, timedOut, interrupted, versionIds };
+  return { inventoryFile, inventoryCounts, copied: copied.size, alreadyUpToDate: plan.fresh.length, budgetHit: stopReason === 'budget', stopReason, timedOut, interrupted, versionIds };
 }
 
 // ── retention: PLAN (backup step, writer: list only) ─────────────────────────
@@ -1049,14 +1093,16 @@ async function runBackupSteps(ctx) {
   if (d) {
     let inv = null; let inventoryError = null;
     try {
-      const text = JSON.stringify(d.inventory);
-      inventoryBytes = Buffer.byteLength(text);
-      inv = await putBuffer(ctx, keys.inventory, text, 'application/json');
+      // Streamed upload of the inventory file (never a materialised string).
+      const invInfo = await hashFile(d.inventoryFile);
+      inventoryBytes = invInfo.size;
+      await putFile(ctx, keys.inventory, d.inventoryFile, invInfo);
+      inv = await verifyObject(ctx, keys.inventory, invInfo);
     } catch (e) {
       inventoryError = errName(e);
       log(`docs inventory not written ${inventoryError}`);
     }
-    const c = d.inventory.counts;
+    const c = d.inventoryCounts;
     docs = {
       status: docsStatus(c, null, !!inv),
       sourceBucket: cfg.sourceBucket,
@@ -1196,7 +1242,7 @@ module.exports = {
   EXIT, BackupError, LAYOUT, PLAN_FILE, PLAN_FORMAT, keysFor, classifyKey, dayNumber, isValidDate, isoWeekIndex,
   monthIndex, weekdayUtc, planRetention, parseEnvFile, parseSha256Line, parseMigrationsCopy, resolveMigrationTag,
   parsePrefixes, withScheme, encodeKey, checkDumpSize, checkDocsSource, docsStatus, checkFreshness, upToDate, planDocs,
-  buildInventory, readConfig, assertBuckets, buildManifest, buildLatestPointer, validatePurgePlan, runBackup, runPurge,
+  buildInventory, writeInventoryFile, readConfig, assertBuckets, buildManifest, buildLatestPointer, validatePurgePlan, runBackup, runPurge,
   runFreshness,
   DEFAULT_TIMEOUTS, readTimeouts, requestDeadlineMs, s3send, buildRequestHandler, partialReasonOf, stoppedError,
 };
