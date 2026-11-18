@@ -811,14 +811,23 @@ test-refresh-renders: ## Validate refresh defaults and render mutation guards wi
 	@bash tools/make/purge-ai-annotations-preprod.test.sh
 	@bash deploy/k8s/refresh-cronjobs/verify-renders.test.sh
 
-deploy-db-migrate-k8s: ## Run the one-shot DB migrator Job in the live namespace
+MIGRATE_IMAGE ?=
+deploy-db-migrate-k8s: ## Run the one-shot DB migrator Job in the live namespace (MIGRATE_IMAGE=ghcr.io/rhanka/radar-api@sha256:<64 hex>)
 	@if [ "$(K8S_DEPLOY_CONFIRM)" != "1" ] || [ -z "$$KUBECONFIG" ]; then \
 	  echo "[deploy-db-migrate-k8s] refused: set KUBECONFIG and K8S_DEPLOY_CONFIRM=1"; \
 	  exit 1; \
 	fi
-	$(KUBECTL) -n $(K8S_NAMESPACE) delete job radar-db-migrate --ignore-not-found
-	$(KUBECTL) -n $(K8S_NAMESPACE) apply -f deploy/k8s/36-db-migrate-job.yaml
-	$(KUBECTL) -n $(K8S_NAMESPACE) wait --for=condition=complete job/radar-db-migrate --timeout=180s
+	@printf '%s' "$(MIGRATE_IMAGE)" | grep -Eq '^ghcr\.io/rhanka/radar-api@sha256:[0-9a-f]{64}$$' || { \
+	  echo "[deploy-db-migrate-k8s] refused: MIGRATE_IMAGE must be a pinned digest (ghcr.io/rhanka/radar-api@sha256:<64 hex>), got '$(MIGRATE_IMAGE)'"; \
+	  exit 1; \
+	}
+	@tmp="$$(mktemp -d)"; trap 'rm -rf "$$tmp"' EXIT; \
+	sed "s|image: ghcr.io/rhanka/radar-api.*|image: $(MIGRATE_IMAGE)|" deploy/k8s/36-db-migrate-job.yaml > "$$tmp/job.yaml"; \
+	grep -q "image: $(MIGRATE_IMAGE)" "$$tmp/job.yaml" || { echo "[deploy-db-migrate-k8s] refused: digest pin did not apply"; exit 1; }; \
+	echo "[deploy-db-migrate-k8s] image $(MIGRATE_IMAGE) namespace $(K8S_NAMESPACE)"; \
+	$(KUBECTL) -n $(K8S_NAMESPACE) delete job radar-db-migrate --ignore-not-found; \
+	$(KUBECTL) -n $(K8S_NAMESPACE) apply -f "$$tmp/job.yaml"; \
+	$(KUBECTL) -n $(K8S_NAMESPACE) wait --for=condition=complete job/radar-db-migrate --timeout=180s; \
 	$(KUBECTL) -n $(K8S_NAMESPACE) logs job/radar-db-migrate
 
 # ─────────────────────────────────────────────────────────────────────
