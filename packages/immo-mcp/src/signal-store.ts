@@ -11,7 +11,12 @@ export interface SignalRuntime {
 export function createSignalBinding(env: NodeJS.ProcessEnv): pg.Pool | undefined {
   if (env.IMMO_MCP_SIGNALS_WRITE_ENABLED !== "1") return undefined;
   const url = env.IMMO_MCP_SIGNAL_DATABASE_URL;
-  if (!url) throw new Error("signal_database_binding_required");
+  if (!url) {
+    // Flag on but Secret not provisioned yet: start read-only instead of
+    // crashing the whole MCP server; the five signal tools stay absent.
+    process.stderr.write("[immo-mcp] signal binding unavailable: IMMO_MCP_SIGNAL_DATABASE_URL missing while IMMO_MCP_SIGNALS_WRITE_ENABLED=1; starting read-only without the five signal tools\n");
+    return undefined;
+  }
   return new pg.Pool({ connectionString: bindDatabaseName(url, env.IMMO_MCP_DATABASE_NAME), max: 3,
     connectionTimeoutMillis: 2000, statement_timeout: 5000 });
 }
