@@ -9,8 +9,15 @@ steps below done.
 
 ## Commissioning, in order
 
-Do preprod first (its overlay already carries the activation values), then
-prod with the same steps.
+Exact order, per environment: role, migration + grants, Secret, IdP scope,
+then activation. Never announce the scope or set the flag before the steps
+above it exist. Do preprod first (activation overlay
+`deploy/overlays/preprod-signal-write`), qualify, then prod the same way
+(overlay `deploy/overlays/prod-signal-write`). For prod in particular, the
+Secret exists BEFORE any activation: a flag at `"1"` with no Secret no
+longer crashes the server, but it starts read-only (twelve tools, explicit
+`signal binding unavailable` log line) and the five signal tools stay
+unregistered until the Secret and the binding are in place.
 
 1. **Role.** Create the dedicated PostgreSQL role with LOGIN:
    `CREATE ROLE immo_mcp_signal_writer LOGIN;` and set its password through
@@ -33,12 +40,16 @@ prod with the same steps.
    and on the `immo-mcp` client row (preprod IdP, qualify, then prod IdP).
    Announcing the scope before this step makes authorization requests fail
    with `invalid_scope`.
-5. **Activation.** Only now apply the activation overlay, which announces
-   the scope and sets the flag to `"1"`:
-   `kubectl kustomize deploy/overlays/prod-signal-write` (render check), then
-   apply that render. The five signal tools appear in `tools/list` only
-   while the binding is active. Users then grant the new scope explicitly
-   and reconnect; the default consent selection stays read-only.
+5. **Activation.** Only now apply the activation overlay of the
+   environment, which announces the scope and sets the flag to `"1"`
+   (preprod: `deploy/overlays/preprod-signal-write`; prod:
+   `deploy/overlays/prod-signal-write`; render check first, then apply).
+   The five signal tools appear in `tools/list` only while the binding is
+   active, which needs flag `"1"` AND the Secret present: with the flag on
+   and the Secret missing, the server starts read-only and logs
+   `signal binding unavailable` instead of crashing. Users then grant the
+   new scope explicitly and reconnect; the default consent selection stays
+   read-only.
 
 ## Verification at flag "0" (base, no Secret)
 

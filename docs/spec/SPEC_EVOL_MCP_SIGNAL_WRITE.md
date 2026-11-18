@@ -63,9 +63,12 @@ Production prerequisites, in order:
    stays inert (`IMMO_MCP_SIGNALS_WRITE_ENABLED="0"`, scope not announced,
    optional Secret reference); activation is the separate
    `deploy/overlays/prod-signal-write` overlay, applied by an operator after
-   the prerequisites. The preprod overlay carries the activation values for
-   qualification first. Commissioning order and the exact 0048 rollback SQL
-   live in `docs/operator/mcp-signal-write-runbook.md`.
+   the prerequisites. Preprod follows the same split: its default overlay
+   stays inert and `deploy/overlays/preprod-signal-write` carries the
+   activation. With the flag on and the Secret missing, the server starts
+   read-only (explicit log) instead of crashing. Commissioning order and
+   the exact 0048 rollback SQL live in
+   `docs/operator/mcp-signal-write-runbook.md`.
 4. Default consent selection stays read-only. Users explicitly grant the new
    scope and reconnect. Read-only OAuth tokens still cannot write with the
    binding enabled.
