@@ -28,6 +28,7 @@ spec:
         runAsUser: 1001
         runAsGroup: 1001
         fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
         seccompProfile: { type: RuntimeDefault }
       containers:
         - name: requeue-abandoned
@@ -61,6 +62,12 @@ spec:
               args="REQUEUE-ARGS-SET-BY-RENDER"
               marker="REQUEUE-ARGS-SET-""BY-RENDER"
               case " $args " in *" $marker "*) echo "unrendered requeue arguments" >&2; exit 1;; esac
+              # fsGroup remounts restore 0770 on the runtime keyring; the
+              # encrypted keyring refuses anything but 0700. Normalize before
+              # node reads it (lock files keep their shared mode).
+              chmod 00700 /keyring/runtime
+              find /keyring/runtime -type d -exec chmod 00700 {} +
+              find /keyring/runtime -type f \( -name .key -o -name "*.json" \) -exec chmod 0600 {} +
               # Same lock as a refresh pass, non-blocking: refuse, never race.
               # A real run HOLDS the lock for its whole duration. A dry run
               # only CHECKS it (then releases): it writes nothing, and holding
