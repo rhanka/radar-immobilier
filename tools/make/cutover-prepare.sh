@@ -38,10 +38,14 @@ prepare_database() {
     run_job catalogue 840 900
   else
     run_job backup 840 900
-    # Production preparation verifies the live schema; it never restores it.
-    # Rollback references this backup (fast release path has no migrate stage).
+    # Production preparation never restores the live schema. Rollback
+    # references this backup. Writers are already drained (suspend_writers
+    # above) and the recovery backup exists, so the release DDL now runs on
+    # the live database, inside this locked operation, before the
+    # destination verification below. A retry re-enters through the lock.
     jq --arg ref "$(recovery_backup_reference)" '.targetDb=.liveDb|.recoveryReference=$ref' "$WORK/record.json" > "$WORK/next.json"
     mv "$WORK/next.json" "$WORK/record.json"; record_save
+    run_job ddl 540 600
   fi
   run_job destination 60 90
   prepared_smoke
