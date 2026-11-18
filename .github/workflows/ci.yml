@@ -14,6 +14,18 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  mcp-signals:
+    name: MCP signals (PostgreSQL, SDK and browser)
+    if: ${{ !startsWith(github.head_ref, 'artifact/') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run the gated SQL, SDK and browser contracts
+        run: make -f tools/make/mcp-signal-write.mk test-api test-mcp test-ui-e2e ENV=test-mcp-signal-write
+      - name: Tear down with volumes
+        if: always()
+        run: make -f tools/make/mcp-signal-write.mk down ENV=test-mcp-signal-write
   quality:
     name: Quality gates
     if: ${{ !startsWith(github.head_ref, 'artifact/') }}
