@@ -77,6 +77,57 @@ test('all competing workflows acquire before mutations and release through alway
   assert.equal(promotion.includes('docker/build-push-action'), false);
   assert.equal(build.jobs['promote-prod'].environment, 'production');
 });
+test('production promotion migrates inside prepare, under lock, after backup and writer drain', () => {
+  const w = workflow('build-push-images.yml');
+  const job = w.jobs['promote-prod'];
+  assert.equal(job.if, "startsWith(github.ref, 'refs/tags/v') && vars.PROMOTE_PROD_ENABLED == 'true'", 'promote-prod stays disarmed until the owner arms it');
+  const steps = job.steps;
+  assert.equal(steps.some(s => (s.name || '').includes('Migrate production DB')), false, 'no standalone migrate step outside the lock');
+  const prepare = steps.findIndex(s => s.name === 'Prepare production recovery backup and verify live migrations');
+  const run = steps.findIndex(s => s.name === 'Sequential cutover (same manifest as rehearsal)');
+  assert.ok(prepare >= 0 && prepare < run, 'prepare precedes run');
+  // release.json is generated with dataMigration:null (cutover-release.sh);
+  // the promotion gate must require exactly that, never a "6h" hook.
+  assert.ok(steps.some(s => (s.run || '').includes('.dataMigration==null')));
+  const flow = readFileSync('tools/make/cutover-prepare.sh', 'utf8');
+  const lock = flow.indexOf('lock_acquire prepare');
+  const drain = flow.indexOf('suspend_writers drain');
+  const backup = flow.indexOf('run_job backup 840 900');
+  const ddl = flow.indexOf('run_job ddl 540 600', backup);
+  const destination = flow.indexOf('run_job destination 60 90');
+  assert.ok(lock >= 0 && lock < drain && drain < backup && backup < ddl && ddl < destination,
+    'prod DDL runs after lock, writer drain and backup, before destination');
+});
+test('bascule-bundle-cd proves lock RBAC before creating the lock and always releases it', () => {
+  const w = workflow('bascule-bundle-cd.yml');
+  for (const name of ['apply-bundle', 'apply-backup']) {
+    const steps = w.jobs[name].steps;
+    const guard = steps.findIndex(s => (s.name || '').startsWith('Assert change-lock RBAC before lock creation'));
+    const acquire = steps.findIndex(s => s.uses === './deploy/cutover/lock-action' && s.with.action === 'lock');
+    const release = steps.findIndex(s => s.uses === './deploy/cutover/lock-action' && s.with.action === 'release-lock');
+    assert.ok(guard >= 0 && guard < acquire, `${name}: RBAC guard precedes lock creation`);
+    assert.ok(steps[guard].run.includes('auth can-i') && steps[guard].run.includes('radar-change-lock'));
+    for (const verb of ['create', 'get', 'update', 'delete']) assert.ok(steps[guard].run.includes(verb), `${name}: can-i ${verb}`);
+    assert.ok(release > acquire && steps[release].if.includes('always()'), `${name}: release runs on failure`);
+  }
+  const lockEngine = readFileSync('tools/make/cutover-cluster.sh', 'utf8');
+  assert.ok(lockEngine.includes('created lock released'), 'unreadable created lock is dropped, not orphaned');
+  const prod = readFileSync('deploy/cutover/rbac-prod.yaml', 'utf8');
+  assert.ok(prod.includes('resourceNames: [radar-change-lock]') && prod.includes('verbs: [delete]'));
+  assert.equal(prod.includes('name: radar-ci-bascule-prod\n    namespace: radar-immobilier'), false,
+    'bascule SA is not a subject of the cutover Role (no secret patch, deployments, ingresses, services, portforward)');
+  assert.ok(prod.includes('resources: [pods/log]'), 'prod Role grants Job log reads');
+  const bascule = readFileSync('deploy/ci/bascule-preprod/rbac-ci-bascule-prod.yaml', 'utf8');
+  assert.ok(bascule.includes('resourceNames: ["radar-change-lock"]') && bascule.includes('"get", "update", "delete"'),
+    'bascule lock verbs stay name-scoped in its own Role');
+  assert.equal(bascule.includes('radar-db-credentials'), false, 'bascule Role never touches the DB credentials Secret');
+});
+test('manual migrate target requires a pinned digest and the manifest carries no dated tag', () => {
+  const makefile = readFileSync('Makefile', 'utf8');
+  assert.ok(makefile.includes('MIGRATE_IMAGE') && makefile.includes('@sha256:[0-9a-f]{64}'));
+  const manifest = readFileSync('deploy/k8s/36-db-migrate-job.yaml', 'utf8');
+  assert.equal(/radar-api:(main-|[0-9]{7})/.test(manifest), false, 'no dated image tag in the migrate manifest');
+});
 test('retired executable vehicles have no fallback entry', () => {
   for (const file of ['deploy/base-preprod/operator.mk', 'deploy/ci/bascule-preprod/bascule.mjs',
     'deploy/ci/bascule-preprod/restore-mode.mjs', 'tools/make/base-preprod-maintenance.sh']) assert.equal(existsSync(file), false);

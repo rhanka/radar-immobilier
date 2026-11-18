@@ -1228,7 +1228,9 @@ jobs:
 
   promote-prod:
     name: Promote rehearsed release through cutover
-    if: startsWith(github.ref, 'refs/tags/v')
+    # ARMING SWITCH: stays skipped until the owner sets PROMOTE_PROD_ENABLED
+    # to 'true' after the RBAC/secret checks of docs/runbooks/prod-promotion.md.
+    if: startsWith(github.ref, 'refs/tags/v') && vars.PROMOTE_PROD_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 330
     environment: production
@@ -1270,6 +1272,9 @@ jobs:
             printf '%s' "$KUBE_CONFIG_DATA" > "$HOME/.kube/config"
           fi
           chmod 600 "$HOME/.kube/config"
+      # No standalone migrate step here: DDL runs inside `prepare`
+      # (tools/make/cutover-prepare.sh), after the change lock, the recovery
+      # backup and the writer drain, before the destination verification.
       - name: Prepare production recovery backup and verify live migrations
         run: make -f deploy/cutover/operator.mk prepare RELEASE=cutover-release/release.json ENV=prod
       - name: Sequential cutover (same manifest as rehearsal)
