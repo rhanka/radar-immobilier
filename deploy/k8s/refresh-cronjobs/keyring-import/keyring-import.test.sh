@@ -211,5 +211,21 @@ if make -s -f "$MK" cleanup-keyring-import KUBECONFIG="$T/kubeconfig" ENV=prepro
   && [ "$(grep -c ' delete ' "$CALLS")" -eq 2 ]; then ok "cleanup-keyring-import is rerunnable"
 else bad "cleanup-keyring-import rerun failed ($(cat "$T/out"))"; fi
 
+# --- the import copy normalizes Secret-volume permissions -------------------
+# The Secret volume arrives 0777 and cp -a preserves the mode; the encrypted
+# keyring (llm-mesh 0.38.2) refuses a keyring directory that is not 0700.
+# Replay the copy lines of the real Job command with the volume paths rebound
+# to fixtures (nothing is read, modes only).
+perm_src="$T/perm-src"; perm_dest="$T/perm-dest/.import"
+mkdir -p "$perm_src" "$T/perm-dest"; chmod 0777 "$perm_src"
+printf 'fixture' >"$perm_src/.key"; chmod 0440 "$perm_src/.key"
+printf 'fixture' >"$perm_src/account.json"; chmod 0440 "$perm_src/account.json"
+grep -E 'mkdir|cp -a|chmod|find' "$HERE/job.yaml" | grep -F '.import' \
+  | sed "s#/import#$perm_src#g; s#/keyring/runtime/.import#$perm_dest#g" >"$T/perm-cmds.sh"
+if bash -e "$T/perm-cmds.sh" && [ "$(stat -c %a "$perm_dest")" = 700 ] \
+  && [ "$(stat -c %a "$perm_dest/.key")" = 600 ] && [ "$(stat -c %a "$perm_dest/account.json")" = 600 ]; then
+  ok "import copy normalizes a 0777 Secret volume to 0700/0600"
+else bad "import copy left Secret-volume permissions (dest=$(stat -c %a "$perm_dest" 2>/dev/null))"; fi
+
 echo "keyring-import.test.sh: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]
