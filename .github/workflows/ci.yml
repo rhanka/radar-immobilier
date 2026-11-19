@@ -116,6 +116,9 @@ jobs:
       - name: Validate P0-C preprod switchover hook (hermetic, fake kubectl)
         run: bash deploy/ci/p0c-apply-hook.test.sh
 
+      - name: Validate prod non-Deployment drift check (hermetic, fake kubectl)
+        run: bash deploy/ci/check-prod-drift.test.sh
+
       - name: Validate manifest filter equivalence (fixtures and preprod render)
         run: bash deploy/ci/kfilter.test.sh
 
@@ -126,7 +129,7 @@ jobs:
         run: node deploy/ci/backup/backup-daily.selftest.mjs
 
       - name: Validate cutover controller and backup adapters (hermetic tests)
-        run: make -f deploy/cutover/operator.mk test TEST_PATTERN='one command restores|long owned radar-refresh-pending-watchdog|failure remains closed.*failJob|daily restoration|daily and inter-tenant interfaces|prepare|prepared|rollback patches|resume reconciles|main deployment|production promotion|bascule-bundle-cd proves|manual migrate|promote-prod applies' ENV=test-cutover
+        run: make -f deploy/cutover/operator.mk test TEST_PATTERN='one command restores|long owned radar-refresh-pending-watchdog|failure remains closed.*failJob|daily restoration|daily and inter-tenant interfaces|prepare|prepared|rollback patches|resume reconciles|main deployment|production promotion|bascule-bundle-cd proves|manual migrate|promote-prod applies|backup-cd applies' ENV=test-cutover
 
       - name: Validate git-artifact guards (descriptor, build env, tag ancestry, pre-flight, workflows)
         run: make -f tools/make/git-artifact.mk test ENV=test-git-artifact
