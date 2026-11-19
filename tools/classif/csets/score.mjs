@@ -1,5 +1,5 @@
-import {readFileSync,readdirSync,writeFileSync} from 'node:fs';
-import {load,home,json,sourceText,hash,modes} from './inputs.mjs';
+import {readFileSync,writeFileSync} from 'node:fs';
+import {load,home,sourceText,hash,modes} from './inputs.mjs';
 import {parseJsonObject} from '../run-seat.mjs';
 import {metrics,annotation,shown} from './metrics.mjs';
 import {seal,unseal,keyFromEnv} from '../lib/refc1.mjs';

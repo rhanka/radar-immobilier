@@ -13,9 +13,9 @@ for(const row of batch){
  let valid=false,error:string|null=null,compositionMatches=false;
  try {
   await extractRefreshProfile([row.chunk],{context,singlePassPrompt,maxOutputTokens:32000,
-   textClient:{async generateJson(request:any){
+   textClient:{async generateJson(request:{prompt:string;schema:string;validateResponse:(text:string)=>void}){
     compositionMatches=`${request.prompt}\n\nJSON schema:\n${request.schema}`===row.prompt;
-    request.validateResponse(row.text);valid=true;throw new Error('validated');}} as any});
+    request.validateResponse(row.text);valid=true;throw new Error('validated');}} as never});
  }catch(e){if(!valid) error=(e as Error).message;}
  results.push({file:row.file,digest:row.digest,valid,error,compositionMatches});
 }
