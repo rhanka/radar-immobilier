@@ -53,6 +53,12 @@ tags: [workflow]
 - Merge commit is the only allowed strategy (sentropic policy inherited).
 - After merge, do NOT delete the source branch.
 
+## Production CD path rule
+
+- No manual `kubectl apply` / `kubectl patch` in production (`radar-immobilier`) outside a declared GitHub Actions CD path.
+- Any new production manifest added under `deploy/` MUST map to an active workflow in `deploy/ci/prod-cd-paths.json` (verified in CI by `deploy/ci/check-prod-cd-paths.mjs`).
+- Break-glass actions with Product Owner GO must be recorded in `docs/operator/manual-operations-log.md` with a planned CD return (see `docs/runbooks/prod-promotion.md`).
+
 ## Cross-repo work
 
 - Changes to `../poc-k8s/`, `../sentropic/`, `../graphify/` require an explicit `BRxx-EXn` exception in the branch file.
