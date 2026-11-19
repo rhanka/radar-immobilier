@@ -133,7 +133,7 @@ jobs:
           {
             echo "### backup-cd applied (daily backup + dormant db-backup-prod)"
             echo ""
-            echo "- Arming variable: BACKUP_CD_ENABLED (independent of BASCULE_BUNDLE_CD_ENABLED)"
+            echo "- Arming variable: BACKUP_CD_ENABLED (isolated from bascule-bundle-cd)"
             echo "- ConfigMap: radar-backup-daily-script (from deploy/ci/backup/backup-daily.cjs)"
             echo "- CronJob: radar-backup-daily (23 2 * * * UTC, suspend=false, Forbid)"
             echo "- CronJob: radar-backup-freshness (53 6 * * * UTC, suspend=false, Forbid)"
