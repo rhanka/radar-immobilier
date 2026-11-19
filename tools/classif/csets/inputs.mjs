@@ -1,5 +1,4 @@
 import {readFileSync,copyFileSync,existsSync} from 'node:fs';
-import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {privateDir} from '../lib/paths.mjs';
 import {openBlindSet} from '../lib/blind.mjs';
