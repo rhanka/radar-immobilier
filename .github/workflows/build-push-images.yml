@@ -1349,3 +1349,16 @@ jobs:
           kubectl -n "$NAMESPACE" apply -f "$tmp/requeue.yaml"
           kubectl -n "$NAMESPACE" get cronjob radar-refresh-requeue-abandoned \
             -o jsonpath='{.metadata.name} suspend={.spec.suspend} schedule={.spec.schedule} image={.spec.jobTemplate.spec.template.spec.containers[0].image}{"\n"}'
+
+      - name: Check production non-Deployment drift against main (read-only)
+        env:
+          NAMESPACE: radar-immobilier
+          EXPECTED_KUBE_APISERVER_HOST_PROD: ${{ vars.EXPECTED_KUBE_APISERVER_HOST_PROD || vars.EXPECTED_KUBE_APISERVER_HOST }}
+        run: |
+          set -euo pipefail
+          main_tmp="$(mktemp -d)"
+          trap 'rm -rf "$main_tmp"' EXIT
+          git fetch --no-tags origin main
+          git archive origin/main | tar -x -C "$main_tmp"
+          EXPECTED_API_IMAGE="$(jq -er '.apiImage' cutover-release/release.json)" \
+            bash deploy/ci/check-prod-drift.sh "$main_tmp"
