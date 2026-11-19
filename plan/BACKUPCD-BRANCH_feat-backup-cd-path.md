@@ -48,8 +48,8 @@ Add a dedicated, fail-closed GitHub Actions CD workflow (`.github/workflows/back
   - [x] Audit `radar-ci-bascule-prod` RBAC (`can-i.txt` + `roles.yaml`) and `backup-daily.selftest.mjs`.
   - [x] Declare `BACKUPCD-EX1` exception for `.github/workflows/**`.
 
-- [ ] **Lot 1 — Dedicated backup CD workflow (`backup-cd.yml`)**
-  - [ ] Create `.github/workflows/backup-cd.yml` guarded by `vars.BACKUP_CD_ENABLED == 'true'`, positive PROD pre-flight, lock RBAC + target RBAC `auth can-i` check, `lock-action`, ConfigMap + 3 CronJob apply, and post-apply `schedule|suspend|concurrencyPolicy|automountServiceAccountToken` checks without triggering any manual run.
+- [x] **Lot 1 — Dedicated backup CD workflow (`backup-cd.yml`)**
+  - [x] Create `.github/workflows/backup-cd.yml` guarded by `vars.BACKUP_CD_ENABLED == 'true'`, positive PROD pre-flight, lock RBAC + target RBAC `auth can-i` check, `lock-action`, ConfigMap + 3 CronJob apply, and post-apply `schedule|suspend|concurrencyPolicy|automountServiceAccountToken` checks without triggering any manual run.
 
 - [ ] **Lot 2 — Hermetic tests & CI wiring**
   - [ ] Add hermetic assertions in `tools/make/cutover-workflows.test.mjs`.
