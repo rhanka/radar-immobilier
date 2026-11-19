@@ -58,6 +58,11 @@ jobs:
           bash deploy/ci/check-ui-scoped-signal-routes.sh
           bash deploy/ci/check-ui-scoped-signal-routes.test.sh
 
+      - name: Require declared CD paths for all prod manifests
+        run: |
+          node deploy/ci/check-prod-cd-paths.mjs
+          node --test deploy/ci/check-prod-cd-paths.test.mjs
+
       - name: Validate compose files
         run: |
           docker compose -f docker-compose.yml -f docker-compose.dev.yml config -q
