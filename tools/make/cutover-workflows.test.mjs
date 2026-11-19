@@ -117,6 +117,7 @@ test('promote-prod applies drift check and schedules prod-drift-check without Se
   assert.ok(Array.isArray(drift.on.schedule) && drift.on.schedule.length === 1, 'daily schedule present');
   assert.notEqual(drift.on.workflow_dispatch, undefined, 'workflow_dispatch enabled');
   assert.equal(drift.permissions.contents, 'read');
+  assert.equal(drift.jobs.check.environment, 'production');
   assert.equal(drift.jobs.check.if, "github.ref == 'refs/heads/main'");
   const runCmd = drift.jobs.check.steps.at(-1).run;
   assert.equal(runCmd, 'bash deploy/ci/check-prod-drift.sh');
