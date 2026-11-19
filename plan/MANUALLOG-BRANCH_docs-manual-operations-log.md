@@ -40,12 +40,12 @@ Create an append-only English operator log (`docs/operator/manual-operations-log
   - [x] Read `rules/MASTER.md`, `rules/workflow.md`, `docs/runbooks/prod-promotion.md`, `docs/operator/mcp-signal-write-runbook.md`, and `prod-snapshot/`.
   - [x] Confirm isolated worktree `./tmp/manual-operations-log` off `origin/main`.
 
-- [ ] **Lot 1 — Manual operations log & 2026-11-18 backfill**
-  - [ ] Create `docs/operator/manual-operations-log.md` defining the required fields (who, when UTC, what, command, diff summary, owner GO ref, planned CD return) and recording the four 2026-11-18 manual production operations with zero secret values.
+- [x] **Lot 1 — Manual operations log & 2026-11-18 backfill**
+  - [x] Create `docs/operator/manual-operations-log.md` defining the required fields (who, when UTC, what, command, diff summary, owner GO ref, planned CD return) and recording the four 2026-11-18 manual production operations with zero secret values.
 
-- [ ] **Lot 2 — Runbook rules**
-  - [ ] Add `## Manual operations log` to `docs/runbooks/prod-promotion.md` before `## Manual migration (break-glass only)`.
-  - [ ] Add logging requirement to `docs/operator/mcp-signal-write-runbook.md`.
+- [x] **Lot 2 — Runbook rules**
+  - [x] Add `## Manual operations log` to `docs/runbooks/prod-promotion.md` before `## Manual migration (break-glass only)`.
+  - [x] Add logging requirement to `docs/operator/mcp-signal-write-runbook.md`.
 
 - [ ] **Lot 3 — PR & CI verification**
   - [ ] Push `docs/manual-operations-log` and open PR targeting `main`.
