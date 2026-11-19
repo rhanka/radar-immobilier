@@ -49,9 +49,9 @@ Add a read-only production drift check script and workflow (`.github/workflows/p
   - [x] Confirm isolated worktree `./tmp/prod-drift-check` off `origin/main`.
   - [x] Declare `DRIFTCHK-EX1` exception for `.github/workflows/**`.
 
-- [ ] **Lot 1 — Drift checker scripts (`deploy/ci/check-prod-drift*`)**
-  - [ ] Implement `deploy/ci/check-prod-drift-summary.mjs` (render validation, unified diff `(object, field)` summarizer, pinned image digest verifier).
-  - [ ] Implement `deploy/ci/check-prod-drift.sh` (positive pre-flight, render 8 non-Deployment objects from `main`, `kubectl diff`, image verification, conditional `secrets:get` name-only existence check, loud summary).
+- [x] **Lot 1 — Drift checker scripts (`deploy/ci/check-prod-drift*`)**
+  - [x] Implement `deploy/ci/check-prod-drift-summary.mjs` (render validation, unified diff `(object, field)` summarizer, pinned image digest verifier).
+  - [x] Implement `deploy/ci/check-prod-drift.sh` (positive pre-flight, render 8 non-Deployment objects from `main`, `kubectl diff`, image verification, conditional `secrets:get` name-only existence check, loud summary).
 
 - [ ] **Lot 2 — Workflow & `promote-prod` integration + hermetic tests**
   - [ ] Create `.github/workflows/prod-drift-check.yml` (`schedule` + `workflow_dispatch`, `main`-only).
