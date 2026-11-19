@@ -5,10 +5,14 @@ CSETS_VERSION ?= v1
 CSETS_MODES ?= B
 export CSETS_VERSION CSETS_MODES
 # Model under test: a route label of tools/classif/run-seat.mjs ROUTES
-# (astra-low | gemini-4-hydrogen-low | gemini-4-neon-low | gemini-3.8-flash-low).
+# (astra-low | astra-6.2-low | gemini-4-hydrogen-low | gemini-4-neon-low | gemini-3.8-flash-low).
 BENCH_MODEL ?= astra-low
 BENCH_CONCURRENCY ?= 10
 export BENCH_MODEL BENCH_CONCURRENCY
+BENCH_B_DIR ?= /home/antoinefa/src/radar-immobilier/.claude/worktrees/agent-ae1c01a14a9859391/tools/bench-v11
+BENCH_B_HOME ?= /home/antoinefa/.local/share/radar-classif/bench-b-models/$(BENCH_MODEL)
+BENCH_B_SPLIT_FILE ?= /home/antoinefa/src/radar-immobilier/tmp/classif-1passe/tools/classif/1passe/split.json
+export BENCH_B_DIR BENCH_B_HOME BENCH_B_SPLIT_FILE BENCH_B_OUT
 CLASSIF_HOME ?= /home/antoinefa/.local/share/radar-classif/1passe-csets
 export CLASSIF_HOME
 .PHONY: csets-commit
@@ -39,9 +43,13 @@ csets-pr:
 .PHONY: csets-pr-update
 csets-pr-update:
 	@gh api repos/rhanka/radar-immobilier/pulls/1105 --method PATCH -F body=@$(CLASSIF_HOME)/pr-body.md --jq .html_url
-.PHONY: csets-test
+.PHONY: csets-test bench-b-run bench-b-score
 csets-test:
 	@$(CLASSIF_NODE) --test tools/classif/csets/metrics.test.mjs
+bench-b-run:
+	@$(CLASSIF_NODE) tools/classif/csets/bench-b.mjs
+bench-b-score:
+	@$(CLASSIF_NODE) tools/classif/csets/bench-b-score.mjs
 .PHONY: csets-validate
 csets-validate:
 	@docker run --rm --user $(shell id -u):$(shell id -g) -e CLASSIF_BLIND_KEY -e CSETS_HALF=$(if $(HALF),$(HALF),tuning) -v /home/antoinefa/src/radar-immobilier/tmp/refresh-single-pass:/src:ro -v $(CLASSIF_HOME):/private -v $(CURDIR):/lane:ro -w /private/deps node:24-bookworm-slim sh -c 'cp /lane/tools/classif/csets/validate.ts .; node --import ./node_modules/tsx/dist/loader.mjs validate.ts'

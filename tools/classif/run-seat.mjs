@@ -126,6 +126,8 @@ export const ROUTES = {
     ['luna-6-medium', 'Luna 6', 'gpt-6-luna', 'medium'],
     ['astra-low', 'Astra', 'gpt-6-astra', 'low'],
     ['astra-medium', 'Astra', 'gpt-6-astra', 'medium'],
+    // Owner 19/11: GPT-6.2-Astra low (slug `gpt-6.2-astra` verified in ~/.codex/models_cache.json).
+    ['astra-6.2-low', 'Astra 6.2', 'gpt-6.2-astra', 'low'],
   ].map(([label, family, model, effort]) => [label, {
     family, model, effort, route: `codex exec -m ${model} -c model_reasoning_effort=${effort} -s read-only, isolated CODEX_HOME, empty cwd, scrubbed env (--json + -o last-message.md for parsing, prompt on stdin)`,
     build: (dir, _file, prompt) => ({ cmd: 'codex', args: ['exec', '-m', model, '-c', `model_reasoning_effort=${effort}`, '-s', 'read-only',

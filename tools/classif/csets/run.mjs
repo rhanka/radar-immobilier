@@ -16,7 +16,7 @@ const initial=isCodexBench?json(`${home}/quota-start.json`):null;
 if(isCodexBench){
  if(initial.code!==0||!initial.rateLimits?.primary) throw new Error('Fresh quota probe required');
  if(Date.now()-Date.parse(initial.at)>3600000) throw new Error('Quota probe is stale');
- guard.observe('astra-low',initial.rateLimits);
+ guard.observe(benchModel,initial.rateLimits);
 }
 const concurrency=Math.min(16,Math.max(1,Number(process.env.BENCH_CONCURRENCY??10)||10));
 let stop=null,done=0,cached=0;
@@ -44,7 +44,7 @@ async function worker(){
    appendJsonlRecord(log,{at:new Date().toISOString(),half,mode,intent:false,inputHash:digest,
     code:result.code,latencyMs:result.latencyMs,usage:result.usage,toolEvents:result.toolEvents,...quotaFields(result)});
    if(isCodexBench){
-    guard.observe('astra-low',result.rateLimits);
+    guard.observe(benchModel,result.rateLimits);
     if(result.authError||result.binaryMissing||result.rateLimits?.rate_limit_reached_type) stop='account-or-quota-refusal';
     if(!result.rateLimits?.primary) stop='quota-observation-missing';
    } else if(result.authError||result.binaryMissing
