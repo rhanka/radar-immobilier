@@ -3,6 +3,21 @@
 Short runbook. No manual image roll in production: a version tag promotes
 the exact images already built from `main`.
 
+## No manual production apply outside CD
+
+Every production Kubernetes manifest under `deploy/` MUST be applied through a
+declared GitHub Actions CD workflow (mapped in `deploy/ci/prod-cd-paths.json`
+and enforced by `deploy/ci/check-prod-cd-paths.mjs`).
+
+- Manual `kubectl apply` / `kubectl patch` / `kubectl edit` against production
+  outside a declared CD path is **forbidden**.
+- If a CD path is broken or missing, fix or add the workflow in git and promote
+  via PR rather than patching live state.
+- Break-glass exception: requires explicit Product Owner GO beforehand,
+  read-only `kubectl diff` before applying, zero Secret leaks, and same-day
+  recording with the planned CD return in
+  `docs/operator/manual-operations-log.md`.
+
 ## Owner prerequisites (once)
 
 Install both RBAC files with a cluster-admin identity. Nothing in CI can
