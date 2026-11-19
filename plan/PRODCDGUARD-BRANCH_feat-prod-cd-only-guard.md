@@ -47,9 +47,9 @@ Codify the rule prohibiting manual production applies outside declared CD paths 
   - [x] Confirm isolated worktree `./tmp/prod-cd-only-guard` off `origin/main`.
   - [x] Declare `PRODCDGUARD-EX1`.
 
-- [ ] **Lot 1 — Codify no-manual-prod-apply rule**
-  - [ ] Add `## No manual production apply outside CD` at top of `docs/runbooks/prod-promotion.md`.
-  - [ ] Document rule and mandatory log cross-reference in `rules/MASTER.md`, `rules/workflow.md`, and `AGENTS.md`.
+- [x] **Lot 1 — Codify no-manual-prod-apply rule**
+  - [x] Add `## No manual production apply outside CD` at top of `docs/runbooks/prod-promotion.md`.
+  - [x] Document rule and mandatory log cross-reference in `rules/MASTER.md`, `rules/workflow.md`, and `AGENTS.md`.
 
 - [ ] **Lot 2 — Prod CD-path registry, CI guard & tests**
   - [ ] Create `deploy/ci/prod-cd-paths.json` mapping prod manifests to workflows (with frozen bootstrap/legacy exemptions).

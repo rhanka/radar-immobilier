@@ -46,6 +46,7 @@ project rules.
 - Tests on `ENV=test-*` or `ENV=e2e-*`, never `ENV=dev`.
 - Atomic commits (~150 lines max between commits), selective staging.
 - Merge commits only — no squash, no rebase merge.
+- No manual production `kubectl apply`/`patch` outside declared CD workflows (`deploy/ci/prod-cd-paths.json`; break-glass requires Product Owner GO and same-day logging in `docs/operator/manual-operations-log.md`).
 
 ## Discussion language
 
