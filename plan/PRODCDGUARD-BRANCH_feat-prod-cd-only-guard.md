@@ -51,10 +51,10 @@ Codify the rule prohibiting manual production applies outside declared CD paths 
   - [x] Add `## No manual production apply outside CD` at top of `docs/runbooks/prod-promotion.md`.
   - [x] Document rule and mandatory log cross-reference in `rules/MASTER.md`, `rules/workflow.md`, and `AGENTS.md`.
 
-- [ ] **Lot 2 — Prod CD-path registry, CI guard & tests**
-  - [ ] Create `deploy/ci/prod-cd-paths.json` mapping prod manifests to workflows (with frozen bootstrap/legacy exemptions).
-  - [ ] Implement `deploy/ci/check-prod-cd-paths.mjs` refusing undeclared prod manifests, invalid workflow refs, or stale entries.
-  - [ ] Implement `deploy/ci/check-prod-cd-paths.test.mjs`, wire into `.github/workflows/ci.yml`, and run tests locally.
+- [x] **Lot 2 — Prod CD-path registry, CI guard & tests**
+  - [x] Create `deploy/ci/prod-cd-paths.json` mapping prod manifests to workflows (with frozen bootstrap/legacy exemptions).
+  - [x] Implement `deploy/ci/check-prod-cd-paths.mjs` refusing undeclared prod manifests, invalid workflow refs, or stale entries.
+  - [x] Implement `deploy/ci/check-prod-cd-paths.test.mjs`, wire into `.github/workflows/ci.yml`, and run tests locally.
 
 - [ ] **Lot 3 — PR & CI verification**
   - [ ] Push `feat/prod-cd-only-guard` and open PR targeting `main`.
