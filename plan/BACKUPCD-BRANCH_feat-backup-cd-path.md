@@ -51,11 +51,11 @@ Add a dedicated, fail-closed GitHub Actions CD workflow (`.github/workflows/back
 - [x] **Lot 1 — Dedicated backup CD workflow (`backup-cd.yml`)**
   - [x] Create `.github/workflows/backup-cd.yml` guarded by `vars.BACKUP_CD_ENABLED == 'true'`, positive PROD pre-flight, lock RBAC + target RBAC `auth can-i` check, `lock-action`, ConfigMap + 3 CronJob apply, and post-apply `schedule|suspend|concurrencyPolicy|automountServiceAccountToken` checks without triggering any manual run.
 
-- [ ] **Lot 2 — Hermetic tests & CI wiring**
-  - [ ] Add hermetic assertions in `tools/make/cutover-workflows.test.mjs`.
-  - [ ] Register `backup-cd.yml/apply` in `tools/make/git-artifact-workflows.test.mjs` tag-ancestry check.
-  - [ ] Extend `.github/workflows/ci.yml` `TEST_PATTERN` to execute the new test.
-  - [ ] Run hermetic test suites and static guards locally.
+- [x] **Lot 2 — Hermetic tests & CI wiring**
+  - [x] Add hermetic assertions in `tools/make/cutover-workflows.test.mjs`.
+  - [x] Register `backup-cd.yml/apply` in `tools/make/git-artifact-workflows.test.mjs` tag-ancestry check.
+  - [x] Extend `.github/workflows/ci.yml` `TEST_PATTERN` to execute the new test.
+  - [x] Run hermetic test suites and static guards locally.
 
 - [ ] **Lot 3 — PR & CI verification**
   - [ ] Push `feat/backup-cd-path` and open PR targeting `main`.
