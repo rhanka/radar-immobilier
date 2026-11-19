@@ -33,6 +33,12 @@ create Secret `immo-mcp-signal-writer` (step 3, BEFORE any activation),
 declare `immo:signals:write` at the prod IdP (step 4), then apply the
 activation overlay `deploy/overlays/prod-signal-write` (step 5).
 
+> **Mandatory logging**: every manual production step below (role/grants SQL,
+> Secret creation or rotation, and prod overlay apply) MUST be appended to
+> [`docs/operator/manual-operations-log.md`](./manual-operations-log.md) with
+> role, UTC timestamp, scope, redacted command, diff summary, Product Owner GO
+> reference, and planned CD return — never log Secret values or URIs.
+
 1. **Role.** Create the dedicated PostgreSQL role with LOGIN:
    `CREATE ROLE immo_mcp_signal_writer LOGIN;` and set its password through
    the operator credential cycle. The role holds no direct table privilege;
