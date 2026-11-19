@@ -79,7 +79,8 @@ export const ROUTES = {
   }])),
   // Owner 12/11: Gemini 4 Carbon low and Gemini 3.8 Flash low (the production detection fallback
   // and check model), same agy route as Argon (ids from `agy models` of 12/11).
-  ...Object.fromEntries([['gemini-4-carbon-low', 'Gemini 4 Carbon'], ['gemini-3.8-flash-low', 'Gemini 3.8 Flash']].map(([label, family]) => [label, {
+  ...Object.fromEntries([['gemini-4-carbon-low', 'Gemini 4 Carbon'], ['gemini-3.8-flash-low', 'Gemini 3.8 Flash'],
+    ['gemini-4-hydrogen-low', 'Gemini 4 Hydrogen'], ['gemini-4-neon-low', 'Gemini 4 Neon']].map(([label, family]) => [label, {
     family, model: label, effort: 'low', route: 'agy --print= with stream-json stdin input, slash commands disabled, empty cwd',
     build: (_dir, _file, prompt) => ({ cmd: 'agy', args: ['--model', label, '--input-format', 'stream-json', '--output-format', 'stream-json',
       '--disable-slash-commands', '--print='], stdin: `${JSON.stringify({ event: 'user', message: { role: 'user', content: prompt } })}\n` }),
