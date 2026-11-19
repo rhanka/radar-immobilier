@@ -24,7 +24,7 @@ const {scoreSource}=await import(pathToFileURL(`${benchDir}/full/score-676.mjs`)
 const {aggregate}=await import(pathToFileURL(`${benchDir}/harness/score-oracle-v3.mjs`).href);
 const manifest=JSON.parse(readFileSync(`${benchDir}/harness/manifest-v101b.json`,'utf8'));
 const split=JSON.parse(readFileSync(splitFile,'utf8'));
-if(sha256(JSON.stringify(split.tuning))!==TUNING_IDS_SHA256||sha256(JSON.stringify(split.blind))!==BLIND_IDS_SHA256){
+if(sha256(`${split.tuning.join('\n')}\n`)!==TUNING_IDS_SHA256||sha256(`${split.blind.join('\n')}\n`)!==BLIND_IDS_SHA256){
  throw new Error('Frozen tuning/blind split checksum mismatch');
 }
 const tuningSet=new Set(split.tuning);
