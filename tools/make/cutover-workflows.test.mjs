@@ -112,6 +112,25 @@ test('promote-prod applies the refresh prod overlay at the release digest after 
   assert.ok(step.run.includes('fsGroupChangePolicy') && step.run.includes('OnRootMismatch'), 'post-apply control checks fsGroupChangePolicy');
   assert.ok(step.run.includes('live_image') && step.run.includes('!= promoted digest'), 'post-apply control checks the live image');
 });
+test('promote-prod applies drift check and schedules prod-drift-check without Secret reads', () => {
+  const drift = workflow('prod-drift-check.yml');
+  assert.ok(Array.isArray(drift.on.schedule) && drift.on.schedule.length === 1, 'daily schedule present');
+  assert.notEqual(drift.on.workflow_dispatch, undefined, 'workflow_dispatch enabled');
+  assert.equal(drift.permissions.contents, 'read');
+  assert.equal(drift.jobs.check.if, "github.ref == 'refs/heads/main'");
+  const runCmd = drift.jobs.check.steps.at(-1).run;
+  assert.equal(runCmd, 'bash deploy/ci/check-prod-drift.sh');
+  const script = readFileSync('deploy/ci/check-prod-drift.sh', 'utf8');
+  for (const name of ['radar-backup-daily', 'radar-backup-freshness', 'radar-db-backup-prod',
+    'radar-refresh-pv', 'radar-refresh-pending-watchdog', 'radar-backup-daily-script',
+    'immo-mcp-config', 'radar-refresh-keyring']) {
+    assert.ok(script.includes(name), `drift script covers ${name}`);
+  }
+  assert.equal(/\bkubectl[^\n]*(apply|patch|replace|delete)\b/.test(script), false, 'strictly read-only');
+  const build = workflow('build-push-images.yml');
+  const tail = build.jobs['promote-prod'].steps.at(-1);
+  assert.ok(tail.run.includes('git archive origin/main') && tail.run.includes('check-prod-drift.sh'));
+});
 test('bascule-bundle-cd proves lock RBAC before creating the lock and always releases it', () => {
   const w = workflow('bascule-bundle-cd.yml');
   for (const name of ['apply-bundle', 'apply-backup']) {
