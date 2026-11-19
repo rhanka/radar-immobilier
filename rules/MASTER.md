@@ -175,6 +175,11 @@ human baseline (e.g. a manual ChatGPT run) — for the demo or anywhere else.
 - **Honest reporting**: "we do better" must be proven by the frozen metrics + sources; if the human is better on a metric, say so.
 - Reference methodology: `docs/spec/SPEC_EVOL_DEMO_FINDINGS.md`.
 
+## Production CD Only (MANDATORY)
+- Never apply, patch, edit, or delete Kubernetes objects in production (`radar-immobilier`) manually outside a declared GitHub Actions CD workflow (`deploy/ci/prod-cd-paths.json`, checked in CI by `deploy/ci/check-prod-cd-paths.mjs`).
+- Every new production manifest under `deploy/` MUST declare its owning CD workflow in `deploy/ci/prod-cd-paths.json` before merge.
+- Only break-glass exceptions with explicit Product Owner GO, pre-apply `kubectl diff`, and same-day recording plus planned CD return in `docs/operator/manual-operations-log.md` are allowed. See `docs/runbooks/prod-promotion.md`.
+
 ## Other Rules Files
 - `rules/workflow.md` — branching, commits, PR, orchestration.
 - `rules/conductor.md` — conductor orchestration, fixed UAT ports, multi-agent lane registry, `conductor-report`.
