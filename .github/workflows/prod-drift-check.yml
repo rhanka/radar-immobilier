@@ -1,0 +1,50 @@
+# prod-drift-check — daily and on-demand read-only production drift check.
+#
+# Renders the 8 non-Deployment production objects from main, runs read-only
+# `kubectl diff` against the live cluster, checks pinned image digests against
+# the served release digest, and never reads Secret values.
+name: prod-drift-check (read-only non-Deployment drift check)
+
+on:
+  schedule:
+    - cron: '15 7 * * *'
+  workflow_dispatch: {}
+
+concurrency:
+  group: prod-drift-check
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.ref == 'refs/heads/main'
+    env:
+      NAMESPACE: radar-immobilier
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.31.0'
+
+      - name: Configure namespace-scoped kubeconfig (read-only drift check)
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.kube"
+          bash deploy/ci/write-kubeconfig.sh "$KUBE_CONFIG_DATA"
+          chmod 600 "$HOME/.kube/config"
+
+      - name: Check non-Deployment prod objects against main
+        env:
+          EXPECTED_KUBE_APISERVER_HOST_PROD: ${{ vars.EXPECTED_KUBE_APISERVER_HOST_PROD || vars.EXPECTED_KUBE_APISERVER_HOST }}
+        run: bash deploy/ci/check-prod-drift.sh
