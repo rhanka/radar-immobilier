@@ -60,7 +60,7 @@ test('a daily restore whose job died is recovered by the same workflow', () => {
 test('all competing workflows acquire before mutations and release through always', () => {
   for (const [file, jobs] of [['build-push-images.yml', ['deploy', 'deploy-preprod']],
     ['rollback.yml', ['rollback-preprod', 'rollback-prod']], ['run-job.yaml', ['run']], ['k8s-apply-mcp.yaml', ['apply']],
-    ['bascule-bundle-cd.yml', ['apply-bundle', 'apply-backup']]]) {
+    ['bascule-bundle-cd.yml', ['apply-bundle', 'apply-backup']], ['backup-cd.yml', ['apply']]]) {
     const w = workflow(file);
     for (const name of jobs) {
       const steps = w.jobs[name].steps;
@@ -146,4 +146,32 @@ test('retired executable vehicles have no fallback entry', () => {
   for (const file of ['deploy/base-preprod/operator.mk', 'deploy/ci/bascule-preprod/bascule.mjs',
     'deploy/ci/bascule-preprod/restore-mode.mjs', 'tools/make/base-preprod-maintenance.sh']) assert.equal(existsSync(file), false);
   assert.equal(readFileSync('deploy/cutover/operator.mk', 'utf8').includes('include .env'), false);
+});
+test('backup-cd applies backup manifests and db-backup-prod without re-arming bascule', () => {
+  const w = workflow('backup-cd.yml');
+  assert.deepEqual(w.on.push.branches, ['main']);
+  assert.deepEqual(w.on.push.tags, ['v[0-9]*']);
+  for (const p of ['deploy/ci/backup/backup-daily.cjs', 'deploy/ci/backup/cronjob-backup-daily.yaml',
+    'deploy/ci/backup/cronjob-backup-freshness.yaml', 'deploy/ci/bascule-preprod/cronjob-db-backup-prod.yaml',
+    '.github/workflows/backup-cd.yml']) {
+    assert.ok(w.on.push.paths.includes(p), `missing push path ${p}`);
+  }
+  assert.equal(w.on.workflow_dispatch?.inputs, undefined, 'no workflow_dispatch inputs / manual run toggle');
+  const job = w.jobs.apply;
+  assert.equal(job.if, "vars.BACKUP_CD_ENABLED == 'true' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))");
+  assert.equal(JSON.stringify(w).includes('BASCULE_BUNDLE_CD_ENABLED'), false, 'independent of BASCULE_BUNDLE_CD_ENABLED');
+  const bascule = workflow('bascule-bundle-cd.yml');
+  assert.ok(bascule.jobs['apply-bundle'].if.includes("vars.BASCULE_BUNDLE_CD_ENABLED == 'true'"), 'bascule stays separately gated');
+  assert.equal(/create job|backup_run_now|--from=cronjob/.test(JSON.stringify(w.jobs)), false, 'never triggers a manual backup job');
+  const names = job.steps.map(s => s.name || '');
+  const preflight = names.findIndex(n => n.startsWith('Pre-flight'));
+  const rbac = names.findIndex(n => n.startsWith('Assert change-lock and backup target RBAC'));
+  const lock = job.steps.findIndex(s => s.uses === './deploy/cutover/lock-action' && s.with.action === 'lock');
+  const apply = names.findIndex(n => n.startsWith('Apply script ConfigMap and backup CronJobs'));
+  const release = job.steps.findIndex(s => s.uses === './deploy/cutover/lock-action' && s.with.action === 'release-lock');
+  assert.ok(preflight >= 0 && preflight < rbac && rbac < lock && lock < apply && apply < release, 'fail-closed step ordering');
+  assert.ok(job.steps[apply].run.includes('radar-backup-daily-script') && job.steps[apply].run.includes('cronjob-db-backup-prod.yaml'));
+  for (const want of ['23 2 * * *|false|Forbid|false', '53 6 * * *|false|Forbid|false', '*/5 * * * *|true|Forbid|false']) {
+    assert.ok(job.steps[apply].run.includes(want), `post-apply verification includes ${want}`);
+  }
 });
