@@ -53,11 +53,11 @@ Add a read-only production drift check script and workflow (`.github/workflows/p
   - [x] Implement `deploy/ci/check-prod-drift-summary.mjs` (render validation, unified diff `(object, field)` summarizer, pinned image digest verifier).
   - [x] Implement `deploy/ci/check-prod-drift.sh` (positive pre-flight, render 8 non-Deployment objects from `main`, `kubectl diff`, image verification, conditional `secrets:get` name-only existence check, loud summary).
 
-- [ ] **Lot 2 — Workflow & `promote-prod` integration + hermetic tests**
-  - [ ] Create `.github/workflows/prod-drift-check.yml` (`schedule` + `workflow_dispatch`, `main`-only).
-  - [ ] Append read-only drift-check step at the end of `promote-prod` in `.github/workflows/build-push-images.yml`.
-  - [ ] Create `deploy/ci/check-prod-drift.test.sh`, add assertions in `tools/make/cutover-workflows.test.mjs`, and wire into `.github/workflows/ci.yml`.
-  - [ ] Run hermetic tests locally.
+- [x] **Lot 2 — Workflow & `promote-prod` integration + hermetic tests**
+  - [x] Create `.github/workflows/prod-drift-check.yml` (`schedule` + `workflow_dispatch`, `main`-only).
+  - [x] Append read-only drift-check step at the end of `promote-prod` in `.github/workflows/build-push-images.yml`.
+  - [x] Create `deploy/ci/check-prod-drift.test.sh`, add assertions in `tools/make/cutover-workflows.test.mjs`, and wire into `.github/workflows/ci.yml`.
+  - [x] Run hermetic tests locally.
 
 - [ ] **Lot 3 — PR & CI verification**
   - [ ] Push `feat/prod-drift-check` and open PR targeting `main`.
