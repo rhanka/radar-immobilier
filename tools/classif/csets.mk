@@ -4,6 +4,11 @@ CLASSIF_ENV_FILE ?= /home/antoinefa/src/radar-immobilier/.env
 CSETS_VERSION ?= v1
 CSETS_MODES ?= B
 export CSETS_VERSION CSETS_MODES
+# Model under test: a route label of tools/classif/run-seat.mjs ROUTES
+# (astra-low | gemini-4-hydrogen-low | gemini-4-neon-low | gemini-3.8-flash-low).
+BENCH_MODEL ?= astra-low
+BENCH_CONCURRENCY ?= 10
+export BENCH_MODEL BENCH_CONCURRENCY
 CLASSIF_HOME ?= /home/antoinefa/.local/share/radar-classif/1passe-csets
 export CLASSIF_HOME
 .PHONY: csets-commit
