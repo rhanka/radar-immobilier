@@ -1,0 +1,147 @@
+# backup-cd — dedicated CD path for daily prod backups + dormant db-backup-prod.
+#
+# Decouples backup manifest & script reconciliation from bascule-bundle-cd.yml
+# (where BASCULE_BUNDLE_CD_ENABLED stays false) behind its own switch
+# BACKUP_CD_ENABLED == 'true'. Reuses KUBE_CONFIG_DATA_PROD (radar-ci-bascule-prod)
+# and radar-change-lock. Never triggers manual backup runs (no create job).
+name: backup-cd (daily prod backup & dormant db-backup-prod)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deploy/ci/backup/backup-daily.cjs'
+      - 'deploy/ci/backup/cronjob-backup-daily.yaml'
+      - 'deploy/ci/backup/cronjob-backup-freshness.yaml'
+      - 'deploy/ci/bascule-preprod/cronjob-db-backup-prod.yaml'
+      - '.github/workflows/backup-cd.yml'
+    tags: ['v[0-9]*']
+  workflow_dispatch: {}
+
+concurrency:
+  group: backup-cd
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: vars.BACKUP_CD_ENABLED == 'true' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    env:
+      NAMESPACE: radar-immobilier
+      BACKUP_DIR: deploy/ci/backup
+      BASCULE_DIR: deploy/ci/bascule-preprod
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Refuse a version tag outside main history
+        if: startsWith(github.ref, 'refs/tags/')
+        run: bash deploy/ci/require-main-ancestry.sh
+
+      - name: Selftest backup logic and automount guard (0 network)
+        run: |
+          set -euo pipefail
+          node "$BACKUP_DIR/backup-daily.selftest.mjs"
+          bash deploy/ci/check-bascule-automount.sh \
+            "$BACKUP_DIR/cronjob-backup-daily.yaml" \
+            "$BACKUP_DIR/cronjob-backup-freshness.yaml" \
+            "$BASCULE_DIR/cronjob-db-backup-prod.yaml"
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig (PROD — permanent radar-ci-bascule-prod SA)
+        env:
+          KUBE_CONFIG_DATA_PROD: ${{ secrets.KUBE_CONFIG_DATA_PROD }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.kube"
+          bash deploy/ci/write-kubeconfig.sh "$KUBE_CONFIG_DATA_PROD"
+          chmod 600 "$HOME/.kube/config"
+
+      - name: Pre-flight — assert PROD cluster
+        env:
+          EXPECTED_KUBE_APISERVER_HOST_PROD: ${{ vars.EXPECTED_KUBE_APISERVER_HOST_PROD || vars.EXPECTED_KUBE_APISERVER_HOST }}
+        run: |
+          set -euo pipefail
+          DEFAULT_HOST='hlhedx.c1.bhs5.k8s.ovh.net'
+          expected="${EXPECTED_KUBE_APISERVER_HOST_PROD:-$DEFAULT_HOST}"
+          server="$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
+          host="${server#*://}"; host="${host%%/*}"; host="${host%%:*}"
+          echo "kubeconfig apiserver host : ${host:-<none>}"
+          echo "expected apiserver host   : ${expected}"
+          if [ "$host" != "$expected" ]; then
+            echo "::error title=Wrong cluster — backup-cd refused::kubeconfig targets '${host:-<none>}' but expected '${expected}'. Nothing was applied."
+            exit 1
+          fi
+          kubectl -n "$NAMESPACE" get deploy radar-api -o name
+          echo "pre-flight OK — ${expected} / namespace ${NAMESPACE}"
+
+      - name: Assert change-lock and backup target RBAC before lock creation
+        run: |
+          set -euo pipefail
+          for verb in create get update delete; do
+            target="configmaps"; [ "$verb" = create ] || target="configmaps/radar-change-lock"
+            kubectl -n "$NAMESPACE" auth can-i "$verb" "$target" >/dev/null \
+              || { echo "::error title=Change-lock RBAC missing::radar-ci-bascule-prod cannot $verb $target in $NAMESPACE. No lock was created."; exit 1; }
+          done
+          kubectl -n "$NAMESPACE" auth can-i get jobs >/dev/null && kubectl -n "$NAMESPACE" auth can-i get pods >/dev/null \
+            || { echo "::error title=Change-lock RBAC missing::radar-ci-bascule-prod cannot read jobs/pods for lock release. No lock was created."; exit 1; }
+          for target in configmaps/radar-backup-daily-script cronjobs.batch/radar-backup-daily cronjobs.batch/radar-backup-freshness cronjobs.batch/radar-db-backup-prod; do
+            for verb in get patch; do
+              kubectl -n "$NAMESPACE" auth can-i "$verb" "$target" >/dev/null \
+                || { echo "::error title=Backup CD RBAC missing::radar-ci-bascule-prod cannot $verb $target in $NAMESPACE."; exit 1; }
+            done
+          done
+          echo "RBAC OK (radar-change-lock + radar-backup-daily-script + 3 backup CronJobs)"
+
+      - uses: ./deploy/cutover/lock-action
+        with:
+          action: lock
+          environment: prod
+
+      - name: Apply script ConfigMap and backup CronJobs (daily, freshness, dormant db-backup-prod)
+        run: |
+          set -euo pipefail
+          kubectl -n "$NAMESPACE" create configmap radar-backup-daily-script \
+            --from-file=backup-daily.cjs="$BACKUP_DIR/backup-daily.cjs" --dry-run=client -o yaml \
+            | kubectl label --local -f - app.kubernetes.io/name=radar-immobilier app.kubernetes.io/part-of=sentropic \
+                app.kubernetes.io/component=db-backup -o yaml \
+            | kubectl -n "$NAMESPACE" apply -f -
+          kubectl -n "$NAMESPACE" apply -f "$BACKUP_DIR/cronjob-backup-daily.yaml"
+          kubectl -n "$NAMESPACE" apply -f "$BACKUP_DIR/cronjob-backup-freshness.yaml"
+          kubectl -n "$NAMESPACE" apply -f "$BASCULE_DIR/cronjob-db-backup-prod.yaml"
+          check() {
+            got="$(kubectl -n "$NAMESPACE" get cronjob "$1" -o jsonpath='{.spec.schedule}|{.spec.suspend}|{.spec.concurrencyPolicy}|{.spec.jobTemplate.spec.template.spec.automountServiceAccountToken}')"
+            echo "$1 schedule|suspend|concurrencyPolicy|automount = ${got}"
+            if [ "$got" != "$2" ]; then
+              echo "::error title=$1 not as committed::live spec '${got}' differs from '${2}'."
+              exit 1
+            fi
+          }
+          check radar-backup-daily "23 2 * * *|false|Forbid|false"
+          check radar-backup-freshness "53 6 * * *|false|Forbid|false"
+          check radar-db-backup-prod "*/5 * * * *|true|Forbid|false"
+          echo "script sha256 = $(sha256sum "$BACKUP_DIR/backup-daily.cjs" | cut -d' ' -f1)"
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### backup-cd applied (daily backup + dormant db-backup-prod)"
+            echo ""
+            echo "- Arming variable: BACKUP_CD_ENABLED (isolated from bascule-bundle-cd)"
+            echo "- ConfigMap: radar-backup-daily-script (from deploy/ci/backup/backup-daily.cjs)"
+            echo "- CronJob: radar-backup-daily (23 2 * * * UTC, suspend=false, Forbid)"
+            echo "- CronJob: radar-backup-freshness (53 6 * * * UTC, suspend=false, Forbid)"
+            echo "- CronJob: radar-db-backup-prod (*/5 * * * *, suspend=true, Forbid)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: ./deploy/cutover/lock-action
+        if: always() && env.CUTOVER_LOCK_RUN != ''
+        with:
+          action: release-lock
+          environment: prod
