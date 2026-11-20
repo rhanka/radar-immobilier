@@ -90,6 +90,15 @@ after the first successful rehearsed promotion is reviewed.
 - Breaking migration: image rollback alone is not enough. Restore the
   recovery backup written by `prepare`. This step stays owner-run.
 
+## Manual operations log
+
+Any break-glass or out-of-band manual production mutation MUST be recorded the
+same day in [`docs/operator/manual-operations-log.md`](../operator/manual-operations-log.md)
+with: **who** (role), **when (UTC)**, **what** (namespace + resources),
+**command** (secrets redacted), **diff summary**, **Product Owner GO
+reference**, and **planned CD return** (workflow + arming variable). Never
+record Secret values, passwords, tokens, or connection URIs in git.
+
 ## Manual migration (break-glass only)
 
 ```bash
