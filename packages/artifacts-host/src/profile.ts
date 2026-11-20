@@ -7,6 +7,7 @@
 
 /** Installed operation selection for the Radar profile, ordered. */
 import { ACTIVE_ARTIFACT_TOOLS, ARTIFACT_PROVIDER_VERSION } from "./p0b-profile.js";
+import { PUBLISH_MAX_FILE_BYTES } from "./publish-policy.js";
 import { POLICY_REVISION } from "./transaction-authority.js";
 export const FROZEN_CAPABILITIES = Object.freeze([...ACTIVE_ARTIFACT_TOOLS].sort());
 
@@ -26,7 +27,7 @@ export const RADAR_EFFECTIVE_PROFILE = Object.freeze({
       rejectLoneSurrogates: true, normalize: false }),
     artifactId: Object.freeze({ validator: "lowercase-uuid" }),
     publishFiles: Object.freeze({ min: 1, max: 32 }),
-    publishBytes: Object.freeze({ maxDecodedPerFile: 262144, maxDecodedTotal: 262144 }),
+    publishBytes: Object.freeze({ maxDecodedPerFile: PUBLISH_MAX_FILE_BYTES, maxDecodedTotal: PUBLISH_MAX_FILE_BYTES }),
     mime: Object.freeze(["text/html", "text/css", "text/javascript", "application/json"]),
     path: Object.freeze({ maxUtf8Bytes: 1024, forbidColon: true, forbidDel: true,
       noEmptyDotSegments: true, noBackslash: true, noPercent: true,

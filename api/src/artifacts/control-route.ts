@@ -75,7 +75,7 @@ export interface ControlRouteDeps {
   readonly liveEdge?: LiveEdgePorts | undefined;
 }
 
-export const CONTROL_MAX_BODY_BYTES = 2 * 1024 * 1024;
+export const CONTROL_MAX_BODY_BYTES = 10 * 1024 * 1024;
 
 function jsonError(c: Context, status: ContentfulStatusCode, body: Record<string, string>): Response {
   const { error = "invalid_request", ...details } = body;

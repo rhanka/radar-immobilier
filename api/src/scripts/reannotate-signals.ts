@@ -5,7 +5,13 @@ import { createDb } from "../db/client.js";
 import { createRefreshMesh, refreshErrorDiagnostic } from "../services/graph/refresh-mesh.js";
 import { createRefreshModelPolicy } from "../services/graph/refresh-model-policy.js";
 import { createReannotationRepository } from "../services/graph/reannotate-repository.js";
-import { createReannotationClassifier, parseReannotationArgs, runReannotation } from "../services/graph/reannotate-signals.js";
+import {
+  createReannotationClassifier,
+  parseReannotationArgs,
+  parseReannotationPipelineRunId,
+  parseReannotationSinceDays,
+  runReannotation,
+} from "../services/graph/reannotate-signals.js";
 import { loadSinglePassPrompt } from "../services/graph/refresh-single-pass.js";
 import { refreshClassifyConfig } from "../services/graph/refresh-classify-config.js";
 import { parsePurgeAiAnnotationsArgs, purgeAiAnnotations } from "../services/graph/purge-ai-annotations.js";
@@ -25,10 +31,16 @@ async function main(): Promise<void> {
     return;
   }
   const { apply } = parseReannotationArgs(process.argv.slice(2));
+  const sinceDays = parseReannotationSinceDays();
+  const pipelineRunId = parseReannotationPipelineRunId() ?? randomUUID();
   const { primary, fallback, concurrency } = refreshClassifyConfig();
   const timeoutMs = Number(process.env.REFRESH_TIMEOUT_MS ?? 900_000);
   if (!Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 3_600_000) {
     throw new Error("REFRESH_TIMEOUT_MS must be an integer from 1 to 3600000");
+  }
+  const runTimeoutMs = Number(process.env.REFRESH_SWEEP_DEADLINE_MS ?? 18_900_000);
+  if (!Number.isInteger(runTimeoutMs) || runTimeoutMs < 1 || runTimeoutMs > 86_400_000) {
+    throw new Error("REFRESH_SWEEP_DEADLINE_MS must be an integer from 1 to 86400000");
   }
   const prompt = await loadSinglePassPrompt();
   const controller = new AbortController();
@@ -47,7 +59,8 @@ async function main(): Promise<void> {
   const { db, pool } = createDb(loadConfig());
   try {
     const report = await runReannotation({ repository: createReannotationRepository(db),
-      primary, fallback, concurrency, prompt, apply, now: new Date(), pipelineRunId: randomUUID(),
+      primary, fallback, concurrency, prompt, apply, sinceDays, actTimeoutMs: timeoutMs, runTimeoutMs,
+      now: new Date(), pipelineRunId,
       classify: createReannotationClassifier(models, prompt), signal: controller.signal });
     console.log(JSON.stringify({ kind: "signal-reannotation", ...report }));
     if (report.failures.length) process.exitCode = 1;

@@ -35,12 +35,12 @@
     { "path": "deploy/ci/bascule-preprod/radar-db-ro-prod-sealed.yaml", "objects": ["SealedSecret/radar-db-ro-prod"], "workflow": ".github/workflows/bascule-bundle-cd.yml", "workflowRef": "radar-db-ro-prod-sealed.yaml" },
     { "path": "deploy/ci/bascule-preprod/radar-pra-admin-prod-sealed.yaml", "objects": ["SealedSecret/radar-pra-admin-prod"], "workflow": ".github/workflows/bascule-bundle-cd.yml", "workflowRef": "radar-pra-admin-prod-sealed.yaml" },
     { "path": "deploy/ci/bascule-preprod/rbac-ci-trigger-prod.yaml", "objects": ["ServiceAccount/radar-ci-trigger-prod", "Role/radar-ci-trigger-prod", "RoleBinding/radar-ci-trigger-prod"], "workflow": ".github/workflows/bascule-bundle-cd.yml", "workflowRef": "rbac-ci-trigger-prod" },
-    { "path": "deploy/ci/bascule-preprod/vap-ci-trigger-suspend-only.yaml", "objects": ["ValidatingAdmissionPolicy/radar-ci-trigger-suspend-only", "ValidatingAdmissionPolicyBinding/radar-ci-trigger-suspend-only"], "workflow": ".github/workflows/bascule-bundle-cd.yml", "workflowRef": "vap-ci-trigger-suspend-only" },
     { "path": "deploy/ci/bascule-preprod/backup-read-job.tmpl.yaml", "objects": ["Job/radar-bascule-backup-read"], "workflow": ".github/workflows/bascule-preprod.yml", "workflowRef": "operator.mk run" },
     { "path": "deploy/ci/bascule-preprod/db-restore-backup-job.tmpl.yaml", "objects": ["Job/radar-db-restore-backup"], "workflow": ".github/workflows/bascule-preprod.yml", "workflowRef": "operator.mk run" },
     { "path": "deploy/ci/bascule-preprod/docs-restore-backup-job.tmpl.yaml", "objects": ["Job/radar-docs-restore-backup"], "workflow": ".github/workflows/bascule-preprod.yml", "workflowRef": "operator.mk run" },
     { "path": "deploy/ci/bascule-preprod/served-refs-job.tmpl.yaml", "objects": ["Job/radar-bascule-served-refs"], "workflow": ".github/workflows/bascule-preprod.yml", "workflowRef": "operator.mk report-refs" },
     { "path": "deploy/ci/db-backup-job.tmpl.yaml", "objects": ["Job/radar-db-backup"], "workflow": ".github/workflows/build-push-images.yml", "workflowRef": "run-db-backup.sh" },
+    { "path": "deploy/ci/reannotate-signals-prod.tmpl.yaml", "objects": ["Job/radar-reannotate-prod"], "workflow": ".github/workflows/reannotate-signals-prod.yml", "workflowRef": "deploy/ci/reannotate-signals-prod.tmpl.yaml" },
     { "path": "deploy/cutover/backup-probe-job.tmpl.yaml", "objects": ["Job/cutover-backup-probe"], "workflow": ".github/workflows/build-push-images.yml", "workflowRef": "operator.mk prepare" },
     { "path": "deploy/cutover/catalogue-import-job.tmpl.yaml", "objects": ["Job/radar-catalogue-import"], "workflow": ".github/workflows/build-push-images.yml", "workflowRef": "operator.mk run" },
     { "path": "deploy/cutover/data-migrate-job.tmpl.yaml", "objects": ["Job/cutover-data"], "workflow": ".github/workflows/build-push-images.yml", "workflowRef": "operator.mk run" },
@@ -64,11 +64,25 @@
     { "path": "deploy/k8s/42-graph-city-key-repair-job.yaml", "objects": ["Job/radar-graph-city-key-repair"], "workflow": ".github/workflows/run-job.yaml", "workflowRef": "42-graph-city-key-repair-job.yaml" },
     { "path": "deploy/k8s/50-ui.yaml", "objects": ["Service/radar-ui", "Deployment/radar-ui"], "workflow": ".github/workflows/build-push-images.yml", "workflowRef": "deploy/radar-ui" },
     { "path": "deploy/k8s/70-networkpolicy.yaml", "objects": ["NetworkPolicy/*"], "workflow": ".github/workflows/k8s-apply-mcp.yaml", "workflowRef": "70-networkpolicy.yaml" },
-    { "path": "deploy/k8s/immo-mcp/40-immo-mcp-http-deploy.yaml", "objects": ["ConfigMap/immo-mcp-config", "Deployment/radar-immo-mcp", "Service/radar-immo-mcp"], "workflow": ".github/workflows/build-push-images.yml", "workflowRef": "40-immo-mcp-http-deploy.yaml" },
+    { "path": "deploy/k8s/immo-mcp/40-immo-mcp-http-deploy.yaml", "objects": ["ConfigMap/immo-mcp-config", "Deployment/radar-immo-mcp", "Service/radar-immo-mcp"], "workflow": ".github/workflows/build-push-images.yml", "workflowRef": "apply-prod-immo-mcp-config.sh" },
     { "path": "deploy/k8s/immo-mcp/41-immo-mcp-ingress.yaml", "objects": ["Ingress/radar-immo-mcp"], "workflow": ".github/workflows/k8s-apply-mcp.yaml", "workflowRef": "41-immo-mcp-ingress.yaml" },
-    { "path": "deploy/k8s/immo-mcp/kustomization.yaml", "objects": ["ConfigMap/immo-mcp-config", "Deployment/radar-immo-mcp", "Service/radar-immo-mcp", "Ingress/radar-immo-mcp"], "workflow": ".github/workflows/k8s-apply-mcp.yaml", "workflowRef": "40-immo-mcp-http-deploy.yaml" },
+    { "path": "deploy/k8s/immo-mcp/kustomization.yaml", "objects": ["ConfigMap/immo-mcp-config"], "workflow": ".github/workflows/build-push-images.yml", "workflowRef": "apply-prod-immo-mcp-config.sh" },
     { "path": "deploy/k8s/refresh-cronjobs-prod/kustomization.yaml", "objects": ["CronJob/radar-refresh-pv", "CronJob/radar-refresh-pending-watchdog", "PersistentVolumeClaim/radar-refresh-keyring"], "workflow": ".github/workflows/build-push-images.yml", "workflowRef": "render-prod" },
     { "path": "deploy/k8s/refresh-cronjobs/requeue-recurrent-prod/kustomization.yaml", "objects": ["CronJob/radar-refresh-requeue-abandoned"], "workflow": ".github/workflows/build-push-images.yml", "workflowRef": "render-requeue-recurrent" }
+  ],
+  "operatorPaths": [
+    {
+      "path": "deploy/k8s/refresh-cronjobs/keyring-import-prod/kustomization.yaml",
+      "objects": [
+        "Job/radar-refresh-keyring-account-import",
+        "Secret/radar-refresh-keyring-account-import",
+        "ConfigMap/radar-refresh-keyring-import-script"
+      ],
+      "entrypoint": "deploy/k8s/refresh-cronjobs/refresh-018.mk",
+      "entrypointRef": "run-keyring-import-prod",
+      "doc": "docs/operator/prod-keyring-import.md",
+      "reason": "OAuth seat credentials stay outside GitHub/CD; operator imports into prod PVC via guarded ephemeral Job and logs in docs/operator/manual-operations-log.md"
+    }
   ],
   "legacyExempt": [
     { "path": "deploy/cutover/rbac-prod.yaml", "reason": "Cluster-admin RBAC prerequisite installed once by owner", "doc": "docs/runbooks/prod-promotion.md" },

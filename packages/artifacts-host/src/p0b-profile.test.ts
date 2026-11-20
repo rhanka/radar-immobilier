@@ -73,4 +73,52 @@ describe("artifact provider qualification", () => {
     vi.stubEnv("ARTIFACTS_RESULTS_QUALIFIED", "true");
     await expect(providerVersion(version)).rejects.toThrow("artifact_strict_provider_unqualified");
   });
+
+  it("enforces the 5 MiB page ceiling on inline and uploaded text files and accepts schema metadata on P0b", async () => {
+    vi.doUnmock("@sentropic/artifacts/mcp-core");
+    vi.resetModules();
+    const { extractEnvelopeV1Metadata, validateArtifactInput } = await import("./p0b-profile.js");
+    const { PUBLISH_MAX_FILE_BYTES } = await import("./publish-policy.js");
+    const artifactId = "123e4567-e89b-12d3-a456-426614174000";
+
+    expect(PUBLISH_MAX_FILE_BYTES).toBe(5 * 1024 * 1024);
+
+    // 5 MiB inline text/html succeeds; 5 MiB + 1 fails.
+    expect(() => validateArtifactInput("artifacts_publish", {
+      artifactId, idempotencyKey: "k-5m",
+      files: [{ path: "index.html", mimeType: "text/html", text: "a".repeat(PUBLISH_MAX_FILE_BYTES) }],
+    })).not.toThrow();
+    expect(() => validateArtifactInput("artifacts_publish", {
+      artifactId, idempotencyKey: "k-over",
+      files: [{ path: "index.html", mimeType: "text/html", text: "a".repeat(PUBLISH_MAX_FILE_BYTES + 1) }],
+    })).toThrow();
+
+    // Out-of-model text/html upload accepts <= 5 MiB and refuses > 5 MiB; binary PNG accepts 10 MiB.
+    expect(() => validateArtifactInput("artifacts_create_upload", {
+      artifactId, mimeType: "text/html", maxSize: PUBLISH_MAX_FILE_BYTES,
+    })).not.toThrow();
+    expect(() => validateArtifactInput("artifacts_create_upload", {
+      artifactId, mimeType: "text/html", maxSize: PUBLISH_MAX_FILE_BYTES + 1,
+    })).toThrow();
+    expect(() => validateArtifactInput("artifacts_create_upload", {
+      artifactId, mimeType: "image/png", maxSize: 10 * 1024 * 1024,
+    })).not.toThrow();
+
+    // Schema-advertised metadata (title, description, icon) passes on P0b and strips cleanly.
+    const extracted = extractEnvelopeV1Metadata("artifacts_ensure", {
+      bindingName: "chaperon-v13", idempotencyKey: "k-meta",
+      title: "Dossier Chaperon v13", description: "Synthese", icon: "building",
+    }, 1);
+    expect(extracted).toEqual({
+      strippedArgs: { bindingName: "chaperon-v13", idempotencyKey: "k-meta" },
+      metadata: { title: "Dossier Chaperon v13", description: "Synthese", icon: "building" },
+    });
+    expect(() => validateArtifactInput("artifacts_ensure", {
+      bindingName: "chaperon-v13", idempotencyKey: "k-meta",
+      title: "Dossier Chaperon v13", description: "Synthese", icon: "building",
+    })).not.toThrow();
+    expect(() => validateArtifactInput("artifacts_ensure", {
+      bindingName: "chaperon-v13", idempotencyKey: "k-bad", title: "",
+    })).toThrow();
+  });
 });
