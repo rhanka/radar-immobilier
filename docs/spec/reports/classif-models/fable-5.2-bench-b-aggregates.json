@@ -1,0 +1,172 @@
+{
+  "bench": "B",
+  "protocol": "bench-v11-oracle-676",
+  "systemPromptSha256": "bdc1327904ac4c5a36b91dfdbe887a6f1a900b8fe5f1427249e54d83c250d461",
+  "model": "fable-5.2-low",
+  "scoredAt": "2026-11-20T20:19:43.803Z",
+  "docs": 100,
+  "completed": 100,
+  "accepted": 100,
+  "invalid": 0,
+  "failClasses": {
+    "J": 0,
+    "V": 0,
+    "Pr": 0,
+    "T": 0
+  },
+  "toolEventsTotal": 0,
+  "strict": {
+    "tp": 236,
+    "fp": 485,
+    "fn": 440,
+    "precision": 0.3273231622746186,
+    "recall": 0.34911242603550297,
+    "f1": 0.33786685755189694,
+    "support": 676,
+    "missed": 440,
+    "recallWilson95": {
+      "low": 0.3141221465590015,
+      "high": 0.3858078924917585
+    },
+    "precisionWilson95": {
+      "low": 0.29406602031960344,
+      "high": 0.3624105829846293
+    }
+  },
+  "broad": {
+    "tp": 239,
+    "fp": 486,
+    "fn": 480,
+    "precision": 0.3296551724137931,
+    "recall": 0.33240611961057026,
+    "f1": 0.33102493074792244,
+    "support": 719,
+    "missed": 480,
+    "recallWilson95": {
+      "low": 0.2989438899251535,
+      "high": 0.3676496665745137
+    },
+    "precisionWilson95": {
+      "low": 0.29641320634095125,
+      "high": 0.36469279001707733
+    }
+  },
+  "stageTolerant": {
+    "tp": 276,
+    "fp": 445,
+    "fn": 400,
+    "precision": 0.3828016643550624,
+    "recall": 0.40828402366863903,
+    "f1": 0.39513242662848963,
+    "addedMatches": 40,
+    "support": 676,
+    "missed": 400,
+    "recallWilson95": {
+      "low": 0.3718513832361779,
+      "high": 0.4457531503044801
+    },
+    "precisionWilson95": {
+      "low": 0.3480317896123646,
+      "high": 0.41881377648568896
+    }
+  },
+  "soft": {
+    "tp": 292,
+    "fp": 429,
+    "fn": 384,
+    "precision": 0.40499306518723993,
+    "recall": 0.4319526627218935,
+    "f1": 0.4180386542591267,
+    "addedMatches": 56,
+    "support": 676,
+    "missed": 384,
+    "recallWilson95": {
+      "low": 0.39509990165862197,
+      "high": 0.46957442967799523
+    },
+    "precisionWilson95": {
+      "low": 0.36975658055724253,
+      "high": 0.4412365706583394
+    }
+  },
+  "f1n4": 0.5588235294117647,
+  "halves": {
+    "tuning": {
+      "half": "tuning",
+      "docs": 50,
+      "accepted": 50,
+      "invalid": 0,
+      "failClasses": {
+        "J": 0,
+        "V": 0,
+        "Pr": 0,
+        "T": 0
+      },
+      "strict": {
+        "tp": 137,
+        "fp": 250,
+        "fn": 235,
+        "precision": 0.35400516795865633,
+        "recall": 0.3682795698924731,
+        "f1": 0.36100131752305664,
+        "support": 372,
+        "missed": 235,
+        "recallWilson95": {
+          "low": 0.3208435552726612,
+          "high": 0.41840820181794325
+        },
+        "precisionWilson95": {
+          "low": 0.30800870673113284,
+          "high": 0.40287150454184545
+        }
+      }
+    },
+    "blind": {
+      "half": "blind",
+      "docs": 50,
+      "accepted": 50,
+      "invalid": 0,
+      "failClasses": {
+        "J": 0,
+        "V": 0,
+        "Pr": 0,
+        "T": 0
+      },
+      "strict": {
+        "tp": 99,
+        "fp": 235,
+        "fn": 205,
+        "precision": 0.2964071856287425,
+        "recall": 0.3256578947368421,
+        "f1": 0.3103448275862069,
+        "support": 304,
+        "missed": 205,
+        "recallWilson95": {
+          "low": 0.27543961918851534,
+          "high": 0.3802272932342817
+        },
+        "precisionWilson95": {
+          "low": 0.24997078244473145,
+          "high": 0.34747353219108545
+        }
+      }
+    }
+  },
+  "execution": {
+    "callsLogged": 103,
+    "codeZero": 103,
+    "concurrency": 10,
+    "stopped": null,
+    "wallSeconds": 1190.635,
+    "p50Seconds": 72.264,
+    "p90Seconds": 158.551,
+    "tokens": {
+      "input": 2555496,
+      "output": 1105986,
+      "thinking": 0,
+      "cached": 65789,
+      "total": 3661482
+    },
+    "costUsd": "missing source"
+  }
+}

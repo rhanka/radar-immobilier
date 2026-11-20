@@ -5,9 +5,9 @@ const context=loadRefreshProfileContext({root:'/src',profilePath:'/src/radar/ont
 const singlePassPrompt=await loadSinglePassPrompt();
 let captured:unknown;
 try {
- await extractRefreshProfile([{id:'csets',docSha:'a'.repeat(64),originalKey:'csets.pdf',sourceUrl:'https://example.org/csets.pdf',pages:[1],text:'[PDF PAGE 1]\nCSETS_SOURCE_TEXT',} as any],{
+ await extractRefreshProfile([{id:'csets',docSha:'a'.repeat(64),originalKey:'csets.pdf',sourceUrl:'https://example.org/csets.pdf',pages:[1],text:'[PDF PAGE 1]\nCSETS_SOURCE_TEXT',} as never],{
  context,singlePassPrompt,maxOutputTokens:32000,
- textClient:{async generateJson(request:unknown){captured=request;throw new Error('captured');}} as any,
+ textClient:{async generateJson(request:unknown){captured=request;throw new Error('captured');}} as never,
  });
 } catch(error) {if((error as Error).message!=='captured') throw error;}
 if(!captured) throw new Error('Prompt capture failed');

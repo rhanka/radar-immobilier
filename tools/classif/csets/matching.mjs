@@ -1,4 +1,12 @@
-import {pairOneToOne} from '/home/antoinefa/src/radar-immobilier/tmp/refresh-single-pass/tools/bench-v11/harness/oracle-v3-lib.mjs';
+import {existsSync} from 'node:fs';
+import {pathToFileURL} from 'node:url';
+const oracleCandidates=[
+ process.env.BENCH_B_DIR&&`${process.env.BENCH_B_DIR}/harness/oracle-v3-lib.mjs`,
+ '/home/antoinefa/src/radar-immobilier/tmp/refresh-single-pass/tools/bench-v11/harness/oracle-v3-lib.mjs',
+ '/home/antoinefa/src/radar-immobilier/.claude/worktrees/agent-ae1c01a14a9859391/tools/bench-v11/harness/oracle-v3-lib.mjs',
+].filter(Boolean);
+const oraclePath=oracleCandidates.find(existsSync)??oracleCandidates[0];
+const {pairOneToOne}=await import(pathToFileURL(oraclePath).href);
 export function pairAct(input,text,acts){
  const stage=input.match(/étape = ([^;\n]+)/)?.[1]?.trim();
  const human={page:1,stage,anchor:text.slice(0,20),citation:text};
