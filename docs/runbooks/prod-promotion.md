@@ -75,8 +75,29 @@ after the first successful rehearsed promotion is reviewed.
    - `prepare`: change lock, recovery backup, writer drain, then the
      release DDL on the live database (`run_job ddl`, release digest),
      then the destination schema verification;
-   - `run` (sequential cutover, same manifest as the preprod rehearsal).
+   - `run` (sequential cutover, same manifest as the preprod rehearsal);
+   - `Apply immo-mcp-config ConfigMap (prod)`: applies `ConfigMap/immo-mcp-config`
+     from `deploy/k8s/immo-mcp` (`IMMO_MCP_SIGNALS_WRITE_ENABLED: "0"` kept
+     inert, standard `app.kubernetes.io/*` labels reconciled) before the drift
+     check;
+   - `Check production non-Deployment drift against main (read-only)`.
 4. Check the job summary and `https://immo.sent-tech.ca/health`.
+
+## Manual 30d signal reannotation (two-step B+C)
+
+The `production` GitHub environment only accepts `v*` release tags. Trigger
+`.github/workflows/reannotate-signals-prod.yml` against the deployed release
+tag (never `main`), dry-run first:
+
+```bash
+gh workflow run reannotate-signals-prod.yml --ref vX.Y.Z -f mode=dry-run -f since_days=30
+```
+
+After reviewing the per-city dry-run summary, apply:
+
+```bash
+gh workflow run reannotate-signals-prod.yml --ref vX.Y.Z -f mode=apply -f since_days=30
+```
 
 ## Roll back
 
