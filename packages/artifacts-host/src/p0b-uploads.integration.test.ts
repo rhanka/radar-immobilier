@@ -282,4 +282,113 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("files parity upload channel", ()
     expect(await fixture.blobs.getBlob(casBlobKey("p0b", `sha256:${hex}`)))
       .toEqual(new Uint8Array(Buffer.from(text, "utf8")));
   });
+
+  it("should stage and publish a 2 MiB index.html plus CSS/JS/JSON outside the model, and reject invalid UTF-8", async () => {
+    const actor = "idp-upload-text-2mib";
+    await fixture.pool.query(
+      "INSERT INTO account_users (sub, status) VALUES ($1, 'approved') ON CONFLICT (sub) DO NOTHING", [actor]);
+    const ensured = await call("ensure", {
+      bindingName: randomUUID(), idempotencyKey: randomUUID(),
+      title: "Dossier Chaperon v13", description: "HTML autonome 2 Mio", icon: "file-text",
+    }, actor);
+    expect(ensured.status).toBe(201);
+    expect(ensured.body).toMatchObject({ title: "Dossier Chaperon v13", description: "HTML autonome 2 Mio", icon: "file-text" });
+    const artifactId = (ensured.body as { artifactId: string }).artifactId;
+
+    const prefix = "<!doctype html><html lang=\"fr\"><body>";
+    const suffix = "</body></html>";
+    const htmlBytes = Buffer.from(prefix + "x".repeat(2 * 1024 * 1024 - prefix.length - suffix.length) + suffix, "utf8");
+    expect(htmlBytes.byteLength).toBe(2 * 1024 * 1024);
+    const cssBytes = Buffer.from("body{color:var(--st-text-primary)}", "utf8");
+    const jsBytes = Buffer.from("console.log('ok');", "utf8");
+    const jsonBytes = Buffer.from(JSON.stringify({ version: 13 }), "utf8");
+
+    const htmlPinned = await upload(artifactId, "index.html", "text/html", htmlBytes, actor);
+    const cssPinned = await upload(artifactId, "app.css", "text/css", cssBytes, actor);
+    const jsPinned = await upload(artifactId, "app.js", "text/javascript", jsBytes, actor);
+    const jsonPinned = await upload(artifactId, "data/config.json", "application/json", jsonBytes, actor);
+
+    const published = await call("publish_bundle", {
+      artifactId, idempotencyKey: randomUUID(), expectedCurrentReleaseId: null,
+      title: "Dossier Chaperon v13 — publie",
+      assets: [
+        { path: "index.html", uploadId: htmlPinned.uploadId },
+        { path: "app.css", uploadId: cssPinned.uploadId },
+        { path: "app.js", uploadId: jsPinned.uploadId },
+        { path: "data/config.json", uploadId: jsonPinned.uploadId },
+      ],
+    }, actor);
+    expect(published.status).toBe(201);
+    expect(published.body).toMatchObject({ title: "Dossier Chaperon v13 — publie" });
+    const releaseId = (published.body as { releaseId: string }).releaseId;
+    const { rows } = await fixture.pool.query<{ manifest: string }>(
+      "SELECT manifest FROM artifacts.releases WHERE artifact_id=$1 AND id=$2", [artifactId, releaseId]);
+    const manifest = JSON.parse(rows[0]!.manifest) as { files: Array<{ path: string; mimeType: string; size: number }> };
+    expect(manifest.files.find((f) => f.path === "index.html")).toMatchObject({
+      path: "index.html", mimeType: "text/html", size: 2 * 1024 * 1024,
+    });
+
+    // Invalid UTF-8 on text/html is refused fail-closed at commit_upload.
+    const badUtf8 = new Uint8Array([0x3c, 0x70, 0x3e, 0xff, 0xfe, 0x3c, 0x2f, 0x70, 0x3e]);
+    const createdBad = await call("create_upload", { artifactId, mimeType: "text/html", maxSize: badUtf8.length }, actor);
+    expect(createdBad.status).toBe(201);
+    const badSession = createdBad.body as { uploadId: string; requiredHeaders: Record<string, string> };
+    const badKey = stagingKey("p0b", badSession.uploadId);
+    signerDouble.put({ key: badKey, contentType: "text/html", contentLength: badUtf8.length }, badUtf8,
+      { ...badSession.requiredHeaders });
+    await staging.put(badKey, badUtf8);
+    const badCommit = await call("commit_upload", {
+      artifactId, uploadId: badSession.uploadId, path: "broken.html", mimeType: "text/html",
+      digest: digestOf(badUtf8), size: badUtf8.length, idempotencyKey: randomUUID(),
+    }, actor);
+    expect(badCommit.status).toBe(422);
+    expect((badCommit.body as { error: string }).error).toBe("verification_failed");
+  });
+
+  it("should enforce the 5 MiB ceiling on page text uploads and bundles while keeping 16 MiB for binaries", async () => {
+    const actor = "idp-upload-text-5mib-cap";
+    await fixture.pool.query(
+      "INSERT INTO account_users (sub, status) VALUES ($1, 'approved') ON CONFLICT (sub) DO NOTHING", [actor]);
+    const ensured = await call("ensure", { bindingName: randomUUID(), idempotencyKey: randomUUID() }, actor);
+    const artifactId = (ensured.body as { artifactId: string }).artifactId;
+    const fiveMib = 5 * 1024 * 1024;
+
+    const overCreate = await call("create_upload", { artifactId, mimeType: "text/html", maxSize: fiveMib + 1 }, actor);
+    expect(overCreate.status).toBe(400);
+    expect((overCreate.body as { error: string }).error).toBe("invalid_request");
+
+    const defaultTextSession = await call("create_upload", { artifactId, mimeType: "text/html" }, actor);
+    expect(defaultTextSession.status).toBe(201);
+    expect((defaultTextSession.body as { maxSize: number }).maxSize).toBe(fiveMib);
+
+    const overCommit = await call("commit_upload", {
+      artifactId, uploadId: (defaultTextSession.body as { uploadId: string }).uploadId,
+      path: "index.html", mimeType: "text/html", digest: `sha256:${"0".repeat(64)}`,
+      size: fiveMib + 1, idempotencyKey: randomUUID(),
+    }, actor);
+    expect(overCommit.status).toBe(400);
+    expect((overCommit.body as { error: string }).error).toBe("invalid_request");
+
+    // Two 3 MiB staged text files individually pass commit_upload (<= 5 MiB),
+    // but their 6 MiB union in publish_bundle exceeds the 5 MiB page-text cap.
+    const threeMibHtml = Buffer.from("a".repeat(3 * 1024 * 1024), "utf8");
+    const threeMibJs = Buffer.from("b".repeat(3 * 1024 * 1024), "utf8");
+    const htmlUp = await upload(artifactId, "index.html", "text/html", threeMibHtml, actor);
+    const jsUp = await upload(artifactId, "app.js", "text/javascript", threeMibJs, actor);
+    const overBundle = await call("publish_bundle", {
+      artifactId, idempotencyKey: randomUUID(), expectedCurrentReleaseId: null,
+      assets: [
+        { path: "index.html", uploadId: htmlUp.uploadId },
+        { path: "app.js", uploadId: jsUp.uploadId },
+      ],
+    }, actor);
+    expect(overBundle.status).toBe(400);
+    expect((overBundle.body as { error: string }).error).toBe("invalid_request");
+
+    // Binary uploads above 5 MiB (e.g. 6 MiB PNG) remain allowed up to 16 MiB.
+    const sixMibPngCreate = await call("create_upload", {
+      artifactId, mimeType: "image/png", maxSize: 6 * 1024 * 1024,
+    }, actor);
+    expect(sixMibPngCreate.status).toBe(201);
+  });
 });

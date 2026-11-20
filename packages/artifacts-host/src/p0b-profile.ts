@@ -1,5 +1,7 @@
-import { ARTIFACTS_PROVIDER_VERSION, compileArtifactsProfile, RADAR_ARTIFACTS_PROFILE } from "@sentropic/artifacts/mcp-core";
+import { AsyncLocalStorage } from "node:async_hooks";
+import { ArtifactProfileInputError, ARTIFACTS_PROVIDER_VERSION, compileArtifactsProfile, RADAR_ARTIFACTS_PROFILE } from "@sentropic/artifacts/mcp-core";
 import { gitProfileOperations, resolveGitMode, type GitArtifactTool } from "./git-mode/flag.js";
+import { isPageTextMimeType, PUBLISH_MAX_FILE_BYTES } from "./publish-policy.js";
 
 /** Package qualification and deployment qualification are separate switches. */
 export const ARTIFACT_PROVIDER_VERSION: string = ARTIFACTS_PROVIDER_VERSION;
@@ -74,8 +76,9 @@ export const ACTIVE_ARTIFACT_TOOLS = Object.freeze([
 ]);
 /**
  * Files parity LOT 1 — immo release ceilings (server maxima, never above):
- * 255 files per release, 16 MiB per file, 64 MiB per release. Inline budgets
- * stay at 256 KiB; only the uploaded-asset union may reach these ceilings.
+ * 255 files per release, 16 MiB per file, 64 MiB per release. Page text files
+ * (HTML/CSS/JS/JSON, inline or uploaded) are capped at 5 MiB per file and
+ * 5 MiB total; binary assets in the release union may reach 16/64 MiB.
  */
 export const RELEASE_FILES_MAX = 255;
 export const RELEASE_FILE_BYTES_MAX = 16 * 1024 * 1024;
@@ -120,7 +123,9 @@ export function compileHostArtifactProfile(descriptor = ARTIFACT_PROFILE_DESCRIP
       ...(descriptor.resultEnvelopeVersion === 2 ? PART1_ARTIFACT_TOOLS : []),
       ...gitTools],
     operations: [...RADAR_ARTIFACTS_PROFILE.operations.map((entry) => entry.operation === "publish"
-      ? { ...entry, limits: { ...entry.limits, releaseFilesMax: RELEASE_FILES_MAX,
+      ? { ...entry, limits: { ...entry.limits,
+        maxDecodedFileBytes: PUBLISH_MAX_FILE_BYTES, maxDecodedTotalBytes: PUBLISH_MAX_FILE_BYTES,
+        releaseFilesMax: RELEASE_FILES_MAX,
         releaseFileBytesMax: RELEASE_FILE_BYTES_MAX, releaseTotalBytesMax: RELEASE_TOTAL_BYTES_MAX } }
       : entry), ...(ARTIFACT_P0B ? [
       // set_access (like lookup_people/list_access for wagon 3) already
@@ -165,9 +170,113 @@ export const isArtifactMutation = (op: string): boolean => ["ensure", "publish",
 export const isArtifactPublication = (op: string): boolean => ["ensure", "publish", "revert",
   "publish_bundle", "publish_bundle_v2"].includes(op);
 
+export interface ArtifactDisplayMetadata {
+  readonly title?: string;
+  readonly description?: string;
+  readonly icon?: string | null;
+}
+
+const METADATA_ARTIFACT_TOOLS: ReadonlySet<string> = new Set([
+  "artifacts_ensure", "artifacts_publish", "artifacts_publish_bundle", "artifacts_publish_bundle_v2",
+]);
+const ICON_RE = /^[a-z][a-z0-9-]{0,31}$/;
+const LONE_SURROGATE_RE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
+const pendingMetadata = new AsyncLocalStorage<ArtifactDisplayMetadata | undefined>();
+
+export function withPendingArtifactMetadata<T>(metadata: ArtifactDisplayMetadata | undefined, fn: () => T): T {
+  return pendingMetadata.run(metadata, fn);
+}
+
+export function getPendingArtifactMetadata(): ArtifactDisplayMetadata | undefined {
+  return pendingMetadata.getStore();
+}
+
+/**
+ * Tools/list freezes the static 0.2.9+ schemas (which advertise title,
+ * description and icon) across every profile so claude.ai never resets
+ * "Always allow" grants, while envelope-v1 profiles omit those properties in
+ * their compiled validator. Validate and strip them on envelope-v1 profiles so
+ * callers supplying schema-advertised metadata succeed and persist it.
+ */
+export function extractEnvelopeV1Metadata(
+  tool: string,
+  args: unknown,
+  resultEnvelopeVersion: 1 | 2 | undefined = HOST_ARTIFACT_PROFILE.resultEnvelopeVersion,
+): { readonly strippedArgs: unknown; readonly metadata: ArtifactDisplayMetadata | undefined } {
+  if (resultEnvelopeVersion === 2 || !METADATA_ARTIFACT_TOOLS.has(tool) ||
+    !args || typeof args !== "object" || Array.isArray(args)) {
+    return { strippedArgs: args, metadata: undefined };
+  }
+  const record = args as Record<string, unknown>;
+  const hasTitle = Object.hasOwn(record, "title");
+  const hasDescription = Object.hasOwn(record, "description");
+  const hasIcon = Object.hasOwn(record, "icon");
+  if (!hasTitle && !hasDescription && !hasIcon) {
+    return { strippedArgs: args, metadata: undefined };
+  }
+  const meta: { title?: string; description?: string; icon?: string | null } = {};
+  if (hasTitle) {
+    const title = record.title;
+    if (typeof title !== "string" || title.length < 1 || title.length > 160 || LONE_SURROGATE_RE.test(title)) {
+      throw new ArtifactProfileInputError();
+    }
+    meta.title = title;
+  }
+  if (hasDescription) {
+    const description = record.description;
+    if (typeof description !== "string" || description.length > 2000 || LONE_SURROGATE_RE.test(description)) {
+      throw new ArtifactProfileInputError();
+    }
+    meta.description = description;
+  }
+  if (hasIcon) {
+    const icon = record.icon;
+    if (icon !== null && (typeof icon !== "string" || !ICON_RE.test(icon))) {
+      throw new ArtifactProfileInputError();
+    }
+    meta.icon = icon;
+  }
+  const stripped = { ...record };
+  delete stripped.title;
+  delete stripped.description;
+  delete stripped.icon;
+  return { strippedArgs: stripped, metadata: Object.freeze(meta) };
+}
+
+export function assertPageTextUploadArgs(tool: string, normalized: Record<string, unknown>): void {
+  if (tool === "artifacts_create_upload" && isPageTextMimeType(normalized.mimeType)) {
+    if (typeof normalized.maxSize === "number" && normalized.maxSize > PUBLISH_MAX_FILE_BYTES) {
+      throw new ArtifactProfileInputError();
+    }
+  } else if (tool === "artifacts_commit_upload" && isPageTextMimeType(normalized.mimeType)) {
+    if (typeof normalized.size === "number" && normalized.size > PUBLISH_MAX_FILE_BYTES) {
+      throw new ArtifactProfileInputError();
+    }
+  } else if (tool === "artifacts_publish_bundle" || tool === "artifacts_publish_bundle_v2") {
+    let total = 0;
+    for (const file of (normalized.files as Array<{ mimeType?: unknown; bytes?: readonly number[] }> | undefined) ?? []) {
+      if (isPageTextMimeType(file.mimeType)) {
+        const size = file.bytes?.length ?? 0;
+        if (size > PUBLISH_MAX_FILE_BYTES) throw new ArtifactProfileInputError();
+        total += size;
+      }
+    }
+    for (const asset of (normalized.assets as Array<{ mimeType?: unknown; size?: unknown }> | undefined) ?? []) {
+      if (isPageTextMimeType(asset.mimeType) && typeof asset.size === "number") {
+        if (asset.size > PUBLISH_MAX_FILE_BYTES) throw new ArtifactProfileInputError();
+        total += asset.size;
+      }
+    }
+    if (total > PUBLISH_MAX_FILE_BYTES) throw new ArtifactProfileInputError();
+  }
+}
+
 /** Defer CAS presence until after authorization and historical receipt lookup. Never fill it. */
 export function validateArtifactInput(tool: string, args: unknown) {
-  return HOST_ARTIFACT_PROFILE.validate(tool, args, undefined, { deferPrecondition: true });
+  const { strippedArgs } = extractEnvelopeV1Metadata(tool, args);
+  const normalized = HOST_ARTIFACT_PROFILE.validate(tool, strippedArgs, undefined, { deferPrecondition: true });
+  assertPageTextUploadArgs(tool, normalized as Record<string, unknown>);
+  return normalized;
 }
 
 export function artifactPublicSchema(tool: string, schema: Readonly<Record<string, unknown>>) {

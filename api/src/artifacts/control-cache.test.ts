@@ -109,7 +109,7 @@ describe("control cache headers on errors [T29]", () => {
       { name: "oversized", expected: 413,
         run: async () => app.request(`${CONTROL}/ensure`, { method: "POST",
           headers: { host: APP_HOST, ...json, cookie: await cookieFor("sub-ok") },
-          body: `{"pad":${JSON.stringify("a".repeat(2 * 1024 * 1024 + 1))}}` }) },
+          body: `{"pad":${JSON.stringify("a".repeat(10 * 1024 * 1024 + 1))}}` }) },
       { name: "unknown op", expected: 503,
         run: async () => app.request(`${CONTROL}/fork`, { method: "POST",
           headers: { host: APP_HOST, ...json, cookie: await cookieFor("sub-ok") }, body: "{}" }) },
