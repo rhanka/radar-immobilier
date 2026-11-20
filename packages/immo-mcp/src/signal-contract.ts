@@ -23,11 +23,11 @@ export type SignalTool = keyof typeof signalSchemas;
 export const isSignalWrite = (name: string) => ["classify_signal", "confirm_classification", "annotate_signal"].includes(name);
 export const SIGNAL_TOOL_DEFINITIONS: readonly ToolDefinition[] = Object.entries(signalSchemas).map(([name, schema]) => ({
   name, title: name.replaceAll("_", " "),
-  description: name === "classify_signal" ? "Classify a scoped signal with automatic validation. Accepted elicitation only marks it pending human confirmation in the immo UI. A registry reason and declared model are required."
+  description: name === "classify_signal" ? "Classify a scoped signal with automatic validation. Accepted elicitation only marks it pending human confirmation in the immo UI. A registry reason and declared model are required. In scope \"workspace\", only classe \"ecarte\" is accepted (requires moderateArchive); classe \"non_classe\" requires human confirmation."
     : name === "confirm_classification" ? "Propose confirmation or rejection through elicitation. Always automatic, pending confirmation in the immo UI. Down requires a different class, registry code and reason."
       : name === "annotate_signal" ? "Append a scoped plain-text note (2000 characters max) with declared model and MCP provenance."
         : name === "list_class_reasons" ? "List four signal classes and all 28 registry reason codes with definitions."
-          : "Read the effective scoped signal class, provenance, ambiguity, history, feedback and notes.",
+          : "Read the effective scoped signal class, provenance, ambiguity, feedback, notes, global AI history (history), and scoped MCP/manual journal (mcpHistory).",
   inputSchema: schema.shape, scope: isSignalWrite(name) ? SIGNAL_WRITE_SCOPE : "immo:read",
 }));
 export const SIGNAL_WRITE_ANNOTATIONS = Object.freeze({ readOnlyHint: false, destructiveHint: false,
