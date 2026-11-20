@@ -42,6 +42,33 @@ DOG="deploy/k8s/34-refresh-pending-watchdog.yaml"
 
 fixture; run_ok "released overlays pass"
 
+# Explicit render-prod check: prod radar-refresh-pv must render Muse Wonder 1.0
+# low fallback (both REFRESH_FALLBACK_* and REFRESH_CLASSIFY_FALLBACK_*) and
+# mount the shared keyring mechanism identically to preprod.
+fixture
+PROD_RENDER="$CASE_ROOT/prod-rendered.yaml"
+if make --no-print-directory -f "$CASE_ROOT/deploy/k8s/refresh-cronjobs/refresh-018.mk" render-prod \
+    IMAGE_REF='ghcr.io/rhanka/radar-api@sha256:0000000000000000000000000000000000000000000000000000000000000000' \
+    RENDER_OUT="$PROD_RENDER" ENV=prod >/dev/null 2>&1 \
+  && awk 'BEGIN{RS="\n---\n"} /kind: CronJob/ && /\n  name: radar-refresh-pv\n/ {
+      pv=1
+      if ($0 !~ /namespace: radar-immobilier\n/) exit 1
+      if ($0 !~ /name: REFRESH_FALLBACK_PROVIDER\n[ ]+value: muse\n/) exit 1
+      if ($0 !~ /name: REFRESH_FALLBACK_MODEL\n[ ]+value: muse-wonder-1.0\n/) exit 1
+      if ($0 !~ /name: REFRESH_FALLBACK_REASONING_EFFORT\n[ ]+value: low\n/) exit 1
+      if ($0 !~ /name: REFRESH_CLASSIFY_FALLBACK_PROVIDER\n[ ]+value: muse\n/) exit 1
+      if ($0 !~ /name: REFRESH_CLASSIFY_FALLBACK_MODEL\n[ ]+value: muse-wonder-1.0\n/) exit 1
+      if ($0 !~ /name: REFRESH_CLASSIFY_FALLBACK_REASONING_EFFORT\n[ ]+value: low\n/) exit 1
+      if ($0 !~ /name: SENTROPIC_LLM_MESH_KEYRING_DIR\n[ ]+value: \/keyring\/runtime\n/) exit 1
+      if ($0 !~ /claimName: radar-refresh-keyring\n/) exit 1
+      if ($0 !~ /secretName: radar-refresh-keyring-bootstrap\n/) exit 1
+      if ($0 !~ /mountPath: \/keyring\n/) exit 1
+    } END { if (!pv) exit 1 }' "$PROD_RENDER"; then
+  ok "prod render pins muse/muse-wonder-1.0/low fallback and mounts keyring"
+else
+  bad "prod render pins muse/muse-wonder-1.0/low fallback and mounts keyring"
+fi
+
 fixture; sed -i '/REFRESH_CLASSIFY_MODE/d' "$CASE_ROOT/$BASE"
 run_bad "classification mode missing" "refresh activation/model contract failed"
 
@@ -53,26 +80,29 @@ done
 fixture; sed -i '/REFRESH_CLASSIFY_REASONING_EFFORT/s/value: "low"/value: "medium"/' "$CASE_ROOT/$BASE"
 run_bad "classification must default to Astra low" "refresh activation/model contract failed"
 
-fixture; sed -i '/REFRESH_CLASSIFY_FALLBACK_MODEL/s/gemini-3.8-flash/other/' "$CASE_ROOT/$BASE"
-run_bad "classification fallback must stay Gemini Flash" "refresh activation/model contract failed"
+fixture; sed -i '/REFRESH_CLASSIFY_FALLBACK_MODEL/s/muse-wonder-1.0/other/' "$CASE_ROOT/$BASE"
+run_bad "classification fallback must stay Muse Wonder 1.0" "refresh activation/model contract failed"
 
-fixture; sed -i '/name: REFRESH_FALLBACK_PROVIDER/s/value: "gemini"/value: "muse"/; /name: REFRESH_FALLBACK_MODEL/s/gemini-3.8-flash/muse-wonder-1.0/' "$CASE_ROOT/$BASE"
-run_ok "declared muse fallback (provider and Wonder 1.0 model) passes"
+fixture; sed -i '/name: REFRESH_FALLBACK_PROVIDER/s/value: "muse"/value: "gemini"/; /name: REFRESH_FALLBACK_MODEL/s/muse-wonder-1.0/gemini-3.8-flash/' "$CASE_ROOT/$BASE"
+run_bad "gemini fallback in base is refused now that prod and preprod use muse" "refresh activation/model contract failed"
 
-fixture; sed -i '/name: REFRESH_FALLBACK_PROVIDER/s/value: "gemini"/value: "muse"/' "$CASE_ROOT/$BASE"
+fixture; sed -i '/name: REFRESH_FALLBACK_MODEL/s/muse-wonder-1.0/gemini-3.8-flash/' "$CASE_ROOT/$BASE"
 run_bad "muse provider without the Wonder 1.0 model" "refresh activation/model contract failed"
 
-fixture; sed -i '/name: REFRESH_FALLBACK_MODEL/s/gemini-3.8-flash/muse-wonder-1.0/' "$CASE_ROOT/$BASE"
+fixture; sed -i '/name: REFRESH_FALLBACK_PROVIDER/s/value: "muse"/value: "gemini"/' "$CASE_ROOT/$BASE"
 run_bad "Wonder 1.0 model without the muse provider" "refresh activation/model contract failed"
 
-fixture; sed -i '/REFRESH_FALLBACK_MODEL/s/muse-wonder-1.0/other/' "$CASE_ROOT/$PRE"
-run_bad "preprod fallback model drift" "refresh activation/model contract failed"
+fixture; sed -i '/name: REFRESH_CLASSIFY_FALLBACK_PROVIDER/s/value: "muse"/value: "gemini"/' "$CASE_ROOT/$BASE"
+run_bad "classify fallback provider without its muse model" "refresh activation/model contract failed"
 
-fixture; sed -i '/REFRESH_FALLBACK_PROVIDER/s/value: "muse"/value: "gemini"/' "$CASE_ROOT/$PRE"
-run_bad "preprod fallback provider without its model" "refresh activation/model contract failed"
+fixture; sed -i '/name: REFRESH_FALLBACK_REASONING_EFFORT/s/value: "low"/value: "medium"/' "$CASE_ROOT/$BASE"
+run_bad "fallback reasoning effort must stay low" "refresh activation/model contract failed"
 
-fixture; sed -i '/REFRESH_CLASSIFY_FALLBACK_PROVIDER/s/value: "muse"/value: "gemini"/' "$CASE_ROOT/$PRE"
-run_bad "preprod classify fallback provider without its model" "refresh activation/model contract failed"
+fixture; sed -i '/name: REFRESH_CLASSIFY_FALLBACK_REASONING_EFFORT/s/value: "low"/value: "medium"/' "$CASE_ROOT/$BASE"
+run_bad "classify fallback reasoning effort must stay low" "refresh activation/model contract failed"
+
+fixture; sed -i '/name: NODE_OPTIONS/a\                      - { name: REFRESH_FALLBACK_PROVIDER, value: "gemini" }\n                      - { name: REFRESH_FALLBACK_MODEL, value: "gemini-3.8-flash" }' "$CASE_ROOT/$PROD"
+run_bad "prod overlay reverting fallback to gemini is refused" "refresh activation/model contract failed"
 
 fixture; sed -i '/REFRESH_CLASSIFY_CONCURRENCY/s/value: "2"/value: "200"/' "$CASE_ROOT/$BASE"
 run_bad "classification concurrency must stay bounded" "refresh activation/model contract failed"
