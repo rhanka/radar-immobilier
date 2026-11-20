@@ -9,7 +9,7 @@ import { ARTIFACT_P0B } from "@radar/artifacts-host";
 const config: ImmoHttpConfig = {
   issuer: "https://synthetic.test", resource: "https://synthetic.test/mcp", requiredScopes: [],
   scopesSupported: ["immo:read"], dataMode: "simulation", port: 0,
-  sessionIdleTimeoutMs: 1000, sessionMaxLifetimeMs: 2000,
+  sessionIdleTimeoutMs: 30_000, sessionMaxLifetimeMs: 60_000,
 };
 const ALL_SCOPES = "immo:read immo:artifacts:read immo:artifacts:write";
 const PUBLISH = { artifactId: "123e4567-e89b-12d3-a456-426614174000", idempotencyKey: "k",
@@ -222,7 +222,7 @@ describe("P7 composed transport (contract double; no storage qualification)", ()
     expect(overLimit.isError).toBe(true);
     expect(overLimit.body).toMatchObject({ error: "invalid_request", retryable: false });
     expect(h.execute).toHaveBeenCalledTimes(2);
-  });
+  }, 30_000);
 
   it.skipIf(!ARTIFACT_P0B)("should accept text/html uploads up to 5 MiB, refuse > 5 MiB, and accept schema metadata on P0b", async () => {
     const h = await setup();

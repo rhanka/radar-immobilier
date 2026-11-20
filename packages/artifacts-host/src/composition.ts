@@ -143,9 +143,9 @@ export async function composeArtifactHost(
     // staged TTL with consumed-pin release, orphan staging keys (S3 stores
     // without last-write enumeration skip that pass), and expired pages.
     const baseUploadSessions = options.uploads?.sessions ?? createPostgresUploadSessionStore(pool);
-    let publicationRefsForSessions: ReturnType<typeof createPostgresUploadSessionStore> extends never ? never : {
-      unpin(digest: string, holder: string): Promise<void>;
-    } | undefined;
+    const sessionRefs: {
+      current?: { unpin(digest: string, holder: string): Promise<void> };
+    } = {};
     const uploadSessions: UploadSessionStore = options.uploads?.sessions ? baseUploadSessions : {
       ...baseUploadSessions,
       async recordStagedFile(record) {
@@ -156,7 +156,7 @@ export async function composeArtifactHost(
           [record.artifactId, record.path, record.uploadId],
         );
         for (const old of rows) {
-          await publicationRefsForSessions?.unpin(old.digest, `upload:${old.upload_id}`).catch(() => undefined);
+          await sessionRefs.current?.unpin(old.digest, `upload:${old.upload_id}`).catch(() => undefined);
         }
         return baseUploadSessions.recordStagedFile(record);
       },
@@ -182,7 +182,7 @@ export async function composeArtifactHost(
     // the orphan/expiry passes see the same ledger as publication. The
     // orphan-key bound stays visible here (provider default): a slow S3
     // listing never turns one tick into an unbounded scan.
-    publicationRefsForSessions = domain.publicationRefs;
+    sessionRefs.current = domain.publicationRefs;
     const sweeper = createUploadSweeper({ sessions: uploadSessions, staging,
       refs: domain.publicationRefs, pages: uploadPages }, { orphanKeyLimit: ORPHAN_SWEEP_MAX_KEYS });
     // Files parity LOT 2 — the browser page service over the same ledger,
