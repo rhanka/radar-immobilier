@@ -27,10 +27,34 @@ export interface ReannotationRepository {
   annotation(signal: ReannotationSignal, abort?: AbortSignal): Promise<ReannotationIdentity | undefined>;
   write(input: ReannotationWrite, abort?: AbortSignal): Promise<"written" | "manual" | "noop">;
 }
+export const DEFAULT_REANNOTATION_SINCE_DAYS = 30;
+const PIPELINE_RUN_ID_PATTERN = /^[A-Za-z0-9._:-]{1,200}$/;
+
+export function parseReannotationSinceDays(env: NodeJS.ProcessEnv = process.env): number {
+  const raw = env.REANNOTATION_SINCE_DAYS;
+  if (raw === undefined || raw.trim() === "") return DEFAULT_REANNOTATION_SINCE_DAYS;
+  const days = Number(raw);
+  if (!Number.isInteger(days) || days < 1 || days > 365) {
+    throw new Error("REANNOTATION_SINCE_DAYS must be an integer from 1 to 365");
+  }
+  return days;
+}
+
+export function parseReannotationPipelineRunId(env: NodeJS.ProcessEnv = process.env): string | undefined {
+  const raw = env.PIPELINE_RUN_ID?.trim();
+  if (!raw) return undefined;
+  if (!PIPELINE_RUN_ID_PATTERN.test(raw)) {
+    throw new Error("PIPELINE_RUN_ID must match ^[A-Za-z0-9._:-]{1,200}$");
+  }
+  return raw;
+}
+
 export interface ReannotationPrompt { id: string; sha256: string; text: string }
 export interface ReannotationReport {
-  mode: "dry-run" | "apply"; pipelineRunId: string; since: string; candidates: number;
-  classified: number; written: number; skippedManual: number; skippedUnchanged: number;
+  mode: "dry-run" | "apply"; pipelineRunId: string; promptId: string; promptSha256: string;
+  sinceDays: number; since: string; candidates: number; candidatesByCity: Record<string, number>;
+  processed: number; classified: number; written: number; skippedManual: number;
+  skippedUnchanged: number; refused: number; failed: number;
   classes: Record<ReannotationDecision["classe"], number>;
   failures: Array<{ citySlug: string; nodeType: string; nodeId: string; code: string }>;
 }
@@ -55,6 +79,7 @@ export async function runReannotation(options: {
   fallback: RefreshModel; pipelineRunId: string; now: Date; apply?: boolean;
   classify(signal: ReannotationSignal, abort?: AbortSignal): Promise<ReannotationDecision>;
   signal?: AbortSignal;
+  sinceDays?: number;
   concurrency?: number;
   changedInputOnly?: boolean;
   actTimeoutMs?: number;
@@ -65,16 +90,24 @@ export async function runReannotation(options: {
   if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 16) {
     throw new Error("Reannotation concurrency must be an integer from 1 to 16");
   }
-  const since = new Date(options.now.getTime() - 30 * 86_400_000);
+  const sinceDays = options.sinceDays ?? DEFAULT_REANNOTATION_SINCE_DAYS;
+  if (!Number.isInteger(sinceDays) || sinceDays < 1 || sinceDays > 365) {
+    throw new Error("Reannotation sinceDays must be an integer from 1 to 365");
+  }
+  const since = new Date(options.now.getTime() - sinceDays * 86_400_000);
   const runSignal = AbortSignal.any([AbortSignal.timeout(options.runTimeoutMs ?? 300_000),
     ...(options.signal ? [options.signal] : [])]);
   const report: ReannotationReport = { mode: options.apply ? "apply" : "dry-run",
-    pipelineRunId: options.pipelineRunId, since: since.toISOString(), candidates: 0,
-    classified: 0, written: 0, skippedManual: 0, skippedUnchanged: 0,
+    pipelineRunId: options.pipelineRunId, promptId: options.prompt.id, promptSha256: options.prompt.sha256,
+    sinceDays, since: since.toISOString(), candidates: 0, candidatesByCity: {},
+    processed: 0, classified: 0, written: 0, skippedManual: 0, skippedUnchanged: 0, refused: 0, failed: 0,
     classes: { pertinent: 0, a_surveiller: 0, ecarte: 0 }, failures: [] };
   runSignal.throwIfAborted();
   const signals = await withinReannotationDeadline(options.repository.list(since, runSignal), runSignal);
   report.candidates = signals.length;
+  const byCity = new Map<string, number>();
+  for (const signal of signals) byCity.set(signal.citySlug, (byCity.get(signal.citySlug) ?? 0) + 1);
+  report.candidatesByCity = Object.fromEntries([...byCity.entries()].sort(([a], [b]) => a.localeCompare(b)));
   let next = 0;
   async function classifyOne(signal: ReannotationSignal) {
     runSignal.throwIfAborted();
@@ -83,9 +116,11 @@ export async function runReannotation(options: {
       const annotation = await options.repository.annotation(signal, abort);
       if (annotation?.source === "manual") { report.skippedManual++; return; }
       const inputSha256 = reannotationInputSha256(signal);
-      // A prior fallback result is valid for the same configured model pair.
+      // A prior fallback result is valid for the same configured model pair
+      // (muse receipts persist effort as "provider-default").
       const currentModel = [options.primary, options.fallback].some((model) =>
-        model.model === annotation?.model && model.effort === annotation?.effort);
+        model.model === annotation?.model
+        && (model.effort === annotation?.effort || (model.provider === "muse" && annotation?.effort === "provider-default")));
       if (annotation?.inputSha256 === inputSha256 && (options.changedInputOnly
         || (currentModel && annotation.promptSha256 === options.prompt.sha256))) {
         report.skippedUnchanged++; return;
@@ -114,6 +149,9 @@ export async function runReannotation(options: {
   // Drain every worker before returning or propagating cancellation to the CLI.
   const workers = await Promise.allSettled(Array.from({ length: Math.min(concurrency, signals.length) }, worker));
   for (const result of workers) if (result.status === "rejected") throw result.reason;
+  report.refused = report.skippedManual;
+  report.failed = report.failures.length;
+  report.processed = report.classified + report.skippedManual + report.skippedUnchanged + report.failures.length;
   return report;
 }
 
