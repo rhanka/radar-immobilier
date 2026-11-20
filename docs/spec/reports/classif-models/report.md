@@ -20,6 +20,7 @@ Protocole figé : 100 PV du manifeste `v101b` (50 mise au point = 372 actes, 50 
 | Total (100 PV, 676) | GPT-6 Astra medium (v12) | 99/100 | 315/676 | 53,40 % | — | 37,10 % | 0,438 | 1 | v12 | 100 | 0,4689 USD API/doc (0,0207 siège) |
 | Total (100 PV, 676) | GPT-6 Astra low (baseline v12) | 100/100 | 344/676 | 49,10 % | — | 37,30 % | 0,424 | 0 | v12 | 100 | 0,4072 USD API/doc (0,0180 siège) |
 | Total (100 PV, 676) | Gemini 4 Argon low (v12, agy) | 88/100 | 386/676 | 42,90 % | — | 33,00 % | 0,373 | 12 | v12 | 140 | 0,2074 USD API/doc (0,00801 siège) |
+| Total (100 PV, 676) | Muse Wonder 1.0 low (repli v12) | 90/100 | 451/676 | 33,30 % | — | 36,10 % | 0,346 | 10 | v12 | 100 | 0,2731 USD API/doc (`missing source` siège) |
 | Total (100 PV, 676) | Gemini 3.8 Flash low (repli v12) | 85/100 | 473/676 | 30,00 % | — | 47,50 % | 0,368 | 15 | v12 | 100 | 0,0376 USD API/doc (0,00143 siège) |
 | Total (100 PV, 676) | **Gemini 4 Hydrogen low (agy)** | **96/100** | **453/676** | **32,99 %** | **[29,55 % ; 36,62 %]** | **28,05 %** | **0,303** | **4** | **18,67 min** | **100** | `missing source` |
 | Mise au point (50 PV, 372) | **Gemini 4 Hydrogen low (agy)** | **48/50** | **234/372** | **37,10 %** | **[32,34 % ; 42,11 %]** | **30,60 %** | **0,335** | **2** | — | 50 | `missing source` |
@@ -42,8 +43,12 @@ Protocole figé : jeux C (252 unités mise au point dont 95 P ∪ S ; 252 unité
 | Mise au point | **Gemini 4 Hydrogen low** | **0/95** | **100,00 %** | **[96,11 % ; 100,00 %]** | **70,90 %** | **réussi** | **1** | ~11 min | 252 | `missing source` |
 | Aveugle | Astra low v2 (baseline) | 0/94 | 100,00 % | [96,07 % ; 100,00 %] | 71,76 % | réussi | 0 | 3,98 min | 252 | `missing source` |
 | Aveugle | **Gemini 4 Hydrogen low** | **2/94** | **97,87 %** | **[92,57 % ; 99,41 %]** | **76,67 %** | **échoué** | **1** | 9,91 min | 252 | `missing source` |
+| Mise au point | Muse Wonder 1.0 low (série 13, P0) | 0/95 | 100,00 % | [96,11 % ; 100,00 %] | 59,01 % | réussi | 0 | `missing source` | 252 | `missing source` |
+| Aveugle | Muse Wonder 1.0 low (série 13, P0) | 1/94 | 98,94 % | [94,22 % ; 99,81 %] | 62,84 % | échoué | 0 | `missing source` | 252 | `missing source` |
 | Mise au point | Gemini 3.8 Flash low (v2 B) | `missing source` | — | — | — | — | — | — | — | `missing source` |
 | Aveugle | Gemini 3.8 Flash low (v2 B) | `missing source` | — | — | — | — | — | — | — | `missing source` |
+
+Note Muse Wonder 1.0 low sur C : les mesures proviennent de la série 13 existante (prompt P0 SHA-256 `a60713366128ae4348a45a7323d0b0984cef87ca6cb33eda15073c045235b016`, mêmes 252 + 252 unités C ; sources `series-13-dev.json` et `blind/series-13-aggregates.json`). Aucun appel v2 n'a été lancé : sonde `muse usage --json` à **92 % hebdo** (seuil 90 % déjà dépassé, réinitialisation `2026-11-23T00:00:00Z`), et consigne owner d'économiser le quota Muse. Prompt P0 ≠ v2 : comparaison indicative.
 
 Note Flash sur C : aucun agrégat jeux C prompt v2 mode B n'existe pour `gemini-3.8-flash-low` (`missing source`). À titre indicatif uniquement (protocole différent : prompt P0 série 9, mêmes 252 unités mise au point), `gemini-3.8-flash-low` affichait 5/95 manqués (rappel 94,74 %), précision 24,57 % et 126/252 échecs (non lancé en aveugle).
 
