@@ -4,8 +4,10 @@ ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/../../..)
 OVERLAY := $(ROOT)/deploy/k8s/refresh-cronjobs
 PROD_OVERLAY := $(ROOT)/deploy/k8s/refresh-cronjobs-prod
 NAMESPACE := radar-immobilier-preprod
+PROD_NAMESPACE := radar-immobilier
 EXPECTED_SERVER := https://hlhedx.c1.bhs5.k8s.ovh.net
 K := kubectl --kubeconfig "$(KUBECONFIG)" -n $(NAMESPACE)
+K_PROD := kubectl --kubeconfig "$(KUBECONFIG)" -n $(PROD_NAMESPACE)
 PLACEHOLDER := ghcr.io/rhanka/radar-api:PINNED-BY-CI-AT-RELEASE-DO-NOT-APPLY-UNEDITED
 API_IMAGE := ghcr.io/rhanka/radar-api
 CONTRACT_AWK := $(OVERLAY)/refresh-contract.awk
@@ -25,6 +27,28 @@ guard-preprod:
 	@server="$$(kubectl --kubeconfig "$(KUBECONFIG)" config view --minify -o jsonpath='{.clusters[0].cluster.server}')"; \
 	  case "$$server" in "$(EXPECTED_SERVER)"|"$(EXPECTED_SERVER)":*) ;; *) echo "refusing unexpected API server" >&2; exit 1;; esac
 	@timeout $$(( $(IMPORT_REQUEST_SECONDS) * 3 )) $(K) --request-timeout=$(IMPORT_REQUEST_SECONDS)s get serviceaccount radar-app -o name >/dev/null
+
+.PHONY: guard-prod
+guard-prod:
+	@test "$(ENV)" = "prod" || { echo "ENV=prod is required" >&2; exit 1; }
+	@test -n "$(KUBECONFIG)" -a -f "$(KUBECONFIG)" || { echo "KUBECONFIG file is required" >&2; exit 1; }
+	@set -e; \
+	  server="$$(kubectl --kubeconfig "$(KUBECONFIG)" config view --minify -o jsonpath='{.clusters[0].cluster.server}')" \
+	    || { echo "refusing: cannot read API server identity" >&2; exit 1; }; \
+	  case "$$server" in "$(EXPECTED_SERVER)"|"$(EXPECTED_SERVER)":*) ;; *) echo "refusing unexpected API server" >&2; exit 1;; esac; \
+	  ctx="$$(kubectl --kubeconfig "$(KUBECONFIG)" config current-context)" \
+	    || { echo "refusing: cannot read kubeconfig context" >&2; exit 1; }; \
+	  case "$$ctx" in ""|*preprod*) echo "refusing kubeconfig context $$ctx for ENV=prod" >&2; exit 1;; esac; \
+	  ctx_ns="$$(kubectl --kubeconfig "$(KUBECONFIG)" config view --minify -o jsonpath='{.contexts[0].context.namespace}')" \
+	    || { echo "refusing: cannot read kubeconfig context namespace" >&2; exit 1; }; \
+	  case "$$ctx_ns" in ""|"$(PROD_NAMESPACE)") ;; *) echo "refusing kubeconfig context namespace $$ctx_ns for ENV=prod (expected $(PROD_NAMESPACE))" >&2; exit 1;; esac; \
+	  whoami="$$(timeout $$(( $(IMPORT_REQUEST_SECONDS) * 3 )) kubectl --kubeconfig "$(KUBECONFIG)" --request-timeout=$(IMPORT_REQUEST_SECONDS)s auth whoami -o jsonpath='{.status.userInfo.username}')" \
+	    || { echo "refusing: cannot read caller identity (kubectl auth whoami)" >&2; exit 1; }; \
+	  case "$$whoami" in "system:serviceaccount:$(NAMESPACE):"*) echo "refusing $(NAMESPACE) identity for ENV=prod" >&2; exit 1;; esac; \
+	  timeout $$(( $(IMPORT_REQUEST_SECONDS) * 3 )) kubectl --kubeconfig "$(KUBECONFIG)" --request-timeout=$(IMPORT_REQUEST_SECONDS)s get namespace "$(PROD_NAMESPACE)" -o name >/dev/null \
+	    || { echo "refusing: namespace $(PROD_NAMESPACE) probe failed" >&2; exit 1; }; \
+	  timeout $$(( $(IMPORT_REQUEST_SECONDS) * 3 )) $(K_PROD) --request-timeout=$(IMPORT_REQUEST_SECONDS)s get serviceaccount radar-app -o name >/dev/null \
+	    || { echo "refusing: ServiceAccount radar-app probe in $(PROD_NAMESPACE) failed" >&2; exit 1; }
 
 .PHONY: inspect-preprod
 inspect-preprod: guard-preprod
@@ -117,16 +141,26 @@ import-keyring-account:
 	  ( set -C; : > "$$out" ) 2>/dev/null || { echo "IMPORT_RENDER_OUT could not be created exclusively" >&2; exit 1; }; \
 	  { [ ! -L "$$out" ] && [ -f "$$out" ] && [ "$$(cd -- "$$(dirname -- "$$(readlink -f -- "$$out")")" && pwd -P)" = "$$dir" ]; } \
 	    || fail "IMPORT_RENDER_OUT resolved outside its directory"; \
-	  { kubectl create secret generic radar-refresh-keyring-account-import \
+	  import_overlay="$(OVERLAY)/keyring-import"; import_ns="$(NAMESPACE)"; \
+	  if [ "$(ENV)" = "prod" ]; then import_overlay="$(OVERLAY)/keyring-import-prod"; import_ns="$(PROD_NAMESPACE)"; fi; \
+	  { kubectl create secret generic radar-refresh-keyring-account-import -n "$$import_ns" \
 	      --from-file="$(IMPORT_SOURCE_DIR)" --dry-run=client -o yaml && echo --- && \
-	    kubectl kustomize --load-restrictor LoadRestrictionsNone "$(OVERLAY)/keyring-import" \
+	    kubectl kustomize --load-restrictor LoadRestrictionsNone "$$import_overlay" \
 	      | sed -e "s#$(PLACEHOLDER)#$(IMPORT_IMAGE_REF)#g" -e "s#IMPORT-TRANSPORT-SET-BY-RENDER#$(IMPORT_TRANSPORT)#g"; \
 	  } > "$$out" || fail "render failed"; \
 	  test "$$(grep -c '^kind: Job$$' "$$out")" -eq 1 || fail "render must hold exactly one Job"; \
 	  test "$$(grep -c '^kind: Secret$$' "$$out")" -eq 1 || fail "render must hold exactly one Secret"; \
+	  grep -q "^  namespace: $$import_ns$$" "$$out" || fail "render does not target namespace $$import_ns"; \
 	  ! grep -q 'PINNED-BY-CI\|radar-api:latest\|IMPORT-TRANSPORT-SET-BY-RENDER' "$$out" || fail "render is not pinned"; \
 	  grep -A1 -E 'name: IMPORT_TRANSPORT$$' "$$out" | grep -Eq 'value: "?$(IMPORT_TRANSPORT)"?$$' \
 	    || fail "rendered Job does not carry IMPORT_TRANSPORT=$(IMPORT_TRANSPORT)"
+
+.PHONY: import-keyring-account-prod
+import-keyring-account-prod:
+	@test "$(ENV)" = "prod" || { echo "ENV=prod is required" >&2; exit 1; }
+	@$(MAKE) -s -f "$(lastword $(MAKEFILE_LIST))" import-keyring-account \
+	  IMPORT_TRANSPORT="$(IMPORT_TRANSPORT)" IMPORT_IMAGE_REF="$(IMPORT_IMAGE_REF)" \
+	  IMPORT_SOURCE_DIR="$(IMPORT_SOURCE_DIR)" IMPORT_RENDER_OUT="$(IMPORT_RENDER_OUT)" ENV=prod
 
 IMPORT_WAIT_SECONDS ?= 21600
 IMPORT_POLL_SECONDS ?= 10
@@ -135,6 +169,7 @@ IMPORT_OBJECTS := job/radar-refresh-keyring-account-import secret/radar-refresh-
   configmap/radar-refresh-keyring-import-script
 # Every API call of the import is bounded, both by kubectl and by the clock.
 IMPORT_K = timeout $$(( $(IMPORT_REQUEST_SECONDS) * 3 )) $(K) --request-timeout=$(IMPORT_REQUEST_SECONDS)s
+IMPORT_K_PROD = timeout $$(( $(IMPORT_REQUEST_SECONDS) * 3 )) $(K_PROD) --request-timeout=$(IMPORT_REQUEST_SECONDS)s
 # Removes the local render without ever following a symlink (only the link goes).
 IMPORT_SHRED_LOCAL = if [ -n "$(IMPORT_RENDER_OUT)" ]; then \
 	  if [ -L "$(IMPORT_RENDER_OUT)" ]; then rm -f -- "$(IMPORT_RENDER_OUT)"; \
@@ -204,6 +239,82 @@ cleanup-keyring-import:
 	  fi; \
 	  echo "cleanup guard: preprod identity confirmed"; \
 	  $(IMPORT_K) delete $(IMPORT_OBJECTS) --ignore-not-found --wait=true
+
+# Production counterpart of run-keyring-import (declared operatorPath in
+# deploy/ci/prod-cd-paths.json, documented in docs/operator/prod-keyring-import.md).
+# Enforces guard-prod (context + namespace radar-immobilier), PROD_CONFIRM=1,
+# a prod-targeted render, and zero active radar-refresh-pv pods BEFORE touching
+# any remote object. Always cleans up Job, Secret, ConfigMap and local render.
+.PHONY: run-keyring-import-prod
+run-keyring-import-prod:
+	@set -uo pipefail; status=1; remote_ok=0; \
+	  shred_local() { $(IMPORT_SHRED_LOCAL); }; \
+	  cleanup() { if [ "$$remote_ok" -eq 1 ]; then $(MAKE) -s -f "$(lastword $(MAKEFILE_LIST))" cleanup-keyring-import-prod \
+	    KUBECONFIG="$(KUBECONFIG)" IMPORT_RENDER_OUT="$(IMPORT_RENDER_OUT)" IMPORT_REQUEST_SECONDS=$(IMPORT_REQUEST_SECONDS) ENV=$(ENV) \
+	    || { echo "prod keyring import cleanup FAILED: rerun cleanup-keyring-import-prod" >&2; exit 1; }; \
+	    else shred_local; fi; }; \
+	  trap cleanup EXIT; trap 'exit 130' INT TERM; \
+	  $(MAKE) -s -f "$(lastword $(MAKEFILE_LIST))" guard-prod KUBECONFIG="$(KUBECONFIG)" IMPORT_REQUEST_SECONDS=$(IMPORT_REQUEST_SECONDS) ENV=$(ENV) || exit 1; \
+	  test "$(PROD_CONFIRM)" = "1" || { echo "PROD_CONFIRM=1 is required" >&2; exit 1; }; \
+	  { [ ! -L "$(IMPORT_RENDER_OUT)" ] && [ -f "$(IMPORT_RENDER_OUT)" ]; } \
+	    || { echo "IMPORT_RENDER_OUT must be the regular render file" >&2; exit 1; }; \
+	  grep -q '^  namespace: $(PROD_NAMESPACE)$$' "$(IMPORT_RENDER_OUT)" \
+	    || { echo "IMPORT_RENDER_OUT must target namespace $(PROD_NAMESPACE)" >&2; exit 1; }; \
+	  ! grep -q '^  namespace: $(NAMESPACE)$$' "$(IMPORT_RENDER_OUT)" \
+	    || { echo "IMPORT_RENDER_OUT targets preprod namespace $(NAMESPACE); refusing in prod" >&2; exit 1; }; \
+	  active_pods="$$($(IMPORT_K_PROD) get pods -l app.kubernetes.io/instance=radar-refresh-pv \
+	    -o jsonpath='{range .items[*]}{.metadata.name} {.status.phase}{"\n"}{end}')" \
+	    || { echo "refusing: cannot check active radar-refresh-pv pods in $(PROD_NAMESPACE)" >&2; exit 1; }; \
+	  if printf '%s\n' "$$active_pods" | awk 'NF >= 2 && $$2 != "Succeeded" && $$2 != "Failed" { found=1 } END { exit !found }'; then \
+	    echo "refusing: a radar-refresh-pv pod is currently active in $(PROD_NAMESPACE); wait for the refresh to finish" >&2; exit 1; \
+	  fi; \
+	  remote_ok=1; \
+	  $(IMPORT_K_PROD) delete $(IMPORT_OBJECTS) --ignore-not-found --wait=true >/dev/null 2>&1 \
+	    || { echo "could not clear a previous prod import" >&2; exit 1; }; \
+	  err="$$($(IMPORT_K_PROD) create -f "$(IMPORT_RENDER_OUT)" 2>&1 >/dev/null)" || { \
+	    reason="$$(printf '%s\n' "$$err" | grep -oE '^Error from server \([A-Za-z]+\)' | head -1 | grep -oE '[A-Za-z]+\)$$' | tr -d ')')"; [ -n "$$reason" ] || reason=unknown; \
+	    echo "kubectl create refused (reason: $$reason); details withheld, they may quote the Secret" >&2; \
+	    err=; exit 1; }; err=; \
+	  deadline=$$(( $$(date +%s) + $(IMPORT_WAIT_SECONDS) )); \
+	  while :; do \
+	    state="$$($(IMPORT_K_PROD) get job radar-refresh-keyring-account-import -o jsonpath='{.status.succeeded}/{.status.failed}')" \
+	      || { echo "could not read the prod import Job" >&2; break; }; \
+	    case "$$state" in 1/*) status=0; break;; */[1-9]*) echo "prod keyring import Job failed" >&2; break;; esac; \
+	    [ "$$(date +%s)" -lt "$$deadline" ] || { echo "prod keyring import Job did not finish in time" >&2; break; }; \
+	    sleep $(IMPORT_POLL_SECONDS); \
+	  done; \
+	  $(IMPORT_K_PROD) logs job/radar-refresh-keyring-account-import || true; \
+	  exit $$status
+
+# Idempotent production cleanup. Shreds the local render FIRST and
+# unconditionally, then validates prod cluster identity (API server, context,
+# namespace radar-immobilier, caller identity, ServiceAccount probe) before
+# deleting remote Job, Secret, and ConfigMap.
+.PHONY: cleanup-keyring-import-prod
+cleanup-keyring-import-prod:
+	@$(IMPORT_SHRED_LOCAL)
+	@set -u; \
+	  test "$(ENV)" = "prod" || { echo "cleanup guard refused: ENV=prod is required, no remote delete" >&2; exit 1; }; \
+	  test -n "$(KUBECONFIG)" -a -f "$(KUBECONFIG)" || { echo "cleanup guard refused: KUBECONFIG file is required, no remote delete" >&2; exit 1; }; \
+	  server="$$(kubectl --kubeconfig "$(KUBECONFIG)" config view --minify -o jsonpath='{.clusters[0].cluster.server}')" \
+	    || { echo "cleanup guard refused: cannot read API server identity, no remote delete" >&2; exit 1; }; \
+	  case "$$server" in "$(EXPECTED_SERVER)"|"$(EXPECTED_SERVER)":*) ;; \
+	    *) echo "cleanup guard refused: unexpected API server, no remote delete" >&2; exit 1;; esac; \
+	  ctx="$$(kubectl --kubeconfig "$(KUBECONFIG)" config current-context)" \
+	    || { echo "cleanup guard refused: cannot read kubeconfig context, no remote delete" >&2; exit 1; }; \
+	  case "$$ctx" in ""|*preprod*) echo "cleanup guard refused: preprod or empty context, no remote delete" >&2; exit 1;; esac; \
+	  ctx_ns="$$(kubectl --kubeconfig "$(KUBECONFIG)" config view --minify -o jsonpath='{.contexts[0].context.namespace}')" \
+	    || { echo "cleanup guard refused: cannot read context namespace, no remote delete" >&2; exit 1; }; \
+	  case "$$ctx_ns" in ""|"$(PROD_NAMESPACE)") ;; \
+	    *) echo "cleanup guard refused: unexpected context namespace $$ctx_ns, no remote delete" >&2; exit 1;; esac; \
+	  whoami="$$(timeout $$(( $(IMPORT_REQUEST_SECONDS) * 3 )) kubectl --kubeconfig "$(KUBECONFIG)" --request-timeout=$(IMPORT_REQUEST_SECONDS)s auth whoami -o jsonpath='{.status.userInfo.username}')" \
+	    || { echo "cleanup guard refused: cannot read caller identity, no remote delete" >&2; exit 1; }; \
+	  case "$$whoami" in "system:serviceaccount:$(NAMESPACE):"*) echo "cleanup guard refused: preprod identity, no remote delete" >&2; exit 1;; esac; \
+	  if ! timeout $$(( $(IMPORT_REQUEST_SECONDS) * 3 )) $(K_PROD) --request-timeout=$(IMPORT_REQUEST_SECONDS)s get serviceaccount radar-app -o name >/dev/null; then \
+	    echo "cleanup guard: ServiceAccount probe unavailable, no remote delete" >&2; exit 1; \
+	  fi; \
+	  echo "cleanup guard: prod identity confirmed"; \
+	  $(IMPORT_K_PROD) delete $(IMPORT_OBJECTS) --ignore-not-found --wait=true
 
 .PHONY: test-keyring-import
 test-keyring-import: ## Hermetic tests of the keyring account import (no cluster)
@@ -292,8 +403,8 @@ render-prod:
 # deux blocs s'ajoutent, eux aussi relationnels :
 #   - DÉCALAGE (refresh-stagger.awk) : forme `<minute> <heures> * * *`, et les
 #     lancements prod et préprod les plus proches à au moins
-#     REFRESH_STAGGER_MIN_MINUTES l'un de l'autre (la minute et le nombre de
-#     passages, communs, sont gardés par la parité) ;
+#     REFRESH_STAGGER_MIN_MINUTES l'un de l'autre (la minute et les champs jour,
+#     communs, sont gardés par la parité) ;
 #   - GARDIEN DES PODS PENDING (refresh-watchdog.awk) : le CronJob
 #     radar-refresh-pending-watchdog est rendu, actif, câblé sur le label du pod
 #     de passage, et le Job de passage garde `backoffLimit: 0`.
