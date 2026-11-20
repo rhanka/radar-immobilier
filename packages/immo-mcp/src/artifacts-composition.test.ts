@@ -197,14 +197,70 @@ describe("P7 composed transport (contract double; no storage qualification)", ()
     expect(h.createGuard).not.toHaveBeenCalled();
   });
 
-  it("should carry the supported worst-case decoded-byte envelope through the bridge", async () => {
+  it("should carry a 5 MiB inline page through the MCP HTTP bridge and refuse above 5 MiB", async () => {
     const h = await setup();
-    const result = await (await h.call("artifacts_publish", {
-      artifactId: "123e4567-e89b-12d3-a456-426614174000", idempotencyKey: "k",
-      files: [{ path: "index.html", mimeType: "text/html", text: "\u0001".repeat(262144) }],
+    const fiveMib = "a".repeat(5 * 1024 * 1024);
+    const accepted = await (await h.call("artifacts_publish", {
+      artifactId: "123e4567-e89b-12d3-a456-426614174000", idempotencyKey: "k-5mib",
+      files: [{ path: "index.html", mimeType: "text/html", text: fiveMib }],
     })).json();
-    expect(result.result.isError).not.toBe(true);
+    expect(accepted.result.isError).not.toBe(true);
     expect(h.execute).toHaveBeenCalledTimes(1);
+
+    const escapedTwoMib = "\u0001".repeat(2 * 1024 * 1024);
+    const escapedRes = await (await h.call("artifacts_publish", {
+      artifactId: "123e4567-e89b-12d3-a456-426614174000", idempotencyKey: "k-escaped",
+      files: [{ path: "index.html", mimeType: "text/html", text: escapedTwoMib }],
+    })).json();
+    expect(escapedRes.result.isError).not.toBe(true);
+    expect(h.execute).toHaveBeenCalledTimes(2);
+
+    const overLimit = await payload(await h.call("artifacts_publish", {
+      artifactId: "123e4567-e89b-12d3-a456-426614174000", idempotencyKey: "k-over",
+      files: [{ path: "index.html", mimeType: "text/html", text: "a".repeat(5 * 1024 * 1024 + 1) }],
+    }));
+    expect(overLimit.isError).toBe(true);
+    expect(overLimit.body).toMatchObject({ error: "invalid_request", retryable: false });
+    expect(h.execute).toHaveBeenCalledTimes(2);
+  });
+
+  it.skipIf(!ARTIFACT_P0B)("should accept text/html uploads up to 5 MiB, refuse > 5 MiB, and accept schema metadata on P0b", async () => {
+    const h = await setup();
+    const uploadOk = await payload(await h.call("artifacts_create_upload", {
+      artifactId: PUBLISH.artifactId, mimeType: "text/html", maxSize: 2 * 1024 * 1024,
+    }));
+    expect(uploadOk.isError).toBe(false);
+
+    const uploadOver = await payload(await h.call("artifacts_create_upload", {
+      artifactId: PUBLISH.artifactId, mimeType: "text/html", maxSize: 5 * 1024 * 1024 + 1,
+    }));
+    expect(uploadOver.isError).toBe(true);
+    expect(uploadOver.body).toMatchObject({ error: "invalid_request", retryable: false });
+
+    const ensuredWithMeta = await payload(await h.call("artifacts_ensure", {
+      bindingName: "chaperon-v13", idempotencyKey: "k-meta-ensure",
+      title: "Dossier Chaperon v13", description: "Synthese complete", icon: "building",
+    }));
+    expect(ensuredWithMeta.isError).toBe(false);
+    expect(ensuredWithMeta.body).toMatchObject({ title: "Dossier Chaperon v13", description: "Synthese complete", icon: "building" });
+
+    const bundleWithMeta = await payload(await h.call("artifacts_publish_bundle", {
+      artifactId: PUBLISH.artifactId, idempotencyKey: "k-meta-bundle", expectedCurrentReleaseId: null,
+      title: "Dossier Chaperon v13",
+      assets: [{ path: "index.html", uploadId: "223e4567-e89b-12d3-a456-426614174000" }],
+    }));
+    expect(bundleWithMeta.isError).toBe(false);
+
+    const invalidSchemaMeta = await payload(await h.call("artifacts_ensure", {
+      bindingName: "bad-meta", idempotencyKey: "k-bad-meta", title: "",
+    }));
+    expect(invalidSchemaMeta.isError).toBe(true);
+
+    const invalidSurrogateMeta = await payload(await h.call("artifacts_ensure", {
+      bindingName: "bad-surrogate", idempotencyKey: "k-bad-surrogate", title: "bad\uD800title",
+    }));
+    expect(invalidSurrogateMeta.isError).toBe(true);
+    expect(invalidSurrogateMeta.body).toMatchObject({ error: "invalid_request", retryable: false });
   });
 
   it("should deny artifact effects when the account port is absent even with fixture business data", async () => {
