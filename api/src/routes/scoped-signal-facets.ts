@@ -47,6 +47,68 @@ const headSchemas = {
   restore: historicalSchemas.restore.extend({ expectedHeadId }),
 };
 
+const CLOSED_FACET_DETAILS = new Set([
+  "expected_selection_heads_forbidden_without_deselect",
+  "expected_selection_heads_keys_must_match_deselect",
+]);
+
+function facetCommandDetail(error: z.ZodError): string {
+  for (const issue of error.issues) {
+    if (issue.code === "custom" && CLOSED_FACET_DETAILS.has(issue.message)) {
+      return issue.message;
+    }
+  }
+  const fields = new Set<string>();
+  for (const issue of error.issues) {
+    const safeSegments = issue.path
+      .map((segment) => String(segment))
+      .filter((segment) => /^[a-zA-Z0-9_]+$/.test(segment));
+    if (safeSegments.length > 0) {
+      fields.add(safeSegments.join("."));
+    } else if (issue.code === "unrecognized_keys") {
+      fields.add("unrecognized_keys");
+    } else {
+      fields.add("body");
+    }
+  }
+  const sorted = [...fields].sort();
+  return `invalid_fields:${sorted.length > 0 ? sorted.join(",") : "body"}`;
+}
+
+const discardSchema = z.object({
+  target, reasonCode, deselect: z.array(basket).max(2).optional(),
+  expectedHeadId, expectedSelectionHeads, displayedFingerprint,
+}).strict().superRefine((value, ctx) => {
+  const removals = [...new Set(value.deselect ?? [])].sort();
+  if (removals.length === 0) {
+    if (value.expectedSelectionHeads !== undefined) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["expectedSelectionHeads"],
+        message: "expected_selection_heads_forbidden_without_deselect",
+      });
+    }
+    return;
+  }
+  const expected = value.expectedSelectionHeads;
+  if (expected === undefined) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["expectedSelectionHeads"],
+      message: "expected_selection_heads_keys_must_match_deselect",
+    });
+    return;
+  }
+  const keys = Object.keys(expected).sort();
+  if (keys.length !== removals.length || keys.some((key, index) => key !== removals[index])) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["expectedSelectionHeads"],
+      message: "expected_selection_heads_keys_must_match_deselect",
+    });
+  }
+});
+
 const schemas = {
   reclassify: z.object({
     target, displayedFingerprint,
@@ -57,10 +119,7 @@ const schemas = {
   }).strict(),
   select: z.object({ target, basket, reasonCode, expectedHeadId, displayedFingerprint }).strict(),
   deselect: z.object({ target, basket, expectedHeadId, displayedFingerprint }).strict(),
-  discard: z.object({
-    target, reasonCode, deselect: z.array(basket).max(2).optional(),
-    expectedHeadId, expectedSelectionHeads, displayedFingerprint,
-  }).strict(),
+  discard: discardSchema,
   restore: z.object({ target, expectedHeadId, displayedFingerprint }).strict(),
 };
 
@@ -91,13 +150,15 @@ export function scopedSignalFacetsRoute(deps: ScopedSignalFacetsDeps): Hono {
       const parsed = schemas[action].safeParse(body);
       const key = z.string().guid().transform((value) => value.toLowerCase())
         .safeParse(c.req.header("Idempotency-Key"));
-      if (!key.success) return c.json({ error: "invalid_facet_command" }, 400);
-      if (action === "reclassify" && !parsed.success) return c.json({ error: "invalid_facet_command" }, 400);
+      if (!key.success) return c.json({ error: "invalid_facet_command", detail: "missing_or_invalid_idempotency_key" }, 400);
+      if (action === "reclassify" && !parsed.success) {
+        return c.json({ error: "invalid_facet_command", detail: facetCommandDetail(parsed.error) }, 400);
+      }
       const previousHead = parsed.success || action === "reclassify" ? null : headSchemas[action].safeParse(body);
       const historical = parsed.success ? null : previousHead!.success
         ? previousHead : action === "reclassify" ? null : historicalSchemas[action].safeParse(body);
       if (!parsed.success && !historical!.success) {
-        return c.json({ error: "invalid_facet_command" }, 400);
+        return c.json({ error: "invalid_facet_command", detail: facetCommandDetail(parsed.error) }, 400);
       }
       const session = c.get("session" as never) as { sub: string };
       try {
@@ -120,7 +181,9 @@ export function scopedSignalFacetsRoute(deps: ScopedSignalFacetsDeps): Hono {
         if (error instanceof FacetTargetVersionConflictError) {
           return c.json({ error: error.message, current: error.current }, error.status);
         }
-        if (error instanceof FacetError) return c.json({ error: error.message }, error.status);
+        if (error instanceof FacetError) {
+          return c.json({ error: error.message, ...(error.detail ? { detail: error.detail } : {}) }, error.status);
+        }
         if (error instanceof WorkspaceRevisionConflictError) {
           return c.json({ error: error.message, current: error.current }, error.status);
         }
@@ -141,7 +204,9 @@ export function scopedSignalFacetsRoute(deps: ScopedSignalFacetsDeps): Hono {
       if (error instanceof WorkspaceError || error instanceof ScopeError) {
         return c.json({ error: error.message }, error.status);
       }
-      if (error instanceof FacetError) return c.json({ error: error.message }, error.status);
+      if (error instanceof FacetError) {
+        return c.json({ error: error.message, ...(error.detail ? { detail: error.detail } : {}) }, error.status);
+      }
       throw error;
     }
   });

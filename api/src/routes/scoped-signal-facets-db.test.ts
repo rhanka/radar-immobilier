@@ -86,6 +86,10 @@ describeDb("6H scoped HTTP contract", () => {
     expect((await f.pool.query("SELECT count(*)::int AS n FROM facet_events")).rows[0].n).toBe(before);
     const unknown = await post(randomUUID());
     expect(unknown.status).toBe(400);
+    expect(await unknown.json()).toEqual({
+      error: "invalid_facet_command",
+      detail: "historical_receipt_not_found",
+    });
     expect((await f.pool.query("SELECT count(*)::int AS n FROM facet_commands")).rows[0].n).toBe(1);
     await f.pool.query("DELETE FROM graph_nodes WHERE id = $1", [node!.id]);
     expect(await (await post(key)).json()).toEqual({ ok: true, event: facetEventResponse(snapshot) });
