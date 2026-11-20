@@ -25,8 +25,8 @@ stays **kubectl-only + STATUS-ONLY** (no `kubectl logs`, no S3/DB creds, no PII)
 ```
   ┌── ONE-TIME, k8s lane at cluster install (the ONLY human step) ──────────────┐
   │ 1. kubectl apply -f deploy/ci/bascule-preprod/rbac-ci-bascule-prod.yaml      │
-  │      (cluster-admin) → SA radar-ci-bascule-prod (VAP cluster + ns bundle     │
-  │      + impersonate name-scoped, 0 secrets:create).                           │
+  │      (cluster-admin) → SA radar-ci-bascule-prod (ns bundle + impersonate     │
+  │      name-scoped, 0 ClusterRole/VAP rights, 0 secrets:create).               │
   │ 2. kubectl -n radar-immobilier create token radar-ci-bascule-prod            │
   │      → kubeconfig → base64 → GH secret KUBE_CONFIG_DATA_PROD (PERMANENT).     │
   │ 3. gh variable set BASCULE_BUNDLE_CD_ENABLED --body true   (arm the apply)    │
@@ -45,7 +45,7 @@ stays **kubectl-only + STATUS-ONLY** (no `kubectl logs`, no S3/DB creds, no PII)
   │        radar-pra-admin-prod (runner never sees plaintext)                   │
   │   3. Job db-ro-role-provision (wait Complete, fail-closed)                  │
   │   4. apply dormant CronJob radar-db-backup-prod (suspend:true)              │
-  │   5. apply VAP + RBAC T1 + wait propagation                                 │
+  │   5. apply RBAC T1 (VAP owned by poc-k8s platform/78-radar-immobilier-ci-guards.yaml @ 25a4a34) │
   │   6. ANTI-RCE GATE (impersonation --dry-run=server):                        │
   │        (A) jobTemplate mutation → DENIED   (B) suspend flip → ALLOWED       │
   │        fail ⇒ NEUTRALIZE T1 (Role rules emptied) + abort                    │
@@ -93,7 +93,6 @@ in-cluster sealed-secrets controller materializes. See `CRED_CYCLE.md`.
   literal, so tuning the time is a one-line code change; arming is the variable.
 - `EXPECTED_KUBE_APISERVER_HOST_PROD` (falls back to `EXPECTED_KUBE_APISERVER_HOST`,
   then the OVH host) — PROD cluster identity for the apply.
-- `BASCULE_VAP_PROPAGATION_SEC` (default `20`) — VAP propagation wait.
 - `BASCULE_PREPROD_NAMESPACE` (default `radar-immobilier-preprod`),
   `BASCULE_REFRESH_CRONJOB` (default `radar-refresh-pv`) — force-refresh target
   (`bascule-refresh.yml`).
@@ -108,8 +107,9 @@ in-cluster sealed-secrets controller materializes. See `CRED_CYCLE.md`.
    install variable, not a per-act validation).
 4. **GH-secret materialization of the 2 app creds** (`kubectl create secret … from
    GH secrets`) — gone; SealedSecrets committed + controller-materialized.
-5. **Manual `kubectl apply`** of VAP / RBAC T1 / RO-role / dump CronJob — all in
-   the on-merge apply.
+5. **Manual `kubectl apply`** of RBAC T1 / RO-role / dump CronJob — all in
+   the on-merge apply (while VAP `radar-ci-trigger-suspend-only` is platform-owned in
+   `poc-k8s` `platform/78-radar-immobilier-ci-guards.yaml`, commit `25a4a34`).
 6. **Manual dispatch of the run** as the only entry — the run is scheduled daily at 04:00 UTC
    (`workflow_dispatch` kept for the first run / on-demand).
 7. **`.env` fragility for the app creds** — the material now lives encrypted in git
@@ -130,7 +130,7 @@ Once this PR is merged and the install is done, these are unused by the pipeline
 - SealedSecrets: `kubectl apply` = create-or-update; the controller reconciles the
   core Secret. The apply waits for `Synced` (tolerant) before the RO-role Job.
 - RO-role Job: immutable → delete `--ignore-not-found` then apply, wait Complete.
-- VAP / RBAC / CronJob: `kubectl apply` is idempotent; the CronJob stays
+- RBAC T1 / CronJob: `kubectl apply` is idempotent (VAP is reconciled by `poc-k8s`); the CronJob stays
   `suspend: true` (dormant) until the bascule's S1 trigger un-suspends it.
 - Anti-RCE gate: non-destructive (`--dry-run=server`); on failure it **empties the
   T1 Role rules** to close the RCE window (the permanent SA has no `delete` verb —

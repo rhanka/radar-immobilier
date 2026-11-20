@@ -403,8 +403,8 @@ render-prod:
 # deux blocs s'ajoutent, eux aussi relationnels :
 #   - DÉCALAGE (refresh-stagger.awk) : forme `<minute> <heures> * * *`, et les
 #     lancements prod et préprod les plus proches à au moins
-#     REFRESH_STAGGER_MIN_MINUTES l'un de l'autre (la minute et le nombre de
-#     passages, communs, sont gardés par la parité) ;
+#     REFRESH_STAGGER_MIN_MINUTES l'un de l'autre (la minute et les champs jour,
+#     communs, sont gardés par la parité) ;
 #   - GARDIEN DES PODS PENDING (refresh-watchdog.awk) : le CronJob
 #     radar-refresh-pending-watchdog est rendu, actif, câblé sur le label du pod
 #     de passage, et le Job de passage garde `backoffLimit: 0`.

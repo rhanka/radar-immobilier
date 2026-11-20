@@ -35,8 +35,8 @@ import { FRAMEWORK_STARTERS, FRAMEWORK_BUILD_RULE } from "./framework-starters.j
 import { ARTIFACT_LIST_ORDER } from "./artifact-read-schema.js";
 
 export const AUTHORING_GUIDE_ID = "immo-artifact-authoring" as const;
-const BASE_GUIDE_REVISION = ARTIFACT_STRICT ? `2026-11-05-${ARTIFACT_PROFILE_DESCRIPTOR.profileRevisionId}-r8`
-  : ARTIFACT_P0B ? "2026-11-05-p0b-r8" : "2026-11-05-r8";
+const BASE_GUIDE_REVISION = ARTIFACT_STRICT ? `2026-11-05-${ARTIFACT_PROFILE_DESCRIPTOR.profileRevisionId}-r9`
+  : ARTIFACT_P0B ? "2026-11-05-p0b-r9" : "2026-11-05-r9";
 /** Git mode adds a suffix only when the flag is on; off keeps the historical revision. */
 export const AUTHORING_GUIDE_REVISION = ARTIFACT_GIT_MODE.stage === "off" ? BASE_GUIDE_REVISION
   : `${BASE_GUIDE_REVISION}-git-${ARTIFACT_GIT_MODE.stage}`;
@@ -94,7 +94,7 @@ export function gitAuthoringSection(mode: GitModeResolution): AuthoringGuideGitM
     },
   };
 }
-export const STARTER_VERSION = "1.1.0" as const;
+export const STARTER_VERSION = "1.2.0" as const;
 export const STRICT_ARTIFACT_GUIDE = "This profile requires expectedCurrentReleaseId for artifacts_publish, artifacts_revert and artifacts_delete. First read the artifact with artifacts_get or artifacts_list. For a first publication, send expectedCurrentReleaseId: null only after that read returns currentReleaseId: null. For an update, read the observed release with artifacts_get_source, edit those files, and send its releaseId as expectedCurrentReleaseId. Conversation files alone do not establish the current release. For a revert or deletion, send the currentReleaseId observed by your read. On conflict, re-read and reconcile before submitting a changed command with a new idempotencyKey. For a lost response or commitState: unknown, reconcile with the same idempotencyKey and unchanged command before attempting a new write. Read resultEnvelopeVersion in this guide: version 1 keeps business fields at the root; version 2 places them in output and the guide in output.authoringGuide.";
 
 /**
@@ -199,6 +199,17 @@ export interface AuthoringGuide {
     warning: string;
     grantCycle: readonly string[];
     operations: readonly Readonly<{ name: string; method: string; path: string; params: string; response: string }>[];
+    relay: Readonly<{
+      prefix: string;
+      usage: string;
+      selectionHeadsRule: string;
+      signalFacetWrites: Readonly<{
+        headers: string;
+        shortFormNote: string;
+        expectedSelectionHeadsRule: string;
+        endpoints: readonly Readonly<{ action: string; path: string; body: string }>[];
+      }>;
+    }>;
     errorKinds: readonly Readonly<{ kind: string; codes: string; ui: string }>[];
   }>;
   readonly components: readonly AuthoringGuideComponentRef[];
@@ -248,7 +259,7 @@ export function getAuthoringGuide(): AuthoringGuide {
               : "Currently source retrieval is blocked: artifacts_get_source is unavailable and artifacts_get returns metadata plus this guide, without editable files."),
           ARTIFACT_STRICT ? STRICT_ARTIFACT_GUIDE : "When the complete original source bundle is already available in the conversation, edit those files and publish the full bundle with artifacts_publish on the same artifactId. Do not call artifacts_ensure to replace an existing artifact.",
           "Each publication creates a new release/version and pinnedUrl; stableUrl stays the same. Use a fresh idempotencyKey for changed content, and reuse a previous key only to retry the identical publication.",
-          "When page files (text/html, text/css, text/javascript, application/json) or binary assets (photographs, PDF) are large, stage bytes outside the model: artifacts_create_upload({artifactId, mimeType, maxSize:<exact file byte size>}) returns a signed PUT URL that binds that exact Content-Length: PUT exactly those bytes with exactly the announced requiredHeaders and nothing else, artifacts_commit_upload pins them to a manifest path, and artifacts_publish_bundle releases inline files plus staged assets atomically (expectedCurrentReleaseId is always required, null only for a first publication after a read with no current release). Page text files (text/html, text/css, text/javascript, application/json) are capped at 5 MiB per file and 5 MiB total whether sent inline or via create_upload, verified as strict UTF-8 plus sha256 digest at commit with no magic-byte check, and served as page files under the exact same release CSP (never as binaries). When the Product Owner supplies the files, mint an upload page: artifacts_create_upload_page({artifactId}) returns an uploadPageUrl for originals — bytes go browser to storage, never through a model payload. List assets with artifacts_list_assets; publish with artifacts_publish_bundle or artifacts_publish_bundle_v2. Release ceilings: 255 files, 16 MiB per binary file, 64 MiB per release (5 MiB per file and 5 MiB total for page text files). Served binaries: image/png, image/jpeg, image/gif, image/webp, image/svg+xml, application/pdf, font/woff2, video/mp4; magic-byte verified at commit; SVG must carry no script, handler or external reference — served sandboxed, never executable.",
+          "When page files (text/html, text/css, text/javascript, application/json) or binary assets (photographs, PDF) are large, stage bytes outside the model: artifacts_create_upload({artifactId, mimeType, maxSize:<exact file byte size>}) returns a signed PUT URL that binds that exact Content-Length (measure the exact UTF-8 byte length first, never pad files; omitting maxSize defaults to 5 MiB for page text files and 16 MiB for binaries): PUT exactly those bytes with exactly the announced requiredHeaders and nothing else, artifacts_commit_upload pins them to a manifest path, and artifacts_publish_bundle releases inline files plus staged assets atomically (expectedCurrentReleaseId is always required, null only for a first publication after a read with no current release). Page text files (text/html, text/css, text/javascript, application/json) are capped at 5 MiB per file and 5 MiB total whether sent inline or via create_upload, verified as strict UTF-8 plus sha256 digest at commit with no magic-byte check, and served as page files under the exact same release CSP (never as binaries). When the Product Owner supplies the files, mint an upload page: artifacts_create_upload_page({artifactId}) returns an uploadPageUrl for originals — bytes go browser to storage, never through a model payload. List assets with artifacts_list_assets; publish with artifacts_publish_bundle or artifacts_publish_bundle_v2. Release ceilings: 255 files, 16 MiB per binary file, 64 MiB per release (5 MiB per file and 5 MiB total for page text files). Served binaries: image/png, image/jpeg, image/gif, image/webp, image/svg+xml, application/pdf, font/woff2, video/mp4; magic-byte verified at commit; SVG must carry no script, handler or external reference — served sandboxed, never executable.",
         ],
         unavailableTools: ARTIFACT_P0B ? ["artifacts_restore", "artifacts_fork", "artifacts_promote", "artifacts_renew"]
           : ["artifacts_get_source", "artifacts_delete", "artifacts_restore", "artifacts_set_access",
@@ -402,6 +413,28 @@ export function getAuthoringGuide(): AuthoringGuide {
           { name: "status.closed.v1", method: "GET", path: "/__reader/api/status.closed.v1",
             params: "None. Closed capability diagnostic only.", response: "Unavailable; never a production data source." },
         ],
+        relay: {
+          prefix: "/__reader/app/api/*",
+          usage: "Same-origin RW relay to the app API under the reader's own session: send credentials:'same-origin' and x-preview-grant (renew via /__reader/renew before expiry). Writes require a browser same-origin proof (Origin host or Sec-Fetch-Site: same-origin). No basket-consent gate or operation allowlist; application authorizations apply unchanged. Never call /api/* directly.",
+          selectionHeadsRule: "Selection responses (coherent-city, baskets.search.v1, personal/cities/:city) retain inactive heads (state: 'inactive') so callers can supply expectedHeadId on re-selection. UIs must filter selection entries by state === 'active' when rendering active classifications or unclassified queues.",
+          signalFacetWrites: {
+            headers: "Every POST requires Content-Type: application/json and Idempotency-Key: <UUID> (fresh UUID per distinct command; reuse only to retry the identical command).",
+            shortFormNote: "Short forms omitting displayedFingerprint (e.g. { target, basket }) exist strictly for pre-6B receipt replay under the original Idempotency-Key; any new write without displayedFingerprint and expectedHeadId fails with 400 invalid_facet_command.",
+            expectedSelectionHeadsRule: "On discard, omit expectedSelectionHeads when deselect is absent or empty (sending { pertinent: null, a_surveiller: null } without deselect is rejected with 400). When deselect is non-empty, expectedSelectionHeads is required and its keys must exactly match the baskets in deselect.",
+            endpoints: [
+              { action: "select", path: "/__reader/app/api/v1/workspaces/:workspaceId/signal-facets/personal/select",
+                body: "{ target: { citySlug, type: 'Signal'|'DesignationEvent', id }, basket: 'pertinent'|'a_surveiller', reasonCode?, expectedHeadId: UUID|null, displayedFingerprint: '<64-hex>' }" },
+              { action: "deselect", path: "/__reader/app/api/v1/workspaces/:workspaceId/signal-facets/personal/deselect",
+                body: "{ target, basket: 'pertinent'|'a_surveiller', expectedHeadId: UUID|null, displayedFingerprint: '<64-hex>' }" },
+              { action: "discard", path: "/__reader/app/api/v1/workspaces/:workspaceId/signal-facets/personal/discard",
+                body: "{ target, reasonCode, deselect?: ('pertinent'|'a_surveiller')[], expectedHeadId: UUID|null, expectedSelectionHeads?: { pertinent?: UUID|null, a_surveiller?: UUID|null }, displayedFingerprint: '<64-hex>' }" },
+              { action: "restore", path: "/__reader/app/api/v1/workspaces/:workspaceId/signal-facets/personal/restore",
+                body: "{ target, expectedHeadId: UUID|null, displayedFingerprint: '<64-hex>' }" },
+              { action: "reclassify", path: "/__reader/app/api/v1/workspaces/:workspaceId/signal-facets/personal/reclassify",
+                body: "{ target, displayedFingerprint: '<64-hex>', archives: { personal?: UUID, workspace?: UUID }, selectionHeads: { pertinent: UUID|null, a_surveiller: UUID|null }, nextClass: 'non_classe'|'pertinent'|'a_surveiller', reasonCode? }" },
+            ],
+          },
+        },
         errorKinds: [
           { kind: "no_workspace", codes: "workspace_required, workspace_ambiguous, workspace_missing", ui: "Prompt for an explicit workspace." },
           { kind: "consent", codes: "basket_consent_required", ui: "One-time top-level consent at /__reader/consent, then replay the call once." },
@@ -443,7 +476,7 @@ export function getAuthoringGuide(): AuthoringGuide {
       ...(ARTIFACT_P0B ? { artifactLifecycle: {
         descriptor: ARTIFACT_PROFILE_DESCRIPTOR,
         edit: ["Read artifacts_get for permissions and currentReleaseId, then artifacts_get_source({artifactId}) for the retained manifest and file text. Source requires immo:artifacts:read; immo:read alone is insufficient. get_source stays bounded (at most 32 files / 256 KiB total): a release larger than that cannot be re-read whole through this call — republish from the author's own files instead; never invent missing source.",
-          "For large page files (text/html, text/css, text/javascript, application/json, up to 5 MiB per file and 5 MiB total) and binary assets (photographs, PDF) stage bytes outside the model: artifacts_create_upload({artifactId, mimeType, maxSize:<exact file byte size>}) for a signed PUT URL — the signature binds that exact Content-Length, so measure the bytes first: a PUT of any other size is refused. PUT the exact bytes with exactly the announced requiredHeaders and nothing else, artifacts_commit_upload({artifactId, uploadId, path, mimeType, digest, size, idempotencyKey}) to pin, then artifacts_publish_bundle({artifactId, files, assets, expectedCurrentReleaseId, idempotencyKey}) for one atomic release — or artifacts_publish_bundle_v2 for the copy/carry/keep asset forms. Page text files staged via create_upload are verified as strict UTF-8 plus sha256 digest with no magic-byte check and served as page files under the same release CSP (never as binaries). When the Product Owner supplies the files, mint an upload page: artifacts_create_upload_page({artifactId}) returns an uploadPageUrl for originals — bytes go browser to storage, never through a model payload; review staged and released files with artifacts_list_assets. Release ceilings: 255 files, 16 MiB per binary file, 64 MiB per release (5 MiB per file and 5 MiB total for page text files). Served binaries: image/png, image/jpeg, image/gif, image/webp, image/svg+xml, application/pdf, font/woff2, video/mp4; magic-byte verified at commit. Commit re-verifies the staged bytes server-side and refuses a mismatch with verification_failed, deleting the staging and closing the session with no release.",
+          "For large page files (text/html, text/css, text/javascript, application/json, up to 5 MiB per file and 5 MiB total) and binary assets (photographs, PDF) stage bytes outside the model: artifacts_create_upload({artifactId, mimeType, maxSize:<exact file byte size>}) for a signed PUT URL — the signature binds that exact Content-Length, so measure the exact UTF-8 byte length first and never pad files (omitting maxSize defaults to 5 MiB for page text files and 16 MiB for binaries): a PUT of any other size is refused. PUT the exact bytes with exactly the announced requiredHeaders and nothing else, artifacts_commit_upload({artifactId, uploadId, path, mimeType, digest, size, idempotencyKey}) to pin, then artifacts_publish_bundle({artifactId, files, assets, expectedCurrentReleaseId, idempotencyKey}) for one atomic release — or artifacts_publish_bundle_v2 for the copy/carry/keep asset forms. Page text files staged via create_upload are verified as strict UTF-8 plus sha256 digest with no magic-byte check and served as page files under the same release CSP (never as binaries). When the Product Owner supplies the files, mint an upload page: artifacts_create_upload_page({artifactId}) returns an uploadPageUrl for originals — bytes go browser to storage, never through a model payload; review staged and released files with artifacts_list_assets. Release ceilings: 255 files, 16 MiB per binary file, 64 MiB per release (5 MiB per file and 5 MiB total for page text files). Served binaries: image/png, image/jpeg, image/gif, image/webp, image/svg+xml, application/pdf, font/woff2, video/mp4; magic-byte verified at commit. Commit re-verifies the staged bytes server-side and refuses a mismatch with verification_failed, deleting the staging and closing the session with no release.",
           ARTIFACT_STRICT ? STRICT_ARTIFACT_GUIDE : "Edit the returned text locally with the supplied DS starter rules, preserve every required file, then artifacts_publish({artifactId, files, idempotencyKey}) with a fresh key. Publish the complete snapshot, not a patch. expectedCurrentReleaseId is not required by this profile.",
           `Keep the same key and identical content on retries. resultEnvelopeVersion: ${ARTIFACT_PROFILE_DESCRIPTOR.resultEnvelopeVersion}. ` +
             (ARTIFACT_PART1 ? "Results are in output; use either full files or edits:[{path,oldStr,newStr}], never both. Supply title/description/icon on ensure or publish. list_versions returns retained releases; revert({artifactId,targetReleaseId,expectedCurrentReleaseId,idempotencyKey}) creates a new release with current metadata and ACL. " : "Results remain at the root. ") +
