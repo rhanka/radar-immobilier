@@ -1,0 +1,48 @@
+{
+ "pass": 6,
+ "createdAt": "2026-11-05T19:14:44.358Z",
+ "deferred": [],
+ "gaps": [],
+ "metrics": {
+  "items": 504,
+  "alphaVerdict": 0.9888053343211706,
+  "alphaCode": 0.9814019740471323,
+  "verdictUnanimity": 0.9920634920634921,
+  "verdictConverged": 1,
+  "codeUnanimity": 0.9781746031746031,
+  "codeConverged": 1,
+  "nonConvergedCode": 0,
+  "nonConvergedVerdict": 0,
+  "executionFailures": 0,
+  "ambiguous33": 168,
+  "missingInfoFlagged": 6,
+  "changedShare": 0.3074712643678161,
+  "reannotatedVotes": 348
+ },
+ "residuals": {
+  "count": 176,
+  "causes": {
+   "definition-gap": 165,
+   "code-pair-confusion": 5,
+   "data-outside-immo": 5,
+   "missing-information": 1
+  },
+  "unclassified": [],
+  "unclassifiedCount": 0,
+  "mapSha256": "fc35ac55d6ce150c044b989bc30a0d80b0f174083ca93115120ca6ab35970944",
+  "fallbackToDefinitionGap": 1
+ },
+ "stop": {
+  "stop": true,
+  "why": "cap reached (pass 6 ≥ 5) with 1 fallback definition-gap residual(s) reported as such"
+ },
+ "budget": {
+  "spent": 1054,
+  "cap": 22000
+ },
+ "reannotatedThisPass": {
+  "muse-wonder-max": 116,
+  "astra-max": 116,
+  "opus-5.5-max": 116
+ }
+}

@@ -1,0 +1,29 @@
+{
+ "kind": "l4-series",
+ "series": 11,
+ "method": "gepa",
+ "promptSha256": "a60713366128ae4348a45a7323d0b0984cef87ca6cb33eda15073c045235b016",
+ "routes": [
+  "fable-5.2-low"
+ ],
+ "seed": "gepa-s5",
+ "halves": {
+  "tuningSha256": "dcaf04fa8d740565b1832d55df705f6b28ac99e0f5b184c78614f2e2cd7efc86",
+  "blindSha256": "8c7f4650ba8235da9efa3cc242b3c6ab085c9a2c2afa3058556d3a3d9bd8a46c"
+ },
+ "failureCeiling": 0.05,
+ "supports": {
+  "recall": 30,
+  "precision": 30
+ },
+ "budget": {
+  "cap": 30000,
+  "spent": 26801,
+  "planned": {
+   "dev": 252,
+   "blind": 252,
+   "s113": 113
+  }
+ },
+ "note": "Pre-registered by a conductor lane BEFORE any evaluation call of this series (Annex M M.5). Owner decision 15/11: P0 on Fable 5.2 low (claude-fable-5-2, effort low) on the owner Claude seat, isolated claude -p route (no tools, no MCP, no CLAUDE.md, skills and slash commands disabled, prompt on stdin, no API key). P11 = P0 bytes. Verdict per route: 0 miss and failed-call share <= 5 % (GEPA rule); recall and precision with lower bounds reported. Same protocol as series 9: prompt P0, parsing, scoring, tuning half then blind half, concurrency 1, pause on transient seat errors (429, 5xx, timeout) with resume, 10-item blind pilot first. Served model checked on every answer (another model = failed call, never scored). Blind half and S113 (golden-exposed, secondary) scored once by the executor role."
+}

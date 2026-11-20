@@ -1,0 +1,29 @@
+{
+ "kind": "l4-blind",
+ "series": "1",
+ "createdAt": "2026-11-06T04:36:48.062Z",
+ "promptSha256": "c8c8de654ac0d3d9eff70ebd761331672907035758af9b4210b0e3a9d6c75d37",
+ "routes": [
+  "muse-spark-1.3-low",
+  "muse-spark-1.3-medium",
+  "opus-5.5-low",
+  "opus-5.5-medium",
+  "mistral-large-4-medium",
+  "glm-5.3-low"
+ ],
+ "blindItems": 252,
+ "aggregatesSha256": "48d5617a34a12eee3aeefd2dc1c49384d6624a55a217ec92d33d8965ece58592",
+ "infraReruns": [
+  {
+   "route": "mistral-large-4-medium",
+   "previousAnswered": 1,
+   "reason": "seat infrastructure failure: 1/252 items answered (route file 251/252 failed, calls.jsonl exitCode 0 on 1 items, 1 cached), terminal exit codes 0x1,2x251"
+  },
+  {
+   "route": "glm-5.3-low",
+   "previousAnswered": 0,
+   "reason": "seat infrastructure failure: 0/252 items answered (route file 252/252 failed, calls.jsonl exitCode 0 on 0 items, 0 cached), terminal exit codes 2x252"
+  }
+ ],
+ "note": "blind aggregates sealed in $CLASSIF_HOME/blind/ (owner only); S113 is golden-exposed and excluded from selection"
+}

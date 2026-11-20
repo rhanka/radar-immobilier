@@ -1,0 +1,80 @@
+{
+ "lot": "L2",
+ "createdAt": "2026-11-01T04:14:19.886Z",
+ "passes": 1,
+ "stop": {
+  "stop": true,
+  "why": "α verdict 0.773 and α code 0.754 ≥ 0.67, verdict unanimity 84.7 % ≥ 75 %"
+ },
+ "metrics": {
+  "items": 504,
+  "alphaVerdict": 0.7730908225694153,
+  "alphaCode": 0.7543742031449214,
+  "verdictUnanimity": 0.8472222222222222,
+  "verdictConverged": 1,
+  "codeUnanimity": 0.7142857142857143,
+  "codeConverged": 0.9642857142857143,
+  "nonConvergedCode": 18,
+  "nonConvergedVerdict": 0,
+  "executionFailures": 0,
+  "ambiguous33": 101,
+  "missingInfoFlagged": 48,
+  "changedShare": null
+ },
+ "byKind": {
+  "signal": {
+   "items": 384,
+   "code3of3": 267,
+   "codeMajority": 369,
+   "verdict3of3": 318,
+   "ambiguous3of3": 95
+  },
+  "pv": {
+   "items": 120,
+   "code3of3": 93,
+   "codeMajority": 117,
+   "verdict3of3": 109,
+   "ambiguous3of3": 6
+  }
+ },
+ "verdictMajority": {
+  "a_surveiller": 167,
+  "non_pertinent": 332,
+  "pertinent": 5
+ },
+ "nonConvergedCode": 18,
+ "calls": {
+  "muse-wonder-max": {
+   "paid": 159,
+   "reusedAfterRestart": 1
+  },
+  "gemini-4-argon-high": {
+   "paid": 159,
+   "quotaDenialsOrErrors": 84,
+   "killedHung": 1,
+   "lostAtRestart": 2
+  },
+  "opus-5.5-max": {
+   "paid": 159,
+   "lostAtRestart": 2,
+   "apiEquivalentUsd": 99.81
+  }
+ },
+ "wallClock": {
+  "first": "2026-10-31T20:51:12Z",
+  "last": "2026-11-01T04:08:50Z",
+  "hours": 7.3
+ },
+ "complements": {
+  "flagged": 48,
+  "ok": 11,
+  "refusedFingerprint": 30,
+  "noTarget": 5,
+  "httpError": 2,
+  "usedInPasses": "none (stop rule met after pass 1; complements are kept for L3 dev truth)"
+ },
+ "notes": [
+  "Seat quota denials (Argon) cost no call: affected lots were re-called after the reset (cleanup-log).",
+  "Engram deps volume was empty after a machine crash: 16 lots revalidated from saved extractions, no seat call."
+ ]
+}

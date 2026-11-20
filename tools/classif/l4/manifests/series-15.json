@@ -1,0 +1,59 @@
+{
+ "kind": "l4-series",
+ "series": 15,
+ "method": "gepa",
+ "promptSha256": "a60713366128ae4348a45a7323d0b0984cef87ca6cb33eda15073c045235b016",
+ "routes": [
+  "muse-ember-1.0-low-api"
+ ],
+ "seed": "gepa-s5",
+ "halves": {
+  "tuningSha256": "dcaf04fa8d740565b1832d55df705f6b28ac99e0f5b184c78614f2e2cd7efc86",
+  "blindSha256": "8c7f4650ba8235da9efa3cc242b3c6ab085c9a2c2afa3058556d3a3d9bd8a46c"
+ },
+ "failureCeiling": 0.05,
+ "supports": {
+  "recall": 30,
+  "precision": 30
+ },
+ "passes": {
+  "count": 3,
+  "decision": {
+   "rule": "union",
+   "of": 2
+  },
+  "info": [
+   {
+    "rule": "single",
+    "of": 1,
+    "pass": 1
+   },
+   {
+    "rule": "single",
+    "of": 1,
+    "pass": 2
+   },
+   {
+    "rule": "majority",
+    "of": 3
+   }
+  ]
+ },
+ "budget": {
+  "cap": 30000,
+  "spent": 27484,
+  "planned": {
+   "dev": 756,
+   "blind": 756,
+   "s113": 339
+  }
+ },
+ "bias": "Variant chosen after reading the blind aggregate of series 12 on the same blind set (Ember low single pass: 0 miss on the tuning half, 3 misses on the blind half). The blind half of this series is therefore not a fresh held-out measure for this choice.",
+ "note": "Pre-registered by a conductor lane BEFORE any evaluation call of this series (Annex M M.5). Owner decision 15/11: Muse Ember 1.0 low x2, union, on the Meta API route (muse-ember-1.0-low-api, served model checked, 429 and 5xx retried), goal: reduce misses (criterion D4: 0 blind miss). Every item is called 3 times (independent passes, pass-major order, same P0 and parsing, own per-pass caches: no answer of series 12 is reused). DECISION rule, the only one used for the verdict: union of passes 1 and 2 (an item is shown when pass 1 OR pass 2 shows it; a failed pass makes the combined row failed). INFORMATION only, never used for the verdict: pass 1, pass 2 and the 2-of-3 majority. P15 = P0 bytes. Same protocol as series 9: tuning half then blind half, concurrency 1, pause on transient seat errors with resume, 10-call blind pilot first. Verdict per route on the union rows: 0 miss and failed-call share <= 5 % (GEPA rule); recall and precision with lower bounds reported. Blind half and S113 (golden-exposed, secondary, scored with the same union rule) scored once by the executor role.",
+ "ownerDecision": "2026-11-15, owner: lift the blind one-shot guard for the union (aggregation passes=3/union2), bias accepted",
+ "amendment": {
+  "at": "2026-11-16",
+  "by": "conductor lane (owner decision 15/11)",
+  "reason": "Committed BEFORE any blind call of this series. The blind launch was refused by the one-shot guard (prompt a60713366128 already run with muse-ember-1.0/low in series 12). The guard key now includes the aggregation (passes=3/union2), distinct from the single pass; the distinction is admitted only with this ownerDecision. The single pass still cannot re-run, and this series runs once."
+ }
+}

@@ -1,0 +1,13 @@
+{
+ "kind": "l4-blind",
+ "series": "12",
+ "createdAt": "2026-11-15T22:49:52.145Z",
+ "promptSha256": "a60713366128ae4348a45a7323d0b0984cef87ca6cb33eda15073c045235b016",
+ "method": "gepa",
+ "routes": [
+  "muse-ember-1.0-low-api"
+ ],
+ "blindItems": 252,
+ "aggregatesSha256": "45c0a9d00f296da86a59c5d3c4d2e96623de7fa3a9366aefff03fa52c05c0578",
+ "note": "blind aggregates sealed in $CLASSIF_HOME/blind/ (owner only); S113 is golden-exposed and excluded from selection"
+}

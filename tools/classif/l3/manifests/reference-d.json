@@ -1,0 +1,29 @@
+{
+ "kind": "reference-d",
+ "createdAt": "2026-11-05T19:15:42.271Z",
+ "llmCalls": 0,
+ "fromPass": 6,
+ "deferred": [],
+ "gaps": [],
+ "halves": {
+  "tuning": 252,
+  "blind": 252
+ },
+ "partitions": {
+  "core": 504,
+  "unresolved": 0,
+  "unresolvedCauses": {}
+ },
+ "provenances": {
+  "model_consensus": 483,
+  "mixed": 21
+ },
+ "adjudications": 0,
+ "hashes": {
+  "referenceD": "d1f0ddc2b27fabf4c299e8e9c6b0b8c7129b0715b88c58777648c2df538bd8cd",
+  "blindPlain": "ac2dc7f7b715a03617da2b0a33a987e8129fadcdd19d2511fc843f9b7e55c1f2",
+  "blindSealed": "4b61d79d83492aa5cd7c63450614d28ae80ebc00aae6cddfd23f538b03ac74bf"
+ },
+ "externalEvidence": 10,
+ "trackEvent": "to be recorded by the conductor (single track writer) before P0: referenceDSha256 + blind seal hashes above"
+}

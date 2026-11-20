@@ -1,0 +1,132 @@
+{
+ "kind": "l4-dev",
+ "series": "9",
+ "createdAt": "2026-11-12T20:43:52.246Z",
+ "promptSha256": "a60713366128ae4348a45a7323d0b0984cef87ca6cb33eda15073c045235b016",
+ "routes": [
+  "gemini-4-argon-low",
+  "gemini-4-carbon-low",
+  "gemini-3.8-flash-low"
+ ],
+ "deferred": [],
+ "tuningItems": 252,
+ "aggregates": {
+  "gemini-4-argon-low": {
+   "scored": 252,
+   "refShown": 95,
+   "predShown": 125,
+   "recall": 1,
+   "recallLB": 0.968957988132045,
+   "precision": 0.744,
+   "precisionLB": 0.6718010379329439,
+   "indeterminate": {
+    "recall": false,
+    "precision": false
+   },
+   "failures": 2,
+   "withUnresolved": {
+    "scored": 252,
+    "refShown": 95,
+    "predShown": 125,
+    "recall": 1,
+    "recallLB": 0.968957988132045,
+    "precision": 0.744,
+    "precisionLB": 0.6718010379329439,
+    "indeterminate": {
+     "recall": false,
+     "precision": false
+    }
+   },
+   "misses": 0,
+   "verdict": "pass",
+   "costUsd": 0,
+   "items": 252
+  },
+  "gemini-4-carbon-low": {
+   "scored": 252,
+   "refShown": 95,
+   "predShown": 141,
+   "recall": 1,
+   "recallLB": 0.968957988132045,
+   "precision": 0.6312056737588653,
+   "precisionLB": 0.5591963759158125,
+   "indeterminate": {
+    "recall": false,
+    "precision": false
+   },
+   "failures": 27,
+   "withUnresolved": {
+    "scored": 252,
+    "refShown": 95,
+    "predShown": 141,
+    "recall": 1,
+    "recallLB": 0.968957988132045,
+    "precision": 0.6312056737588653,
+    "precisionLB": 0.5591963759158125,
+    "indeterminate": {
+     "recall": false,
+     "precision": false
+    }
+   },
+   "misses": 0,
+   "verdict": "fail",
+   "costUsd": 0,
+   "items": 252
+  },
+  "gemini-3.8-flash-low": {
+   "scored": 252,
+   "refShown": 95,
+   "predShown": 175,
+   "recall": 0.9473684210526315,
+   "recallLB": 0.8925230597836208,
+   "precision": 0.24571428571428572,
+   "precisionLB": 0.19288013817737748,
+   "indeterminate": {
+    "recall": false,
+    "precision": false
+   },
+   "failures": 126,
+   "withUnresolved": {
+    "scored": 252,
+    "refShown": 95,
+    "predShown": 175,
+    "recall": 0.9473684210526315,
+    "recallLB": 0.8925230597836208,
+    "precision": 0.24571428571428572,
+    "precisionLB": 0.19288013817737748,
+    "indeterminate": {
+     "recall": false,
+     "precision": false
+    }
+   },
+   "misses": 5,
+   "verdict": "fail",
+   "costUsd": 0,
+   "items": 252
+  }
+ },
+ "method": "gepa",
+ "gepa": {
+  "verdict": "fail",
+  "missing": [],
+  "failing": [
+   "gemini-4-carbon-low",
+   "gemini-3.8-flash-low"
+  ],
+  "rule": "pass only when every GEPA route has 0 miss (P/S predicted non_pertinent) and a failure share within the ceiling; precision reported, no floor"
+ },
+ "selection": {
+  "order": [
+   "gemini-4-argon-low",
+   "gemini-4-carbon-low",
+   "gemini-3.8-flash-low"
+  ],
+  "best": "gemini-4-argon-low",
+  "excluded": [
+   "gemini-4-carbon-low",
+   "gemini-3.8-flash-low"
+  ],
+  "criterion": "M.3 lexicographic (tuning half only, failing routes excluded)"
+ },
+ "trackNote": "per-item tuning outputs stay private (optimiser input); this manifest carries metrics only"
+}

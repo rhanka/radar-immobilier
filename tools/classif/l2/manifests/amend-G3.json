@@ -1,0 +1,87 @@
+{
+ "kind": "guide-amendment",
+ "from": "G2",
+ "to": "G3",
+ "afterPass": 4,
+ "createdAt": "2026-11-05T11:52:35.683Z",
+ "half": "tuning",
+ "deferred": [],
+ "gaps": [],
+ "residualItems": 86,
+ "proposed": 21,
+ "adopted": 10,
+ "votes": [
+  3,
+  3,
+  2,
+  3,
+  2,
+  3,
+  0,
+  0,
+  0,
+  2,
+  0,
+  2,
+  1,
+  0,
+  0,
+  0,
+  2,
+  2,
+  1,
+  0,
+  1
+ ],
+ "calls": [
+  {
+   "annotator": "muse-wonder-max",
+   "step": "propose",
+   "exitCode": 0,
+   "latencyMs": 1899028,
+   "reused": false,
+   "toolEvents": null
+  },
+  {
+   "annotator": "astra-max",
+   "step": "propose",
+   "exitCode": 0,
+   "latencyMs": 2439531,
+   "reused": false,
+   "toolEvents": 0
+  },
+  {
+   "annotator": "opus-5.5-max",
+   "step": "propose",
+   "exitCode": 0,
+   "latencyMs": 4052407,
+   "reused": false,
+   "toolEvents": null
+  },
+  {
+   "annotator": "muse-wonder-max",
+   "step": "vote",
+   "exitCode": 0,
+   "latencyMs": 121509,
+   "reused": false,
+   "toolEvents": null
+  },
+  {
+   "annotator": "astra-max",
+   "step": "vote",
+   "exitCode": 0,
+   "latencyMs": 435735,
+   "reused": false,
+   "toolEvents": 0
+  },
+  {
+   "annotator": "opus-5.5-max",
+   "step": "vote",
+   "exitCode": 0,
+   "latencyMs": 2074637,
+   "reused": false,
+   "toolEvents": null
+  }
+ ],
+ "guideSha256": "67058e5e4e900db41f051d70dcf7f92d4a126db5a5217e9b025336857aeff311"
+}

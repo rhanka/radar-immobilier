@@ -1,0 +1,38 @@
+{
+ "kind": "fingerprint-refusal-audit",
+ "createdAt": "2026-11-01T04:19:25.215Z",
+ "flagged": 48,
+ "refused": 30,
+ "refusedPerList": {
+  "bylaws": 29,
+  "citySlugs": 3,
+  "shingles": 3
+ },
+ "refusedPerCombination": {
+  "bylaws": 24,
+  "bylaws+citySlugs": 2,
+  "citySlugs": 1,
+  "bylaws+shingles": 3
+ },
+ "bylaws": {
+  "distinctExposedBylawTokensMatched": 46,
+  "tokenShapes": {
+   "999": 58,
+   "9999": 30,
+   "9.9": 16,
+   "9999-99": 3,
+   "9.9.9.9": 1,
+   "9999-999": 6
+  },
+  "tokenLengths": {
+   "3": 74,
+   "4": 30,
+   "7": 4,
+   "8": 6
+  },
+  "refusalsWithOnlyShortTokens": 27,
+  "exposedBylawListSize": 212
+ },
+ "measuredOn": "full stored source document (the refused excerpt itself is not kept), so token counts are an upper bound for the excerpt",
+ "reading": "The bylaw-number list causes 29 of the 30 refusals (24 alone). Most matching tokens are 3- or 4-digit numbers (shapes 999, 9999, 9.9): the bylaw tokenizer used to build the exposed list (bylawsIn, minimum 3 characters, any number) also keeps generic numbers such as years or article numbers, which occur in unrelated municipalities. Lists are neither widened nor narrowed here; any change (e.g. keep only bylaw tokens with a separator or a letter, or match bylaw numbers per city) is a decision for the conductor."
+}
