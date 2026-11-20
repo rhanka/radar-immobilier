@@ -57,11 +57,20 @@ function normalize(result: ToolResult): ToolResult {
     ...result,
     content: result.content.map((block) => {
       if (block.type !== "text" || !block.text) return block;
-      const payload = JSON.parse(block.text) as { correlationId?: unknown; source?: unknown };
+      const payload = JSON.parse(block.text) as { correlationId?: unknown; source?: unknown; workspaceId?: unknown };
       let text = block.text;
+      let rewritten = false;
       if (payload.source !== undefined) {
         expect(payload.source).toMatch(/^(live|fixture)$/);
         delete payload.source;
+        rewritten = true;
+      }
+      if (payload.workspaceId !== undefined) {
+        expect(payload.workspaceId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+        delete payload.workspaceId;
+        rewritten = true;
+      }
+      if (rewritten) {
         text = text.includes("\n") ? JSON.stringify(payload, null, 2) : JSON.stringify(payload);
       }
       text = text.replace("not_wired:http_data_source", "not_wired_yet:http_data_source");

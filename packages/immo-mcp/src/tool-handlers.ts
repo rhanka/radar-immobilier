@@ -142,8 +142,14 @@ async function searchSignalsHandler(
   // The request-bound exchange is the only protected HTTP credential.
   const callCtx = await resolveExchangedCallContext(ctx, "search_signals");
   try {
-    const signals = await ctx.data.searchSignals(args, callCtx);
-    return jsonResult({ source: domainSource(ctx), city: args.city, count: signals.length, signals });
+    const { signals, workspaceId } = await ctx.data.searchSignals(args, callCtx);
+    return jsonResult({
+      source: domainSource(ctx),
+      ...(workspaceId ? { workspaceId } : {}),
+      city: args.city,
+      count: signals.length,
+      signals,
+    });
   } catch (error) {
     if ((error instanceof RadarSignalReadError &&
       (error.upstreamStatus === 401 || error.upstreamStatus === 403)) ||

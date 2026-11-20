@@ -10,7 +10,7 @@ describe("signal response workspace identifiers", () => {
     it("accepts historical identifier " + workspaceId, () => {
       expect(parseSignalSearchResponse(response(workspaceId), {
         city: "longueuil", limit: 20, workspaceId,
-      })).toEqual([]);
+      })).toEqual({ signals: [], workspaceId });
     });
   }
   for (const workspaceId of ["radar/default", "11111111-1111-1111-1111-11111111111g",

@@ -274,9 +274,9 @@ describe("delegated token propagation (P4) through the transport", () => {
     override async searchSignals(
       args: SearchSignalsArgs,
       ctx: DataSourceCallContext = {},
-    ): Promise<MockSignal[]> {
+    ) {
       this.lastAccessToken = ctx.accessToken;
-      return [
+      return { signals: [
         {
           id: "sig-x",
           city: args.city,
@@ -289,7 +289,7 @@ describe("delegated token propagation (P4) through the transport", () => {
           summary: "signal réel",
           source_document_id: "doc-1",
         },
-      ];
+      ] };
     }
   }
 

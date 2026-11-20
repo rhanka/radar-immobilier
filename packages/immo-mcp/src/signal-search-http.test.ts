@@ -10,7 +10,8 @@ describe("scoped signal HTTP adapter", () => {
     const fetchImpl = vi.fn(async () => Response.json(signalSearchBody("mont-tremblant", [signal])));
     const data = new HttpDataSource({ baseUrl, fetchImpl });
     expect(await data.searchSignals({ city: "Mont-Tremblant", limit: 1, etape: "avis motion",
-      query: "zone & lot", showDiscarded, workspaceId: SIGNAL_TEST_WORKSPACE }, { accessToken: "exchanged" })).toEqual([signal]);
+      query: "zone & lot", showDiscarded, workspaceId: SIGNAL_TEST_WORKSPACE }, { accessToken: "exchanged" }))
+      .toEqual({ signals: [signal], workspaceId: SIGNAL_TEST_WORKSPACE });
     expect(fetchImpl).toHaveBeenCalledTimes(1);
     const [input, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
     const url = new URL(input);
@@ -48,7 +49,8 @@ describe("scoped signal HTTP adapter", () => {
   it("allows only an explicit valid 200 empty collection and rejects malformed JSON", async () => {
     const fetchImpl = vi.fn(async () => Response.json(signalSearchBody()));
     const data = new HttpDataSource({ baseUrl, fetchImpl });
-    expect(await data.searchSignals({ city: "longueuil", limit: 1 })).toEqual([]);
+    expect(await data.searchSignals({ city: "longueuil", limit: 1 }))
+      .toEqual({ signals: [], workspaceId: SIGNAL_TEST_WORKSPACE });
     fetchImpl.mockImplementation(async () => new Response("secret"));
     await expect(data.searchSignals({ city: "longueuil", limit: 1 })).rejects.toMatchObject({ code: "radar_api_bad_payload" });
     fetchImpl.mockRejectedValue(new Error("https://internal/token=secret"));
