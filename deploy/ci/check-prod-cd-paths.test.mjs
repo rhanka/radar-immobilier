@@ -95,3 +95,22 @@ test('runbook and governance rules document the CD-only rule', () => {
     assert.ok(fs.readFileSync(path.join(ROOT, f), 'utf8').includes(needle), `${f} documents ${needle}`);
   }
 });
+
+test('platform-owned VAP radar-ci-trigger-suspend-only is absent from tenant CD apply and ClusterRole RBAC', () => {
+  const vapRel = 'deploy/ci/bascule-preprod/vap-ci-trigger-suspend-only.yaml';
+  assert.equal(fs.existsSync(path.join(ROOT, vapRel)), false, 'tenant VAP manifest removed');
+  const regRaw = fs.readFileSync(path.join(ROOT, 'deploy/ci/prod-cd-paths.json'), 'utf8');
+  assert.equal(regRaw.includes('vap-ci-trigger-suspend-only'), false, 'no tenant VAP entry in prod-cd-paths.json');
+
+  const rbac = fs.readFileSync(path.join(ROOT, 'deploy/ci/bascule-preprod/rbac-ci-bascule-prod.yaml'), 'utf8');
+  const activeRbac = rbac.split('\n').filter((l) => !/^\s*#/.test(l)).join('\n');
+  assert.equal(/^kind:\s*ClusterRole(Binding)?\b/m.test(activeRbac), false, 'no ClusterRole or ClusterRoleBinding in rbac-ci-bascule-prod.yaml');
+  assert.equal(activeRbac.includes('admissionregistration.k8s.io'), false, 'zero admissionregistration.k8s.io RBAC rules');
+  assert.equal(activeRbac.includes('radar-ci-bascule-prod-vap'), false, 'no radar-ci-bascule-prod-vap object');
+
+  const wf = fs.readFileSync(path.join(ROOT, '.github/workflows/bascule-bundle-cd.yml'), 'utf8');
+  assert.equal(wf.includes('vap-ci-trigger-suspend-only.yaml'), false, 'workflow does not apply tenant VAP file');
+  assert.ok(wf.includes('platform/78-radar-immobilier-ci-guards.yaml') && wf.includes('25a4a34'), 'workflow cites platform VAP ownership');
+  assert.ok(wf.includes('--dry-run=server') && wf.includes('radar-ci-trigger-suspend-only\\|jobTemplate') && wf.includes('{"spec":{"suspend":false}}'),
+    'anti-RCE dry-run gate preserved');
+});
