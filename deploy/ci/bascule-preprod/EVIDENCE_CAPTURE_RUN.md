@@ -43,6 +43,15 @@ Set once: `PNS=radar-immobilier-preprod ; CJNS=radar-immobilier ; CJ=radar-db-ba
 
 ## [b] VAP prod negative + mint-after + suspend-only patch — CAPTURE k8s → CERTIF i-infra
 
+`ValidatingAdmissionPolicy` and `ValidatingAdmissionPolicyBinding` `radar-ci-trigger-suspend-only`
+are owned and reconciled by the Kubernetes platform repository (`poc-k8s`
+`platform/78-radar-immobilier-ci-guards.yaml`, commit `25a4a34`), not applied by
+`bascule-bundle-cd.yml` (`radar-ci-bascule-prod` holds zero `ClusterRole` or
+`admissionregistration.k8s.io` permissions). On every bundle apply, `.github/workflows/bascule-bundle-cd.yml`
+verifies enforcement via `kubectl --as=system:serviceaccount:radar-immobilier:radar-ci-trigger-prod --dry-run=server`
+(`jobTemplate` mutation denied by `radar-ci-trigger-suspend-only`, `suspend` flip allowed,
+fail-closed Role neutralization on failure).
+
     # @T1 — UPDATE test on jobTemplate/schedule → EXPECT Denied (radar-ci-trigger-suspend-only)
     date -u +%FT%TZ    # T1
     kubectl --kubeconfig "$DUMP_KUBECONFIG" -n "$CJNS" patch cronjob "$CJ" \
@@ -108,5 +117,5 @@ then `kubectl patch ... suspend=true` runs (bascule.mjs:451), THEN `die` if `!ve
 
 ## Order (matches i-infra gates)
 
-VAP → RBAC T1 → test-prod DENIED → mint KUBE_CONFIG_DATA_PROD_TRIGGER → CronJob suspend=false (trigger)
+platform VAP (`poc-k8s` `platform/78-radar-immobilier-ci-guards.yaml` @ `25a4a34`) → RBAC T1 → test-prod DENIED → mint KUBE_CONFIG_DATA_PROD_TRIGGER → CronJob suspend=false (trigger)
 → freshness → re-suspend=true → restore → migrate → docs-sync → recon (G4) → flip → smoke (no refresh).
