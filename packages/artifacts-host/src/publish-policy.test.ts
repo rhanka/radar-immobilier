@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   BINDING_NAME_MAX_LENGTH,
+  PAGE_TEXT_MIME_TYPES,
   PUBLISH_MAX_FILE_BYTES,
   PUBLISH_MAX_FILES,
+  isPageTextMimeType,
   validateBindingName,
   validatePublishFilePath,
   validatePublishFiles,
@@ -59,10 +61,21 @@ describe("validatePublishFilePath", () => {
 });
 
 describe("validatePublishFiles", () => {
-  it("bounds the total decoded manifest and refuses noncanonical MIME types", () => {
-    expect(validatePublishFiles([file({ sizeBytes: 150000 }), file({ path: "a.css", sizeBytes: 150000 })])).not.toEqual([]);
+  it("enforces the 5 MiB (5 242 880 B) ceiling per file and across the manifest", () => {
+    expect(PUBLISH_MAX_FILE_BYTES).toBe(5 * 1024 * 1024);
+    expect(validatePublishFiles([
+      file({ sizeBytes: 3 * 1024 * 1024 }),
+      file({ path: "a.css", sizeBytes: 3 * 1024 * 1024 }),
+    ]).join("\n")).toContain("5 MiB");
+    expect(validatePublishFiles([
+      file({ sizeBytes: 2 * 1024 * 1024 }),
+      file({ path: "a.css", sizeBytes: 3 * 1024 * 1024 }),
+    ])).toEqual([]);
     expect(validatePublishFiles([file({ mediaType: "TEXT/HTML" })])).not.toEqual([]);
     expect(validatePublishFiles([file({ mediaType: "text/html; charset=utf-8" })])).not.toEqual([]);
+    for (const mime of PAGE_TEXT_MIME_TYPES) expect(isPageTextMimeType(mime)).toBe(true);
+    expect(isPageTextMimeType("image/png")).toBe(false);
+    expect(isPageTextMimeType("text/html; charset=utf-8")).toBe(false);
   });
   it("accepts the documented fork manifest", () => {
     expect(
@@ -99,7 +112,7 @@ describe("validatePublishFiles", () => {
     ).toContain("duplicate path");
     expect(
       validatePublishFiles([file({ sizeBytes: PUBLISH_MAX_FILE_BYTES + 1 })]).join("\n"),
-    ).toContain("256 KiB");
+    ).toContain("5 MiB");
     expect(validatePublishFiles([file({ sizeBytes: PUBLISH_MAX_FILE_BYTES })])).toEqual([]);
     for (const sizeBytes of [-1, 1.5, Number.NaN]) {
       expect(validatePublishFiles([file({ sizeBytes })]), String(sizeBytes)).not.toEqual([]);
