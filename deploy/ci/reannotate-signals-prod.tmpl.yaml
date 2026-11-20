@@ -1,0 +1,32 @@
+# Declarative override contract applied to a Job derived from
+# CronJob/radar-refresh-pv in namespace radar-immobilier by
+# deploy/ci/reannotate-signals-prod.sh (.github/workflows/reannotate-signals-prod.yml).
+#
+# Reuses radar-refresh-pv's pinned image digest, securityContext, DB/S3
+# credentials, keyring PVC mount, and two-step B+C / Muse fallback env.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ${JOB_NAME}
+  namespace: radar-immobilier
+spec:
+  ttlSecondsAfterFinished: 86400
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: radar-reannotate-signals
+    spec:
+      containers:
+        - name: refresh-pv
+          command:
+            - /usr/bin/flock
+            - -n
+            - /keyring/runtime/.refresh.lock
+            - node
+            - dist/scripts/reannotate-signals.js
+            - --${REANNOTATION_MODE}
+          env:
+            - name: REANNOTATION_SINCE_DAYS
+              value: "${REANNOTATION_SINCE_DAYS}"
+            - name: PIPELINE_RUN_ID
+              value: "${PIPELINE_RUN_ID}"
