@@ -323,12 +323,13 @@ verify-renders:
 	      if (($$0 !~ /name: REFRESH_PROVIDER\n[ ]+value: openai\n/ \
 	        || $$0 !~ /name: REFRESH_MODEL\n[ ]+value: gpt-6-astra\n/ \
 	        || $$0 !~ /name: REFRESH_SINGLE_PASS\n[ ]+value: "0"/ \
-	        || $$0 !~ /name: REFRESH_CLASSIFY_MODE\n[ ]+value: "off"\n/ \
+	        || $$0 !~ /name: REFRESH_CLASSIFY_MODE\n[ ]+value: two-step\n/ \
 	        || $$0 !~ /name: REFRESH_CLASSIFY_PROVIDER\n[ ]+value: openai\n/ \
 	        || $$0 !~ /name: REFRESH_CLASSIFY_MODEL\n[ ]+value: gpt-6-astra\n/ \
 	        || $$0 !~ /name: REFRESH_CLASSIFY_REASONING_EFFORT\n[ ]+value: low\n/ \
 	        || $$0 !~ /name: REFRESH_CLASSIFY_FALLBACK_REASONING_EFFORT\n[ ]+value: low\n/ \
 	        || $$0 !~ /name: REFRESH_CLASSIFY_CONCURRENCY\n[ ]+value: "2"/ \
+	        || $$0 !~ /name: REFRESH_RUN_MAX_TOKENS\n[ ]+value: "100000000"/ \
 		    || $$0 !~ /name: REFRESH_SINGLE_PASS_PROVIDER\n[ ]+value: openai\n/ \
 		    || $$0 !~ /name: REFRESH_SINGLE_PASS_MODEL\n[ ]+value: gpt-6-astra\n/ \
 		    || $$0 !~ /name: REFRESH_SINGLE_PASS_REASONING_EFFORT\n[ ]+value: low\n/ \
@@ -340,8 +341,8 @@ verify-renders:
 	        || $$0 !~ /name: REFRESH_VERIFY_MODEL\n[ ]+value: gemini-3.8-flash\n/ \
 	        || $$0 !~ /name: REFRESH_VERIFY_REASONING_EFFORT\n[ ]+value: low\n/ \
 	        || $$0 !~ /name: REFRESH_MAX_OUTPUT_TOKENS\n[ ]+value: "32768"/)) exit 1; \
-	      if (!(($$0 ~ /name: REFRESH_FALLBACK_PROVIDER\n[ ]+value: gemini\n/ && $$0 ~ /name: REFRESH_FALLBACK_MODEL\n[ ]+value: gemini-3.8-flash\n/) || ($$0 ~ /name: REFRESH_FALLBACK_PROVIDER\n[ ]+value: muse\n/ && $$0 ~ /name: REFRESH_FALLBACK_MODEL\n[ ]+value: muse-wonder-1.0\n/))) exit 1; \
-	      if (!(($$0 ~ /name: REFRESH_CLASSIFY_FALLBACK_PROVIDER\n[ ]+value: gemini\n/ && $$0 ~ /name: REFRESH_CLASSIFY_FALLBACK_MODEL\n[ ]+value: gemini-3.8-flash\n/) || ($$0 ~ /name: REFRESH_CLASSIFY_FALLBACK_PROVIDER\n[ ]+value: muse\n/ && $$0 ~ /name: REFRESH_CLASSIFY_FALLBACK_MODEL\n[ ]+value: muse-wonder-1.0\n/))) exit 1; \
+	      if ($$0 !~ /name: REFRESH_FALLBACK_PROVIDER\n[ ]+value: gemini\n/ || $$0 !~ /name: REFRESH_FALLBACK_MODEL\n[ ]+value: gemini-3.8-flash\n/) exit 1; \
+	      if ($$0 !~ /name: REFRESH_CLASSIFY_FALLBACK_PROVIDER\n[ ]+value: muse\n/ || $$0 !~ /name: REFRESH_CLASSIFY_FALLBACK_MODEL\n[ ]+value: muse-wonder-1.0\n/) exit 1; \
 	    } END { if (!pv) exit 1 }' "$$render" || { echo "refresh activation/model contract failed: $$render" >&2; exit 1; }; \
 	    awk 'BEGIN{RS="\n---\n"} /kind: CronJob/ && /\n  name: radar-refresh-pv\n/ { pv=1; \
 	      if ($$0 !~ /- dist\/scripts\/refresh-pv\.js\n[ ]+- --all\n[ ]+env:/) exit 1; \
@@ -372,7 +373,7 @@ verify-renders:
 	  awk -f "$(CONTRACT_AWK)" "$$tmp/prod.yaml" | sort > "$$tmp/prod.contract"; \
 	  test -s "$$tmp/prod.contract" || { echo "empty refresh contract projection" >&2; exit 1; }; \
 	  diff -u "$$tmp/preprod.contract" "$$tmp/prod.contract" \
-	    || { echo "refresh overlay parity failed: preprod and prod diverge outside the five intended differences (namespace, memory envelope, S3 binding, refresh hour list, fallback provider) — see the diff above (< preprod, > prod)" >&2; exit 1; }; \
+	    || { echo "refresh overlay parity failed: preprod and prod diverge outside the four intended differences (namespace, memory envelope, S3 binding, refresh hour list) — see the diff above (< preprod, > prod)" >&2; exit 1; }; \
 	  wf="$(ROOT)/.github/workflows/bascule-preprod.yml"; \
 	  awk -v min_minutes=$(REFRESH_STAGGER_MIN_MINUTES) -f "$(STAGGER_AWK)" "$$tmp/preprod.yaml" "$$tmp/prod.yaml" \
 	    || { echo "refresh stagger failed: the closest prod and preprod refresh starts must be at least $(REFRESH_STAGGER_MIN_MINUTES) minutes apart (incident 2026-10-09)" >&2; exit 1; }; \
