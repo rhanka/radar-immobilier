@@ -52,6 +52,16 @@ export interface GeoFilterState {
 }
 
 const RELATIVE_PERIODS = new Set(SIGNAL_TIME_RANGE_PRESETS.map(({ token }) => token));
+/** Read-only URL aliases for relative periods; writes always emit the canonical token. */
+const PERIOD_ALIASES: Readonly<Record<string, string>> = {
+  "30d": "1mo",
+};
+
+function canonicalPeriod(raw: string | undefined): string | undefined {
+  if (!raw) return undefined;
+  const resolved = PERIOD_ALIASES[raw] ?? raw;
+  return RELATIVE_PERIODS.has(resolved) ? resolved : undefined;
+}
 
 export function unrestrictedTimeRange(): SignalTimeRange {
   return { mode: "relative", relative: "all", from: 0, to: 0 };
@@ -100,8 +110,8 @@ function dateText(timestamp: number): string {
 }
 
 function readTimeRange(value: (key: string) => string | undefined, now: number): SignalTimeRange {
-  const period = value("period");
-  if (period && RELATIVE_PERIODS.has(period)) {
+  const period = canonicalPeriod(value("period"));
+  if (period) {
     if (period === "all") return unrestrictedTimeRange();
     return normalizeSignalTimeRange({ mode: "relative", relative: period, from: 0, to: now }, now);
   }
@@ -114,8 +124,7 @@ function readTimeRange(value: (key: string) => string | undefined, now: number):
 
 /** A recognized relative `period`, or a valid custom `dateFrom`+`dateTo` window. */
 function hasExplicitPeriod(value: (key: string) => string | undefined): boolean {
-  const period = value("period");
-  if (period && RELATIVE_PERIODS.has(period)) return true;
+  if (canonicalPeriod(value("period"))) return true;
   const from = civilDate(value("dateFrom"));
   const to = civilDate(value("dateTo"));
   return from !== null && to !== null && from <= to;
