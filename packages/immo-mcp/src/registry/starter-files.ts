@@ -1,5 +1,5 @@
 /**
- * Publishable starter files for Radar artifact pages (starter v1.1.0).
+ * Publishable starter files for Radar artifact pages (starter v1.2.0).
  *
  * Single HTML page + author stylesheet + presentation script + the
  * framework-agnostic H5 reader client. The four files are directly
@@ -218,13 +218,15 @@ var KIND_BY_CODE = {
   target_not_found: "invalid",
   unknown_operation: "invalid"
 };
-function ReadError(kind, code, status, requestId) {
+function ReadError(kind, code, status, requestId, detail, current) {
   var err = new Error(code);
   err.name = "ReadError";
   err.kind = kind;
   err.code = code;
   err.status = status;
   err.requestId = requestId || "";
+  if (detail !== undefined && detail !== "") err.detail = detail;
+  if (current !== undefined) err.current = current;
   return err;
 }
 function kindOf(code, status) {
@@ -256,6 +258,7 @@ function timedFetch(path, init) {
   var timer = setTimeout(function () { controller.abort(); }, TIMEOUT_MS);
   var options = { method: init.method, cache: "no-store", credentials: "same-origin", signal: controller.signal };
   if (init.headers) options.headers = init.headers;
+  if (init.body !== undefined) options.body = init.body;
   return fetch(path, options).then(
     function (response) { clearTimeout(timer); return response; },
     function (error) {
@@ -359,11 +362,52 @@ function search(args) {
     personalHistory: args.personalHistory
   });
 }
+function appFetch(apiPath, options) {
+  if (typeof apiPath !== "string" || apiPath.indexOf("/api/") !== 0) {
+    return Promise.reject(ReadError("invalid", "invalid_api_path", 0, ""));
+  }
+  var opts = options || {};
+  var method = opts.method ? String(opts.method).toUpperCase() : "GET";
+  return ensureGrant().then(function () {
+    var headers = {};
+    var hasContentType = false;
+    if (opts.headers) {
+      Object.keys(opts.headers).forEach(function (name) {
+        var lower = name.toLowerCase();
+        if (lower === "x-preview-grant") return;
+        if (lower === "content-type") hasContentType = true;
+        headers[name] = opts.headers[name];
+      });
+    }
+    headers["x-preview-grant"] = grant;
+    if (opts.idempotencyKey) headers["Idempotency-Key"] = String(opts.idempotencyKey);
+    var init = { method: method, headers: headers };
+    if (opts.body !== undefined) {
+      if (typeof opts.body === "string") {
+        init.body = opts.body;
+      } else {
+        init.body = JSON.stringify(opts.body);
+        if (!hasContentType) headers["Content-Type"] = "application/json";
+      }
+    }
+    return timedFetch("/__reader/app" + apiPath, init);
+  }).then(function (response) {
+    return response.json().catch(function () { return null; }).then(function (body) {
+      if (response.ok) return body;
+      var code = failureCode(body, response.status);
+      var kind = kindOf(code, response.status);
+      var detail = body && typeof body.detail === "string" ? body.detail : undefined;
+      var current = body && body.current !== undefined ? body.current : undefined;
+      throw ReadError(kind, code, response.status, requestIdOf(body), detail, current);
+    });
+  });
+}
 window.ImmoReader = {
   ReadError: ReadError,
   workspaces: function () { return read("workspaces.list.v1", {}); },
   context: context,
   search: search,
+  appFetch: appFetch,
   ensureGrant: ensureGrant,
   reopenUrl: function () { return "/__reader/start"; }
 };

@@ -156,6 +156,27 @@ test('bascule-bundle-cd proves lock RBAC before creating the lock and always rel
     'bascule lock verbs stay name-scoped in its own Role');
   assert.equal(bascule.includes('radar-db-credentials'), false, 'bascule Role never touches the DB credentials Secret');
 });
+test('bascule-bundle-cd proves platform VAP enforcement via dry-run without applying VAP or ClusterRole RBAC', () => {
+  const w = workflow('bascule-bundle-cd.yml');
+  const steps = w.jobs['apply-bundle'].steps;
+  assert.equal(steps.some(s => /vap-ci-trigger-suspend-only\.yaml|Apply VAP|VAP propagation/i.test(`${s.name || ''}\n${s.run || ''}`)), false,
+    'tenant workflow never applies or sleeps on cluster-scoped VAP');
+  const t1 = steps.findIndex(s => s.name === 'Apply RBAC T1 (trigger SA/Role/RoleBinding)');
+  const gate = steps.findIndex(s => s.name === 'Anti-RCE gate — impersonation --dry-run=server negative test');
+  assert.ok(t1 >= 0 && gate > t1, 'RBAC T1 precedes anti-RCE dry-run gate');
+  const gateRun = steps[gate].run;
+  assert.ok(gateRun.includes('--as="$SA"') && gateRun.includes('--dry-run=server'), 'impersonation server dry-run kept');
+  assert.ok(gateRun.includes('radar-ci-trigger-suspend-only\\|jobTemplate') && gateRun.includes('{"spec":{"suspend":false}}'),
+    'jobTemplate denied and suspend flip allowed checks kept');
+  assert.equal(/\bkubectl\b[^\n]*\b(validatingadmissionpolic|admissionregistration)/i.test(gateRun), false,
+    'dry-run gate reads zero VAP objects');
+  const rbacDocs = YAML.parseAllDocuments(readFileSync('deploy/ci/bascule-preprod/rbac-ci-bascule-prod.yaml', 'utf8')).map(d => d.toJSON()).filter(Boolean);
+  assert.deepEqual(rbacDocs.map(d => `${d.kind}/${d.metadata.name}`), [
+    'ServiceAccount/radar-ci-bascule-prod',
+    'Role/radar-ci-bascule-prod',
+    'RoleBinding/radar-ci-bascule-prod',
+  ]);
+});
 test('manual migrate target requires a pinned digest and the manifest carries no dated tag', () => {
   const makefile = readFileSync('Makefile', 'utf8');
   assert.ok(makefile.includes('MIGRATE_IMAGE') && makefile.includes('@sha256:[0-9a-f]{64}'));
