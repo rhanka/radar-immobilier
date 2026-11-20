@@ -24,6 +24,7 @@ import { startPreparationCleanup } from "./preparation-cleanup.js";
 import { projectArtifactWriteFailure } from "@sentropic/artifacts/server/outcome-contract";
 import { createTimeoutBlobStore, createTimeoutS3Client, DEFAULT_S3_BUDGET, withS3Deadline } from "./s3-timeout.js";
 import { HOST_ARTIFACT_PROFILE, HOST_MIME_TYPES, isArtifactMutation, RELEASE_FILE_BYTES_MAX, RELEASE_FILES_MAX, RELEASE_TOTAL_BYTES_MAX } from "./p0b-profile.js";
+import { isPageTextMimeType, PUBLISH_MAX_FILE_BYTES } from "./publish-policy.js";
 import type { ArtifactDeleteConfirmation } from "./delete-confirmation.js";
 import { ARTIFACT_GIT_MODE } from "./p0b-profile.js";
 import { composeGitModeFromEnv, type GitModeConfig, type GitModePorts } from "./git-mode/compose.js";
@@ -141,7 +142,25 @@ export async function composeArtifactHost(
     // sweeper runs every minute over all five passes — expired sessions,
     // staged TTL with consumed-pin release, orphan staging keys (S3 stores
     // without last-write enumeration skip that pass), and expired pages.
-    const uploadSessions = options.uploads?.sessions ?? createPostgresUploadSessionStore(pool);
+    const baseUploadSessions = options.uploads?.sessions ?? createPostgresUploadSessionStore(pool);
+    let publicationRefsForSessions: ReturnType<typeof createPostgresUploadSessionStore> extends never ? never : {
+      unpin(digest: string, holder: string): Promise<void>;
+    } | undefined;
+    const uploadSessions: UploadSessionStore = options.uploads?.sessions ? baseUploadSessions : {
+      ...baseUploadSessions,
+      async recordStagedFile(record) {
+        const { rows } = await pool.query<{ upload_id: string; digest: string }>(
+          `DELETE FROM artifacts.staged_files
+           WHERE artifact_id = $1 AND path = $2 AND upload_id <> $3
+           RETURNING upload_id, digest`,
+          [record.artifactId, record.path, record.uploadId],
+        );
+        for (const old of rows) {
+          await publicationRefsForSessions?.unpin(old.digest, `upload:${old.upload_id}`).catch(() => undefined);
+        }
+        return baseUploadSessions.recordStagedFile(record);
+      },
+    };
     const staging = options.uploads?.staging ?? createS3StagingStore({ client, bucket: config.s3Bucket });
     const signer = options.uploads?.signer ?? createS3UploadSigner({ client, bucket: config.s3Bucket });
     const uploadPages = options.uploads?.pages ?? createPostgresUploadPageStore(pool);
@@ -163,6 +182,7 @@ export async function composeArtifactHost(
     // the orphan/expiry passes see the same ledger as publication. The
     // orphan-key bound stays visible here (provider default): a slow S3
     // listing never turns one tick into an unbounded scan.
+    publicationRefsForSessions = domain.publicationRefs;
     const sweeper = createUploadSweeper({ sessions: uploadSessions, staging,
       refs: domain.publicationRefs, pages: uploadPages }, { orphanKeyLimit: ORPHAN_SWEEP_MAX_KEYS });
     // Files parity LOT 2 — the browser page service over the same ledger,
@@ -170,7 +190,7 @@ export async function composeArtifactHost(
     // internal page service (same stores, same ceilings, same quota
     // backstop). Caps mirror the provider construction exactly: release
     // budget from the profile ceilings, MIME/path rules from the profile.
-    const uploadPageService: UploadPageService | undefined = options.uploadPage ? createUploadPageService({
+    const baseUploadPageService: UploadPageService | undefined = options.uploadPage ? createUploadPageService({
       pages: uploadPages, sessions: uploadSessions, staging, signer, blobs, refs: domain.publicationRefs,
       idempotency: domain.store,
       cookieSigner: createHmacUploadPageCookieSigner({ secret: options.uploadPage.cookieSecret }),
@@ -183,6 +203,21 @@ export async function composeArtifactHost(
         maxTotalBytes: RELEASE_TOTAL_BYTES_MAX, mimeTypes: [...HOST_MIME_TYPES] },
       budget: { filesMax: RELEASE_FILES_MAX, totalBytesMax: RELEASE_TOTAL_BYTES_MAX },
     }) : undefined;
+    const uploadPageService: UploadPageService | undefined = baseUploadPageService ? {
+      ...baseUploadPageService,
+      async createFile(input) {
+        if (isPageTextMimeType(input.mimeType) && input.size > PUBLISH_MAX_FILE_BYTES) {
+          throw new Error("invalid page file size");
+        }
+        return baseUploadPageService.createFile(input);
+      },
+      async commitFile(input) {
+        if (isPageTextMimeType(input.mimeType) && input.size > PUBLISH_MAX_FILE_BYTES) {
+          throw new Error("invalid page file size");
+        }
+        return baseUploadPageService.commitFile(input);
+      },
+    } : undefined;
     // One sweep at a time: a slow tick never overlaps the next one (the
     // 60s period keeps overlapping sweeps from piling up on a stalled
     // store).
@@ -230,7 +265,8 @@ export async function composeArtifactHost(
       const dispatch = () => domain.execute(request, invocation);
       // Every PUT and read-back of one publish shares a deadline that ends
       // before the preparation window, so finalization is never refused for it.
-      const outcome = request.method === "POST" && ["/publish", "/revert"].includes(request.path)
+      const outcome = request.method === "POST" &&
+        ["/publish", "/revert", "/publish_bundle", "/publish_bundle_v2"].includes(request.path)
         ? await withS3Deadline(Date.now() + blobDeadlineMs, dispatch) : await dispatch();
       if (!outcome.ok) {
         const entry = projectArtifactWriteFailure(outcome.failure, {
