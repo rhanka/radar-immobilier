@@ -193,11 +193,11 @@ describe("30-day signal reannotation", () => {
     ];
     f.repository.list = vi.fn(async () => signals);
     f.repository.annotation = async (act) => act.id === "s3" ? { source: "manual" } : undefined;
-    f.options.classify = vi.fn(async (act: ReannotationSignal) => {
+    const classify = vi.fn(async (act: ReannotationSignal) => {
       if (act.id === "s4") throw Object.assign(new Error("timeout"), { code: "timeout" });
       return decision;
     });
-    const report = await runReannotation({ ...f.options, sinceDays: 14, pipelineRunId: "prod-reannotate-14d-42" });
+    const report = await runReannotation({ ...f.options, classify, sinceDays: 14, pipelineRunId: "prod-reannotate-14d-42" });
     expect(f.repository.list).toHaveBeenCalledWith(new Date("2026-10-30T12:00:00.000Z"), expect.any(AbortSignal));
     expect(report).toMatchObject({
       mode: "dry-run",
