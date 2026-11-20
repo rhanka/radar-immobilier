@@ -53,11 +53,14 @@ export {
 } from "./s3-timeout.js";
 export {
   BINDING_NAME_MAX_LENGTH,
+  PAGE_TEXT_MIME_TYPES,
   PUBLISH_MAX_FILE_BYTES,
   PUBLISH_MAX_FILES,
+  isPageTextMimeType,
   validateBindingName,
   validatePublishFilePath,
   validatePublishFiles,
+  type PageTextMimeType,
   type PublishFileInput,
 } from "./publish-policy.js";
 export {
@@ -74,7 +77,8 @@ export { ARTIFACT_P0B, ARTIFACT_P0B_VERSIONS, ARTIFACT_PROVIDER_VERSION, ARTIFAC
   compileHostArtifactProfile, UPLOAD_ARTIFACT_TOOLS, UPLOAD_PAGE_ARTIFACT_TOOLS, SHARING_ARTIFACT_TOOLS,
   RELEASE_FILES_MAX, RELEASE_FILE_BYTES_MAX, RELEASE_TOTAL_BYTES_MAX, HOST_MIME_TYPES,
   ACTIVE_ARTIFACT_TOOLS, HOST_ARTIFACT_PROFILE, validateArtifactInput, artifactPublicSchema,
-  isArtifactMutation, isArtifactPublication } from "./p0b-profile.js";
+  extractEnvelopeV1Metadata, withPendingArtifactMetadata, getPendingArtifactMetadata,
+  isArtifactMutation, isArtifactPublication, type ArtifactDisplayMetadata } from "./p0b-profile.js";
 export { projectListVersionsAuthors, type ListVersionsDirectory } from "./list-versions-projection.js";
 export { createAccountDirectory } from "./directory.js";
 export { artifactRefusalResponse } from "./result-projection.js";
