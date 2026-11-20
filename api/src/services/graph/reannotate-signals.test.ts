@@ -1,8 +1,21 @@
 import { describe, expect, it, vi } from "vitest";
 import { createRefreshModelPolicy } from "./refresh-model-policy.js";
-import { createReannotationClassifier, parseReannotationArgs, reannotationInput, reannotationInputSha256, runReannotation,
-  type ReannotationIdentity, type ReannotationRepository, type ReannotationSignal,
-  type ReannotationWrite } from "./reannotate-signals.js";
+import { refreshClassifyConfig } from "./refresh-classify-config.js";
+import { loadSinglePassPrompt } from "./refresh-single-pass.js";
+import {
+  createReannotationClassifier,
+  DEFAULT_REANNOTATION_SINCE_DAYS,
+  parseReannotationArgs,
+  parseReannotationPipelineRunId,
+  parseReannotationSinceDays,
+  reannotationInput,
+  reannotationInputSha256,
+  runReannotation,
+  type ReannotationIdentity,
+  type ReannotationRepository,
+  type ReannotationSignal,
+  type ReannotationWrite,
+} from "./reannotate-signals.js";
 
 const signal: ReannotationSignal = { citySlug: "test-city", id: "signal-1", type: "Signal",
   label: "Four residential units", props: { excerpt: "Four units approved" }, sourceRef: null };
@@ -154,5 +167,169 @@ describe("30-day signal reannotation", () => {
     } })).toEqual({ classe: "pertinent",
       reason: "Residential project", ambiguous: false, model: fallback.model, effort: fallback.effort });
     expect(calls).toEqual([primary.model, fallback.model]);
+  });
+
+  it("parses REANNOTATION_SINCE_DAYS (default 30) and PIPELINE_RUN_ID explicitly", () => {
+    expect(DEFAULT_REANNOTATION_SINCE_DAYS).toBe(30);
+    expect(parseReannotationSinceDays({})).toBe(30);
+    expect(parseReannotationSinceDays({ REANNOTATION_SINCE_DAYS: "" })).toBe(30);
+    expect(parseReannotationSinceDays({ REANNOTATION_SINCE_DAYS: "30" })).toBe(30);
+    expect(parseReannotationSinceDays({ REANNOTATION_SINCE_DAYS: "14" })).toBe(14);
+    for (const bad of ["0", "-5", "366", "3.5", "abc"]) {
+      expect(() => parseReannotationSinceDays({ REANNOTATION_SINCE_DAYS: bad })).toThrow("REANNOTATION_SINCE_DAYS");
+    }
+    expect(parseReannotationPipelineRunId({})).toBeUndefined();
+    expect(parseReannotationPipelineRunId({ PIPELINE_RUN_ID: "prod-reannotate-30d-123" })).toBe("prod-reannotate-30d-123");
+    expect(() => parseReannotationPipelineRunId({ PIPELINE_RUN_ID: "bad id with space" })).toThrow("PIPELINE_RUN_ID");
+  });
+
+  it("applies custom sinceDays, reports per-city counts and traceability fields in dry-run", async () => {
+    const f = fixture();
+    const signals: ReannotationSignal[] = [
+      { ...signal, citySlug: "valleyfield", id: "s1" },
+      { ...signal, citySlug: "brossard", id: "s2" },
+      { ...signal, citySlug: "valleyfield", id: "s3" },
+      { ...signal, citySlug: "brossard", id: "s4" },
+    ];
+    f.repository.list = vi.fn(async () => signals);
+    f.repository.annotation = async (act) => act.id === "s3" ? { source: "manual" } : undefined;
+    f.options.classify = vi.fn(async (act: ReannotationSignal) => {
+      if (act.id === "s4") throw Object.assign(new Error("timeout"), { code: "timeout" });
+      return decision;
+    });
+    const report = await runReannotation({ ...f.options, sinceDays: 14, pipelineRunId: "prod-reannotate-14d-42" });
+    expect(f.repository.list).toHaveBeenCalledWith(new Date("2026-10-30T12:00:00.000Z"), expect.any(AbortSignal));
+    expect(report).toMatchObject({
+      mode: "dry-run",
+      pipelineRunId: "prod-reannotate-14d-42",
+      promptId: prompt.id,
+      promptSha256: prompt.sha256,
+      sinceDays: 14,
+      candidates: 4,
+      candidatesByCity: { brossard: 2, valleyfield: 2 },
+      processed: 4,
+      classified: 2,
+      written: 0,
+      skippedManual: 1,
+      refused: 1,
+      failed: 1,
+    });
+    expect(f.write).not.toHaveBeenCalled();
+  });
+
+  it("uses two-step v2 prompt with Astra low primary, Muse Wonder 1.0 low fallback, and preserves manual priority", async () => {
+    const v2Prompt = await loadSinglePassPrompt();
+    expect(v2Prompt.id).toBe("v2");
+    expect(v2Prompt.sha256).toMatch(/^34df2dd7/);
+    const cfg = refreshClassifyConfig({
+      REFRESH_CLASSIFY_PROVIDER: "openai",
+      REFRESH_CLASSIFY_MODEL: "gpt-6-astra",
+      REFRESH_CLASSIFY_REASONING_EFFORT: "low",
+      REFRESH_CLASSIFY_FALLBACK_PROVIDER: "muse",
+      REFRESH_CLASSIFY_FALLBACK_MODEL: "muse-wonder-1.0",
+      REFRESH_CLASSIFY_FALLBACK_REASONING_EFFORT: "low",
+      REFRESH_CLASSIFY_CONCURRENCY: "2",
+    });
+    const attempted: Array<{ provider: string; model: string; effort: string }> = [];
+    const policy = createRefreshModelPolicy({
+      primary: cfg.primary,
+      fallback: cfg.fallback,
+      primaryQualityAttempts: 1,
+      forceFallback: false,
+      timeoutMs: 1000,
+      createClient: (model) => ({
+        mode: "mesh",
+        provider: model.provider,
+        model: model.model,
+        async generateJson(request) {
+          attempted.push({ provider: model.provider, model: model.model, effort: model.effort });
+          if (model.provider === "openai") throw Object.assign(new Error("rate limited"), { status: 429 });
+          const output = { classe: "a_surveiller", reason: "PPCMOI residentiel a suivre", reasonCode: "S-INFO-MANQUANTE", ambiguous: false };
+          await request.validateResponse?.(JSON.stringify(output));
+          return { status: "completed", mode: "mesh", provider: model.provider, model: model.model, audit: {} };
+        },
+      }),
+    });
+    const writes: ReannotationWrite[] = [];
+    const stored = new Map<string, ReannotationIdentity>([["human-1", { source: "manual" }]]);
+    const repo: ReannotationRepository = {
+      list: async () => [
+        { ...signal, citySlug: "drummondville", id: "auto-1" },
+        { ...signal, citySlug: "drummondville", id: "human-1" },
+      ],
+      annotation: async (act) => stored.get(act.id),
+      write: async (input) => {
+        writes.push(input);
+        stored.set(input.nodeId, input);
+        return "written";
+      },
+    };
+    const report = await runReannotation({
+      repository: repo,
+      prompt: v2Prompt,
+      primary: cfg.primary,
+      fallback: cfg.fallback,
+      concurrency: cfg.concurrency,
+      apply: true,
+      sinceDays: 30,
+      now,
+      pipelineRunId: "prod-reannotate-30d-muse-1",
+      classify: createReannotationClassifier(policy, v2Prompt),
+    });
+    expect(attempted).toEqual([
+      { provider: "openai", model: "gpt-6-astra", effort: "low" },
+      { provider: "muse", model: "muse-wonder-1.0", effort: "low" },
+    ]);
+    expect(writes).toHaveLength(1);
+    expect(writes[0]).toMatchObject({
+      citySlug: "drummondville",
+      nodeId: "auto-1",
+      classe: "a_surveiller",
+      source: "ai",
+      model: "muse-wonder-1.0",
+      effort: "provider-default",
+      promptId: "v2",
+      promptSha256: v2Prompt.sha256,
+      pipelineRunId: "prod-reannotate-30d-muse-1",
+    });
+    expect(report).toMatchObject({
+      mode: "apply",
+      pipelineRunId: "prod-reannotate-30d-muse-1",
+      promptId: "v2",
+      promptSha256: v2Prompt.sha256,
+      sinceDays: 30,
+      candidates: 2,
+      candidatesByCity: { drummondville: 2 },
+      processed: 2,
+      classified: 1,
+      written: 1,
+      skippedManual: 1,
+      refused: 1,
+      failed: 0,
+    });
+    // Resume run must treat the Muse provider-default annotation as unchanged.
+    const resumed = await runReannotation({
+      repository: repo,
+      prompt: v2Prompt,
+      primary: cfg.primary,
+      fallback: cfg.fallback,
+      concurrency: cfg.concurrency,
+      apply: true,
+      sinceDays: 30,
+      now,
+      pipelineRunId: "prod-reannotate-30d-muse-2",
+      classify: createReannotationClassifier(policy, v2Prompt),
+    });
+    expect(resumed).toMatchObject({
+      candidates: 2,
+      processed: 2,
+      classified: 0,
+      written: 0,
+      skippedUnchanged: 1,
+      skippedManual: 1,
+      refused: 1,
+      failed: 0,
+    });
+    expect(attempted).toHaveLength(2);
   });
 });
