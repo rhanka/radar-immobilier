@@ -341,7 +341,7 @@ verify-renders:
 	        || $$0 !~ /name: REFRESH_VERIFY_MODEL\n[ ]+value: gemini-3.8-flash\n/ \
 	        || $$0 !~ /name: REFRESH_VERIFY_REASONING_EFFORT\n[ ]+value: low\n/ \
 	        || $$0 !~ /name: REFRESH_MAX_OUTPUT_TOKENS\n[ ]+value: "32768"/)) exit 1; \
-	      if ($$0 !~ /name: REFRESH_FALLBACK_PROVIDER\n[ ]+value: muse\n/ || $$0 !~ /name: REFRESH_FALLBACK_MODEL\n[ ]+value: muse-wonder-1.0\n/) exit 1; \
+	      if ($$0 !~ /name: REFRESH_FALLBACK_PROVIDER\n[ ]+value: gemini\n/ || $$0 !~ /name: REFRESH_FALLBACK_MODEL\n[ ]+value: gemini-3.8-flash\n/) exit 1; \
 	      if ($$0 !~ /name: REFRESH_CLASSIFY_FALLBACK_PROVIDER\n[ ]+value: muse\n/ || $$0 !~ /name: REFRESH_CLASSIFY_FALLBACK_MODEL\n[ ]+value: muse-wonder-1.0\n/) exit 1; \
 	    } END { if (!pv) exit 1 }' "$$render" || { echo "refresh activation/model contract failed: $$render" >&2; exit 1; }; \
 	    awk 'BEGIN{RS="\n---\n"} /kind: CronJob/ && /\n  name: radar-refresh-pv\n/ { pv=1; \
