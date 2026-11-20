@@ -10,6 +10,7 @@ function client(respond: (path: string, init: RequestInit) => Response, withGran
   const window = {} as { ImmoReader: {
     context(id: string): Promise<unknown>; search(args: object): Promise<unknown>;
     workspaces(): Promise<unknown>;
+    appFetch(apiPath: string, options?: { method?: string; body?: unknown; headers?: Record<string, string>; idempotencyKey?: string }): Promise<unknown>;
     ensureGrant(): Promise<void>;
   } };
   runInNewContext(STARTER_READER_JS, { window, history, fetch, URL, URLSearchParams, AbortController,
@@ -86,5 +87,83 @@ describe("publishable H5 client", () => {
     const changed = client(() => Response.json({ ok: false, requestId: "trace", error: { code: "cursor_expired" } }, { status: 409 }));
     await expect(changed.reader.search({})).rejects.toMatchObject({ kind: "changed", code: "cursor_expired", requestId: "trace" });
     expect(changed.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("should relay GET and POST requests via appFetch with grant renewal and Idempotency-Key", async () => {
+    const c = client((path) => {
+      if (path === "/__reader/renew") return Response.json({ grant: "renewed" });
+      return Response.json({ ok: true, event: { id: "ev-1" } });
+    });
+    const got = await c.reader.appFetch("/api/v1/workspaces/w1/signal-facets/personal/cities/rawdon");
+    expect(got).toEqual({ ok: true, event: { id: "ev-1" } });
+    expect(c.fetch).toHaveBeenCalledWith(
+      "/__reader/app/api/v1/workspaces/w1/signal-facets/personal/cities/rawdon",
+      expect.objectContaining({
+        method: "GET",
+        credentials: "same-origin",
+        headers: { "x-preview-grant": "initial" },
+      }),
+    );
+
+    c.expire();
+    const payload = { target: { citySlug: "rawdon", type: "Signal", id: "s1" }, basket: "pertinent", expectedHeadId: null, displayedFingerprint: "a".repeat(64) };
+    const posted = await c.reader.appFetch("/api/v1/workspaces/w1/signal-facets/personal/select", {
+      method: "POST",
+      body: payload,
+      idempotencyKey: "11111111-1111-4111-8111-111111111111",
+    });
+    expect(posted).toEqual({ ok: true, event: { id: "ev-1" } });
+    const postCall = c.fetch.mock.calls.at(-1)!;
+    expect(postCall[0]).toBe("/__reader/app/api/v1/workspaces/w1/signal-facets/personal/select");
+    expect(postCall[1]).toMatchObject({
+      method: "POST",
+      credentials: "same-origin",
+      body: JSON.stringify(payload),
+      headers: {
+        "Content-Type": "application/json",
+        "Idempotency-Key": "11111111-1111-4111-8111-111111111111",
+        "x-preview-grant": "renewed",
+      },
+    });
+  });
+
+  it("should reject non-/api/ paths locally in appFetch without network calls", async () => {
+    const c = client(() => Response.json({ ok: true }));
+    for (const bad of ["", "/", "/__reader/start", "https://evil.example/api/v1", "/api"]) {
+      await expect(c.reader.appFetch(bad)).rejects.toMatchObject({
+        name: "ReadError",
+        kind: "invalid",
+        code: "invalid_api_path",
+        status: 0,
+      });
+    }
+    expect(c.fetch).not.toHaveBeenCalled();
+  });
+
+  it("should surface status, code, detail and current on non-2xx appFetch responses", async () => {
+    const c400 = client(() => Response.json(
+      { error: "invalid_facet_command", detail: "missing_or_invalid_idempotency_key" },
+      { status: 400 },
+    ));
+    await expect(c400.reader.appFetch("/api/v1/workspaces/w1/signal-facets/personal/select", { method: "POST", body: {} }))
+      .rejects.toMatchObject({
+        name: "ReadError",
+        status: 400,
+        code: "invalid_facet_command",
+        detail: "missing_or_invalid_idempotency_key",
+      });
+
+    const current = { target: { citySlug: "rawdon", type: "Signal", id: "s1" }, version: null, heads: [] };
+    const c409 = client(() => Response.json(
+      { error: "facet_head_conflict", current },
+      { status: 409 },
+    ));
+    await expect(c409.reader.appFetch("/api/v1/workspaces/w1/signal-facets/personal/select", { method: "POST", body: {} }))
+      .rejects.toMatchObject({
+        name: "ReadError",
+        status: 409,
+        code: "facet_head_conflict",
+        current,
+      });
   });
 });
