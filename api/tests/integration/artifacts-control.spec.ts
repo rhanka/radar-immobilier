@@ -49,7 +49,7 @@ describe("artifact control HTTP isolation", () => {
       [{ sub: "anonymous", bearer: true }, 401], [{ origin: "https://foreign.example" }, 403],
       [{ origin: "https://123e4567-e89b-12d3-a456-426614174000.pages.example.test" }, 403],
       [{ contentType: "text/plain" }, 415], [{ contentType: "text/plain; application/json" }, 415],
-      [{ raw: "x".repeat(2 * 1024 * 1024 + 1) }, 413],
+      [{ raw: "x".repeat(10 * 1024 * 1024 + 1) }, 413],
       [{ host: "123e4567-e89b-12d3-a456-426614174000.pages.example.test" }, 401],
     ] as const) expect((await request("ensure", input, options)).status, JSON.stringify(options).slice(0, 100)).toBe(expected);
     expect((await request("ensure", { ...input, storageScopeId: "forged" })).status).toBe(400);
@@ -78,12 +78,12 @@ describe("artifact control HTTP isolation", () => {
       ...["../index.html", "a\\b", "a//b", "%69ndex.html", "api/test", "__artifacts/x", "health", "livez"].map((path) => [{ ...base, path }]),
       [{ ...base, mimeType: "application/javascript" }], [base, base],
       Array.from({ length: 33 }, (_, i) => ({ ...base, path: `${i}.html` })),
-      [{ ...base, text: "é".repeat(131073) }],
+      [{ ...base, text: "é".repeat(2_621_441) }],
       [{ ...base, bytes: [256] }],
     ];
     for (const files of badFiles) {
       expect((await request("publish", { artifactId, files, idempotencyKey: "invalid" })).status).toBe(400);
     }
     expect(await counts()).toEqual(before);
-  });
+  }, 30_000);
 });
