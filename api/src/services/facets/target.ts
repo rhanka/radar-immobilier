@@ -9,8 +9,10 @@ export interface SignalTarget {
   id: string;
 }
 export class FacetError extends Error {
-  constructor(public status: 400 | 401 | 403 | 404 | 409 | 422, message: string) {
+  readonly detail?: string;
+  constructor(public status: 400 | 401 | 403 | 404 | 409 | 422, message: string, detail?: string) {
     super(message);
+    if (detail !== undefined) this.detail = detail;
   }
 }
 
