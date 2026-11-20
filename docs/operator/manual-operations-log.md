@@ -81,3 +81,25 @@ See also [docs/runbooks/prod-promotion.md](../runbooks/prod-promotion.md) and
 - **Diff summary**: Created login role `immo_mcp_signal_writer` and materialized `Secret/immo-mcp-signal-writer` (`Opaque`) in `radar-immobilier`. Production remains inert (`IMMO_MCP_SIGNALS_WRITE_ENABLED` not enabled live; IdP scope step 4 and `deploy/overlays/prod-signal-write` step 5 not yet executed). Zero secrets committed to git.
 - **Owner GO (reference)**: Product Owner GO (`mcp-signal-write-runbook.md` steps 1–3 prerequisite provisioning, 2026-11-18).
 - **Planned CD return**: Credentials stay outside git per `docs/operator/mcp-signal-write-runbook.md` (`SECRET_EXCLUSION` — CI `radar-ci-deployer` holds zero `secrets:get`). Secret presence may be checked by name only (`kubectl get secret ... -o name`) when an account permits `secrets:get`. ConfigMap activation state remains audited via `prod-drift-check`.
+
+### 2026-11-20 — Production refresh keyring import (`muse`, `acct-0d955d8a68`)
+
+- **Who**: Cluster operator (`i-cond`, `radar-immobilier` conductor session).
+- **When (UTC)**: Meta enrollment `2026-11-20` around `07:17Z`; production import `2026-11-20T07:19:23Z`–`07:19:56Z`.
+- **What**: Production, namespace `radar-immobilier`, `PVC/radar-refresh-keyring`. Added `muse` account `acct-0d955d8a68` (transport `muse`), distinct from the preprod account and enrolled fresh so prod and preprod do not share the same OAuth authorization. Ephemeral objects created then deleted: `Job/radar-refresh-keyring-account-import`, `Secret/radar-refresh-keyring-account-import`, and `ConfigMap/radar-refresh-keyring-import-script`. Local keyring backup before enrollment: `~/.sentropic/llm-mesh-reauth-cloud-code-20261101.backup-pre-muse-prod-11200716` (path only, no content).
+- **Command**:
+  ```bash
+  make -f deploy/k8s/refresh-cronjobs/refresh-018.mk enroll-muse \
+    LOCAL_IMAGE=ghcr.io/rhanka/radar-api@sha256:ed346ff5... \
+    KEYRING_SOURCE_DIR=<redacted> REFRESH_OWNER_SCOPE_REF=<read-from-prod-secret-without-echo> \
+    ENV=test-refresh-018
+  make -f deploy/k8s/refresh-cronjobs/refresh-018.mk import-keyring-account-prod \
+    IMPORT_TRANSPORT=muse IMPORT_IMAGE_REF=ghcr.io/rhanka/radar-api@sha256:b7011b04... \
+    IMPORT_SOURCE_DIR=<redacted> IMPORT_RENDER_OUT=<tmp>/import-muse-prod.yaml ENV=prod
+  make -f deploy/k8s/refresh-cronjobs/refresh-018.mk run-keyring-import-prod \
+    KUBECONFIG=<redacted> IMPORT_RENDER_OUT=<tmp>/import-muse-prod.yaml PROD_CONFIRM=1 ENV=prod
+  ```
+  (Declared operator path, PR `#1153`.)
+- **Diff summary**: Import result `{"status":"imported","transport":"muse","account":"acct-0d955d8a68","replaced":[],"accounts":6}`. Zero residual remote objects (`kubectl -n radar-immobilier get ... --ignore-not-found` empty). Local render removed.
+- **Owner GO (reference)**: Product Owner GO — objective (b), Muse fallback for classification C in production, with enrollment and import executed by `i-cond`; PR `#1143` (two-step mode, `muse` fallback for C).
+- **Planned CD return**: N/A — an OAuth seat does not transit through CI. Operator path declared in `operatorPaths` (`deploy/ci/prod-cd-paths.json`), runbook `docs/operator/prod-keyring-import.md`.
