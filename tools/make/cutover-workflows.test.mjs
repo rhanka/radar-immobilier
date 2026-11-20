@@ -132,6 +132,28 @@ test('promote-prod applies drift check and schedules prod-drift-check without Se
   const tail = build.jobs['promote-prod'].steps.at(-1);
   assert.ok(tail.run.includes('git archive origin/main') && tail.run.includes('check-prod-drift.sh'));
 });
+test('promote-prod applies immo-mcp-config after cutover and before drift check, and reannotate targets v* tags', () => {
+  const build = workflow('build-push-images.yml');
+  const steps = build.jobs['promote-prod'].steps;
+  const run = steps.findIndex(s => s.name === 'Sequential cutover (same manifest as rehearsal)');
+  const applyCm = steps.findIndex(s => s.name === 'Apply immo-mcp-config ConfigMap (prod)');
+  const drift = steps.findIndex(s => s.name === 'Check production non-Deployment drift against main (read-only)');
+  assert.ok(run >= 0 && applyCm > run && drift > applyCm, 'immo-mcp-config apply runs after cutover and before drift check');
+  assert.equal(steps[applyCm].env.NAMESPACE, 'radar-immobilier');
+  assert.equal(steps[applyCm].run, 'bash deploy/ci/apply-prod-immo-mcp-config.sh');
+  const reg = JSON.parse(readFileSync('deploy/ci/prod-cd-paths.json', 'utf8'));
+  const mcpEntries = reg.cdPaths.filter(e => e.path === 'deploy/k8s/immo-mcp/40-immo-mcp-http-deploy.yaml' || e.path === 'deploy/k8s/immo-mcp/kustomization.yaml');
+  assert.equal(mcpEntries.length, 2);
+  for (const entry of mcpEntries) {
+    assert.equal(entry.workflow, '.github/workflows/build-push-images.yml');
+    assert.equal(entry.workflowRef, 'apply-prod-immo-mcp-config.sh');
+    assert.ok(entry.objects.includes('ConfigMap/immo-mcp-config'));
+  }
+  const reann = workflow('reannotate-signals-prod.yml');
+  assert.deepEqual(Object.keys(reann.on), ['workflow_dispatch']);
+  assert.equal(reann.jobs.reannotate.environment, 'production');
+  assert.equal(reann.jobs.reannotate.if, "startsWith(github.ref, 'refs/tags/v')");
+});
 test('bascule-bundle-cd proves lock RBAC before creating the lock and always releases it', () => {
   const w = workflow('bascule-bundle-cd.yml');
   for (const name of ['apply-bundle', 'apply-backup']) {
@@ -155,6 +177,27 @@ test('bascule-bundle-cd proves lock RBAC before creating the lock and always rel
   assert.ok(bascule.includes('resourceNames: ["radar-change-lock"]') && bascule.includes('"get", "update", "delete"'),
     'bascule lock verbs stay name-scoped in its own Role');
   assert.equal(bascule.includes('radar-db-credentials'), false, 'bascule Role never touches the DB credentials Secret');
+});
+test('bascule-bundle-cd proves platform VAP enforcement via dry-run without applying VAP or ClusterRole RBAC', () => {
+  const w = workflow('bascule-bundle-cd.yml');
+  const steps = w.jobs['apply-bundle'].steps;
+  assert.equal(steps.some(s => /vap-ci-trigger-suspend-only\.yaml|Apply VAP|VAP propagation/i.test(`${s.name || ''}\n${s.run || ''}`)), false,
+    'tenant workflow never applies or sleeps on cluster-scoped VAP');
+  const t1 = steps.findIndex(s => s.name === 'Apply RBAC T1 (trigger SA/Role/RoleBinding)');
+  const gate = steps.findIndex(s => s.name === 'Anti-RCE gate — impersonation --dry-run=server negative test');
+  assert.ok(t1 >= 0 && gate > t1, 'RBAC T1 precedes anti-RCE dry-run gate');
+  const gateRun = steps[gate].run;
+  assert.ok(gateRun.includes('--as="$SA"') && gateRun.includes('--dry-run=server'), 'impersonation server dry-run kept');
+  assert.ok(gateRun.includes('radar-ci-trigger-suspend-only\\|jobTemplate') && gateRun.includes('{"spec":{"suspend":false}}'),
+    'jobTemplate denied and suspend flip allowed checks kept');
+  assert.equal(/\bkubectl\b[^\n]*\b(validatingadmissionpolic|admissionregistration)/i.test(gateRun), false,
+    'dry-run gate reads zero VAP objects');
+  const rbacDocs = YAML.parseAllDocuments(readFileSync('deploy/ci/bascule-preprod/rbac-ci-bascule-prod.yaml', 'utf8')).map(d => d.toJSON()).filter(Boolean);
+  assert.deepEqual(rbacDocs.map(d => `${d.kind}/${d.metadata.name}`), [
+    'ServiceAccount/radar-ci-bascule-prod',
+    'Role/radar-ci-bascule-prod',
+    'RoleBinding/radar-ci-bascule-prod',
+  ]);
 });
 test('manual migrate target requires a pinned digest and the manifest carries no dated tag', () => {
   const makefile = readFileSync('Makefile', 'utf8');
