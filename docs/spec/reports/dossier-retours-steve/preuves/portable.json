@@ -1,46 +1,46 @@
 {
   "output": "docs/spec/reports/dossier-retours-steve/decision-focus.html",
-  "bytes": 668969,
-  "htmlSha256": "cebf2e37e9d7fa5efed12f22a79fe773a21bab186a136c1698b787867e787242",
-  "embeddedSha256": "0b0e0115916614faa997085664a481703677c45cbe656bb181d8ec79816d2d65",
+  "bytes": 4519804,
+  "htmlSha256": "63ce2a59539d3db53786057b3ddb52146ae08489bf7a462d215727ce4bd382d2",
+  "embeddedSha256": "af67a1569bac9f3ae52212312c551e1ddaa871fa1fe3a46b17829a423e3b3acb",
   "embeddedSha256Rule": "sha256 of the file with the embedded value replaced by 64 zeros",
-  "dossierHash": "f9066e532bd560e36b2225993936beb70421ee1125554ceff729d637ecb25b83",
-  "artifactInputHash": "3c82786a9d2dccf128f2b81c73763ba8b5fd6e10aa0b9f50549a726108df95b7",
+  "dossierHash": "24b68a8f4380257d4bb6e98b03a44ea553122eef996833b116626940e1a93e46",
+  "artifactInputHash": "3aca10b134eb7817ff84623b0a98210868348a7a58e906c4c4ae1f032144ee23",
   "graphs": [
     {
       "id": "criteres-steve",
-      "nodes": 10,
-      "edges": 9,
+      "nodes": 5,
+      "edges": 0,
+      "subflows": 0,
+      "sceneHash": "0954467486fd59288ec397a1f638dd066cbebfe7f4e830b587f0412451125cc1"
+    },
+    {
+      "id": "affichage-abc",
+      "nodes": 16,
+      "edges": 19,
       "subflows": 5,
-      "sceneHash": "8d3f825fce7c2738b790ab3a6fd1d15d39847a3bb4e85c7b6bf556ac3e179e44"
+      "sceneHash": "5ce17eb15e6b0f43d19366d776914e8f362a8daafc3a24dd8aec70389bd9422d"
     },
     {
       "id": "modele-donnees",
-      "nodes": 11,
-      "edges": 10,
-      "subflows": 5,
-      "sceneHash": "b87aacb0f2030bb54bfdd42a480417c453e7c66c54fc3b16ec21b8d21e376a1a"
+      "nodes": 26,
+      "edges": 29,
+      "subflows": 0,
+      "sceneHash": "2c9ef0b4f166a1e8f985a1eb6535b57410a2c997d29d1d2a5f717329b278ce24"
     },
     {
-      "id": "flux-import-oracle",
-      "nodes": 13,
-      "edges": 12,
-      "subflows": 6,
-      "sceneHash": "5ff3efd5348c2319e72b2e590171d070697dd938dad5e1eabdfb9fef54d27dd7"
+      "id": "flux-import-reference",
+      "nodes": 24,
+      "edges": 26,
+      "subflows": 7,
+      "sceneHash": "5f2f4138d413877f1be9e378041ec5ebe6acc3468fbe07e4a7a5e840016d7173"
     },
     {
       "id": "architecture-ui",
       "nodes": 13,
       "edges": 12,
       "subflows": 3,
-      "sceneHash": "755869fede014f3ea1d54057e679bcc4a55ff2c3d73f420f38b02517ed4f6aac"
-    },
-    {
-      "id": "affichage-abc",
-      "nodes": 10,
-      "edges": 10,
-      "subflows": 4,
-      "sceneHash": "b1d7776fd1c90d436293c87e47a2a673d7f2bb67c0da0a1b7f52efcc159fab5e"
+      "sceneHash": "daa153ab307b4b5a0b90dd3611cbccaa5f26f69ba8bae737e3074916d206d2b0"
     }
   ]
 }
