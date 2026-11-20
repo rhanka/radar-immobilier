@@ -116,8 +116,14 @@ jobs:
       - name: Validate P0-C preprod switchover hook (hermetic, fake kubectl)
         run: bash deploy/ci/p0c-apply-hook.test.sh
 
+      - name: Validate prod immo-mcp-config CD reconcile (hermetic, fake kubectl)
+        run: bash deploy/ci/apply-prod-immo-mcp-config.test.sh
+
       - name: Validate prod non-Deployment drift check (hermetic, fake kubectl)
         run: bash deploy/ci/check-prod-drift.test.sh
+
+      - name: Validate prod 30d signal reannotation runner and workflow (hermetic, fake kubectl)
+        run: bash deploy/ci/reannotate-signals-prod.test.sh
 
       - name: Validate manifest filter equivalence (fixtures and preprod render)
         run: bash deploy/ci/kfilter.test.sh

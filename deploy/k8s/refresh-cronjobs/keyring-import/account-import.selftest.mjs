@@ -111,6 +111,27 @@ test("picks the owner's account out of a shared owner keyring holding other owne
   assert.equal(runtime.store.has("sentropic-llm-mesh:cc-foreign:public"), false);
 });
 
+test("muse transport adds a Muse account and leaves Codex and Cloud Code untouched", async () => {
+  const runtime = memoryKeyring({ ...index("codex-1", "cc-1"),
+    ...account("codex-1", "codex", "openai", { secret: "codex-live" }),
+    ...account("cc-1", "cloud-code", "gemini", { secret: "cc-live" }) });
+  const source = memoryKeyring({ ...index("muse-1"),
+    ...account("muse-1", "muse", "muse", { secret: "muse-oauth-token" }) });
+  const codexBefore = runtime.store.get("sentropic-llm-mesh:codex-1:envelope");
+  const ccBefore = runtime.store.get("sentropic-llm-mesh:cc-1:envelope");
+
+  const result = await importAccount({ transport: "muse", source, runtime, ownerScopeRef: OWNER });
+
+  assert.deepEqual(JSON.parse(runtime.store.get(ACCOUNT_INDEX_KEY)), ["codex-1", "cc-1", "muse-1"]);
+  assert.equal(runtime.store.get("sentropic-llm-mesh:codex-1:envelope"), codexBefore);
+  assert.equal(runtime.store.get("sentropic-llm-mesh:cc-1:envelope"), ccBefore);
+  assert.equal(runtime.store.get("sentropic-llm-mesh:muse-1:envelope"), source.store.get("sentropic-llm-mesh:muse-1:envelope"));
+  assert.equal(result.transport, "muse");
+  assert.deepEqual(result.replaced, []);
+  assert.equal(result.accounts, 3);
+  assert.doesNotMatch(JSON.stringify(result), /muse-1|token/);
+});
+
 test("refuses an account that carries a removal tombstone in the runtime", async () => {
   const runtime = memoryKeyring({ ...index(), "sentropic-llm-mesh:cc-new:removed": "{}" });
   const source = memoryKeyring({ ...index("cc-new"), ...account("cc-new", "cloud-code", "gemini") });

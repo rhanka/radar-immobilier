@@ -25,7 +25,7 @@ import { createDataSource, type ImmoDataSource } from "./data-source.js";
 import { createRawDataSource, type RawDataSource } from "./raw-data.js";
 import { IMMO_MCP_NAME, IMMO_MCP_VERSION } from "./meta.js";
 import { ImmoStatefulHost } from "./stateful-host.js";
-import { composeStatefulImmo } from "./registry/stateful-composition.js";
+import { ARTIFACT_WIRE_LIMITS, composeStatefulImmo, IMMO_WIRE_LIMITS } from "./registry/stateful-composition.js";
 import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-stateful";
 import { createAccountBinding } from "./account-binding.js";
 import { admissionJitInputFromClaims } from "./admission-jit.js";
@@ -460,6 +460,7 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
     const transport = new WebStandardStreamableHTTPServerTransport({
       sessionIdGenerator: () => randomUUID(),
       enableJsonResponse: true,
+      maxRequestBodySize: deps.artifacts ? ARTIFACT_WIRE_LIMITS.maxRequestBytes : IMMO_WIRE_LIMITS.maxRequestBytes,
     });
     transport.onclose = () => {
       host.forget(server.server);
