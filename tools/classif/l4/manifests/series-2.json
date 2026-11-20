@@ -1,0 +1,31 @@
+{
+ "kind": "l4-series",
+ "series": 2,
+ "promptSha256": "c0ba6a671141b251a3393a6884deb2aaa5b055087658b3277e0c19d468f30b2f",
+ "routes": [
+  "muse-spark-1.3-low",
+  "muse-spark-1.3-medium",
+  "opus-5.5-low",
+  "opus-5.5-medium",
+  "mistral-large-4-medium",
+  "glm-5.3-low"
+ ],
+ "halves": {
+  "tuningSha256": "dcaf04fa8d740565b1832d55df705f6b28ac99e0f5b184c78614f2e2cd7efc86",
+  "blindSha256": "8c7f4650ba8235da9efa3cc242b3c6ab085c9a2c2afa3058556d3a3d9bd8a46c"
+ },
+ "floors": {
+  "recall": 0.8,
+  "precision": 0.5
+ },
+ "failureCeiling": 0.05,
+ "supports": {
+  "recall": 30,
+  "precision": 30
+ },
+ "budget": {
+  "cap": 22000,
+  "spent": 8502
+ },
+ "note": "Pre-registered by the conductor before the series-2 tuning run (Annex M M.5). Prompt P2 = series-1 optimise output (commit 5362c89ae, 1 generic repair pass). Same 6 routes as series 0-1. Argon routes still deferred (seat quota until ~06/11 19:00 MTL)."
+}

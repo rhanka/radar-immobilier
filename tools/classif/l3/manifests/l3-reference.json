@@ -1,0 +1,252 @@
+{
+ "lot": "L3",
+ "kind": "dev-reference",
+ "createdAt": "2026-11-01T13:53:34.582Z",
+ "llmCalls": 0,
+ "fromPass": 1,
+ "provenance": "model_consensus (3 annotators: muse-wonder-1.0 max, gemini-4-argon-high, opus-5.5 max; guide G0)",
+ "refUsesExternal": {
+  "items": 0,
+  "share": 0,
+  "note": "No reconciliation pass ran (stop rule met after pass 1): 11 items have a traced complement but no vote was cast with it. The immo-only ceiling is therefore not reduced by external evidence."
+ },
+ "partitions": {
+  "dev-core": {
+   "items": 386,
+   "signal": 275,
+   "pv": 111,
+   "codeVotes3": 284,
+   "codeVotes2": 102
+  },
+  "dev-ambiguous": {
+   "items": 118,
+   "noCodeMajority": 18,
+   "ambiguous3of3": 101,
+   "both": 1,
+   "note": "out of the dev objective"
+  }
+ },
+ "pvActs": {
+  "items": 120,
+  "actMatched2of3": 104,
+  "note": "one annotation per PV item and annotator (no per-act annotation in this pilot): act agreement = at least 2 annotators cite the same passage (same page, ≥ 50 % word overlap)"
+ },
+ "agreement": {
+  "items": 504,
+  "alphaVerdict": 0.7730908225694153,
+  "alphaCode": 0.7543742031449214,
+  "verdictUnanimity": 0.8472222222222222,
+  "verdictConverged": 1,
+  "codeUnanimity": 0.7142857142857143,
+  "codeConverged": 0.9642857142857143,
+  "nonConvergedCode": 18,
+  "nonConvergedVerdict": 0,
+  "executionFailures": 0,
+  "ambiguous33": 101,
+  "missingInfoFlagged": 48,
+  "changedShare": null
+ },
+ "codeCoverage": {
+  "devCore": {
+   "S-PLANIFIE": 19,
+   "N-FAUX-POSITIF": 112,
+   "S-PORTEE-FLOUE": 30,
+   "S-INFO-MANQUANTE": 4,
+   "N-DOUBLON": 5,
+   "N-FORME": 24,
+   "V2-PRECEDENT": 123,
+   "N-ODJ-SEUL": 34,
+   "N-NON-RES": 21,
+   "N-RESTRICTIF": 2,
+   "S-PREEMPTION": 4,
+   "N-RETIRE": 1,
+   "P-NOUV-ZONE": 4,
+   "S-MANDAT-AMONT": 2,
+   "P-USAGE-MULTI": 1
+  },
+  "codesPresent": 15,
+  "codesInRegistry": 28
+ },
+ "lowPertinent": {
+  "referenceVerdicts": {
+   "all": {
+    "a_surveiller": 167,
+    "non_pertinent": 332,
+    "pertinent": 5
+   },
+   "devCore": {
+    "a_surveiller": 59,
+    "non_pertinent": 322,
+    "pertinent": 5
+   },
+   "devAmbiguous": {
+    "a_surveiller": 108,
+    "non_pertinent": 10
+   },
+   "signal": {
+    "a_surveiller": 152,
+    "non_pertinent": 227,
+    "pertinent": 5
+   },
+   "pv": {
+    "non_pertinent": 105,
+    "a_surveiller": 15
+   }
+  },
+  "pertinentItems": [
+   {
+    "kind": "signal",
+    "partition": "dev-core",
+    "code": "P-NOUV-ZONE",
+    "codeVotes": 3,
+    "bprimePass": "pass2"
+   },
+   {
+    "kind": "signal",
+    "partition": "dev-core",
+    "code": "P-NOUV-ZONE",
+    "codeVotes": 2,
+    "bprimePass": "pass2"
+   },
+   {
+    "kind": "signal",
+    "partition": "dev-core",
+    "code": "P-USAGE-MULTI",
+    "codeVotes": 3,
+    "bprimePass": "pass2"
+   },
+   {
+    "kind": "signal",
+    "partition": "dev-core",
+    "code": "P-NOUV-ZONE",
+    "codeVotes": 2,
+    "bprimePass": "pass2"
+   },
+   {
+    "kind": "signal",
+    "partition": "dev-core",
+    "code": "P-NOUV-ZONE",
+    "codeVotes": 3,
+    "bprimePass": "pass2"
+   }
+  ],
+  "pertinentCodes": {
+   "P-NOUV-ZONE": 4,
+   "P-USAGE-MULTI": 1
+  },
+  "itemsWithAtLeastOnePVote": 6,
+  "itemsWithTwoOrMorePVotes": 5,
+  "pVotesPerAnnotator": {
+   "muse-wonder-max": 5,
+   "gemini-4-argon-high": 6,
+   "opus-5.5-max": 4
+  },
+  "signalsByBprimePass": {
+   "pass1": {
+    "a_surveiller": 116,
+    "non_pertinent": 76
+   },
+   "pass2": {
+    "a_surveiller": 26,
+    "non_pertinent": 65,
+    "pertinent": 5
+   },
+   "pass3": {
+    "a_surveiller": 10,
+    "non_pertinent": 86
+   }
+  },
+  "codesByBprimePass": {
+   "pass1": {
+    "S-PORTEE-FLOUE": 84,
+    "S-PLANIFIE": 15,
+    "N-FAUX-POSITIF": 25,
+    "S-INFO-MANQUANTE": 11,
+    "N-DOUBLON": 5,
+    "N-FORME": 17,
+    "V2-PRECEDENT": 8,
+    "N-ODJ-SEUL": 3,
+    "N-NON-RES": 11,
+    "no-majority": 9,
+    "N-RESTRICTIF": 1,
+    "S-PREEMPTION": 2,
+    "N-RETIRE": 1
+   },
+   "pass2": {
+    "S-PORTEE-FLOUE": 16,
+    "N-ODJ-SEUL": 3,
+    "P-NOUV-ZONE": 4,
+    "N-NON-RES": 7,
+    "no-majority": 5,
+    "N-FAUX-POSITIF": 14,
+    "S-INFO-MANQUANTE": 2,
+    "N-RESTRICTIF": 1,
+    "S-PLANIFIE": 4,
+    "V2-PRECEDENT": 36,
+    "S-PREEMPTION": 1,
+    "S-MANDAT-AMONT": 1,
+    "P-USAGE-MULTI": 1,
+    "N-FORME": 1
+   },
+   "pass3": {
+    "S-INFO-MANQUANTE": 2,
+    "N-FAUX-POSITIF": 9,
+    "S-PORTEE-FLOUE": 6,
+    "no-majority": 1,
+    "N-FORME": 2,
+    "S-PLANIFIE": 1,
+    "N-NON-RES": 3,
+    "S-MANDAT-AMONT": 1,
+    "V2-PRECEDENT": 70,
+    "N-ODJ-SEUL": 1
+   }
+  },
+  "shownCodes": {
+   "S-PORTEE-FLOUE": 115,
+   "S-PLANIFIE": 21,
+   "S-INFO-MANQUANTE": 16,
+   "no-majority": 8,
+   "S-PREEMPTION": 5,
+   "S-MANDAT-AMONT": 2
+  },
+  "facts": [
+   "All 5 Pertinent are signals in B′ pass 2, in dev-core; none in B′ pass 1 (192 signals: S-PORTEE-FLOUE is the most frequent code there) and none among the 120 PVs.",
+   "Guide G0 requires positive evidence of the three criteria for a P code and sends an unreadable scope or direction to an S code (asymmetry reserve); the served signal text rarely states scope, direction and capacity together.",
+   "The dev pool excludes the 67 exposed cities; its P base rate is unknown (source-gap) and cannot be compared with Steve’s pass shares."
+  ],
+  "consequenceForL4": "With 5 Pertinent in dev-core, \"Pertinent masked\" on dev cannot separate prompts: 0 masked out of 5 gives a 95 % Clopper-Pearson upper bound of about 52 %, and one masked item moves the rate by 20 points. The first criterion of the lexicographic dev objective would be decided by noise; precision on P∪S and the later criteria would decide in practice. The S113 evaluation (Steve’s labels, about 38 P) is unaffected.",
+  "options": [
+   {
+    "id": "A",
+    "title": "Dev objective on shown items",
+    "change": "Replace \"Pertinent masked\" by \"shown masked\" (reference P or S predicted N, n = 172 including dev-ambiguous S, 64 in dev-core) as the first dev criterion, consistent with Steve’s asymmetry reserve; keep Pertinent masked as a reported dev diagnostic and as the primary metric on S113 only.",
+    "cost": "0 LLM call; protocol amendment of L4 (Annex M) before series 0."
+   },
+   {
+    "id": "B",
+    "title": "Additional P-oriented draw from the non-sealed pool",
+    "change": "Seeded draw of extra signals from B′ pass 2 (where the 5 P are; 4,030 pool items, 96 drawn) and pass 1 regulatory instruments, same exclusions and fingerprint checks, annotated by the 3 annotators with G0 (L2 circuit).",
+    "cost": "draw: 0 LLM call; annotation about 3 calls per 10 signals (e.g. 240 signals ≈ 72 calls); P yield unknown (5 P in 96 pass-2 signals so far ≈ 5 %)."
+   }
+  ]
+ },
+ "hashes": {
+  "devItemsSha256": "13e60c918e249ccbdc931f1a6a33137242bafe3a9d164507b751d1e71864cb04",
+  "devReferenceSha256": "33344e5c14569a775c57d7f41dc32438f9ba5fbc5bdfefbc5e9e83c70f5e9357",
+  "sealedTest": {
+   "readme": "docs/spec/reports/classif-eval/README.md",
+   "files": {
+    "eval-inputs.jsonl.sealed": {
+     "plaintextSha256": "07cc1eab3079c0af117c6b764c78b5443fb10c2f12605b8f2afad68bf57221c3",
+     "sealedFileSha256": "8bf9175e0b5092a8fad59199fddfa439e49cb41dff652dd0edc7147f576b29c7"
+    },
+    "eval-expected.jsonl.sealed": {
+     "plaintextSha256": "6e23bb3b593655714b4c39bc24bb3b372fb721817d1db0165489f4cdd5f9f2a3",
+     "sealedFileSha256": "1fcb8cfe54f4a105692c95361860b92d57828a88379a9fa4544d67a272da15e5"
+    }
+   },
+   "note": "hashes copied from the committed README and computed on the encrypted files; the evaluation set was not opened"
+  }
+ },
+ "trackEvent": "to be recorded by the conductor (single track writer) before L4: devReferenceSha256 + sealed test plaintext hashes above"
+}

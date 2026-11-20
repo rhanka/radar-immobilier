@@ -1,0 +1,99 @@
+{
+ "kind": "l4-dev",
+ "series": "8",
+ "createdAt": "2026-11-12T20:03:04.476Z",
+ "promptSha256": "a60713366128ae4348a45a7323d0b0984cef87ca6cb33eda15073c045235b016",
+ "routes": [
+  "luna-6-low",
+  "luna-6-medium"
+ ],
+ "deferred": [],
+ "tuningItems": 252,
+ "aggregates": {
+  "luna-6-low": {
+   "scored": 252,
+   "refShown": 95,
+   "predShown": 150,
+   "recall": 0.9789473684210527,
+   "recallLB": 0.935211069685495,
+   "precision": 0.62,
+   "precisionLB": 0.5501087742217444,
+   "indeterminate": {
+    "recall": false,
+    "precision": false
+   },
+   "failures": 0,
+   "withUnresolved": {
+    "scored": 252,
+    "refShown": 95,
+    "predShown": 150,
+    "recall": 0.9789473684210527,
+    "recallLB": 0.935211069685495,
+    "precision": 0.62,
+    "precisionLB": 0.5501087742217444,
+    "indeterminate": {
+     "recall": false,
+     "precision": false
+    }
+   },
+   "misses": 2,
+   "verdict": "fail",
+   "costUsd": 0,
+   "items": 252
+  },
+  "luna-6-medium": {
+   "scored": 252,
+   "refShown": 95,
+   "predShown": 151,
+   "recall": 0.9894736842105263,
+   "recallLB": 0.9510378297006205,
+   "precision": 0.6158940397350994,
+   "precisionLB": 0.546178723162706,
+   "indeterminate": {
+    "recall": false,
+    "precision": false
+   },
+   "failures": 1,
+   "withUnresolved": {
+    "scored": 252,
+    "refShown": 95,
+    "predShown": 151,
+    "recall": 0.9894736842105263,
+    "recallLB": 0.9510378297006205,
+    "precision": 0.6158940397350994,
+    "precisionLB": 0.546178723162706,
+    "indeterminate": {
+     "recall": false,
+     "precision": false
+    }
+   },
+   "misses": 1,
+   "verdict": "fail",
+   "costUsd": 0,
+   "items": 252
+  }
+ },
+ "method": "gepa",
+ "gepa": {
+  "verdict": "fail",
+  "missing": [],
+  "failing": [
+   "luna-6-low",
+   "luna-6-medium"
+  ],
+  "rule": "pass only when every GEPA route has 0 miss (P/S predicted non_pertinent) and a failure share within the ceiling; precision reported, no floor"
+ },
+ "selection": {
+  "order": [
+   "luna-6-medium",
+   "luna-6-low"
+  ],
+  "best": null,
+  "excluded": [
+   "luna-6-medium",
+   "luna-6-low"
+  ],
+  "criterion": "M.3 lexicographic (tuning half only, failing routes excluded)"
+ },
+ "trackNote": "per-item tuning outputs stay private (optimiser input); this manifest carries metrics only"
+}

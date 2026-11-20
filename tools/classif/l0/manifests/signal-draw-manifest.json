@@ -1,0 +1,5458 @@
+{
+ "lot": "L0",
+ "kind": "signal-draw",
+ "createdAt": "2026-10-31T09:22:13.262Z",
+ "seedsFile": "tools/classif/l0/seeds.json",
+ "seed": "156cd2ddda3d63f55a9347a5524c2e12",
+ "exclusions": {
+  "source": "guard/exclusions.json",
+  "complete": true
+ },
+ "rows": 18522,
+ "classified": 18522,
+ "excludedByReason": {
+  "exposed-city": 2549,
+  "exposed-bylaw-number": 41,
+  "no-evidence": 1451
+ },
+ "pool": 14481,
+ "poolByPass": {
+  "pass1": 1302,
+  "pass2": 4030,
+  "pass3": 9149
+ },
+ "poolCities": 668,
+ "targets": {
+  "pass1": 192,
+  "pass2": 96,
+  "pass3": 96
+ },
+ "allocation": {
+  "pass1": {
+   "regulatory-instrument|DesignationEvent": 164,
+   "individual-authorisation|DesignationEvent": 5,
+   "regulatory-instrument|Signal": 22,
+   "individual-authorisation|Signal": 1
+  },
+  "pass2": {
+   "regulatory-instrument|DesignationEvent": 55,
+   "individual-authorisation|DesignationEvent": 24,
+   "regulatory-instrument|Signal": 7,
+   "individual-authorisation|Signal": 10
+  },
+  "pass3": {
+   "regulatory-instrument|Signal": 21,
+   "regulatory-instrument|DesignationEvent": 3,
+   "individual-authorisation|DesignationEvent": 63,
+   "individual-authorisation|Signal": 9
+  }
+ },
+ "perCityCap": 4,
+ "losses": {
+  "fingerprint-hit": 67,
+  "city-cap": 83
+ },
+ "drawn": 384,
+ "cities": 204,
+ "itemsFileSha256": "3e6ce939d96b2fad0041a095fc848aec8cd80427bfc6b75baff88710bdccdd0c",
+ "drawnBy": {
+  "pass": {
+   "pass1": 192,
+   "pass2": 96,
+   "pass3": 96
+  },
+  "group": {
+   "regulatory-instrument": 272,
+   "individual-authorisation": 112
+  },
+  "type": {
+   "DesignationEvent": 314,
+   "Signal": 70
+  },
+  "region": {
+   "150-300km": 140,
+   "50-150km": 167,
+   "gt300km": 30,
+   "unknown": 11,
+   "lt50km": 36
+  }
+ },
+ "items": [
+  {
+   "itemId": "dev-sig-26bf279a808a",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-2017-056",
+   "citySlug": "weedon",
+   "docShas": [
+    "c6140bf8710c4b61eed24f9ce60c9ef218ffeb95e1c78ea5a455ff0359398247"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "6722d779c994fb4458c0aaf020d70d7fee59ed1180dff3ffb94b811b9867a64e"
+  },
+  {
+   "itemId": "dev-sig-e9be03b2dee2",
+   "type": "DesignationEvent",
+   "id": "event-6-4-avis-motion-77-94",
+   "citySlug": "saint-pie",
+   "docShas": [
+    "5c1fef7fcd06902a512041366e33985aac381acea0baf190bdbbbeda50e6c7be"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "cf4b9e6c34d88750308f42d8e1f2d58bd2885dc4e90671f6826af0dbeb7027d4"
+  },
+  {
+   "itemId": "dev-sig-a4817b13d8af",
+   "type": "DesignationEvent",
+   "id": "event-matane-multifamilial-2025-04-07",
+   "citySlug": "matane",
+   "docShas": [
+    "371a8e08046f6cdba1361f8b503c42f8660c6dcd2c2d8b5a162a91ef771f1d46"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "gt300km",
+   "instrument": "autre",
+   "inputSha256": "1f8f04030f233f8791068f0409bc4f5d3616a8f33e5615b95fa3321b4b34af99"
+  },
+  {
+   "itemId": "dev-sig-b550f03ef888",
+   "type": "DesignationEvent",
+   "id": "event-pp21-2026-adoption",
+   "citySlug": "granby",
+   "docShas": [
+    "ad942193df86c5bbb2924e1859618e22911c4b0c0a0efef01f0b501fd4ad3cd2"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "85a4e3d08fea6e96fc70433899d1f3b0506c70173bbc16a8409d2a2a581b6ed8"
+  },
+  {
+   "itemId": "dev-sig-e309030b8e7b",
+   "type": "DesignationEvent",
+   "id": "event-042-02-2024",
+   "citySlug": "pont-rouge",
+   "docShas": [
+    "15ced2cb496e25b7fccfa62bbe8b5956b15420e0897af34ef17235ab0754f924"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "b9329643bc78058b34db303d25a047354e4583ad9abdfd4d404a767c508775f9"
+  },
+  {
+   "itemId": "dev-sig-7514760f9f50",
+   "type": "DesignationEvent",
+   "id": "event-1957-2026-avis-motion",
+   "citySlug": "sainte-marie",
+   "docShas": [
+    "066f88388c48ed36a54cd39274b84f9e110a6fa663235fb596c332aa45c5a6ac"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "99bbfc0bc1156c52e1420b9dfb30829b87f3fdfa7321d893157c4be7cb45a76e"
+  },
+  {
+   "itemId": "dev-sig-8578891b62b0",
+   "type": "DesignationEvent",
+   "id": "event-2026-10-09",
+   "citySlug": "saint-antoine-de-lisle-aux-grues",
+   "docShas": [
+    "973c5155a001d709051f2b01c6b366ebb9a147e2898d3b2b23fe3584caa515d8"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "5efefcb58ba24939cfdc684550e2f9382edf9975f3732c8db40d8f8c0221c70e"
+  },
+  {
+   "itemId": "dev-sig-886181135df9",
+   "type": "DesignationEvent",
+   "id": "event-adoption-projet-2024-270-02",
+   "citySlug": "saint-claude",
+   "docShas": [
+    "7d6aae402e49db45b17d54538e88059174f39981f22f617a765ba29280fabd3e"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "ed618a39ed4988910a42fd23d1167d21e887a07d2c8922d04722121ffe147609"
+  },
+  {
+   "itemId": "dev-sig-5f96433622fa",
+   "type": "DesignationEvent",
+   "id": "event-2024-04-062",
+   "citySlug": "riviere-a-pierre",
+   "docShas": [
+    "2a8c8922b83391970323976a264473154795dff22c80901a1fc8a72ac261ce75"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "3776a0e5c37bb1e39c1a6fd2a29c8588217d037e4eb79f3c6302849385627ce7"
+  },
+  {
+   "itemId": "dev-sig-576fcaa9a4a8",
+   "type": "DesignationEvent",
+   "id": "event-mdar25-02-023",
+   "citySlug": "denholm",
+   "docShas": [
+    "2bb9a8e75595a83ab304d61c9ff746390b57fc2e0bdff3650067161874fd6f21"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "a43e2d2060d7595716e0eca1f6a6e69ae2bf46bc0dcf4525747d6c51086be691"
+  },
+  {
+   "itemId": "dev-sig-5b53197a924c",
+   "type": "DesignationEvent",
+   "id": "event-26-221",
+   "citySlug": "la-peche",
+   "docShas": [
+    "1a4632b30e58d8ef92d15100bde174f7e20a3f3a99b0ad0351d8f4a18ea5739f"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "04f01c10736a02a4cc4733b3729b1f53cde9e679da45af23764fe53174badb8b"
+  },
+  {
+   "itemId": "dev-sig-31fab26adffb",
+   "type": "DesignationEvent",
+   "id": "event-a-26-10-089",
+   "citySlug": "mont-laurier",
+   "docShas": [
+    "d78a18a4bd8920bbdf068ac405979f5dd65c73e44bfb46bae16222042eca32bd"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "42547c2c6c82ff985eb7ef6b07ddf83a1fe010b2a8fae07a973bc10969ec998f"
+  },
+  {
+   "itemId": "dev-sig-e971bd087228",
+   "type": "DesignationEvent",
+   "id": "event-2023-08-16",
+   "citySlug": "sainte-felicite--lislet",
+   "docShas": [
+    "4b8d4fcc6db27994122488c9cea4bcf2c841776c459614238261f3f197ab8b3b"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "unknown",
+   "instrument": "autre",
+   "inputSha256": "1e0acd5c8a6a5fac28be52c2b27f53836e812b2e33202cee2a4b6899a8b2d4d1"
+  },
+  {
+   "itemId": "dev-sig-eef6b8e0d9e8",
+   "type": "DesignationEvent",
+   "id": "event-2026-05-234",
+   "citySlug": "sainte-marie",
+   "docShas": [
+    "4d02065879c81a3210fb3fb1e332a3ba442c3ec1a75fcc155c1c80ca3581bbe0"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "94adeb9e768eaf1a9bc3c5ce3c430242a77b0aecf8f653b75306a08c63760159"
+  },
+  {
+   "itemId": "dev-sig-2458688094c4",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-361-rmu-05",
+   "citySlug": "sainte-petronille",
+   "docShas": [
+    "a5ce36883656bdf3a4b26362dbbbb25013e264761f2d1222dbcd2c7f50a82999"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "35ef43a399dbb22c4d9e4260ea51287e2962c74b420c1d3434b9aa16c16e1299"
+  },
+  {
+   "itemId": "dev-sig-2e43548d8851",
+   "type": "DesignationEvent",
+   "id": "event-adoption-1er-projet-2025-306",
+   "citySlug": "lac-saint-joseph",
+   "docShas": [
+    "c4ee0022e5765257a1d8ed4479d3f4eafc5a645d49fae4a131fa45db025e1d62"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "1d6eee70d188d801c0a6e3b77b2b50ac428e9eacc847a2c07b39d96409d02450"
+  },
+  {
+   "itemId": "dev-sig-0f437dfb2b17",
+   "type": "DesignationEvent",
+   "id": "event-saint-eustache-zonage-1675-388",
+   "citySlug": "saint-eustache",
+   "docShas": [
+    "5207fa7da9a3c9928e87746111550d922fa6b0420e9feac771c99866a12cf70e"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "3025a82fb4eb4c0acaac394862028b117e479cff1f3cb87f843482177c9ad475"
+  },
+  {
+   "itemId": "dev-sig-305d5c511fa6",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-213-2023-06-06",
+   "citySlug": "compton",
+   "docShas": [
+    "9c52a082b44fc775f39cdb13fe817a0b9d6fb2c2d553c37420996fe982d5d03a"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "99da65570783e83c29eff837377c6c490e0e50da7563d0924e0fed4ee51e7f09"
+  },
+  {
+   "itemId": "dev-sig-df8711bb32c4",
+   "type": "DesignationEvent",
+   "id": "designation-event-adoption-projet-2025-03",
+   "citySlug": "val-joli",
+   "docShas": [
+    "8f0886473e886030a3815e7f158047c6a2604d4c080ea310a621fd170ab7f8ce"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "d4beca1ae59116534d656928e89fb2ab44118d489ed385e5e82d701766af1bc5"
+  },
+  {
+   "itemId": "dev-sig-e181e220357b",
+   "type": "DesignationEvent",
+   "id": "event-496.39-2023-1er-projet",
+   "citySlug": "pont-rouge",
+   "docShas": [
+    "2ce4886d8beef5d65be952b6d1ae0e4dcb6f1ea5040c10d8dde7b1cce3f29373"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "25bcb7dea5d0a7df256b16c0437e100488bfcfbedcde8aadc5bc993eef8749d8"
+  },
+  {
+   "itemId": "dev-sig-a9f63ac3a7ef",
+   "type": "DesignationEvent",
+   "id": "event-adoption-1er-projet-496.35-2022",
+   "citySlug": "pont-rouge",
+   "docShas": [
+    "9c8e6e00b1671c6bd984b69b61b4e9631f6ca56f22f466c82529e912459ac778"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "e03beadf6078c949fc15f124cd15dee6fe8a6f4c1727baa345f6b90f24587bee"
+  },
+  {
+   "itemId": "dev-sig-28ea9f6958d5",
+   "type": "DesignationEvent",
+   "id": "event-2023-11-avis-motion",
+   "citySlug": "melbourne",
+   "docShas": [
+    "dc74be6a1268bdd32f78ae2c2686afb1fd8a8bff1f7c88800605a97d5954b129"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "2ecd59c77ce19394b42dcc0828e28d298a4e9e866a9147751708bde1ceeae517"
+  },
+  {
+   "itemId": "dev-sig-35e76ef3299b",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-2012-03",
+   "citySlug": "chartierville",
+   "docShas": [
+    "3060c4bd2047a67b2ff19a20a9b97aac8d1de2ee604af479fdd4a22f5633917a"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "5d3e931c3d85ba2297d52ba2d6c18df8bcbcce4380d2fa2f20c54627dfbb5662"
+  },
+  {
+   "itemId": "dev-sig-77d6512248d7",
+   "type": "DesignationEvent",
+   "id": "event-276-2014",
+   "citySlug": "lac-beauport",
+   "docShas": [
+    "255107750ef076af5f4afd9247fc3448d9aaaa55a1b804e072ca9513ec21f033"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "317a08110b8cd3746cf37cd98cd760d3500aa642606955b2005ca07174d04139"
+  },
+  {
+   "itemId": "dev-sig-01bdca1d1e9d",
+   "type": "DesignationEvent",
+   "id": "event-saint-eustache-zonage-1675-425",
+   "citySlug": "saint-eustache",
+   "docShas": [
+    "cb996f9a9d239a422807cae23129c1888b3ee4c98d9503c0e7f8f7e4040bb53a"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "c48a463416c8843e5d4da3216d0970b07373804360afc7a31e3a5bf237162602"
+  },
+  {
+   "itemId": "dev-sig-2df70dd3e143",
+   "type": "DesignationEvent",
+   "id": "event-adoption-projet-496.35-2022",
+   "citySlug": "pont-rouge",
+   "docShas": [
+    "8e20c64db25ed8e4ac571e42943ae32cd3d0e592d1925bfdee34cb21b8d81288"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "17a0084325b1ebc7f2b9117269b293934576b802f8ec0e00c5a74e68a4f08300"
+  },
+  {
+   "itemId": "dev-sig-30840c10208b",
+   "type": "DesignationEvent",
+   "id": "event-40-4-720-117",
+   "citySlug": "beaconsfield",
+   "docShas": [
+    "652c15b335f2a85d53b8575902d8dad887b38679ca7090c71543482b20e0f8d4"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "8b92cea3ab01fa9e4cb51950069fd27edb83c0d4d1634c70be37109a87d94003"
+  },
+  {
+   "itemId": "dev-sig-c5e0c4a87730",
+   "type": "DesignationEvent",
+   "id": "event-181-22",
+   "citySlug": "sainte-henedine",
+   "docShas": [
+    "31dc5761ca0f6f3389479c6b3b431f0fb87ed426dc6abdf5175732237115b3f4"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "9b9c1a753ec446b700b8f92437887d2ba90aa827548df6a76ba70509ac7f56d6"
+  },
+  {
+   "itemId": "dev-sig-88d4cda9b3c5",
+   "type": "DesignationEvent",
+   "id": "designation-event-adoption-projet-2025-02",
+   "citySlug": "val-joli",
+   "docShas": [
+    "8f0886473e886030a3815e7f158047c6a2604d4c080ea310a621fd170ab7f8ce"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "a3d60f98067692b33644b9f66c09f1dae844d0b96470d582ed9a515edf5183dd"
+  },
+  {
+   "itemId": "dev-sig-8c81e203cfae",
+   "type": "DesignationEvent",
+   "id": "designation-event-574-1-2026",
+   "citySlug": "saint-roch-de-lachigan",
+   "docShas": [
+    "3e6897a855804aa687c6360ab8d7e1c122d676f82ad49ac3fa40350e1875ce7c"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "ecd862e9c24910701fe0a83d8b049b4e7455ee006e500dfe006ab9c5f0947a0f"
+  },
+  {
+   "itemId": "dev-sig-8ff48821d0ff",
+   "type": "DesignationEvent",
+   "id": "event-627-22-24-adoption-1er-projet",
+   "citySlug": "saint-joseph-de-beauce",
+   "docShas": [
+    "281bf53450a4dd88140494bb31172cbcd443deb87bb01d81ed504faaf104086a"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "c6b182c0597960395ed73af38c125d9d4fc43c447324ab987b1a5b8b885a26dc"
+  },
+  {
+   "itemId": "dev-sig-f87bd5278242",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-c-11-2020",
+   "citySlug": "saint-prosper-de-champlain",
+   "docShas": [
+    "3f34b5fc993f5cf00ca0cc76d1cad0ab0681dba35467aa8d3b3f9e6359a71ccb"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "d09c7b9e40e4b5abd10bc695ed762ef626fcdc209388792ec84347844a1e1dc0"
+  },
+  {
+   "itemId": "dev-sig-20396516f158",
+   "type": "DesignationEvent",
+   "id": "event-premier-projet-2023-11",
+   "citySlug": "melbourne",
+   "docShas": [
+    "dc74be6a1268bdd32f78ae2c2686afb1fd8a8bff1f7c88800605a97d5954b129"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "6a09faafe4fc67532b3edd61c7dd95e44494690647689b0b7bb082acb58daa24"
+  },
+  {
+   "itemId": "dev-sig-8b28d3d8dda2",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-2024-06",
+   "citySlug": "saints-anges",
+   "docShas": [
+    "61235cc10123e5348b4e33b3f8c3dbf4570f9d45912589f21d580792a15016b7"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "7d5dd7f389bf612d880c185ff6d0189fe2f400264f64675a5dab6fdd60d06e17"
+  },
+  {
+   "itemId": "dev-sig-bb6da4a5b136",
+   "type": "DesignationEvent",
+   "id": "event-2022-072",
+   "citySlug": "montmagny",
+   "docShas": [
+    "1d08a71c9f7e5e58faa54a2d7e6a823d5aa1973a11389d5d48d023f2ffdcd8ae"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "49040bfea208dcb62d668dcae44bede4a4a66ba30853975dd4d093c4773ef637"
+  },
+  {
+   "itemId": "dev-sig-cc520c9c53f9",
+   "type": "DesignationEvent",
+   "id": "event-adoption-projet-191-2024",
+   "citySlug": "deschaillons-sur-saint-laurent",
+   "docShas": [
+    "c8b5a2f71dd04f20ea3bdd341ae3ff10051f8a7fdea4b1e8ff7ef4e5568dc640"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "5cda2b852e519fe70a0d2e4d9c92daacd92c39449eb8aae03715224064a986b9"
+  },
+  {
+   "itemId": "dev-sig-2ab1c1bc44a8",
+   "type": "DesignationEvent",
+   "id": "event-barkmere-2013-55",
+   "citySlug": "barkmere",
+   "docShas": [
+    "19f6b4d4ab6b39d1204cb44132ef360c93ccb8d3fcf51593c40158937ad64d9e"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "6767d0b0884f21d2af63a9e68d1f27adfa64c7833b063d54862f6369481060df"
+  },
+  {
+   "itemId": "dev-sig-9f5443386d04",
+   "type": "DesignationEvent",
+   "id": "event-mont-laurier-rezonage-va821-2026-05-25",
+   "citySlug": "mont-laurier",
+   "docShas": [
+    "5566f31b8ae684342e2443264f6bb067a9960cd0cd4b39693517081250ba2a4f"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "9b17d907bb1b1a9df0831f175782f853707000ba92ee6d1f9a4e0f40f4c849ca"
+  },
+  {
+   "itemId": "dev-sig-1d3b09d36a6e",
+   "type": "DesignationEvent",
+   "id": "event-338-2014",
+   "citySlug": "lac-beauport",
+   "docShas": [
+    "4e87ef7aa9e6d4f61a3236c7359ee29cd896ea1cfd96e9b8d0a795b49f977255"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "f3c276d76fbd19f35937290c83fdde5a5bba915d90f96dddac0a92a061985d65"
+  },
+  {
+   "itemId": "dev-sig-f4b189844c9b",
+   "type": "DesignationEvent",
+   "id": "event-beaupre-rezoning-73h",
+   "citySlug": "beaupre",
+   "docShas": [
+    "e9ac03f3f431c840316d9bc73873010ea9ad3b17ec89356f08647e1fc679a2b3"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "3a001448cd50a7524f939a3638e32e4707928fc001d0c6dc760a13b0c6fd75c4"
+  },
+  {
+   "itemId": "dev-sig-a9d93037ca72",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-324-1",
+   "citySlug": "havelock",
+   "docShas": [
+    "a150c295494518d8afed8d9af049684ed5d1561dd8fe8c3e306c2f77a1b1afec"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "2fc419fdebf76be99f8799478941c6b1a6e5e165a5828a27e0666cf6e25b4ddd"
+  },
+  {
+   "itemId": "dev-sig-7f1c4afb934d",
+   "type": "DesignationEvent",
+   "id": "event-projet-reglement-257-2026",
+   "citySlug": "saint-casimir",
+   "docShas": [
+    "b982f0c50caf3d533f402e20de2b60b91ef5d29eeaa5f5661bef41dfd5a81b89"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "a0654d8f31c9d4c06144317f1424578019586fe3771c3996f1b11460645ecc6e"
+  },
+  {
+   "itemId": "dev-sig-ac4d43563c22",
+   "type": "DesignationEvent",
+   "id": "event-adoption-projet-2026-10",
+   "citySlug": "saints-anges",
+   "docShas": [
+    "d2a53d47c85b682a80a178d33615cddafbc474f71ba4468dd2619146d95f9cee"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "abbf11fe5d50ce995deca0afb5d70a0f8375cbd052147b8461fdc326a4899453"
+  },
+  {
+   "itemId": "dev-sig-a81050bc93d7",
+   "type": "DesignationEvent",
+   "id": "event-regl-778-avis-motion",
+   "citySlug": "saint-hyacinthe",
+   "docShas": [
+    "abf36e6b41a123561aaea32efa9d5517d352126cce7ea9c55734c7572893c70c"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "895a7eb8d71f7f784eebeac3bf155834e3d99ed91795cfb71fc1619547b94566"
+  },
+  {
+   "itemId": "dev-sig-6cb481d736e9",
+   "type": "DesignationEvent",
+   "id": "event-184-2022-projet",
+   "citySlug": "deschaillons-sur-saint-laurent",
+   "docShas": [
+    "b999a0bb40e248b2baa470184b4650a7af276d4484886c2b255c19c5ca4bf6b9"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "86205bc372c6f1637ef14d39bac3b0857fec83b2ba93ec3404c02c788bfcc1fc"
+  },
+  {
+   "itemId": "dev-sig-28a83e4aca3e",
+   "type": "DesignationEvent",
+   "id": "event-11-4-avis-motion-projet-1071-93-2026",
+   "citySlug": "lanoraie",
+   "docShas": [
+    "7a78e45523863e27284c6232ebbf7c608503861cc7478b63b892dc2efc6d4e01"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "12bd0ed9b321f1a27bb8a3b5a66c8f8e70b8b029bb93565fa06c564e2f6b32d2"
+  },
+  {
+   "itemId": "dev-sig-fa1c20fd0cfa",
+   "type": "DesignationEvent",
+   "id": "de-reglement-2020-166-12-24-p1",
+   "citySlug": "compton",
+   "docShas": [
+    "68c3499215ec7ec7c7bca6ba6900bee885d2aa72314ab443b0e2c4c3aa060721"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "470b369a9c0895f39e57bfa8a935f47b6075cf5c12175fd658f3eb4c4d5c8748"
+  },
+  {
+   "itemId": "dev-sig-e901a26bfaea",
+   "type": "DesignationEvent",
+   "id": "rawdon-event-projet-reglement-170-2026",
+   "citySlug": "rawdon",
+   "docShas": [
+    "2f0cb62d08397f3e22ff0f1994d98e7a145a074e63227b6040e519be610e62b0"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "fa1c78847a4fded18fdbf9da878e3bb5d20e4b0a310c56cf780dbb8d2d08cbda"
+  },
+  {
+   "itemId": "dev-sig-d49f4ecbea63",
+   "type": "DesignationEvent",
+   "id": "devent-13-8",
+   "citySlug": "ogden",
+   "docShas": [
+    "0d9c2d08ba510829ad1fd35606ce10786887f6a0a2e6215bad159bc6ac79dcbe"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "3a6a2d953e9c287c05a3ff9dbde77821bcde366525ac8b117819a79d7e7d8359"
+  },
+  {
+   "itemId": "dev-sig-7344179faa22",
+   "type": "DesignationEvent",
+   "id": "event-ca-25-09-15-07",
+   "citySlug": "lac-saint-joseph",
+   "docShas": [
+    "09bb24b9f90ab4b638697d25e5310a0dafdc29524f3139eb6e85206b21a0c500"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "d38406fd3f99f6acfbfa898eeb22036338e3b809c5f9221f082cd21aab8f0bbd"
+  },
+  {
+   "itemId": "dev-sig-561ef5b8c1d9",
+   "type": "DesignationEvent",
+   "id": "event-158-05.2021",
+   "citySlug": "saint-francois-xavier-de-brompton",
+   "docShas": [
+    "0ac66bed4c22f6f0b04e2365daf7096d3548031403da7bde3a00e590bf895b3a"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "96642f533a6e2cfd8a9b0ba471c9622484ce489dec8811735aea4b6e9ad5f103"
+  },
+  {
+   "itemId": "dev-sig-98115893bc25",
+   "type": "DesignationEvent",
+   "id": "de-2024-09-03-2024-05",
+   "citySlug": "notre-dame-du-sacre-coeur-dissoudun",
+   "docShas": [
+    "99ce70b3bc6bb65254768612d84b9f7ab5157a22eedc4e43e0ed837e7d69ff12"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "0334c7d299fd5032feb13b251d77a5c582be37c3142824368272a77fa5af38d3"
+  },
+  {
+   "itemId": "dev-sig-42e1ade8127a",
+   "type": "DesignationEvent",
+   "id": "event-26351-07-25",
+   "citySlug": "prevost",
+   "docShas": [
+    "f2c8be90cc9e1503bcce9a8ab8baeacda1f5d8f1c6caf962d3f23b9239213242"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "1a60e7158d95cbd8efce087ac4841d91522a560c7f28c6b2ba91a1294095e91b"
+  },
+  {
+   "itemId": "dev-sig-0fef9a4a789a",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-425-2025",
+   "citySlug": "saint-patrice-de-beaurivage",
+   "docShas": [
+    "230a55264335d5f626641bc36a7817efdd337a0d0a8664c6e874f1deb70c7311"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "858e5a8df17eec31d4ea17e8959b23e2b2a0dcd5cbb50a952f0ccefd6d1fbe5c"
+  },
+  {
+   "itemId": "dev-sig-70bc015ddedc",
+   "type": "DesignationEvent",
+   "id": "event-9-2-avis-motion-462-2026",
+   "citySlug": "saint-paul-de-lile-aux-noix",
+   "docShas": [
+    "3804e3bd6d0bc5be491a44254bc8b07d111c0088040d64b5a6465ba9778202ad"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "47a8ec0fa4cb258aa0aff75d564cb2dd7e50d1c23f28b21f89e6cabf4b047518"
+  },
+  {
+   "itemId": "dev-sig-da9f58903f6d",
+   "type": "DesignationEvent",
+   "id": "event-sainte-perpetue--nicolet-yamaska-rezonage-h06-2026",
+   "citySlug": "sainte-perpetue--nicolet-yamaska",
+   "docShas": [
+    "c2d22ea8a1d2413b1653ed26e7b758840afc5ba2490d96e0a86455fbd1183019"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "unknown",
+   "instrument": "autre",
+   "inputSha256": "cc13e6095ee9fc728b6beabfd51eb78627a0ae4c3918f918ec1efccb546b1e1e"
+  },
+  {
+   "itemId": "dev-sig-31a77069efc2",
+   "type": "DesignationEvent",
+   "id": "event-2022-06-073",
+   "citySlug": "terrasse-vaudreuil",
+   "docShas": [
+    "46b8fc75af33a0552cb674f73153524f79312041afff4c4ddecbb498a03e1f9a"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "1621335e2c8fbfba1e50102dd3d1b4b7814a7342ae4782412f37c52aacdf6bd5"
+  },
+  {
+   "itemId": "dev-sig-7d82343e83e1",
+   "type": "DesignationEvent",
+   "id": "event-adoption-1er-projet-627-22-24",
+   "citySlug": "saint-joseph-de-beauce",
+   "docShas": [
+    "281bf53450a4dd88140494bb31172cbcd443deb87bb01d81ed504faaf104086a"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "3a45e1c6afc6a78433c66528fb14166cfb9e37a1cfb5a8018fa216d275703c4c"
+  },
+  {
+   "itemId": "dev-sig-5b807c12026e",
+   "type": "DesignationEvent",
+   "id": "event-2026-427",
+   "citySlug": "farnham",
+   "docShas": [
+    "bf549b3b66635d066fb8d3993375a9aa62c341b1ff182839d89cb9cf648e75b2"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "2e781232f9a66c8b09239f82d16d747c15feb1e806e525fb1811beb300dbd7c9"
+  },
+  {
+   "itemId": "dev-sig-f92add764256",
+   "type": "DesignationEvent",
+   "id": "event-2022-068",
+   "citySlug": "montmagny",
+   "docShas": [
+    "1d08a71c9f7e5e58faa54a2d7e6a823d5aa1973a11389d5d48d023f2ffdcd8ae"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "16bb9502f8484b8f7dc264c30e6bfcca9d85032009b650c406aa624029e743af"
+  },
+  {
+   "itemId": "dev-sig-d3bbcf22b796",
+   "type": "DesignationEvent",
+   "id": "event-041-2024-02-13",
+   "citySlug": "compton",
+   "docShas": [
+    "684fb1406da5f8e48179a873c203304264d34a8ece39563713a67fb2ebc226fd"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "5b29060a0f3ecd24c8b596776ab72d7aedffea6a0c103c549eaaef67d38fff76"
+  },
+  {
+   "itemId": "dev-sig-c83036ccd95e",
+   "type": "DesignationEvent",
+   "id": "event:saint-gabriel-de-valcartier:2023-09-11:depot-projet-259",
+   "citySlug": "saint-gabriel-de-valcartier",
+   "docShas": [
+    "bc0d36c8b37f026ca60f06816cefdc22779b43cbee85f9d11179ce121894d846"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "95ec7b960d3d6d35fa6bd249f786d06713c90f2aa5578c0c6f560fb1a0467e76"
+  },
+  {
+   "itemId": "dev-sig-c53f307205a3",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-2026-05",
+   "citySlug": "lac-tremblant-nord",
+   "docShas": [
+    "fcaac3f1fe78a818fb837939e643c18a064ed858888e20179631840ae1a54c0a"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "ca34386a521511983d8ee1bf192b6b79c2600aa779fb0f7f225ed5b0f1ed50c7"
+  },
+  {
+   "itemId": "dev-sig-3d1b34a019d8",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-g-05-2026",
+   "citySlug": "saint-prosper-de-champlain",
+   "docShas": [
+    "e729eb34973a5ddaa7e2ca3d7c8e47cf55daff24e0a6119cbef67f381a195bc8"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "a1e608fa9b7b7f69a33161e2e65dc155152980f4b49e55470aaa22ad471185ef"
+  },
+  {
+   "itemId": "dev-sig-5e7511a4638b",
+   "type": "DesignationEvent",
+   "id": "de-2020-01-013",
+   "citySlug": "kazabazua",
+   "docShas": [
+    "38e890d068c528e59b214c6f7f4ec7c5dab2ecd8765974aa4bab4606688bc5c2"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "ab477e9b973f87ff05769ae40fb0ae51b7b9adbcd2948374aa88dde3786e25e4"
+  },
+  {
+   "itemId": "dev-sig-bdc6fb0b34a1",
+   "type": "DesignationEvent",
+   "id": "event-notre-dame-du-rosaire-avis-motion-2026-04-2026-03-20",
+   "citySlug": "notre-dame-du-rosaire",
+   "docShas": [
+    "199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "573b69d16da04d7e5e6c3c6fde73f88347570ae51bc7bf00f7be517758001ba2"
+  },
+  {
+   "itemId": "dev-sig-b5a0a2fc18c0",
+   "type": "DesignationEvent",
+   "id": "event-24-01-031",
+   "citySlug": "princeville",
+   "docShas": [
+    "6351db498dfeca39da4be8740cc0c0ae725a3c00354a5874274a6a70e138d223"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "714ac429dc1563c842807585448da3fedf2b077e4d950434ca84256f6a406391"
+  },
+  {
+   "itemId": "dev-sig-71302fa873ec",
+   "type": "DesignationEvent",
+   "id": "event-adoption-projet-2023-311",
+   "citySlug": "saint-francois-xavier-de-brompton",
+   "docShas": [
+    "10020e6875dc50cbccf886e2bc67336e0a9322499876bb5910f4983084787981"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "09cfc84a045cd959326f99771f5c8fcf097f799ce4f42b84a24efffd7192cf97"
+  },
+  {
+   "itemId": "dev-sig-da778dcb4412",
+   "type": "DesignationEvent",
+   "id": "event-dunham-domaine-centaure-subdivision",
+   "citySlug": "dunham",
+   "docShas": [
+    "60b46fbd75cc5ff23fa6a4563cbc21228049af23db80176e031fdeea7402f30f"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "59625bd27cb6ead8abff679e2211b2561b9cee9a2b2f74dddad59466eb0ac572"
+  },
+  {
+   "itemId": "dev-sig-cf2c81b5fde4",
+   "type": "DesignationEvent",
+   "id": "designation-event-2026-08-148",
+   "citySlug": "herouxville",
+   "docShas": [
+    "851d4423b8e6955ce9fd3aef03f00aa0107794aca595eed0b3319c0ce2446078"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "9a758372feef672f46bd35056b3722529b6d92052327f02f31c748103b10aa67"
+  },
+  {
+   "itemId": "dev-sig-8e5040b4b4be",
+   "type": "DesignationEvent",
+   "id": "ev-adoption-378-27",
+   "citySlug": "hinchinbrooke",
+   "docShas": [
+    "5c8bc7fdea2d7371eeeebf17d71ce55325ef373fffe194c8978fea985efa84db"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "05477465297110daf5d41b1a1e520f0d0a7f89405091bc9d650841f74003d379"
+  },
+  {
+   "itemId": "dev-sig-e201e54832d6",
+   "type": "DesignationEvent",
+   "id": "ev-avis-motion-2023-165",
+   "citySlug": "saint-isidore-de-clifton",
+   "docShas": [
+    "271a93ed821b553993d40ea8f2338012624936a3578a7635b762cb42f9ec3c54"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "ce38ec040e61213982977adbd5ba5d665b2c6c187fe7a6b11f03e9a5b43e00e9"
+  },
+  {
+   "itemId": "dev-sig-3c185a7de3eb",
+   "type": "DesignationEvent",
+   "id": "event-26-220",
+   "citySlug": "la-peche",
+   "docShas": [
+    "1a4632b30e58d8ef92d15100bde174f7e20a3f3a99b0ad0351d8f4a18ea5739f"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "bdc267e7a06bc0388ae7224db4285017155833d59cd66d0ccc79621a98999e68"
+  },
+  {
+   "itemId": "dev-sig-469a10b5ffd2",
+   "type": "DesignationEvent",
+   "id": "event-saint-hippolyte-reglement-1172-19-02-projet",
+   "citySlug": "saint-hippolyte",
+   "docShas": [
+    "450423f83cbeeb5802bd58f17d8d9ddcb4d0f89a95d04f7f57a1348a8b2294f3"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "9b74530ba9364454dfb3f83f703adbb5fb6a05e9f1f19f808e5d7e4b53be584f"
+  },
+  {
+   "itemId": "dev-sig-095f7e4a93fd",
+   "type": "DesignationEvent",
+   "id": "event-lochaber-partie-ouest-sage-solaire-2026-03-09",
+   "citySlug": "lochaber-partie-ouest",
+   "docShas": [
+    "775c79d70137180b0f0a62e317f204cf59186c5962fd7cb1e472150d60c1a757"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "e8db59b985d1cef7f04d3eaff65e4cc9b9ac80d2d390a0ce5d068256206f3507"
+  },
+  {
+   "itemId": "dev-sig-102a25aeea15",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-2012-01-02",
+   "citySlug": "chartierville",
+   "docShas": [
+    "8c5eb6bd04a6208b4f77e028b5332ad2adef2a773115f0fa38ec1a04e23736c9"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "b51c8a2d2df915b450d6f643bb0d8458114cce3fb8108d78a8341a22d64c1b35"
+  },
+  {
+   "itemId": "dev-sig-51504ee00757",
+   "type": "DesignationEvent",
+   "id": "event-saint-eustache-zonage-1675-399",
+   "citySlug": "saint-eustache",
+   "docShas": [
+    "112d3ab4b7aa7583af74fef59f0838a538e4b57bf325d91c56591ea8b69ee9a5"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "8031cac3f41834cce656a991193d36c227f6cf6ce5a32f92d0f18cdced059960"
+  },
+  {
+   "itemId": "dev-sig-bfa93b66de30",
+   "type": "DesignationEvent",
+   "id": "event-lavenir-avis-797-26-2026-03",
+   "citySlug": "lavenir",
+   "docShas": [
+    "ccf75e1339319fd452f1c1499d5378551196c2de46b8b3da6c33967c78863015"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "7aeda20e2ede43882492e8c666810d4d01cde3756cef27d1f44649fac6f0d621"
+  },
+  {
+   "itemId": "dev-sig-7972314fe652",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-2026-06",
+   "citySlug": "saint-albert",
+   "docShas": [
+    "f7484cd60d5647083052f269e85295fe251807b70af189c52d414850ebd57df6"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "a048bf80e094dc6f7b2a71c4b49707ccb986627c0a0c701e94ba682fbff529f3"
+  },
+  {
+   "itemId": "dev-sig-985bd291e717",
+   "type": "DesignationEvent",
+   "id": "event-1960-2026-premier-projet",
+   "citySlug": "sainte-marie",
+   "docShas": [
+    "598701b492460ee34f5c814b68983ae84631b27ce8416ff3fc30562a76e55bcb"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "2eb99cfdf19be802cc153697192ea641a7e6e93c9e9bc164b1e1a108771ddf37"
+  },
+  {
+   "itemId": "dev-sig-1b8166cc8a1f",
+   "type": "DesignationEvent",
+   "id": "event-26-4551",
+   "citySlug": "chartierville",
+   "docShas": [
+    "6bc750e196773dba965ab732a841e770a8841bb672a1a63163f4df0da3a1960b"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "67e1e10476af71cd65846afeddc22ba21b0d8ebfe8e5b037637c6b6449f17a34"
+  },
+  {
+   "itemId": "dev-sig-0dc4184a5a9e",
+   "type": "DesignationEvent",
+   "id": "event-sainte-adele-regl-1314-2021-z-23",
+   "citySlug": "sainte-adele",
+   "docShas": [
+    "7c97d33f4446b87789c19cd39faa03d0adad38477455052788ff24693ed64887"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "497d9a664ca0431ab2885ce1fdc72cad82e2a2629d0a2d378cbd546a8ef29879"
+  },
+  {
+   "itemId": "dev-sig-53f295ad37ff",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-2023-09",
+   "citySlug": "saints-anges",
+   "docShas": [
+    "b6d4a1ecf42059ce3d7f83a30e946eff794331e0ab38216c81f405e6d639bc92"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "ef7be0a18aee27d481fe26d30102dd4387f5d4775997b0bbbe13544522cbba5f"
+  },
+  {
+   "itemId": "dev-sig-6ed7b3ce9ea1",
+   "type": "DesignationEvent",
+   "id": "event-cm2608-385",
+   "citySlug": "dorval",
+   "docShas": [
+    "277a86d1b4e3adf181e9977321d54b2b43eb4d56b7bbd7170e96dfb1860dbb12"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "0725339b063d0a28d93701c7edcebdc3b012f01d172be4513eab00ecf650a10e"
+  },
+  {
+   "itemId": "dev-sig-aeb9f57c832f",
+   "type": "DesignationEvent",
+   "id": "event-2023-03-112",
+   "citySlug": "saint-zotique",
+   "docShas": [
+    "dfaff697e7996b0a6f4541ff986b1e79d4aa75b80fab102ca3d1077c7a482d03"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "349628bcbbce281a68b9044fc6976a5c0abba9549f78d5e835392cd8c446f578"
+  },
+  {
+   "itemId": "dev-sig-efcf0236b724",
+   "type": "DesignationEvent",
+   "id": "event-item-37",
+   "citySlug": "farnham",
+   "docShas": [
+    "87bfd103e27151c77ce48db456f0cd0eaa802c31a9392d5fb5672ee7cd175612"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "25b33aeef1e5844b714e96fb87772e8c5edc1f527e08176fe88117d046f9e6e3"
+  },
+  {
+   "itemId": "dev-sig-61c8f1bd53d9",
+   "type": "DesignationEvent",
+   "id": "event-2017-09-117",
+   "citySlug": "terrasse-vaudreuil",
+   "docShas": [
+    "73504ca261d393191902f762e8c5c209afd0aa5aa9b7f3585ccffcbae7e228a8"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "0e106803a0b17dda3eaa12342a0fa2a43c567327186bc8e2acdeaa41ea4eaeb8"
+  },
+  {
+   "itemId": "dev-sig-eb69606309f6",
+   "type": "DesignationEvent",
+   "id": "designation-event-2023-12-329",
+   "citySlug": "saint-norbert",
+   "docShas": [
+    "5e9b9651b754cd6b7906bcb4586a3c5edf9a54d6b04b34deea46f135ab05ec9d"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "1ea43e2fec5e4f85fdc9e636962101faa896623e012d2e438dac817e23d7ff7b"
+  },
+  {
+   "itemId": "dev-sig-ef5e7e0b9b48",
+   "type": "DesignationEvent",
+   "id": "event-2026-03-022",
+   "citySlug": "sainte-anne-de-la-perade",
+   "docShas": [
+    "6a23985458560db1a7f0718e54b6f5ec0c7bc7747eec1e1b00dca8819b97d708"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "2c48a356263c967a0180e9f47f5c011a82c51dbe8e02745677a5a3dd0162a748"
+  },
+  {
+   "itemId": "dev-sig-3e69c6a77cf1",
+   "type": "DesignationEvent",
+   "id": "event-14-02-2023",
+   "citySlug": "saint-pie",
+   "docShas": [
+    "03594ab2c3bb22a68a4b9b60c755466e26f66b3690c6b94c1e97220e2de8c06b"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "443622cd2d0dbf5dd162ccaf9e108c737c21d2268fa59c3f70bc858a67c12db1"
+  },
+  {
+   "itemId": "dev-sig-3c1b650c90b0",
+   "type": "DesignationEvent",
+   "id": "event-portneuf-amend-116-zones-mixtes",
+   "citySlug": "portneuf",
+   "docShas": [
+    "5702eb77bf452a71cf2588ab1f85a7a74b0df5fe45fb82c2ca2480b8341d7e95"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "01b1399c4dc6ee604b7e4a5c1ad63f3a50326521cf29be2f8e0d02daec848f08"
+  },
+  {
+   "itemId": "dev-sig-4f8c0d9fd8dc",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-2022-08",
+   "citySlug": "melbourne",
+   "docShas": [
+    "2443edb30f08a24c7554a6baa7f3568a6d524c0cdf29c5b59759756ca3bd2005"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "670679973ffcdae473a645d2131f1cbe3d97b554a25ae84c915ce27ad621ca5f"
+  },
+  {
+   "itemId": "dev-sig-f4b946f4c406",
+   "type": "DesignationEvent",
+   "id": "event-336-2014",
+   "citySlug": "lac-beauport",
+   "docShas": [
+    "4e87ef7aa9e6d4f61a3236c7359ee29cd896ea1cfd96e9b8d0a795b49f977255"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "8de740d2bece6a8a3fae078436b31e1ee0e3cc41a000f09b89b035a716a8452a"
+  },
+  {
+   "itemId": "dev-sig-9aa2c2e1f017",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-258-2026",
+   "citySlug": "saint-casimir",
+   "docShas": [
+    "b982f0c50caf3d533f402e20de2b60b91ef5d29eeaa5f5661bef41dfd5a81b89"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "e9adb1fc5bc8f8a526da9641b20e5c119fcc54d59d6d585781116e0e84543639"
+  },
+  {
+   "itemId": "dev-sig-40cf9e89b891",
+   "type": "DesignationEvent",
+   "id": "event-2024-10-162",
+   "citySlug": "sainte-catherine-de-hatley",
+   "docShas": [
+    "ed0799d1d24ee0947b0357efb6232540ce14910a9499416a21e97d5401051002"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "4762e6761fc9e7f84e392a996d25e63186580ae12119aeca5538c50b8abac8cb"
+  },
+  {
+   "itemId": "dev-sig-83105be1dab2",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-876-2023",
+   "citySlug": "saint-georges",
+   "docShas": [
+    "2a27ac32a339bc66ecaa4ea0e81648b6397e3a4fb7696d17f2ac3d39716a7221"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "572753e7784ec1ba02873b53d1078646f30291e1aa96cb0ab8bcf68fc3e28b7e"
+  },
+  {
+   "itemId": "dev-sig-eb0eba09fdb7",
+   "type": "DesignationEvent",
+   "id": "event-beaupre-fyra-quartier-phase-2",
+   "citySlug": "beaupre",
+   "docShas": [
+    "af9003c4d0f5a760cc038f180dea59f33d39fbacc1519500ae761f661badc480"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "85fc907415a8f9ed752f1661b91f3e3590d31366760d9b85feb9137578b018b7"
+  },
+  {
+   "itemId": "dev-sig-19ae945908c5",
+   "type": "DesignationEvent",
+   "id": "event-186-20",
+   "citySlug": "saint-henri",
+   "docShas": [
+    "19ef5276a5c2593349cca0f6736fcf0e24d8778f0b9ff9a207186b8fc9b9fd19"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "d9d08e74b7cd120fc02a053241502a4e4c7558736b61a8b0a01e6382a56bfd58"
+  },
+  {
+   "itemId": "dev-sig-9c14646b42c4",
+   "type": "DesignationEvent",
+   "id": "de-2026-04-066",
+   "citySlug": "notre-dame-du-sacre-coeur-dissoudun",
+   "docShas": [
+    "02db9b687fe0829dd2129d1cbb25a90e4012bcd29fea8ffe6931986989bafbc3"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "d7c6ee02cac67e22df831b6574287026a68e09888df2c562cbff9b687a902419"
+  },
+  {
+   "itemId": "dev-sig-cd8fb8a9b63e",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-2025-308",
+   "citySlug": "lac-saint-joseph",
+   "docShas": [
+    "96f814b041eaeb9d9a05a9d99748539d8687668fe9c17b6e94dcb861e995d02a"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "b35d7d15fd9f0e1774fe831ee1d938e05c79d9ec07835600aeec2b5b76da5013"
+  },
+  {
+   "itemId": "dev-sig-486967d406cf",
+   "type": "DesignationEvent",
+   "id": "event-2023-03-113",
+   "citySlug": "saint-zotique",
+   "docShas": [
+    "dfaff697e7996b0a6f4541ff986b1e79d4aa75b80fab102ca3d1077c7a482d03"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "5fb1775fef3fce540d5afa5ac7b84ad68fa69ada89483e1d5e080293cfddb70d"
+  },
+  {
+   "itemId": "dev-sig-bf129b4fe7b8",
+   "type": "DesignationEvent",
+   "id": "event-projet-reglement-apr-414-2025",
+   "citySlug": "sainte-catherine-de-la-jacques-cartier",
+   "docShas": [
+    "fe33104cb2a76d741cc19695fbd235646867a15235d241b2bbd99bdb56b58717"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "39dcda442e3c3907f19053b5f05a0129e4884fed403430a1ef1b6f5e107a64e0"
+  },
+  {
+   "itemId": "dev-sig-97a3c7d30396",
+   "type": "DesignationEvent",
+   "id": "event-adoption-projet-289",
+   "citySlug": "saint-gabriel-de-valcartier",
+   "docShas": [
+    "d1d0886bf7e2d90f86154946b5c38907e897822025e5c796637a2de61fa0954b"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "b7e4eb7611ba8a06327586eb54fdd79899d2830e11f144d063d3a109658cdb8b"
+  },
+  {
+   "itemId": "dev-sig-7f68e4c38526",
+   "type": "DesignationEvent",
+   "id": "event-10-3-avis-motion-projet-599",
+   "citySlug": "cleveland",
+   "docShas": [
+    "8b382868c13533e610e72d37113b1d8c33124ae79c14128c58f2d03b57bb345c"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "eff5f7277dc0a98075adcad971adc7464d51d1234a483c8c16bc8300638014ae"
+  },
+  {
+   "itemId": "dev-sig-c5b107334acb",
+   "type": "DesignationEvent",
+   "id": "designation-a-91-avis-motion",
+   "citySlug": "mont-laurier",
+   "docShas": [
+    "ec914af542bcbe878b674854ba6023d9271e1887beea9513fe479fe547f2580b"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "cc85bbe6ea67f6d21d2db5bfd12b322ecc5d68f751d5431c6934a1a9be70ec2d"
+  },
+  {
+   "itemId": "dev-sig-9e286f31a973",
+   "type": "DesignationEvent",
+   "id": "event-2022-19-adoption-1er-projet",
+   "citySlug": "ogden",
+   "docShas": [
+    "41565062058c6173350b088910e4c0c79a5b574665ed4c8980861b209524fc54"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "a85084fd1c17b963ed930b5335135cbd8a557c3caf8d9aaf13e93ad5c9ec14b7"
+  },
+  {
+   "itemId": "dev-sig-14db52247927",
+   "type": "DesignationEvent",
+   "id": "event-213-2015",
+   "citySlug": "lac-beauport",
+   "docShas": [
+    "b01d60fc841996e178a521cd6b2de15aa7c93ce6faf3966084e674e9479674c1"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "38c03b8310abed6dcb2fa7e676b387fd4cc2ce65bc225eec764b2ecef7a8be4b"
+  },
+  {
+   "itemId": "dev-sig-251fb65ca9b4",
+   "type": "DesignationEvent",
+   "id": "desig-083-2024-03-12",
+   "citySlug": "compton",
+   "docShas": [
+    "c8adbc561a2b321ea342fe625b1a85535216309d047a6e353dfc7ffabf96ff42"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "dcd9a970f66b7b82bfbc908db77c91a04c2d277c305277cd0e6f6296e39e8174"
+  },
+  {
+   "itemId": "dev-sig-9e59834724a9",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-570-4",
+   "citySlug": "terrasse-vaudreuil",
+   "docShas": [
+    "8a932a5e8876f3a4e6f6b29524f228464f95f0c960e5160848813d36c51db639"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "c37aa471cab4c0a01d0f597a4674ee88b5de5a2925ce00ad65e978275d32e159"
+  },
+  {
+   "itemId": "dev-sig-027fbe9e4791",
+   "type": "DesignationEvent",
+   "id": "event-saint-bruno-densification-trifamiliale-2026-01-12",
+   "citySlug": "saint-bruno",
+   "docShas": [
+    "9cef30fe3bc28e7f55d24c56182b8faf2a6236be3d905478439f7ed28c15b633"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "gt300km",
+   "instrument": "autre",
+   "inputSha256": "1ae333051898e2bb61fc932b942d009099bd8a1042c6bd4855a00940a3254532"
+  },
+  {
+   "itemId": "dev-sig-494186fcd7ae",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-140-2021",
+   "citySlug": "saint-just-de-bretenieres",
+   "docShas": [
+    "521310476d45c4df2272dc10a8bc17d609a6b1467d53480373317a482af386fe"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "c2d6c991f949fb8b555f0dc956ea8b2c29a0caa5ea22eb65d5b81bd219866459"
+  },
+  {
+   "itemId": "dev-sig-fcb7d725b12d",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-2025-03",
+   "citySlug": "saints-anges",
+   "docShas": [
+    "ed0f3ada70dfab5cdd3bcbe2ccfd5943ef3455ac2c84f9405f5801c5db03ad94"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "5ce01c33d58693213c13d56c65c88e7dc331945b00ce33c5fff4a19e63ada347"
+  },
+  {
+   "itemId": "dev-sig-11cbac9393ea",
+   "type": "DesignationEvent",
+   "id": "event-13-1",
+   "citySlug": "granby",
+   "docShas": [
+    "ae5a8a06054e51194fdfc652a42d61ccbb70a7e0d64099097511a7b6406ac163"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "143e1de3729f7d81ffa84e14bf857cf147489a673ac785e4f9382f4e4559e07c"
+  },
+  {
+   "itemId": "dev-sig-5d35e8ba4481",
+   "type": "DesignationEvent",
+   "id": "event-saint-eustache-zonage-1675-367",
+   "citySlug": "saint-eustache",
+   "docShas": [
+    "5207fa7da9a3c9928e87746111550d922fa6b0420e9feac771c99866a12cf70e"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "4eef6feb0a16e90fc3254b1aec1faaa7961d11790917662c50cb4c1fbaf9f6cb"
+  },
+  {
+   "itemId": "dev-sig-9eb118be7e74",
+   "type": "DesignationEvent",
+   "id": "event-saguenay-solaire-6468372",
+   "citySlug": "saguenay",
+   "docShas": [
+    "76f209254994e23f02cc39f21fcf362c1b3338aac7c0909ab9686f07e8ca891c"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "gt300km",
+   "instrument": "autre",
+   "inputSha256": "42b0f4f3b97b56ee96b57ebf18b28616c948e480580c7774f95481f919189fd0"
+  },
+  {
+   "itemId": "dev-sig-033018192289",
+   "type": "DesignationEvent",
+   "id": "event-depot-projet-2020-11-05",
+   "citySlug": "saint-prosper-de-champlain",
+   "docShas": [
+    "3f34b5fc993f5cf00ca0cc76d1cad0ab0681dba35467aa8d3b3f9e6359a71ccb"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "dd5c7d337f0ccc523832ff4a65847cb911b299cd6b92661afd9caef839273927"
+  },
+  {
+   "itemId": "dev-sig-b34c4ef8730b",
+   "type": "DesignationEvent",
+   "id": "designation-event-2026-09-270",
+   "citySlug": "otterburn-park",
+   "docShas": [
+    "7006889ca3aa0259a69950ce23e86453f8581e7397856d1dab325f82886ae0a8"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "63743e045978c843e5da7d2ddcd19be1d3d5ccdb47ad6a9994222a3114169063"
+  },
+  {
+   "itemId": "dev-sig-759cc339dd92",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-2023-11",
+   "citySlug": "melbourne",
+   "docShas": [
+    "dc74be6a1268bdd32f78ae2c2686afb1fd8a8bff1f7c88800605a97d5954b129"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "745a9e8f6db35f6e21bcb534d67424e9e31142210cd850468ca9b85c4f2ba137"
+  },
+  {
+   "itemId": "dev-sig-7bb4e9b86e8e",
+   "type": "DesignationEvent",
+   "id": "event-2026-09-388",
+   "citySlug": "bromont",
+   "docShas": [
+    "24d52a35e5acba423d90747b757acff09368e3bc1aad4f428e13d1f41c794389"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "c9ea914754d94873fc2aa2bdbf41a42288c5b30f5f2974493df30f669228feb9"
+  },
+  {
+   "itemId": "dev-sig-0f7d55993562",
+   "type": "DesignationEvent",
+   "id": "event-barkmere-2013-52",
+   "citySlug": "barkmere",
+   "docShas": [
+    "19f6b4d4ab6b39d1204cb44132ef360c93ccb8d3fcf51593c40158937ad64d9e"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "23981cf93998d9318a4ff9458f5a6c17de6104e11c5cea103409ab3d3843eabe"
+  },
+  {
+   "itemId": "dev-sig-e6425004d2a0",
+   "type": "DesignationEvent",
+   "id": "event-saint-sauveur-zonage-omnibus-2026-05-20",
+   "citySlug": "saint-sauveur",
+   "docShas": [
+    "bce5a701c75e79a0a637dd1cfad0ed781022a9ecb03fd3a1d2b99f57ca5504d3"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "0ccefa410a81402a755d57e09b5798b2365e5520d3a1267de7345122f2c2d83c"
+  },
+  {
+   "itemId": "dev-sig-cbfde7d25410",
+   "type": "DesignationEvent",
+   "id": "event-saint-damase-r-2025-05-105",
+   "citySlug": "saint-damase",
+   "docShas": [
+    "d3bcf481d54d46037e6cbe0ccb9d561790149e52caadf7bd36ea388522c9d6ad"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "unknown",
+   "instrument": "autre",
+   "inputSha256": "dd6184d9044fd39cf3b374086f0fe00b09625f5548972de3501c6c02549c06e9"
+  },
+  {
+   "itemId": "dev-sig-d5aaa85ee581",
+   "type": "DesignationEvent",
+   "id": "designation-event-2018-05-116",
+   "citySlug": "val-alain",
+   "docShas": [
+    "517681b7e47f194bfa8d93a1d1eede7bc22e72694f4d955022a76b32d31b3b80"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "ad4d7194de32cadc2099efa19e00e9bdf76e718402a707dc56a6e9a0a6f23895"
+  },
+  {
+   "itemId": "dev-sig-e2fdba079261",
+   "type": "DesignationEvent",
+   "id": "event-151-05-2021",
+   "citySlug": "saint-francois-xavier-de-brompton",
+   "docShas": [
+    "714a0b0f7d73f151b11db358fadbd4f0c4a36c57b69ff21e9b6be693037b65cb"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "d36fad9350ded2a49239b88c744993635c5a72c0033dabbe161c020d4dc8d19d"
+  },
+  {
+   "itemId": "dev-sig-a6ca51854784",
+   "type": "DesignationEvent",
+   "id": "event-11-1-avis-motion-26-934",
+   "citySlug": "saint-ferreol-les-neiges",
+   "docShas": [
+    "94bfe7a6cf2f5f1f27c387d5ce3c131eb5c0daf556912d9e855775d57eef7cf0"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "c2220a3a2c2ae17c65ce8e2275263f694cf26363677b2455737e4943678ad2a1"
+  },
+  {
+   "itemId": "dev-sig-0bdc8d5a490b",
+   "type": "DesignationEvent",
+   "id": "event-shannon-controle-interimaire-boul-jc-2026-01-12",
+   "citySlug": "shannon",
+   "docShas": [
+    "928848cda7f818e979ad12af8ed3bb1bab6ecca291cb46d2f87156d5465ac09b"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "43ed010ff56c1f4084b28363bcbcc6deeb86dfeb3fb88dc62a165e7d8565c8b5"
+  },
+  {
+   "itemId": "dev-sig-3bf6f12876a0",
+   "type": "DesignationEvent",
+   "id": "event-2019-068",
+   "citySlug": "montmagny",
+   "docShas": [
+    "3c011ba3e9cc4252f4a6e2a84225412ed5a02b37f69a4bedbe64d4de16a503a9"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "edccfd864714736859376667c341f82608dee6acdcf0f75659a374b4d83d6025"
+  },
+  {
+   "itemId": "dev-sig-19c5d8b727c2",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-609-2026",
+   "citySlug": "sainte-anne-de-sorel",
+   "docShas": [
+    "01ed392b6f0b2988dbe242fbab19f5779053904d138bea5fe57d4e04dcb0fdfe"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "243cf3fa7bdd963ff2b15c7f2c326400eeaa77d2ead71a76393b3a616783cf9d"
+  },
+  {
+   "itemId": "dev-sig-e7a6d8a85f3d",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-484",
+   "citySlug": "sainte-petronille",
+   "docShas": [
+    "c5fb0444f5e0d50930b334619bbb74227a57aa9784a3a5abe0812cba5e7d5d77"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "4e2062cdf755a8b021aa9c7aee379c9e878f137bff82d2546f6f52f20f053c1e"
+  },
+  {
+   "itemId": "dev-sig-c19768f4e4f7",
+   "type": "DesignationEvent",
+   "id": "event-08-07-2026",
+   "citySlug": "saint-cuthbert",
+   "docShas": [
+    "b8bd263b4fb7488a12c201cb02a1dc9a89509d8eaad36e85b29093d2440ec953"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "8427366c807b7292bb228dfb4cac5f687028756a5a31b81d323d2101a7ada1b3"
+  },
+  {
+   "itemId": "dev-sig-ffd19f0e9f73",
+   "type": "DesignationEvent",
+   "id": "evt-2026-01-038",
+   "citySlug": "lanoraie",
+   "docShas": [
+    "927cf22b67c260b2fa09ecf492c2e585a92304e0abea08560b2b77b8a700bf7d"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "1273f10c1afd14ab53e1c9012ee7e0ad2777a211a47a549b736cc44974ad3148"
+  },
+  {
+   "itemId": "dev-sig-e0f3aabd8a01",
+   "type": "DesignationEvent",
+   "id": "de-14-02-7695",
+   "citySlug": "dosquet",
+   "docShas": [
+    "84d6a9582d99178f42bcf8638793460f678b7161a91076cd6dfcdc67e1b3aba3"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "5f1ccae48f7bd932a89661c3bf1e37d450751b34ed6ee9e55f4281b7d8b508ff"
+  },
+  {
+   "itemId": "dev-sig-9fca90124876",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-258",
+   "citySlug": "saint-gabriel-de-valcartier",
+   "docShas": [
+    "fa61fea50f37d531f7a45bcc9027644ba79e292167dc4c6a115adb8534c4d8d8"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "db461d2f589fac03320044469db3c0489bb1e44bc6b5e60a19bd8532b93b7d56"
+  },
+  {
+   "itemId": "dev-sig-3db6c2a4bcf1",
+   "type": "DesignationEvent",
+   "id": "designation-event-avis-motion-288",
+   "citySlug": "saint-gabriel-de-valcartier",
+   "docShas": [
+    "108da34bd2347df57d60ee1cef1ece3c37d18c44d6bcd1a4aa3ecf9e2faf207b"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "8d48b38a5f3ab43ebcbf5bcec00ca3eec3051bfe3e0e752a019942222a4d66c0"
+  },
+  {
+   "itemId": "dev-sig-8a3f6baf04d8",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-425",
+   "citySlug": "saint-norbert",
+   "docShas": [
+    "ff9c1e4ab719c08e7de1c0076756fa54ed070e1bd66efcd4b730ee147bd33e8e"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "219f646c0b8276260608da9ff7b4f4486063098dc665969c621aac3a071e587a"
+  },
+  {
+   "itemId": "dev-sig-61f726d7bfc0",
+   "type": "DesignationEvent",
+   "id": "event-depot-projet-579",
+   "citySlug": "cleveland",
+   "docShas": [
+    "57e8c66f8d1e5cf5e93e3b8c5738bd80f0c9c297337da3a13d615191166f3e0a"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "bfd95414213c6fa816e44350a5e454e2ee80c03de84f4a3b356255a7d6507f50"
+  },
+  {
+   "itemId": "dev-sig-bc8c8c390d41",
+   "type": "DesignationEvent",
+   "id": "event-ppcmoi-lot-4355183",
+   "citySlug": "farnham",
+   "docShas": [
+    "4b87d7b992f8caaf8aaa98133e7a8ab985c8e20e45ba602856068949808fb3a2"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "a8ad2f73f5df4d0b08048bd9f69f6f52ff1f9470e15a4856c8f5b2520b3d129a"
+  },
+  {
+   "itemId": "dev-sig-1cc3477d3a1b",
+   "type": "DesignationEvent",
+   "id": "event-adoption-pp-2024-07-086",
+   "citySlug": "esterel",
+   "docShas": [
+    "d9e8fec3e1e7aef112a46134487162f983f7709be7af097cd9be4b64e9764845"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "2fe63f2b43f0658c14e9dc415c60f16b5d37b5401324ad88b139fee738a0766f"
+  },
+  {
+   "itemId": "dev-sig-0dc5ade9a7bd",
+   "type": "DesignationEvent",
+   "id": "event-302-11-2020",
+   "citySlug": "saint-valerien-de-milton",
+   "docShas": [
+    "df4161f33493e4d5c6cc2a32ad2bfaad7e6205c1a4d098ef22f32691c20a0bcb"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "c152c44141bd4d8be936393fbcaa1da54f1c89a414969742d3d30f55ce016dfd"
+  },
+  {
+   "itemId": "dev-sig-4107d604457e",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-531-2020",
+   "citySlug": "saint-tite-des-caps",
+   "docShas": [
+    "184c9891ddf39a4db924873a58e506e0aea43cc13fd73e502581c5dd41af8f02"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "7af063181fe859e53f868f05103b70c35b7760e42f50d1aa03573e0018bd4de0"
+  },
+  {
+   "itemId": "dev-sig-d9ddd241481d",
+   "type": "DesignationEvent",
+   "id": "event-item-27-premier-projet",
+   "citySlug": "saint-paul-dabbotsford",
+   "docShas": [
+    "38269d5e5ab1d7affc335f9a9d97d2b0f26b440414ea7e7974bf7205d63808d6"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "90ae1babec9feb04fc0dd59f99ad4a093cf528e6ec63e3e1b296c5b27d82df87"
+  },
+  {
+   "itemId": "dev-sig-f20ddbe27cd6",
+   "type": "DesignationEvent",
+   "id": "event-adoption-1er-projet-532-2026",
+   "citySlug": "notre-dame-des-bois",
+   "docShas": [
+    "47e399b923f2db6a0e1e23f93c05b242085bfdaa1f33923aed31bfafa9e654d1"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "8ec31e4f14f8e5d241570a77ce0a24899d9322784f1457d8591123817b8892a5"
+  },
+  {
+   "itemId": "dev-sig-b29c0dff056a",
+   "type": "DesignationEvent",
+   "id": "event-137-2026",
+   "citySlug": "saint-jacques",
+   "docShas": [
+    "e6e7c4d46687e4e6b5fcf18958a4f1e4774b6214648c1d247ccfdc9238e1b4d5"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "573d63050a9d3506bb1848c647c3a63eec424415294fe1a684cdfe696e57a82a"
+  },
+  {
+   "itemId": "dev-sig-ae2c7730d400",
+   "type": "DesignationEvent",
+   "id": "event-18-2898",
+   "citySlug": "chartierville",
+   "docShas": [
+    "8658e73763870ad953b9c433fd18c7ec2a3697ced417a765e7aebf44bcc89e8e"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "c64254e1786c3b217ab545b49e98a87f2aa197f6b2fe7c2cecc0cece511bc8db"
+  },
+  {
+   "itemId": "dev-sig-0557e3c65b6d",
+   "type": "DesignationEvent",
+   "id": "event-108-08-20",
+   "citySlug": "saint-blaise-sur-richelieu",
+   "docShas": [
+    "c2e939184fd48cc8fbef010e706dd30b10bf0b47f40aeb30f8eea9633635c35b"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "e3244d8e27be70c229a4515732b592e295db2b99fd96555076723746227863b0"
+  },
+  {
+   "itemId": "dev-sig-3b0fa9673fac",
+   "type": "DesignationEvent",
+   "id": "event-2017-03-042",
+   "citySlug": "terrasse-vaudreuil",
+   "docShas": [
+    "95fb630987ed999624734c3bc6749f7c35c00654c3e04f53e36d0ea279c57eff"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "47cdc910d33249cfdf6de3b3362cc29997ae412643abe9efe1b3cd991b9db97b"
+  },
+  {
+   "itemId": "dev-sig-fdd1efa25879",
+   "type": "DesignationEvent",
+   "id": "event-saint-felix-de-valois-rezonage-542-2025-10-01",
+   "citySlug": "saint-felix-de-valois",
+   "docShas": [
+    "cf5c8a9a51147cb93f9aa06a9d45609474cee2d12377decfc43d903464f4a148"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "831ed321d8f19753f19eb807faa91cdc2a2ac1df4d9ee50aed7d661bf9426897"
+  },
+  {
+   "itemId": "dev-sig-7d9ebed02beb",
+   "type": "DesignationEvent",
+   "id": "event-saint-alexis-motion-regl-urbanisme-2026-01-26",
+   "citySlug": "saint-alexis",
+   "docShas": [
+    "73d22dc265499f97f4fee61f90cb0f69edd5606629821abc44f3e8951d913cd9"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "00370a080ebaff3323dbe7ca0783e902277113344e98f03f5711b470a9f17e57"
+  },
+  {
+   "itemId": "dev-sig-3a294f7e69c2",
+   "type": "DesignationEvent",
+   "id": "event-2019-330",
+   "citySlug": "montmagny",
+   "docShas": [
+    "a7ed55dd9e29b3e2fd47f65ebbdb899c94637c17e5faeeca0f39ef815f2c9238"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "f7fa3d4a0c99d37c050fa138b735d2a7e9267810b9b72cb93a2b2359f775d4d5"
+  },
+  {
+   "itemId": "dev-sig-7a6784f20968",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-706-24",
+   "citySlug": "saint-joseph-de-beauce",
+   "docShas": [
+    "281bf53450a4dd88140494bb31172cbcd443deb87bb01d81ed504faaf104086a"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "39225db41ccd13e0eb521fd69f90a2efe3c3201477b8c6f586978399eb8eb129"
+  },
+  {
+   "itemId": "dev-sig-4cd201899339",
+   "type": "DesignationEvent",
+   "id": "event-auclair-modification-zonage-2024-10",
+   "citySlug": "auclair",
+   "docShas": [
+    "e6e5464d95107d35cfa01032081c6bf0866b0e8fd0a92ddd782dab83cb28ce2a"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "gt300km",
+   "instrument": "autre",
+   "inputSha256": "3fbc9bcb3edbfd100391886740712cca1452d891999cc21bb24c40276d0d037a"
+  },
+  {
+   "itemId": "dev-sig-5cf26af4f967",
+   "type": "DesignationEvent",
+   "id": "event-gore-intention-rezonage-lots-5080562-5082612",
+   "citySlug": "gore",
+   "docShas": [
+    "570f1e9c5e524359335ce8513a1304ddeb1d1234c50c5f593ed29c92835ba319"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "refonte",
+   "inputSha256": "b83ac908210ef323ce67bb6c2384991f821c48add02848e927bd37738cc6626c"
+  },
+  {
+   "itemId": "dev-sig-41090f1542d2",
+   "type": "DesignationEvent",
+   "id": "event-grenville-rezoning-2019-02-287-021",
+   "citySlug": "grenville",
+   "docShas": [
+    "be699c43ee0c8c39009c9c984dd677020a8abe387d552601e14999b16c1ceb0c"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "0758e4015e3b22910cac89e8afa8741789d22244c7ea5346e31c4d596729e92e"
+  },
+  {
+   "itemId": "dev-sig-29e9d795e8f8",
+   "type": "DesignationEvent",
+   "id": "event-saint-pie-de-guire-regl25-737-projet-2026-02-02",
+   "citySlug": "saint-pie-de-guire",
+   "docShas": [
+    "83b31d30bd0da92244440f62eca4a0cb6c9921e7dcb9064770bdcc832b75b001"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "c262a2259f800515dac6e852f10f963990782ea38c4d786743d363cd839505a4"
+  },
+  {
+   "itemId": "dev-sig-7049a73b5881",
+   "type": "DesignationEvent",
+   "id": "event-notre-dame-du-bon-conseil--drummond-rezonage-M1-2026-01",
+   "citySlug": "notre-dame-du-bon-conseil--drummond",
+   "docShas": [
+    "1fda79844a5da6eb20db42475f395fe599899c1c6691657bb263a3df1a8d1778"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "unknown",
+   "instrument": "autre",
+   "inputSha256": "c7c8c5e374ff2fddfdcc22b3e3476098047e232a32963f92a0da6a7c5a9a3526"
+  },
+  {
+   "itemId": "dev-sig-a6ad995d08e3",
+   "type": "DesignationEvent",
+   "id": "event-7-1-presentation-projet",
+   "citySlug": "lac-sergent",
+   "docShas": [
+    "2651425d9648b366aed1842eb2f5f7e8925e4dc670e12606a40287099709de48"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "79f9908aec92a942a14b98c313ebe096d372ac7f05f5f30a8ea7bdba283c5e65"
+  },
+  {
+   "itemId": "dev-sig-bb300d3dc87f",
+   "type": "DesignationEvent",
+   "id": "deve-beac-045-10-avis-motion",
+   "citySlug": "beaconsfield",
+   "docShas": [
+    "0cbc2b97d168fc10d58b98f07265d9de8f7a2587366b40daf428d5808a6366e0"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "f33eab293b57639f51c8ffaaaa84663bd320d0b76815739fea6c855b939992c0"
+  },
+  {
+   "itemId": "dev-sig-5cfa2cd9b608",
+   "type": "DesignationEvent",
+   "id": "event-166-24",
+   "citySlug": "lancienne-lorette",
+   "docShas": [
+    "2f0bac335ced1ed029f18356d08bab869323a7e689b66f80cbbac22ea2b9e84a"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "d6c7eb4ad738eff60296c364d4210370249875ba8081e55de2b5c83769f7cefa"
+  },
+  {
+   "itemId": "dev-sig-ec1e1bc1c824",
+   "type": "DesignationEvent",
+   "id": "event-9039-04-26",
+   "citySlug": "sainte-anne-des-lacs",
+   "docShas": [
+    "6c47961e29a7d2d6220233c4eef1aa67580e5be7cfa9883f65e7c7cb1bf2cb3d"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "8814f9e35efdf96b9e930ac73318d4144ce55d958613909c7d6e68a3eb5cebbe"
+  },
+  {
+   "itemId": "dev-sig-d408e624fede",
+   "type": "DesignationEvent",
+   "id": "designation-2023-02-042",
+   "citySlug": "ogden",
+   "docShas": [
+    "209107d03fcc21aabd993c2c5d9059cec0997c2860c1ad15d236adc35ac7e3a6"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "1a909fac1a9b2f04a41edfd5e8c164b2b1516e332a7c400cef1d86d5f34ecd8f"
+  },
+  {
+   "itemId": "dev-sig-f7d1b4308c77",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-d-04-2021",
+   "citySlug": "saint-prosper-de-champlain",
+   "docShas": [
+    "3556a02c20b8d713ad2c9da19c78a9720ae43e87d074152a1219840a9edfb017"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "b0c6e47e2cc4bc474fe11ffe203f13ce3a8804f41c3e71accd14af2950ac60a2"
+  },
+  {
+   "itemId": "dev-sig-4e1ef9267ade",
+   "type": "DesignationEvent",
+   "id": "event-26-09-173",
+   "citySlug": "saint-urbain-premier",
+   "docShas": [
+    "467dbf17733d61d6f4387945734970c849b3e458bc4e3fd55a9aa1163fc5b98e"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "0bef3a26079870895203d13885f55b8cc8ed8f42128dbb56d62aac77382d4fde"
+  },
+  {
+   "itemId": "dev-sig-ea6d009dac23",
+   "type": "DesignationEvent",
+   "id": "event-adoption-premier-projet-700-50-1999",
+   "citySlug": "bromont",
+   "docShas": [
+    "240a87044628927c707104e08ee3798e74041ad2af215f971d1a719fa42c8b9e"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "7cf19318af91a99561f10f01bf383f2a253c74388b8080e3c98cbff75a031e7e"
+  },
+  {
+   "itemId": "dev-sig-dfc8248b7315",
+   "type": "DesignationEvent",
+   "id": "event-26-04-202",
+   "citySlug": "mont-laurier",
+   "docShas": [
+    "d7172f143e670700820f6fc7c90a7c01ad8900831d812808d35e8ebfcf897036"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "d5078d5f3ff1a4ab8ef9144b610d7a610789e01b1f300870196c2e6301891fad"
+  },
+  {
+   "itemId": "dev-sig-26407e229172",
+   "type": "DesignationEvent",
+   "id": "event-avis-motion-134",
+   "citySlug": "sainte-clotilde-de-horton",
+   "docShas": [
+    "6a5917bfb0f3bb78e56b60a79b5703f830024dfc7379ec284ce0e732e484068e"
+   ],
+   "pass": "pass1",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "ppcmoi",
+   "inputSha256": "ac3b175490257d94d4579c2b1b8e93262dbdf0058cceba9d448424f569ee80bb"
+  },
+  {
+   "itemId": "dev-sig-090a21fa8bf0",
+   "type": "DesignationEvent",
+   "id": "event-24-05r-210",
+   "citySlug": "sainte-julienne",
+   "docShas": [
+    "1dc81648d61061840436b5bea755958f90d345bcaba162dbb65ac6fbecc5299e"
+   ],
+   "pass": "pass1",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "ppcmoi",
+   "inputSha256": "fdc45fbba59ee1d8d7b8cae25d20553749605a10f555ecae6002c4a70d5bd196"
+  },
+  {
+   "itemId": "dev-sig-779d47fe31db",
+   "type": "DesignationEvent",
+   "id": "event-2020-11-385",
+   "citySlug": "beaconsfield",
+   "docShas": [
+    "dc2403d8ebb2b6de20c1a52565e4e11479fff2f3b21c2748d906e950b297054e"
+   ],
+   "pass": "pass1",
+   "group": "individual-authorisation",
+   "region": "lt50km",
+   "instrument": "ppcmoi",
+   "inputSha256": "a68b1cd764e587c9fe9b4089cce91b8619c0bea91bea40acfbe19a6f875ff18a"
+  },
+  {
+   "itemId": "dev-sig-8b082094e836",
+   "type": "DesignationEvent",
+   "id": "event-upton-avis-motion-2026-406",
+   "citySlug": "upton",
+   "docShas": [
+    "e966998cf517abdee38edd150497aa33bf52ed79af0880d510519905b1127505"
+   ],
+   "pass": "pass1",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "166902674ab78a636d4fa0ef4113f9d66cad3c3d7987fc99e77a55feae65466f"
+  },
+  {
+   "itemId": "dev-sig-1fd896bcdeed",
+   "type": "DesignationEvent",
+   "id": "de-ppcmoi-554-2022",
+   "citySlug": "saint-tite-des-caps",
+   "docShas": [
+    "566ade23cee4d50349d498714bde8bc6c7adcf5b7f011307c525a1c5b44ed5c6"
+   ],
+   "pass": "pass1",
+   "group": "individual-authorisation",
+   "region": "150-300km",
+   "instrument": "ppcmoi",
+   "inputSha256": "a59593abf3c99346ebd69bbf159d574d4c5b0ea43453c0b113c1be25fb299ccc"
+  },
+  {
+   "itemId": "dev-sig-49668e6a118f",
+   "type": "Signal",
+   "id": "signal-arundel-lotissement-110-1",
+   "citySlug": "arundel",
+   "docShas": [
+    "2bace233fc56e2f08cdad6562c3b93f8d786feae0b832697689b3d96d01ac012"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "rezonage",
+   "inputSha256": "a316fa1dbcd9d326dfcfe7db02aa31256af4c59b9b1e3b9d3b6b6f0b79529b77"
+  },
+  {
+   "itemId": "dev-sig-431801870467",
+   "type": "Signal",
+   "id": "signal-saint-tite-des-caps-creation-zones-va89-va90",
+   "citySlug": "saint-tite-des-caps",
+   "docShas": [
+    "4202e078ec33cf57d55b6b51cbce52eb0bd7eb58b25362706de50f47f954e26b"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "rezonage",
+   "inputSha256": "bc904b62d3accf0d7ee78d24d28f917ae836e9e18ceaeda887895b1b53de57d3"
+  },
+  {
+   "itemId": "dev-sig-ba07341b492f",
+   "type": "Signal",
+   "id": "signal-grand-metis-zone20-chalets-2025",
+   "citySlug": "grand-metis",
+   "docShas": [
+    "220c2bf3ae93c172f9d624edea0bd45a761fa63fb49e59797b35b7ad83103fe8"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "gt300km",
+   "instrument": "rezonage",
+   "inputSha256": "741229191cbb109a405fbced9fbbd16833130a9e819c169937329b84c70b3929"
+  },
+  {
+   "itemId": "dev-sig-cdc28e754eb5",
+   "type": "Signal",
+   "id": "signal-25-02-039",
+   "citySlug": "princeville",
+   "docShas": [
+    "f3b49525120db4698e1d674d06b5c68f3b3d941fdfe8edf72d51d2f5f08d1fe0"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "e18cca810538db754114d42739945d4435be8cf735ae5c61b0fadf7b148f3ec4"
+  },
+  {
+   "itemId": "dev-sig-a7b900ffdbc3",
+   "type": "Signal",
+   "id": "signal-gore-rezonage-lots-5080562-5082612",
+   "citySlug": "gore",
+   "docShas": [
+    "570f1e9c5e524359335ce8513a1304ddeb1d1234c50c5f593ed29c92835ba319"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "rezonage",
+   "inputSha256": "98da86f510287bd4470dca7200175ccdf0c187966b646becb9babf7bf684ea5b"
+  },
+  {
+   "itemId": "dev-sig-1a484a4c75b5",
+   "type": "Signal",
+   "id": "signal-lac-brome-rezonage-596-20",
+   "citySlug": "lac-brome",
+   "docShas": [
+    "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "rezonage",
+   "inputSha256": "45ff6643aa9756fee54029716d28bb9f1a2357b969366a6956c32941cad1afd9"
+  },
+  {
+   "itemId": "dev-sig-dcce17bb1396",
+   "type": "Signal",
+   "id": "signal-sainte-marie-salome-citation-patrimoine-2024",
+   "citySlug": "sainte-marie-salome",
+   "docShas": [
+    "befa82d2fa3a67e915e74c9d589a70c257675199095195ce2f74ec02217c4817"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "da96cc3b00702857425f33d430972a135cd20f95581d034f6c1fed6d53338897"
+  },
+  {
+   "itemId": "dev-sig-c41eb3ac8a3d",
+   "type": "Signal",
+   "id": "signal-tadoussac-changement-usage-31c",
+   "citySlug": "tadoussac",
+   "docShas": [
+    "1560037951cc576f8159b15ce395fb9e1412b1e34649bb53a613d72cbb2be289"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "gt300km",
+   "instrument": "rezonage",
+   "inputSha256": "b496412535ac0ba9bbcb3975672c411115e282662174ac1e4634718feb3b0f21"
+  },
+  {
+   "itemId": "dev-sig-d700e3905b47",
+   "type": "Signal",
+   "id": "signal-warden-tiam-zonage-2026",
+   "citySlug": "warden",
+   "docShas": [
+    "34592fdd744cfdfb293d01f28c10cb98d7ead32f517f1d6ee80b592f2909acab"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "rezonage",
+   "inputSha256": "e4888eb604541843e14d708f455eb80bcdf0c01cd092567ef951b3cc09848755"
+  },
+  {
+   "itemId": "dev-sig-441e6f55601c",
+   "type": "Signal",
+   "id": "signal-saint-paul-de-montminy-usage-hebergement-rdm1",
+   "citySlug": "saint-paul-de-montminy",
+   "docShas": [
+    "d3976e1ca321fd0d6c6e15c6c4ec83c5e6c10e789ac59a82a83f4dec25444e29"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "rezonage",
+   "inputSha256": "cd284945c13ba03695f68a58c4c8f3c0837d9eed400e6affc97520636a6f2867"
+  },
+  {
+   "itemId": "dev-sig-39f21e33a5f6",
+   "type": "Signal",
+   "id": "signal-saint-elzear--bonaventure-droit-preemption-2026",
+   "citySlug": "saint-elzear--bonaventure",
+   "docShas": [
+    "e11fd544f8c350206cae1192fea10e536f31323cf87a1e9d9ffdaddb7a36451b"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "unknown",
+   "instrument": "rezonage",
+   "inputSha256": "8b619396e83c7d0d6d4e65f499de1aec521a1776ab0da6ecaaae7f68bfce5328"
+  },
+  {
+   "itemId": "dev-sig-f88fb38b4a55",
+   "type": "Signal",
+   "id": "signal-franklin-usages-zones",
+   "citySlug": "franklin",
+   "docShas": [
+    "4563ceeb73ba0fce550d31a4f75f9fa5948f45cb44561532c6bb2d2e58cfa3d9"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "rezonage",
+   "inputSha256": "f3aa43eb251b4b5ddda270181e8779eb5be80402dd0423e761401656aa38bc1a"
+  },
+  {
+   "itemId": "dev-sig-adb3e240e441",
+   "type": "Signal",
+   "id": "signal-lochaber-partie-ouest-solaire-2026",
+   "citySlug": "lochaber-partie-ouest",
+   "docShas": [
+    "775c79d70137180b0f0a62e317f204cf59186c5962fd7cb1e472150d60c1a757"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "rezonage",
+   "inputSha256": "9cdb9a37f780f019147d90b05f8974dc24ca7b96a293839770266fd076734221"
+  },
+  {
+   "itemId": "dev-sig-4701c8c545ec",
+   "type": "Signal",
+   "id": "signal-saint-ambroise-de-kildare-zonage-866-2026",
+   "citySlug": "saint-ambroise-de-kildare",
+   "docShas": [
+    "5cc065c9f7f10cf0e232aaf15a65b7724894750347ab422a3ddf1b2164dce272"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "rezonage",
+   "inputSha256": "0977e18cea539e2d1fc54391ab62ec00aa7d64c9622cbc81f945d2ee44eafa59"
+  },
+  {
+   "itemId": "dev-sig-b5c9c0687c3f",
+   "type": "Signal",
+   "id": "signal-saguenay-concordance-chicoutimi",
+   "citySlug": "saguenay",
+   "docShas": [
+    "633ebf7487e7035ad18a81d214ce39f24a191e65b1f2b21a6710ac9666bbe784"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "gt300km",
+   "instrument": "rezonage",
+   "inputSha256": "8554948251eb60ff11878bb4250146f7e47479e7c838f97342859325e80eade6"
+  },
+  {
+   "itemId": "dev-sig-42e5e9ab0ad2",
+   "type": "Signal",
+   "id": "signal-saint-alphonse-piste-course-zone-6af",
+   "citySlug": "saint-alphonse",
+   "docShas": [
+    "f64476e0a40dd48d08bb72eaeab2ce8bbbb6f5fd2e58fea2308803ac54292b28"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "gt300km",
+   "instrument": "rezonage",
+   "inputSha256": "4dae82108a774e8608899bc1e438def4e8c6eefe82621172d09effe9dbc7cc87"
+  },
+  {
+   "itemId": "dev-sig-4cb100132006",
+   "type": "Signal",
+   "id": "signal-notre-dame-du-bon-conseil--drummond-densification-H15-PPU-2025",
+   "citySlug": "notre-dame-du-bon-conseil--drummond",
+   "docShas": [
+    "330553e939a1e4ace64055b97ee4a1ef150a82023c88e0b824b6248341f51d85"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "unknown",
+   "instrument": "rezonage",
+   "inputSha256": "dc757e8860d3163346ea1aa464af0a3a44ad15ed52a6dec1b8f2e238f342d91f"
+  },
+  {
+   "itemId": "dev-sig-8115b5a86714",
+   "type": "Signal",
+   "id": "signal-lac-des-ecorces-retrait-urbanisme",
+   "citySlug": "lac-des-ecorces",
+   "docShas": [
+    "8b16091b848814e4c262ee4f8ed8b16fc1c3279ee49059617e67d279b2e1c068"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "rezonage",
+   "inputSha256": "7f9ae6d7581128db3b0b5f9f66fee969411cfec97dd4ee5eee3eb71979ee895f"
+  },
+  {
+   "itemId": "dev-sig-d91ad8201110",
+   "type": "Signal",
+   "id": "signal-saint-felix-de-valois-rezonage-m12-restauration",
+   "citySlug": "saint-felix-de-valois",
+   "docShas": [
+    "d581326ce85843c33a63bc08df6216a2ace5dfbbfd36a2026fa0f6a137e691a5"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "rezonage",
+   "inputSha256": "4c8ca4bc17ac81a03a1b42f7bce1a4d0c286f660fca06aa66cd5203dcc05adf6"
+  },
+  {
+   "itemId": "dev-sig-7c5f090b4614",
+   "type": "Signal",
+   "id": "signal-saint-bruno-de-montarville-modif-zonage-URB-Z2017-086",
+   "citySlug": "saint-bruno-de-montarville",
+   "docShas": [
+    "76fe36c8bb52deb9d5513e2e260b2c4d1b14fb868ca4073ac2e841f90db79b4f"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "lt50km",
+   "instrument": "rezonage",
+   "inputSha256": "7a79762a8df3a2681a6ee03bc2094c1265aaee41666a8ae651ade6b903b9d201"
+  },
+  {
+   "itemId": "dev-sig-f221ede54a24",
+   "type": "Signal",
+   "id": "signal-auclair-modification-zonage-2024",
+   "citySlug": "auclair",
+   "docShas": [
+    "e6e5464d95107d35cfa01032081c6bf0866b0e8fd0a92ddd782dab83cb28ce2a"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "gt300km",
+   "instrument": "rezonage",
+   "inputSha256": "1518c9d8513c9fed038fdf68deab053816ce23489fd0d6f3199437594561855e"
+  },
+  {
+   "itemId": "dev-sig-16b53e7357c2",
+   "type": "Signal",
+   "id": "signal-disraeli--les-appalaches-programme-multilogement",
+   "citySlug": "disraeli--les-appalaches",
+   "docShas": [
+    "363135bb2f171a2c5f51f704b5f8026b93ded1cdb79c32355cd5870b36581bcb"
+   ],
+   "pass": "pass1",
+   "group": "regulatory-instrument",
+   "region": "unknown",
+   "instrument": "rezonage",
+   "inputSha256": "31ae279bba71ca91bede943037bb202ff77c19a582a4f7948e096a332c7b696f"
+  },
+  {
+   "itemId": "dev-sig-e7795c7d9807",
+   "type": "Signal",
+   "id": "signal-pr01-2026",
+   "citySlug": "granby",
+   "docShas": [
+    "d807646fdb81bea5a89c263ff5a3b01b38da0f5f282e28d9e77b74af8f76f7eb"
+   ],
+   "pass": "pass1",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "ppcmoi",
+   "inputSha256": "8626a2d30a129e307be2d171991246772e7f8b1693ffb6c6f3ae279e9a13cb7d"
+  },
+  {
+   "itemId": "dev-sig-43c2d7229941",
+   "type": "DesignationEvent",
+   "id": "event-adoption-2023-273-04",
+   "citySlug": "saint-claude",
+   "docShas": [
+    "2a78d1e0108a4aa4ae582762981dd40b6a8f1c22858c209f9b0949c13cde41ce"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "a3e82683fb120d6ad7fb5a3423235efe2ce3def9995848fdd3358bc871a9234f"
+  },
+  {
+   "itemId": "dev-sig-bf4444ba2d6c",
+   "type": "DesignationEvent",
+   "id": "event-subdiv-rue-montagne",
+   "citySlug": "lac-brome",
+   "docShas": [
+    "e4183dd38d2211a15a86d6725d28e8ed2bda575f5c44d175198cfa0a5facafbd"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "5de8c596fe21e874d93fdfca0ad83cc1fe903b9f88ac58004af133f2aaabfede"
+  },
+  {
+   "itemId": "dev-sig-d1e57016a547",
+   "type": "DesignationEvent",
+   "id": "event-2024-488",
+   "citySlug": "chertsey",
+   "docShas": [
+    "83799f04aec0ff1fd0c487f76ad21260f63c52d8ffb3f7664705f1295592f979"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "c90088ad4aeec6f91ce2596edf883221131d209ecb643f0fb13bc9bdd59d54ac"
+  },
+  {
+   "itemId": "dev-sig-8ac9d88bf8d6",
+   "type": "DesignationEvent",
+   "id": "event-1714-2026-242-2026",
+   "citySlug": "sainte-catherine-de-la-jacques-cartier",
+   "docShas": [
+    "749db4c057e2d3f0be87c80f6b33f6ed2e45040340be29d843cab46aa605b2d6"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "656b2711f59d812bfd47e7a450a7905694c5957fcd165737a120f3c7585784de"
+  },
+  {
+   "itemId": "dev-sig-d2f1e59dd6e4",
+   "type": "DesignationEvent",
+   "id": "event-26-09-136",
+   "citySlug": "dosquet",
+   "docShas": [
+    "5cabd81b1a1158a9ad2a4a69cd2f6dd5b92e8cd3ad08aceb7a4ef62bc3b61f7c"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "550302e75be680a5e15adecd0b5a37b7574032a341cb74ea102e9bd4572926d6"
+  },
+  {
+   "itemId": "dev-sig-a17db36cb344",
+   "type": "DesignationEvent",
+   "id": "event-saint-pie-76-10-adoption",
+   "citySlug": "saint-pie",
+   "docShas": [
+    "7ec3cd9aad2dd92cf0190101dc051a8566a8eae31cc73b22911a4538e51395bc"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "f2117d646f48ac3e23c51fe9f47c96395739c12ae172984a442eb5f844c51eed"
+  },
+  {
+   "itemId": "dev-sig-db21f9eac666",
+   "type": "DesignationEvent",
+   "id": "event-2022-10-200",
+   "citySlug": "riviere-a-pierre",
+   "docShas": [
+    "08b564be734a1959f6d913689df54eeff8f17c5222bb63541ddc09aff949d29b"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "1aca3decbf7a025d4d451bc7271e6cb43ca36153b1b2916dda50c885d159c035"
+  },
+  {
+   "itemId": "dev-sig-5544f7eda1ed",
+   "type": "DesignationEvent",
+   "id": "event-chibougamau-parc-obalski-2009",
+   "citySlug": "chibougamau",
+   "docShas": [
+    "da6b49ac6f8593de3e077e48ebb5add50ba1a7f72984b24350a0c2052b152894"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "gt300km",
+   "instrument": "autre",
+   "inputSha256": "ac801ec48917725abb248b68741a51a8712c14c2f772b59fc73d7cead85dc5d4"
+  },
+  {
+   "itemId": "dev-sig-6d6ace317874",
+   "type": "DesignationEvent",
+   "id": "event-162-08-2026",
+   "citySlug": "saint-basile",
+   "docShas": [
+    "df114e268d75990ae5444366bbdfa4016638f111944467795960eb3d6e33f69c"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "45aae5450cfbee82abe5243d1927ba99d561098bbf6c5697f6a46846d668e7dc"
+  },
+  {
+   "itemId": "dev-sig-6fbe9b01245f",
+   "type": "DesignationEvent",
+   "id": "event-havre-saint-pierre-vente-lot-5339602",
+   "citySlug": "havre-saint-pierre",
+   "docShas": [
+    "7c736c88f7286bbe75a8e3a0a63dca02f5f004392d62f1f19488c7e0116e5e83"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "gt300km",
+   "instrument": "autre",
+   "inputSha256": "f0a87d4983e9148bb8197d08d3d6a327566377e416973a15904bcda68bf97368"
+  },
+  {
+   "itemId": "dev-sig-036c4f1e7566",
+   "type": "DesignationEvent",
+   "id": "event-2022-11-651",
+   "citySlug": "saint-anicet",
+   "docShas": [
+    "8ca12e259b5ac07f8e08deb87cfd76660d2b54482819697c8dfec73cea3c5a49"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "99fcf79932d99c832021b70aea15310faf37d3da7a369a7aa31bf0fed5450640"
+  },
+  {
+   "itemId": "dev-sig-666811a5b083",
+   "type": "DesignationEvent",
+   "id": "event-241-09-2026",
+   "citySlug": "saint-guillaume",
+   "docShas": [
+    "f813b7511af8209e7ca6971793dc65a1c1edf2f9c9ed6876d3f97455a5478d84"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "f74d04c3ba88f8be9a5819040092ebf94ef598e5e02b5f14d3914bf2ae8aa215"
+  },
+  {
+   "itemId": "dev-sig-e41e93b1ddc7",
+   "type": "DesignationEvent",
+   "id": "designation-event-77-20",
+   "citySlug": "saint-henri",
+   "docShas": [
+    "e9c29d2d152c1c0f25c89c2b0e9089cf545e12afaf9d20bbcbd8e12e215cd5a8"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "1e66e0196864fd20ed5ed9e3d2f9fd01d45326b5b3b9113c80fd1086b1ce0cb0"
+  },
+  {
+   "itemId": "dev-sig-edd44838a9c9",
+   "type": "DesignationEvent",
+   "id": "event:saint-georges:23-13687",
+   "citySlug": "saint-georges",
+   "docShas": [
+    "95f3ea80547c0a2a34cf67b06fb9bc0fcd191f31da3567a9d978caf6558186c4"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "08eef6c9d6d185c0a981acfc6f2c1d385722178c0f87d082d73168c3fc21bd4b"
+  },
+  {
+   "itemId": "dev-sig-a988954d90ff",
+   "type": "DesignationEvent",
+   "id": "event-2026-10-195",
+   "citySlug": "vercheres",
+   "docShas": [
+    "e1ebea6541368bb08d3da71721e8b4f42f037d449af1ef7dcfa2f707811981d9"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "b6b89bfe0ed217eee19d7d255732aff5cc21bc3af2fc926fe745e23ea8030a93"
+  },
+  {
+   "itemId": "dev-sig-4bbaafb401dd",
+   "type": "DesignationEvent",
+   "id": "event-laurierville-ferme-59-manningham",
+   "citySlug": "laurierville",
+   "docShas": [
+    "35c91979b977e5307b88c8ab077387554c174e104bd5da172de03787287e01dd"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "34ee516990612173f547ad76e2c8ee300c21b1b1380404e5890f61fe624adf2b"
+  },
+  {
+   "itemId": "dev-sig-1a700ba54816",
+   "type": "DesignationEvent",
+   "id": "event-beauceville-rezonage-206h-2026-01",
+   "citySlug": "beauceville",
+   "docShas": [
+    "b5d9357a02f328e8782f9faf675c64ed967209e19caeada6561755edf7a67b52"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "dbf6edb316bfd2f7e33418fedcebf5a4441e462944ba5cabbc72de52f33def16"
+  },
+  {
+   "itemId": "dev-sig-ccd025a68f45",
+   "type": "DesignationEvent",
+   "id": "event-23-13627",
+   "citySlug": "saint-georges",
+   "docShas": [
+    "1fc94900b82820bde436360e2f98bb166ca340b9db1492f6b3a46eda7946561b"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "0449e1d65441778cce0f66e849b0d39682c01aa1202576adc1901c6c5a0ccde9"
+  },
+  {
+   "itemId": "dev-sig-8fab390128bb",
+   "type": "DesignationEvent",
+   "id": "event-2026-06-116",
+   "citySlug": "daveluyville",
+   "docShas": [
+    "fe2638c4f26784e5f833c888ab417764c0c1d785e6ca60e50ab8ca1c266157de"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "dff0c6b7aa78ec0a701479db64d556363a778839e3bfd4b9dee7bffb25aa91c3"
+  },
+  {
+   "itemId": "dev-sig-a4cc3cdedb34",
+   "type": "DesignationEvent",
+   "id": "event-05.01-lot-6117011",
+   "citySlug": "sainte-sophie-dhalifax",
+   "docShas": [
+    "53f57a0c185d155bc586f6971fa11cd282e0272e2aa5d4a11c6397a3127b7623"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "7ffdf8f72706294e90d7659d1ca649edd4fe52eeba45acb863aa38c094d86b38"
+  },
+  {
+   "itemId": "dev-sig-620b3cd774ff",
+   "type": "DesignationEvent",
+   "id": "event-9-15-lotissement-2026-701",
+   "citySlug": "lac-sergent",
+   "docShas": [
+    "2651425d9648b366aed1842eb2f5f7e8925e4dc670e12606a40287099709de48"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "49fc43e11ae8a33b1ba85c971f6b4d00d2a69a1b9b3f25b186dc263925f6c794"
+  },
+  {
+   "itemId": "dev-sig-4d0dd42786ae",
+   "type": "DesignationEvent",
+   "id": "event-45-12",
+   "citySlug": "beaconsfield",
+   "docShas": [
+    "0366f19a0e20632a43d6cc4e935d1779c497f09d0d6e78c4b5a2640875671f3f"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "eff7c32752cf8a3312a54e99a10e9a52069b9f44f2c8140eaf0cd3ff4d2e30f5"
+  },
+  {
+   "itemId": "dev-sig-30d301f4a0b0",
+   "type": "DesignationEvent",
+   "id": "event-beloeil-zonage-1667-129-c733",
+   "citySlug": "beloeil",
+   "docShas": [
+    "b1532e08afd4b9c9f0ed2ce474fe5c9ac699b3b69c6f972ac571f0181dbecae4"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "a75dc33273772b53a9af4f309fac3d555d8b179552d856db0bd4c29d9b75896b"
+  },
+  {
+   "itemId": "dev-sig-e0b579d4988e",
+   "type": "DesignationEvent",
+   "id": "event-2021-02-25",
+   "citySlug": "sainte-catherine-de-hatley",
+   "docShas": [
+    "64f6fd894ed9228e0947d3aecbd36bd82b123c8fe22ea883e9ec8011190f60eb"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "7d6e37b019e97ab2c25fd35d0b3ea5c6f386b424a4cc9d5ba83f2c8587f36ce2"
+  },
+  {
+   "itemId": "dev-sig-38c683b0c1cc",
+   "type": "DesignationEvent",
+   "id": "event-195-09-2026",
+   "citySlug": "campbells-bay",
+   "docShas": [
+    "12dbec29cd481c5801d8fb96d97c51501f35d65170bb81d5d25a8c9ca0e9915c"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "caf3ba05f90e9b78be07baf332cfbca576af9f7862c9d69d6364c79c3da43493"
+  },
+  {
+   "itemId": "dev-sig-d848b55d6852",
+   "type": "DesignationEvent",
+   "id": "event-cptaq-9300-5486-quebec",
+   "citySlug": "warwick",
+   "docShas": [
+    "78d4353c8082e0ab7ce0dd0150dab80aee994ef5b78aa53c90e852bbd54651b5"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "88d2238d9d7bf2e601a845a4029b620d96f262dd601e280d16e63b198af5a2ac"
+  },
+  {
+   "itemId": "dev-sig-0fdb0cca8a0b",
+   "type": "DesignationEvent",
+   "id": "event-02-02-11",
+   "citySlug": "notre-dame-de-ham",
+   "docShas": [
+    "7df8b2ec33011173996225ca0da4d6da452bbe50bfe2db761bfa4c1492ad2bb0"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "62bd2923930a8fb68a0bbf1898cb8418f09c5a7fc80bd37d1597d0e1035ccaa1"
+  },
+  {
+   "itemId": "dev-sig-55194a4b50a4",
+   "type": "DesignationEvent",
+   "id": "de-2012-02-4311",
+   "citySlug": "beauceville",
+   "docShas": [
+    "34d6c25c30282eec20d6691bdfb124841a767197c55e3b81ed04b93c53ee9f85"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "a7457e3d9b157e5196e403bbcaedbda5bb457686be74fabf920dbcfce29ce410"
+  },
+  {
+   "itemId": "dev-sig-77abad2e4957",
+   "type": "DesignationEvent",
+   "id": "event-saint-isidore-de-clifton-cadastre-lot-6599470",
+   "citySlug": "saint-isidore-de-clifton",
+   "docShas": [
+    "1a6a700d00f84cbb6a5ffc7663c2125f6bc3d95a523e781fca68cee5fe287538"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "899862eeb32b0f037a643576e2d8f9a39c228a152b7016bf9e0210430983ac05"
+  },
+  {
+   "itemId": "dev-sig-58c59c13c53b",
+   "type": "DesignationEvent",
+   "id": "event-parisville-refection-principale-contrat-2026",
+   "citySlug": "parisville",
+   "docShas": [
+    "bcc198c79fa89ab5e2cceab4c48039869cdbd0458e913e2e414afaa991a0ba1c"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "04062f776b1cd99c5a239b6e17fc2cc0efecfba13e898ee244d760c7a926457c"
+  },
+  {
+   "itemId": "dev-sig-556dde3bfe89",
+   "type": "DesignationEvent",
+   "id": "event-carleton-sur-mer-rachat-lot-6450945-2026",
+   "citySlug": "carleton-sur-mer",
+   "docShas": [
+    "a7c916896211e6e88b8bb62214c4e620025bf014ecf0f852ddd93e71be9fbe5b"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "gt300km",
+   "instrument": "autre",
+   "inputSha256": "d55e57482f50c4a5f73959fe6876165783781bdeec61a88df0ef611cfc885227"
+  },
+  {
+   "itemId": "dev-sig-67c49758995b",
+   "type": "DesignationEvent",
+   "id": "event-laurierville-2013-09-rezoning",
+   "citySlug": "laurierville",
+   "docShas": [
+    "a84aa77f408d161f378f1d25914cb08841cf9f5ccdaaeb0efd75666f34535244"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "775bb0f6e68781eb31a848259c83c6a47be0972da2017e2e869e7e74092df8f8"
+  },
+  {
+   "itemId": "dev-sig-6c96661cad6e",
+   "type": "DesignationEvent",
+   "id": "designation-event-2015-151",
+   "citySlug": "barkmere",
+   "docShas": [
+    "49d0ee5b4c326ca159a28d75d4100f40ae8bd7a55f215ab390b94e60349cac4d"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "4586b7553fa804e3d9a237d220cf2d32fe4c597dcea2f849731eceb2ca4d4dfc"
+  },
+  {
+   "itemId": "dev-sig-e5690ae877ef",
+   "type": "DesignationEvent",
+   "id": "designation-event-2019-10-803",
+   "citySlug": "wentworth-nord",
+   "docShas": [
+    "0914f089566e56a323d2b8f73cef2acd9a903a1e23e17a772e83a4443934f9b4"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "2d802012155b4cb8b48a013587a227afa022365acc60857d36ea3eca44f4657a"
+  },
+  {
+   "itemId": "dev-sig-9cea4aaf223a",
+   "type": "DesignationEvent",
+   "id": "event-2026-06-121",
+   "citySlug": "havelock",
+   "docShas": [
+    "691f1c7024721b14a5d275f281104c0bfd58c73e6958a7545e3d9d4117b5c606"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "7c0821969f3509c63e4c5e871d8e7cd6ae3c24da369891cf2e6b5fd6fb72888a"
+  },
+  {
+   "itemId": "dev-sig-26458c17012e",
+   "type": "DesignationEvent",
+   "id": "event-notre-dame-des-monts-zonage-hebergement-touristique-2026-03",
+   "citySlug": "notre-dame-des-monts",
+   "docShas": [
+    "6cde4e1b7845bf388d66a40cacbafa47dec37bccdae6c4c483a9c1e1ab33d91a"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "gt300km",
+   "instrument": "autre",
+   "inputSha256": "8e3fd422a64c566d0d8daba80705af6b994b0d1e78d8abda2759821b3b42cba5"
+  },
+  {
+   "itemId": "dev-sig-d6cf9a41da65",
+   "type": "DesignationEvent",
+   "id": "event-thorne-lotissement-plan-117687",
+   "citySlug": "thorne",
+   "docShas": [
+    "510b4440e6d0e5a9de617fc154ec998eef1225d395f5a4223139cc63e8607614"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "5091d0476e08f5b5d524830751207c18643b4e6f1d261eaaf5f412d381023eef"
+  },
+  {
+   "itemId": "dev-sig-91fa31ee7f96",
+   "type": "DesignationEvent",
+   "id": "de-126-2026",
+   "citySlug": "riviere-rouge",
+   "docShas": [
+    "e0f4b3689bf220c78374d8a8151d5500f0e29b4f061cffba552b99415f01d3a3"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "bbcb9e66dcd00ae85827095a7cfe1ce83ada41247b5d4158939d64e581ae517b"
+  },
+  {
+   "itemId": "dev-sig-9aa1435945e1",
+   "type": "DesignationEvent",
+   "id": "event-2019-08-747",
+   "citySlug": "wentworth-nord",
+   "docShas": [
+    "e4dcd0f98da95e7d7f2359fcdea451ae17d8345b9d3995ba5846e7568d921c90"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "93b6ea3b8a2cf7dd38a95265db25578e793e6bc3fdad1bb0bc99e511d84ec87a"
+  },
+  {
+   "itemId": "dev-sig-56db1a59293c",
+   "type": "DesignationEvent",
+   "id": "event-2026-145",
+   "citySlug": "val-des-sources",
+   "docShas": [
+    "8a565172c779e7fbfbac55d0549a29ebaa5e707771d651cc5c9f845fe9ba0af6"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "35157e4c5362ca544d0568e4d3f8167fa32b1b1b82bb59a27516c3c6e5b5f2ad"
+  },
+  {
+   "itemId": "dev-sig-551e50ac3249",
+   "type": "DesignationEvent",
+   "id": "desig-2025-07-243-cptaq",
+   "citySlug": "deschaillons-sur-saint-laurent",
+   "docShas": [
+    "3c48ca23dce1ef2d9b920eb99da6430e6b856f5ec0b2508fbfcabb820024fee3"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "daefa07dc70ce070cb3e9f1854e9e21943150df55e38d9bf7bada889586909fb"
+  },
+  {
+   "itemId": "dev-sig-537bc674636b",
+   "type": "DesignationEvent",
+   "id": "event-saint-severe-adoption-regl-eau-278-22",
+   "citySlug": "saint-severe",
+   "docShas": [
+    "902387d28357d29c46c80933e476975a84fc9a75c3606f2d5ff51f737d7eda4e"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "4a04aa625427c6831d11e7a83152ff111ca44dff9e29374581409ae0a7ac76af"
+  },
+  {
+   "itemId": "dev-sig-320fc56652d7",
+   "type": "DesignationEvent",
+   "id": "designation-event-adoption-843-07",
+   "citySlug": "prevost",
+   "docShas": [
+    "2bc256066e3c6ad7d34ca11461ac2de6e2ec8693dd148bcb6335426989556df7"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "946f42ad1fbd7796809ae30ab68d58db17c84b5322dc356e437ea2809c60fdf8"
+  },
+  {
+   "itemId": "dev-sig-fee2b5625eb0",
+   "type": "DesignationEvent",
+   "id": "event-beaupre-cession-rue-pionniere-10893",
+   "citySlug": "beaupre",
+   "docShas": [
+    "9986cc54d17e022c56a1461104afbd9cd56d5af37ef7e3849f4f6d00dcc310ef"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "280cd70fa2b32eca6af02fb2719ecb235e50567b3c168db13c530047c909c7a1"
+  },
+  {
+   "itemId": "dev-sig-629284510930",
+   "type": "DesignationEvent",
+   "id": "event-armagh-mandat-ccu-2026-05-25",
+   "citySlug": "armagh",
+   "docShas": [
+    "97f7b73e70d7a301bac9e13227f4c2eef017d1a856fdc8cdfde81a8166de3c2d"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "29323808aab6abbaa6f3999ffb6e7e8a1719ac24bef47c7fc0a6e8e0cac621c2"
+  },
+  {
+   "itemId": "dev-sig-62801704ab8b",
+   "type": "DesignationEvent",
+   "id": "event-2026-07-189",
+   "citySlug": "cheneville",
+   "docShas": [
+    "af9a09b94064f7a0731d81c37ac128a235a0a23aaddb55689e750fbd18d97610"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "fb9f4ffeae83045ac8dcbba701b720059c9a7af5ea7f8178c0f1c5156eccd63d"
+  },
+  {
+   "itemId": "dev-sig-006a6d4a9f6c",
+   "type": "DesignationEvent",
+   "id": "event-macamic-adoption-zonage-26382-2026-03-02",
+   "citySlug": "macamic",
+   "docShas": [
+    "fde7ac55cde1a1542b65349a09457d04661abd1b6d5c388eca36d3786ed61bca"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "gt300km",
+   "instrument": "autre",
+   "inputSha256": "80b0cc8e2493bf3e18589d2a1df46ce6c9d25a6725966da24119c4dcb755097e"
+  },
+  {
+   "itemId": "dev-sig-23388abd17b5",
+   "type": "DesignationEvent",
+   "id": "event-saint-joseph-de-beauce-rezonage-H15-2026-05-11",
+   "citySlug": "saint-joseph-de-beauce",
+   "docShas": [
+    "4e7edfb9df12c51d4d7f92b6fb5e170d5ba825233df16634f6a37ee63b0a9889"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "37c36c50ac3e6e4f33f44fda10b98f4a9a070ce44bcd78551e6ca88ac9b2a21b"
+  },
+  {
+   "itemId": "dev-sig-d2df9fdd4352",
+   "type": "DesignationEvent",
+   "id": "event-2026-04-129",
+   "citySlug": "saint-agapit",
+   "docShas": [
+    "c0a77152b8a2c0f008d0d47b95682be87867ea5021c6f175134f5680da8ea988"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "a6f96a96bd5257dc571f7468b2c011bd4b0158fcc91fab323015c87cb5fc79ae"
+  },
+  {
+   "itemId": "dev-sig-3a4c8145d192",
+   "type": "DesignationEvent",
+   "id": "designation-event-2026-05-165",
+   "citySlug": "saint-agapit",
+   "docShas": [
+    "a24465c3583245faa50815a9eb54bae86b49da9f69c2619044b0028371269875"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "d1f132ac0e0da253b046b0b59450292683d15ea6aff708031400625c01b65a54"
+  },
+  {
+   "itemId": "dev-sig-a2b243a5e4e0",
+   "type": "DesignationEvent",
+   "id": "event-saint-cyprien--riviere-du-loup-cession-lot-6665280",
+   "citySlug": "saint-cyprien--riviere-du-loup",
+   "docShas": [
+    "3624370410481034f21dfb630bad502d5d5b5e845cda425cb128053c3b3790a9"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "unknown",
+   "instrument": "autre",
+   "inputSha256": "3fb325d355dc8859856ad8c0e1428f6c6a061326ac7adedad6d671535cc55252"
+  },
+  {
+   "itemId": "dev-sig-5ae618536a96",
+   "type": "DesignationEvent",
+   "id": "event-2026-04-092",
+   "citySlug": "notre-dame-des-bois",
+   "docShas": [
+    "ed87c4d828e35713fb52981f2026c4445c82ecadb5e794811672a9efbb258a3b"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "3b62be33572477758c5a392fff5bdd2bc7cd912c203f1f486a19afd74f3d7e51"
+  },
+  {
+   "itemId": "dev-sig-d97b9b28de9c",
+   "type": "DesignationEvent",
+   "id": "designation-event-986-2026",
+   "citySlug": "saint-georges",
+   "docShas": [
+    "aacd08a71ecc7d8d1903623337bda76127e8c1a5c4d82da5652be5161af1a525"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "00d6045dd9f7e355ffc537f05e86e126cb05908a0e0fae93a2f70eb3ae0cc7d8"
+  },
+  {
+   "itemId": "dev-sig-490a0ac73aec",
+   "type": "DesignationEvent",
+   "id": "event-saint-cuthbert-rezonage-352-3-second-2026-03-02",
+   "citySlug": "saint-cuthbert",
+   "docShas": [
+    "986a59c40ce8d35a87705d6a14424e6750f2d257d53ce6549eb7810a33484568"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "87606b95dde09bd07ef1eb835667afc40e6a0016b0788bbd585371a4540a57da"
+  },
+  {
+   "itemId": "dev-sig-4e39364a21fa",
+   "type": "DesignationEvent",
+   "id": "event-notre-dame-des-monts-lot-6332450-2026-01",
+   "citySlug": "notre-dame-des-monts",
+   "docShas": [
+    "c37c81b1273471642a2dba26318de35e6367cf6a074e771b67e01129a1f7580c"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "gt300km",
+   "instrument": "autre",
+   "inputSha256": "5acaacb9f26bd3d6547b143aeabc3c7af63ed903dee12e46e0f1800b5c1c2c85"
+  },
+  {
+   "itemId": "dev-sig-72d702fc259b",
+   "type": "DesignationEvent",
+   "id": "event-res-2026-216",
+   "citySlug": "sainte-adele",
+   "docShas": [
+    "dbf4ad2577a2ed39325710c9693370315ca832a3eb48ec9eb267c0c41ee90c5a"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "d89a3ace99255b53b092a950dd9ac5982c648cd532d64fd58cf8c69753e53f00"
+  },
+  {
+   "itemId": "dev-sig-a20038811dc5",
+   "type": "DesignationEvent",
+   "id": "event-usage-conditionnel-2023-185",
+   "citySlug": "chertsey",
+   "docShas": [
+    "6c52456a7319f0d40dc4cd4b7164f77c8595ace7ad3490a05e37323b2f3b4a63"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "f2ef914ab042b363c2a74b0d049a27b995d4cb3df733d55dc4c8915335f061ae"
+  },
+  {
+   "itemId": "dev-sig-86b06928e557",
+   "type": "DesignationEvent",
+   "id": "desig-res-2020-06-081",
+   "citySlug": "esterel",
+   "docShas": [
+    "3247b045b4daa7f9718d31c6f7e112d0777aadf5d8e290fd169e28502d3ceff5"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "ef63092be2b1dfd060f89faff92302b90b472b8bfa784b8cc737fe3eff4a5335"
+  },
+  {
+   "itemId": "dev-sig-fd4fa2bc60c2",
+   "type": "DesignationEvent",
+   "id": "event-chibougamau-143r-multifamilial-authorization",
+   "citySlug": "chibougamau",
+   "docShas": [
+    "588f7de95b0acbef50293d799b8123613b804221d5c358ffb1fc9a08a649afc2"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "gt300km",
+   "instrument": "autre",
+   "inputSha256": "a80f3369dc901d8ad910eeeefcf05f2196453c19baa602181a0f5efdc8799f4f"
+  },
+  {
+   "itemId": "dev-sig-9d254a6012dd",
+   "type": "DesignationEvent",
+   "id": "event-2014-09-670",
+   "citySlug": "saint-hippolyte",
+   "docShas": [
+    "4c813eef8420d6e2d9e58d3e57611c4b2a6273b334b2ea0a3bdb1602b46844f7"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "0b48db1630bc02ee2f0c7a6f177e74d20ff44c0479ae4f5296a5d319bccbecab"
+  },
+  {
+   "itemId": "dev-sig-f3548dfb9916",
+   "type": "DesignationEvent",
+   "id": "de-2024-515",
+   "citySlug": "chertsey",
+   "docShas": [
+    "97171188d54646d2015a95b34ace7a01d968d35d378ae9319c68b28db75fe5d6"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "961c800409767405e29db2bb45ecac8e1b14f97a4b7331dcd43e13db91d2e1b5"
+  },
+  {
+   "itemId": "dev-sig-3102953ff9e0",
+   "type": "DesignationEvent",
+   "id": "event-uc-saint-jean",
+   "citySlug": "plessisville",
+   "docShas": [
+    "e28116b4d498ce5d487f750d2449c00c67fa43dbef494736a61cb2b927f0ef5c"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "30230129ba757153aa9ffbc13e6910a13e8f18e992361c09f862205c30dbd7c7"
+  },
+  {
+   "itemId": "dev-sig-204959771c4c",
+   "type": "DesignationEvent",
+   "id": "evt-usage-conditionnel-magnan",
+   "citySlug": "saint-mathieu-du-parc",
+   "docShas": [
+    "2953a850ad4f57d079f0db8a57aee8d92cccefe9715a342db48563d95d9daecc"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "4225ae7638f6f70ab2ed96a34293413bb9dc2f4c9c586b25d6692047760a2c12"
+  },
+  {
+   "itemId": "dev-sig-c185b23c6c5c",
+   "type": "DesignationEvent",
+   "id": "event-saint-andre-dargenteuil-piia-002-long-sault-221",
+   "citySlug": "saint-andre-dargenteuil",
+   "docShas": [
+    "5bbe0cf4354cbc7b3f3d1d1d54bec2e4756dc7c83b4374fc730d6495b38dd31c"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "piia",
+   "inputSha256": "b9c8ecb6dcaad01ba150da86e8217b2956f6282e0177a7b852c01a21ab646484"
+  },
+  {
+   "itemId": "dev-sig-4d39cda7efc1",
+   "type": "DesignationEvent",
+   "id": "event-saint-germain-de-grantham-ppcmoi-255-michaud-2026-05-04",
+   "citySlug": "saint-germain-de-grantham",
+   "docShas": [
+    "0c0ab6efaab986b2953a01463f6952de1bb421180f08465ca3f4afa9fe867391"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "ppcmoi",
+   "inputSha256": "0c66a66f66a99933d9da63ba420bc455e124a813ed2e14c0a99f768f349a58d4"
+  },
+  {
+   "itemId": "dev-sig-0fb66b166288",
+   "type": "DesignationEvent",
+   "id": "event-uc-4827-rte-125",
+   "citySlug": "rawdon",
+   "docShas": [
+    "3ed3846eac6d42e17d26d1fc8d8da7ddd6ec5595c741a820299b3cbad7e2af6c"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "0027db3ed4d28342fbf304c05e265ee0d7fc0943ffb497b2fb2469fe02fc5501"
+  },
+  {
+   "itemId": "dev-sig-93bbe40b9511",
+   "type": "DesignationEvent",
+   "id": "evt-2025-252",
+   "citySlug": "chertsey",
+   "docShas": [
+    "d3e2071e10328b79dfccf1e587edf7881c546b5f4b80843d4ebd25138e859585"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "7bf1816aedeab1439b9b7a2f89dc6904be2586d2374a355aaf7525677187746f"
+  },
+  {
+   "itemId": "dev-sig-f9f2e73b6660",
+   "type": "DesignationEvent",
+   "id": "event-dm-2020-0099",
+   "citySlug": "wentworth-nord",
+   "docShas": [
+    "c766fa877b6ea5212d1fdc2f3679292e20d307588df5eba47fa9d1fc68c7df36"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "d2a754c7322c61a2dbc4a9b5ef7446efc7354653ffd842118466559b32491b22"
+  },
+  {
+   "itemId": "dev-sig-e9603f4f6a03",
+   "type": "DesignationEvent",
+   "id": "designationevent-chibougamau-314-16-refection-ponceau-wilkie",
+   "citySlug": "chibougamau",
+   "docShas": [
+    "3a71912875cec8b88ce5dc83e59124b8856fecf45de4b28bf87a09ec51933547"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "gt300km",
+   "instrument": "autre",
+   "inputSha256": "fbbe16e4a0343d5b8fbb6cef29c4195531c5ce8ff74d1e9c42d25f4dd6624f39"
+  },
+  {
+   "itemId": "dev-sig-fd926fdb5f4e",
+   "type": "DesignationEvent",
+   "id": "event:piia-56-2026",
+   "citySlug": "saint-paul",
+   "docShas": [
+    "7487ef8b1fa4e504edc1d4b910cfd19d309183a0543441631309be9fbc730f1c"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "piia",
+   "inputSha256": "f75fcaae3ee7ff1090d6a9ee50e4f1427879973329c036ba51e74886012dce25"
+  },
+  {
+   "itemId": "dev-sig-5ce33afbe8d8",
+   "type": "DesignationEvent",
+   "id": "event-lile-perrot-dm-328-330-boul-perrot",
+   "citySlug": "lile-perrot",
+   "docShas": [
+    "0132a2ad8a2dea8208206118ee43ee5a1a45eec9af4db19db6bdef6548e99189"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "e96779fd063c30e7934764e5afbdfd9531dd063ddf13df7df92f6df5f33e31fe"
+  },
+  {
+   "itemId": "dev-sig-7ffe7c089708",
+   "type": "DesignationEvent",
+   "id": "event-rawdon-PPCMOI-metcalfe-cv7-trifamilial",
+   "citySlug": "rawdon",
+   "docShas": [
+    "45de7fc2e59a4d1444eec755a423d146a9d5b96f4ac75638c0487db5ace0dfee"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "ppcmoi",
+   "inputSha256": "6520243cc95b4fa8297264d75e0545f0da5f59ed5e81b4d415930161521a21e1"
+  },
+  {
+   "itemId": "dev-sig-92627137b9bb",
+   "type": "DesignationEvent",
+   "id": "event-dm-2020-0227",
+   "citySlug": "wentworth-nord",
+   "docShas": [
+    "9e40ac35c7cd3ebe48b1d281858bdd69063484e78be43acded91b75adfe1b2d9"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "a971800e332fde3432ffb1d6d2fa0556d0502d963498f610c0fe63b91f614371"
+  },
+  {
+   "itemId": "dev-sig-d46a95a1867e",
+   "type": "DesignationEvent",
+   "id": "designation-event-289-2026",
+   "citySlug": "sainte-claire",
+   "docShas": [
+    "bc34f2b18b3991980c4db2d754ba9c5e6a06d1f15fc6f6113a00c2295cd163e0"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "150-300km",
+   "instrument": "ppcmoi",
+   "inputSha256": "1101abaf427feee774e49e8d5eee00edc2b001c0be7003d5e04b4e0c5e1f4307"
+  },
+  {
+   "itemId": "dev-sig-98dbce070e34",
+   "type": "DesignationEvent",
+   "id": "event-lachute-ppcmoi-hc415-multilogements-2026",
+   "citySlug": "lachute",
+   "docShas": [
+    "4f0a91086eaa3d49ebc8a15c2c3a030c4b46b74b61fd94061bd72a639b8badcc"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "ppcmoi",
+   "inputSha256": "db427d463ad3f5285c3a1ff5f72e246c0343f0441ecc006f88cd13c21ddab20d"
+  },
+  {
+   "itemId": "dev-sig-e5f5f7f6ff09",
+   "type": "DesignationEvent",
+   "id": "event-cm2608-404",
+   "citySlug": "dorval",
+   "docShas": [
+    "277a86d1b4e3adf181e9977321d54b2b43eb4d56b7bbd7170e96dfb1860dbb12"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "33fc8f007dee7a0cb6f37ab3631cac40527c7a4d93d656d880a8cf90a05e83b6"
+  },
+  {
+   "itemId": "dev-sig-85e83831e7a3",
+   "type": "DesignationEvent",
+   "id": "event-26-0908-367",
+   "citySlug": "saint-donat--matawinie",
+   "docShas": [
+    "c1705fc6d4a87e4588069a29d1dba35cf4c30a048ccef89ff3c88baf351a32e1"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "unknown",
+   "instrument": "autre",
+   "inputSha256": "94530341b14632cf794e57f4f57690b4cd18408902148f9b4efbf4eb3a18dc87"
+  },
+  {
+   "itemId": "dev-sig-1afffdc36b54",
+   "type": "DesignationEvent",
+   "id": "event-2026-418",
+   "citySlug": "farnham",
+   "docShas": [
+    "53926a281365bce59967b695eac584c3f20d06847ca2f42d2973c62d801e1c9c"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "ppcmoi",
+   "inputSha256": "bbb463d65131ec160e5b4bc411aef3722913f2ad893023d943ceafe187233fb5"
+  },
+  {
+   "itemId": "dev-sig-c46648f61c54",
+   "type": "DesignationEvent",
+   "id": "event-2025-30141",
+   "citySlug": "bromont",
+   "docShas": [
+    "29663419089b56439767ed9ec4f1d6b7d7105f710a6457bc9dcf8ecff7ee9c67"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "ppcmoi",
+   "inputSha256": "ae3578bd150f73af1dba009f52285332435b60042212227b051e97cea054c706"
+  },
+  {
+   "itemId": "dev-sig-32b82bf079ef",
+   "type": "Signal",
+   "id": "signal-joliette-loi31-densite-monseigneur-forbes",
+   "citySlug": "joliette",
+   "docShas": [
+    "bb1ba62e91e2d3b31aea3346408f397b13847aa459f76fdad29249a3fd42cf3c"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "rezonage",
+   "inputSha256": "e4ad7130976549ac9b6cd16602f8f0f4d466c11b015b6c5e9a894ce60a56939b"
+  },
+  {
+   "itemId": "dev-sig-647761af2401",
+   "type": "Signal",
+   "id": "signal-bonaventure-logements-abordables-rezonage-2025",
+   "citySlug": "bonaventure",
+   "docShas": [
+    "3be6d3090479b437720dbfeaf22f4495f75d18d710c63ee0634c26e0d1599316"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "gt300km",
+   "instrument": "rezonage",
+   "inputSha256": "defe98a961e73f7961f2192833e050d8f2fcafb4f5e775c8c8e2d1a3c20856e2"
+  },
+  {
+   "itemId": "dev-sig-43432d699adf",
+   "type": "Signal",
+   "id": "signal-saint-henri-de-taillon-creation-rv8",
+   "citySlug": "saint-henri-de-taillon",
+   "docShas": [
+    "8d13428ec9f5b1ca28ef41a04d0ce044b46b87835a620d09307359d12545d805"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "gt300km",
+   "instrument": "rezonage",
+   "inputSha256": "e3c718df55a52b51fa07b51811621b5b8c7fa9a7dc1a752030850e20e83a16b5"
+  },
+  {
+   "itemId": "dev-sig-2c79e1d44ab2",
+   "type": "Signal",
+   "id": "signal-racine-citation-patrimoine-eglise",
+   "citySlug": "racine",
+   "docShas": [
+    "d99e289d99bc212c17ed97c0e63e0added43a0910dfc3b2ceed57dd925c0538b"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "da1b71fc680abdddee6cafb022df18383395568c179a0f58a526ef6bca77b98f"
+  },
+  {
+   "itemId": "dev-sig-803d1af68534",
+   "type": "Signal",
+   "id": "signal-cap-saint-ignace-cptaq-lot-3250933",
+   "citySlug": "cap-saint-ignace",
+   "docShas": [
+    "2b85ec7dc6426a019315e0277afcd07ce04e5522e906a911d1fa238d8bc44ac8"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "11260f306ff5e02774781e441c6cc336713689ed109919f84b40a00287b7a7f2"
+  },
+  {
+   "itemId": "dev-sig-6550c7a16a53",
+   "type": "Signal",
+   "id": "signal-saint-remi-de-tingwick-rezonage-a12-2025",
+   "citySlug": "saint-remi-de-tingwick",
+   "docShas": [
+    "9f827ebc80841bb1cb83d657e26ba35219251c4cf2a975d8f24480829f7c8748"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "rezonage",
+   "inputSha256": "a2a1fe54a786f946aadffb28f26543455f6a8f5f69d868a66f7bfbeb0b19e3bf"
+  },
+  {
+   "itemId": "dev-sig-4d92c3483fe0",
+   "type": "Signal",
+   "id": "signal-barkmere-demolition-289",
+   "citySlug": "barkmere",
+   "docShas": [
+    "061fae470ccbfd4112bc85327b5e55bccd11e8b50e337a8ae5555d17cc3f69b0"
+   ],
+   "pass": "pass2",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "rezonage",
+   "inputSha256": "841b9d0e4eb44725011cc93dfb62d206d0e6a3f593e21f8111691c0d2fca4d24"
+  },
+  {
+   "itemId": "dev-sig-3f4a49f1f7a8",
+   "type": "Signal",
+   "id": "signal-sainte-thecle-hebergement-touristique-436",
+   "citySlug": "sainte-thecle",
+   "docShas": [
+    "d4eca008002bd5f68b22c4fc22f9c5fdb4182966cf579e0defce14991aa88a1f"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "f1f2e5f4b33e4deb0e93bd0cc686e3e2b6507109667782172fbe9a0eecc0887d"
+  },
+  {
+   "itemId": "dev-sig-de4dc25cf899",
+   "type": "Signal",
+   "id": "signal-usage-conditionnel-2025-0040",
+   "citySlug": "prevost",
+   "docShas": [
+    "eeb45f5d51cad992c4a3309c481fda9a4ef3d2c64ac8fcbdef7fd5cfbd8ac2c0"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "ce32b727625ef03aeccad3fa8ed6cf1eb25c7430219acd79026f11fc4b6606ea"
+  },
+  {
+   "itemId": "dev-sig-503f5e79a70e",
+   "type": "Signal",
+   "id": "signal-chibougamau-terrain-vente-beaudoin",
+   "citySlug": "chibougamau",
+   "docShas": [
+    "b903bc459aaa843a4052f6a7301311359737ab64cc0f6d4dd68c92e697cc8284"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "gt300km",
+   "instrument": "autre",
+   "inputSha256": "715117ba2de6fa17e7b58f6785815c9995d83e60fcbe63f6f2c69435905ff984"
+  },
+  {
+   "itemId": "dev-sig-e38450bd64de",
+   "type": "Signal",
+   "id": "signal-montebello-densification-notre-dame",
+   "citySlug": "montebello",
+   "docShas": [
+    "5cb27b7ec3dec80bafa64da757a09ee9068fc43a68ea609734b071a04999e89c"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "piia",
+   "inputSha256": "17073d7e991848322d7a5d3c90ed5d557d56366cf73f7351171bbb7e3c36611d"
+  },
+  {
+   "itemId": "dev-sig-bd19f95c5ea8",
+   "type": "Signal",
+   "id": "signal-dunham-reduction-vitesse-rue-principale",
+   "citySlug": "dunham",
+   "docShas": [
+    "e22fe9344317f6fd2415a64ca6137ac4a83dd3516ce0ad7f25061b39ee784fd8"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "3b998bc3d57b3706acc90abd3794c2b118f2ffcd2f6783535c597c7783a315b7"
+  },
+  {
+   "itemId": "dev-sig-90a13b6e3cda",
+   "type": "Signal",
+   "id": "signal-sainte-julienne-ppcmoi-consignaction",
+   "citySlug": "sainte-julienne",
+   "docShas": [
+    "50b67332be6cf3e227cba0393caf1125a9fbb61da529cd1f9757b6a20030264f"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "ppcmoi",
+   "inputSha256": "b7ac3573815b1b91fd68c74906b44c69f2233553173c29ee62e54f64a79d598d"
+  },
+  {
+   "itemId": "dev-sig-55392186b4e5",
+   "type": "Signal",
+   "id": "signal-lachute-ppcmoi-residences-hamford-2026",
+   "citySlug": "lachute",
+   "docShas": [
+    "b69465678d54274bc2b8cebf863df52a894c4d224ae831f20c2346be723bf12b"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "ppcmoi",
+   "inputSha256": "1890b7c997ebade2445c77d0b71f7898072643e0bf16e08d5067a019a1a63270"
+  },
+  {
+   "itemId": "dev-sig-b95ef4f0fd75",
+   "type": "Signal",
+   "id": "signal-beaupre-9760-construction-cabanon",
+   "citySlug": "beaupre",
+   "docShas": [
+    "f9394e5d4d1015a6870de16eaae86aa79ded9acd05832f874f8d6ebb7d6964e8"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "62387cc32e11cddf3ce9fa4bff40751c5ae8739f10669bd36d6ede8583848e06"
+  },
+  {
+   "itemId": "dev-sig-a18b3ac1b808",
+   "type": "Signal",
+   "id": "signal-25-10-362",
+   "citySlug": "princeville",
+   "docShas": [
+    "1cb77ebcb9f63e0ef8f5c7b01ea02fafd54c515df2050223df2956d36a2eaa63"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "28adce4be2de324cbcb66da478c4a593e7d19d98038ec5892d60bc518e3a0152"
+  },
+  {
+   "itemId": "dev-sig-a602be854757",
+   "type": "Signal",
+   "id": "signal-grenville-patrimoine-renovation-19-canal",
+   "citySlug": "grenville",
+   "docShas": [
+    "7fea10b58c7928c97dd083a409f33ebab0cd34998b5b72130badf519825a3b07"
+   ],
+   "pass": "pass2",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "5dcc65c6f367c1dfcdec4f75076ece4091ec99701f580ade33ea5476647c73d2"
+  },
+  {
+   "itemId": "dev-sig-f80dc63bf1ed",
+   "type": "Signal",
+   "id": "sig-lotissement-iles",
+   "citySlug": "low",
+   "docShas": [
+    "5ffd1d775b6dd49522b12662bd0a8ab4ef4afcf55488a5e48672db72d7ba76ae"
+   ],
+   "pass": "pass3",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "c800ef28bfd601b838507dcbd2745809e514a1df21f045a23025c5cf6470b982"
+  },
+  {
+   "itemId": "dev-sig-9f09a3645aaa",
+   "type": "Signal",
+   "id": "signal-avis-motion-411",
+   "citySlug": "hinchinbrooke",
+   "docShas": [
+    "7e01c7f8c1312f27ba1236ecc357daadb577a757c59c46c81915706cf16b5f10"
+   ],
+   "pass": "pass3",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "db8c8d9bd84e01257ba541d85b0eb5b0cee7c636f3f083abae56065e3794ce16"
+  },
+  {
+   "itemId": "dev-sig-5adf5e877fd7",
+   "type": "Signal",
+   "id": "signal-roxton-pond-piste-cyclable-acquisition-2026",
+   "citySlug": "roxton-pond",
+   "docShas": [
+    "de343db25c8a1e3f7b9d2c4e6f8a0b1c3d5e7f9a1b3c5d7e9f1a3b5c7d9e1f3a"
+   ],
+   "pass": "pass3",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "a7165fc83dd7ae4001f2b73e7d127250cdf38a773e2a1be82be19e7b1c1f363e"
+  },
+  {
+   "itemId": "dev-sig-01a11491489b",
+   "type": "Signal",
+   "id": "signal-192-09-2017",
+   "citySlug": "harrington",
+   "docShas": [
+    "a23c7145ea6cb08d8f9ba5552226b6d8c6ad0e28519787a5c7a8f1a7f9d9ac8a"
+   ],
+   "pass": "pass3",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "05499e7fa4d43085201c8cd5c511a3dda20a6829f6774ce6a4a2f17b0981e887"
+  },
+  {
+   "itemId": "dev-sig-6cc0df1198e0",
+   "type": "Signal",
+   "id": "signal-cptaq-2020-06-109",
+   "citySlug": "kazabazua",
+   "docShas": [
+    "40fe19636ae115bdcfbaa2dc0cb889ad063b6abea45ed75c30bd05bcf68eba5b"
+   ],
+   "pass": "pass3",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "4d40b9077bfe9352bc70885f24109557e296271ce67ad68dc1640e555e4231df"
+  },
+  {
+   "itemId": "dev-sig-cb9c8eebd542",
+   "type": "Signal",
+   "id": "signal-buntin-463",
+   "citySlug": "salaberry-de-valleyfield",
+   "docShas": [
+    "056ee8a01b40ce72403ff90cc7d908f2ad3762f23918b24db501af3741800666"
+   ],
+   "pass": "pass3",
+   "group": "regulatory-instrument",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "8809bf3e8f71623c5c7a608898a64eb4936240e44f05566ff99b04d8c7ee871f"
+  },
+  {
+   "itemId": "dev-sig-a3dc2d594561",
+   "type": "Signal",
+   "id": "sig-travaux-municipaux",
+   "citySlug": "saint-urbain-premier",
+   "docShas": [
+    "1095b4038cde9355a11b305a7cb7d59767fc0332cd480a10850d05baea579363"
+   ],
+   "pass": "pass3",
+   "group": "regulatory-instrument",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "ce7f9642b34d2c0adcf133c428d508912420debcf9ff6244ca2b73174d274910"
+  },
+  {
+   "itemId": "dev-sig-0bc496e742d2",
+   "type": "Signal",
+   "id": "signal-dunham-toiture-3650-principale",
+   "citySlug": "dunham",
+   "docShas": [
+    "b41b3b56237153a9125c3d47a13fd665cebceef791a560588885513456bd71ba"
+   ],
+   "pass": "pass3",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "4d0ff3dfe936932082ff5b0edb7cc2fd953972d9e7ca2eff5dedb491b6238607"
+  },
+  {
+   "itemId": "dev-sig-637c85c717d4",
+   "type": "Signal",
+   "id": "signal-infrastructure-honorius-gagnon",
+   "citySlug": "sainte-marie",
+   "docShas": [
+    "3cef721862bde8c1a39542075f3a0425891e63a5739800e2386615e8018fbebe"
+   ],
+   "pass": "pass3",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "ea8bf238ba2051e4c771f06427fce646586556699047b1e37a9fad5bd6f78d63"
+  },
+  {
+   "itemId": "dev-sig-13f03ad091c5",
+   "type": "Signal",
+   "id": "signal-mercier-acquisition-municipale-6685529-2026",
+   "citySlug": "mercier",
+   "docShas": [
+    "304f0f6a508d90b9fd0a58d83afd046d3379eba133f35358d6842b4229720cb1"
+   ],
+   "pass": "pass3",
+   "group": "regulatory-instrument",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "2bda1044ef7c35352ed068e58acc80b4d834e2c92a137e94922d5210ebd98c4f"
+  },
+  {
+   "itemId": "dev-sig-21f62309d38b",
+   "type": "Signal",
+   "id": "signal-971-2023",
+   "citySlug": "saint-apollinaire",
+   "docShas": [
+    "3a7d20a25ca01e293b455b46abaff9bc61a0d6935b0691215bed16416fdb9011"
+   ],
+   "pass": "pass3",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "717c73ce71110ada7a8dec547ce31f39993b397371c9216092b01adf5290e13d"
+  },
+  {
+   "itemId": "dev-sig-0bfb476e9c95",
+   "type": "Signal",
+   "id": "signal-2021-03-53",
+   "citySlug": "riviere-a-pierre",
+   "docShas": [
+    "d7016b2061447e7593b2753ccd341a190bb630614b49b201030f4fa756fcd8ec"
+   ],
+   "pass": "pass3",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "6698eb29085c2f1ccec1ca1d0b9a274e7fc900a396a560ada262688190f4bd59"
+  },
+  {
+   "itemId": "dev-sig-8a4f16071f29",
+   "type": "Signal",
+   "id": "signal-176-2020-lotissement",
+   "citySlug": "saint-anicet",
+   "docShas": [
+    "00f3bee82c96cc7fb241c5a70ce3bdeb0e55e18a67a4099eb02fa69c7f53e349"
+   ],
+   "pass": "pass3",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "c8ccfaa181fa1c2d6b7b7e7474a774fc659b43692bead631084a46de3b7624ac"
+  },
+  {
+   "itemId": "dev-sig-322fa9e1c7f5",
+   "type": "Signal",
+   "id": "signal-dunham-domaine-centaure-development",
+   "citySlug": "dunham",
+   "docShas": [
+    "60b46fbd75cc5ff23fa6a4563cbc21228049af23db80176e031fdeea7402f30f"
+   ],
+   "pass": "pass3",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "c9066b8f6ce1f8f283e5d1e93db205ad071431c2f395004aa60c61cf18e369b1"
+  },
+  {
+   "itemId": "dev-sig-74eecc88cc4a",
+   "type": "Signal",
+   "id": "signal-saint-pie-77-114-second-projet",
+   "citySlug": "saint-pie",
+   "docShas": [
+    "7ec3cd9aad2dd92cf0190101dc051a8566a8eae31cc73b22911a4538e51395bc"
+   ],
+   "pass": "pass3",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "0f461c80539c8576264e8bc35bf38762e3b84f85c65421add911fb46fc80de7a"
+  },
+  {
+   "itemId": "dev-sig-7a314c350745",
+   "type": "Signal",
+   "id": "signal-2022-05-122",
+   "citySlug": "kazabazua",
+   "docShas": [
+    "34215fd1f9392a75c912cdd1482a742e222a7621e642cb5988a3b8e652592b2c"
+   ],
+   "pass": "pass3",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "cafe41e34c8c30ef68cdbfc45adbacd3e95bbec2a3c6bb810a1b4ed03401d21e"
+  },
+  {
+   "itemId": "dev-sig-f0ad8c998e7c",
+   "type": "Signal",
+   "id": "signal-laurierville-station-service-zone-6",
+   "citySlug": "laurierville",
+   "docShas": [
+    "72315c1c4f28c4fbbc20a8d0982dab43f667c01489cf2e27c0abb73b1e8a8cda"
+   ],
+   "pass": "pass3",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "5706435fef7c2a0554ecb0c11625a426fb28497f1e10375c58fd97e609f6568a"
+  },
+  {
+   "itemId": "dev-sig-8fc03dcaf87f",
+   "type": "Signal",
+   "id": "signal-mandat-zonage-m3",
+   "citySlug": "lambton",
+   "docShas": [
+    "d0d6faf97aa6bee2ef6af40c3eee7085efc1746f81441a42820f7322acdaac8e"
+   ],
+   "pass": "pass3",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "6e4ea3cfd9ad9e112ba882e5df014fe20e2ce542a3ba4ae8e8ea3c65bd4fb722"
+  },
+  {
+   "itemId": "dev-sig-8c7f58f7e739",
+   "type": "Signal",
+   "id": "sig-467-2026",
+   "citySlug": "sainte-anne-de-la-perade",
+   "docShas": [
+    "872c0b1865b97f739e69370a629eaf982770fd05aed6ad5e5ea99962d11892ea"
+   ],
+   "pass": "pass3",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "c3d7c827cb176bbf5778148168c9f38b933ca6c5b5c2912b274a8809dbb23bc4"
+  },
+  {
+   "itemId": "dev-sig-0fc977901ffa",
+   "type": "Signal",
+   "id": "signal-lyster-rang-3-ouest-pavage-economique",
+   "citySlug": "lyster",
+   "docShas": [
+    "65511ce41781c790cc6eb41a01804595246edc7a60d589c8c6be1c624d990dff"
+   ],
+   "pass": "pass3",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "6b0b3b62d8c1473ed5683c51c1d9c8ed8af9a4fd06f39f93f6634ffe0d43b824"
+  },
+  {
+   "itemId": "dev-sig-93ff1c5980b8",
+   "type": "Signal",
+   "id": "signal-huntingdon-rezonage-co5-chemin-ridge",
+   "citySlug": "huntingdon",
+   "docShas": [
+    "c08eacfffc19c9c6f12a6792bfbc13f8e93a44133ff1b29a49b92d3a0182dda2"
+   ],
+   "pass": "pass3",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "rezonage",
+   "inputSha256": "3f27b464afa85a522ec5221e0b4df8b2946e447939842a954ad64d5f861af231"
+  },
+  {
+   "itemId": "dev-sig-a32853697a42",
+   "type": "DesignationEvent",
+   "id": "event-kingsbury-subdivision-3510608-2026-03-007",
+   "citySlug": "kingsbury",
+   "docShas": [
+    "f2c950f406851186d747af6b04d73be7787fb00f494640f554cb8c9e4c611d5d"
+   ],
+   "pass": "pass3",
+   "group": "regulatory-instrument",
+   "region": "50-150km",
+   "instrument": "autre",
+   "inputSha256": "c3bb0b853ea5442cb10c4c1da58380eea363c6985981709743f49d47361842ca"
+  },
+  {
+   "itemId": "dev-sig-51fa53db244e",
+   "type": "DesignationEvent",
+   "id": "event-chateauguay-densification-c754-2026-04",
+   "citySlug": "chateauguay",
+   "docShas": [
+    "c10798c93236b235c3c5bf9f34a2ed140ac0e3ffdee273c5791f9aabf79dc85b"
+   ],
+   "pass": "pass3",
+   "group": "regulatory-instrument",
+   "region": "lt50km",
+   "instrument": "autre",
+   "inputSha256": "e301d299bfb0fe5ce9eea8280d6b20e3a6abb6c8fd427e0f02e2be94aa27fd64"
+  },
+  {
+   "itemId": "dev-sig-63f01193666e",
+   "type": "DesignationEvent",
+   "id": "cptaq-sabliere-drouin-2010",
+   "citySlug": "notre-dame-de-ham",
+   "docShas": [
+    "c25a635e0631c4a87292d7dc23013da44f22a051edd8a418c7b9996394e37eaf"
+   ],
+   "pass": "pass3",
+   "group": "regulatory-instrument",
+   "region": "150-300km",
+   "instrument": "autre",
+   "inputSha256": "3cb57f38d0b1a5580abc3ab9d31bd3112f3b40d5cf9b99bd89de5b0d8fc1972d"
+  },
+  {
+   "itemId": "dev-sig-031e87cff78b",
+   "type": "DesignationEvent",
+   "id": "event-hatley-township-municipality-piia-5138138-2026-04",
+   "citySlug": "hatley-township-municipality",
+   "docShas": [
+    "731595b030b9c671c31dfaafe81105ae895935a33e081ea968f2165b8f1dd000"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "piia",
+   "inputSha256": "954f74a47816760b905fa4c34df6166e6433111d3fc51fa269fce94061339118"
+  },
+  {
+   "itemId": "dev-sig-1158db8aecb9",
+   "type": "DesignationEvent",
+   "id": "event-huntingdon-piia-2026-007-95-chateauguay",
+   "citySlug": "huntingdon",
+   "docShas": [
+    "e539caa102eaf0a968f44b83bbd5da0002da3e98c8e776ce6681631e6ebdfbbc"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "piia",
+   "inputSha256": "ac437b47a67e277b63c41dab8874901612b8c35cbbd51c71ea0adf8b62a17502"
+  },
+  {
+   "itemId": "dev-sig-7ad61d7769d3",
+   "type": "DesignationEvent",
+   "id": "event-les-eboulements-derogation-dm170-25",
+   "citySlug": "les-eboulements",
+   "docShas": [
+    "5077ba4376f9a3deacba8c0e05d0cdf8162582e0e8744503ec7d2fdb7f16cdcf"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "gt300km",
+   "instrument": "derogation",
+   "inputSha256": "2c0c268d5cc62b00112a7a939fcb693205bfb027c99ce18bfdffb49b8e505459"
+  },
+  {
+   "itemId": "dev-sig-3b820441f6e3",
+   "type": "DesignationEvent",
+   "id": "designation-d2026-16",
+   "citySlug": "baie-saint-paul",
+   "docShas": [
+    "508ae941590baa7599ee87f4a58b3c0af66998edb8ffbe8e2887b85649158bc3"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "gt300km",
+   "instrument": "derogation",
+   "inputSha256": "dfae4a079115581672245f7c702a11367c55a32fc3a87a3dfde6fda33b1d5b78"
+  },
+  {
+   "itemId": "dev-sig-265e2c077d80",
+   "type": "DesignationEvent",
+   "id": "event-piia-3000-7020",
+   "citySlug": "saint-roch-de-lachigan",
+   "docShas": [
+    "f3864bea7f74d670c3f6accb5f1a4bf5a8f978ac984bf2ffac8102779d87c15e"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "lt50km",
+   "instrument": "piia",
+   "inputSha256": "e7244a00fe789d31aadafbd27fae14a8fad81863c5f8ec0a1f7368cdb42d7ed7"
+  },
+  {
+   "itemId": "dev-sig-b479642e3b66",
+   "type": "DesignationEvent",
+   "id": "event-12.2-derogation-lot-6183536",
+   "citySlug": "saint-alphonse-rodriguez",
+   "docShas": [
+    "deaeadde15f6585631ee8bc7f5de2a3322eba1c7ed974ee3878f78397a12f775"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "derogation",
+   "inputSha256": "0654335333454959b43b263cd439cdd163ea5c5fceb9d2f89cb02288a2cabba3"
+  },
+  {
+   "itemId": "dev-sig-407c026121e3",
+   "type": "DesignationEvent",
+   "id": "event-piia-26-09-194",
+   "citySlug": "lac-sergent",
+   "docShas": [
+    "1196a5b200a8c16239cc62cde2e48b32a5d08e1fdc843ec505e89b30001fa81d"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "150-300km",
+   "instrument": "piia",
+   "inputSha256": "27c42eb7ed89cf2a8de1274ae2168db16665653e6cfc3a26a4efca0c84243f6d"
+  },
+  {
+   "itemId": "dev-sig-0b78c9b0036d",
+   "type": "DesignationEvent",
+   "id": "event:2024-10-176",
+   "citySlug": "saint-leonard-daston",
+   "docShas": [
+    "f743a289039fd829b3d0dc6d8f9c58fcd7df63753ae8448857a35a872bd83e42"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "derogation",
+   "inputSha256": "30bc890ddc9cb3a7e4862e151d0269a32ad4a2b7fa81deef97de017b7c4adb96"
+  },
+  {
+   "itemId": "dev-sig-264cc712227a",
+   "type": "DesignationEvent",
+   "id": "event-chateauguay-derogation-84-danjou-2026-04",
+   "citySlug": "chateauguay",
+   "docShas": [
+    "c10798c93236b235c3c5bf9f34a2ed140ac0e3ffdee273c5791f9aabf79dc85b"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "lt50km",
+   "instrument": "derogation",
+   "inputSha256": "902f0280c5893646db9f4f1ee9137e0f08fdda161616ad85c7c0a75d9fddd534"
+  },
+  {
+   "itemId": "dev-sig-c7e7fc1135b8",
+   "type": "DesignationEvent",
+   "id": "event-dm-2026-08",
+   "citySlug": "val-des-lacs",
+   "docShas": [
+    "b3e0fcf4810902f1026dca9ebb0c85dc323d16dc90fdeb3932069fae807c465c"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "derogation",
+   "inputSha256": "c63927b81e879d2f3bf82c30699791ce978de68b5b33b622a747d3c9435fa4fe"
+  },
+  {
+   "itemId": "dev-sig-14f3e5282ee9",
+   "type": "DesignationEvent",
+   "id": "event-2026-09-228",
+   "citySlug": "gore",
+   "docShas": [
+    "10f8b8a16a14dfd4fccbb055ed2cb459632dd7305fab461969521240026527e9"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "piia",
+   "inputSha256": "cf5419921321486d5f6529f73d1e9b49095020cdcef1cb80dfc6fdc325ef4236"
+  },
+  {
+   "itemId": "dev-sig-b72047c579bf",
+   "type": "DesignationEvent",
+   "id": "deve-2026-0080",
+   "citySlug": "prevost",
+   "docShas": [
+    "c7b715452edd9698d8f30e829cdf78c595a03f8a210c8e306ed68ceab59348eb"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "derogation",
+   "inputSha256": "cbe6bd9cdd0461ac5440a97f8d0edc7fb2c405626b8c597db8ae7ae090f439fc"
+  },
+  {
+   "itemId": "dev-sig-4b5abba675c0",
+   "type": "DesignationEvent",
+   "id": "de-piia-267-notredame",
+   "citySlug": "donnacona",
+   "docShas": [
+    "be240a8f2c1e6ea5ca30eb0e564fe305d2c96c25cc93082bb355bf0743e3548a"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "150-300km",
+   "instrument": "piia",
+   "inputSha256": "57b56116eb54108c43b6f7bb024abfee1ff88812bc3fe72205b880769dd38b27"
+  },
+  {
+   "itemId": "dev-sig-892699077d11",
+   "type": "DesignationEvent",
+   "id": "event-piia-703-709-dufferin",
+   "citySlug": "stanstead--memphremagog",
+   "docShas": [
+    "cd5516fdf4ec94a3dd0b6030bc763b7dafe7d764b50cb32e5879a9232886d6bf"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "unknown",
+   "instrument": "piia",
+   "inputSha256": "852064d936d32fda09e7988eea1621a1ebd6a94b9fd2fcbd82794d00f1ad7f96"
+  },
+  {
+   "itemId": "dev-sig-223343dfa06c",
+   "type": "DesignationEvent",
+   "id": "event-saint-etienne-de-bolton-permis-conteneur-601-rang1",
+   "citySlug": "saint-etienne-de-bolton",
+   "docShas": [
+    "41180987ba9b3bbbe36db4c12e8305ae437b03ebf37660f42aa8b12f2eaa3d22"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "piia",
+   "inputSha256": "8eb32ce7e5bff7c526166aa60516480a231127f243826f35904b296dfe5ec5b9"
+  },
+  {
+   "itemId": "dev-sig-02e228eafc88",
+   "type": "DesignationEvent",
+   "id": "event-derogation-ddm-2026-07",
+   "citySlug": "saint-valerien-de-milton",
+   "docShas": [
+    "d52f59b052ab9d44c1cf017ecb10bb2794b5c70c4d3a3fcc84bcf98a0e3d06eb"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "derogation",
+   "inputSha256": "8959b3e7524ea751f9f0bc505da1979b47c838b2aeccbd9e486816e16fbb6a87"
+  },
+  {
+   "itemId": "dev-sig-be2c1741414f",
+   "type": "DesignationEvent",
+   "id": "evt-piia-2026-0055",
+   "citySlug": "piedmont",
+   "docShas": [
+    "b17108b0de7e1cae8efe42e84e93937b62c24232c1e6d095ed8c201ff31d6140"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "piia",
+   "inputSha256": "68ce590c40d48ced96c7b2644b395b88abe4462b39973a5c9e6dce3cd2c513df"
+  },
+  {
+   "itemId": "dev-sig-1e8ffa089ed8",
+   "type": "DesignationEvent",
+   "id": "event-16-1-1-derogation",
+   "citySlug": "ayers-cliff",
+   "docShas": [
+    "2d9ecc472e7518b689ce3f95711f8a01e42053266d539820fdb04f0243da2fbc"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "derogation",
+   "inputSha256": "018d45102e1e3671852c2af1d0e35805ae8c5bb5fa9920c087aafbe126340a10"
+  },
+  {
+   "itemId": "dev-sig-2fc221ff0583",
+   "type": "DesignationEvent",
+   "id": "event-2026-10-177-piia",
+   "citySlug": "saint-jude",
+   "docShas": [
+    "b09dfa9ba492ac3ca79b7a1f31b2b61194ece42d0bbe5b3e697495f571beee31"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "piia",
+   "inputSha256": "1bf6a65d6e0453c2045c9e1ee5040aa36b9a0b861ce87cf96f1741793c7a8715"
+  },
+  {
+   "itemId": "dev-sig-65213b6168bb",
+   "type": "DesignationEvent",
+   "id": "event-hinchinbrooke-derogation-lot5267376-2026-01",
+   "citySlug": "hinchinbrooke",
+   "docShas": [
+    "3c61a0a1e3b54a2508bbf140dc02fcf4b41a6d7fb710c002c4a5addaa1a216e8"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "derogation",
+   "inputSha256": "745f3dcc56599ebcfa4526cc2422a512eb988f4d6ea6b8aa9204f715f0f3c68a"
+  },
+  {
+   "itemId": "dev-sig-00fd19761395",
+   "type": "DesignationEvent",
+   "id": "event-321-2019",
+   "citySlug": "saint-anicet",
+   "docShas": [
+    "ad3db8ae56055331486695d3ec7a0dc308bfdd747715f0ce7716d40660cf276e"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "derogation",
+   "inputSha256": "3b72a224d14a20b08fd78b50f8e5e6b99be4a580d47baced4d0e60f6a8b41573"
+  },
+  {
+   "itemId": "dev-sig-48b8a6613283",
+   "type": "DesignationEvent",
+   "id": "event-derogation-2023-06",
+   "citySlug": "saint-valerien-de-milton",
+   "docShas": [
+    "003411af0d76d8a517898a30a5a542afceeaf1cb3c86d7a607738bb814a35ab1"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "derogation",
+   "inputSha256": "bbeea3e4e64f610de363d2b972f6f27858ee93e3218856165cbb44d1c108224f"
+  },
+  {
+   "itemId": "dev-sig-7c3882b01c69",
+   "type": "DesignationEvent",
+   "id": "designation-res-354-2026",
+   "citySlug": "saint-jacques",
+   "docShas": [
+    "d3e8a3368fc7c42a64970a208987ea5822f7ab2d6afe11864ec26a365c8ce70b"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "piia",
+   "inputSha256": "ca3d2fc0dabb04750bae233c38d60e706ffa1a2cb443b3b0ccd13870115c4f5b"
+  },
+  {
+   "itemId": "dev-sig-8f59f18cdc11",
+   "type": "DesignationEvent",
+   "id": "event-montreal-est-piia-6635000-2026-02-18",
+   "citySlug": "montreal-est",
+   "docShas": [
+    "c04804af9c9c053158e4edd5c7f49e1c96e3fbdf17ded40ec563e5867f29baba"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "lt50km",
+   "instrument": "piia",
+   "inputSha256": "ecdcdc021a715da63af84b80fa0c3cea8e1808498b56f244b8c0acef2a4da8a9"
+  },
+  {
+   "itemId": "dev-sig-c7c3bde1fc75",
+   "type": "DesignationEvent",
+   "id": "event-129-06-26",
+   "citySlug": "saint-aubert",
+   "docShas": [
+    "56bc9d5e15f86391be86c1f4b2aced9deed0c366cd69df9c589442da9f2a5551"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "gt300km",
+   "instrument": "derogation",
+   "inputSha256": "db99365f1ca0da530d23254dd36ca5f19e9a50551a531ef911960935b97b41fc"
+  },
+  {
+   "itemId": "dev-sig-583fb54991e2",
+   "type": "DesignationEvent",
+   "id": "event-455-09-2026",
+   "citySlug": "notre-dame-des-prairies",
+   "docShas": [
+    "db3a88008c2ddef67e8e9b94667023366749c1f887e5224cee595ee56dd44297"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "piia",
+   "inputSha256": "6f2a788a57cbd0be0605ca7ae192c029f54997d899e9e399468cde88f73ab90a"
+  },
+  {
+   "itemId": "dev-sig-49ae1f13de9f",
+   "type": "DesignationEvent",
+   "id": "event-riviere-rouge-piia-2026-40042",
+   "citySlug": "riviere-rouge",
+   "docShas": [
+    "0b5be4e2c6203130d1fa8c49efd6b39e0c94140ccf8989b6acdaad9fcfcdbcdc"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "150-300km",
+   "instrument": "piia",
+   "inputSha256": "92ea2f4aeaed963884ad9c1dc37143ed8d398a98e7ddfd5dab73309a5df5b6cd"
+  },
+  {
+   "itemId": "dev-sig-00b051e3a749",
+   "type": "DesignationEvent",
+   "id": "de-d2026-07",
+   "citySlug": "baie-saint-paul",
+   "docShas": [
+    "297524f19632ccefb0522cfb922d367658aa73da4458e19cbf647c2a221a512c"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "gt300km",
+   "instrument": "derogation",
+   "inputSha256": "5dc0ee5a96c8d0007fe1d5d1f25ba9a2075d66721eec49f4454f7467b957e3f0"
+  },
+  {
+   "itemId": "dev-sig-d52a633171e5",
+   "type": "DesignationEvent",
+   "id": "de-16-1-6",
+   "citySlug": "ayers-cliff",
+   "docShas": [
+    "277997bb0f5aa35b672da54eb15fe8f66d2db5224c08063850847f7566d69692"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "piia",
+   "inputSha256": "66c21be669c2c46c2cd41ad57de2fe5ef389e6172f0c0ca291a4b48393479377"
+  },
+  {
+   "itemId": "dev-sig-f0d2ba3ad9c1",
+   "type": "DesignationEvent",
+   "id": "event-saint-come-dm-2026-0003-141-87e-avenue",
+   "citySlug": "saint-come",
+   "docShas": [
+    "a7607e5e1b4780a5ec22ea186f490f4c57d293e5a69a94fed609311ebbcad456"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "derogation",
+   "inputSha256": "f6c5163b675fcfb09807a337b5f7b42f1df00ac6f15cacf5db160ab913e083f2"
+  },
+  {
+   "itemId": "dev-sig-4f1c183d5a10",
+   "type": "DesignationEvent",
+   "id": "event-piia-cascades-1935-1955-refus",
+   "citySlug": "saint-hyacinthe",
+   "docShas": [
+    "abf36e6b41a123561aaea32efa9d5517d352126cce7ea9c55734c7572893c70c"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "piia",
+   "inputSha256": "9872d4850b99b07635511da784981741dc19191196bdbffac9709c061cb8308c"
+  },
+  {
+   "itemId": "dev-sig-435b65c4f69c",
+   "type": "DesignationEvent",
+   "id": "event-262-07-2026",
+   "citySlug": "lepiphanie",
+   "docShas": [
+    "8ec1d18bf6f643cbb1d5a64d868486d6cc73221cb5ea5576281d397ed792954c"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "lt50km",
+   "instrument": "piia",
+   "inputSha256": "f80bf7f6e246571c96ed63454e88f8cc6bb8373f5d54e2bc8a0ea14faf90f197"
+  },
+  {
+   "itemId": "dev-sig-00d3e8fb449c",
+   "type": "DesignationEvent",
+   "id": "event-saint-hugues-derogation-dm2026-03",
+   "citySlug": "saint-hugues",
+   "docShas": [
+    "079af75e0312530a9856b0731a10e7fefb634709d3bb7af01dd003c93afc82dd"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "derogation",
+   "inputSha256": "2d30115f80bef5830b5467a5fb0afd63a175696f4bda134a87336cd9d0bd00cb"
+  },
+  {
+   "itemId": "dev-sig-c0cf7485c66b",
+   "type": "DesignationEvent",
+   "id": "de-2026-06-198",
+   "citySlug": "donnacona",
+   "docShas": [
+    "1a443289e97b0dad87cab6e2d43d544c88db81e53c91307ee157a4dbbd426806"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "150-300km",
+   "instrument": "derogation",
+   "inputSha256": "422216ab889dd4cb738710221aa72e20d1519076ae4039a69baa5f7d69529fec"
+  },
+  {
+   "itemId": "dev-sig-80816a650c90",
+   "type": "DesignationEvent",
+   "id": "event-2019-10-210",
+   "citySlug": "sainte-catherine-de-hatley",
+   "docShas": [
+    "7734f1bbbad8b547e838cf86b1906a4b2ecdec8682ab2bb247cc79f7261c68a5"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "derogation",
+   "inputSha256": "28d0467270aa53b97520fec941c2c20690e274b49d1d776d86a8c791aef02dc8"
+  },
+  {
+   "itemId": "dev-sig-d8e96f20b3e2",
+   "type": "DesignationEvent",
+   "id": "event-res-11305",
+   "citySlug": "saint-tite-des-caps",
+   "docShas": [
+    "94eda0a201c76e3e183dcaefad7fcb5a1ec0a9c1d9107fe4a3227c7729c3a830"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "150-300km",
+   "instrument": "piia",
+   "inputSha256": "dd71a971b8e1c58b51145a435902ca237bb879a0eb8e5826ba01f36efa425af8"
+  },
+  {
+   "itemId": "dev-sig-7a3f129f4bd1",
+   "type": "DesignationEvent",
+   "id": "event-sainte-catherine-de-la-jacques-cartier-piia-lot-4366544-2026-01-12",
+   "citySlug": "sainte-catherine-de-la-jacques-cartier",
+   "docShas": [
+    "f0a6e566f0e0a650cb6842ede2fa7621b17d247c1db19f929947bc089d0a81d9"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "150-300km",
+   "instrument": "piia",
+   "inputSha256": "8c36cff22925325a22c0969bc219953a15fbe8ba7b6c01ca2744a433773ac78f"
+  },
+  {
+   "itemId": "dev-sig-46d87654f486",
+   "type": "DesignationEvent",
+   "id": "event-les-eboulements-derogation-dm173-2026",
+   "citySlug": "les-eboulements",
+   "docShas": [
+    "1e59bed5976903f8afa2689a06940360c29c8bcab0bf22b2e1a01e5be46e7880"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "gt300km",
+   "instrument": "derogation",
+   "inputSha256": "04ad283e20fd654fb05887b3f12a410ee87e62c09c5b887148db2feb58f3c6f8"
+  },
+  {
+   "itemId": "dev-sig-99873035d8ee",
+   "type": "DesignationEvent",
+   "id": "event-2026-08-173",
+   "citySlug": "saint-albert",
+   "docShas": [
+    "a19be4d96d9ad64c8bfc8e9777cdbde6bd48c10d404e40cf6896f7637e51594a"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "derogation",
+   "inputSha256": "08fa130418697f77cc45df47a3234d6f306a88a270ad68dd44f9e030259b95cf"
+  },
+  {
+   "itemId": "dev-sig-1de8055a3ee0",
+   "type": "DesignationEvent",
+   "id": "designation-event-091-04-2026",
+   "citySlug": "lislet",
+   "docShas": [
+    "2fe44d4239513b2cb04282b8b4a2a5ac5d2a7bfce93a40b779f63409f24cd4d6"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "gt300km",
+   "instrument": "piia",
+   "inputSha256": "317b16f17a900b0d874dee3c901a4f0bb4e6ca58f81d48ace2df9a44fac0edbc"
+  },
+  {
+   "itemId": "dev-sig-d1ba531748ba",
+   "type": "DesignationEvent",
+   "id": "event-25-01r-043",
+   "citySlug": "sainte-julienne",
+   "docShas": [
+    "4b48b3263673580b52129ab0d53d31d9254b0f6da5e7ba94c7cf9754ffea5b2d"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "derogation",
+   "inputSha256": "fec0d046c27e87559052644aeb4257288acfe2057e8bfc6033769371ca3c2822"
+  },
+  {
+   "itemId": "dev-sig-4b93b5d2aeae",
+   "type": "DesignationEvent",
+   "id": "event-sainte-catherine-de-hatley-derogation-2026-01",
+   "citySlug": "sainte-catherine-de-hatley",
+   "docShas": [
+    "9286d57d5343b1b8a10e063253b0c1e48a94e811d1677dd02687082e35225d91"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "derogation",
+   "inputSha256": "a7c8eab4505196490d8f8b5c778b04bcbe8211de30b9e4e0e9c8905ba4384015"
+  },
+  {
+   "itemId": "dev-sig-6e83ffa85078",
+   "type": "DesignationEvent",
+   "id": "event-saint-honore-derogation-05-2026",
+   "citySlug": "saint-honore",
+   "docShas": [
+    "81beadb8060a5db4dfbe7ae58301bf7346db96aa89d6c77bdf4f793b680d410b"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "gt300km",
+   "instrument": "derogation",
+   "inputSha256": "5b23b6a32699872a9f2ca8af7c298bab4ce428690d5a0d733bc94e9e38c1b3db"
+  },
+  {
+   "itemId": "dev-sig-3888d3069713",
+   "type": "DesignationEvent",
+   "id": "event-dm-06-2020",
+   "citySlug": "saint-anicet",
+   "docShas": [
+    "1d5d2134f9c309727f6e84893c4d10e1cb13f605d6f6004293b5c4ff1328af91"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "derogation",
+   "inputSha256": "1f4d0446c6d90c82fb9982aad6fd557c054e57aec6f680736ca83c14db735ae3"
+  },
+  {
+   "itemId": "dev-sig-ea0a2fcbfdcc",
+   "type": "DesignationEvent",
+   "id": "event-2026-09-1500",
+   "citySlug": "sainte-brigide-diberville",
+   "docShas": [
+    "83e9ccde5aa54fc7abc66bb63a42f403fd460f8cbeea1864da0cd2dbaf212253"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "lt50km",
+   "instrument": "derogation",
+   "inputSha256": "9a9e2d482662797b079a8e0f744205200d87b655b40c5e7ab7e9cb86e30ae121"
+  },
+  {
+   "itemId": "dev-sig-e0a94b3404e2",
+   "type": "DesignationEvent",
+   "id": "event-bolton-est-piia-6465655-jan2026",
+   "citySlug": "bolton-est",
+   "docShas": [
+    "23f15d6b5c4e36c9dcc09399ab0ba27e0321cec98ba3e480f1309942fd4c2bb1"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "piia",
+   "inputSha256": "a8b3d7705b1c7b10ed7c070bc820033b33280a8236f6d67e723056b37a0b169c"
+  },
+  {
+   "itemId": "dev-sig-2048265bfb06",
+   "type": "DesignationEvent",
+   "id": "event-dm-144-06-26",
+   "citySlug": "sainte-sophie",
+   "docShas": [
+    "76680711ec666f797eb1935f218495b61e7f23ec9a992e649d739ac1e97d774e"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "lt50km",
+   "instrument": "derogation",
+   "inputSha256": "ad61c3bd70c08ffdf375f4aa1377f9dc4cc5e2565531197db8e49d51ba36e7c0"
+  },
+  {
+   "itemId": "dev-sig-6d0f1bd0d877",
+   "type": "DesignationEvent",
+   "id": "de-2017-074",
+   "citySlug": "berthier-sur-mer",
+   "docShas": [
+    "ef3b013e15ad7d7227fd59ad1f958cc2f0a0f7ed6ef6b37c3c0d2efa8c6a462b"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "150-300km",
+   "instrument": "derogation",
+   "inputSha256": "155c2671769053418a9250f0c56961f082070b1337b33d33008d60caea653651"
+  },
+  {
+   "itemId": "dev-sig-3d685c518ba7",
+   "type": "DesignationEvent",
+   "id": "event-2026-07-122",
+   "citySlug": "esterel",
+   "docShas": [
+    "338177bb2d187d093e7ad148e98c75d3084d556df63dc3e2a75b509d0b2e8162"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "derogation",
+   "inputSha256": "79a48d9bee2b02d39ddbd31d7e73e03b37a7b7ad704e860a3a51a57a741f94c4"
+  },
+  {
+   "itemId": "dev-sig-ecaf6be86b9f",
+   "type": "DesignationEvent",
+   "id": "event-derogation-6-1",
+   "citySlug": "rawdon",
+   "docShas": [
+    "22a1c7ac2bfbaff80bf2b0ecac2754141fb504d358001bf2e3e94a8fac992503"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "derogation",
+   "inputSha256": "49baac90ac0fea82efb94b6936929648585f7948dae48db9d47014ba71aead1f"
+  },
+  {
+   "itemId": "dev-sig-2ee07a0f897f",
+   "type": "DesignationEvent",
+   "id": "event-piia-lot-5508760",
+   "citySlug": "esterel",
+   "docShas": [
+    "257b5d2e98b590caca65e1bf9770a6125f49fc8389404cb44f3d7f90f65ceea2"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "piia",
+   "inputSha256": "f9912743ebcb7a21953c2610b5f08aa7602eb38b6b6224c7e54601bdb634b28a"
+  },
+  {
+   "itemId": "dev-sig-587ac5614d5b",
+   "type": "DesignationEvent",
+   "id": "designation-piia-2026-0011",
+   "citySlug": "piedmont",
+   "docShas": [
+    "8cb4a43bbabd530c25b49a4d497101bdbc09f8511709bc6aaeb59fc6688a66ac"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "piia",
+   "inputSha256": "54950619c12fe0c7b97ee45fd69348b18f81559fc199f3a2a652840c38eed435"
+  },
+  {
+   "itemId": "dev-sig-47e727321c20",
+   "type": "DesignationEvent",
+   "id": "event-saint-david-de-falardeau-piia-131-cortina-2024",
+   "citySlug": "saint-david-de-falardeau",
+   "docShas": [
+    "78be77f68212d256965c2092d0b9ed4c3d23ecb051cfd20dc4af41e0caa9d654"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "gt300km",
+   "instrument": "piia",
+   "inputSha256": "9dc3b43425fa938eaffafeb0bb648b851ec57bbeb949d9cd35892e9d0db7a161"
+  },
+  {
+   "itemId": "dev-sig-dafdd16deb15",
+   "type": "DesignationEvent",
+   "id": "event-d2026-05",
+   "citySlug": "baie-saint-paul",
+   "docShas": [
+    "5bfd276dd1c16983c7fb044bb7f5e99798c24d93c5d02a9137431242a0676cf3"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "gt300km",
+   "instrument": "derogation",
+   "inputSha256": "179b248e7597b3939210285bd39f6bfa96bb73ee5037784b5efec9dc4fb648f7"
+  },
+  {
+   "itemId": "dev-sig-3d90c41a7ba4",
+   "type": "DesignationEvent",
+   "id": "event-2022-30191",
+   "citySlug": "bromont",
+   "docShas": [
+    "64e9bd1403b939fe9f41c92a503294875e4b97307dc8b666d96c7571b72d2751"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "derogation",
+   "inputSha256": "cd2be6f8bfaa3a99a558647727c29547267249134bf7387ed07d31f70b41ec7e"
+  },
+  {
+   "itemId": "dev-sig-ff757ee6a225",
+   "type": "DesignationEvent",
+   "id": "de-7-12",
+   "citySlug": "sainte-adele",
+   "docShas": [
+    "b0ed86c686ecfafe4be1fbb6d21d874b866c5fd051082081f7dad00cef4752a3"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "piia",
+   "inputSha256": "717a076e47529a044aa2e6712e60b0cbe7ded2f463f928324f5e7ea643f7c72a"
+  },
+  {
+   "itemId": "dev-sig-2fa9c677bcc1",
+   "type": "DesignationEvent",
+   "id": "de-5.1-derogation-4624-fossambault",
+   "citySlug": "sainte-catherine-de-la-jacques-cartier",
+   "docShas": [
+    "9889d100a1d2c62099054fa7994ee9d0cb2ebd6de89e8c1e8f36ef0e2da9f3da"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "150-300km",
+   "instrument": "derogation",
+   "inputSha256": "fedce618345cebcd45d7e6b772cb65f43fa68053bf8feac01a92a5f0f20ef64c"
+  },
+  {
+   "itemId": "dev-sig-109cdfcab8a2",
+   "type": "DesignationEvent",
+   "id": "designation-event-2026-06-11",
+   "citySlug": "sainte-felicite--lislet",
+   "docShas": [
+    "4be13f316ef7dc019f4bd5aec4c2e85103e8dfcf708ef1319fea089043196d4f"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "unknown",
+   "instrument": "derogation",
+   "inputSha256": "c02e9defd68fa410f77a0a064c634bde19feafe94c34c1a37c0c491f01a4086e"
+  },
+  {
+   "itemId": "dev-sig-7f5f49361281",
+   "type": "DesignationEvent",
+   "id": "event-13017-2025",
+   "citySlug": "chute-saint-philippe",
+   "docShas": [
+    "9be397a6209afe720225723dd6ba9d74ddba30ac64b85409c129596f9db95439"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "150-300km",
+   "instrument": "derogation",
+   "inputSha256": "4a7d6e319ca3dadfdc9dbf9b648b714ce2405e019a6f0769baec915fbf1e0bcc"
+  },
+  {
+   "itemId": "dev-sig-ae011e63ceff",
+   "type": "DesignationEvent",
+   "id": "de-335-22",
+   "citySlug": "lancienne-lorette",
+   "docShas": [
+    "6cc000ce63098680ac14556f9f4c5a0979cc5771f238dd7c8df296d33ac5edc9"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "150-300km",
+   "instrument": "piia",
+   "inputSha256": "0283f7d11dab5243a04db2d656c623df82d37d86cdb6f753b4f247d788d9c8e9"
+  },
+  {
+   "itemId": "dev-sig-418ecbcd3ba5",
+   "type": "DesignationEvent",
+   "id": "event-19203-07-2023",
+   "citySlug": "saint-apollinaire",
+   "docShas": [
+    "2b2b5c3a38aa9b75a73bfa31fa5239d487bd2080053ab898a3b362328420beda"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "150-300km",
+   "instrument": "piia",
+   "inputSha256": "abc0e8edf6c2f71f13d31e5283373baec06aa1ce36e0265161d208d52e6223f6"
+  },
+  {
+   "itemId": "dev-sig-fa801127f646",
+   "type": "DesignationEvent",
+   "id": "event-183-06-2022",
+   "citySlug": "saint-francois-xavier-de-brompton",
+   "docShas": [
+    "020ed018129b0472f9cbbce4530c04382670b99b0ce15d07b62e18913626ebee"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "derogation",
+   "inputSha256": "760e976a2462ef6ceb412820638367bee9ec0d18cabc5e1afd9e596a4b751154"
+  },
+  {
+   "itemId": "dev-sig-ba850c1ed6fc",
+   "type": "DesignationEvent",
+   "id": "event-2026-06-1993",
+   "citySlug": "lac-superieur",
+   "docShas": [
+    "54e51229024fd37d84889d0673914200864c2318e2a4a9705eb6e09b2f180491"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "piia",
+   "inputSha256": "d099bef73da4a6523e7676fff65640fc80e7acf847b8a2a62e522a4e1d1dd96d"
+  },
+  {
+   "itemId": "dev-sig-7056fee7e6cf",
+   "type": "Signal",
+   "id": "signal-ppcmoi-lot-5717564",
+   "citySlug": "sainte-anne-de-la-perade",
+   "docShas": [
+    "a67208d16806e8a0aad52df10d7ae90a6af2addf18e3b091e4e4f30e6006ee1d"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "150-300km",
+   "instrument": "ppcmoi",
+   "inputSha256": "18c0ef88aef6b4d98fe40c692ae2b5b13d1d297fe86295313bd17af1fbe79aa4"
+  },
+  {
+   "itemId": "dev-sig-a0bdb0839c7c",
+   "type": "Signal",
+   "id": "signal-derogations-mineures-reglement",
+   "citySlug": "princeville",
+   "docShas": [
+    "cb23d47cb3f6db2ed0677978f88aa9d8ab13ac1b41462ecb3d93db1283213cca"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "150-300km",
+   "instrument": "derogation",
+   "inputSha256": "c44e521ad3044112edacddb73dba83f85180f6125e4b6a0ee3a01564ac4af908"
+  },
+  {
+   "itemId": "dev-sig-deecf6f64f38",
+   "type": "Signal",
+   "id": "signal-saint-felix-de-valois-dm-2026-025",
+   "citySlug": "saint-felix-de-valois",
+   "docShas": [
+    "75fd3ba8b2b393088970681dd5e03b2d9448eb6e6de1886bd6b95cb5107474a1"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "derogation",
+   "inputSha256": "f0f8c05c519d066973733d1d56b01f4b1a7d33d28f87e4fd4782596b01d6117d"
+  },
+  {
+   "itemId": "dev-sig-1d71f2b228e0",
+   "type": "Signal",
+   "id": "signal-saint-denis-sur-richelieu-derogation-717-patriotes",
+   "citySlug": "saint-denis-sur-richelieu",
+   "docShas": [
+    "45b2d50eb1599df6a69fd7d2331f1f1ad401d9fa6824679135ee018fbdba2b0d"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "lt50km",
+   "instrument": "derogation",
+   "inputSha256": "4ff7cbb4e5cca2c4a2a2b11a4ffb149a284c0f60078a52bbd6eb8c5441e619e0"
+  },
+  {
+   "itemId": "dev-sig-768e5c0e1833",
+   "type": "Signal",
+   "id": "signal-2026-08-314",
+   "citySlug": "lisle-aux-coudres",
+   "docShas": [
+    "9853cbd37cc8985433207a28dfb3dafa58cbfc69b95ff2fb99cb9ebca0a09daf"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "gt300km",
+   "instrument": "derogation",
+   "inputSha256": "411ebd8fc546c7a8535f4f7758cf82a1cfd93e68414439a9adcc3fc801cc13e3"
+  },
+  {
+   "itemId": "dev-sig-7f7f990c937f",
+   "type": "Signal",
+   "id": "signal-saint-dominique-derogation-mineure-2026-04",
+   "citySlug": "saint-dominique",
+   "docShas": [
+    "8a1d0fa771c3febdc5168e99d4e1453ab668295237c2cd57d27a717263cceb0a"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "derogation",
+   "inputSha256": "6cb267eaeedacd706181c04c084d546a6bccf60fa6b6c75c9b783aacad622654"
+  },
+  {
+   "itemId": "dev-sig-00e35ef19376",
+   "type": "Signal",
+   "id": "signal-saint-hippolyte-piia-2025-0050",
+   "citySlug": "saint-hippolyte",
+   "docShas": [
+    "450423f83cbeeb5802bd58f17d8d9ddcb4d0f89a95d04f7f57a1348a8b2294f3"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "piia",
+   "inputSha256": "48954ff414993a9fb50de49d36377e84e03dcb3e1c2f13df25d4046245646d6f"
+  },
+  {
+   "itemId": "dev-sig-d2f5b3baafd7",
+   "type": "Signal",
+   "id": "sig-odj-item-12",
+   "citySlug": "lancienne-lorette",
+   "docShas": [
+    "3e75f74dd1d5830d28613ab49bfeda4a97b7acd960d417c00fa952c1295b82c4"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "150-300km",
+   "instrument": "piia",
+   "inputSha256": "aa068f75a364e4981c2530fff6190b023de0ed9552f8973b86631d85ae1ccd43"
+  },
+  {
+   "itemId": "dev-sig-37c9e4ac7984",
+   "type": "Signal",
+   "id": "signal-shawinigan-densification-1802-4e-rue",
+   "citySlug": "shawinigan",
+   "docShas": [
+    "e1b84a6d08eba15866b26b263d707c3a07a841dd5d83f2574e9c3c66935dda86"
+   ],
+   "pass": "pass3",
+   "group": "individual-authorisation",
+   "region": "50-150km",
+   "instrument": "derogation",
+   "inputSha256": "df0dffb6140bf310305985ddd7bd0462f6785d8755b7e9c2d41f9b41cdd76c6b"
+  }
+ ]
+}

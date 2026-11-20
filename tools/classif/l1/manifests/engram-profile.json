@@ -1,0 +1,24 @@
+{
+ "lot": "L1",
+ "kind": "engram-profile",
+ "createdAt": "2026-10-31T20:04:23.962Z",
+ "engram": "0.21.2",
+ "profile": {
+  "id": "steve-classification",
+  "version": "1",
+  "hash": "48b4761992929945a18506e77e2a61b47bc80e455fcf421b94480707bb16b0cf"
+ },
+ "codebook": {
+  "rows": 28,
+  "equalToMigration": true,
+  "csvSha256": "6fa2d846f4b0c125b9ec63a6f29d765be9c3f03b53f6d35e1a4c3a7abb871413"
+ },
+ "registries": {
+  "reason_codes": 28,
+  "verdicts": 3
+ },
+ "registryNodes": 31,
+ "corpus": 504,
+ "semanticFiles": 504,
+ "profilePromptSha256": "a27ed8f1fcac8e0b02e2a50eaa1ef6861fdc14117ff2a041890dd4f115edecf2"
+}

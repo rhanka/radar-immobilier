@@ -1,0 +1,9 @@
+{
+ "kind": "guide-freeze",
+ "frozen": "FINAL",
+ "from": "G3",
+ "createdAt": "2026-11-05T12:32:54.065Z",
+ "llmCalls": 0,
+ "guideSha256": "67058e5e4e900db41f051d70dcf7f92d4a126db5a5217e9b025336857aeff311",
+ "shingleCheck": "pass (0 verbatim shingles from the sealed set)"
+}

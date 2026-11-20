@@ -1,0 +1,25 @@
+{
+  "kind": "bc-singlepass-v1",
+  "status": "D4 actée, D5 provisoire actée le 13/11 ; lancement hors de cette lane",
+  "startingPrompt": "série 7, P0, sha256 a60713366128ae4348a45a7323d0b0984cef87ca6cb33eda15073c045235b016",
+  "adapter": "../run-seat.mjs#callSeat",
+  "prompt": "singlepass-prompt.md",
+  "iterations": [
+    ["astra-low", "astra-medium"],
+    ["sol-6.1-medium", "opus-5.5-medium"]
+  ],
+  "callUnit": "PV complet",
+  "callsPerRouteTuning": 50,
+  "tuningCallsCap": 200,
+  "blind": {
+    "routes": "deux finalistes au plus, gelés avant ouverture",
+    "callsPerRoute": 50,
+    "callsCap": 100,
+    "role": "test-executor",
+    "oneShot": true,
+    "output": "privé scellé, agrégats seulement"
+  },
+  "selectionTuning": ["zéro manqué", "précision décroissante", "coût croissant", "route lexicale"],
+  "selectionFinal": ["zéro manqué des deux côtés", "précision aveugle décroissante"],
+  "pending": ["référence C scellée", "stratification C : écart publié"]
+}
