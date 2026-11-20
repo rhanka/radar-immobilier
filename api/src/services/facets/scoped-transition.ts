@@ -78,7 +78,7 @@ export function assertScopedExpectations(
   const selection = command.action === "select" || command.action === "deselect";
   if (selection || command.action === "restore") {
     if (command.expectedSelectionHeads !== undefined) {
-      throw new FacetError(400, "invalid_facet_command");
+      throw new FacetError(400, "invalid_facet_command", "expected_selection_heads_forbidden_without_deselect");
     }
     return;
   }
@@ -86,11 +86,11 @@ export function assertScopedExpectations(
     const expectedKeys = Object.keys(command.expectedSelectionHeads ?? {}).sort();
     if (expectedKeys.length !== removals.length
       || expectedKeys.some((entry, index) => entry !== [...removals].sort()[index])) {
-      throw new FacetError(400, "invalid_facet_command");
+      throw new FacetError(400, "invalid_facet_command", "expected_selection_heads_keys_must_match_deselect");
     }
     return;
   }
   if (command.expectedSelectionHeads !== undefined) {
-    throw new FacetError(400, "invalid_facet_command");
+    throw new FacetError(400, "invalid_facet_command", "expected_selection_heads_forbidden_without_deselect");
   }
 }
