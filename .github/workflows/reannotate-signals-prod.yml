@@ -1,0 +1,78 @@
+# reannotate-signals-prod — manual two-step B+C reannotation of recent prod signals.
+#
+# Trigger: manual only (workflow_dispatch), on main, gated by environment: production.
+# Derives a one-shot Job from CronJob/radar-refresh-pv in radar-immobilier using the
+# existing least-privilege prod CI ServiceAccount (radar-ci-deployer via KUBE_CONFIG_DATA).
+name: Reannotate prod signals (30d two-step)
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Execution mode: dry-run (default, no DB write) or apply (writes AI annotations, preserves manual)"
+        required: true
+        type: choice
+        options:
+          - dry-run
+          - apply
+        default: dry-run
+      since_days:
+        description: "Lookback window in days (default 30, integer 1..365)"
+        required: false
+        type: string
+        default: "30"
+
+concurrency:
+  group: reannotate-signals-prod
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  reannotate:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    environment: production
+    env:
+      NAMESPACE: radar-immobilier
+      TEMPLATE_PATH: deploy/ci/reannotate-signals-prod.tmpl.yaml
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.31.0'
+
+      - name: Configure prod kubeconfig (radar-ci-deployer)
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        run: |
+          set -euo pipefail
+          if [ -z "${KUBE_CONFIG_DATA}" ]; then
+            echo "::error title=Missing credential::secret KUBE_CONFIG_DATA is empty or not visible."
+            exit 1
+          fi
+          mkdir -p "$HOME/.kube"
+          bash deploy/ci/write-kubeconfig.sh "${KUBE_CONFIG_DATA}"
+          chmod 600 "$HOME/.kube/config"
+
+      - uses: ./deploy/cutover/lock-action
+        with:
+          action: lock
+          environment: prod
+
+      - name: Run prod 30d signal reannotation
+        env:
+          REANNOTATION_MODE: ${{ github.event.inputs.mode }}
+          REANNOTATION_SINCE_DAYS: ${{ github.event.inputs.since_days || '30' }}
+          EXPECTED_KUBE_APISERVER_HOST_PROD: ${{ vars.EXPECTED_KUBE_APISERVER_HOST_PROD || vars.EXPECTED_KUBE_APISERVER_HOST }}
+        run: bash deploy/ci/reannotate-signals-prod.sh
+
+      - name: Release prod writer lock
+        if: always()
+        uses: ./deploy/cutover/lock-action
+        with:
+          action: unlock
+          environment: prod
