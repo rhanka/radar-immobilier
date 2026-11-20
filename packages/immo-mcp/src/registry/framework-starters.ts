@@ -86,7 +86,7 @@ export const FRAMEWORK_BUILD_RULE = "Keep the starter head, data-st-theme and ex
   "entrypoint. shell.html is trusted template markup, never reader data: render API values as text. " +
   "Publish only compiled HTML/CSS/JS (not JSX, Svelte, Vue or TypeScript sources); extract styles, disable " +
   "dev mode/HMR and runtime compilers. All imports/assets must resolve on the same pinned origin, no eval " +
-  "or injected styles. Maximum 32 files and 256 KiB decoded total. Browser-qualify any added runtime under " +
+  "or injected styles. Maximum 32 files and 5 MiB decoded total. Browser-qualify any added runtime under " +
   "the real CSP. The native starter is qualified here; these framework adapters are authoring sources, " +
   "not prebuilt or qualified full framework runtimes. The same ImmoArtifact.mount/dispose, ImmoReader " +
   "and UI-state contract apply to all five paths.";

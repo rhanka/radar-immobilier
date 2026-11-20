@@ -6,7 +6,7 @@
  * content-host path and the reader approval page: the bytes served
  * under `/__artifacts/design/<kit>/<digest>/<file>` are the real upstream
  * stylesheets, pinned by version AND sha256. No floating CDN, no per-page
- * bundle copy. The kit lives outside the 256 KiB publication budget.
+ * bundle copy. The kit lives outside the 5 MiB publication budget.
  *
  * Provenance:
  * - sent-tech.css: `@sentropic/design-system-themes` 0.11.0 token build
