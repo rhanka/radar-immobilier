@@ -1,0 +1,45 @@
+# allow-scrape-to-minio (PREPROD) — §6 diag/scrape → minio. Same class as NP 71
+# (allow-graph-projection-to-minio) and 72 (allow-grounding-to-minio).
+#
+# After #592 repointed SCRAPE_S3 to the in-cluster MinIO (radar-minio:9000), the
+# nightly scrape CronJob (radar-refresh-scrape, component=scrape) AND the one-shot
+# diag Job (radar-refresh-diag, component=refresh-diag) write RAW to MinIO. But
+# minio's default-deny ingress only allowed api / graph-projection / grounding /
+# snapshot-dump → the scrape/diag connection to radar-minio:9000 is DROPPED → the
+# S3 client HANGS → the deploy-preprod poll runs empty → job cancelled. This adds
+# the missing ingress: minio ← {scrape, refresh-diag} on 9000.
+#
+# APPLICATION = out-of-band by k8s in cluster-admin (like 71/72; NOT the CD
+# deployer — no networkpolicies grant; NOT the owner directly; not in any
+# kustomization). i-infra co-vals (selectors + ns).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-scrape-to-minio
+  namespace: radar-immobilier-preprod
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: minio
+spec:
+  # Ingress ON the minio pod(s).
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: radar-immobilier
+      app.kubernetes.io/component: minio
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        # the nightly scrape CronJob writes RAW → MinIO.
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: radar-immobilier
+              app.kubernetes.io/component: scrape
+        # the one-shot diag Job runs the same scrape leg.
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: radar-immobilier
+              app.kubernetes.io/component: refresh-diag
+      ports:
+        - protocol: TCP
+          port: 9000
