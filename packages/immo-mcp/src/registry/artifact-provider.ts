@@ -8,7 +8,7 @@ import type { VerifiedMcpRequest } from "@sentropic/cluster-mesh/compose/mcp-sta
 import { computeManifestDigest, type RegistryDefinition } from "@sentropic/cluster-mesh/mcp/registry";
 import { projectArtifactHttpOutcome } from "@sentropic/artifacts/http";
 import { assertContentIdsDisjoint, checkAdmission, createArtifactControl, HOST_ARTIFACT_PROFILE, ARTIFACT_PROFILE_DESCRIPTOR, ARTIFACT_STRICT, ARTIFACT_PART1,
-  artifactRefusalResponse, isGitArtifactTool, liveCapacityState, projectContentUrls, projectListVersionsAuthors, validateArtifactInput, withInvocationScopes,
+  artifactRefusalResponse, extractEnvelopeV1Metadata, isGitArtifactTool, liveCapacityState, projectContentUrls, projectListVersionsAuthors, validateArtifactInput, withInvocationScopes, withPendingArtifactMetadata,
   type AdmissionAuthority, type ListVersionsDirectory } from "@radar/artifacts-host";
 import { ARTIFACT_INVOCATION_SCOPES, ARTIFACT_TOOL_SCOPES, acceptedArtifactScopes, hasArtifactScope,
   isArtifactToolName, STRICT_ARTIFACT_SCOPE_POLICY, type ArtifactScopePolicy } from "./artifact-profile.js";
@@ -274,6 +274,9 @@ export function bindArtifactProvider(options: {
         if (error instanceof ArtifactProfileInputError) return refusal(error.publicCode, error.retriable);
         throw error;
       }
+      const { strippedArgs, metadata: envelopeV1Meta } =
+        extractEnvelopeV1Metadata(tool, args, IMMO_ARTIFACT_PROFILE.resultEnvelopeVersion);
+      let effectiveArgs = strippedArgs;
       // Defense in depth behind the registry: the namespace already refuses a
       // declared scope, and only this check expresses the legacy-read "or".
       if (!isArtifactToolName(tool) || !hasArtifactScope(tool, request.principal.scopes, scopePolicy)) {
@@ -301,16 +304,16 @@ export function bindArtifactProvider(options: {
         invocationId: randomUUID(), actorId: request.principal.sub, storageScopeId: scope,
         authorizeCommit: authority,
       });
-      if (!ARTIFACT_STRICT && tool === "artifacts_delete" && args && typeof args === "object" && !Array.isArray(args) &&
-        !Object.hasOwn(args, "expectedCurrentReleaseId")) {
+      if (!ARTIFACT_STRICT && tool === "artifacts_delete" && effectiveArgs && typeof effectiveArgs === "object" && !Array.isArray(effectiveArgs) &&
+        !Object.hasOwn(effectiveArgs, "expectedCurrentReleaseId")) {
         if (!options.prepareDelete) return refusal("capability_unavailable", true);
-        try { args = await options.prepareDelete(request.principal.sub, args as Record<string, unknown>); }
+        try { effectiveArgs = await options.prepareDelete(request.principal.sub, effectiveArgs as Record<string, unknown>); }
         catch { return refusal("capability_unavailable", true); }
       }
       let body: unknown;
       if (tool === "artifacts_get_source" || tool === "artifacts_list_versions") {
         // The shared facade rereads IMMO admission after every source blob has been read.
-        const response = await sourceControl.handle(tool.slice("artifacts_".length), request.principal.sub, args);
+        const response = await sourceControl.handle(tool.slice("artifacts_".length), request.principal.sub, effectiveArgs);
         if (response.status < 200 || response.status >= 300) {
           if (ARTIFACT_PART1) return { isError: true, content: [{ type: "text", text: JSON.stringify(projectContentUrls(response.body)) }] };
           const error = response.body as { error: string; details?: unknown };
@@ -323,7 +326,8 @@ export function bindArtifactProvider(options: {
         }
       } else {
         // Git mode: the host write scope of this call reaches the git ports through the scope context.
-        const outcome = await withInvocationScopes(request.principal.scopes, () => executor.execute({ tool, args, invocation }));
+        const outcome = await withInvocationScopes(request.principal.scopes, () =>
+          withPendingArtifactMetadata(envelopeV1Meta, () => executor.execute({ tool, args: effectiveArgs, invocation })));
         if (!outcome.ok) {
           if (admission && outcome.failure.conflict?.currentSource !== undefined) {
             try {
@@ -346,11 +350,14 @@ export function bindArtifactProvider(options: {
           });
         }
         body = projectContentUrls(projectArtifactHttpOutcome(outcome, ARTIFACT_PART1).body);
+        if (envelopeV1Meta !== undefined && !ARTIFACT_PART1 && typeof body === "object" && body !== null && !Array.isArray(body)) {
+          body = { ...envelopeV1Meta, ...(body as Record<string, unknown>) };
+        }
         if (tool === "artifacts_publish" || tool === "artifacts_revert" || tool === "artifacts_publish_bundle" ||
           tool === "artifacts_publish_bundle_v2") {
           const payload = (body as { output?: unknown }).output ?? body;
           const record = payload as { artifactId?: unknown; releaseId?: unknown };
-          const requestArgs = args as { artifactId?: unknown };
+          const requestArgs = effectiveArgs as { artifactId?: unknown };
           try {
             assertContentIdsDisjoint(requestArgs.artifactId ?? record.artifactId, record.releaseId);
           } catch {

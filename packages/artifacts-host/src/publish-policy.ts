@@ -7,15 +7,23 @@ export interface PublishFileInput {
 }
 
 export const PUBLISH_MAX_FILES = 32;
-export const PUBLISH_MAX_FILE_BYTES = 256 * 1024;
+export const PUBLISH_MAX_FILE_BYTES = 5 * 1024 * 1024;
 export const BINDING_NAME_MAX_LENGTH = 128;
 
-const ALLOWED_MEDIA_TYPES = new Set([
+export const PAGE_TEXT_MIME_TYPES = Object.freeze([
   "text/html",
   "text/css",
   "text/javascript",
   "application/json",
-]);
+] as const);
+
+export type PageTextMimeType = (typeof PAGE_TEXT_MIME_TYPES)[number];
+
+export function isPageTextMimeType(mimeType: unknown): mimeType is PageTextMimeType {
+  return typeof mimeType === "string" && (PAGE_TEXT_MIME_TYPES as readonly string[]).includes(mimeType);
+}
+
+const ALLOWED_MEDIA_TYPES = new Set<string>(PAGE_TEXT_MIME_TYPES);
 
 const RESERVED_FIRST_SEGMENTS = new Set(["api", "__artifacts", "livez", "health"]);
 
@@ -56,7 +64,7 @@ function validatePublishFileSize(sizeBytes: number, path: string): string[] {
   }
   if (sizeBytes > PUBLISH_MAX_FILE_BYTES) {
     return [
-      `file ${JSON.stringify(path)} exceeds 256 KiB decoded (${sizeBytes} bytes)`,
+      `file ${JSON.stringify(path)} exceeds 5 MiB decoded (${sizeBytes} bytes)`,
     ];
   }
   return [];
@@ -74,7 +82,7 @@ export function validatePublishFiles(files: readonly PublishFileInput[]): string
   }
   const seen = new Set<string>();
   if (files.reduce((sum, file) => sum + file.sizeBytes, 0) > PUBLISH_MAX_FILE_BYTES) {
-    violations.push("manifest exceeds 256 KiB decoded");
+    violations.push("manifest exceeds 5 MiB decoded");
   }
   for (const file of files) {
     violations.push(...validatePublishFilePath(file.path));
