@@ -5,6 +5,7 @@ import { loadConfig } from "../../src/config.js";
 import { startHarness, type Harness } from "./artifacts-h2.helpers.js";
 import { createStoredReader, BASKET_READER_PROFILE } from "../../src/artifacts/reader-storage.js";
 import { createReaderContentApp } from "../../src/artifacts/content-serve.js";
+import { releaseCspForHtml } from "../../src/artifacts/release-files.js";
 import { mintGrant } from "../../src/artifacts/preview-grant.js";
 import { fingerprintReaderProfile } from "../../src/artifacts/reader-profile.js";
 import { mintSessionCookie } from "../../src/artifacts/preview-session.js";
@@ -61,7 +62,7 @@ describe("files parity bundle publish and serve", () => {
   // deletes blob keys, so the spec removes its own leftovers for the
   // bucket deletion in close().
   const stagingLeftovers: string[] = [];
-  beforeAll(async () => { h = await startHarness("filesparity", ["author-alice"]); });
+  beforeAll(async () => { h = await startHarness("filesparity", ["author-alice", "author-chaperon-2mib"]); });
   afterAll(async () => {
     try {
       const env = loadConfig();
@@ -402,5 +403,124 @@ describe("files parity bundle publish and serve", () => {
       expect(served?.contentType, path).toBe(mimeType);
       expect(Buffer.from(served!.body as Uint8Array).equals(Buffer.from(bytes)), path).toBe(true);
     }
+  });
+
+  it("should publish a 2 MiB index.html outside the model and serve it with release HTML CSP (never binary/sandbox), while refusing > 5 MiB", async () => {
+    const author = "author-chaperon-2mib";
+    const readerSub = "reader-chaperon-2mib";
+    await h.pool.query(
+      "INSERT INTO account_users (sub, status) VALUES ($1, 'approved'), ($2, 'approved') ON CONFLICT (sub) DO NOTHING",
+      [author, readerSub],
+    );
+    const ensured = await h.control.handle("ensure", author, {
+      bindingName: randomUUID(), idempotencyKey: randomUUID(),
+      title: "Dossier Chaperon v13", description: "Synthese autonome 2 Mio",
+    });
+    expect(ensured.status).toBe(201);
+    expect(ensured.body).toMatchObject({ title: "Dossier Chaperon v13", description: "Synthese autonome 2 Mio" });
+    const artifactId = (ensured.body as { artifactId: string }).artifactId;
+    await h.pool.query(
+      "INSERT INTO artifacts.artifact_access (artifact_id, principal_id, permission) VALUES ($1, $2, 'read')",
+      [artifactId, readerSub],
+    );
+
+    const head = "<!doctype html><html lang=\"fr\" data-st-theme=\"sent-tech\"><head><meta charset=\"utf-8\"><title>Chaperon v13</title></head><body><main>";
+    const tail = "</main><script>window.__CHAPERON_READY__ = true;</script></body></html>";
+    const fillerLength = 2 * 1024 * 1024 - Buffer.byteLength(head, "utf8") - Buffer.byteLength(tail, "utf8");
+    const htmlText = head + "p".repeat(fillerLength) + tail;
+    const htmlBytes = Buffer.from(htmlText, "utf8");
+    expect(htmlBytes.byteLength).toBe(2 * 1024 * 1024);
+
+    const created = await h.control.handle("create_upload", author, {
+      artifactId, mimeType: "text/html", maxSize: htmlBytes.byteLength,
+    });
+    expect(created.status).toBe(201);
+    const session = created.body as { uploadId: string; uploadUrl: string; requiredHeaders: Record<string, string> };
+    const put = await fetch(session.uploadUrl, {
+      method: "PUT", headers: { ...session.requiredHeaders }, body: htmlBytes,
+    });
+    expect(put.status).toBeLessThan(300);
+
+    const committed = await h.control.handle("commit_upload", author, {
+      artifactId, uploadId: session.uploadId, path: "index.html", mimeType: "text/html",
+      digest: `sha256:${createHash("sha256").update(htmlBytes).digest("hex")}`,
+      size: htmlBytes.byteLength, idempotencyKey: randomUUID(),
+    });
+    expect(committed.status).toBe(201);
+
+    const published = await h.control.handle("publish_bundle", author, {
+      artifactId, idempotencyKey: randomUUID(), expectedCurrentReleaseId: null,
+      title: "Dossier Chaperon v13",
+      assets: [{ path: "index.html", uploadId: session.uploadId }],
+    });
+    expect(published.status).toBe(201);
+    const releaseId = (published.body as { releaseId: string }).releaseId;
+
+    const stored = createStoredReader(h.pool, h.config.storageScope, "pages.example.test", h.blobs);
+    const app = createReaderContentApp({
+      ...stored, contentBase: "pages.example.test",
+      grantSecret: GRANT_SECRET, sessionSecret: SESSION_SECRET, issuer: ISSUER,
+    });
+    const host = `${artifactId}.pages.example.test`;
+    const now = Date.now();
+    const sid = randomUUID();
+    const grant = await mintGrant({
+      ...ISSUER, host, artifactId, releaseId, readerSub, sessionId: sid,
+      profileName: BASKET_READER_PROFILE.name, policyRevision: BASKET_READER_PROFILE.policyRevision,
+      profileFingerprint: fingerprintReaderProfile(BASKET_READER_PROFILE),
+    }, GRANT_SECRET, now);
+    const cookie = mintSessionCookie(
+      { sid, readerSub, artifactId, createdAt: now, expiresAt: now + 900_000 },
+      SESSION_SECRET,
+    ).split(";")[0]!;
+
+    const res = await app.request(`https://${host}/index.html?grant=${grant}`, { headers: { host, cookie } });
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")?.toLowerCase()).toBe("text/html; charset=utf-8");
+    expect(res.headers.get("x-content-type-options")).toBe("nosniff");
+    const csp = res.headers.get("content-security-policy") ?? "";
+    expect(csp).not.toBe("sandbox");
+    expect(csp).toBe(releaseCspForHtml(htmlText));
+    expect(csp).toContain("script-src 'self' 'sha256-");
+    expect(await res.text()).toBe(htmlText);
+
+    // Above 5 MiB is refused for out-of-model page text files on create_upload, commit_upload, and publish_bundle.
+    const fiveMib = 5 * 1024 * 1024;
+    const refusedCreate = await h.control.handle("create_upload", author, {
+      artifactId, mimeType: "text/html", maxSize: fiveMib + 1,
+    });
+    expect(refusedCreate.status).toBe(400);
+    expect((refusedCreate.body as { error: string }).error).toBe("invalid_request");
+
+    // Two 3 MiB staged text files exceed the 5 MiB total page-text ceiling at publish_bundle.
+    const stagedPair: { path: string; uploadId: string }[] = [];
+    for (const [path, mimeType, ch] of [
+      ["index.html", "text/html", "a"],
+      ["app.js", "text/javascript", "b"],
+    ] as const) {
+      const part = Buffer.from(ch.repeat(3 * 1024 * 1024), "utf8");
+      const up = await h.control.handle("create_upload", author, {
+        artifactId, mimeType, maxSize: part.byteLength,
+      });
+      expect(up.status).toBe(201);
+      const upSession = up.body as { uploadId: string; uploadUrl: string; requiredHeaders: Record<string, string> };
+      const putPart = await fetch(upSession.uploadUrl, {
+        method: "PUT", headers: { ...upSession.requiredHeaders }, body: part,
+      });
+      expect(putPart.status).toBeLessThan(300);
+      const com = await h.control.handle("commit_upload", author, {
+        artifactId, uploadId: upSession.uploadId, path, mimeType,
+        digest: `sha256:${createHash("sha256").update(part).digest("hex")}`,
+        size: part.byteLength, idempotencyKey: randomUUID(),
+      });
+      expect(com.status).toBe(201);
+      stagedPair.push({ path, uploadId: upSession.uploadId });
+    }
+    const refusedBundle = await h.control.handle("publish_bundle", author, {
+      artifactId, idempotencyKey: randomUUID(), expectedCurrentReleaseId: releaseId,
+      assets: stagedPair,
+    });
+    expect(refusedBundle.status).toBe(400);
+    expect((refusedBundle.body as { error: string }).error).toBe("invalid_request");
   });
 });
