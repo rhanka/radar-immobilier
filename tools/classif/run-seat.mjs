@@ -94,6 +94,55 @@ export const ROUTES = {
     parse: (stdout) => { const j = lastJson(stdout); return { text: j?.result ?? '', usage: j?.usage ?? null, costUsdApiEquivalent: j?.total_cost_usd ?? null, isError: j?.is_error ?? false,
       errorEnvelope: j?.is_error ? String(j?.result ?? j?.error ?? '') : '' }; },
   }])),
+  'fable-5.2-low': {
+    family: 'Fable 5.2', model: 'claude-fable-5-2', effort: 'low', route: 'isolated claude -p stream-json: no tools, no CLAUDE.md (CLAUDE_CODE_DISABLE_CLAUDE_MDS=1), project settings only, neutral system prompt, empty MCP config, no session persistence, empty cwd',
+    build: (_dir, _file, prompt) => ({ cmd: 'claude', args: ['-p', '--model', 'claude-fable-5-2', '--effort', 'low', '--output-format', 'stream-json', '--verbose',
+      '--tools', '', '--setting-sources', 'project', '--no-session-persistence', '--system-prompt', NEUTRAL_SYSTEM,
+      '--strict-mcp-config', '--mcp-config', '{"mcpServers":{}}'], stdin: prompt, env: { CLAUDE_CODE_DISABLE_CLAUDE_MDS: '1' } }),
+    parse: (stdout) => {
+      let res = null;
+      const rateLimitEvents = [];
+      let toolEvents = 0;
+      const toolKinds = {};
+      for (const line of String(stdout ?? '').split('\n')) {
+        if (!line.trim()) continue;
+        let e;
+        try { e = JSON.parse(line); } catch { continue; }
+        if (e?.type === 'rate_limit_event' && e.rate_limit_info) rateLimitEvents.push(e.rate_limit_info);
+        if (e?.type === 'result') res = e;
+        if (e?.type === 'assistant' && Array.isArray(e?.message?.content)) {
+          for (const c of e.message.content) {
+            if (c?.type === 'tool_use' || c?.type === 'server_tool_use') {
+              toolEvents++;
+              toolKinds[c.type] = (toolKinds[c.type] ?? 0) + 1;
+            }
+          }
+        }
+      }
+      if (!res) res = lastJson(stdout);
+      const lastRl = rateLimitEvents.at(-1) ?? null;
+      const weeklyWin = lastRl?.unifiedWindows?.seven_day ?? null;
+      const util = typeof lastRl?.utilization === 'number' ? lastRl.utilization
+        : (typeof weeklyWin?.utilization === 'number' ? weeklyWin.utilization : null);
+      const rateLimits = lastRl ? {
+        primary: {
+          used_percent: util !== null ? Math.round(util * 1000) / 10 : null,
+          window_minutes: lastRl.rateLimitType === 'seven_day' || weeklyWin ? 10080 : (lastRl.rateLimitType === 'five_hour' ? 300 : null),
+          resets_at: typeof (weeklyWin?.resetsAt ?? lastRl.resetsAt) === 'number' ? (weeklyWin?.resetsAt ?? lastRl.resetsAt) : null,
+          status: weeklyWin?.status ?? lastRl.status ?? null,
+          rateLimitType: lastRl.rateLimitType ?? null,
+        },
+        all: rateLimitEvents,
+        rate_limit_reached_type: (lastRl.status && !['allowed', 'allowed_warning'].includes(lastRl.status)) ? (lastRl.rateLimitType ?? lastRl.status)
+          : (weeklyWin?.status && !['allowed', 'allowed_warning'].includes(weeklyWin.status) ? `seven_day:${weeklyWin.status}` : null),
+      } : null;
+      return {
+        text: res?.result ?? '', usage: res?.usage ?? null, costUsdApiEquivalent: res?.total_cost_usd ?? null,
+        isError: res?.is_error ?? false, toolEvents, toolKinds, rateLimits,
+        errorEnvelope: res?.is_error ? String(res?.result ?? res?.error ?? '') : '',
+      };
+    },
+  },
   // Astra (ChatGPT seat, plan v3 owner decision 04/11): conductor-verified route
   // `codex exec -m gpt-6-astra -c model_reasoning_effort=max -s read-only`, empty cwd, scrubbed
   // env, isolated CODEX_HOME ($CLASSIF_HOME/seat-homes/astra, mode 700, config with NO

@@ -103,7 +103,7 @@ const sumToken=(...keys)=>metas.reduce((s,m)=>{
 },0);
 const sumTotalTokens=()=>metas.reduce((s,m)=>{
  if(typeof m.usage?.total_tokens==='number') return s+m.usage.total_tokens;
- return s+(m.usage?.input_tokens??0)+(m.usage?.output_tokens??0);
+ return s+(m.usage?.input_tokens??0)+(m.usage?.cache_creation_input_tokens??0)+(m.usage?.cache_read_input_tokens??0)+(m.usage?.output_tokens??0);
 },0);
 const toolEventsTotal=metas.reduce((s,m)=>s+(m.toolEvents??0),0);
 const status=existsSync(`${benchHome}/status.json`)?JSON.parse(readFileSync(`${benchHome}/status.json`,'utf8')):null;
@@ -139,10 +139,10 @@ const report={
   p50Seconds:okMetas.length?quantile(okMetas.map(m=>m.latencyMs),0.5)/1000:null,
   p90Seconds:okMetas.length?quantile(okMetas.map(m=>m.latencyMs),0.9)/1000:null,
   tokens:{
-   input:sumToken('input_tokens'),
+   input:sumToken('input_tokens')+sumToken('cache_creation_input_tokens')+sumToken('cache_read_input_tokens'),
    output:sumToken('output_tokens'),
    thinking:sumToken('thinking_tokens','reasoning_output_tokens'),
-   cached:sumToken('cache_read_tokens','cached_input_tokens'),
+   cached:sumToken('cache_read_tokens','cached_input_tokens','cache_read_input_tokens'),
    total:sumTotalTokens(),
   },
   costUsd:'missing source',
