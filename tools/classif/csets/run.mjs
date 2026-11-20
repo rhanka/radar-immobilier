@@ -48,7 +48,7 @@ async function worker(){
     if(result.authError||result.binaryMissing||result.rateLimits?.rate_limit_reached_type) stop='account-or-quota-refusal';
     if(!result.rateLimits?.primary) stop='quota-observation-missing';
    } else if(result.authError||result.binaryMissing
-    ||/(\b429\b|rate.?limit|quota)/i.test(`${result.errorEnvelope??''} ${JSON.stringify(result.error??'')}`)) stop='account-or-quota-refusal';
+    ||/(\b429\b|\b401\b|\b403\b|rate.?limit|quota|authentication|unauthori[sz]ed|token.*expired|not logged in)/i.test(`${result.errorEnvelope??''} ${JSON.stringify(result.error??'')} ${result.stderrTail??''}`)) stop='account-or-quota-refusal';
   }
   const bytes=Buffer.from(JSON.stringify({digest,itemId:item.itemId,mode,request:req,result}));
   writeFileSync(file,blind?seal(key,bytes):bytes,{mode:0o600});
