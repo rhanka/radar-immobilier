@@ -42,6 +42,31 @@ DOG="deploy/k8s/34-refresh-pending-watchdog.yaml"
 
 fixture; run_ok "released overlays pass"
 
+# Explicit suspend contract: preprod radar-refresh-pv is suspended (suspend: true)
+# while its watchdog remains active; prod radar-refresh-pv stays active (suspend: false,
+# never true).
+fixture
+PRE_RENDER="$CASE_ROOT/preprod-suspend.yaml"
+PROD_RENDER="$CASE_ROOT/prod-suspend.yaml"
+if make --no-print-directory -f "$CASE_ROOT/deploy/k8s/refresh-cronjobs/refresh-018.mk" render-preprod \
+    IMAGE_REF='ghcr.io/rhanka/radar-api@sha256:0000000000000000000000000000000000000000000000000000000000000000' \
+    RENDER_OUT="$PRE_RENDER" ENV=preprod >/dev/null 2>&1 \
+  && make --no-print-directory -f "$CASE_ROOT/deploy/k8s/refresh-cronjobs/refresh-018.mk" render-prod \
+    IMAGE_REF='ghcr.io/rhanka/radar-api@sha256:0000000000000000000000000000000000000000000000000000000000000000' \
+    RENDER_OUT="$PROD_RENDER" ENV=prod >/dev/null 2>&1 \
+  && awk 'BEGIN{RS="\n---\n"} /kind: CronJob/ && /\n  name: radar-refresh-pv\n/ { pv=1; if ($0 !~ /\n  suspend: true\n/) exit 1 } /kind: CronJob/ && /\n  name: radar-refresh-pending-watchdog\n/ { wd=1; if ($0 !~ /\n  suspend: false\n/) exit 1 } END { if (!pv || !wd) exit 1 }' "$PRE_RENDER" \
+  && awk 'BEGIN{RS="\n---\n"} /kind: CronJob/ && /\n  name: radar-refresh-pv\n/ { pv=1; if ($0 ~ /\n  suspend: true\n/) exit 1; if ($0 !~ /\n  suspend: false\n/) exit 1 } END { if (!pv) exit 1 }' "$PROD_RENDER"; then
+  ok "preprod renders suspend=true (watchdog active) and prod renders suspend=false"
+else
+  bad "preprod renders suspend=true (watchdog active) and prod renders suspend=false"
+fi
+
+fixture; sed -i '/name: radar-refresh-pv/,/value: true/s/value: true/value: false/' "$CASE_ROOT/$PRE"
+run_bad "preprod radar-refresh-pv unsuspended is refused" "refresh activation/model contract failed"
+
+fixture; sed -i '/name: radar-refresh-pv/,/value: false/s/value: false/value: true/' "$CASE_ROOT/$PROD"
+run_bad "prod radar-refresh-pv suspended is refused" "refresh activation/model contract failed"
+
 fixture; sed -i '/REFRESH_CLASSIFY_MODE/d' "$CASE_ROOT/$BASE"
 run_bad "classification mode missing" "refresh activation/model contract failed"
 

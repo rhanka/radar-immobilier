@@ -22,8 +22,13 @@
 #   5. le fournisseur de repli — REFRESH_FALLBACK_* et
 #      REFRESH_CLASSIFY_FALLBACK_* : muse/muse-wonder-1.0 en préprod (compte
 #      importé dans son seul PVC keyring), gemini/gemini-3.8-flash en prod.
-#      Chaque rendu reste épinglé à l'un des deux couples par verify-renders.
-# Ces cinq points ne sont PAS projetés. Tout le reste — schéma d'exécution,
+#      Chaque rendu reste épinglé à l'un des deux couples par verify-renders ;
+#   6. la suspension planifiée de `radar-refresh-pv` — `suspend: true` en
+#      préprod (la restauration quotidienne prod -> préprod fournit déjà les
+#      données ; le déclenchement manuel via `create job --from=cronjob/` reste
+#      actif), `suspend: false` en prod. Le gardien `radar-refresh-pending-watchdog`
+#      reste actif (`suspend: false`) dans les deux environnements.
+# Ces points ne sont PAS projetés. Tout le reste — schéma d'exécution,
 # échéances, commande `--all`, variables de balayage, PVC keyring, CPU,
 # contexte de sécurité, gardien des pods Pending — l'est, et doit coïncider au
 # caractère près. Chaque ligne d'un CronJob est préfixée par son nom : le rendu
@@ -106,6 +111,9 @@ kind == "CronJob" && obj == "radar-refresh-pv" && /^  schedule:[ \t]/ {
   print obj " spec schedule day fields: " sf[3] " " sf[4] " " sf[5]
   next
 }
+# La suspension planifiée de `radar-refresh-pv` est une divergence voulue
+# (true en préprod, false en prod), épinglée explicitement par verify-renders.
+kind == "CronJob" && obj == "radar-refresh-pv" && /^  suspend:[ \t]/ { next }
 /^[ ]+(- )?(schedule|timeZone|concurrencyPolicy|startingDeadlineSeconds|successfulJobsHistoryLimit|failedJobsHistoryLimit|suspend|backoffLimit|activeDeadlineSeconds|ttlSecondsAfterFinished|restartPolicy|terminationGracePeriodSeconds|serviceAccountName|workingDir|imagePullPolicy|claimName|secretName|defaultMode|mountPath|sizeLimit|storage|cpu|readOnlyRootFilesystem|allowPrivilegeEscalation|runAsNonRoot|runAsUser|runAsGroup|fsGroup|type|automountServiceAccountToken):[ \t]/ {
   print obj " spec " trim($0)
 }
