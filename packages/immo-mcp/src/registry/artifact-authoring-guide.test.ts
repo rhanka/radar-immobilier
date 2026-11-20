@@ -52,7 +52,7 @@ describe("artifact authoring guide", () => {
     expect(guide.guideId).toBe(AUTHORING_GUIDE_ID);
     // Pinned literal (not the constant itself): a content change without a
     // revision bump must fail here.
-    expect(guide.revision).toBe("2026-11-05-p0b-r7");
+    expect(guide.revision).toBe("2026-11-05-p0b-r8");
     expect(guide.starterVersion).toBe(STARTER_VERSION);
     expect(guide.starterVersion).toBe("1.2.0");
     expect(guide.starter.version).toBe(guide.starterVersion);
@@ -115,7 +115,7 @@ describe("artifact authoring guide", () => {
     const guide = getAuthoringGuide();
     // Pinned literal (not the constant itself): a content change without a
     // revision bump must fail here.
-    expect(guide.revision).toBe("2026-11-05-p0b-r7");
+    expect(guide.revision).toBe("2026-11-05-p0b-r8");
     const editing = guide.lifecycle.editing.join("\n");
     expect(editing).toContain("artifacts_get_source → edit → artifacts_publish");
     expect(editing).toContain("same artifactId");
@@ -187,9 +187,36 @@ describe("artifact authoring guide", () => {
     const editing = guide.lifecycle.editing.join("\n");
     expect(editing).toContain("artifacts_create_upload({artifactId, mimeType, maxSize:<exact file byte size>})");
     expect(editing).toContain("binds that exact Content-Length");
+    expect(editing).toContain("never pad files");
     const edit = (guide.artifactLifecycle?.edit ?? []).join("\n");
     expect(edit).toContain("artifacts_create_upload({artifactId, mimeType, maxSize:<exact file byte size>})");
     expect(edit).toContain("a PUT of any other size is refused");
+    expect(edit).toContain("never pad files");
+  });
+
+  it("should document the RW relay, signal-facet write schemas, and inactive selection heads (EVO-1)", () => {
+    const guide = getAuthoringGuide();
+    expect(guide.data.relay.prefix).toBe("/__reader/app/api/*");
+    expect(guide.data.relay.usage).toContain("x-preview-grant");
+    expect(guide.data.relay.usage).toContain("same-origin");
+    expect(guide.data.relay.usage).toContain("No basket-consent gate");
+    expect(guide.data.relay.selectionHeadsRule).toContain("state: 'inactive'");
+    expect(guide.data.relay.selectionHeadsRule).toContain("state === 'active'");
+    expect(guide.data.relay.selectionHeadsRule).toContain("expectedHeadId");
+    const writes = guide.data.relay.signalFacetWrites;
+    expect(writes.headers).toContain("Idempotency-Key");
+    expect(writes.shortFormNote).toContain("pre-6B receipt");
+    expect(writes.shortFormNote).toContain("displayedFingerprint");
+    expect(writes.expectedSelectionHeadsRule).toContain("omit expectedSelectionHeads when deselect is absent or empty");
+    expect(writes.expectedSelectionHeadsRule).toContain("keys must exactly match");
+    expect(writes.endpoints.map((ep) => ep.action)).toEqual([
+      "select", "deselect", "discard", "restore", "reclassify",
+    ]);
+    for (const ep of writes.endpoints) {
+      expect(ep.path).toBe(`/__reader/app/api/v1/workspaces/:workspaceId/signal-facets/personal/${ep.action}`);
+      expect(ep.body).toContain("displayedFingerprint");
+    }
+    expect(writes.endpoints.find((ep) => ep.action === "discard")?.body).toContain("expectedSelectionHeads");
   });
 
   it("should send exactly the announced headers with no checksum header (provider 0.2.16)", () => {
