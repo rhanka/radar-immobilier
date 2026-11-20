@@ -15,7 +15,11 @@ import { ArtifactOperationError, classifyArtifactFailure } from "@sentropic/arti
 import { assertArtifactReplayMigration } from "@sentropic/artifacts/server/idempotency";
 import { mapHostError, normalizeHostOutcome } from "./host-outcome.js";
 import { rateLimitedOutcome, reserveArtifactAttempt } from "./attempt-admission.js";
-import { ARTIFACT_P0B, isArtifactMutation, isArtifactPublication } from "./p0b-profile.js";
+import {
+  ARTIFACT_P0B, assertPageTextUploadArgs, extractEnvelopeV1Metadata, getPendingArtifactMetadata,
+  isArtifactMutation, isArtifactPublication,
+} from "./p0b-profile.js";
+import { isPageTextMimeType, PUBLISH_MAX_FILE_BYTES } from "./publish-policy.js";
 import { assertP0bStorage, p0bPorts, sharePrincipal } from "./p0b-ports.js";
 import type { ArtifactDeleteConfirmation } from "./delete-confirmation.js";
 import { createArtifactReadMetadata } from "./read-metadata.js";
@@ -56,6 +60,73 @@ export function resolvePublishDeadlines(blobDeadlineMs: number = PUBLISH_BLOB_DE
   readonly blobDeadlineMs: number; readonly preparationWindowMs: number;
 } {
   return { blobDeadlineMs, preparationWindowMs: blobDeadlineMs + PUBLISH_FINALIZE_MARGIN_MS };
+}
+
+async function assertResolvedBundlePageTextBudget(input: {
+  readonly normalized: Record<string, unknown>;
+  readonly isV2: boolean;
+  readonly actorId: string;
+  readonly scope: string;
+  readonly store: ReturnType<typeof createPostgresArtifactStore>;
+  readonly publication: ReturnType<typeof createPublicationService>;
+  readonly sessions: UploadSessionStore | undefined;
+}): Promise<void> {
+  const artifactId = String(input.normalized.artifactId ?? "");
+  const acl = await input.store.getArtifactAcl(artifactId);
+  if (!acl || acl.storageScopeId !== input.scope || acl.ownerId !== input.actorId) return;
+  const explicitPaths = new Set<string>();
+  let pageTextBytes = 0;
+  const addPageTextSize = (size: number) => {
+    if (size > PUBLISH_MAX_FILE_BYTES) throw new ArtifactProfileInputError();
+    pageTextBytes += size;
+    if (pageTextBytes > PUBLISH_MAX_FILE_BYTES) throw new ArtifactProfileInputError();
+  };
+  for (const file of (input.normalized.files as Array<{ path: string; mimeType: string; bytes: readonly number[] }> | undefined) ?? []) {
+    explicitPaths.add(file.path);
+    if (isPageTextMimeType(file.mimeType)) addPageTextSize(file.bytes.length);
+  }
+  const readReleaseManifest = async (targetArtifactId: string, releaseId?: string) => {
+    const release = releaseId !== undefined
+      ? await input.publication.getRelease(releaseId)
+      : await input.publication.getCurrent(targetArtifactId);
+    if (!release || release.artifactId !== targetArtifactId) return undefined;
+    try {
+      return JSON.parse(release.manifest) as { files?: Array<{ path: string; mimeType: string; size: number }> };
+    } catch {
+      return undefined;
+    }
+  };
+  for (const asset of (input.normalized.assets as Array<Record<string, unknown>> | undefined) ?? []) {
+    const path = String(asset.path ?? "");
+    explicitPaths.add(path);
+    if (Object.hasOwn(asset, "uploadId") && input.sessions) {
+      const staged = await input.sessions.getStagedFile(String(asset.uploadId));
+      if (staged && staged.artifactId === artifactId && isPageTextMimeType(staged.mimeType)) {
+        addPageTextSize(staged.size);
+      }
+    } else if (input.isV2 && (Object.hasOwn(asset, "sourceArtifactId") || Object.hasOwn(asset, "carryFromReleaseId"))) {
+      const sourceArtifactId = Object.hasOwn(asset, "sourceArtifactId") ? String(asset.sourceArtifactId) : artifactId;
+      const sourceAcl = sourceArtifactId === artifactId ? acl : await input.store.getArtifactAcl(sourceArtifactId);
+      if (!sourceAcl || sourceAcl.storageScopeId !== input.scope) continue;
+      const releaseId = typeof asset.carryFromReleaseId === "string" ? asset.carryFromReleaseId
+        : typeof asset.sourceReleaseId === "string" ? asset.sourceReleaseId : undefined;
+      const manifest = await readReleaseManifest(sourceArtifactId, releaseId);
+      const wanted = typeof asset.sourcePath === "string" ? asset.sourcePath : path;
+      const entry = manifest?.files?.find((candidate) => candidate.path === wanted);
+      if (entry && isPageTextMimeType(entry.mimeType)) addPageTextSize(entry.size);
+    } else if (isPageTextMimeType(asset.mimeType) && typeof asset.size === "number") {
+      addPageTextSize(asset.size);
+    }
+  }
+  if (input.isV2 && input.normalized.keepUnmodifiedPaths === true &&
+    typeof input.normalized.expectedCurrentReleaseId === "string") {
+    const manifest = await readReleaseManifest(artifactId, input.normalized.expectedCurrentReleaseId);
+    for (const entry of manifest?.files ?? []) {
+      if (!explicitPaths.has(entry.path) && isPageTextMimeType(entry.mimeType)) {
+        addPageTextSize(entry.size);
+      }
+    }
+  }
 }
 
 export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | "coordinator"> & {
@@ -142,6 +213,39 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
     try {
       const actors = await pool.query<{ sub: string; status?: string }>("SELECT sub, status FROM account_users ORDER BY sub");
       const binding = createRadarKeyDerivation({ storageScopeId: scope, actorIds: actors.rows.map((row) => row.sub) });
+      const routeCapability = request.method === "POST"
+        ? (profile.capabilityForRoute(request.method, request.path) ?? `artifacts_${request.path.slice(1)}`)
+        : undefined;
+      const envelopeVersion = (profile.resultEnvelopeVersion ?? 1) as 1 | 2;
+      const extractedMeta = routeCapability
+        ? extractEnvelopeV1Metadata(routeCapability, request.body, envelopeVersion)
+        : { strippedArgs: request.body, metadata: undefined };
+      const pendingMeta = extractedMeta.metadata ?? getPendingArtifactMetadata();
+      if (extractedMeta.metadata !== undefined) {
+        request = { ...request, body: extractedMeta.strippedArgs };
+      }
+      if (request.method === "POST" && request.path === "/uploads/create" &&
+        request.body && typeof request.body === "object" && !Array.isArray(request.body)) {
+        const createBody = request.body as Record<string, unknown>;
+        if (isPageTextMimeType(createBody.mimeType)) {
+          if (Object.hasOwn(createBody, "maxSize")) {
+            if (typeof createBody.maxSize !== "number" || !Number.isSafeInteger(createBody.maxSize) ||
+              createBody.maxSize < 1 || createBody.maxSize > PUBLISH_MAX_FILE_BYTES) {
+              throw new ArtifactProfileInputError();
+            }
+          } else {
+            request = { ...request, body: { ...createBody, maxSize: PUBLISH_MAX_FILE_BYTES } };
+          }
+        }
+      }
+      if (request.method === "POST" && request.path === "/uploads/commit" &&
+        request.body && typeof request.body === "object" && !Array.isArray(request.body)) {
+        const commitBody = request.body as Record<string, unknown>;
+        if (isPageTextMimeType(commitBody.mimeType) &&
+          typeof commitBody.size === "number" && commitBody.size > PUBLISH_MAX_FILE_BYTES) {
+          throw new ArtifactProfileInputError();
+        }
+      }
       if (ARTIFACT_P0B && !profile.requireExpectedCurrentReleaseId && request.path === "/delete" && request.body && typeof request.body === "object" &&
         !Array.isArray(request.body) && !Object.hasOwn(request.body, "expectedCurrentReleaseId")) {
         request = { ...request, body: await options.confirmation!.prepareDelete(invocation.actorId, request.body as Record<string, unknown>) };
@@ -157,8 +261,20 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
             const args = { ...request.body as Record<string, unknown> };
             if (args.storageScopeId !== undefined && args.storageScopeId !== scope) return app.execute(request, invocation);
             delete args.storageScopeId;
-            const capability = `artifacts_${request.path.slice(1)}`;
+            const capability = routeCapability ?? `artifacts_${request.path.slice(1)}`;
             const normalized = profile.validate(capability, args, request.idempotencyKey, { deferPrecondition: true });
+            assertPageTextUploadArgs(capability, normalized as Record<string, unknown>);
+            if (request.path === "/publish_bundle" || request.path === "/publish_bundle_v2") {
+              await assertResolvedBundlePageTextBudget({
+                normalized: normalized as Record<string, unknown>,
+                isV2: request.path === "/publish_bundle_v2",
+                actorId: invocation.actorId,
+                scope,
+                store,
+                publication,
+                sessions: options.uploads?.sessions,
+              });
+            }
             // The provider owns historical decoding, authorization and the required-field error.
             if (profile.requireExpectedCurrentReleaseId && ["/publish", "/revert", "/delete"].includes(request.path) &&
               !Object.hasOwn(args, "expectedCurrentReleaseId")) {
@@ -208,7 +324,28 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
               console.error(JSON.stringify({ kind: "artifacts.reconcile_unavailable", path: request.path }));
             }
           }
-          return reads.project(request, () => app.execute(request, invocation));
+          const outcome = await reads.project(request, () => app.execute(request, invocation));
+          if (outcome.ok && pendingMeta !== undefined && envelopeVersion !== 2) {
+            const resultBody = outcome.result.body as Record<string, unknown>;
+            const targetId = typeof resultBody.artifactId === "string" ? resultBody.artifactId : body?.artifactId;
+            if (typeof targetId === "string" && targetId.length > 0) {
+              const shouldWrite = !outcome.replayed &&
+                (request.path !== "/ensure" || resultBody.created !== false);
+              const { rows } = shouldWrite
+                ? await pool.query<{ metadata: Record<string, unknown> | null }>(
+                  `UPDATE artifacts.artifacts SET metadata = COALESCE(metadata, '{}'::jsonb) || $2::jsonb
+                   WHERE id = $1 AND storage_scope_id = $3 RETURNING metadata`,
+                  [targetId, JSON.stringify(pendingMeta), scope],
+                )
+                : await pool.query<{ metadata: Record<string, unknown> | null }>(
+                  "SELECT metadata FROM artifacts.artifacts WHERE id = $1 AND storage_scope_id = $2",
+                  [targetId, scope],
+                );
+              const storedMeta = rows[0]?.metadata ?? pendingMeta;
+              return { ...outcome, result: { ...outcome.result, body: { ...resultBody, ...storedMeta } } };
+            }
+          }
+          return outcome;
         })))));
     } catch (cause) {
       const failure = classifyArtifactFailure(cause, { invocationId: invocation.invocationId,

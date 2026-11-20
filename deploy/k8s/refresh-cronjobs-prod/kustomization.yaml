@@ -26,7 +26,7 @@
 # seule fois, et les deux overlays suivent. `verify-renders` refuse désormais
 # tout écart entre le rendu préprod et le rendu prod (refresh-contract.awk).
 #
-# LES CINQ SEULES DIVERGENCES VOULUES AVEC LA PRÉPRODUCTION
+# LES QUATRE SEULES DIVERGENCES VOULUES AVEC LA PRÉPRODUCTION
 # -----------------------------------------------------------
 #   1. le namespace ;
 #   2. l'enveloppe mémoire (voir le bloc dédié plus bas) ;
@@ -40,11 +40,7 @@
 #      heure plus tard. La minute (`0`, heure pile) et le nombre de passages
 #      restent communs, et `verify-renders` exige au moins 15 minutes entre les
 #      lancements les plus proches (incident 2026-10-09 : même minute, même
-#      nœud, course à l'attachement des PVC keyring RWO) ;
-#   5. le fournisseur de repli : la préproduction lit muse/muse-wonder-1.0
-#      (compte importé dans son seul PVC keyring), la production garde
-#      gemini/gemini-3.8-flash. Sans compte muse, la route refuse en
-#      `no-route`, explicitement, jamais en silence.
+#      nœud, course à l'attachement des PVC keyring RWO).
 # Toute autre divergence fait rougir la CI.
 #
 # Le gardien `radar-refresh-pending-watchdog` (../34-refresh-pending-watchdog.yaml)

@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { SIGNAL_TOOL_DEFINITIONS } from "./signal-contract.js";
 import { invokeSignalTool } from "./signal-tools.js";
 import { captureInvocationContext } from "./invocation-context.js";
 import { resolveAuthContext } from "./auth-context.js";
@@ -62,5 +63,16 @@ describe("MCP signal write guards", () => {
     }
     expect(parse(await invokeSignalTool("annotate_signal", { signalRef, model: "client-model", text: "x".repeat(2001) }, f.ctx)))
       .toEqual({ error: "invalid_signal_command" });
+  });
+
+  it("should document workspace archive-only scope, non_classe confirmation and history vs mcpHistory", () => {
+    const byName = Object.fromEntries(SIGNAL_TOOL_DEFINITIONS.map((tool) => [tool.name, tool.description]));
+    expect(byName.classify_signal).toContain('scope "workspace"');
+    expect(byName.classify_signal).toContain('classe "ecarte"');
+    expect(byName.classify_signal).toContain("moderateArchive");
+    expect(byName.classify_signal).toContain("non_classe");
+    expect(byName.classify_signal).toContain("human confirmation");
+    expect(byName.get_signal_classification).toContain("history");
+    expect(byName.get_signal_classification).toContain("mcpHistory");
   });
 });
