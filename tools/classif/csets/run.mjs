@@ -37,19 +37,22 @@ async function worker(){
    if(prev.digest!==digest) throw new Error('Cache input mismatch');
    cached++;continue;
   }
-  let result=null;
+  let result=null,quotaOrAccountStop=false;
   if(req){
    appendJsonlRecord(log,{at:new Date().toISOString(),half,mode,intent:true,inputHash:digest});
    result=await call(req.prompt);
    appendJsonlRecord(log,{at:new Date().toISOString(),half,mode,intent:false,inputHash:digest,
     code:result.code,latencyMs:result.latencyMs,usage:result.usage,toolEvents:result.toolEvents,...quotaFields(result)});
+   const errText=`${result.errorEnvelope??''} ${JSON.stringify(result.error??'')} ${result.stderrTail??''}`;
+   const rateLimitErr=/(\b429\b|rate.?limit|usage limit|individual quota)/i.test(errText);
+   const quotaErr=result.code!==0&&/(\b429\b|\b401\b|\b403\b|rate.?limit|quota|authentication|unauthori[sz]ed|token.*expired|not logged in)/i.test(errText);
    if(isCodexBench){
     guard.observe(benchModel,result.rateLimits);
-    if(result.authError||result.binaryMissing||result.rateLimits?.rate_limit_reached_type) stop='account-or-quota-refusal';
-    if(!result.rateLimits?.primary) stop='quota-observation-missing';
-   } else if(result.authError||result.binaryMissing
-    ||/(\b429\b|\b401\b|\b403\b|rate.?limit|quota|authentication|unauthori[sz]ed|token.*expired|not logged in)/i.test(`${result.errorEnvelope??''} ${JSON.stringify(result.error??'')} ${result.stderrTail??''}`)) stop='account-or-quota-refusal';
+    if(result.authError||result.binaryMissing||result.rateLimits?.rate_limit_reached_type||rateLimitErr||quotaErr){stop='account-or-quota-refusal';quotaOrAccountStop=true;}
+    if(!result.rateLimits?.primary){stop='quota-observation-missing';quotaOrAccountStop=true;}
+   } else if(result.authError||result.binaryMissing||rateLimitErr||quotaErr){stop='account-or-quota-refusal';quotaOrAccountStop=true;}
   }
+  if(quotaOrAccountStop) continue;
   const bytes=Buffer.from(JSON.stringify({digest,itemId:item.itemId,mode,request:req,result}));
   writeFileSync(file,blind?seal(key,bytes):bytes,{mode:0o600});
   done++;

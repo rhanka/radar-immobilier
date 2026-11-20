@@ -39,7 +39,8 @@ export function request(item,mode){
   :{file:'refresh-single-pass-v2.md',sha256:'34df2dd7da379699ed8cefcc1dac07010f5618519fbdd7eb9c33d3d77e0ddc50'};
  if(version==='v1'&&manifest.sha256!=='8957bcaa146b3b83ee89000fccec3c6f393c7b801b320a158d58d2631fa3a205')
   throw new Error('V1 differs from the owner-frozen prompt');
- const root=version==='v1'?refresh:'/home/antoinefa/src/radar-immobilier/tmp/refresh-v2';
+ const v2Roots=[process.env.CSETS_V2_ROOT,'/home/antoinefa/src/radar-immobilier/tmp/refresh-v2','/home/antoinefa/src/radar-immobilier/tmp/ops-main','.'].filter(Boolean);
+ const root=version==='v1'?refresh:(v2Roots.find(r=>existsSync(`${r}/radar/prompts/${manifest.file}`))??v2Roots[0]);
  const frozen=readFileSync(`${root}/radar/prompts/${manifest.file}`,'utf8');
  if(hash(frozen)!==manifest.sha256) throw new Error('Immutable prompt checksum mismatch');
  if(mode==='B') return {prompt:`${frozen}\n\nMode: reannotation of one existing signal. Return ONLY one annotation object.\n\n${item.input}`,schema:null};

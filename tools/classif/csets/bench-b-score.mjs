@@ -97,7 +97,14 @@ const wallSeconds=firstAt&&lastAt?(lastAt-firstAt)/1000:null;
 
 const metas=[...cacheEntries.values()];
 const okMetas=metas.filter(m=>m.code===0&&m.toolEvents===0);
-const sumToken=k=>metas.reduce((s,m)=>s+(m.usage?.[k]??0),0);
+const sumToken=(...keys)=>metas.reduce((s,m)=>{
+ for(const k of keys) if(typeof m.usage?.[k]==='number') return s+m.usage[k];
+ return s;
+},0);
+const sumTotalTokens=()=>metas.reduce((s,m)=>{
+ if(typeof m.usage?.total_tokens==='number') return s+m.usage.total_tokens;
+ return s+(m.usage?.input_tokens??0)+(m.usage?.output_tokens??0);
+},0);
 const toolEventsTotal=metas.reduce((s,m)=>s+(m.toolEvents??0),0);
 const status=existsSync(`${benchHome}/status.json`)?JSON.parse(readFileSync(`${benchHome}/status.json`,'utf8')):null;
 
@@ -134,9 +141,9 @@ const report={
   tokens:{
    input:sumToken('input_tokens'),
    output:sumToken('output_tokens'),
-   thinking:sumToken('thinking_tokens'),
-   cached:sumToken('cache_read_tokens'),
-   total:sumToken('total_tokens'),
+   thinking:sumToken('thinking_tokens','reasoning_output_tokens'),
+   cached:sumToken('cache_read_tokens','cached_input_tokens'),
+   total:sumTotalTokens(),
   },
   costUsd:'missing source',
  },
