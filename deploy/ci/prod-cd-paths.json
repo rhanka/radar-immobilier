@@ -70,6 +70,20 @@
     { "path": "deploy/k8s/refresh-cronjobs-prod/kustomization.yaml", "objects": ["CronJob/radar-refresh-pv", "CronJob/radar-refresh-pending-watchdog", "PersistentVolumeClaim/radar-refresh-keyring"], "workflow": ".github/workflows/build-push-images.yml", "workflowRef": "render-prod" },
     { "path": "deploy/k8s/refresh-cronjobs/requeue-recurrent-prod/kustomization.yaml", "objects": ["CronJob/radar-refresh-requeue-abandoned"], "workflow": ".github/workflows/build-push-images.yml", "workflowRef": "render-requeue-recurrent" }
   ],
+  "operatorPaths": [
+    {
+      "path": "deploy/k8s/refresh-cronjobs/keyring-import-prod/kustomization.yaml",
+      "objects": [
+        "Job/radar-refresh-keyring-account-import",
+        "Secret/radar-refresh-keyring-account-import",
+        "ConfigMap/radar-refresh-keyring-import-script"
+      ],
+      "entrypoint": "deploy/k8s/refresh-cronjobs/refresh-018.mk",
+      "entrypointRef": "run-keyring-import-prod",
+      "doc": "docs/operator/prod-keyring-import.md",
+      "reason": "OAuth seat credentials stay outside GitHub/CD; operator imports into prod PVC via guarded ephemeral Job and logs in docs/operator/manual-operations-log.md"
+    }
+  ],
   "legacyExempt": [
     { "path": "deploy/cutover/rbac-prod.yaml", "reason": "Cluster-admin RBAC prerequisite installed once by owner", "doc": "docs/runbooks/prod-promotion.md" },
     { "path": "deploy/ci/bascule-preprod/rbac-ci-bascule-prod.yaml", "reason": "Cluster-admin RBAC prerequisite installed once by owner", "doc": "docs/runbooks/prod-promotion.md" },
