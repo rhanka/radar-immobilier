@@ -17,7 +17,6 @@ import type {
   SearchSignalsArgs,
 } from "./data-source.js";
 import { MockDataSource } from "./data-source.js";
-import type { MockSignal } from "./mocks.js";
 
 // Same resource-server settings as server-http.test.ts (`resource` == token `aud`).
 const ISSUER = "https://auth.test.local";
