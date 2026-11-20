@@ -54,7 +54,7 @@ describe("artifact authoring guide", () => {
     // revision bump must fail here.
     expect(guide.revision).toBe("2026-11-05-p0b-r8");
     expect(guide.starterVersion).toBe(STARTER_VERSION);
-    expect(guide.starterVersion).toBe("1.1.0");
+    expect(guide.starterVersion).toBe("1.2.0");
     expect(guide.starter.version).toBe(guide.starterVersion);
     expect(guide.theme).toBe("sent-tech");
     expect(guide.rule).toContain("Sentropic DS is mandatory");
@@ -352,8 +352,12 @@ describe("artifact authoring guide", () => {
       expect(files["index.html"]).toContain(designKitAssetUrl(asset));
     }
     for (const path of ["app.js", "reader.js"]) {
-      // The only /api/ segment allowed is the H5 bridge prefix itself.
-      expect(files[path].split("/__reader/api/").join("")).not.toContain("/api/");
+      // Only the H5 bridge prefixes (/ __reader/api/ and /__reader/app) and the
+      // local "/api/" prefix validation inside appFetch are allowed.
+      const stripped = files[path]
+        .split("/__reader/api/").join("")
+        .split('indexOf("/api/")').join("");
+      expect(stripped).not.toContain("/api/");
       expect(files[path]).not.toContain("localStorage");
       expect(files[path]).not.toContain("sessionStorage");
     }
