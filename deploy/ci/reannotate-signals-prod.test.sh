@@ -196,6 +196,7 @@ if grep -Fq 'workflow_dispatch:' "$WF" \
   && grep -Fq 'environment: production' "$WF" \
   && grep -Fq 'default: dry-run' "$WF" \
   && grep -Fq "if: startsWith(github.ref, 'refs/tags/v')" "$WF" \
+  && grep -Fq 'bash deploy/ci/require-main-ancestry.sh' "$WF" \
   && ! grep -Fq "refs/heads/main" "$WF" \
   && grep -Fq 'deploy/ci/reannotate-signals-prod.tmpl.yaml' "$WF" \
   && grep -Fq 'dist/scripts/reannotate-signals.js' "$TMPL" \
