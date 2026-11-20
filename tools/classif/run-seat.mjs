@@ -289,6 +289,9 @@ web_search = "disabled"
 approval_policy = "never"
 sandbox_mode = "read-only"
 
+[agents]
+enabled = false
+
 [features]
 ${CODEX_DISABLED_FEATURES.map((f) => `${f} = false`).join('\n')}
 `;
@@ -441,7 +444,10 @@ export const CODEX_BENIGN_ITEM_TYPES = new Set(['agent_message', 'reasoning']);
 export const CODEX_BENIGN_ERROR_NOTICES = [/^Code Mode is unavailable because code-mode host is disabled/,
   // Transport fallback (observed 12/11 on astra-low and sol-6.1-medium, answered calls): the
   // ChatGPT WebSocket refuses (403), codex falls back to HTTPS — a CLI transport notice, no tool.
-  /^Falling back from WebSockets to HTTPS transport\. /];
+  /^Falling back from WebSockets to HTTPS transport\. /,
+  // Config deprecation notice (codex 0.171.0+): [features].multi_agent = false stays in the
+  // isolated config alongside [agents].enabled = false — pure CLI config warning, no tool.
+  /^`\[features\]\.multi_agent` is deprecated\. /];
 const benignErrorItem = (item) => item?.type === 'error' && CODEX_BENIGN_ERROR_NOTICES.some((re) => re.test(String(item.message ?? item.text ?? '')));
 
 /**
@@ -458,6 +464,7 @@ const CODEX_TOOL_KEY = /(tool_call|toolcall|function_call|exec_command|shell_com
 export function countCodexToolEvents(stdout) {
   let toolEvents = 0;
   const unknownTypes = [];
+  const errorNotices = [];
   // Diagnostic (owner 12/11): kind of every counted event — event and item types only, never
   // a message, a command or any model text — so an intermittent refusal can be explained.
   const toolKinds = {};
@@ -478,13 +485,17 @@ export function countCodexToolEvents(stdout) {
       const itype = item?.type ?? null;
       if (!itype || typeof itype !== 'string') { toolEvents++; unknownTypes.push(`${type}:<missing-item-type>`); kind(`${type}:<missing-item-type>`); continue; }
       if (benignErrorItem(item)) continue;
-      if (!CODEX_BENIGN_ITEM_TYPES.has(itype)) { toolEvents++; kind(`${type}:${itype}`); continue; }
+      if (!CODEX_BENIGN_ITEM_TYPES.has(itype)) {
+        toolEvents++; kind(`${type}:${itype}`);
+        if (itype === 'error') errorNotices.push(String(item.message ?? item.text ?? '').slice(0, 200));
+        continue;
+      }
       // Fail closed on a tool payload nested inside a benign item (keys only, never the
       // model text: the word "tool" in prose must not count).
       if (CODEX_TOOL_KEY.test(JSON.stringify(Object.keys(item)))) { toolEvents++; kind(`${type}:${itype}:tool-key`); }
     }
   }
-  return { toolEvents, unknownTypes, toolKinds };
+  return { toolEvents, unknownTypes, toolKinds, errorNotices };
 }
 
 export function parseCodex(stdout, dir) {
@@ -519,8 +530,8 @@ export function parseCodex(stdout, dir) {
   for (const line of String(stdout ?? '').split('\n')) {
     try { walk(JSON.parse(line)); } catch { /* not json */ }
   }
-  const { toolEvents, unknownTypes, toolKinds } = countCodexToolEvents(stdout);
-  return { text, usage, toolEvents, unknownTypes, toolKinds, errorEnvelope: codexErrorEnvelope(stdout), rateLimits: extractCodexRateLimits(stdout) };
+  const { toolEvents, unknownTypes, toolKinds, errorNotices } = countCodexToolEvents(stdout);
+  return { text, usage, toolEvents, unknownTypes, toolKinds, errorNotices, errorEnvelope: codexErrorEnvelope(stdout), rateLimits: extractCodexRateLimits(stdout) };
 }
 
 /**

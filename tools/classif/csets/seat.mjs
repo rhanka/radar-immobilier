@@ -1,5 +1,12 @@
+import {existsSync} from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import {ROUTES,callSeat,ensureCodexHome,isCodexSeat} from '../run-seat.mjs';
+// Prefer the auto-updated codex CLI when installed (required for newer models such as gpt-6.2-astra).
+function codexBin(){
+ const updated=path.join(os.homedir(),'.codex','packages','app-server-daemon','current','codex');
+ return existsSync(updated)?updated:'codex';
+}
 // Reuse C's transport, parser, isolation and tool accounting, with a lane-owned home.
 // Never sweep or write the Astra homes of concurrently running lanes.
 function ensureLaneCodexRoute(label){
@@ -8,7 +15,7 @@ function ensureLaneCodexRoute(label){
  const laneLabel=`csets-${label}`;
  if(!ROUTES[laneLabel]){
   ROUTES[laneLabel]={...base,build(dir,_file,prompt){
-   return {cmd:'codex',args:['exec','-m',base.model,'-c',`model_reasoning_effort=${base.effort}`,'-s','read-only',
+   return {cmd:codexBin(),args:['exec','-m',base.model,'-c',`model_reasoning_effort=${base.effort}`,'-s','read-only',
    '--skip-git-repo-check','--json','-o',path.join(dir,'last-message.md'),'-'],stdin:prompt,
    env:{CODEX_HOME:ensureCodexHome(laneLabel,{model:base.model,effort:base.effort,root:'/tmp/radar-csets-seats'})}};
   }};
