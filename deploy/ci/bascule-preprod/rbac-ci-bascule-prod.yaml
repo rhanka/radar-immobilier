@@ -1,6 +1,9 @@
 # SA CD DÉDIÉ PERMANENT `radar-ci-bascule-prod` (option B2) — appliqué UNE fois à l'install cluster (comme les autres
 # KUBE_CONFIG), puis le CD standard applique le bundle bascule au merge. 0 token éphémère, 0 owner, 0 fenêtre.
-# COMMITTÉ (PR CD-native-v2). Isole les droits élevés (VAP cluster + impersonate) hors du déployeur général étroit.
+# COMMITTÉ (PR CD-native-v2). Isolates namespace bundle + impersonate rights outside the general deployer SA.
+# Platform-owned VAP: ValidatingAdmissionPolicy + ValidatingAdmissionPolicyBinding `radar-ci-trigger-suspend-only`
+# live in `poc-k8s` (`platform/78-radar-immobilier-ci-guards.yaml`, commit `25a4a34`); this SA holds zero cluster-scoped
+# or `admissionregistration.k8s.io` permissions (cluster-admin deletes legacy ClusterRole/CRB `radar-ci-bascule-prod-vap`).
 #
 # ⚠ 0 `secrets:create` : les creds (radar-db-ro-prod, radar-pra-admin-prod) arrivent en **SealedSecret committées** ;
 #   le controller sealed-secrets (ns sealed-secrets) matérialise les core Secrets. Le CD n'applique que des manifests.
@@ -19,29 +22,6 @@ metadata:
   name: radar-ci-bascule-prod
   namespace: radar-immobilier
   labels: { app.kubernetes.io/name: radar-immobilier, role: ci-bascule-prod, usage: bascule-cd-permanent }
----
-# ── Cluster-scoped : VAP (non-namespacé) ──────────────────────────────────────────────────────────────────────
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: radar-ci-bascule-prod-vap
-  labels: { app.kubernetes.io/name: radar-immobilier, role: ci-bascule-prod }
-rules:
-  - apiGroups: ["admissionregistration.k8s.io"]
-    resources: ["validatingadmissionpolicies", "validatingadmissionpolicybindings"]
-    verbs: ["create"]
-  - apiGroups: ["admissionregistration.k8s.io"]
-    resources: ["validatingadmissionpolicies", "validatingadmissionpolicybindings"]
-    verbs: ["get", "update", "patch"]
-    resourceNames: ["radar-ci-trigger-suspend-only"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: radar-ci-bascule-prod-vap
-  labels: { app.kubernetes.io/name: radar-immobilier, role: ci-bascule-prod }
-roleRef: { apiGroup: rbac.authorization.k8s.io, kind: ClusterRole, name: radar-ci-bascule-prod-vap }
-subjects: [ { kind: ServiceAccount, name: radar-ci-bascule-prod, namespace: radar-immobilier } ]
 ---
 # ── Namespaced : bundle intratenant (ns radar-immobilier) — core secrets : les 3 identités backup SEULEMENT ────
 apiVersion: rbac.authorization.k8s.io/v1
@@ -137,7 +117,7 @@ roleRef: { apiGroup: rbac.authorization.k8s.io, kind: Role, name: radar-ci-bascu
 subjects: [ { kind: ServiceAccount, name: radar-ci-bascule-prod, namespace: radar-immobilier } ]
 ---
 # EXCLUS : core secrets (tous verbes, sauf get/update sur les 3 identités backup radar-backup-*),
-#   secrets:create/patch/list/watch/delete, pods/exec, deployments:patch/scale, PV/PVC,
-#   namespaces, nodes, autres ns, impersonate users/groups.
+#   secrets:create/patch/list/watch/delete, admissionregistration.k8s.io (ClusterRole/VAP), pods/exec,
+#   deployments:patch/scale, PV/PVC, namespaces, nodes, autres ns, impersonate users/groups.
 # INSTALL : appliqué UNE fois (cluster-admin/install). Token permanent → KUBE_CONFIG_DATA_PROD (secret CD standard).
-#   Réversible : delete SA/Role/RB/ClusterRole/CRB.
+#   Réversible : delete SA/Role/RB (and one-time cleanup of legacy ClusterRole/CRB `radar-ci-bascule-prod-vap`).
