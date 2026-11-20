@@ -42,27 +42,27 @@ DOG="deploy/k8s/34-refresh-pending-watchdog.yaml"
 
 fixture; run_ok "released overlays pass"
 
-# Explicit suspend contract: preprod radar-refresh-pv is suspended (suspend: true)
-# while its watchdog remains active; prod radar-refresh-pv stays active (suspend: false,
-# never true).
+# Explicit schedule + suspend contract: preprod radar-refresh-pv runs once a day
+# at 06:00 UTC (suspend: false, watchdog active); prod stays unchanged at 4 runs
+# per day (0 5,11,17,23 * * *, Etc/UTC, suspend: false).
 fixture
-PRE_RENDER="$CASE_ROOT/preprod-suspend.yaml"
-PROD_RENDER="$CASE_ROOT/prod-suspend.yaml"
+PRE_RENDER="$CASE_ROOT/preprod-schedule.yaml"
+PROD_RENDER="$CASE_ROOT/prod-schedule.yaml"
 if make --no-print-directory -f "$CASE_ROOT/deploy/k8s/refresh-cronjobs/refresh-018.mk" render-preprod \
     IMAGE_REF='ghcr.io/rhanka/radar-api@sha256:0000000000000000000000000000000000000000000000000000000000000000' \
     RENDER_OUT="$PRE_RENDER" ENV=preprod >/dev/null 2>&1 \
   && make --no-print-directory -f "$CASE_ROOT/deploy/k8s/refresh-cronjobs/refresh-018.mk" render-prod \
     IMAGE_REF='ghcr.io/rhanka/radar-api@sha256:0000000000000000000000000000000000000000000000000000000000000000' \
     RENDER_OUT="$PROD_RENDER" ENV=prod >/dev/null 2>&1 \
-  && awk 'BEGIN{RS="\n---\n"} /kind: CronJob/ && /\n  name: radar-refresh-pv\n/ { pv=1; if ($0 !~ /\n  suspend: true\n/) exit 1 } /kind: CronJob/ && /\n  name: radar-refresh-pending-watchdog\n/ { wd=1; if ($0 !~ /\n  suspend: false\n/) exit 1 } END { if (!pv || !wd) exit 1 }' "$PRE_RENDER" \
-  && awk 'BEGIN{RS="\n---\n"} /kind: CronJob/ && /\n  name: radar-refresh-pv\n/ { pv=1; if ($0 ~ /\n  suspend: true\n/) exit 1; if ($0 !~ /\n  suspend: false\n/) exit 1 } END { if (!pv) exit 1 }' "$PROD_RENDER"; then
-  ok "preprod renders suspend=true (watchdog active) and prod renders suspend=false"
+  && awk 'BEGIN{RS="\n---\n"} /kind: CronJob/ && /\n  name: radar-refresh-pv\n/ { pv=1; if ($0 !~ /\n  suspend: false\n/ || $0 !~ /\n  schedule: "?0 6 \* \* \*"?\n/ || $0 !~ /\n  timeZone: "?Etc\/UTC"?\n/) exit 1 } /kind: CronJob/ && /\n  name: radar-refresh-pending-watchdog\n/ { wd=1; if ($0 !~ /\n  suspend: false\n/) exit 1 } END { if (!pv || !wd) exit 1 }' "$PRE_RENDER" \
+  && awk 'BEGIN{RS="\n---\n"} /kind: CronJob/ && /\n  name: radar-refresh-pv\n/ { pv=1; if ($0 !~ /\n  suspend: false\n/ || $0 !~ /\n  schedule: "?0 5,11,17,23 \* \* \*"?\n/ || $0 !~ /\n  timeZone: "?Etc\/UTC"?\n/) exit 1 } END { if (!pv) exit 1 }' "$PROD_RENDER"; then
+  ok "preprod renders 0 6 * * * UTC (suspend=false) and prod stays 0 5,11,17,23 * * * UTC (suspend=false)"
 else
-  bad "preprod renders suspend=true (watchdog active) and prod renders suspend=false"
+  bad "preprod renders 0 6 * * * UTC (suspend=false) and prod stays 0 5,11,17,23 * * * UTC (suspend=false)"
 fi
 
-fixture; sed -i '/name: radar-refresh-pv/,/value: true/s/value: true/value: false/' "$CASE_ROOT/$PRE"
-run_bad "preprod radar-refresh-pv unsuspended is refused" "refresh activation/model contract failed"
+fixture; sed -i '/name: radar-refresh-pv/,/value: false/s/value: false/value: true/' "$CASE_ROOT/$PRE"
+run_bad "preprod radar-refresh-pv suspended is refused" "refresh activation/model contract failed"
 
 fixture; sed -i '/name: radar-refresh-pv/,/value: false/s/value: false/value: true/' "$CASE_ROOT/$PROD"
 run_bad "prod radar-refresh-pv suspended is refused" "refresh activation/model contract failed"
@@ -111,17 +111,20 @@ run_bad "single-pass enabled by default" "refresh activation/model contract fail
 fixture; sed -i '/REFRESH_SINGLE_PASS_REASONING_EFFORT/s/value: "low"/value: "medium"/' "$CASE_ROOT/$BASE"
 run_bad "single-pass must default to Astra low" "refresh activation/model contract failed"
 
-P='s#value: "0 0,6,12,18 \* \* \*"#value: "%s"#'
+P='s#value: "0 6 \* \* \*"#value: "%s"#'
 pre_sched() { sed -i "$(printf "$P" "$1")" "$CASE_ROOT/$PRE"; }
 
 fixture; pre_sched "0 5,11,17,23 * * *"
 run_bad "preprod on the prod hours (same starts)" "refresh stagger failed"
 
-fixture; pre_sched "30 0,6,12,18 * * *"
+fixture; pre_sched "30 6 * * *"
 run_bad "preprod off the hour (minute differs from prod)" "refresh overlay parity failed"
 
-fixture; pre_sched "0 0,6,12 * * *"
-run_bad "preprod with fewer passes than prod" "refresh overlay parity failed"
+fixture; pre_sched "0 6 * * 1-5"
+run_bad "preprod non-daily day fields (differs from prod)" "refresh overlay parity failed"
+
+fixture; pre_sched "0 6,18 * * *"
+run_ok "preprod with another valid daily hour count (2 passes/day, 1h from prod) passes"
 
 fixture; pre_sched "0 1,7,13,19 * * *"
 run_ok "another hour list on the hour, two hours away, passes (relational, not pinned)"
@@ -196,6 +199,9 @@ WF=".github/workflows/bascule-preprod.yml"
 BK="deploy/ci/backup/cronjob-backup-daily.yaml"
 restore_cron() { sed -i "s|^    - cron: '0 4 \* \* \*'\$|    - cron: $1|" "$CASE_ROOT/$WF"; }
 W_FAIL="must stay after the daily backup and clear of every refresh start"
+
+fixture; pre_sched "0 4 * * *"
+run_bad "preprod single daily refresh starting with the restore (04:00)" "$W_FAIL"
 
 fixture; pre_sched "0 4,10,16,22 * * *"
 run_bad "preprod refresh starting with the restore (04:00)" "$W_FAIL"

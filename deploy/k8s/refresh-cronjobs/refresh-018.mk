@@ -292,8 +292,8 @@ render-prod:
 # deux blocs s'ajoutent, eux aussi relationnels :
 #   - DÉCALAGE (refresh-stagger.awk) : forme `<minute> <heures> * * *`, et les
 #     lancements prod et préprod les plus proches à au moins
-#     REFRESH_STAGGER_MIN_MINUTES l'un de l'autre (la minute et le nombre de
-#     passages, communs, sont gardés par la parité) ;
+#     REFRESH_STAGGER_MIN_MINUTES l'un de l'autre (la minute et les champs jour,
+#     communs, sont gardés par la parité) ;
 #   - GARDIEN DES PODS PENDING (refresh-watchdog.awk) : le CronJob
 #     radar-refresh-pending-watchdog est rendu, actif, câblé sur le label du pod
 #     de passage, et le Job de passage garde `backoffLimit: 0`.
@@ -317,12 +317,9 @@ verify-renders:
 	    test "$$(grep -c '^kind: CronJob$$' "$$render")" -eq 2 \
 	      || { echo "refresh render must contain exactly two CronJobs (radar-refresh-pv, radar-refresh-pending-watchdog): $$render" >&2; exit 1; }; \
 	    test "$$(grep -c '^kind: PersistentVolumeClaim$$' "$$render")" -eq 1; \
-	    expected_suspend="false"; \
-	    if [ "$$render" = "$$tmp/preprod.yaml" ]; then expected_suspend="true"; fi; \
-	    awk -v exp_suspend="$$expected_suspend" 'BEGIN{RS="\n---\n"} /kind: CronJob/ && /\n  name: radar-refresh-pv\n/ { \
+	    awk 'BEGIN{RS="\n---\n"} /kind: CronJob/ && /\n  name: radar-refresh-pv\n/ { \
 	      pv=1; \
-	      if (exp_suspend == "true") { if ($$0 !~ /\n  suspend: true\n/) exit 1; } \
-	      else { if ($$0 ~ /\n  suspend: true\n/) exit 1; if ($$0 !~ /\n  suspend: false\n/) exit 1; } \
+	      if ($$0 !~ /suspend: false/) exit 1; \
 	      if (($$0 !~ /name: REFRESH_PROVIDER\n[ ]+value: openai\n/ \
 	        || $$0 !~ /name: REFRESH_MODEL\n[ ]+value: gpt-6-astra\n/ \
 	        || $$0 !~ /name: REFRESH_SINGLE_PASS\n[ ]+value: "0"/ \
