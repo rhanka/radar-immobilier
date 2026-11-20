@@ -109,16 +109,3 @@ patches:
                         valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_ACCESS_KEY } }
                       - name: SCRAPE_S3_SECRET_KEY
                         valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_SECRET_KEY } }
-                      # Fallback provider, PREPROD ONLY (intended divergence n°5,
-                      # refresh-contract.awk): the muse account is imported in
-                      # the preprod keyring PVC only. In off mode the code
-                      # reads REFRESH_FALLBACK_*; REFRESH_CLASSIFY_FALLBACK_*
-                      # is aligned so a later single-pass switch keeps the
-                      # same fallback. Prod keeps gemini (its keyring has no
-                      # muse account: the route would refuse no-route).
-                      - { name: REFRESH_FALLBACK_PROVIDER, value: "muse" }
-                      - { name: REFRESH_FALLBACK_MODEL, value: "muse-wonder-1.0" }
-                      - { name: REFRESH_FALLBACK_REASONING_EFFORT, value: "low" }
-                      - { name: REFRESH_CLASSIFY_FALLBACK_PROVIDER, value: "muse" }
-                      - { name: REFRESH_CLASSIFY_FALLBACK_MODEL, value: "muse-wonder-1.0" }
-                      - { name: REFRESH_CLASSIFY_FALLBACK_REASONING_EFFORT, value: "low" }
