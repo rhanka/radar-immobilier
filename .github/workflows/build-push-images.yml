@@ -1350,6 +1350,17 @@ jobs:
           kubectl -n "$NAMESPACE" get cronjob radar-refresh-requeue-abandoned \
             -o jsonpath='{.metadata.name} suspend={.spec.suspend} schedule={.spec.schedule} image={.spec.jobTemplate.spec.template.spec.containers[0].image}{"\n"}'
 
+      # IMMO MCP CONFIGMAP (prod) — reconcile ConfigMap/immo-mcp-config from the
+      # committed prod base (deploy/k8s/immo-mcp) after cutover and before the
+      # read-only drift check. Applies ONLY ConfigMap/immo-mcp-config (never the
+      # Deployment/Service/Ingress), keeping IMMO_MCP_SIGNALS_WRITE_ENABLED="0"
+      # inert and reconciling the app.kubernetes.io/* labels.
+      - name: Apply immo-mcp-config ConfigMap (prod)
+        env:
+          NAMESPACE: radar-immobilier
+          EXPECTED_KUBE_APISERVER_HOST_PROD: ${{ vars.EXPECTED_KUBE_APISERVER_HOST_PROD || vars.EXPECTED_KUBE_APISERVER_HOST }}
+        run: bash deploy/ci/apply-prod-immo-mcp-config.sh
+
       - name: Check production non-Deployment drift against main (read-only)
         env:
           NAMESPACE: radar-immobilier
