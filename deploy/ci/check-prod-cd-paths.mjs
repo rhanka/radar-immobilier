@@ -30,8 +30,10 @@ export function validateProdCdPaths(root) {
   const preprodFiles = new Set(reg.preprodFiles || []);
   const preprodPrefixes = reg.preprodPrefixes || [];
   const cdMap = new Map();
+  const operatorMap = new Map();
   const exemptMap = new Map();
   const wfCache = new Map();
+  const epCache = new Map();
 
   const seenAll = new Set();
   const track = (p, section) => {
@@ -65,6 +67,29 @@ export function validateProdCdPaths(root) {
     }
   }
 
+  for (const entry of reg.operatorPaths || []) {
+    track(entry.path, 'operatorPaths');
+    operatorMap.set(entry.path, entry);
+    if (!Array.isArray(entry.objects) || entry.objects.length === 0) {
+      errors.push(`operatorPaths entry '${entry.path}' must list target Kubernetes objects`);
+    }
+    if (!entry.reason || !String(entry.reason).trim()) {
+      errors.push(`operatorPaths entry '${entry.path}' requires a reason`);
+    }
+    if (!entry.doc || !fs.existsSync(path.join(root, entry.doc))) {
+      errors.push(`operatorPaths entry '${entry.path}' references missing doc '${entry.doc || ''}'`);
+    }
+    if (!entry.entrypoint || !fs.existsSync(path.join(root, entry.entrypoint))) {
+      errors.push(`operatorPaths entry '${entry.path}' references missing entrypoint '${entry.entrypoint || ''}'`);
+      continue;
+    }
+    if (!epCache.has(entry.entrypoint)) epCache.set(entry.entrypoint, fs.readFileSync(path.join(root, entry.entrypoint), 'utf8'));
+    const epText = epCache.get(entry.entrypoint);
+    if (!entry.entrypointRef || !epText.includes(entry.entrypointRef)) {
+      errors.push(`operatorPaths entry '${entry.path}': entrypointRef '${entry.entrypointRef || ''}' not found in ${entry.entrypoint}`);
+    }
+  }
+
   for (const entry of reg.legacyExempt || []) {
     track(entry.path, 'legacyExempt');
     exemptMap.set(entry.path, entry);
@@ -83,16 +108,16 @@ export function validateProdCdPaths(root) {
       continue;
     }
     const inPreprod = preprodFiles.has(f.rel) || preprodPrefixes.some((pfx) => f.rel.startsWith(pfx));
-    if (nonProd.has(f.rel) || inPreprod || cdMap.has(f.rel) || exemptMap.has(f.rel)) continue;
+    if (nonProd.has(f.rel) || inPreprod || cdMap.has(f.rel) || operatorMap.has(f.rel) || exemptMap.has(f.rel)) continue;
     errors.push(
-      `Undeclared production manifest '${f.rel}': add a GitHub Actions CD workflow and register it under cdPaths in deploy/ci/prod-cd-paths.json`
+      `Undeclared production manifest '${f.rel}': add a GitHub Actions CD workflow (cdPaths) or a documented operator path (operatorPaths) in deploy/ci/prod-cd-paths.json`
     );
   }
 
   return {
     ok: errors.length === 0,
     errors,
-    counts: { cd: cdMap.size, legacyExempt: exemptMap.size, totalScanned: files.length },
+    counts: { cd: cdMap.size, operator: operatorMap.size, legacyExempt: exemptMap.size, totalScanned: files.length },
   };
 }
 
@@ -103,5 +128,5 @@ if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
     for (const e of res.errors) console.error(`ERROR: ${e}`);
     process.exit(1);
   }
-  console.log(`prod-cd-paths guard OK: ${res.counts.cd} CD-mapped, ${res.counts.legacyExempt} documented legacyExempt (${res.counts.totalScanned} YAML files checked)`);
+  console.log(`prod-cd-paths guard OK: ${res.counts.cd} CD-mapped, ${res.counts.operator} operatorPaths, ${res.counts.legacyExempt} documented legacyExempt (${res.counts.totalScanned} YAML files checked)`);
 }
