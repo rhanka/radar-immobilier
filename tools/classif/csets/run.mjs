@@ -44,8 +44,12 @@ async function worker(){
    appendJsonlRecord(log,{at:new Date().toISOString(),half,mode,intent:false,inputHash:digest,
     code:result.code,latencyMs:result.latencyMs,usage:result.usage,toolEvents:result.toolEvents,...quotaFields(result)});
    const errText=`${result.errorEnvelope??''} ${JSON.stringify(result.error??'')} ${result.stderrTail??''}`;
-   const rateLimitErr=/(\b429\b|rate.?limit|usage limit|individual quota)/i.test(errText);
-   const quotaErr=result.code!==0&&/(\b429\b|\b401\b|\b403\b|rate.?limit|quota|authentication|unauthori[sz]ed|token.*expired|not logged in)/i.test(errText);
+   const rateLimitErr=/(\b429\b|rate.?limit|usage limit|individual quota|hit your limit|overloaded)/i.test(errText);
+   const quotaErr=(result.code!==0||result.isError)&&/(\b429\b|\b401\b|\b403\b|rate.?limit|quota|authentication|unauthori[sz]ed|token.*expired|not logged in)/i.test(errText);
+   if(result.rateLimits?.primary){
+    const usedPct=result.rateLimits.primary.used_percent;
+    if(result.rateLimits.rate_limit_reached_type||(typeof usedPct==='number'&&usedPct>=90)){stop='quota-threshold-90';quotaOrAccountStop=true;}
+   }
    if(isCodexBench){
     guard.observe(benchModel,result.rateLimits);
     if(result.authError||result.binaryMissing||result.rateLimits?.rate_limit_reached_type||rateLimitErr||quotaErr){stop='account-or-quota-refusal';quotaOrAccountStop=true;}

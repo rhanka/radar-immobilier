@@ -73,7 +73,14 @@ async function worker(){
 
   let quotaOrAccountStop=false;
   const errText=`${result.errorEnvelope??''} ${JSON.stringify(result.error??'')} ${result.stderrTail??''}`;
-  const rateLimitErr=/(\b429\b|rate.?limit|usage limit|individual quota)/i.test(errText);
+  const rateLimitErr=/(\b429\b|rate.?limit|usage limit|individual quota|hit your limit|overloaded)/i.test(errText);
+  if(result.rateLimits?.primary){
+   const usedPct=result.rateLimits.primary.used_percent;
+   if(result.rateLimits.rate_limit_reached_type||(typeof usedPct==='number'&&usedPct>=90)){
+    stop='quota-threshold-90';
+    quotaOrAccountStop=true;
+   }
+  }
   if(isCodexBench){
    guard.observe(benchModel,result.rateLimits);
    if(result.authError||result.binaryMissing||result.rateLimits?.rate_limit_reached_type||rateLimitErr||(result.code!==0&&QUOTA_RE.test(errText))){
@@ -84,7 +91,7 @@ async function worker(){
     stop='quota-observation-missing';
     quotaOrAccountStop=true;
    }
-  } else if(result.authError||result.binaryMissing||rateLimitErr||(result.code!==0&&QUOTA_RE.test(errText))){
+  } else if(result.authError||result.binaryMissing||rateLimitErr||((result.code!==0||result.isError)&&QUOTA_RE.test(errText))){
    stop='account-or-quota-refusal';
    quotaOrAccountStop=true;
   }
@@ -92,7 +99,7 @@ async function worker(){
    // Do not cache a quota-aborted attempt so a later resumed run executes this document.
    continue;
   }
-  const okRun=result.code===0&&result.toolEvents===0&&typeof result.text==='string'&&result.text.trim().length>0;
+  const okRun=result.code===0&&!result.isError&&(result.toolEvents??0)===0&&typeof result.text==='string'&&result.text.trim().length>0;
   if(okRun){
    writeFileSync(rawFile,result.text,{mode:0o600});
   }
