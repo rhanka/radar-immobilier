@@ -1,0 +1,17 @@
+# Ingress preprod : autorise le pod restore (app=preprod-snapshot-restore) → radar-postgres:5432.
+# Sans ça, default-deny + les netpol existantes (graph-projection/api only) DROP le restore → timeout.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-restore-to-postgres
+  namespace: radar-immobilier-preprod
+  labels: {owner: poc-k8s, app.kubernetes.io/part-of: preprod-snapshot-pattern}
+spec:
+  podSelector:
+    matchLabels: {app.kubernetes.io/component: postgres, app.kubernetes.io/name: radar-immobilier}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector: {matchLabels: {app: preprod-snapshot-restore}}
+      ports:
+        - {protocol: TCP, port: 5432}
