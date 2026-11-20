@@ -62,7 +62,7 @@ export async function writeScopedPersonalFacetInTx(
   options: { validatedAiFeedbackId?: string } = {},
 ) {
   if (command.expectedHeadId === undefined) {
-    throw new FacetError(400, "invalid_facet_command");
+    throw new FacetError(400, "invalid_facet_command", "invalid_fields:expectedHeadId");
   }
   const key = command.commandKey.toLowerCase();
     await lockWorkspace(tx, workspaceId);
@@ -218,7 +218,7 @@ async function recoverScopedHistoricalFacet(
       throw new FacetError(409, "idempotency_key_conflict");
     }
     const replay = await readCommand(tx, accountId, key, commandDigest);
-    if (replay === undefined) throw new FacetError(400, "invalid_facet_command");
+    if (replay === undefined) throw new FacetError(400, "invalid_facet_command", "historical_receipt_not_found");
     return replay;
   });
 }
