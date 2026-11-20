@@ -6,7 +6,7 @@
  */
 
 import { ACTIVE_ARTIFACT_TOOLS, ARTIFACT_PROFILE_DESCRIPTOR, ARTIFACT_P0B, ARTIFACT_STRICT, ARTIFACT_PART1,
-  RELEASE_FILES_MAX, RELEASE_FILE_BYTES_MAX, RELEASE_TOTAL_BYTES_MAX, HOST_MIME_TYPES } from "@radar/artifacts-host";
+  PUBLISH_MAX_FILE_BYTES, RELEASE_FILES_MAX, RELEASE_FILE_BYTES_MAX, RELEASE_TOTAL_BYTES_MAX, HOST_MIME_TYPES } from "@radar/artifacts-host";
 export { ARTIFACT_PROVIDER_VERSION } from "@radar/artifacts-host";
 import { GIT_EFFECTIVE_REQUIRED, gitEffectiveProfile, gitSelection, gitToolScope, type GitOperation } from "./artifact-git-profile.js";
 export const ARTIFACT_PROVIDER_ID = "sentropic.artifacts" as const;
@@ -150,8 +150,8 @@ export const ARTIFACT_SELECTION: readonly ArtifactSelectionEntry[] = [
 export const ARTIFACT_LIMITS = {
   filesMin: 1,
   filesMax: 32,
-  decodedBytesPerFile: 262144,
-  decodedBytesTotal: 262144,
+  decodedBytesPerFile: PUBLISH_MAX_FILE_BYTES,
+  decodedBytesTotal: PUBLISH_MAX_FILE_BYTES,
   // Files parity LOT 1 — release budgets for the uploaded-asset union.
   releaseFilesMax: RELEASE_FILES_MAX,
   releaseFileBytesMax: RELEASE_FILE_BYTES_MAX,

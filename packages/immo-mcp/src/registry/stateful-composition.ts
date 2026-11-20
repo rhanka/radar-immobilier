@@ -20,7 +20,7 @@ export const IMMO_WIRE_LIMITS = Object.freeze({
   maxResultBytes: 32 * 1024 * 1024, maxResultDepth: 128,
 });
 export const ARTIFACT_WIRE_LIMITS = Object.freeze({ ...IMMO_WIRE_LIMITS,
-  maxRequestBytes: 2 * 1024 * 1024, maxArgumentBytes: 2 * 1024 * 1024 });
+  maxRequestBytes: 32 * 1024 * 1024, maxArgumentBytes: 32 * 1024 * 1024 });
 export const IMMO_WIRE_TOOLS: readonly Tool[] = ALL_TOOL_DEFINITIONS.map((def) => {
   const schema = normalizeToolJsonSchema(def.name, convertInputShape(def.inputSchema));
   return { name: def.name, title: def.title, description: def.description,

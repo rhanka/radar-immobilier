@@ -5,7 +5,7 @@
  * the MCP authoring guide references exactly what this server serves. The
  * stylesheets themselves are vendored under design-assets/ (verbatim
  * upstream bytes) and copied into the runtime image next to the compiled
- * output (see api/Dockerfile). They never count toward the 256 KiB
+ * output (see api/Dockerfile). They never count toward the 5 MiB
  * publication budget.
  */
 import { existsSync, readFileSync } from "node:fs";

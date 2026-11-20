@@ -6,7 +6,7 @@
  * guide asset URLs and the reserved content-host path. The bytes served
  * under `/__artifacts/design/<kit>/<digest>/<file>` are worker-free ESM
  * plus its layout stylesheet, pinned by version AND sha256. No floating
- * CDN, no per-page bundle copy. The kit lives outside the 256 KiB
+ * CDN, no per-page bundle copy. The kit lives outside the 5 MiB
  * publication budget.
  *
  * Provenance: authored in `api/src/artifacts/design-assets/` (I-4,
