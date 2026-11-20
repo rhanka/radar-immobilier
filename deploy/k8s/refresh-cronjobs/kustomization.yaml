@@ -1,21 +1,19 @@
 # refresh-cronjobs — Kustomize overlay that deploys the refresh CronJob to
 # PREPROD (radar-immobilier-preprod), pinned to the release image. The
-# scheduled PV-to-Signal refresh stays SUSPENDED (spec.suspend: true) in
-# preprod because the daily prod -> preprod restore already provides data;
-# ad hoc runs via `kubectl create job --from=cronjob/radar-refresh-pv` and
-# `make reannotate-signals-preprod` keep using this template, and the
-# pending-pod watchdog stays active (suspend: false). Production uses the
-# separate refresh-cronjobs-prod twin (suspend: false), independently gated
-# in the promote-prod path.
+# scheduled PV-to-Signal refresh stays ACTIVE (spec.suspend: false) at one
+# pass per day (`0 6 * * *` Etc/UTC, see
+# docs/decisions/2026-11-20-refresh-preprod-1-par-jour.md); ad hoc runs remain
+# available via `.github/workflows/bascule-refresh.yml` (force preprod refresh)
+# or `kubectl create job --from=cronjob/radar-refresh-pv`. Production uses the
+# separate refresh-cronjobs-prod twin (4 passes/day, `0 5,11,17,23 * * *`),
+# independently gated in the promote-prod path.
 #
 # It transforms the base ../34-refresh-cronjob.yaml (ns radar-immobilier,
 # suspend:true — the prod-dormant default) into the preprod instance:
 #   - namespace -> radar-immobilier-preprod
-#   - suspend   -> true for radar-refresh-pv (scheduled passes disabled; manual
-#                  Jobs from the CronJob template remain supported), false for
-#                  radar-refresh-pending-watchdog
-#   - schedule  -> `0 0,6,12,18 * * *` UTC for radar-refresh-pv: one hour after
-#                  the prod base (`0 5,11,17,23`), still on the hour (incident
+#   - suspend   -> false for radar-refresh-pv and radar-refresh-pending-watchdog
+#   - schedule  -> `0 6 * * *` UTC for radar-refresh-pv: one daily pass, one
+#                  hour after the 05:00 prod pass, still on the hour (incident
 #                  2026-10-09: same minute, same node, RWO keyring attach race)
 #   - image     -> pinned by CI to the deploy-preprod release :<sha> (no :latest)
 #
@@ -57,21 +55,22 @@ images:
 patches:
   # One causally ordered acquisition -> Graphify -> publish -> PG workload is
   # the only preprod refresh (legacy scrape/projection CronJobs removed 2026-09-18).
-  # Preprod starts on the hour, one hour after prod: 00:00, 06:00, 12:00,
-  # 18:00 UTC. Intended divergence n°4 (refresh-contract.awk): only the HOUR
-  # LIST differs; the minute and the number of passes stay shared, and
-  # verify-renders requires >= 15 minutes between the closest prod and preprod
-  # starts.
+  # Preprod runs once a day on the hour, one hour after the 05:00 prod pass:
+  # 06:00 UTC. Intended divergence n°4 (refresh-contract.awk): only the HOUR
+  # LIST differs (prod 5,11,17,23 vs preprod 6); the minute and the day fields
+  # stay shared, and verify-renders requires >= 15 minutes between the closest
+  # prod and preprod starts.
   - target:
       kind: CronJob
       name: radar-refresh-pv
     patch: |
       - op: replace
         path: /spec/suspend
-        value: true
+        value: false
       - op: replace
         path: /spec/schedule
-        value: "0 0,6,12,18 * * *"
+        # 1 run/jour : décision owner du 20/11/2026, voir docs/decisions/2026-11-20-refresh-preprod-1-par-jour.md
+        value: "0 6 * * *"
 
   - target:
       kind: CronJob
