@@ -233,7 +233,7 @@ test('every job a version tag can start proves main ancestry before any secret o
   }
   assert.deepEqual(checked.sort(), ['backup-cd.yml/apply', 'bascule-bundle-cd.yml/apply-backup', 'bascule-bundle-cd.yml/apply-bundle',
     'bascule-refresh.yml/force-refresh', 'build-push-images.yml/promote-prod', 'k8s-apply-mcp.yaml/apply',
-    'rollback.yml/rollback-preprod', 'rollback.yml/rollback-prod', 'run-job.yaml/run']);
+    'reannotate-signals-prod.yml/reannotate', 'rollback.yml/rollback-preprod', 'rollback.yml/rollback-prod', 'run-job.yaml/run']);
 });
 
 test('no workflow builds or publishes a git-backed artifact', () => {
