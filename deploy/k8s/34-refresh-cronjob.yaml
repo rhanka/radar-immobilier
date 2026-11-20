@@ -213,8 +213,8 @@ spec:
                 - { name: REFRESH_MODEL, value: "gpt-6-astra" }
                 - { name: REFRESH_REASONING_EFFORT, value: "medium" }
                 - { name: REFRESH_PRIMARY_QUALITY_ATTEMPTS, value: "2" }
-                - { name: REFRESH_FALLBACK_PROVIDER, value: "muse" }
-                - { name: REFRESH_FALLBACK_MODEL, value: "muse-wonder-1.0" }
+                - { name: REFRESH_FALLBACK_PROVIDER, value: "gemini" }
+                - { name: REFRESH_FALLBACK_MODEL, value: "gemini-3.8-flash" }
                 - { name: REFRESH_FALLBACK_REASONING_EFFORT, value: "low" }
                 - { name: REFRESH_VERIFY_ENABLED, value: "1" }
                 - { name: REFRESH_VERIFY_PROVIDER, value: "gemini" }
