@@ -6,7 +6,7 @@ import {createQuotaGuard,quotaFields} from '../lib/codex-quota.mjs';
 import {appendJsonlRecord} from '../lib/jsonl.mjs';
 
 const SYSTEM_SHA256='bdc1327904ac4c5a36b91dfdbe887a6f1a900b8fe5f1427249e54d83c250d461';
-const QUOTA_RE=/(\b429\b|rate.?limit|quota|overloaded|capacity|usage limit|individual quota)/i;
+const QUOTA_RE=/(\b429\b|\b401\b|\b403\b|rate.?limit|quota|overloaded|capacity|usage limit|individual quota|authentication|unauthori[sz]ed|token.*expired|not logged in)/i;
 const sha256=x=>createHash('sha256').update(x).digest('hex');
 
 const benchDir=process.env.BENCH_B_DIR??'/home/antoinefa/src/radar-immobilier/.claude/worktrees/agent-ae1c01a14a9859391/tools/bench-v11';
