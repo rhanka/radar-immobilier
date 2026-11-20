@@ -17,7 +17,6 @@ import type {
   SearchSignalsArgs,
 } from "./data-source.js";
 import { MockDataSource } from "./data-source.js";
-import type { MockSignal } from "./mocks.js";
 import { createIsolatedExchangeFixture, exchangeDepsFor } from "./test-exchange-fixtures.js";
 
 // Resource-server settings under test. `resource` == the token `aud` (single-audience model).
