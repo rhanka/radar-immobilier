@@ -42,17 +42,25 @@ DOG="deploy/k8s/34-refresh-pending-watchdog.yaml"
 
 fixture; run_ok "released overlays pass"
 
-# Explicit render-prod check: prod radar-refresh-pv must render Muse Wonder 1.0
-# low fallback (both REFRESH_FALLBACK_* and REFRESH_CLASSIFY_FALLBACK_*) and
-# mount the shared keyring mechanism identically to preprod.
+# Explicit render-prod and render-preprod check: both radar-refresh-pv renders
+# must activate two-step B+C classification (keeping REFRESH_SINGLE_PASS=0), pin
+# openai/gpt-6-astra/low primary + muse/muse-wonder-1.0/low fallback + budget,
+# and mount the shared keyring mechanism identically.
 fixture
 PROD_RENDER="$CASE_ROOT/prod-rendered.yaml"
-if make --no-print-directory -f "$CASE_ROOT/deploy/k8s/refresh-cronjobs/refresh-018.mk" render-prod \
-    IMAGE_REF='ghcr.io/rhanka/radar-api@sha256:0000000000000000000000000000000000000000000000000000000000000000' \
-    RENDER_OUT="$PROD_RENDER" ENV=prod >/dev/null 2>&1 \
-  && awk 'BEGIN{RS="\n---\n"} /kind: CronJob/ && /\n  name: radar-refresh-pv\n/ {
+PREPROD_RENDER="$CASE_ROOT/preprod-rendered.yaml"
+check_bc_render() {
+  local ns="$1" file="$2"
+  awk -v ns="$ns" 'BEGIN{RS="\n---\n"} /kind: CronJob/ && /\n  name: radar-refresh-pv\n/ {
       pv=1
-      if ($0 !~ /namespace: radar-immobilier\n/) exit 1
+      if ($0 !~ "namespace: " ns "\n") exit 1
+      if ($0 !~ /name: REFRESH_SINGLE_PASS\n[ ]+value: "0"\n/) exit 1
+      if ($0 !~ /name: REFRESH_CLASSIFY_MODE\n[ ]+value: two-step\n/) exit 1
+      if ($0 !~ /name: REFRESH_CLASSIFY_PROVIDER\n[ ]+value: openai\n/) exit 1
+      if ($0 !~ /name: REFRESH_CLASSIFY_MODEL\n[ ]+value: gpt-6-astra\n/) exit 1
+      if ($0 !~ /name: REFRESH_CLASSIFY_REASONING_EFFORT\n[ ]+value: low\n/) exit 1
+      if ($0 !~ /name: REFRESH_CLASSIFY_CONCURRENCY\n[ ]+value: "2"\n/) exit 1
+      if ($0 !~ /name: REFRESH_RUN_MAX_TOKENS\n[ ]+value: "100000000"\n/) exit 1
       if ($0 !~ /name: REFRESH_FALLBACK_PROVIDER\n[ ]+value: muse\n/) exit 1
       if ($0 !~ /name: REFRESH_FALLBACK_MODEL\n[ ]+value: muse-wonder-1.0\n/) exit 1
       if ($0 !~ /name: REFRESH_FALLBACK_REASONING_EFFORT\n[ ]+value: low\n/) exit 1
@@ -63,19 +71,41 @@ if make --no-print-directory -f "$CASE_ROOT/deploy/k8s/refresh-cronjobs/refresh-
       if ($0 !~ /claimName: radar-refresh-keyring\n/) exit 1
       if ($0 !~ /secretName: radar-refresh-keyring-bootstrap\n/) exit 1
       if ($0 !~ /mountPath: \/keyring\n/) exit 1
-    } END { if (!pv) exit 1 }' "$PROD_RENDER"; then
-  ok "prod render pins muse/muse-wonder-1.0/low fallback and mounts keyring"
+    } END { if (!pv) exit 1 }' "$file"
+}
+if make --no-print-directory -f "$CASE_ROOT/deploy/k8s/refresh-cronjobs/refresh-018.mk" render-prod \
+    IMAGE_REF='ghcr.io/rhanka/radar-api@sha256:0000000000000000000000000000000000000000000000000000000000000000' \
+    RENDER_OUT="$PROD_RENDER" ENV=prod >/dev/null 2>&1 \
+  && check_bc_render "radar-immobilier" "$PROD_RENDER"; then
+  ok "prod render pins two-step B+C, muse/muse-wonder-1.0/low fallback and keyring"
 else
-  bad "prod render pins muse/muse-wonder-1.0/low fallback and mounts keyring"
+  bad "prod render pins two-step B+C, muse/muse-wonder-1.0/low fallback and keyring"
+fi
+if make --no-print-directory -f "$CASE_ROOT/deploy/k8s/refresh-cronjobs/refresh-018.mk" render-preprod \
+    IMAGE_REF='ghcr.io/rhanka/radar-api@sha256:0000000000000000000000000000000000000000000000000000000000000000' \
+    RENDER_OUT="$PREPROD_RENDER" ENV=preprod >/dev/null 2>&1 \
+  && check_bc_render "radar-immobilier-preprod" "$PREPROD_RENDER"; then
+  ok "preprod render pins two-step B+C, muse/muse-wonder-1.0/low fallback and keyring"
+else
+  bad "preprod render pins two-step B+C, muse/muse-wonder-1.0/low fallback and keyring"
 fi
 
 fixture; sed -i '/REFRESH_CLASSIFY_MODE/d' "$CASE_ROOT/$BASE"
 run_bad "classification mode missing" "refresh activation/model contract failed"
 
-for mode in two-step single-pass invalid; do
-  fixture; sed -i "/REFRESH_CLASSIFY_MODE/s/value: \"off\"/value: \"$mode\"/" "$CASE_ROOT/$BASE"
-  run_bad "classification mode $mode enabled by default" "refresh activation/model contract failed"
+for mode in off single-pass invalid; do
+  fixture; sed -i "/REFRESH_CLASSIFY_MODE/s/value: \"two-step\"/value: \"$mode\"/" "$CASE_ROOT/$BASE"
+  run_bad "classification mode $mode in base is refused" "refresh activation/model contract failed"
 done
+
+fixture; sed -i '/name: NODE_OPTIONS/a\                      - { name: REFRESH_CLASSIFY_MODE, value: "off" }' "$CASE_ROOT/$PROD"
+run_bad "prod overlay setting classification mode to off is refused" "refresh activation/model contract failed"
+
+fixture; printf '                      - { name: REFRESH_CLASSIFY_MODE, value: "off" }\n' >> "$CASE_ROOT/$PRE"
+run_bad "preprod overlay setting classification mode to off is refused" "refresh activation/model contract failed"
+
+fixture; sed -i '/REFRESH_RUN_MAX_TOKENS/d' "$CASE_ROOT/$BASE"
+run_bad "classification run token budget missing" "refresh activation/model contract failed"
 
 fixture; sed -i '/REFRESH_CLASSIFY_REASONING_EFFORT/s/value: "low"/value: "medium"/' "$CASE_ROOT/$BASE"
 run_bad "classification must default to Astra low" "refresh activation/model contract failed"
