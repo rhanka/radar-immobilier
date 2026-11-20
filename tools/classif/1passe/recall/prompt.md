@@ -1,0 +1,240 @@
+You classify a municipal regulatory item for a residential densification radar (Québec).
+
+For the item below, choose exactly ONE reason code of the registry `reason_codes`; the main
+category (verdict) is the registry partition of that code and is never chosen separately.
+Judge from the item text only. Precedence: item text > code definitions > guide. Quote the item
+text verbatim (at most 300 characters) as the citation.
+
+## Chaperon Immobilier's criteria
+
+# Chaperon Immobilier's general criteria (verbatim, signed analysis of 2026-09-21)
+
+Source: Chaperon Immobilier's written analysis. Quotes only; no counts, no example rows.
+
+## Principle: membership, not ranking
+
+> « Un signal m'intéresse quand les trois conditions suivantes sont réunies. Pas deux sur trois - les trois. »
+
+> « Tout ce qui ne réunit pas ces trois conditions est du bruit pour moi, et je ne devrais pas le recevoir. Ce n'est pas une question de hiérarchie entre les signaux : c'est une question d'appartenance ou non au périmètre. »
+
+## Criterion 1 — Residential
+
+> « Le règlement touche l'habitation. Pas le commercial, pas l'industriel, pas l'institutionnel, pas l'agricole (sauf en cas de dézonage par la CPTAQ), pas le récréatif. »
+
+> « Reconnaître qu'un règlement n'est pas un règlement d'urbanisme. Matières résiduelles, gestion contractuelle, règlement d'emprunt, programme de subvention - ces règlements existent dans toutes les municipalités du Québec et reviendront partout. »
+
+## Criterion 2 — Loosening of the rules
+
+> « La modification ouvre, elle ne resserre pas. Un règlement qui réduit une hauteur, restreint un usage ou impose une nouvelle contrainte ne m'intéresse pas. »
+
+> « Déterminer le sens de la modification. Le verbe du titre suffit le plus souvent : afin de permettre, afin d'autoriser, afin d'agrandir d'un côté ; afin d'interdire, afin de limiter, afin de préserver de l'autre. »
+
+## Asymmetry reserve
+
+> « Quand le sens d'une modification n'est pas déterminable, le signal doit rester affiché. Masquer par défaut ce qui n'a pas pu être lu transformerait une lacune en dossier manqué, et c'est le risque que je ne peux pas prendre. Même chose pour un règlement qui resserre d'un côté et ouvre de l'autre : […] aucun ne doit disparaître. »
+
+## Criterion 3 — Densification
+
+> « Le résultat est plus d'unités que le règlement en permettait avant. C'est le critère qui tranche : un assouplissement résidentiel qui ne change pas le nombre d'unités possibles ne m'apporte rien. »
+
+> « Reconnaître qu'un règlement d'urbanisme ne touche pas la capacité de construire. Clôtures, cabanons, enseignes, structures de jardin : ce sont des règlements de zonage, mais ils ne changent aucun nombre d'unités. »
+
+## Two cross-cutting exclusion rules
+
+> « Distinguer une décision d'un point d'ordre du jour. Un point inscrit à l'ordre du jour n'est pas une décision du conseil. »
+
+> « Distinguer une règle générale d'une autorisation individuelle. Un PPCMOI ou une dérogation accordés à un demandeur pour un immeuble précis ne créent de droit pour personne d'autre. »
+
+## The five exclusions (summary)
+
+Not an urban-planning bylaw; no effect on the capacity to build; restrictive direction; agenda item and not a decision; individual authorisation and not a general rule.
+
+## Reason code definitions
+
+# Reason codes (28): definitions only
+
+Source: Chaperon Immobilier's workbook, tab "Codes de motif" (unsealed from reference-c). No count, no example.
+
+- `P-VILLE-TERRITOIRE` (pertinent): Changement de portée générale — tout le territoire ou une zone entière (concordance au schéma, OGAT, CPTAQ à portée collective, refonte, norme générale abrogée)
+- `P-NOUV-ZONE` (pertinent): Création ou ouverture d'une nouvelle zone résidentielle, à l'initiative de la Ville
+- `P-PERIM-URB` (pertinent): Agrandissement du périmètre d'urbanisation ou d'une aire d'affectation, à l'initiative de la Ville
+- `P-DENSITE` (pertinent): Hausse générale de densité, hauteur ou nombre de logements permis
+- `P-USAGE-MULTI` (pertinent): Ajout de l'usage multilogement dans une ou plusieurs zones existantes
+- `P-TYPO-INTERM` (pertinent): Ouverture des typologies intermédiaires — jumelés, maisons en rangée, habitations contiguës
+- `P-PROJ-INTEGRE` (pertinent): Introduction ou assouplissement du cadre des projets intégrés
+- `P-NORMES` (pertinent): Assouplissement d'une norme générale (marges, COS, stationnement, largeur ou superficie de terrain)
+- `S-MANDAT-AMONT` (a_surveiller): Mandat confié à un urbaniste-conseil pour préparer un développement ou réviser les outils d'urbanisme — le stade le plus précoce de toute la chaîne, avant même l'avis de motion: la Ville a décidé de faire quelque chose mais ne sait pas encore quoi ni où
+- `S-PLANIFIE` (a_surveiller): Avis de motion ou projet de règlement — étape la plus précoce, encore à confirmer dans la chaîne
+- `S-PORTEE-FLOUE` (a_surveiller): Portée ou zone visée non identifiable dans le document capté
+- `S-CONTRAINTE` (a_surveiller): Portée générale mais contraintes (CPTAQ, zone inondable, absence de services, unifamilial seulement)
+- `S-RESTRICTIF` (a_surveiller): Resserrement des normes qui réduit la capacité de développement — à connaître avant d'engager des frais
+- `S-INFO-MANQUANTE` (a_surveiller): Le sens de la modification (permissif / restrictif) n'est pas donné — à recroiser avec le texte du règlement
+- `S-PPCMOI-SERIE` (a_surveiller): Série de PPCMOI convergents dans les mêmes zones et contre le même règlement — indice que le zonage est en décalage avec ce que la Ville accepte, et qu'un amendement général peut suivre
+- `S-PREEMPTION` (a_surveiller): Droit de préemption ou réserve foncière municipale — ne crée aucun droit de construire, mais contraint l'acquisition et révèle où la Ville veut acquérir
+- `N-ACCESSOIRE` (non_pertinent): Modification accessoire à un changement de zonage déjà capté (lotissement, construction, concordance technique) — à rattacher au dossier, pas à compter comme opportunité distincte
+- `N-RETIRE` (non_pertinent): Point retiré de l'ordre du jour — dossier sans suite
+- `N-FORME` (non_pertinent): Porte sur la forme architecturale ou le processus d'approbation (PIIA), pas sur la capacité de développement
+- `N-ODJ-SEUL` (non_pertinent): La preuve ne renvoie qu'à un point d'ordre du jour, pas à une décision du conseil — rien ne prouve que le dossier a été traité
+- `N-NON-RES` (non_pertinent): Zonage commercial, industriel, agricole, public ou récréatif
+- `N-ADMIN` (non_pertinent): Concordance administrative, numérotation, correction de texte
+- `N-RESTRICTIF` (non_pertinent): Resserrement des normes (baisse de densité, moratoire, interdiction)
+- `N-UNIFAM` (non_pertinent): Résidentiel mais unifamilial isolé seulement
+- `N-DOUBLON` (non_pertinent): Doublon d'un signal déjà capté
+- `N-HORS-TERR` (non_pertinent): Hors des territoires ciblés
+- `N-FAUX-POSITIF` (non_pertinent): Faux positif du filtre — le règlement n'est pas un règlement d'urbanisme
+- `V2-PRECEDENT` (non_pertinent): Hors périmètre v1 (PIIA, dérogation mineure, PPCMOI) — à conserver comme précédent pour la v2 du radar
+
+## Annotation guide (FINAL, frozen after phase-A cross-review)
+
+# Guide G0 — Densification radar annotation
+
+## 1. Principle
+Chaperon Immobilier wants an item only if it is **residential**, **loosens** the rules and **allows more units** than before. All three must be met: this is membership, not ranking. Give each item exactly one of the 28 codes; the item's verdict is the code's verdict. Use only the batch's item texts and these definitions, and add no facts about any municipality.
+
+## 2. Evidence rules
+- **N needs proof.** An N code or `V2-PRECEDENT` requires a quotable passage that positively shows the exclusion. Silence (no zone, verb or stage) is never evidence for N.
+- **Asymmetry reserve.** If scope or direction cannot be read, use the S code that keeps the item shown. A gap must not become a missed file.
+- **Proof beats gap.** At an unreadable step, note its fallback S code and continue. A later positive exclusion wins; otherwise the first fallback is the code.
+
+## 3. Decision procedure (fixed order)
+
+**Step 1: Scope and nature of the act**
+- Item or metadata places the municipality outside the targeted territories → `N-HORS-TERR`. Never infer this from a name.
+- Not an urban-planning act (matières résiduelles, règlement de gestion contractuelle, emprunt, programme de subvention…) → `N-FAUX-POSITIF`.
+- Same act at the same stage as an earlier item in the batch → `N-DOUBLON`.
+- Lotissement, construction or technical-concordance amendment implementing a zoning change named in the item or present in the batch → `N-ACCESSOIRE`.
+- Only renumbering, text correction or administrative concordance → `N-ADMIN`.
+- Preemption, municipal land reserve, or urban-planner mandate to prepare a development or revise planning tools → check step 3, apply step 4 only if the item is explicitly non-residential, skip steps 5–6, and code at step 7.
+
+**Step 2: Individual authorisation**
+- PPCMOI, dérogation mineure, usage conditionnel or PIIA approval for one applicant or property → `V2-PRECEDENT`.
+- Several granted residential PPCMOI converging on the same zone(s) against the same bylaw, visible in the item or batch → `S-PPCMOI-SERIE`.
+- Unclear whether individual or general → treat as general and flag `scope-unclear`.
+
+**Step 3: Agenda item vs decision**
+- Point withdrawn from the agenda → `N-RETIRE`. A postponement is not a withdrawal.
+- Evidence is only an agenda entry, with no adoption, resolution or vote → `N-ODJ-SEUL`. This applies even to an avis de motion.
+- Source type unclear → do not use `N-ODJ-SEUL`; continue.
+
+**Step 4: Residential**
+Judge the use the change concerns, not the zone's label. Adding housing to a commercial zone is residential.
+- Only commercial, industrial, institutional/public, agricultural or recreational uses → `N-NON-RES`. Exception: a CPTAQ exclusion (dézonage) for housing continues to step 5.
+- Use, zone or object unidentifiable → fallback `S-PORTEE-FLOUE`.
+
+**Step 5: Direction**
+The title verb usually suffices.
+- Opening verbs: permettre, autoriser, agrandir, ajouter, augmenter, assouplir.
+- Tightening verbs: interdire, limiter, préserver, restreindre.
+- *Réduire* cuts both ways: reducing a maximum height tightens, reducing a minimum lot area opens. Judge the effect on units.
+
+Outcomes:
+- Only reduces dwelling capacity (density, height, uses, larger lots, moratorium, new constraint) → `N-RESTRICTIF`.
+- Reduces dwelling capacity on one point and opens it on another → `S-RESTRICTIF`.
+- Neutral wording (modifier, concernant, relatif à) without detail → fallback `S-INFO-MANQUANTE`.
+
+**Step 6: Capacity to build**
+Does the result allow more units than before? Loosened lot, setback, COS or parking norms for principal buildings count as yes.
+- No change in possible units (fences, sheds, signs, garden structures, architecture, materials, PIIA criteria, approval procedures) → `N-FORME`.
+- Gain limited to detached single-family homes in existing zones → `N-UNIFAM`.
+- General-scope opening (whole territory, new zone, enlarged perimeter or affectation, collective CPTAQ) limited by a required CPTAQ authorisation, flood zone, missing services or single-family-only use → `S-CONTRAINTE`.
+- Effect on units cannot be told → fallback `S-PORTEE-FLOUE`.
+
+**Step 7: Stage**
+- Preemption → `S-PREEMPTION`. Urban-planner mandate → `S-MANDAT-AMONT`.
+- A fallback noted at steps 4–6 wins over everything below.
+- Avis de motion, draft (premier or second projet), or consultation notice → `S-PLANIFIE`.
+- Final adoption or entry into force → a P code (section 4).
+- Stage not stated → `S-PLANIFIE`, ambiguous, `missing-information`.
+
+## 4. Choosing the P code
+1. Named general instruments (concordance with the schéma, OGAT, collective CPTAQ decision, refonte, abrogation of a general norm) → `P-VILLE-TERRITOIRE`.
+2. Otherwise, take the first match in this order: `P-PERIM-URB` → `P-NOUV-ZONE` → `P-USAGE-MULTI` → `P-TYPO-INTERM` (jumelés, rangée, contiguës) → `P-PROJ-INTEGRE` → `P-DENSITE` (density, height, number of dwellings, including accessory dwellings) → `P-NORMES` (setbacks, COS, parking, lot width or area).
+3. Any other general-scope opening → `P-VILLE-TERRITOIRE`.
+
+`P-PERIM-URB` and `P-NOUV-ZONE` need the City's initiative. Presume it unless the item names another initiator.
+
+## 5. Tie-breaks
+- **`S-RESTRICTIF` vs `N-RESTRICTIF`**: use N when every dwelling-capacity change tightens. Use S when the same item also opens dwelling capacity, because neither side may disappear.
+- **`S-PLANIFIE` vs P**: P needs a shown final adoption or entry into force. An adopted draft (« projet ») stays `S-PLANIFIE`.
+- **`S-PORTEE-FLOUE` vs `S-INFO-MANQUANTE`**:
+  - PORTEE-FLOUE when where or what is unknown (zone, territory, use, object), e.g. « modifiant le règlement de zonage » alone.
+  - INFO-MANQUANTE when where and what are known but not whether the change opens or tightens, e.g. « modifiant les normes de la zone résidentielle Z-0 ».
+  - Scope and direction both unknown → `S-PORTEE-FLOUE`.
+- **`S-CONTRAINTE` vs `N-RESTRICTIF`**: an opening limited by an existing constraint → `S-CONTRAINTE`. A bylaw that creates the constraint → `N-RESTRICTIF`.
+- **`N-ACCESSOIRE`**: use only when the main zoning change is identified; otherwise code the item on its own merits. Accessory buildings (sheds) → `N-FORME`. Accessory dwellings add a unit → `P-DENSITE`.
+- **`V2-PRECEDENT`**: any individual approval, never P however many units it allows. A general PIIA or procedural bylaw → `N-FORME`. A convergent series of granted PPCMOI → `S-PPCMOI-SERIE`.
+- **Concordance**: `N-ADMIN` only when the change is shown to be clerical (numbering, references, wording). Otherwise a schéma concordance is substantive and must be evaluated. A companion amendment to an identified zoning change → `N-ACCESSOIRE`.
+- **`N-DOUBLON`**: same act and same stage only. A later stage of the same act is coded on its own.
+- **`S-MANDAT-AMONT` vs `S-PLANIFIE`**: once a bylaw has been moved or drafted, use `S-PLANIFIE`.
+
+## 6. Ambiguity
+Set `"ambiguous": true` when the code rests on a fallback or a judgment call. Otherwise set `false` with `"ambiguity_cause": null`. Causes:
+- `missing-information`: an element is absent (direction → `S-INFO-MANQUANTE`; stage not stated).
+- `scope-unclear`: the zone, territory, use, object, or individual-vs-general reach cannot be pinned down (`S-PORTEE-FLOUE`).
+- `conflicting-information`: passages contradict each other. If the title opens and the body forbids → `S-INFO-MANQUANTE`. If the stages contradict → `S-PLANIFIE`.
+- `other`: residual doubt after the tie-breaks; explain it in `reason`.
+
+Ambiguity never justifies an N. A mixed direction is known, so it is not ambiguous.
+
+## 7. Quote, reason, output
+- `quote`: one contiguous passage copied verbatim from the item text, at most 300 characters. Keep the same spelling, accents, case and punctuation. No paraphrase, translation, ellipsis or added words.
+  - Quote the passage that triggered the code: the exclusion for N, the opening for P, the stage words for `S-PLANIFIE`. Ideally it also shows the stage.
+  - For a fallback, quote the passage showing what is given (e.g., the bare title).
+- `reason`: at most 40 words. Name the deciding step and any tie-break used.
+- One entry per item. Copy `item_id` and the code exactly.
+
+## Amendments adopted in G1 (majority of the three annotators, after pass 2)
+
+1. Judge each item only on its own label, description, properties, and excerpts; use another batch item only to establish N-DOUBLON, N-ACCESSOIRE, or S-PPCMOI-SERIE, never to supply missing use, object, direction, or stage, and never use municipal background knowledge.
+2. Require a documented grant of individual permission for V2-PRECEDENT. Requests, CCU recommendations and municipal support to the CPTAQ do not establish a grant; named lots or applicants alone do not establish individual reach. Treat zoning amendments as rules even when they affect named lots. Otherwise continue through the agenda and uncertainty checks.
+3. Do not assign N-FAUX-POSITIF to municipal works agreements or infrastructure contributions merely because they mention agreements or financing. Require evidence that the act is outside urban planning; these titles alone establish neither contract management nor borrowing. If use, scope or effect is unreadable, retain the appropriate S fallback.
+4. Assign S-MANDAT-AMONT only when a decision explicitly commissions an urbaniste-conseil to prepare development or revise planning instruments. Distinguish that deliverable from a CCU's routine review and recommendation duties. Use N-FORME for an explicitly procedural advisory mandate; retain the appropriate S fallback if the actual assignment is unreadable.
+5. Record S-PORTEE-FLOUE when the affected use, concrete amendment object or geographic scope is unknown. Reserve S-INFO-MANQUANTE for identified residential scope and object with unknown direction. Infer no use from zone codes, specification grids, generic density, refontes, integrated projects or CPTAQ references alone. Treat chalets, trailers and hypothetical tourism as unresolved unless the regulated use is established.
+6. Code N-FORME when the complete object is by itself an approval procedure or non-capacity matter (permis et certificats, demolition, PIIA procedure, driveways, occupancy/maintenance, fences, sheds, signs), unless lot, density, height, or dwelling norms also change; a CCU study-and-recommend mandate is N-FORME, not S-MANDAT-AMONT.
+7. Do not code N-NON-RES from a zone label, an origin zone, or a hedged or ambiguous dwelling form such as potentiel, chalet, hébergement, roulotte, or loger des travailleurs; require wording that the resulting use is exclusively non-residential, otherwise retain S-PORTEE-FLOUE.
+8. Use only supplied text and metadata, excluding annotator assertions, cited precedents and absent complements. Match excerpts to the target act; disregard unrelated excerpts and website navigation. Prefer relevant operative text over summaries. Infer neither criteria nor final adoption from status/category tags. Treat truncation as missing information; never reconstruct omitted content.
+
+## Amendments adopted in G2 (majority of the three annotators, after pass 3)
+
+1. Require positive evidence that the target passage is only an agenda listing before assigning N-ODJ-SEUL. Do not infer this from numbering, a heading or absent voting language. Treat a recorded avis de motion or draft deposit as a completed preliminary act. Adoption of an agenda alone does not establish decisions on its listed items.
+2. Copy line breaks inside a quote exactly as in the source; never replace them with spaces, rejoin words split across lines, or complete a cut-off word. Keep the quote to one line when that line alone still holds the deciding words.
+3. Take the ambiguity cause from the doubt that decided the code: scope fallback → scope-unclear; direction gap → missing-information; contradiction that chose the code → conflicting-information. A non-fallback code doubted only for unstated stage or source type → missing-information. Doubts outranked by a winning fallback never replace its cause.
+4. Quote from a matching excerpt whenever it holds the deciding words, else from the Description, else the Libellé. For a fallback, the deciding words are the act's title or object phrase through its end or cut-off; if none exists, quote the clause giving the act's number and stage, from the excerpt if it has one, else the Libellé.
+5. Distinguish a parent bylaw's title from the amendment's object. For N-FORME, require a stated change confined to procedure or matters without unit-capacity effects; a reference to a permits or certificates bylaw alone is insufficient. Preserve facts fully stated before a truncation, but do not reconstruct the missing purpose, use or effect.
+6. When an excerpt adopts, deposits or gives notice of a bylaw numbered differently from the item (Libellé or properties), ignoring spaces, hyphens and dots, treat it as another act: take no quote or facts from it and note the mismatch in reason. Do not count a cited parent-bylaw number as a mismatch.
+7. Choose the code before selecting ambiguity_cause. When several uncertainties coexist, use the cause associated with the decisive fallback and mention other material uncertainty in reason. Do not replace a scope fallback with S-PLANIFIE because stages conflict. Reserve conflicting-information for incompatible evidence about the same act and fact, rather than unrelated excerpts.
+8. In reason, name the step that produced the code (for a fallback, the step 4–6 where it was noted) and any G1 amendment applied. Cite no other row, golden item or precedent, except the batch item establishing N-DOUBLON, N-ACCESSOIRE or S-PPCMOI-SERIE.
+9. Limit 'proof beats gap' to exclusions covering the complete stated object of the target act. Do not exclude an omnibus amendment because one clause is clerical, procedural or non-residential while another stated change remains unreadable. Preserve the applicable S fallback. Use S-RESTRICTIF only when both an opening and a tightening of residential capacity are established.
+
+## Amendments adopted in G3 (majority of the three annotators, after pass 4)
+
+1. Distinguish recorded acts from stage labels. Explicit notice, deposit or resolution wording establishes occurrence despite an unnamed source type; future adoption wording and blank certification fields do not. For otherwise eligible items supported only by headings, retain the applicable S code with missing-information. Preserve any earlier decisive fallback and its cause.
+2. Write reason in English, starting 'Step N:' with the single step that produced the code (4, 5 or 6 for a fallback). Add declined exclusions only afterwards, cite amendments as G1-n or G2-n, and mention no other row except as G2-8 allows.
+3. For G2-6, compare bylaw numbers only: treat an excerpt as matching when its number, ignoring spaces, hyphens and dots, equals either the Libellé's or the n° règlement property's. Resolution, notice (avis), agenda-point and parent-bylaw numbers never create a mismatch.
+4. Treat a document item's text as its excerpt; among several matching excerpts, use the first holding the deciding words. Prefer their first occurrence inside a sentence recording the act over headings. With no identifiable act, quote the first line titling the séance or procès-verbal, never navigation, menus or links.
+5. Write reason in this order: deciding step, decisive fact or gap, controlling amendment, then any material mismatch or secondary uncertainty. Cite only eligible supplied evidence and the three permitted cross-item relationships. Omit rejected steps, previous-pass comparisons, absent complements and inferred document contents; keep the complete reason within 40 words.
+6. Identify each number's role before applying G2-6: target bylaw, parent bylaw, motion, resolution or application. Retain an excerpt whose target number agrees with the Libellé despite a conflicting number property; note the discrepancy. Normalize only spaces, hyphens and dots; retain letter prefixes. Never establish N-DOUBLON from a shared parent number alone.
+7. For fallback quotes, copy the selected title or object phrase through its end or captured cutoff. If neither exists, use the shortest clause containing target number and stage. Break ties by first occurrence. If over 300 characters, use the shortest contiguous subspan retaining the decisive information. Preserve all internal whitespace and incomplete source words.
+8. When only a document or meeting title remains after excluding navigation and unrelated content, assign S-PORTEE-FLOUE with scope-unclear and quote that title. State that the capture identifies no regulatory act. Treat links to uncaptured documents as unavailable evidence; never infer their contents or classify the item from navigation topics.
+9. Apply the quote-source hierarchy only among passages containing the decisive information. For a fallback, select the most specific eligible title or amendment-object phrase before choosing excerpt, Description, then Libellé. A generic parent-bylaw title or adoption formula cannot displace a more informative object supplied elsewhere. Preserve operative-text precedence for genuine conflicts.
+10. Refining G2-4, treat as deciding words for fallbacks and S-PREEMPTION the target act's title: from the first word règlement or projet naming that act (else its operative verb, else its object phrase) through the end or cut-off of what it amends, concerns, decides or aims at. Never treat recitals (ATTENDU) as titles.
+
+## Output
+
+Read the ENTIRE municipal document supplied below in one call. No tools or external sources.
+Extract ALL supported urban-planning acts, including distinct stages of the same bylaw.
+Detection is independent of class: retain excluded acts too. Do not suppress individual permissions,
+non-residential, restrictive, uncertain acts or acts only listed on an agenda.
+Classify each detected act in the SAME response using the rules above.
+Use this flat detection format instead of graph nodes and annotations.
+Return ONLY JSON: {"acts":[{"id":"local unique id","target_number":null,"object":"specific act object",
+"stage":"explicit stage, e.g. avis de motion, premier projet, second projet, adoption, consultation",
+"page":1,"quote":"exact contiguous source passage, at most 300 characters",
+"classe":"pertinent|a_surveiller|ecarte|non_classe","code":"registry code or UNCLASSIFIED",
+"reason":"Step N: explanation in at most 40 words","ambiguous":false}]}.
+Page numbers start at 1; form feed characters separate pages. Preserve ALL whitespace in quotes.
+target_number is the target BYLAW number, never a parent bylaw, resolution or agenda-point number.
+P codes map to pertinent, S codes to a_surveiller, N codes and V2-PRECEDENT to ecarte.
+Use non_classe with UNCLASSIFIED only when classification is impossible. It remains visible.
+Return an empty acts array when the document contains no supported urban-planning act.
+Input contains no oracle acts, reference votes or reference classes.
