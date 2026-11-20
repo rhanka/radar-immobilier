@@ -42,10 +42,21 @@ case " $* " in
     if [ "${FAKE_KUSTOMIZE:-}" = empty ]; then exit 0; fi
     exec "$REAL_KUBECTL" "$@" ;;
   *" create secret generic "*"--dry-run=client"*) exec "$REAL_KUBECTL" "$@" ;;
+  *" config current-context "*) echo "${MOCK_CTX:-ovh-prod-admin}" ;;
+  *" config view "*"context.namespace"*) echo "${MOCK_CTX_NS:-radar-immobilier}" ;;
   *" config view "*) echo "${MOCK_SERVER:-https://hlhedx.c1.bhs5.k8s.ovh.net}" ;;
+  *" auth whoami "*)
+    if [ "${MOCK_WHOAMI_FAIL:-}" = 1 ]; then exit 1; fi
+    echo "${MOCK_WHOAMI:-kubernetes-admin}" ;;
+  *" get namespace radar-immobilier -o name "*)
+    if [ "${MOCK_NS_FAIL:-}" = 1 ]; then exit 1; fi
+    echo namespace/radar-immobilier ;;
   *" get serviceaccount radar-app -o name "*)
     if [ "${MOCK_GUARD:-}" = hang ]; then sleep 30; fi
     echo serviceaccount/radar-app ;;
+  *" get pods -l app.kubernetes.io/instance=radar-refresh-pv "*)
+    if [ "${MOCK_PODS_FAIL:-}" = 1 ]; then exit 1; fi
+    printf '%b' "${MOCK_REFRESH_PODS:-}" ;;
   *" apply "*) echo "client-side apply must not be used" >&2; exit 96 ;;
   *" create -f "*)
     [ "${MOCK_CREATE:-ok}" = ok ] || {
@@ -273,6 +284,84 @@ if bash -e "$T/link-cmds.sh" && [ "$(stat -c %a "$link_root/..2026_11_18/.key")"
   && [ "$(stat -c %a "$link_root/.refresh.lock")" = 660 ] && [ -L "$link_root/.key" ]; then
   ok "runtime symlinks: real key targets normalize to 0600, lock untouched"
 else bad "runtime symlinks: targets left at $(stat -c %a "$link_root/..2026_11_18/.key" 2>/dev/null)"; fi
+
+# --- production keyring import (import-keyring-account-prod / run / cleanup) -
+prod_render_dir="$(private_dir)"
+prod_render="$prod_render_dir/prod-muse.yaml"
+if make -s -f "$MK" import-keyring-account-prod IMPORT_TRANSPORT=muse IMPORT_IMAGE_REF="$DIGEST" \
+  IMPORT_SOURCE_DIR="$T/source" IMPORT_RENDER_OUT="$prod_render" ENV=prod >"$T/out" 2>&1 \
+  && grep -q '^  namespace: radar-immobilier$' "$prod_render" \
+  && ! grep -q '^  namespace: radar-immobilier-preprod$' "$prod_render" \
+  && grep -A1 'name: IMPORT_TRANSPORT$' "$prod_render" | grep -q 'value: muse' \
+  && grep -q 'find -L /keyring/runtime' "$prod_render"; then
+  ok "prod render: targets radar-immobilier, pins muse transport, keeps find -L normalization"
+else bad "prod render failed ($(cat "$T/out"))"; fi
+rm -f "$prod_render"
+
+if make -s -f "$MK" import-keyring-account-prod IMPORT_TRANSPORT=muse IMPORT_IMAGE_REF="$DIGEST" \
+  IMPORT_SOURCE_DIR="$T/source" IMPORT_RENDER_OUT="$(private_dir)/p.yaml" ENV=preprod >"$T/out" 2>&1; then
+  bad "import-keyring-account-prod accepted ENV=preprod"
+else ok "import-keyring-account-prod refuses ENV=preprod"; fi
+
+run_prod_case() { # $1 = label, $2 = expected exit (0|nonzero)
+  local label="$1" expect="$2" file status
+  file="$(private_dir)/prod.yaml"
+  printf 'kind: Job\nmetadata:\n  namespace: %s\n' "${MOCK_RENDER_NS:-radar-immobilier}" >"$file"
+  : >"$CALLS"
+  make -s -f "$MK" run-keyring-import-prod PROD_CONFIRM="${TEST_PROD_CONFIRM:-1}" KUBECONFIG="$T/kubeconfig" \
+    IMPORT_RENDER_OUT="$file" IMPORT_POLL_SECONDS=0 IMPORT_WAIT_SECONDS=5 \
+    IMPORT_REQUEST_SECONDS="${IMPORT_REQUEST_SECONDS:-30}" ENV="${TEST_PROD_ENV:-prod}" >"$T/out" 2>&1
+  status=$?
+  if { [ "$expect" = 0 ] && [ "$status" -eq 0 ]; } || { [ "$expect" != 0 ] && [ "$status" -ne 0 ]; }; then :; else
+    bad "$label: exit $status, expected $expect ($(cat "$T/out"))"; return; fi
+  if grep -q "U0VDUkVULUtFWS1MRUFL\|last-applied" "$T/out"; then bad "$label: kubectl stderr echoed"; return; fi
+  if [ -n "${EXPECT_NO_REMOTE:-}" ]; then
+    if [ -e "$file" ]; then bad "$label: render left on disk"; return; fi
+    if grep -q " delete \| create \| apply " "$CALLS"; then bad "$label: remote objects touched ($(cat "$CALLS"))"; return; fi
+    ok "$label: render removed, no remote mutation"
+    return; fi
+  if grep -q -- "-n radar-immobilier .*create -f" "$CALLS" \
+    && grep -q -- "-n radar-immobilier .*delete job/radar-refresh-keyring-account-import secret/radar-refresh-keyring-account-import configmap/radar-refresh-keyring-import-script --ignore-not-found" "$CALLS" \
+    && [ ! -e "$file" ]; then ok "$label: prod Job, Secret, ConfigMap and render cleaned"
+  else bad "$label: prod calls/cleanup missing ($(cat "$CALLS"))"; fi
+}
+
+MOCK_JOB_STATE="1/" run_prod_case "prod run: nominal with no refresh pods" 0
+MOCK_JOB_STATE="1/" MOCK_REFRESH_PODS="radar-refresh-pv-100 Succeeded\nradar-refresh-pv-101 Failed\n" \
+  run_prod_case "prod run: completed refresh pods allowed" 0
+MOCK_JOB_STATE="/1" run_prod_case "prod run: Job failed still cleans up" 1
+MOCK_JOB_STATE="/" MOCK_CREATE=fail run_prod_case "prod run: create refused scrubs stderr" 1
+MOCK_JOB_STATE="1/" TEST_PROD_CONFIRM=0 EXPECT_NO_REMOTE=1 run_prod_case "prod run: refuses without PROD_CONFIRM=1" 1
+MOCK_JOB_STATE="1/" TEST_PROD_ENV=preprod EXPECT_NO_REMOTE=1 run_prod_case "prod run: refuses ENV=preprod" 1
+MOCK_JOB_STATE="1/" MOCK_SERVER=https://elsewhere.example EXPECT_NO_REMOTE=1 run_prod_case "prod run: refuses wrong API server" 1
+MOCK_JOB_STATE="1/" MOCK_CTX=ovh-preprod EXPECT_NO_REMOTE=1 run_prod_case "prod run: refuses preprod context" 1
+MOCK_JOB_STATE="1/" MOCK_CTX_NS=radar-immobilier-preprod EXPECT_NO_REMOTE=1 run_prod_case "prod run: refuses preprod context namespace" 1
+MOCK_JOB_STATE="1/" MOCK_WHOAMI=system:serviceaccount:radar-immobilier-preprod:radar-app EXPECT_NO_REMOTE=1 \
+  run_prod_case "prod run: refuses preprod ServiceAccount identity" 1
+MOCK_JOB_STATE="1/" MOCK_RENDER_NS=radar-immobilier-preprod EXPECT_NO_REMOTE=1 \
+  run_prod_case "prod run: refuses preprod-targeted render" 1
+MOCK_JOB_STATE="1/" MOCK_REFRESH_PODS="radar-refresh-pv-200 Running\n" EXPECT_NO_REMOTE=1 \
+  run_prod_case "prod run: refuses when radar-refresh-pv pod is Running" 1
+MOCK_JOB_STATE="1/" MOCK_REFRESH_PODS="radar-refresh-pv-201 Pending\n" EXPECT_NO_REMOTE=1 \
+  run_prod_case "prod run: refuses when radar-refresh-pv pod is Pending" 1
+MOCK_JOB_STATE="1/" MOCK_PODS_FAIL=1 EXPECT_NO_REMOTE=1 \
+  run_prod_case "prod run: fails closed when active refresh pod check fails" 1
+
+# --- cleanup-keyring-import-prod guards ------------------------------------
+pclean="$(private_dir)/p.yaml"; echo "kind: Secret" >"$pclean"; : >"$CALLS"
+if make -s -f "$MK" cleanup-keyring-import-prod KUBECONFIG="$T/kubeconfig" IMPORT_RENDER_OUT="$pclean" ENV=prod >"$T/out" 2>&1 \
+  && [ ! -e "$pclean" ] && grep -q -- "-n radar-immobilier .*delete job/radar-refresh-keyring-account-import" "$CALLS" \
+  && grep -q "prod identity confirmed" "$T/out"; then
+  ok "prod cleanup nominal: prod identity confirmed, objects deleted, render removed"
+else bad "prod cleanup nominal failed ($(cat "$T/out"); $(cat "$CALLS"))"; fi
+
+pclean_bad="$(private_dir)/p.yaml"; echo "kind: Secret" >"$pclean_bad"; : >"$CALLS"
+if MOCK_CTX_NS=radar-immobilier-preprod make -s -f "$MK" cleanup-keyring-import-prod KUBECONFIG="$T/kubeconfig" \
+  IMPORT_RENDER_OUT="$pclean_bad" ENV=prod >"$T/out" 2>&1; then
+  bad "prod cleanup accepted preprod context namespace"
+elif [ -e "$pclean_bad" ] || grep -q " delete " "$CALLS"; then
+  bad "prod cleanup wrong namespace left render or deleted remotely"
+else ok "prod cleanup refuses preprod context namespace with no remote delete"; fi
 
 echo "keyring-import.test.sh: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]
