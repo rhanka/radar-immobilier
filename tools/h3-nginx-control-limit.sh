@@ -38,7 +38,7 @@ http.createServer((req, res) => {
       const body = JSON.parse(bytes);
       if (!body.artifactId || !body.idempotencyKey || !Array.isArray(body.files)) throw Error("invalid publication");
       const decodedBytes = body.files.reduce((n, file) => n + Buffer.byteLength(file.text), 0);
-      if (decodedBytes > 256 * 1024) throw Error("decoded budget");
+      if (decodedBytes > 5 * 1024 * 1024) throw Error("decoded budget");
       res.writeHead(201, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ bytes: bytes.length, decodedBytes }));
     } catch { res.writeHead(400); res.end(); }
@@ -87,23 +87,23 @@ for (let attempt = 0; attempt < 50; attempt++) {
 }
 assert.ok(ready, "proxy ready");
 for (const [label, path, size, chunked, expected] of [
-  ["control accepts 1.5 MiB", control, 1572864, false, 201],
-  ["exact control accepts 1.5 MiB", "/api/v1/artifacts/control", 1572864, false, 201],
-  ["control accepts exactly 2 MiB", control, 2097152, false, 201],
-  ["control refuses 2 MiB + 1", control, 2097153, false, 413],
+  ["control accepts 5.5 MiB", control, 5767168, false, 201],
+  ["exact control accepts 5.5 MiB", "/api/v1/artifacts/control", 5767168, false, 201],
+  ["control accepts exactly 10 MiB", control, 10485760, false, 201],
+  ["control refuses 10 MiB + 1", control, 10485761, false, 413],
   ["neighbor control-other keeps 1 MiB", "/api/v1/artifacts/control-other", 1572864, false, 413],
   ["neighbor accepts exactly 1 MiB", "/api/v1/artifacts/control-other", 1048576, false, 201],
   ["neighbor refuses 1 MiB + 1", "/api/v1/artifacts/control-other", 1048577, false, 413],
   ["generic route refuses 1.5 MiB", "/api/echo", 1572864, false, 413],
-  ["control accepts chunked exactly 2 MiB", control, 2097152, true, 201],
-  ["control refuses chunked 2 MiB + 1", control, 2097153, true, 413],
+  ["control accepts chunked exactly 10 MiB", control, 10485760, true, 201],
+  ["control refuses chunked 10 MiB + 1", control, 10485761, true, 413],
 ]) {
   const response = await request(path, body(size), chunked);
   assert.equal(response.status, expected, label);
   if (expected === 201) {
     const receipt = JSON.parse(response.data);
     assert.equal(receipt.bytes, size, "upstream received complete body");
-    assert.equal(receipt.decodedBytes, 1024, "decoded files stay within 256 KiB");
+    assert.equal(receipt.decodedBytes, 1024, "decoded files stay within 5 MiB");
   }
   console.log(`[h3-nginx] PASS: ${label} -> ${response.status}`);
 }

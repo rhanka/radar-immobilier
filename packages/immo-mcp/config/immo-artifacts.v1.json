@@ -49,8 +49,8 @@
       "files": {
         "minCount": 1,
         "maxCount": 32,
-        "maxDecodedBytesPerFile": 262144,
-        "maxDecodedBytesTotal": 262144,
+        "maxDecodedBytesPerFile": 5242880,
+        "maxDecodedBytesTotal": 5242880,
         "releaseMaxFiles": 255,
         "releaseMaxFileBytes": 16777216,
         "releaseMaxTotalBytes": 67108864,
