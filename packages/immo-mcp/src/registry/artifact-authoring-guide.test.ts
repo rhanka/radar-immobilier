@@ -52,7 +52,7 @@ describe("artifact authoring guide", () => {
     expect(guide.guideId).toBe(AUTHORING_GUIDE_ID);
     // Pinned literal (not the constant itself): a content change without a
     // revision bump must fail here.
-    expect(guide.revision).toBe("2026-11-05-p0b-r8");
+    expect(guide.revision).toBe("2026-11-05-p0b-r9");
     expect(guide.starterVersion).toBe(STARTER_VERSION);
     expect(guide.starterVersion).toBe("1.2.0");
     expect(guide.starter.version).toBe(guide.starterVersion);
@@ -115,7 +115,7 @@ describe("artifact authoring guide", () => {
     const guide = getAuthoringGuide();
     // Pinned literal (not the constant itself): a content change without a
     // revision bump must fail here.
-    expect(guide.revision).toBe("2026-11-05-p0b-r8");
+    expect(guide.revision).toBe("2026-11-05-p0b-r9");
     const editing = guide.lifecycle.editing.join("\n");
     expect(editing).toContain("artifacts_get_source → edit → artifacts_publish");
     expect(editing).toContain("same artifactId");
@@ -273,8 +273,24 @@ describe("artifact authoring guide", () => {
     const all = [...guide.mapBase.load, ...guide.mapBase.feed, ...guide.mapBase.paint,
       ...guide.mapBase.events, ...guide.mapBase.limits].join("\n");
     for (const fragment of ["createMap", "setZones", "setLots", "setPaint", "fitToBounds",
-      "worker-src 'self'", "basemapTemplate: null", "256 KiB"]) {
+      "worker-src 'self'", "basemapTemplate: null", "5 MiB"]) {
       expect(all, fragment).toContain(fragment);
+    }
+  });
+
+  it("should document the 5 MiB page budget and out-of-model create_upload flow for page text files", () => {
+    const guide = getAuthoringGuide();
+    expect(guide.assets.note).toContain("5 MiB publication budget");
+    expect(guide.mapBase.note).toContain("5 MiB publication budget");
+    const editing = guide.lifecycle.editing.join("\n");
+    expect(editing).toContain("text/html, text/css, text/javascript, application/json");
+    expect(editing).toContain("5 MiB per file and 5 MiB total");
+    expect(editing).toContain("no magic-byte check");
+    expect(editing).toContain("release CSP");
+    if (ARTIFACT_P0B) {
+      const edit = (guide.artifactLifecycle?.edit ?? []).join("\n");
+      expect(edit).toContain("text/html, text/css, text/javascript, application/json, up to 5 MiB per file and 5 MiB total");
+      expect(edit).toContain("strict UTF-8 plus sha256 digest");
     }
   });
 

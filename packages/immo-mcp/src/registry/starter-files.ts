@@ -4,7 +4,7 @@
  * Single HTML page + author stylesheet + presentation script + the
  * framework-agnostic H5 reader client. The four files are directly
  * publishable with artifacts_publish (about 20 KiB total, far below the
- * 256 KiB budget) and satisfy the release CSP without any inline
+ * 5 MiB budget) and satisfy the release CSP without any inline
  * script/style hash: every script and stylesheet loads same-origin.
  *
  * Author code uses Sentropic DS tokens (`--st-*`) and markup only and

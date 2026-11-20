@@ -1,6 +1,9 @@
 # reannotate-signals-prod — manual two-step B+C reannotation of recent prod signals.
 #
-# Trigger: manual only (workflow_dispatch), on main, gated by environment: production.
+# Trigger: manual only (workflow_dispatch), on a release tag v* (refs/tags/v...),
+# gated by environment: production (deployment policy accepts v* tags only).
+# Example:
+#   gh workflow run reannotate-signals-prod.yml --ref vX.Y.Z -f mode=dry-run -f since_days=30
 # Derives a one-shot Job from CronJob/radar-refresh-pv in radar-immobilier using the
 # existing least-privilege prod CI ServiceAccount (radar-ci-deployer via KUBE_CONFIG_DATA).
 name: Reannotate prod signals (30d two-step)
@@ -31,7 +34,7 @@ permissions:
 
 jobs:
   reannotate:
-    if: github.ref == 'refs/heads/main'
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     timeout-minutes: 340
     environment: production
@@ -40,6 +43,10 @@ jobs:
       TEMPLATE_PATH: deploy/ci/reannotate-signals-prod.tmpl.yaml
     steps:
       - uses: actions/checkout@v4
+
+      - name: Refuse a version tag outside main history
+        if: startsWith(github.ref, 'refs/tags/')
+        run: bash deploy/ci/require-main-ancestry.sh
 
       - uses: azure/setup-kubectl@v4
         with:

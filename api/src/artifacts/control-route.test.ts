@@ -111,11 +111,16 @@ describe("controlRoute body guards", () => {
     expect(await res.json()).toEqual({ error: "unsupported_media_type" });
   });
 
-  it("refuses bodies over 2 MiB with 413", async () => {
-    const res = await postEnsure({ sub: "sub-ok", contentType: "application/json",
-      body: `{"pad":${JSON.stringify("a".repeat(2 * 1024 * 1024 + 1))}}` });
-    expect(res.status).toBe(413);
-    expect(await res.json()).toEqual({ error: "body_too_large" });
+  it("accepts a 5 MiB publication envelope and refuses bodies over 10 MiB with 413", async () => {
+    const fiveMib = await postEnsure({ sub: "sub-ok", contentType: "application/json",
+      body: `{"pad":${JSON.stringify("a".repeat(5 * 1024 * 1024))}}` });
+    expect(fiveMib.status).toBe(503);
+    expect(await fiveMib.json()).toEqual({ error: "capability_unavailable" });
+
+    const tooLarge = await postEnsure({ sub: "sub-ok", contentType: "application/json",
+      body: `{"pad":${JSON.stringify("a".repeat(10 * 1024 * 1024 + 1))}}` });
+    expect(tooLarge.status).toBe(413);
+    expect(await tooLarge.json()).toEqual({ error: "body_too_large" });
   });
 
   it("refuses unparseable JSON with 400", async () => {
