@@ -317,9 +317,12 @@ verify-renders:
 	    test "$$(grep -c '^kind: CronJob$$' "$$render")" -eq 2 \
 	      || { echo "refresh render must contain exactly two CronJobs (radar-refresh-pv, radar-refresh-pending-watchdog): $$render" >&2; exit 1; }; \
 	    test "$$(grep -c '^kind: PersistentVolumeClaim$$' "$$render")" -eq 1; \
-	    awk 'BEGIN{RS="\n---\n"} /kind: CronJob/ && /\n  name: radar-refresh-pv\n/ { \
+	    expected_suspend="false"; \
+	    if [ "$$render" = "$$tmp/preprod.yaml" ]; then expected_suspend="true"; fi; \
+	    awk -v exp_suspend="$$expected_suspend" 'BEGIN{RS="\n---\n"} /kind: CronJob/ && /\n  name: radar-refresh-pv\n/ { \
 	      pv=1; \
-	      if ($$0 !~ /suspend: false/) exit 1; \
+	      if (exp_suspend == "true") { if ($$0 !~ /\n  suspend: true\n/) exit 1; } \
+	      else { if ($$0 ~ /\n  suspend: true\n/) exit 1; if ($$0 !~ /\n  suspend: false\n/) exit 1; } \
 	      if (($$0 !~ /name: REFRESH_PROVIDER\n[ ]+value: openai\n/ \
 	        || $$0 !~ /name: REFRESH_MODEL\n[ ]+value: gpt-6-astra\n/ \
 	        || $$0 !~ /name: REFRESH_SINGLE_PASS\n[ ]+value: "0"/ \

@@ -1,13 +1,19 @@
 # refresh-cronjobs — Kustomize overlay that deploys the refresh CronJob to
-# PREPROD (radar-immobilier-preprod), pinned to the release image and
-# with the causal PV-to-Signal refresh UN-SUSPENDED. Production uses the
-# separate refresh-cronjobs-prod twin,
-# independently gated in the promote-prod path.
+# PREPROD (radar-immobilier-preprod), pinned to the release image. The
+# scheduled PV-to-Signal refresh stays SUSPENDED (spec.suspend: true) in
+# preprod because the daily prod -> preprod restore already provides data;
+# ad hoc runs via `kubectl create job --from=cronjob/radar-refresh-pv` and
+# `make reannotate-signals-preprod` keep using this template, and the
+# pending-pod watchdog stays active (suspend: false). Production uses the
+# separate refresh-cronjobs-prod twin (suspend: false), independently gated
+# in the promote-prod path.
 #
 # It transforms the base ../34-refresh-cronjob.yaml (ns radar-immobilier,
-# suspend:true — the prod-dormant default) into the preprod-active instance:
+# suspend:true — the prod-dormant default) into the preprod instance:
 #   - namespace -> radar-immobilier-preprod
-#   - suspend   -> false for radar-refresh-pv and radar-refresh-pending-watchdog
+#   - suspend   -> true for radar-refresh-pv (scheduled passes disabled; manual
+#                  Jobs from the CronJob template remain supported), false for
+#                  radar-refresh-pending-watchdog
 #   - schedule  -> `0 0,6,12,18 * * *` UTC for radar-refresh-pv: one hour after
 #                  the prod base (`0 5,11,17,23`), still on the hour (incident
 #                  2026-10-09: same minute, same node, RWO keyring attach race)
@@ -62,7 +68,7 @@ patches:
     patch: |
       - op: replace
         path: /spec/suspend
-        value: false
+        value: true
       - op: replace
         path: /spec/schedule
         value: "0 0,6,12,18 * * *"
