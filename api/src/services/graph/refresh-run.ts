@@ -30,7 +30,7 @@ import { canonicalHash } from "./replay/canonical-json.js";
 import { extractionToV23Graph } from "./refresh-v23.js";
 import { attachSinglePassAnnotations, type SinglePassPrompt } from "./refresh-single-pass.js";
 import { writeClassAnnotation, type AiClassAnnotation } from "./class-annotations.js";
-import { classifyPublishedRefresh, type RefreshClassification } from "./refresh-classify.js";
+import { classifyPublishedRefresh, retryUnclassifiedRefreshSignals, type RefreshClassification } from "./refresh-classify.js";
 import { completeRefreshChunk, matchProjectedRefreshState, matchPublishedRefreshState, openRefreshState,
   readCompletedRefreshChunk, readRefreshStates, recordRefreshModel, reserveRefreshChunk, writeRefreshCandidate,
   writeRefreshStageReceipt, type RefreshStage, type RefreshStateHandle } from "./refresh-state.js";
@@ -350,11 +350,20 @@ async function publishSnapshot(options: RunPvRefreshOptions, initial: RefreshSta
       "Refresh aborted after projection");
     handle = await completeStage(options.store, handle, "projected", snapshotHash, now);
   }, { resume, now });
-  if (options.classification) await classifyPublishedRefresh({ classification: options.classification,
-    db: options.db, store: options.store, handle, snapshot, citySlug: options.citySlug,
-    pipelineRunId: options.cycleId ?? backupId, now: now(),
-    ...(options.signal ? { signal: options.signal } : {}),
-    ...(options.onNote ? { onNote: options.onNote } : {}) });
+  if (options.classification) {
+    const attemptedNodeIds = new Set<string>();
+    const pipelineRunId = options.cycleId ?? backupId;
+    await classifyPublishedRefresh({ classification: options.classification,
+      db: options.db, store: options.store, handle, snapshot, citySlug: options.citySlug,
+      pipelineRunId, now: now(), attemptedNodeIds,
+      ...(options.signal ? { signal: options.signal } : {}),
+      ...(options.onNote ? { onNote: options.onNote } : {}) });
+    await retryUnclassifiedRefreshSignals({ classification: options.classification,
+      db: options.db, citySlug: options.citySlug,
+      pipelineRunId, now: now(), excludeNodeIds: attemptedNodeIds,
+      ...(options.signal ? { signal: options.signal } : {}),
+      ...(options.onNote ? { onNote: options.onNote } : {}) });
+  }
   return { citySlug: options.citySlug, candidateHash: snapshotHash, stateKey: handle.key };
 }
 
@@ -400,6 +409,13 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
   let ledger = planned.ledger;
   if (planned.changed) await writeRefreshCoverage(options.store, ledger);
   if (planned.workItems.length === 0) {
+    if (options.classification && options.extract !== false) {
+      await retryUnclassifiedRefreshSignals({ classification: options.classification,
+        db: options.db, citySlug: options.citySlug,
+        pipelineRunId: cycleId, now: now(),
+        ...(options.signal ? { signal: options.signal } : {}),
+        ...(options.onNote ? { onNote: options.onNote } : {}) });
+    }
     const newest = candidates[0];
     return { cycleId, citySlug: options.citySlug,
       ...(newest ? { inputHash: newest.inputHash, documentSha: newest.sha } : {}),
@@ -439,6 +455,13 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
   if (alreadyProjected) {
     ledger = coverRefreshDocument(ledger, selected.sha, now);
     await writeRefreshCoverage(options.store, ledger);
+    if (options.classification && options.extract !== false) {
+      await retryUnclassifiedRefreshSignals({ classification: options.classification,
+        db: options.db, citySlug: options.citySlug,
+        pipelineRunId: cycleId, now: now(),
+        ...(options.signal ? { signal: options.signal } : {}),
+        ...(options.onNote ? { onNote: options.onNote } : {}) });
+    }
     return { cycleId, citySlug: options.citySlug, inputHash: selected.inputHash,
       documentSha: selected.sha, candidates: candidates.length, status: "up-to-date" as const,
       candidateHash: baselineHash, stateKey: alreadyProjected.key,
