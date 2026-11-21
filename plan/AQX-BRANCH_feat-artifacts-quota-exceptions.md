@@ -57,6 +57,8 @@ embeds, configured Sentropic bucket origins).
     the host composition is removed with this branch.
 
 ## Feedback Loop
+- `attention`: consensus review incomplete, both Codex legs failed at launch
+  (`h2a_run` central_unavailable, dossier `tmp/reviews/aqx/dossier.md`, untracked); re-dispatch before merge.
 - `attention`: the reported `limit_exceeded` on `artifacts_create_upload` is
   the provider open-upload-session bound (8 open sessions per principal, 24 h
   session TTL), not the durable `host_quotas` / `host_actor_quotas` counters
@@ -95,11 +97,11 @@ embeds, configured Sentropic bucket origins).
 - [ ] **Lot 4 — External heavy media**
   - [x] Release CSP: `frame-src https://www.youtube-nocookie.com`, configured bucket origins on `media-src`/`img-src`.
   - [x] Guide: YouTube and bucket paths, 10 GB bucket policy.
-  - [ ] Sentropic PR: opt-in `externalSources` on `contentHeaders` (AQX-EX1).
+  - [x] Sentropic PR: opt-in `externalSources` on `contentHeaders` (AQX-EX1, rhanka/sentropic#1064).
 
 - [ ] **Lot 5 — Verification and PR**
-  - [ ] `make typecheck` + `make lint` (`ENV=test-aqx`).
-  - [ ] Scoped host, MCP and API tests on `ENV=test-aqx` through the existing standalone
+  - [x] `make typecheck` + `make lint` (`ENV=test-aqx-tc`).
+  - [x] Scoped host, MCP and API tests on `ENV=test-aqx` through the existing standalone
     runners (`tools/mcp-p0b.mk integration|test-api`, `tools/immo-mcp-test.mk test-immo-mcp`),
     each tearing down with `down -v`.
   - [ ] Push branch, open draft PR with migration notes and post-deploy admin command.
