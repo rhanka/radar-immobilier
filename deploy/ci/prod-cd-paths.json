@@ -64,9 +64,9 @@
     { "path": "deploy/k8s/42-graph-city-key-repair-job.yaml", "objects": ["Job/radar-graph-city-key-repair"], "workflow": ".github/workflows/run-job.yaml", "workflowRef": "42-graph-city-key-repair-job.yaml" },
     { "path": "deploy/k8s/50-ui.yaml", "objects": ["Service/radar-ui", "Deployment/radar-ui"], "workflow": ".github/workflows/build-push-images.yml", "workflowRef": "deploy/radar-ui" },
     { "path": "deploy/k8s/70-networkpolicy.yaml", "objects": ["NetworkPolicy/*"], "workflow": ".github/workflows/k8s-apply-mcp.yaml", "workflowRef": "70-networkpolicy.yaml" },
-    { "path": "deploy/k8s/immo-mcp/40-immo-mcp-http-deploy.yaml", "objects": ["ConfigMap/immo-mcp-config", "Deployment/radar-immo-mcp", "Service/radar-immo-mcp"], "workflow": ".github/workflows/build-push-images.yml", "workflowRef": "40-immo-mcp-http-deploy.yaml" },
+    { "path": "deploy/k8s/immo-mcp/40-immo-mcp-http-deploy.yaml", "objects": ["ConfigMap/immo-mcp-config", "Deployment/radar-immo-mcp", "Service/radar-immo-mcp"], "workflow": ".github/workflows/build-push-images.yml", "workflowRef": "apply-prod-immo-mcp-config.sh" },
     { "path": "deploy/k8s/immo-mcp/41-immo-mcp-ingress.yaml", "objects": ["Ingress/radar-immo-mcp"], "workflow": ".github/workflows/k8s-apply-mcp.yaml", "workflowRef": "41-immo-mcp-ingress.yaml" },
-    { "path": "deploy/k8s/immo-mcp/kustomization.yaml", "objects": ["ConfigMap/immo-mcp-config", "Deployment/radar-immo-mcp", "Service/radar-immo-mcp", "Ingress/radar-immo-mcp"], "workflow": ".github/workflows/k8s-apply-mcp.yaml", "workflowRef": "40-immo-mcp-http-deploy.yaml" },
+    { "path": "deploy/k8s/immo-mcp/kustomization.yaml", "objects": ["ConfigMap/immo-mcp-config"], "workflow": ".github/workflows/build-push-images.yml", "workflowRef": "apply-prod-immo-mcp-config.sh" },
     { "path": "deploy/k8s/refresh-cronjobs-prod/kustomization.yaml", "objects": ["CronJob/radar-refresh-pv", "CronJob/radar-refresh-pending-watchdog", "PersistentVolumeClaim/radar-refresh-keyring"], "workflow": ".github/workflows/build-push-images.yml", "workflowRef": "render-prod" },
     { "path": "deploy/k8s/refresh-cronjobs/requeue-recurrent-prod/kustomization.yaml", "objects": ["CronJob/radar-refresh-requeue-abandoned"], "workflow": ".github/workflows/build-push-images.yml", "workflowRef": "render-requeue-recurrent" }
   ],
