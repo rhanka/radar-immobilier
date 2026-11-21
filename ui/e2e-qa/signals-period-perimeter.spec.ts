@@ -36,7 +36,7 @@ test("should select every period preset with real mouse events", async ({ page, 
     await option.click();
     const params = new URL((await request).url()).searchParams;
     expect(params.get("dateFrom")).toBe(from);
-    expect(params.get("dateTo")).toBe(from ? "2026-03-31" : null);
+    expect(params.get("dateTo")).toBeNull();
     await expect(page.getByRole("button", { name: `Période des signaux ${label}`, exact: true })).toBeVisible({ timeout: 1800 });
     if (token === "all") await expect(page).not.toHaveURL(/filter.period=/, { timeout: 1800 });
     else await expect(page).toHaveURL(new RegExp(`filter.period=${token}(?:&|$)`), { timeout: 1800 });
