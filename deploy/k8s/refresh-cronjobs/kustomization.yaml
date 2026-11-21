@@ -9,12 +9,16 @@
 # independently gated in the promote-prod path.
 #
 # It transforms the base ../34-refresh-cronjob.yaml (ns radar-immobilier,
-# suspend:true — the prod-dormant default) into the preprod instance:
-#   - namespace -> radar-immobilier-preprod
+# suspend:true — the prod-dormant default) into the preprod instance. Only the
+# four intended divergences with prod (refresh-contract.awk) live here:
+#   1. namespace -> radar-immobilier-preprod
+#   2. memory    -> base envelope (prod caps to 768Mi / 512Mi heap)
+#   3. S3 write  -> radar-docs-s3-credentials (preprod bucket)
+#   4. schedule  -> `0 6 * * *` UTC for radar-refresh-pv (1 pass/day, one hour
+#                   after the 05:00 prod pass; incident 2026-10-09)
+# Models, verification and fallback (gpt-6.2-astra low B+C, Flash low verify,
+# Muse Wonder 1.0 low fallback) are inherited identically from the base.
 #   - suspend   -> false for radar-refresh-pv and radar-refresh-pending-watchdog
-#   - schedule  -> `0 6 * * *` UTC for radar-refresh-pv: one daily pass, one
-#                  hour after the 05:00 prod pass, still on the hour (incident
-#                  2026-10-09: same minute, same node, RWO keyring attach race)
 #   - image     -> pinned by CI to the deploy-preprod release :<sha> (no :latest)
 #
 # Applied ONLY by the deploy-preprod "Deploy refresh CronJobs (preprod)" step, in
