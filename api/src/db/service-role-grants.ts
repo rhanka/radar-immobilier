@@ -66,6 +66,13 @@ BEGIN
     GRANT USAGE ON SCHEMA artifacts TO ${IMMO_MCP_ARTIFACT_WRITER_ROLE};
     GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA artifacts TO ${IMMO_MCP_ARTIFACT_WRITER_ROLE};
     GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA artifacts TO ${IMMO_MCP_ARTIFACT_WRITER_ROLE};
+    -- AQX: admin quota exceptions and their audit trail are written by the API
+    -- admin route only; the MCP host reads its caller's exception, nothing else.
+    IF to_regclass('artifacts.host_quota_admin_events') IS NOT NULL THEN
+      REVOKE INSERT, UPDATE, DELETE ON artifacts.host_actor_page_text_exceptions,
+        artifacts.host_quota_admin_events FROM ${IMMO_MCP_ARTIFACT_WRITER_ROLE};
+      REVOKE SELECT ON artifacts.host_quota_admin_events FROM ${IMMO_MCP_ARTIFACT_WRITER_ROLE};
+    END IF;
     -- Account admission: column reads, plus the UPDATE on one column that
     -- SELECT ... FOR SHARE requires. The column is created_at on both tables:
     -- workspace_memberships has a composite key (workspace_id, account_id) and

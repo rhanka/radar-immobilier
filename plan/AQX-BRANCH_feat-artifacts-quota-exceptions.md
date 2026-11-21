@@ -81,7 +81,7 @@ embeds, configured Sentropic bucket origins).
 - [ ] **Lot 1 — Data model and effective budget**
   - [x] Migration 0049: page-text exceptions and quota admin audit events.
   - [x] `readPageTextBudget` (exception if active, else 5 MiB default, 10 MiB cap).
-  - [ ] MCP writer role keeps read-only access to the admin tables.
+  - [x] MCP writer role keeps read-only access to the admin tables.
 
 - [ ] **Lot 2 — Enforcement**
   - [x] Upload create/commit, bundle totals and browser page channel read the effective budget.

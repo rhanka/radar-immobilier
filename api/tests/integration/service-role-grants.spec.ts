@@ -179,4 +179,20 @@ describe("restricted MCP role grants", () => {
         "AND status = 'active' AND revoked_at IS NULL", [account.rows[0].id]);
     });
   });
+
+  it("lets the artifact writer read page-text exceptions but never write them or read the admin audit (AQX)", async () => {
+    await stripPrivileges();
+    await applyServiceRoleGrants(pool);
+    await applyServiceRoleGrants(pool); // idempotent replay
+    const privileges = await pool.query(`SELECT
+      has_table_privilege($1, 'artifacts.host_actor_page_text_exceptions', 'SELECT') AS exception_read,
+      has_table_privilege($1, 'artifacts.host_actor_page_text_exceptions', 'INSERT') AS exception_insert,
+      has_table_privilege($1, 'artifacts.host_actor_page_text_exceptions', 'UPDATE') AS exception_update,
+      has_table_privilege($1, 'artifacts.host_actor_page_text_exceptions', 'DELETE') AS exception_delete,
+      has_table_privilege($1, 'artifacts.host_quota_admin_events', 'SELECT,INSERT,UPDATE,DELETE') AS audit_any,
+      has_table_privilege($1, 'artifacts.host_actor_quotas', 'UPDATE') AS actor_quota_update`,
+    [IMMO_MCP_ARTIFACT_WRITER_ROLE]);
+    expect(privileges.rows[0]).toEqual({ exception_read: true, exception_insert: false, exception_update: false,
+      exception_delete: false, audit_any: false, actor_quota_update: true });
+  });
 });
