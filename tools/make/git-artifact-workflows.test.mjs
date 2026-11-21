@@ -145,14 +145,15 @@ test('push triggers never match an artifact branch', () => {
 
 test('pull_request workflows ignore artifact targets and refuse artifact heads', () => {
   const prWorkflows = Object.entries(workflows).filter(([, w]) => 'pull_request' in triggers(w));
-  assert.deepEqual(prWorkflows.map(([f]) => f).sort(), ['branch-policy.yml', 'ci.yml']);
+  assert.deepEqual(prWorkflows.map(([f]) => f).sort(), ['branch-policy.yml', 'ci.yml', 'no-coauthor-trailer.yml']);
   for (const [f, w] of prWorkflows) {
     assert.ok(triggers(w).pull_request['branches-ignore'].includes('artifact/**'), `${f}: target filter`);
   }
-  const ci = workflows['ci.yml'];
-  for (const [name, job] of Object.entries(ci.jobs)) {
-    assert.ok(never(job.if, 'artifactPr'), `ci.yml/${name} runs for an artifact PR head`);
-    assert.ok(can(job.if, 'featurePr') && can(job.if, 'main'), `ci.yml/${name} still runs for ordinary refs`);
+  for (const wfName of ['ci.yml', 'no-coauthor-trailer.yml']) {
+    for (const [name, job] of Object.entries(workflows[wfName].jobs)) {
+      assert.ok(never(job.if, 'artifactPr'), `${wfName}/${name} runs for an artifact PR head`);
+      assert.ok(can(job.if, 'featurePr') && can(job.if, 'main'), `${wfName}/${name} still runs for ordinary refs`);
+    }
   }
 });
 
