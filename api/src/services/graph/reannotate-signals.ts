@@ -10,7 +10,7 @@ export interface ReannotationSignal {
   sourceRef: string | null;
 }
 export interface ReannotationIdentity {
-  source: "ai" | "manual"; model?: string | null; effort?: string | null;
+  source: "ai" | "manual"; classe?: string | null; model?: string | null; effort?: string | null;
   promptId?: string | null;
   promptSha256?: string | null; inputSha256?: string | null;
 }
@@ -82,6 +82,7 @@ export async function runReannotation(options: {
   sinceDays?: number;
   concurrency?: number;
   changedInputOnly?: boolean;
+  missingOnly?: boolean;
   actTimeoutMs?: number;
   runTimeoutMs?: number;
   shouldStop?: () => boolean;
@@ -115,6 +116,9 @@ export async function runReannotation(options: {
     try {
       const annotation = await options.repository.annotation(signal, abort);
       if (annotation?.source === "manual") { report.skippedManual++; return; }
+      if (options.missingOnly && annotation && annotation.classe !== "non_classe") {
+        report.skippedUnchanged++; return;
+      }
       const inputSha256 = reannotationInputSha256(signal);
       // A prior fallback result is valid for the same configured model pair
       // (muse receipts persist effort as "provider-default").
