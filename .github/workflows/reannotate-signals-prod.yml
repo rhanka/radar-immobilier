@@ -78,8 +78,8 @@ jobs:
         run: bash deploy/ci/reannotate-signals-prod.sh
 
       - name: Release prod writer lock
-        if: always()
+        if: always() && env.CUTOVER_LOCK_RUN != ''
         uses: ./deploy/cutover/lock-action
         with:
-          action: unlock
+          action: release-lock
           environment: prod
