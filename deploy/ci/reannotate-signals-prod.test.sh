@@ -60,7 +60,7 @@ EOF
 }
 
 write_base_job() {
-  local out="$1" mode="${2:-two-step}" fb_provider="${3:-muse}" fb_model="${4:-muse-wonder-1.0}"
+  local out="$1" mode="${2:-two-step}" fb_provider="${3:-muse}" fb_model="${4:-muse-wonder-1.0}" classify_model="${5:-gpt-6.2-astra}"
   cat > "$out" <<EOF
 {
   "apiVersion": "batch/v1",
@@ -81,7 +81,7 @@ write_base_job() {
               { "name": "REFRESH_SINGLE_PASS", "value": "0" },
               { "name": "REFRESH_CLASSIFY_MODE", "value": "${mode}" },
               { "name": "REFRESH_CLASSIFY_PROVIDER", "value": "openai" },
-              { "name": "REFRESH_CLASSIFY_MODEL", "value": "gpt-6-astra" },
+              { "name": "REFRESH_CLASSIFY_MODEL", "value": "${classify_model}" },
               { "name": "REFRESH_CLASSIFY_REASONING_EFFORT", "value": "low" },
               { "name": "REFRESH_CLASSIFY_FALLBACK_PROVIDER", "value": "${fb_provider}" },
               { "name": "REFRESH_CLASSIFY_FALLBACK_MODEL", "value": "${fb_model}" },
@@ -154,7 +154,7 @@ else
   bad "off mode refusal ($(cat "$S3/out.txt"))"
 fi
 
-# 4. Refuses CronJob with gemini fallback before creating any Job.
+# 4. Refuses CronJob with gemini fallback or stale gpt-6-astra before creating any Job.
 S4="$TMP/s4"; mkdir -p "$S4"
 write_base_job "$S4/base-job.json" "two-step" "gemini" "gemini-3.8-flash"
 if FAKE_KUBECTL_STATE="$S4" KUBECTL="$TMP/bin/kubectl" REANNOTATION_MODE="dry-run" bash "$SCRIPT" >"$S4/out.txt" 2>&1; then
@@ -163,6 +163,16 @@ elif [[ ! -f "$S4/created-job.json" ]] && grep -Fq "CronJob contract mismatch" "
   ok "refuses CronJob with gemini fallback before creating Job"
 else
   bad "gemini fallback refusal ($(cat "$S4/out.txt"))"
+fi
+
+S4b="$TMP/s4b"; mkdir -p "$S4b"
+write_base_job "$S4b/base-job.json" "two-step" "muse" "muse-wonder-1.0" "gpt-6-astra"
+if FAKE_KUBECTL_STATE="$S4b" KUBECTL="$TMP/bin/kubectl" REANNOTATION_MODE="dry-run" bash "$SCRIPT" >"$S4b/out.txt" 2>&1; then
+  bad "stale gpt-6-astra on CronJob was accepted"
+elif [[ ! -f "$S4b/created-job.json" ]] && grep -Fq "CronJob contract mismatch" "$S4b/out.txt"; then
+  ok "refuses CronJob with stale gpt-6-astra before creating Job"
+else
+  bad "stale gpt-6-astra refusal ($(cat "$S4b/out.txt"))"
 fi
 
 # 5. Refuses wrong apiserver host before creating any Job.
