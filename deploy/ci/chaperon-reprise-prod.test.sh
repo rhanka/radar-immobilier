@@ -214,5 +214,81 @@ else
   bad "workflow contract check failed"
 fi
 
+# 6. Prod container name ("api", not "radar-api") and list/array deploy.json shapes do not crash jq.
+S6A="$TMP/s6a"; mkdir -p "$S6A"
+cat > "$S6A/deploy.json" <<'EOF'
+{
+  "apiVersion": "apps/v1",
+  "kind": "Deployment",
+  "metadata": { "name": "radar-api", "namespace": "radar-immobilier" },
+  "spec": {
+    "template": {
+      "spec": {
+        "serviceAccountName": "radar-app",
+        "containers": [
+          {
+            "name": "sidecar",
+            "image": "ghcr.io/rhanka/sidecar:latest"
+          },
+          {
+            "name": "api",
+            "image": "ghcr.io/rhanka/radar-api@sha256:2222222222222222222222222222222222222222222222222222222222222222",
+            "envFrom": [{ "configMapRef": { "name": "radar-api" } }],
+            "env": [
+              { "name": "POSTGRES_USER", "valueFrom": { "secretKeyRef": { "name": "radar-db-credentials", "key": "POSTGRES_USER" } } }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
+EOF
+cp "$S1/job-status.json" "$S6A/job-status.json"
+cp "$S1/job.log" "$S6A/job.log"
+
+if FAKE_KUBECTL_STATE="$S6A" KUBECTL="$TMP/bin/kubectl" CHAPERON_REPRISE_CSV_PATH="$TMP/synthetic.csv" \
+    REPRISE_MODE="dry-run" REPRISE_POLL_SECONDS="0" bash "$SCRIPT" >"$S6A/out.txt" 2>&1 \
+  && jq -e '
+      .spec.template.spec.containers[0].image == "ghcr.io/rhanka/radar-api@sha256:2222222222222222222222222222222222222222222222222222222222222222"
+      and .spec.template.spec.serviceAccountName == "radar-app"
+    ' "$S6A/created-job.json" >/dev/null; then
+  ok "Deployment with prod container name 'api' selects api container without jq array-index crash"
+else
+  bad "prod container name 'api' ($(cat "$S6A/out.txt"))"
+fi
+
+S6B="$TMP/s6b"; mkdir -p "$S6B"
+jq -s '[{apiVersion:"apps/v1",kind:"Deployment",metadata:{name:"other"},spec:{template:{spec:{containers:[{name:"other",image:"ghcr.io/rhanka/other:latest"}]}}}}, .[0]]' "$S6A/deploy.json" > "$S6B/deploy.json"
+cp "$S1/job-status.json" "$S6B/job-status.json"
+cp "$S1/job.log" "$S6B/job.log"
+
+if FAKE_KUBECTL_STATE="$S6B" KUBECTL="$TMP/bin/kubectl" CHAPERON_REPRISE_CSV_PATH="$TMP/synthetic.csv" \
+    REPRISE_MODE="dry-run" REPRISE_POLL_SECONDS="0" bash "$SCRIPT" >"$S6B/out.txt" 2>&1 \
+  && jq -e '
+      .spec.template.spec.containers[0].image == "ghcr.io/rhanka/radar-api@sha256:2222222222222222222222222222222222222222222222222222222222222222"
+      and .spec.template.spec.serviceAccountName == "radar-app"
+    ' "$S6B/created-job.json" >/dev/null; then
+  ok "deploy.json as JSON array selects Deployment/radar-api cleanly"
+else
+  bad "deploy.json as JSON array ($(cat "$S6B/out.txt"))"
+fi
+
+S6C="$TMP/s6c"; mkdir -p "$S6C"
+jq '{apiVersion:"v1",kind:"List",items:.}' "$S6B/deploy.json" > "$S6C/deploy.json"
+cp "$S1/job-status.json" "$S6C/job-status.json"
+cp "$S1/job.log" "$S6C/job.log"
+
+if FAKE_KUBECTL_STATE="$S6C" KUBECTL="$TMP/bin/kubectl" CHAPERON_REPRISE_CSV_PATH="$TMP/synthetic.csv" \
+    REPRISE_MODE="dry-run" REPRISE_POLL_SECONDS="0" bash "$SCRIPT" >"$S6C/out.txt" 2>&1 \
+  && jq -e '
+      .spec.template.spec.containers[0].image == "ghcr.io/rhanka/radar-api@sha256:2222222222222222222222222222222222222222222222222222222222222222"
+      and .spec.template.spec.serviceAccountName == "radar-app"
+    ' "$S6C/created-job.json" >/dev/null; then
+  ok "deploy.json as Kubernetes List (.items) selects Deployment/radar-api cleanly"
+else
+  bad "deploy.json as Kubernetes List ($(cat "$S6C/out.txt"))"
+fi
+
 echo "chaperon-reprise-prod.test.sh: $PASS passed, $FAIL failed"
 [[ "$FAIL" -eq 0 ]]
