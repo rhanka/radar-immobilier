@@ -73,11 +73,11 @@ Fix three gaps behind issue #1164 in one PR (`Refs #1164`):
   - [x] Allow a `known` candidate to resolve an `ambiguous` sidecar in `api/src/services/sources/document-date-metadata.ts` without downgrading `ambiguous` to `unknown` or overwriting `known`.
   - [x] Add unit tests in `api/src/services/graph/refresh-corpus.test.ts`, `api/src/services/sources/document-date-metadata.test.ts`, and `api/src/services/graph/refresh-run.test.ts`.
 
-- [ ] **Lot 3 — Fix 1: Bounded classification retry on next refresh pass**
-  - [ ] Add configurable `REFRESH_CLASSIFY_RETRY_LIMIT` and `REFRESH_CLASSIFY_RETRY_WINDOW_DAYS` in `api/src/services/graph/refresh-classify-config.ts`.
-  - [ ] Add `missingOnly` and `preserveExistingAi` guards in `api/src/services/graph/reannotate-signals.ts`, `api/src/services/graph/class-annotations.ts`, and `api/src/services/graph/reannotate-repository.ts`.
-  - [ ] Wire `retryUnclassifiedRefreshSignals` in `api/src/services/graph/refresh-classify.ts` and `api/src/services/graph/refresh-run.ts`.
-  - [ ] Add unit and PostgreSQL integration tests in `api/src/services/graph/refresh-classify-config.test.ts`, `api/src/services/graph/refresh-classify.test.ts`, and `api/src/services/graph/refresh-two-step-db.test.ts`.
+- [x] **Lot 3 — Fix 1: Bounded classification retry on next refresh pass**
+  - [x] Add configurable `REFRESH_CLASSIFY_RETRY_LIMIT` and `REFRESH_CLASSIFY_RETRY_WINDOW_DAYS` in `api/src/services/graph/refresh-classify-config.ts`.
+  - [x] Add `missingOnly` and `preserveExistingAi` guards in `api/src/services/graph/reannotate-signals.ts`, `api/src/services/graph/class-annotations.ts`, and `api/src/services/graph/reannotate-repository.ts`.
+  - [x] Wire `retryUnclassifiedRefreshSignals` in `api/src/services/graph/refresh-classify.ts` and `api/src/services/graph/refresh-run.ts`.
+  - [x] Add unit and PostgreSQL integration tests in `api/src/services/graph/refresh-classify-config.test.ts`, `api/src/services/graph/refresh-classify.test.ts`, and `api/src/services/graph/refresh-two-step-db.test.ts`.
 
 - [ ] **Lot 4 — Gate, PR & report**
   - [ ] Run `make typecheck`, `make lint`, `make test-ui`, and scoped `make test-api` on `ENV=test-1164-dates`.
