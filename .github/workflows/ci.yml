@@ -125,6 +125,9 @@ jobs:
       - name: Validate prod 30d signal reannotation runner and workflow (hermetic, fake kubectl)
         run: bash deploy/ci/reannotate-signals-prod.test.sh
 
+      - name: Validate prod Chaperon triage reprise runner and workflow (hermetic, fake kubectl)
+        run: bash deploy/ci/chaperon-reprise-prod.test.sh
+
       - name: Validate manifest filter equivalence (fixtures and preprod render)
         run: bash deploy/ci/kfilter.test.sh
 

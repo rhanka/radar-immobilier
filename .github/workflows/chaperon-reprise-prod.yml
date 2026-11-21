@@ -1,0 +1,97 @@
+# chaperon-reprise-prod — manual, insert-only, idempotent import of the sealed
+# Chaperon Immobilier historical triage (reference set C) into production
+# personal signal facets (source='manual').
+#
+# Trigger: manual only (workflow_dispatch), on a release tag v* (refs/tags/v...),
+# gated by environment: production (deployment policy accepts v* tags only).
+# Example:
+#   gh workflow run chaperon-reprise-prod.yml --ref vX.Y.Z -f mode=dry-run
+#   gh workflow run chaperon-reprise-prod.yml --ref vX.Y.Z -f mode=apply -f confirm=agence-chaperon-immobilier
+name: Chaperon triage reprise (prod)
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Execution mode: dry-run (default, read-only) or apply (insert-only, idempotent, source='manual')"
+        required: true
+        type: choice
+        options:
+          - dry-run
+          - apply
+        default: dry-run
+      confirm:
+        description: "Required for mode=apply: exact workspace slug (agence-chaperon-immobilier)"
+        required: false
+        type: string
+        default: ""
+      owner_accounts:
+        description: "Optional comma-separated account UUIDs (empty = active members of client email domain)"
+        required: false
+        type: string
+        default: ""
+
+concurrency:
+  group: chaperon-reprise-prod
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  reprise:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    env:
+      NAMESPACE: radar-immobilier
+      TEMPLATE_PATH: deploy/ci/chaperon-reprise-prod.tmpl.yaml
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Refuse a version tag outside main history
+        if: startsWith(github.ref, 'refs/tags/')
+        run: bash deploy/ci/require-main-ancestry.sh
+
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.31.0'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Configure prod kubeconfig (radar-ci-deployer)
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        run: |
+          set -euo pipefail
+          if [ -z "${KUBE_CONFIG_DATA}" ]; then
+            echo "::error title=Missing credential::secret KUBE_CONFIG_DATA is empty or not visible."
+            exit 1
+          fi
+          mkdir -p "$HOME/.kube"
+          bash deploy/ci/write-kubeconfig.sh "${KUBE_CONFIG_DATA}"
+          chmod 600 "$HOME/.kube/config"
+
+      - uses: ./deploy/cutover/lock-action
+        with:
+          action: lock
+          environment: prod
+
+      - name: Run prod Chaperon triage reprise
+        env:
+          REPRISE_MODE: ${{ github.event.inputs.mode }}
+          REPRISE_CONFIRM: ${{ github.event.inputs.confirm }}
+          REPRISE_OWNER_ACCOUNTS: ${{ github.event.inputs.owner_accounts }}
+          REFERENCE_C_KEY: ${{ secrets.REFERENCE_C_KEY }}
+          EXPECTED_KUBE_APISERVER_HOST_PROD: ${{ vars.EXPECTED_KUBE_APISERVER_HOST_PROD || vars.EXPECTED_KUBE_APISERVER_HOST }}
+        run: bash deploy/ci/chaperon-reprise-prod.sh
+
+      - name: Release prod writer lock
+        if: always() && env.CUTOVER_LOCK_RUN != ''
+        uses: ./deploy/cutover/lock-action
+        with:
+          action: release-lock
+          environment: prod

@@ -61,7 +61,7 @@ test('all competing workflows acquire before mutations and release through alway
   for (const [file, jobs] of [['build-push-images.yml', ['deploy', 'deploy-preprod']],
     ['rollback.yml', ['rollback-preprod', 'rollback-prod']], ['run-job.yaml', ['run']], ['k8s-apply-mcp.yaml', ['apply']],
     ['bascule-bundle-cd.yml', ['apply-bundle', 'apply-backup']], ['backup-cd.yml', ['apply']],
-    ['reannotate-signals-prod.yml', ['reannotate']]]) {
+    ['reannotate-signals-prod.yml', ['reannotate']], ['chaperon-reprise-prod.yml', ['reprise']]]) {
     const w = workflow(file);
     for (const name of jobs) {
       const steps = w.jobs[name].steps;
