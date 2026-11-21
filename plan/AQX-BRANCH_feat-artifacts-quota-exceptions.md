@@ -77,8 +77,8 @@ embeds, configured Sentropic bucket origins).
   - [x] Declare exception AQX-EX1.
 
 - [ ] **Lot 1 — Data model and effective budget**
-  - [ ] Migration 0049: page-text exceptions and quota admin audit events.
-  - [ ] `readPageTextBudget` (exception if active, else 5 MiB default, 10 MiB cap).
+  - [x] Migration 0049: page-text exceptions and quota admin audit events.
+  - [x] `readPageTextBudget` (exception if active, else 5 MiB default, 10 MiB cap).
   - [ ] MCP writer role keeps read-only access to the admin tables.
 
 - [ ] **Lot 2 — Enforcement**
