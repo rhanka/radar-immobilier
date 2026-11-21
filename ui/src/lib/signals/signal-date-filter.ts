@@ -151,6 +151,11 @@ export function dateRangeFromSignalTimeRange(range: SignalTimeRange): SignalDate
   if (range.mode === "relative" && range.relative === "all") {
     return { start: null, end: null };
   }
+  // Relative presets ("7d", "1mo", …) keep an open upper bound so upcoming
+  // council sessions and agendas published ahead of their date stay visible.
+  if (range.mode === "relative") {
+    return { start: localDate(range.from), end: null };
+  }
   return { start: localDate(range.from), end: localDate(range.to) };
 }
 

@@ -278,8 +278,9 @@ describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
     const today = new Date();
     const weekAgo = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7);
     expect(vi.mocked(fetchGraphSignalsByCity)).toHaveBeenLastCalledWith({ workspaceId: TEST_WORKSPACE_ID }, expect.objectContaining({
-      dateBasis: "document", dateFrom: civil(weekAgo), dateTo: civil(today),
+      dateBasis: "document", dateFrom: civil(weekAgo),
     }));
+    expect(vi.mocked(fetchGraphSignalsByCity).mock.lastCall?.[1]?.dateTo).toBeUndefined();
   });
 
   it("(a) ?lots=0 : fetchAllLots N'EST PAS appelé, les zones se chargent quand même", async () => {

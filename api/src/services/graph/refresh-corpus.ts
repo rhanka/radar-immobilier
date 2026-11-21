@@ -158,7 +158,7 @@ function chunkDocument(doc: Omit<RefreshCorpusDocument, "chunks">): RefreshCorpu
     originalKey: doc.originalKey,
     sourceUrl: doc.sourceUrl,
     ...(doc.documentDate ? { documentDate: doc.documentDate } : {}),
-    ...(index === 0 && doc.documentDate?.status === "unknown" ? {
+    ...(index === 0 && (doc.documentDate?.status === "unknown" || doc.documentDate?.status === "ambiguous") ? {
       documentHeader: { page: 1, text: documentDateHeader(doc.pages[0]?.text ?? "") },
     } : {}),
     pages: [...new Set(chunk.pages)],
