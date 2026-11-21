@@ -20,6 +20,7 @@ Fix three gaps behind issue #1164 in one PR (`Refs #1164`):
   - `ui/src/lib/signals/signal-date-filter.ts`
   - `ui/src/lib/signals/signal-date-filter.test.ts`
   - `ui/src/lib/router/signal-query-v1-mapping.test.ts`
+  - `ui/src/lib/components/maps/SignauxMapView.test.ts`
   - `ui/e2e-qa/signals-period-perimeter.spec.ts`
   - `api/src/services/graph/refresh-corpus.ts`
   - `api/src/services/graph/refresh-corpus.test.ts`
