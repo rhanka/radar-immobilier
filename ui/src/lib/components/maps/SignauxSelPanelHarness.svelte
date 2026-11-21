@@ -11,6 +11,7 @@
   import SignauxSelPanel from "./SignauxSelPanel.svelte";
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
   import type { GraphSignalNode } from "$lib/signals/graph-signal-detail-client.js";
+  import type { ClassementEntry } from "$lib/signals/signal-classement.js";
   import type { GeoZonesResponse } from "$lib/maps/geo-zones-client.js";
   import type { LotsResponse } from "$lib/maps/lots-client.js";
   import {
@@ -47,6 +48,7 @@
   export let selectionState: SelectionBucketState = createSelectionBucketState();
   export let zonesResponse: GeoZonesResponse | null = null;
   export let lotsResponse: LotsResponse | null = null;
+  export let classementMap: ReadonlyMap<string, ClassementEntry> = new Map();
 
   // Miroir des filtres DONNÉES du parent (SignauxMapView) : l'état vit ici et
   // les en-têtes des accordéons remontent le nouveau filtre par callback.
@@ -106,6 +108,7 @@
   {selectionState}
   {zonesResponse}
   {lotsResponse}
+  {classementMap}
   {lotFilter}
   onLotFilterChange={handleLotFilterChange}
   {zoneKindFilter}
