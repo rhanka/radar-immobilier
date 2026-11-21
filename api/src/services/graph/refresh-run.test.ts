@@ -280,6 +280,41 @@ describe("documentary dates in the existing refresh", () => {
     expect(dated).not.toHaveProperty("publishedAt");
   });
 
+  it("should recover and persist a model date when the upstream documentDate is ambiguous", async () => {
+    const store = new MemoryStore();
+    const { record, chunk, document } = await undatedDocument(store);
+    const ambiguous = {
+      status: "ambiguous" as const,
+      candidates: ["2026-06-22", "2026-07-28"],
+      reason: "Multiple candidate dates in PDF page 1 header",
+    };
+    await store.put(rawMetaKey(record.storageKey), JSON.stringify({ ...record, documentDate: ambiguous }));
+    const extraction = sourceExtraction(`source-${record.sha256}`, record.sha256, record.storageKey, "2026-07-28");
+    const [dated] = await recoverRefreshDocumentDates(
+      store,
+      [{ ...document, documentDate: ambiguous }],
+      [{ chunk: { ...chunk, documentDate: ambiguous }, extraction }],
+    );
+    expect(dated).toMatchObject({
+      publishedAt: "2026-07-28",
+      fetchedAt: record.fetchedAt,
+      documentDate: { status: "known", value: "2026-07-28", method: "signal-llm", kind: "session" },
+    });
+    const persisted = JSON.parse(new TextDecoder().decode(await store.get(rawMetaKey(record.storageKey))));
+    expect(persisted).toMatchObject({
+      publishedAt: "2026-07-28",
+      documentDate: { status: "known", value: "2026-07-28", method: "signal-llm" },
+    });
+    const graph = extractionToV23Graph(extraction, {
+      municipality: "testville", generatedAt: "2026-10-01T00:00:00Z",
+      documents: [dated!], baseline: { nodes: [], edges: [] },
+    });
+    expect(graph.nodes[0]?.refs?.[0]).toMatchObject({
+      publishedAt: "2026-07-28",
+      documentDate: { status: "known", value: "2026-07-28", method: "signal-llm" },
+    });
+  });
+
   it("should reuse the published Source identity and date that baseline Source in the same refresh", async () => {
     const store = new MemoryStore();
     const { record, document } = await undatedDocument(store);

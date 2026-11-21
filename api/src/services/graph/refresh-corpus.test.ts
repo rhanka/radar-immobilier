@@ -53,6 +53,48 @@ describe("refresh corpus", () => {
       documentDate: { status: "known", method: "manifest" } });
     expect(corpus.chunks[0]?.documentHeader).toBeUndefined();
   });
+
+  it("should attach documentHeader for model fallback when header extraction is ambiguous", async () => {
+    const ambiguousHeader = "Procès-verbal de la séance du 12 octobre 2026 — adoption du PV du 14 septembre 2026";
+    const input = fixture(encoder.encode("ambiguous-header-pdf"), `${ambiguousHeader}\fpage two\f`);
+    const corpus = await materialize(input);
+    expect(corpus.documents[0]?.documentDate).toMatchObject({
+      status: "ambiguous",
+      candidates: ["2026-09-14", "2026-10-12"],
+    });
+    expect(corpus.chunks[0]?.documentHeader).toEqual({ page: 1, text: ambiguousHeader });
+  });
+
+  it("should attach documentHeader for model fallback when the sidecar stores an ambiguous date", async () => {
+    const header = "Séance ordinaire du conseil municipal du 9 novembre 2026";
+    const bytes = encoder.encode("ambiguous-sidecar-pdf");
+    const digest = sha(bytes);
+    const pdfKey = `raw/pv-waterloo/cas/${digest}.pdf`;
+    const metaKey = `${pdfKey}.meta.json`;
+    const manifest = `${HEADER}\npv-waterloo\twaterloo\t${digest}\t${pdfKey}\t${metaKey}\n`;
+    const corpus = await materializeRefreshCorpus({
+      citySlug: "waterloo",
+      manifestKey: "manifest.tsv",
+      reader: {
+        async get(key: string) {
+          if (key === "manifest.tsv") return encoder.encode(manifest);
+          if (key === pdfKey) return bytes;
+          if (key === metaKey) return encoder.encode(JSON.stringify({
+            sourceUrl: "https://ville.waterloo.qc.ca/pv.pdf",
+            documentDate: {
+              status: "ambiguous",
+              candidates: ["2026-10-12", "2026-11-09"],
+              reason: "Multiple candidate dates in PDF page 1 header",
+            },
+          }));
+          throw new Error(`missing ${key}`);
+        },
+      },
+      extractPdf: async () => `${header}\f`,
+    });
+    expect(corpus.documents[0]?.documentDate).toMatchObject({ status: "ambiguous" });
+    expect(corpus.chunks[0]?.documentHeader).toEqual({ page: 1, text: header });
+  });
   it("should anchor excerpts after typographic normalization without allowing paraphrases", () => {
     const page = "La demande de M. YvesMalouin vise la propriété désignée.";
     expect(containsNormalizedPdfExcerpt(page, "YVES-MALOUÏN vise la propriété")).toBe(true);
