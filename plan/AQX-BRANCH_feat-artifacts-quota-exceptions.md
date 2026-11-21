@@ -34,6 +34,7 @@ embeds, configured Sentropic bucket origins).
   - `api/src/artifacts/release-isolation.test.ts`
   - `api/src/db/service-role-grants.ts`
   - `api/tests/integration/artifacts-quota-exceptions.spec.ts`
+  - `api/tests/integration/service-role-grants.spec.ts`
   - `api/drizzle/0049_artifacts_quota_exceptions.sql`
   - `api/drizzle/meta/_journal.json`
   - `docs/operator/artefacts-mcp.md`
@@ -84,8 +85,8 @@ embeds, configured Sentropic bucket origins).
 
 - [ ] **Lot 2 — Enforcement**
   - [x] Upload create/commit, bundle totals and browser page channel read the effective budget.
-  - [x] MCP pre-validation checks the 10 MiB system ceiling only.
-  - [ ] Authoring guide carries the caller's effective `pageTextBudget`.
+  - [x] MCP pre-validation checks the caller's budget (default 5 MiB when unknown).
+  - [x] Authoring guide carries the caller's effective `pageTextBudget`.
 
 - [ ] **Lot 3 — Admin surface**
   - [ ] `GET/POST /api/v1/admin/artifacts/quotas/:actorId` (admin session only).

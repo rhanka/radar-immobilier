@@ -93,15 +93,21 @@ describe("artifact provider qualification", () => {
       files: [{ path: "index.html", mimeType: "text/html", text: "a".repeat(PUBLISH_MAX_FILE_BYTES + 1) }],
     })).toThrow();
 
-    // Pre-authority check of an out-of-model text/html upload: only the
-    // 10 MiB system maximum (the host applies the caller's effective budget,
-    // 5 MiB unless an admin exception is active); binary PNG accepts 10 MiB.
+    // Out-of-model text/html upload accepts <= 5 MiB and refuses > 5 MiB; binary PNG accepts 10 MiB.
     expect(() => validateArtifactInput("artifacts_create_upload", {
-      artifactId, mimeType: "text/html", maxSize: PUBLISH_MAX_FILE_BYTES + 1,
+      artifactId, mimeType: "text/html", maxSize: PUBLISH_MAX_FILE_BYTES,
     })).not.toThrow();
     expect(() => validateArtifactInput("artifacts_create_upload", {
-      artifactId, mimeType: "text/html", maxSize: 10 * 1024 * 1024 + 1,
+      artifactId, mimeType: "text/html", maxSize: PUBLISH_MAX_FILE_BYTES + 1,
     })).toThrow();
+    // AQX: with the caller's admin exception the same check admits up to 10 MiB, never above.
+    const exception = { maxFileBytes: 10 * 1024 * 1024, maxTotalBytes: 10 * 1024 * 1024 };
+    expect(() => validateArtifactInput("artifacts_create_upload", {
+      artifactId, mimeType: "text/html", maxSize: PUBLISH_MAX_FILE_BYTES + 1,
+    }, exception)).not.toThrow();
+    expect(() => validateArtifactInput("artifacts_create_upload", {
+      artifactId, mimeType: "text/html", maxSize: 10 * 1024 * 1024 + 1,
+    }, exception)).toThrow();
     expect(() => validateArtifactInput("artifacts_create_upload", {
       artifactId, mimeType: "image/png", maxSize: 10 * 1024 * 1024,
     })).not.toThrow();

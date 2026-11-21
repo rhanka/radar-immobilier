@@ -2,7 +2,7 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import { ArtifactProfileInputError, ARTIFACTS_PROVIDER_VERSION, compileArtifactsProfile, RADAR_ARTIFACTS_PROFILE } from "@sentropic/artifacts/mcp-core";
 import { gitProfileOperations, resolveGitMode, type GitArtifactTool } from "./git-mode/flag.js";
 import { isPageTextMimeType, PUBLISH_MAX_FILE_BYTES } from "./publish-policy.js";
-import { PAGE_TEXT_SYSTEM_MAX_BYTES, type PageTextBudget } from "./page-text-budget.js";
+import { DEFAULT_PAGE_TEXT_BUDGET, type PageTextBudget } from "./page-text-budget.js";
 
 /** Package qualification and deployment qualification are separate switches. */
 export const ARTIFACT_PROVIDER_VERSION: string = ARTIFACTS_PROVIDER_VERSION;
@@ -244,16 +244,12 @@ export function extractEnvelopeV1Metadata(
   return { strippedArgs: stripped, metadata: Object.freeze(meta) };
 }
 
-const PAGE_TEXT_SYSTEM_BUDGET = Object.freeze({
-  maxFileBytes: PAGE_TEXT_SYSTEM_MAX_BYTES, maxTotalBytes: PAGE_TEXT_SYSTEM_MAX_BYTES });
-
 /**
- * Page-text ceilings of one call. The host passes the caller's effective
- * budget (default 5 MiB, admin exception up to the system maximum); the
- * pre-authority MCP check knows no actor and applies the system maximum only.
+ * Page-text ceilings of one call against the caller's effective budget
+ * (default 5 MiB, admin exception up to the 10 MiB system maximum).
  */
 export function assertPageTextUploadArgs(tool: string, normalized: Record<string, unknown>,
-  budget: Pick<PageTextBudget, "maxFileBytes" | "maxTotalBytes"> = PAGE_TEXT_SYSTEM_BUDGET): void {
+  budget: Pick<PageTextBudget, "maxFileBytes" | "maxTotalBytes">): void {
   const { maxFileBytes, maxTotalBytes } = budget;
   if (tool === "artifacts_create_upload" && isPageTextMimeType(normalized.mimeType)) {
     if (typeof normalized.maxSize === "number" && normalized.maxSize > maxFileBytes) {
@@ -282,11 +278,15 @@ export function assertPageTextUploadArgs(tool: string, normalized: Record<string
   }
 }
 
-/** Defer CAS presence until after authorization and historical receipt lookup. Never fill it. */
-export function validateArtifactInput(tool: string, args: unknown) {
+/**
+ * Defer CAS presence until after authorization and historical receipt lookup. Never fill it.
+ * The page-text check uses the caller's budget when the transport knows it, else the default.
+ */
+export function validateArtifactInput(tool: string, args: unknown,
+  budget: Pick<PageTextBudget, "maxFileBytes" | "maxTotalBytes"> = DEFAULT_PAGE_TEXT_BUDGET) {
   const { strippedArgs } = extractEnvelopeV1Metadata(tool, args);
   const normalized = HOST_ARTIFACT_PROFILE.validate(tool, strippedArgs, undefined, { deferPrecondition: true });
-  assertPageTextUploadArgs(tool, normalized as Record<string, unknown>);
+  assertPageTextUploadArgs(tool, normalized as Record<string, unknown>, budget);
   return normalized;
 }
 
