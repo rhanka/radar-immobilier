@@ -21,10 +21,11 @@ describe("class annotation provenance", () => {
     expect(classAnnotationLabel({ ...node, classAnnotation: { ...node.classAnnotation!, ambiguous: false } })).not.toContain("ambigu");
     expect(withAiClassement(new Map(), [{ ...node, classAnnotation: undefined }]).size).toBe(0);
   });
-  it("should identify the exact AI and prompt while prioritizing manual changes", () => {
+  it("should identify the exact AI and prompt while returning null for untouched Non classé", () => {
     expect(classAnnotationLabel(node)).toBe("IA · gpt-6-astra medium · prompt v1");
     expect(classAnnotationLabel(node, true)).toBe("Manuel");
-    expect(classAnnotationLabel({ ...node, classAnnotation: undefined })).toBe("Manuel");
+    expect(classAnnotationLabel({ ...node, classAnnotation: undefined })).toBeNull();
+    expect(classAnnotationLabel({ ...node, classAnnotation: undefined }, true)).toBe("Manuel");
   });
   it.each(["gemini-3.8-flash", "gemini-2.5-pro", "custom-model", null, ""])(
     "should show the exact model identifier or a generic unknown label for %s", (model) => {
