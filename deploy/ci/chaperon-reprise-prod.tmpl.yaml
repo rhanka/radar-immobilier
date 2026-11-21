@@ -1,0 +1,33 @@
+# Declarative override contract applied to a one-shot Job derived from
+# Deployment/radar-api in namespace radar-immobilier by
+# deploy/ci/chaperon-reprise-prod.sh (.github/workflows/chaperon-reprise-prod.yml).
+#
+# Reuses Deployment/radar-api's pinned image digest, securityContext, ConfigMap
+# and PostgreSQL credentials to run the insert-only, idempotent Chaperon triage
+# reprise (source='manual' in facet_events).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ${JOB_NAME}
+  namespace: radar-immobilier
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 600
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: radar-chaperon-reprise
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: chaperon-reprise
+          workingDir: /workspace/api
+          command:
+            - node
+            - dist/scripts/chaperon-reprise-apply.js
+            - --${REPRISE_MODE}
+            - --allow-prod
+          env:
+            - name: CHAPERON_REPRISE_PLAN_B64
+              value: "${CHAPERON_REPRISE_PLAN_B64}"
