@@ -70,6 +70,9 @@ const harnessInput = qaHarness
       "basemap-menu": fileURLToPath(
         new URL("./e2e-qa/harness/basemap-menu.html", import.meta.url),
       ),
+      "badges-proposal": fileURLToPath(
+        new URL("./e2e-qa/harness/badges-proposal.html", import.meta.url),
+      ),
     }
   : undefined;
 
