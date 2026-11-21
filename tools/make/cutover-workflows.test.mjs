@@ -132,6 +132,28 @@ test('promote-prod applies drift check and schedules prod-drift-check without Se
   const tail = build.jobs['promote-prod'].steps.at(-1);
   assert.ok(tail.run.includes('git archive origin/main') && tail.run.includes('check-prod-drift.sh'));
 });
+test('promote-prod applies immo-mcp-config after cutover and before drift check, and reannotate targets v* tags', () => {
+  const build = workflow('build-push-images.yml');
+  const steps = build.jobs['promote-prod'].steps;
+  const run = steps.findIndex(s => s.name === 'Sequential cutover (same manifest as rehearsal)');
+  const applyCm = steps.findIndex(s => s.name === 'Apply immo-mcp-config ConfigMap (prod)');
+  const drift = steps.findIndex(s => s.name === 'Check production non-Deployment drift against main (read-only)');
+  assert.ok(run >= 0 && applyCm > run && drift > applyCm, 'immo-mcp-config apply runs after cutover and before drift check');
+  assert.equal(steps[applyCm].env.NAMESPACE, 'radar-immobilier');
+  assert.equal(steps[applyCm].run, 'bash deploy/ci/apply-prod-immo-mcp-config.sh');
+  const reg = JSON.parse(readFileSync('deploy/ci/prod-cd-paths.json', 'utf8'));
+  const mcpEntries = reg.cdPaths.filter(e => e.path === 'deploy/k8s/immo-mcp/40-immo-mcp-http-deploy.yaml' || e.path === 'deploy/k8s/immo-mcp/kustomization.yaml');
+  assert.equal(mcpEntries.length, 2);
+  for (const entry of mcpEntries) {
+    assert.equal(entry.workflow, '.github/workflows/build-push-images.yml');
+    assert.equal(entry.workflowRef, 'apply-prod-immo-mcp-config.sh');
+    assert.ok(entry.objects.includes('ConfigMap/immo-mcp-config'));
+  }
+  const reann = workflow('reannotate-signals-prod.yml');
+  assert.deepEqual(Object.keys(reann.on), ['workflow_dispatch']);
+  assert.equal(reann.jobs.reannotate.environment, 'production');
+  assert.equal(reann.jobs.reannotate.if, "startsWith(github.ref, 'refs/tags/v')");
+});
 test('bascule-bundle-cd proves lock RBAC before creating the lock and always releases it', () => {
   const w = workflow('bascule-bundle-cd.yml');
   for (const name of ['apply-bundle', 'apply-backup']) {

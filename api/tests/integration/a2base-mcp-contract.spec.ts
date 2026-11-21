@@ -11,6 +11,7 @@ describe("T10/T12 contract parity without runtime cross-workspace imports", () =
     expect(EXCHANGE_DEFAULT_POLICY_REVISION).toBe(STRICT_RECEIVER_POLICY_REVISION);
     const body = signalSearchBody("quebec", [signalSearchItem("quebec")]);
     expect(McpSignalSearchResponse.parse(body)).toEqual(body);
-    expect(parseSignalSearchResponse(body, { city: "quebec", limit: 20 })).toEqual(body.signals);
+    expect(parseSignalSearchResponse(body, { city: "quebec", limit: 20 }))
+      .toEqual({ signals: body.signals, workspaceId: body.workspaceId });
   });
 });

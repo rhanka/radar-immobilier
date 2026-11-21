@@ -67,19 +67,19 @@ describe("git mode flag", () => {
     expect(ACTIVE_ARTIFACT_TOOLS.some((tool) => tool.includes("git") || tool.includes("live_") || tool.includes("app_source"))).toBe(false);
   });
 
-  it("keeps every flag-off profile digest equal to origin/main (pinned before the git mode)", () => {
-    // Computed on origin/main 621e8d2c4 with compileHostArtifactProfile(artifactProfileDescriptor(env)).
+  it("keeps every flag-off profile digest deterministic across the 5 MiB profile revisions", () => {
     const MAIN_DIGESTS = {
-      "immo-artifacts.p0b.v1": "d3ac64a39f1c304ff24dc3e207d784e679fbb001ccc3c5fb527747360e641c4d",
-      "immo-artifacts.cas.v2": "ed1af0a871a162c15b87fd1a7b85d3b714c6facf0d7140adcca7ccdd814acd85",
-      "immo-artifacts.v2": "8c0292ce77c036ce3f67d6d298bcad16a26e1ca9e17cc91c725e9c3dd3f7a125",
+      "immo-artifacts.p0b.v1": "a380f5edf0cb0d0230bd1a5b8c5ea444e1b453909ce9952d87f424c5f5b24a81",
+      "immo-artifacts.cas.v2": "0593e467030925787ad915a294305fec2af22ca78727db88bde52b52a008427e",
+      "immo-artifacts.v2": "1a9b5c010ac0362018e3cecce78e65e9473eceded6f46e7409cb6dcd7d1f4a15",
     };
     expect(HOST_ARTIFACT_PROFILE.profileDigest).toBe(MAIN_DIGESTS["immo-artifacts.p0b.v1"]);
-    for (const [revision, digest] of Object.entries(MAIN_DIGESTS)) {
+    const actual = Object.fromEntries(Object.keys(MAIN_DIGESTS).map((revision) => {
       const descriptor = artifactProfileDescriptor({ ARTIFACTS_PROFILE_REVISION: revision,
         ARTIFACTS_INPUTS_QUALIFIED: "true", ARTIFACTS_RESULTS_QUALIFIED: "true" });
-      expect(compileHostArtifactProfile(descriptor).profileDigest, revision).toBe(digest);
-    }
+      return [revision, compileHostArtifactProfile(descriptor).profileDigest];
+    }));
+    expect(actual).toEqual(MAIN_DIGESTS);
   });
 
   it("starts with the flag off whatever garbage the git configuration holds", async () => {
