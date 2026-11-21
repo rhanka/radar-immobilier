@@ -35,7 +35,11 @@ export type AiClassAnnotation = ClassAnnotation & {
 };
 
 /** Human history, including deselections and restored archives, remains authoritative. */
-export async function writeClassAnnotation(db: Database, input: AiClassAnnotation): Promise<"written" | "manual" | "noop"> {
+export async function writeClassAnnotation(
+  db: Database,
+  input: AiClassAnnotation,
+  options: { preserveExistingAi?: boolean } = {},
+): Promise<"written" | "manual" | "noop"> {
   return db.transaction(async (tx) => {
     await tx.execute(sql`SET LOCAL statement_timeout = '5s'`);
     await tx.execute(sql`SET LOCAL lock_timeout = '1s'`);
@@ -49,6 +53,12 @@ export async function writeClassAnnotation(db: Database, input: AiClassAnnotatio
       AND city_slug = ${input.citySlug} AND node_type = ${input.nodeType} AND node_id = ${input.nodeId}
       AND source = 'manual' LIMIT 1`);
     if (manual.rows.length) return "manual";
+    const updateGuard = options.preserveExistingAi
+      ? sql`signal_class_annotations.source = 'ai' AND signal_class_annotations.classe = 'non_classe'`
+      : sql`signal_class_annotations.source = 'ai' AND
+        (signal_class_annotations.prompt_sha256,signal_class_annotations.input_sha256,
+         signal_class_annotations.model,signal_class_annotations.effort) IS DISTINCT FROM
+        (EXCLUDED.prompt_sha256,EXCLUDED.input_sha256,EXCLUDED.model,EXCLUDED.effort)`;
     const result = await tx.execute(sql`INSERT INTO signal_class_annotations
       (city_slug,node_type,node_id,classe,reason,ambiguous,source,model,effort,prompt_id,prompt_sha256,pipeline_run_id,input_sha256)
       VALUES (${input.citySlug},${input.nodeType},${input.nodeId},${input.classe},${input.reason},${input.ambiguous ?? false},'ai',
@@ -57,10 +67,7 @@ export async function writeClassAnnotation(db: Database, input: AiClassAnnotatio
         reason = EXCLUDED.reason, ambiguous = EXCLUDED.ambiguous, model = EXCLUDED.model, effort = EXCLUDED.effort,
         prompt_id = EXCLUDED.prompt_id, prompt_sha256 = EXCLUDED.prompt_sha256,
         pipeline_run_id = EXCLUDED.pipeline_run_id, input_sha256 = EXCLUDED.input_sha256, updated_at = now()
-      WHERE signal_class_annotations.source = 'ai' AND
-        (signal_class_annotations.prompt_sha256,signal_class_annotations.input_sha256,
-         signal_class_annotations.model,signal_class_annotations.effort) IS DISTINCT FROM
-        (EXCLUDED.prompt_sha256,EXCLUDED.input_sha256,EXCLUDED.model,EXCLUDED.effort)
+      WHERE ${updateGuard}
       RETURNING node_id`);
     if (result.rows.length) {
       await bumpClassAnnotationRevision(tx, input.citySlug);
