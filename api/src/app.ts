@@ -32,6 +32,7 @@ import { geoGovernedRoute } from "./routes/geo-governed.js";
 import { signalsDetailRoute } from "./routes/signals-detail.js";
 import { opportunitesRoute } from "./routes/opportunites.js";
 import { adminRoute } from "./routes/admin.js";
+import { adminArtifactQuotaRoute } from "./routes/admin-artifact-quotas.js";
 import { admissionRoute, type AdmissionRouteDeps } from "./admission/route.js";
 import { dataQualityRoute, type DataQualityDeps } from "./routes/data-quality.js";
 import { sourceCoverageRoute } from "./routes/source-coverage.js";
@@ -229,6 +230,9 @@ export function createApp(deps: AppDeps): Hono {
             : { appBaseUrl: deps.auth.appBaseUrl }),
         }),
       );
+      // AQX: admin-managed artifact quota exceptions, same admin authority.
+      app.route("/", adminArtifactQuotaRoute({ db: deps.db, sessionSecret: deps.auth.sessionSecret,
+        storageScope: deps.artifactsControl?.storageScope }));
     }
   }
 

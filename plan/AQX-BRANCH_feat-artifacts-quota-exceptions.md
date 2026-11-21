@@ -89,7 +89,7 @@ embeds, configured Sentropic bucket origins).
   - [x] Authoring guide carries the caller's effective `pageTextBudget`.
 
 - [ ] **Lot 3 — Admin surface**
-  - [ ] `GET/POST /api/v1/admin/artifacts/quotas/:actorId` (admin session only).
+  - [x] `GET/POST /api/v1/admin/artifacts/quotas/:actorId` (admin session only).
   - [ ] Actor quota raise/reset, scope limit raise, page-text exception, upload-session expiry, audit rows.
 
 - [ ] **Lot 4 — External heavy media**

@@ -66,11 +66,12 @@ export const StatusBody = z.object({
 
 /**
  * Resolve the session and check that the requester is an admin.
- * Returns the admin account on success, or an error Response.
+ * Returns the admin account on success, or an error Response. Shared by
+ * every /api/v1/admin route family (accounts, artifact quotas).
  */
-async function requireAdmin(
+export async function requireAdmin(
   c: Context,
-  deps: AdminDeps,
+  deps: Pick<AdminDeps, "db" | "sessionSecret" | "now">,
 ): Promise<{ sub: string } | Response> {
   const nowFn = deps.now ?? (() => Date.now());
   const token = getCookie(c, SESSION_COOKIE_NAME);
@@ -102,7 +103,7 @@ async function requireAdmin(
   return { sub: session.sub };
 }
 
-function isResponse(v: unknown): v is Response {
+export function isResponse(v: unknown): v is Response {
   return v instanceof Response || (typeof v === "object" && v !== null && "status" in v && "headers" in v);
 }
 
