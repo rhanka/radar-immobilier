@@ -12,8 +12,11 @@ export interface SignalMcpRef {
   type: "Signal" | "DesignationEvent"; id: string;
 }
 export interface SignalMcpEntry {
-  id: string; source: "mcp" | "manual" | "ai"; model: string | null;
+  id: string; source: "mcp" | "manual" | "ai"; source_tag?: string | null; sourceTag?: string | null;
+  model: string | null;
   validation: "auto" | "human"; pending_human?: boolean; scope?: "personal" | "workspace";
+  elicitation_id?: string | null; elicitationId?: string | null;
+  elicitation_accepted_at?: string | null; elicitationAcceptedAt?: string | null;
   actor_id?: string; linked_event_id?: string; reason_code?: string; classe?: "pertinent" | "a_surveiller" | "ecarte" | "non_classe";
   reason?: string; text?: string; created_at: string;
 }
@@ -67,10 +70,10 @@ export async function decideSignalMcp(db: Database, sub: string, ref: SignalMcpR
     }
     if (choice.classe === "ecarte" && !code) throw new FacetError(422, "reason_code_required");
     const append = async (scope: string, classe: string) => tx.execute(sql`INSERT INTO signal_mcp_events
-      (workspace_id,actor_id,scope,city_slug,node_type,node_id,kind,source,oauth_sub,validation,
+      (workspace_id,actor_id,scope,city_slug,node_type,node_id,kind,source,source_tag,oauth_sub,validation,
         classe,reason_code,reason,previous_version,linked_event_id,verdict)
       VALUES (${ref.workspaceId},${actor},${scope},${ref.citySlug},${ref.type},${ref.id},
-        'class','manual',${sub},'human',${classe},${code ?? null},${choice.confirm ? "Validated: " + current.reason : "UI reclassification"},
+        'class','manual','manual',${sub},'human',${classe},${code ?? null},${choice.confirm ? "Validated: " + current.reason : "UI reclassification"},
         ${version},${current.id},${choice.confirm ? "up" : null}) RETURNING id`);
     if (current.scope === "workspace" && choice.classe !== "ecarte") await append("workspace", "non_classe");
     await append(current.scope === "workspace" && choice.classe === "ecarte" ? "workspace" : "personal", choice.classe);

@@ -34,14 +34,16 @@ async function fixture() {
   return { ...f, target, fingerprint, ref, body, read, write };
 }
 describe.skipIf(process.env.MCP_SIGNAL_DB_TEST !== "1")("scoped MCP PostgreSQL", () => {
-  it("should replay migration 0048 without changing existing events, audit or protections", async () => {
+  it("should replay migration 0048 and 0049 without changing existing events, audit or protections", async () => {
     const f = await fixture();
     expect(await f.write()).toHaveProperty("id");
     const state = await f.read();
     const audit = await f.pool.query("SELECT * FROM signal_mcp_audit ORDER BY id");
-    const sql = readFileSync(new URL("../../../drizzle/0048_signal_mcp_write.sql", import.meta.url), "utf8");
+    const sql48 = readFileSync(new URL("../../../drizzle/0048_signal_mcp_write.sql", import.meta.url), "utf8");
+    const sql49 = readFileSync(new URL("../../../drizzle/0049_signal_mcp_elicitation_human.sql", import.meta.url), "utf8");
     for (let replay = 0; replay < 2; replay++) {
-      await f.pool.query(sql);
+      await f.pool.query(sql48);
+      await f.pool.query(sql49);
       expect(await f.read()).toEqual(state);
       expect((await f.pool.query("SELECT * FROM signal_mcp_audit ORDER BY id")).rows).toEqual(audit.rows);
       for (const table of ["signal_mcp_events", "signal_mcp_audit"]) {
@@ -51,19 +53,39 @@ describe.skipIf(process.env.MCP_SIGNAL_DB_TEST !== "1")("scoped MCP PostgreSQL",
     }
     expect(await f.write({ ...f.body, classe: "a_surveiller", reasonCode: "S-PLANIFIE" })).toHaveProperty("id");
   });
-  it("should reject fabricated human validation in the function and table CHECK", async () => {
+  it("should record accepted elicitation as human with mcp+elicitation source tag and reject forged human rows", async () => {
     const f = await fixture();
     expect(await f.write(f.body, "human")).toEqual({ error: "invalid_signal_command" });
-    // No callable writer lets the MCP path choose source or validation.
+    // No callable writer lets the MCP path choose source or validation directly.
     expect((await f.pool.query(`SELECT count(*)::int AS n FROM pg_proc
       WHERE proname IN ('signal_mcp_write')`)).rows).toEqual([{ n: 0 }]);
+    // Without elicitationId/elicitationAcceptedAt, MCP remains auto/mcp.
     await f.write({ ...f.body, pendingHuman: true });
-    expect((await f.pool.query(`SELECT source,validation FROM signal_mcp_events`)).rows)
-      .toEqual([{ source: "mcp", validation: "auto" }]);
+    expect((await f.pool.query(`SELECT source,source_tag,validation,elicitation_id FROM signal_mcp_events`)).rows)
+      .toEqual([{ source: "mcp", source_tag: "mcp", validation: "auto", elicitation_id: null }]);
+    // Direct forged human row without elicitation_id + source_tag='mcp+elicitation' fails table CHECK.
     await expect(f.pool.query(`INSERT INTO signal_mcp_events(workspace_id,actor_id,scope,city_slug,node_type,node_id,
-      kind,source,model,client_id,oauth_sub,validation,classe,reason,previous_version)
-      SELECT workspace_id,actor_id,scope,city_slug,node_type,node_id,kind,source,model,client_id,oauth_sub,
+      kind,source,source_tag,model,client_id,oauth_sub,validation,classe,reason,previous_version)
+      SELECT workspace_id,actor_id,scope,city_slug,node_type,node_id,kind,source,'mcp',model,client_id,oauth_sub,
         'human',classe,reason,previous_version FROM signal_mcp_events`)).rejects.toThrow(/check constraint/);
+    // Accepted elicitation produces validation='human', source_tag='mcp+elicitation', and full trace.
+    const elicitationId = randomUUID();
+    const elicitationAcceptedAt = new Date().toISOString();
+    const res = await f.write({ ...f.body, classe: "a_surveiller", reasonCode: "S-PLANIFIE",
+      elicitationId, elicitationAcceptedAt, elicitationStatus: "accepted" });
+    expect(res).toMatchObject({ id: expect.any(String), validation: "human", sourceTag: "mcp+elicitation", elicitationId });
+    const state = await f.read();
+    expect(state.current).toMatchObject({
+      source: "mcp", sourceTag: "mcp+elicitation", validation: "human", pending_human: false,
+      elicitationId, actor_id: f.contributor.id, user: f.contributor.sub, classe: "a_surveiller",
+    });
+    expect(state.canConfirm).toBe(false);
+    // Automatic MCP write and newer AI refresh never supersede an mcp+elicitation human class.
+    expect(await f.write()).toEqual({ error: "classification_priority_conflict" });
+    await writeClassAnnotation(f.db, { citySlug: f.target.citySlug, nodeType: f.target.type, nodeId: f.target.id,
+      classe: "ecarte", reason: "Newer AI", source: "ai", model: "refresh-model", effort: "low",
+      promptId: "v2", promptSha256: "a".repeat(64), pipelineRunId: "refresh-2", inputSha256: "b".repeat(64) });
+    expect((await f.read()).current).toMatchObject({ source: "mcp", sourceTag: "mcp+elicitation", validation: "human", classe: "a_surveiller" });
   });
   it("should persist a browser Non classé override and link it to the MCP event", async () => {
     const f = await fixture();

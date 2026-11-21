@@ -33,11 +33,21 @@ describe("MCP signal write guards", () => {
     expect(f.confirm).toHaveBeenCalledOnce();
     expect(f.confirm.mock.calls[0]![0]).toContain('"version":"v1"');
   });
-  it("should keep automatically accepted elicitation automatic and pending", async () => {
+  it("should pass server-generated elicitation trace on accepted elicitation and omit it otherwise", async () => {
     const f = fixture();
-    expect(parse(await invokeSignalTool("classify_signal", { ...input, humanConfirmed: true }, f.ctx))).toMatchObject({ validation: "auto" });
-    expect(JSON.parse(String(f.query.mock.calls.at(-1)![1][3]))).toHaveProperty("pendingHuman", true);
+    expect(parse(await invokeSignalTool("classify_signal", { ...input, humanConfirmed: true }, f.ctx))).toMatchObject({ id: "event-1" });
+    const acceptedPayload = JSON.parse(String(f.query.mock.calls.at(-1)![1][3]));
+    expect(acceptedPayload).toMatchObject({
+      pendingHuman: false,
+      elicitationStatus: "accepted",
+      elicitationId: expect.any(String),
+      elicitationAcceptedAt: expect.any(String),
+    });
     expect(parse(await invokeSignalTool("classify_signal", input, f.ctx))).toMatchObject({ validation: "auto" });
+    const autoPayload = JSON.parse(String(f.query.mock.calls.at(-1)![1][3]));
+    expect(autoPayload.elicitationStatus).toBe("not_requested");
+    expect(autoPayload.elicitationId).toBeUndefined();
+    expect(autoPayload.elicitationAcceptedAt).toBeUndefined();
   });
   it("should reject negative feedback without a new class before eliciting", async () => {
     const f = fixture();

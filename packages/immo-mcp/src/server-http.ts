@@ -263,12 +263,18 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
   const signalRuntime = (server: McpServer): SignalRuntime | undefined => deps.signals ? {
     db: deps.signals,
     async confirm(message) {
-      if (!server.server.getClientCapabilities()?.elicitation) return false;
+      if (!server.server.getClientCapabilities()?.elicitation) {
+        return { accepted: false, status: "unsupported" };
+      }
+      const elicitationId = randomUUID();
       const response = await server.server.elicitInput({ mode: "form", message,
         requestedSchema: { type: "object", properties: { confirm: { type: "boolean",
-          title: "Confirm this signal change", description: "Accept the displayed change as a human decision." } },
+          title: "Confirm this signal change", description: "Accept the displayed change as a human decision (recorded with source tag mcp+elicitation)." } },
         required: ["confirm"] } }, { timeout: 60_000 });
-      return response.action === "accept" && response.content?.confirm === true;
+      if (response.action === "accept" && response.content?.confirm === true) {
+        return { accepted: true, status: "accepted", elicitationId, acceptedAt: new Date().toISOString() };
+      }
+      return { accepted: false, status: "declined" };
     },
   } : undefined;
 
