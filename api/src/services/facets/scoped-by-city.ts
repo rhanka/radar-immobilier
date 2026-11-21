@@ -69,7 +69,7 @@ async function readScopedSignalClassement(
       LEFT JOIN signal_class_annotations a ON a.source='ai' AND a.city_slug=e.city_slug
         AND a.node_type=e.node_type AND a.node_id=e.node_id
       WHERE e.workspace_id=${workspaceId} AND (e.scope='workspace' OR e.actor_id=${accountId}) AND e.kind IN ('class','feedback')
-        AND NOT (e.scope='workspace' AND e.source='mcp' AND NOT EXISTS (
+        AND NOT (e.scope='workspace' AND e.source='mcp' AND e.validation='auto' AND NOT EXISTS (
           SELECT 1 FROM signal_mcp_events c WHERE c.linked_event_id=e.id AND c.source='manual'))
       ORDER BY e.city_slug, e.node_type, e.node_id,
         (e.validation='human') DESC, (e.created_at) DESC, e.id DESC`);

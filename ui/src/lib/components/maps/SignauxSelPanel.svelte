@@ -97,10 +97,11 @@
   import SignalClassementMenu from "$lib/components/maps/SignalClassementMenu.svelte";
   import SignalClassFeedback from "$lib/components/maps/SignalClassFeedback.svelte";
   import type { FeedbackChoice } from "$lib/signals/class-feedback-client.js";
-  import { classAnnotationLabel } from "$lib/signals/class-annotation-label.js";
-  import { mcpBadge } from "$lib/signals/signal-mcp-client.js";
+  import { aiAnnotationLabel, humanAnnotationLabel } from "$lib/signals/class-annotation-label.js";
+  import { isMcpElicitationHuman, mcpBadge } from "$lib/signals/signal-mcp-client.js";
   import SignalMcpNotes from "./SignalMcpNotes.svelte";
   import {
+    CLASSEMENT_META,
     classementKey,
     EMPTY_CLASSEMENT_ENTRY,
     type ClassementEntry,
@@ -1207,7 +1208,14 @@
                 {@const classementEntry = classementMap.get(classementKey(node.type, node.id, node.citySlug)) ?? EMPTY_CLASSEMENT_ENTRY}
                 {@const cardClassementKey = classementKey(node.type, node.id, node.citySlug)}
                 {@const cardClassementError = classementErrors.get(cardClassementKey)}
-                {@const hasManualClass = classementEntry.annotationSource === "manual" || !!(classementEntry.pertinentExpectedHeadId || classementEntry.aSurveillerExpectedHeadId || classementEntry.archiveHeadId || classementEntry.archiveRestores.length)}
+                {@const mcpCurrent = node.signalAnnotations?.current ?? null}
+                {@const hasMcpClass = mcpCurrent?.source === "mcp"}
+                {@const mcpHuman = hasMcpClass && isMcpElicitationHuman(mcpCurrent)}
+                {@const hasManualFacet = !!(classementEntry.pertinentExpectedHeadId || classementEntry.aSurveillerExpectedHeadId || classementEntry.archiveHeadId || classementEntry.archiveRestores.length)}
+                {@const hasManualClass = classementEntry.annotationSource === "manual" || hasManualFacet}
+                {@const humanBadge = (!hasMcpClass || hasManualFacet) ? humanAnnotationLabel(node, hasManualClass) : null}
+                {@const aiBadge = aiAnnotationLabel(node)}
+                {@const hasHumanClass = Boolean(humanBadge || mcpHuman || node.classFeedback)}
                 <!-- #86 — fiche : ancre de scroll (data-signal-node) + état
                      cross-survolé quand le viewer survole ce signal. Survoler
                      la fiche notifie le parent (→ le surlignage PDF pulse). -->
@@ -1234,14 +1242,19 @@
                     on:click={() => toggleEntity(key)}
                   >
                     <span class="sel-entity-label">{node.label}</span>
-                    {#if node.classAnnotation?.source === "ai" || node.signalAnnotations?.current?.source !== "mcp" || hasManualClass}
-                    <span class="signal-stage-badge" title={node.classAnnotation?.source === "ai" && !hasManualClass ? node.classAnnotation.reason : undefined}>
-                      {classAnnotationLabel(node, hasManualClass)}
-                    </span>
+                    {#if humanBadge}
+                      <span class="signal-stage-badge signal-provenance-badge" data-testid="signal-human-badge">
+                        {humanBadge}
+                      </span>
                     {/if}
-                    {#if node.signalAnnotations?.current?.source === "mcp" && !hasManualClass}
-                      <span class="signal-stage-badge" title={node.signalAnnotations.current.reason}>
-                        {mcpBadge(node.signalAnnotations.current)}
+                    {#if hasMcpClass && !hasManualFacet && mcpCurrent}
+                      <span class="signal-stage-badge signal-provenance-badge" data-testid="signal-mcp-badge" title={mcpCurrent.reason}>
+                        {mcpBadge(mcpCurrent)}
+                      </span>
+                    {/if}
+                    {#if aiBadge}
+                      <span class="signal-stage-badge signal-provenance-badge" data-testid="signal-ai-badge" title={node.classAnnotation?.reason}>
+                        {aiBadge}
                       </span>
                     {/if}
                     {#if isPiiaLie(node)}
@@ -1259,7 +1272,7 @@
                          (« instrument, étape », ex. « Rezonage, avis de motion »).
                          Rendue en TOUT mode, source = classification vivier v2 si
                          posée, sinon props.etape/instrument. Étape inconnue →
-                         aucune bulle (repli honnête). L'effet densifiant N'EST
+                         aucune bulle. L'effet densifiant N'EST
                          PLUS affiché (pas encore détecté de façon fiable). -->
                     {#if stageLabel}
                       <span class="signal-stage-badge" data-testid="signal-stage-badge">
@@ -1267,11 +1280,11 @@
                       </span>
                     {/if}
                   </button>
-                  {#if node.signalAnnotations?.current?.source === "mcp" && node.signalAnnotations.canConfirm && !hasManualClass}
+                  {#if hasMcpClass && mcpCurrent && mcpCurrent.validation !== "human" && node.signalAnnotations?.canConfirm && !hasManualClass}
                     <button type="button" aria-label="Confirmer la classification MCP" disabled={classementInFlight.has(cardClassementKey) || !!classementEntry.restoreBlockedReason}
                       on:click={() => onApplyClassement(node, classementEntry.classe, classementEntry.reasonCode)}>👍</button>
                   {/if}
-                  {#if node.classAnnotation?.source === "ai" && !hasManualClass && !node.classFeedback && node.signalAnnotations?.current?.source !== "mcp"}
+                  {#if node.classAnnotation?.source === "ai" && !hasHumanClass && !hasMcpClass}
                     <div class="signal-feedback-control">
                       <SignalClassFeedback classe={node.classAnnotation.classe} reasonCodes={classementReasonCodes}
                         disabled={classementInFlight.has(cardClassementKey)} restoreBlockedReason={classementEntry.restoreBlockedReason}
@@ -1310,11 +1323,13 @@
                     <SignalMcpNotes annotations={node.signalAnnotations} workspaceId={node.annotationsWorkspaceId}
                       target={{ citySlug: node.citySlug, type: node.type, id: node.id }} />
                   {/if}
-                  {#if node.signalAnnotations?.current?.source === "mcp" && !hasManualClass}
-                    <p class="classement-error-detail">{node.signalAnnotations.current.reason}</p>
+                  {#if hasMcpClass && !hasManualFacet && mcpCurrent?.reason}
+                    <p class="classement-error-detail" data-testid="signal-mcp-reason">{mcpCurrent.reason}</p>
                   {/if}
-                  {#if node.classAnnotation?.source === "ai" && !hasManualClass && node.classAnnotation.reason}
-                    <p class="classement-error-detail">{node.classAnnotation.reason}</p>
+                  {#if node.classAnnotation?.source === "ai" && node.classAnnotation.reason}
+                    <p class="classement-error-detail" data-testid="signal-ai-reason">
+                      {#if hasHumanClass}Classe IA ({CLASSEMENT_META[node.classAnnotation.classe].label}) : {/if}{node.classAnnotation.reason}
+                    </p>
                   {/if}
                   {#if cardClassementError && openClassementErrorKey === cardClassementKey}
                     <p class="classement-error-detail" data-testid="classement-error-detail">{cardClassementError}</p>
@@ -2599,6 +2614,13 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .signal-provenance-badge {
+    border-radius: 0.5rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.25;
   }
 
   .entity-summary {

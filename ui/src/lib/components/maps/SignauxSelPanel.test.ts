@@ -13,6 +13,12 @@ import { render, fireEvent, cleanup } from "@testing-library/svelte";
 import type { MunicipalityT } from "@radar/domain";
 import type { CityMapEntry } from "$lib/maps/maps-data.js";
 import type { GraphSignalNode } from "$lib/signals/graph-signal-detail-client.js";
+import {
+  classementKey,
+  EMPTY_CLASSEMENT_ENTRY,
+  withAiClassement,
+  type ClassementEntry,
+} from "$lib/signals/signal-classement.js";
 import type { GeometryProvenanceStatus } from "$lib/maps/geo-provenance.js";
 import {
   createSelectionBucketState,
@@ -1479,5 +1485,137 @@ describe("SignauxSelPanel — carte signal sans triage ni notes (retrait owner)"
     expect(queryByTestId("annotation-add")).toBeNull();
     expect(queryByTestId("annotation-new")).toBeNull();
     expect(container.textContent).not.toContain("Ajouter une note");
+  });
+});
+
+describe("SignauxSelPanel — quatre badges de provenance (Manuel, IA, MCP+élicitation, MCP auto) et Non classé vierge", () => {
+  it("affiche les quatre badges attendus, conserve IA+motif avec Manuel, et n'affiche jamais Manuel sur un Non classé vierge", () => {
+    const aiAnnotation = {
+      source: "ai" as const,
+      classe: "a_surveiller" as const,
+      reason: "Second projet PPCMOI de 24 logements (G1-2).",
+      model: "gpt-6.2-astra",
+      effort: "low",
+      promptId: "v2",
+      promptSha256: "a".repeat(64),
+      pipelineRunId: "run-1",
+      updatedAt: "2026-11-21T12:00:00.000Z",
+    };
+
+    const untouched: GraphSignalNode = {
+      ...makeSignal("event-2026-418", "Résolution 2026-418", "Signal vierge non classé."),
+      citySlug: "farnham",
+    };
+    const pureAi: GraphSignalNode = {
+      ...makeSignal("sig-ai", "Signal IA seule", "Classé uniquement par l'IA."),
+      citySlug: "farnham",
+      classAnnotation: aiAnnotation,
+    };
+    const manualAndAi: GraphSignalNode = {
+      ...makeSignal("sig-manual-ai", "Signal Manuel + IA", "Reclassé par un humain tout en gardant l'IA."),
+      citySlug: "farnham",
+      classAnnotation: aiAnnotation,
+    };
+    const mcpElicitationAndAi: GraphSignalNode = {
+      ...makeSignal("sig-mcp-elicit", "Signal MCP + élicitation", "Validé humain via MCP + élicitation."),
+      citySlug: "farnham",
+      classAnnotation: aiAnnotation,
+      signalAnnotations: {
+        version: "a".repeat(32),
+        canConfirm: false,
+        current: {
+          id: "mcp-1",
+          source: "mcp",
+          sourceTag: "mcp+elicitation",
+          model: "claude-opus-4",
+          validation: "human",
+          pending_human: false,
+          elicitationId: "elicit-uuid-1",
+          elicitationAcceptedAt: "2026-11-21T14:00:00.000Z",
+          classe: "pertinent",
+          reason: "Confirmé par élicitation MCP.",
+        },
+        notes: [],
+      },
+    };
+    const mcpAuto: GraphSignalNode = {
+      ...makeSignal("sig-mcp-auto", "Signal MCP auto", "Classé MCP sans élicitation."),
+      citySlug: "farnham",
+      signalAnnotations: {
+        version: "b".repeat(32),
+        canConfirm: true,
+        current: {
+          id: "mcp-2",
+          source: "mcp",
+          sourceTag: "mcp",
+          model: "claude-opus-4",
+          validation: "auto",
+          pending_human: false,
+          classe: "a_surveiller",
+          reason: "Suggestion MCP automatique.",
+        },
+        notes: [],
+      },
+    };
+
+    const allNodes = [untouched, pureAi, manualAndAi, mcpElicitationAndAi, mcpAuto];
+    const manualMap = new Map<string, ClassementEntry>([
+      [classementKey(manualAndAi.type, manualAndAi.id, manualAndAi.citySlug), {
+        ...EMPTY_CLASSEMENT_ENTRY,
+        classe: "pertinent",
+        pertinentHeadId: "head-1",
+        pertinentExpectedHeadId: "head-1",
+      }],
+    ]);
+    const classementMap = withAiClassement(manualMap, allNodes);
+
+    const { container } = render(Harness, {
+      props: { selectedCity: makeCity("farnham", "Farnham"), detailNodes: allNodes, classementMap },
+    });
+
+    const cardOf = (id: string) => container.querySelector(`[data-signal-node="${id}"]`)!;
+
+    // 1. Signal Non classé vierge (cas Résolution 2026-418) : aucun badge Manuel / IA / MCP.
+    const untouchedCard = cardOf("event-2026-418");
+    expect(untouchedCard.querySelector('[data-testid="signal-human-badge"]')).toBeNull();
+    expect(untouchedCard.querySelector('[data-testid="signal-ai-badge"]')).toBeNull();
+    expect(untouchedCard.querySelector('[data-testid="signal-mcp-badge"]')).toBeNull();
+
+    // 2. Signal IA seule : badge IA complet + motif + contrôles feedback.
+    const aiCard = cardOf("sig-ai");
+    expect(aiCard.querySelector('[data-testid="signal-human-badge"]')).toBeNull();
+    expect(aiCard.querySelector('[data-testid="signal-ai-badge"]')?.textContent?.trim()).toBe(
+      "IA · gpt-6.2-astra low · prompt v2 · 2026-11-21",
+    );
+    expect(aiCard.querySelector('[data-testid="signal-ai-reason"]')?.textContent).toContain("Second projet PPCMOI");
+    expect(aiCard.querySelector(".signal-feedback-control")).not.toBeNull();
+
+    // 3. Signal Manuel + IA : les DEUX badges visibles + motif IA conservé + classe humaine prioritaire.
+    const manualCard = cardOf("sig-manual-ai");
+    expect(manualCard.querySelector('[data-testid="signal-human-badge"]')?.textContent?.trim()).toBe("Manuel");
+    expect(manualCard.querySelector('[data-testid="signal-ai-badge"]')?.textContent?.trim()).toBe(
+      "IA · gpt-6.2-astra low · prompt v2 · 2026-11-21",
+    );
+    expect(manualCard.querySelector('[data-testid="signal-ai-reason"]')?.textContent).toContain("Classe IA (À surveiller)");
+    expect(manualCard.querySelector('[data-testid="signal-ai-reason"]')?.textContent).toContain("Second projet PPCMOI");
+    expect(manualCard.querySelector('[data-testid="signal-classement-button"]')?.getAttribute("aria-label")).toBe("Classement : Pertinent");
+    expect(manualCard.querySelector(".signal-feedback-control")).toBeNull();
+
+    // 4. Signal MCP + élicitation acceptée (+ IA) : badge « Humain · via MCP + élicitation », sans 👍, IA toujours visible.
+    const mcpElicitCard = cardOf("sig-mcp-elicit");
+    expect(mcpElicitCard.querySelector('[data-testid="signal-mcp-badge"]')?.textContent?.trim()).toBe(
+      "Humain · via MCP + élicitation",
+    );
+    expect(mcpElicitCard.querySelector('[data-testid="signal-ai-badge"]')?.textContent?.trim()).toBe(
+      "IA · gpt-6.2-astra low · prompt v2 · 2026-11-21",
+    );
+    expect(mcpElicitCard.querySelector('button[aria-label="Confirmer la classification MCP"]')).toBeNull();
+
+    // 5. Signal MCP sans élicitation : reste « MCP · <model> · validé auto ».
+    const mcpAutoCard = cardOf("sig-mcp-auto");
+    expect(mcpAutoCard.querySelector('[data-testid="signal-mcp-badge"]')?.textContent?.trim()).toBe(
+      "MCP · claude-opus-4 · validé auto",
+    );
+    expect(mcpAutoCard.querySelector('[data-testid="signal-human-badge"]')).toBeNull();
   });
 });

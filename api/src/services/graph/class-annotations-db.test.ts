@@ -137,13 +137,14 @@ describeDb("single-pass class annotations PostgreSQL", () => {
     });
   });
 
-  it("should let later human history replace the displayed AI provenance", async () => {
+  it("should keep AI provenance readable alongside later human history while still blocking AI overwrites", async () => {
     const f = await fixture();
     await writeClassAnnotation(f.db, input);
     await event(f, { nodeId: input.nodeId });
     const annotation = (await readClassAnnotations(f.db, input.citySlug)).get("Signal:test-ai");
-    expect(annotation?.source).toBe("manual");
-    expect(annotation?.model).toBeNull();
+    expect(annotation?.source).toBe("ai");
+    expect(annotation?.model).toBe(input.model);
+    expect(annotation?.reason).toBe(input.reason);
     expect(await writeClassAnnotation(f.db, { ...input, promptSha256: "c".repeat(64) })).toBe("manual");
   });
 });

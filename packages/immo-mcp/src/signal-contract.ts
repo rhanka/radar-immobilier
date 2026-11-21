@@ -23,8 +23,8 @@ export type SignalTool = keyof typeof signalSchemas;
 export const isSignalWrite = (name: string) => ["classify_signal", "confirm_classification", "annotate_signal"].includes(name);
 export const SIGNAL_TOOL_DEFINITIONS: readonly ToolDefinition[] = Object.entries(signalSchemas).map(([name, schema]) => ({
   name, title: name.replaceAll("_", " "),
-  description: name === "classify_signal" ? "Classify a scoped signal with automatic validation. Accepted elicitation only marks it pending human confirmation in the immo UI. A registry reason and declared model are required. In scope \"workspace\", only classe \"ecarte\" is accepted (requires moderateArchive); classe \"non_classe\" requires human confirmation."
-    : name === "confirm_classification" ? "Propose confirmation or rejection through elicitation. Always automatic, pending confirmation in the immo UI. Down requires a different class, registry code and reason."
+  description: name === "classify_signal" ? "Classify a scoped signal. Without accepted elicitation, records automatic validation (mcp / auto). With accepted elicitation (humanConfirmed=true), records human validation with source tag mcp+elicitation and full elicitation trace. A registry reason and declared model are required. In scope \"workspace\", only classe \"ecarte\" is accepted (requires moderateArchive); classe \"non_classe\" requires human confirmation."
+    : name === "confirm_classification" ? "Confirm or reclassify a signal through MCP elicitation. Accepted elicitation records human validation with source tag mcp+elicitation; declined or unsupported elicitation is refused. Down requires a different class, registry code and reason."
       : name === "annotate_signal" ? "Append a scoped plain-text note (2000 characters max) with declared model and MCP provenance."
         : name === "list_class_reasons" ? "List four signal classes and all 28 registry reason codes with definitions."
           : "Read the effective scoped signal class, provenance, ambiguity, feedback, notes, global AI history (history), and scoped MCP/manual journal (mcpHistory).",
