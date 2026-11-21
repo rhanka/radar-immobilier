@@ -1208,6 +1208,7 @@
                 {@const cardClassementKey = classementKey(node.type, node.id, node.citySlug)}
                 {@const cardClassementError = classementErrors.get(cardClassementKey)}
                 {@const hasManualClass = classementEntry.annotationSource === "manual" || !!(classementEntry.pertinentExpectedHeadId || classementEntry.aSurveillerExpectedHeadId || classementEntry.archiveHeadId || classementEntry.archiveRestores.length)}
+                {@const annotationLabel = classAnnotationLabel(node, hasManualClass)}
                 <!-- #86 — fiche : ancre de scroll (data-signal-node) + état
                      cross-survolé quand le viewer survole ce signal. Survoler
                      la fiche notifie le parent (→ le surlignage PDF pulse). -->
@@ -1234,9 +1235,9 @@
                     on:click={() => toggleEntity(key)}
                   >
                     <span class="sel-entity-label">{node.label}</span>
-                    {#if node.classAnnotation?.source === "ai" || node.signalAnnotations?.current?.source !== "mcp" || hasManualClass}
-                    <span class="signal-stage-badge" title={node.classAnnotation?.source === "ai" && !hasManualClass ? node.classAnnotation.reason : undefined}>
-                      {classAnnotationLabel(node, hasManualClass)}
+                    {#if annotationLabel && (node.classAnnotation?.source === "ai" || node.signalAnnotations?.current?.source !== "mcp" || hasManualClass)}
+                    <span class="signal-stage-badge" data-testid="signal-annotation-badge" title={node.classAnnotation?.source === "ai" && !hasManualClass ? node.classAnnotation.reason : undefined}>
+                      {annotationLabel}
                     </span>
                     {/if}
                     {#if node.signalAnnotations?.current?.source === "mcp" && !hasManualClass}

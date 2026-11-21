@@ -13,6 +13,11 @@ import { render, fireEvent, cleanup } from "@testing-library/svelte";
 import type { MunicipalityT } from "@radar/domain";
 import type { CityMapEntry } from "$lib/maps/maps-data.js";
 import type { GraphSignalNode } from "$lib/signals/graph-signal-detail-client.js";
+import {
+  classementKey,
+  EMPTY_CLASSEMENT_ENTRY,
+  type ClassementEntry,
+} from "$lib/signals/signal-classement.js";
 import type { GeometryProvenanceStatus } from "$lib/maps/geo-provenance.js";
 import {
   createSelectionBucketState,
@@ -1479,5 +1484,37 @@ describe("SignauxSelPanel — carte signal sans triage ni notes (retrait owner)"
     expect(queryByTestId("annotation-add")).toBeNull();
     expect(queryByTestId("annotation-new")).toBeNull();
     expect(container.textContent).not.toContain("Ajouter une note");
+  });
+});
+
+describe("SignauxSelPanel — badge Manuel réservé aux signaux classés par un humain", () => {
+  it("n'affiche pas Manuel sur un signal Non classé vierge (cas Farnham Résolution 2026-418) mais l'affiche sur un classement manuel", () => {
+    const untouched: GraphSignalNode = {
+      ...makeSignal("event-2026-418", "Résolution 2026-418", "Signal vierge non classé."),
+      citySlug: "farnham",
+    };
+    const manual: GraphSignalNode = {
+      ...makeSignal("event-2026-511", "Résolution 2026-511", "Signal classé manuellement."),
+      citySlug: "farnham",
+    };
+    const classementMap = new Map<string, ClassementEntry>([
+      [classementKey(manual.type, manual.id, manual.citySlug), {
+        ...EMPTY_CLASSEMENT_ENTRY,
+        classe: "pertinent",
+        pertinentHeadId: "head-1",
+        pertinentExpectedHeadId: "head-1",
+      }],
+    ]);
+
+    const { container } = render(Harness, {
+      props: { selectedCity: makeCity("farnham", "Farnham"), detailNodes: [untouched, manual], classementMap },
+    });
+
+    const untouchedCard = container.querySelector('[data-signal-node="event-2026-418"]')!;
+    expect(untouchedCard.querySelector('[data-testid="signal-annotation-badge"]')).toBeNull();
+    expect(untouchedCard.textContent).not.toContain("Manuel");
+
+    const manualCard = container.querySelector('[data-signal-node="event-2026-511"]')!;
+    expect(manualCard.querySelector('[data-testid="signal-annotation-badge"]')?.textContent?.trim()).toBe("Manuel");
   });
 });
