@@ -122,14 +122,28 @@ describe("published release files", () => {
 
   it("should take the release CSP from the provider application mode", () => {
     expect(READER_CONTENT_HEADERS["Content-Security-Policy"]).toBe(APPLICATION_HTML_CSP);
-    expect(releaseCspForHtml("<html><body>ok</body></html>")).toBe(APPLICATION_HTML_CSP);
+    const none = { frameOrigins: [], mediaOrigins: [] };
+    expect(releaseCspForHtml("<html><body>ok</body></html>", none)).toBe(APPLICATION_HTML_CSP);
     const script = "document.body.textContent='ok'";
     const hash = `'sha256-${createHash("sha256").update(script).digest("base64")}'`;
     const csp = releaseCspForHtml(`<script>${script}</script>`);
-    expect(csp).toBe(contentHeaders({ mimeType: "text/html", size: 0, mode: "application",
-      scriptHashes: [hash] })["content-security-policy"]);
+    expect(releaseCspForHtml(`<script>${script}</script>`, none)).toBe(contentHeaders({ mimeType: "text/html",
+      size: 0, mode: "application", scriptHashes: [hash] })["content-security-policy"]);
     expect(csp).toContain(`script-src 'self' ${hash};`);
     expect(csp).toContain("worker-src 'self'");
     expect(csp).not.toContain("unsafe-eval");
+  });
+
+  it("should open only the external media sources on the served release CSP (AQX)", () => {
+    // Default deployment: YouTube nocookie frames only, no bucket origin configured.
+    const served = releaseCspForHtml("<html><body>ok</body></html>");
+    expect(served).toBe(APPLICATION_HTML_CSP.replace("frame-src 'none'", "frame-src https://www.youtube-nocookie.com"));
+    const bucket = "https://media-bucket.s3.bhs.io.cloud.ovh.net";
+    const configured = releaseCspForHtml("<html></html>",
+      { frameOrigins: ["https://www.youtube-nocookie.com"], mediaOrigins: [bucket] });
+    expect(configured).toContain(`media-src 'self' blob: ${bucket}`);
+    expect(configured).toContain(`img-src 'self' data: blob: ${bucket}`);
+    expect(configured).toContain("connect-src 'self';");
+    expect(configured).toContain("frame-ancestors 'none'");
   });
 });

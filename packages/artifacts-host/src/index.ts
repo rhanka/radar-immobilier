@@ -74,6 +74,15 @@ export {
   type PageTextBudgetReader,
 } from "./page-text-budget.js";
 export {
+  EXTERNAL_MEDIA_MAX_OBJECT_BYTES,
+  EXTERNAL_MEDIA_ORIGINS_ENV,
+  YOUTUBE_EMBED_ORIGIN,
+  parseExternalMediaOrigin,
+  readExternalMediaPolicy,
+  withExternalMediaSources,
+  type ExternalMediaPolicy,
+} from "./external-media.js";
+export {
   isApprovedAccountStatus,
   readAccountStatus,
   type AccountStatusQueryable,

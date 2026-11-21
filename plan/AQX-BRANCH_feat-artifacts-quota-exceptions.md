@@ -31,6 +31,7 @@ embeds, configured Sentropic bucket origins).
   - `api/src/app.ts`
   - `api/src/artifacts/release-files.ts`
   - `api/src/artifacts/release-files.test.ts`
+  - `api/src/artifacts/release-isolation.test.ts`
   - `api/src/db/service-role-grants.ts`
   - `api/tests/integration/artifacts-quota-exceptions.spec.ts`
   - `api/drizzle/0049_artifacts_quota_exceptions.sql`
@@ -91,7 +92,7 @@ embeds, configured Sentropic bucket origins).
   - [ ] Actor quota raise/reset, scope limit raise, page-text exception, upload-session expiry, audit rows.
 
 - [ ] **Lot 4 — External heavy media**
-  - [ ] Release CSP: `frame-src https://www.youtube-nocookie.com`, configured bucket origins on `media-src`/`img-src`.
+  - [x] Release CSP: `frame-src https://www.youtube-nocookie.com`, configured bucket origins on `media-src`/`img-src`.
   - [ ] Guide: YouTube and bucket paths, 10 GB bucket policy.
   - [ ] Sentropic PR: opt-in `externalSources` on `contentHeaders` (AQX-EX1).
 
