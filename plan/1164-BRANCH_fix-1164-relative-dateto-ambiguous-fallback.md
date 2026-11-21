@@ -68,10 +68,10 @@ Fix three gaps behind issue #1164 in one PR (`Refs #1164`):
   - [x] Remove `end` (`dateTo`) for relative presets in `ui/src/lib/signals/signal-date-filter.ts`.
   - [x] Update and add J+4 regression tests in `ui/src/lib/signals/signal-date-filter.test.ts`, `ui/src/lib/router/signal-query-v1-mapping.test.ts`, and `ui/e2e-qa/signals-period-perimeter.spec.ts`.
 
-- [ ] **Lot 2 — Fix 2: Model fallback for ambiguous document dates**
-  - [ ] Attach `documentHeader` in `api/src/services/graph/refresh-corpus.ts` when `documentDate.status === "ambiguous"`.
-  - [ ] Allow a `known` candidate to resolve an `ambiguous` sidecar in `api/src/services/sources/document-date-metadata.ts` without downgrading `ambiguous` to `unknown` or overwriting `known`.
-  - [ ] Add unit tests in `api/src/services/graph/refresh-corpus.test.ts`, `api/src/services/sources/document-date-metadata.test.ts`, and `api/src/services/graph/refresh-run.test.ts`.
+- [x] **Lot 2 — Fix 2: Model fallback for ambiguous document dates**
+  - [x] Attach `documentHeader` in `api/src/services/graph/refresh-corpus.ts` when `documentDate.status === "ambiguous"`.
+  - [x] Allow a `known` candidate to resolve an `ambiguous` sidecar in `api/src/services/sources/document-date-metadata.ts` without downgrading `ambiguous` to `unknown` or overwriting `known`.
+  - [x] Add unit tests in `api/src/services/graph/refresh-corpus.test.ts`, `api/src/services/sources/document-date-metadata.test.ts`, and `api/src/services/graph/refresh-run.test.ts`.
 
 - [ ] **Lot 3 — Fix 1: Bounded classification retry on next refresh pass**
   - [ ] Add configurable `REFRESH_CLASSIFY_RETRY_LIMIT` and `REFRESH_CLASSIFY_RETRY_WINDOW_DAYS` in `api/src/services/graph/refresh-classify-config.ts`.
