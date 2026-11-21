@@ -19,7 +19,8 @@ import {
   ARTIFACT_P0B, assertPageTextUploadArgs, extractEnvelopeV1Metadata, getPendingArtifactMetadata,
   isArtifactMutation, isArtifactPublication,
 } from "./p0b-profile.js";
-import { isPageTextMimeType, PUBLISH_MAX_FILE_BYTES } from "./publish-policy.js";
+import { isPageTextMimeType } from "./publish-policy.js";
+import { readPageTextBudget, type PageTextBudget } from "./page-text-budget.js";
 import { assertP0bStorage, p0bPorts, sharePrincipal } from "./p0b-ports.js";
 import type { ArtifactDeleteConfirmation } from "./delete-confirmation.js";
 import { createArtifactReadMetadata } from "./read-metadata.js";
@@ -70,6 +71,7 @@ async function assertResolvedBundlePageTextBudget(input: {
   readonly store: ReturnType<typeof createPostgresArtifactStore>;
   readonly publication: ReturnType<typeof createPublicationService>;
   readonly sessions: UploadSessionStore | undefined;
+  readonly budget: PageTextBudget;
 }): Promise<void> {
   const artifactId = String(input.normalized.artifactId ?? "");
   const acl = await input.store.getArtifactAcl(artifactId);
@@ -77,9 +79,9 @@ async function assertResolvedBundlePageTextBudget(input: {
   const explicitPaths = new Set<string>();
   let pageTextBytes = 0;
   const addPageTextSize = (size: number) => {
-    if (size > PUBLISH_MAX_FILE_BYTES) throw new ArtifactProfileInputError();
+    if (size > input.budget.maxFileBytes) throw new ArtifactProfileInputError();
     pageTextBytes += size;
-    if (pageTextBytes > PUBLISH_MAX_FILE_BYTES) throw new ArtifactProfileInputError();
+    if (pageTextBytes > input.budget.maxTotalBytes) throw new ArtifactProfileInputError();
   };
   for (const file of (input.normalized.files as Array<{ path: string; mimeType: string; bytes: readonly number[] }> | undefined) ?? []) {
     explicitPaths.add(file.path);
@@ -221,6 +223,10 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
         ? extractEnvelopeV1Metadata(routeCapability, request.body, envelopeVersion)
         : { strippedArgs: request.body, metadata: undefined };
       const pendingMeta = extractedMeta.metadata ?? getPendingArtifactMetadata();
+      // Page-text ceilings are per actor (admin exception, migration 0049); read once, lazily.
+      let budget: PageTextBudget | undefined;
+      const pageTextBudget = async (): Promise<PageTextBudget> =>
+        budget ??= await readPageTextBudget(pool, scope, invocation.actorId);
       if (extractedMeta.metadata !== undefined) {
         request = { ...request, body: extractedMeta.strippedArgs };
       }
@@ -230,11 +236,11 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
         if (isPageTextMimeType(createBody.mimeType)) {
           if (Object.hasOwn(createBody, "maxSize")) {
             if (typeof createBody.maxSize !== "number" || !Number.isSafeInteger(createBody.maxSize) ||
-              createBody.maxSize < 1 || createBody.maxSize > PUBLISH_MAX_FILE_BYTES) {
+              createBody.maxSize < 1 || createBody.maxSize > (await pageTextBudget()).maxFileBytes) {
               throw new ArtifactProfileInputError();
             }
           } else {
-            request = { ...request, body: { ...createBody, maxSize: PUBLISH_MAX_FILE_BYTES } };
+            request = { ...request, body: { ...createBody, maxSize: (await pageTextBudget()).maxFileBytes } };
           }
         }
       }
@@ -242,7 +248,7 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
         request.body && typeof request.body === "object" && !Array.isArray(request.body)) {
         const commitBody = request.body as Record<string, unknown>;
         if (isPageTextMimeType(commitBody.mimeType) &&
-          typeof commitBody.size === "number" && commitBody.size > PUBLISH_MAX_FILE_BYTES) {
+          typeof commitBody.size === "number" && commitBody.size > (await pageTextBudget()).maxFileBytes) {
           throw new ArtifactProfileInputError();
         }
       }
@@ -263,7 +269,9 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
             delete args.storageScopeId;
             const capability = routeCapability ?? `artifacts_${request.path.slice(1)}`;
             const normalized = profile.validate(capability, args, request.idempotencyKey, { deferPrecondition: true });
-            assertPageTextUploadArgs(capability, normalized as Record<string, unknown>);
+            if (["artifacts_commit_upload", "artifacts_publish_bundle", "artifacts_publish_bundle_v2"].includes(capability)) {
+              assertPageTextUploadArgs(capability, normalized as Record<string, unknown>, await pageTextBudget());
+            }
             if (request.path === "/publish_bundle" || request.path === "/publish_bundle_v2") {
               await assertResolvedBundlePageTextBudget({
                 normalized: normalized as Record<string, unknown>,
@@ -273,6 +281,7 @@ export async function createCommitDomain(options: Pick<HttpAppDeps, "profile" | 
                 store,
                 publication,
                 sessions: options.uploads?.sessions,
+                budget: await pageTextBudget(),
               });
             }
             // The provider owns historical decoding, authorization and the required-field error.

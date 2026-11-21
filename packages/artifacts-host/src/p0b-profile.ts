@@ -2,6 +2,7 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import { ArtifactProfileInputError, ARTIFACTS_PROVIDER_VERSION, compileArtifactsProfile, RADAR_ARTIFACTS_PROFILE } from "@sentropic/artifacts/mcp-core";
 import { gitProfileOperations, resolveGitMode, type GitArtifactTool } from "./git-mode/flag.js";
 import { isPageTextMimeType, PUBLISH_MAX_FILE_BYTES } from "./publish-policy.js";
+import { PAGE_TEXT_SYSTEM_MAX_BYTES, type PageTextBudget } from "./page-text-budget.js";
 
 /** Package qualification and deployment qualification are separate switches. */
 export const ARTIFACT_PROVIDER_VERSION: string = ARTIFACTS_PROVIDER_VERSION;
@@ -243,13 +244,23 @@ export function extractEnvelopeV1Metadata(
   return { strippedArgs: stripped, metadata: Object.freeze(meta) };
 }
 
-export function assertPageTextUploadArgs(tool: string, normalized: Record<string, unknown>): void {
+const PAGE_TEXT_SYSTEM_BUDGET = Object.freeze({
+  maxFileBytes: PAGE_TEXT_SYSTEM_MAX_BYTES, maxTotalBytes: PAGE_TEXT_SYSTEM_MAX_BYTES });
+
+/**
+ * Page-text ceilings of one call. The host passes the caller's effective
+ * budget (default 5 MiB, admin exception up to the system maximum); the
+ * pre-authority MCP check knows no actor and applies the system maximum only.
+ */
+export function assertPageTextUploadArgs(tool: string, normalized: Record<string, unknown>,
+  budget: Pick<PageTextBudget, "maxFileBytes" | "maxTotalBytes"> = PAGE_TEXT_SYSTEM_BUDGET): void {
+  const { maxFileBytes, maxTotalBytes } = budget;
   if (tool === "artifacts_create_upload" && isPageTextMimeType(normalized.mimeType)) {
-    if (typeof normalized.maxSize === "number" && normalized.maxSize > PUBLISH_MAX_FILE_BYTES) {
+    if (typeof normalized.maxSize === "number" && normalized.maxSize > maxFileBytes) {
       throw new ArtifactProfileInputError();
     }
   } else if (tool === "artifacts_commit_upload" && isPageTextMimeType(normalized.mimeType)) {
-    if (typeof normalized.size === "number" && normalized.size > PUBLISH_MAX_FILE_BYTES) {
+    if (typeof normalized.size === "number" && normalized.size > maxFileBytes) {
       throw new ArtifactProfileInputError();
     }
   } else if (tool === "artifacts_publish_bundle" || tool === "artifacts_publish_bundle_v2") {
@@ -257,17 +268,17 @@ export function assertPageTextUploadArgs(tool: string, normalized: Record<string
     for (const file of (normalized.files as Array<{ mimeType?: unknown; bytes?: readonly number[] }> | undefined) ?? []) {
       if (isPageTextMimeType(file.mimeType)) {
         const size = file.bytes?.length ?? 0;
-        if (size > PUBLISH_MAX_FILE_BYTES) throw new ArtifactProfileInputError();
+        if (size > maxFileBytes) throw new ArtifactProfileInputError();
         total += size;
       }
     }
     for (const asset of (normalized.assets as Array<{ mimeType?: unknown; size?: unknown }> | undefined) ?? []) {
       if (isPageTextMimeType(asset.mimeType) && typeof asset.size === "number") {
-        if (asset.size > PUBLISH_MAX_FILE_BYTES) throw new ArtifactProfileInputError();
+        if (asset.size > maxFileBytes) throw new ArtifactProfileInputError();
         total += asset.size;
       }
     }
-    if (total > PUBLISH_MAX_FILE_BYTES) throw new ArtifactProfileInputError();
+    if (total > maxTotalBytes) throw new ArtifactProfileInputError();
   }
 }
 

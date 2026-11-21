@@ -82,8 +82,8 @@ embeds, configured Sentropic bucket origins).
   - [ ] MCP writer role keeps read-only access to the admin tables.
 
 - [ ] **Lot 2 — Enforcement**
-  - [ ] Upload create/commit, bundle totals and browser page channel read the effective budget.
-  - [ ] MCP pre-validation checks the 10 MiB system ceiling only.
+  - [x] Upload create/commit, bundle totals and browser page channel read the effective budget.
+  - [x] MCP pre-validation checks the 10 MiB system ceiling only.
   - [ ] Authoring guide carries the caller's effective `pageTextBudget`.
 
 - [ ] **Lot 3 — Admin surface**
