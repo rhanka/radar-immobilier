@@ -64,7 +64,7 @@ describe("geoFiltersToSignalFilter translator", () => {
     expect(filter.excludeDerogations).toBe(true);
     expect(filter.dateBasis).toBe("document");
     expect(filter.dateFrom).toBe("2026-10-02");
-    expect(filter.dateTo).toBe("2026-10-09");
+    expect(filter.dateTo).toBeUndefined();
     expect(filter.archive).toBe("exclude");
     expect(filter.basket).toBe("all");
     expect(filter.personalHistory).toBe("any");
