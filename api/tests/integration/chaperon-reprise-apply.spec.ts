@@ -7,7 +7,7 @@ import { runPersonalAttachmentActivation } from "../../src/services/facets/activ
 import { activation, attach, describeDb, fixture, safety, type Fixture } from "../../src/services/facets/scope-db-fixture.js";
 import { writeScopedPersonalFacet, writeScopedPersonalFacetInTx } from "../../src/services/facets/scoped-writer.js";
 import { resolveTarget } from "../../src/services/facets/target.js";
-import { applyReprise, type Plan, type PlanTarget } from "../../src/scripts/chaperon-reprise-apply.js";
+import { applyReprise, assertAllowedBaseUrl, dryRunReprise, type Plan, type PlanTarget, type RawPlan } from "../../src/scripts/chaperon-reprise-apply.js";
 
 const CITY = "synthetic-city";
 const NAMESPACE = "6c1f3a52-8f0e-5b7d-9a41-2e6d0c9b7f13";
@@ -77,5 +77,43 @@ describeDb("chaperon reprise apply (insert-only)", () => {
     await expect(applyReprise(f.db, { ...plan, expectedInserts: { [f.member.id]: 3 } }))
       .rejects.toThrow(/insert count drift/);
     expect(await count(f, "facet_events")).toBe(0);
+  });
+
+  it("dryRunReprise resolves targets read-only and marks source=manual on apply", async () => {
+    const { f, plan } = await setup();
+    const raw: RawPlan = {
+      workspaceSlug: plan.workspaceSlug,
+      ownerEmailDomain: "example.invalid",
+      ownerAccountIds: plan.ownerAccountIds,
+      profile: "immo-steve-2026-09",
+      keyNamespace: plan.keyNamespace,
+      manifestSha: plan.manifestSha,
+      mapping: plan.mapping,
+      targets: plan.targets.map((t) => ({
+        row: t.row, citySlugHint: t.citySlug, nodeId: t.id, verdict: t.verdict,
+        reasonCode: t.reasonCode, rawRefs: [], citations: [],
+      })),
+    };
+    const dry = await dryRunReprise(f.pool, raw);
+    expect(dry.database.read_only).toBe("on");
+    expect(dry.writable).toBe(true);
+    expect(dry.match.resolvedTargets).toBe(4);
+    expect(dry.accounts[0]?.plan.insert).toBe(4);
+    expect(await count(f, "facet_events")).toBe(0);
+
+    await applyReprise(f.db, { ...plan, targets: dry.targets });
+    const sources = await f.pool.query("SELECT DISTINCT source FROM facet_events");
+    expect(sources.rows).toEqual([{ source: "manual" }]);
+
+    const secondDry = await dryRunReprise(f.pool, raw);
+    expect(secondDry.accounts[0]?.plan).toMatchObject({ insert: 0, noop: 4 });
+  });
+
+  it("enforces preprod-only by default and allows prod host only with --allow-prod", () => {
+    expect(() => assertAllowedBaseUrl("https://preprod.immo.sent-tech.ca", false)).not.toThrow();
+    expect(() => assertAllowedBaseUrl("https://immo.sent-tech.ca", false)).toThrow(/preprod only/);
+    expect(() => assertAllowedBaseUrl("https://immo.sent-tech.ca", true)).not.toThrow();
+    expect(() => assertAllowedBaseUrl("https://preprod.immo.sent-tech.ca", true)).not.toThrow();
+    expect(() => assertAllowedBaseUrl("https://evil.example.com", true)).toThrow(/unrecognized APP_BASE_URL/);
   });
 });
