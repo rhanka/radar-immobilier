@@ -90,7 +90,7 @@ embeds, configured Sentropic bucket origins).
 
 - [ ] **Lot 3 — Admin surface**
   - [x] `GET/POST /api/v1/admin/artifacts/quotas/:actorId` (admin session only).
-  - [ ] Actor quota raise/reset, scope limit raise, page-text exception, upload-session expiry, audit rows.
+  - [x] Actor quota raise/reset, scope limit raise, page-text exception, upload-session expiry, audit rows.
 
 - [ ] **Lot 4 — External heavy media**
   - [x] Release CSP: `frame-src https://www.youtube-nocookie.com`, configured bucket origins on `media-src`/`img-src`.
