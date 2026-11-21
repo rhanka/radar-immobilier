@@ -30,7 +30,11 @@ export async function persistDocumentDate(store: ObjectStore, rawRef: string, ca
     throw new Error(`Documentary metadata identity mismatch for ${rawRef}`);
   }
   const current = resolveDocumentDate(record);
-  const date = current.status !== "unknown" ? current : DocumentDateSchema.parse(candidate);
+  let date: DocumentDate = current;
+  if (current.status !== "known") {
+    const parsed = DocumentDateSchema.parse(candidate);
+    if (current.status === "unknown" || parsed.status === "known") date = parsed;
+  }
   const updated = applyDocumentDate(record, date);
   if (!exists || JSON.stringify(updated) !== JSON.stringify(record)) {
     await store.put(key, JSON.stringify(updated, null, 2), "application/json");

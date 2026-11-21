@@ -49,6 +49,29 @@ describe("document date persistence and stock preview", () => {
     expect(updated?.documentDate).toMatchObject({ status: "known", value: "2026-07", precision: "month" });
     expect(updated?.publishedAt).toBe("2026-07");
   });
+  it("should resolve an ambiguous sidecar with a known model date without downgrading ambiguous to unknown", async () => {
+    const fx = fixture();
+    const ambiguous = {
+      ...fx.record,
+      documentDate: {
+        status: "ambiguous" as const,
+        candidates: ["2026-10-12", "2026-11-09"],
+        reason: "Multiple candidate dates in PDF page 1 header",
+      },
+    };
+    await fx.store.put(rawMetaKey(fx.record.storageKey), JSON.stringify(ambiguous));
+    const kept = await persistDocumentDate(fx.store, fx.record.storageKey, { status: "unknown" });
+    expect(kept?.documentDate).toMatchObject({ status: "ambiguous", candidates: ["2026-10-12", "2026-11-09"] });
+    expect(kept).not.toHaveProperty("publishedAt");
+    const resolved = await persistDocumentDate(fx.store, fx.record.storageKey, {
+      status: "known", value: "2026-11-09", precision: "day", kind: "session", method: "signal-llm",
+      evidence: { page: 1, excerpt: "Séance ordinaire tenue le 9 novembre 2026" },
+    });
+    expect(resolved).toMatchObject({
+      publishedAt: "2026-11-09", sha256: fx.record.sha256, fetchedAt: fx.record.fetchedAt,
+      documentDate: { status: "known", value: "2026-11-09", method: "signal-llm" },
+    });
+  });
   it("should leave a schema-incompatible sidecar untouched instead of failing the caller", async () => {
     const fx = fixture();
     const legacy = JSON.stringify({ sourceUrl: fx.record.sourceUrl });
