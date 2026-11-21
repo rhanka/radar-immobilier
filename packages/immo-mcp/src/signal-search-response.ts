@@ -15,10 +15,15 @@ const envelope = z.object({
   ok: z.literal(true), workspaceId: workspace, citySlug: city, signals: z.array(signal),
 }).strict();
 
+export interface ParsedSignalSearchResponse {
+  signals: MockSignal[];
+  workspaceId: string;
+}
+
 /** API owns normalization and filtering; the MCP validates without reclassification. */
 export function parseSignalSearchResponse(body: unknown, expected: {
   city: string; limit: number; workspaceId?: string | undefined;
-}): MockSignal[] {
+}): ParsedSignalSearchResponse {
   const parsed = envelope.safeParse(body);
   if (!parsed.success || parsed.data.citySlug !== expected.city ||
     parsed.data.signals.length > expected.limit ||
@@ -26,5 +31,5 @@ export function parseSignalSearchResponse(body: unknown, expected: {
     (expected.workspaceId !== undefined && parsed.data.workspaceId !== expected.workspaceId.toLowerCase())) {
     throw new RadarSignalReadError("radar_api_bad_payload", 200);
   }
-  return parsed.data.signals;
+  return { signals: parsed.data.signals, workspaceId: parsed.data.workspaceId };
 }

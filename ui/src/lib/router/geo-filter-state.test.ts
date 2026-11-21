@@ -230,4 +230,25 @@ describe("shareable geographic restrictions", () => {
     // Invalid or absent period on a legacy link: the new last-week default.
     expect(readGeoFilters({ subset: ["vivier-v2"], period: ["2w"] }, opened).timeRange.relative).toBe("7d");
   });
+
+  it("should accept period=30d as a read-only alias for 1mo and canonicalize on write", () => {
+    const opened = new Date(2026, 9, 9, 10, 30).getTime();
+    const state = readGeoFilters(parseGeoQuery("?mode=signal&filter.period=30d").filters, opened);
+    expect(state.timeRange).toEqual({
+      mode: "relative",
+      relative: "1mo",
+      from: new Date(2026, 8, 9, 10, 30).getTime(),
+      to: opened,
+    });
+    expect(writeGeoFilters(state)).toEqual({ period: ["1mo"] });
+
+    // Legacy vivier links with period=30d also resolve to 1mo (not the 7d default).
+    const legacy = readGeoFilters({ subset: ["vivier-v2"], period: ["30d"] }, opened);
+    expect(legacy.timeRange).toMatchObject({ mode: "relative", relative: "1mo", to: opened });
+    expect(writeGeoFilters(legacy).period).toEqual(["1mo"]);
+
+    // Unknown period tokens keep the existing fallback behavior.
+    expect(readGeoFilters({ period: ["2w"] }, opened).timeRange.relative).toBe("all");
+    expect(readGeoFilters({ subset: ["vivier-v2"], period: ["2w"] }, opened).timeRange.relative).toBe("7d");
+  });
 });

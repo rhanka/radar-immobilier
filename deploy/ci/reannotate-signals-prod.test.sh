@@ -199,17 +199,38 @@ else
   ok "invalid REANNOTATION_MODE refused"
 fi
 
-# 7. Workflow contract checks: workflow_dispatch only, environment: production, dry-run default, main guard.
+# 7. Workflow contract checks: workflow_dispatch only, environment: production, dry-run default, v* tag guard (not main).
+RUNBOOK="$ROOT/docs/runbooks/prod-promotion.md"
 if grep -Fq 'workflow_dispatch:' "$WF" \
   && ! grep -Eq '^[[:space:]]+(push|pull_request|schedule):' "$WF" \
   && grep -Fq 'environment: production' "$WF" \
   && grep -Fq 'default: dry-run' "$WF" \
-  && grep -Fq "if: github.ref == 'refs/heads/main'" "$WF" \
+  && grep -Fq "if: startsWith(github.ref, 'refs/tags/v')" "$WF" \
+  && grep -Fq 'bash deploy/ci/require-main-ancestry.sh' "$WF" \
+  && ! grep -Fq "refs/heads/main" "$WF" \
   && grep -Fq 'deploy/ci/reannotate-signals-prod.tmpl.yaml' "$WF" \
-  && grep -Fq 'dist/scripts/reannotate-signals.js' "$TMPL"; then
-  ok "workflow contract: manual-only, environment: production, dry-run default, main-only, template linked"
+  && grep -Fq 'dist/scripts/reannotate-signals.js' "$TMPL" \
+  && grep -Fq 'gh workflow run reannotate-signals-prod.yml --ref vX.Y.Z -f mode=dry-run -f since_days=30' "$RUNBOOK"; then
+  ok "workflow contract: manual-only, environment: production, dry-run default, v* tag guard (not main), runbook aligned"
 else
   bad "workflow contract check failed"
+fi
+
+# 8. Guard semantics: accepts refs/tags/v* and rejects refs/heads/main or non-v tags.
+if node -e '
+  const fs = require("fs");
+  const wf = fs.readFileSync(process.argv[1], "utf8");
+  const m = wf.match(/^\s*if:\s*(.+)$/m);
+  if (!m) process.exit(1);
+  const expr = m[1].trim();
+  if (expr !== "startsWith(github.ref, \x27refs/tags/v\x27)") process.exit(2);
+  const evalGuard = (ref) => ref.startsWith("refs/tags/v");
+  if (!evalGuard("refs/tags/v1.2.24") || !evalGuard("refs/tags/v2.0.0")) process.exit(3);
+  if (evalGuard("refs/heads/main") || evalGuard("refs/tags/release-1") || evalGuard("")) process.exit(4);
+' "$WF"; then
+  ok "tag guard accepts refs/tags/v* and rejects refs/heads/main and non-v tags"
+else
+  bad "tag guard semantics check failed"
 fi
 
 echo "reannotate-signals-prod.test.sh: $PASS passed, $FAIL failed"
