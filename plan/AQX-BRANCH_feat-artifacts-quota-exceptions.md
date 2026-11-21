@@ -94,7 +94,7 @@ embeds, configured Sentropic bucket origins).
 
 - [ ] **Lot 4 — External heavy media**
   - [x] Release CSP: `frame-src https://www.youtube-nocookie.com`, configured bucket origins on `media-src`/`img-src`.
-  - [ ] Guide: YouTube and bucket paths, 10 GB bucket policy.
+  - [x] Guide: YouTube and bucket paths, 10 GB bucket policy.
   - [ ] Sentropic PR: opt-in `externalSources` on `contentHeaders` (AQX-EX1).
 
 - [ ] **Lot 5 — Verification and PR**
