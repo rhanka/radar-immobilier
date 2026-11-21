@@ -455,7 +455,7 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
   if (alreadyProjected) {
     ledger = coverRefreshDocument(ledger, selected.sha, now);
     await writeRefreshCoverage(options.store, ledger);
-    if (options.classification && options.extract !== false) {
+    if (options.classification) {
       await retryUnclassifiedRefreshSignals({ classification: options.classification,
         db: options.db, citySlug: options.citySlug,
         pipelineRunId: cycleId, now: now(),
