@@ -128,7 +128,11 @@ writer_release() {
   "${k[@]}" get pods -o json | jq -e --slurpfile r "$WORK/record.json" --slurpfile jobs "$WORK/writer-jobs.json" '
     all(.items[]|select(.status.phase!="Succeeded" and .status.phase!="Failed")|
       .metadata.ownerReferences[]?|select(.kind=="Job" and .controller==true);
-      .uid as $uid|($r[0].originalJobs|index($uid))!=null and any($jobs[0].items[];.metadata.uid==$uid))' \
+      .uid as $uid|any($jobs[0].items[];
+        .metadata.uid==$uid and (
+          ($r[0].originalJobs|index($uid))!=null or
+          any(.metadata.ownerReferences[]?;.controller==true and .kind=="CronJob")
+        )))' \
     >/dev/null || fail 'Writer Job Pods have not terminated; lock retained for resume'
   lock_delete
 }
