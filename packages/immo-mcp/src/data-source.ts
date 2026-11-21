@@ -87,6 +87,11 @@ export interface DataSourceCallContext {
   accessToken?: string | undefined;
 }
 
+export interface SignalSearchResult {
+  signals: MockSignal[];
+  workspaceId?: string | undefined;
+}
+
 /**
  * The contract every backing source must satisfy. v0 ships `MockDataSource`;
  * phase 2 swaps in `HttpDataSource` (radar API) WITHOUT touching the tool
@@ -96,7 +101,7 @@ export interface ImmoDataSource {
   readonly mode: "mock" | "http";
   searchLots(args: SearchLotsArgs): Promise<MockLot[]>;
   getLotCard(args: GetLotCardArgs): Promise<LotCard | null>;
-  searchSignals(args: SearchSignalsArgs, ctx?: DataSourceCallContext): Promise<MockSignal[]>;
+  searchSignals(args: SearchSignalsArgs, ctx?: DataSourceCallContext): Promise<SignalSearchResult>;
   getOpportunityDossier(args: GetOpportunityDossierArgs): Promise<OpportunityDossier | null>;
   listDocuments(args: ListDocumentsArgs): Promise<MockDocument[]>;
   /** Returns the RAW document body (redaction is applied by the tool layer). */
@@ -130,10 +135,10 @@ export class MockDataSource implements ImmoDataSource {
 
   // Mock fixtures carry no discard dimension: showDiscarded is accepted and
   // ignored here; hiding and reveal are enforced server-side in http mode.
-  async searchSignals(args: SearchSignalsArgs): Promise<MockSignal[]> {
+  async searchSignals(args: SearchSignalsArgs): Promise<SignalSearchResult> {
     const city = norm(args.city);
     const q = args.query ? norm(args.query) : null;
-    return MOCK_SIGNALS.filter((s) => norm(s.city) === city)
+    const signals = MOCK_SIGNALS.filter((s) => norm(s.city) === city)
       .filter((s) => (args.etape ? norm(s.etape) === norm(args.etape) : true))
       .filter((s) =>
         q
@@ -141,6 +146,7 @@ export class MockDataSource implements ImmoDataSource {
           : true,
       )
       .slice(0, args.limit);
+    return { signals };
   }
 
   async getOpportunityDossier(
@@ -225,7 +231,7 @@ export class HttpDataSource implements ImmoDataSource {
   async searchSignals(
     args: SearchSignalsArgs,
     ctx: DataSourceCallContext = {},
-  ): Promise<MockSignal[]> {
+  ): Promise<SignalSearchResult> {
     const slug = citySlug(args.city);
     const params = new URLSearchParams({ city: slug, limit: String(args.limit) });
     if (args.etape !== undefined) params.set("etape", args.etape);

@@ -89,7 +89,7 @@ describe("check-archi FACE-2 — chaque payload servi PORTE regulatoryStatus", (
     const { signalSearchBody, signalSearchItem } = await import(resolve(REPO_ROOT, "packages/immo-mcp/src/signal-search-test-fixture.ts"));
     for (const regulatoryStatus of ["firm", "anticipation"]) {
       const body = signalSearchBody("synthetic-city", [signalSearchItem("synthetic-city", { regulatoryStatus })]);
-      expect(parseSignalSearchResponse(body, { city: "synthetic-city", limit: 20 })[0]?.regulatoryStatus).toBe(regulatoryStatus);
+      expect(parseSignalSearchResponse(body, { city: "synthetic-city", limit: 20 }).signals[0]?.regulatoryStatus).toBe(regulatoryStatus);
     }
     const missing = signalSearchBody("synthetic-city", [signalSearchItem("synthetic-city", { regulatoryStatus: undefined })]);
     expect(() => parseSignalSearchResponse(missing, { city: "synthetic-city", limit: 20 })).toThrowError(expect.objectContaining({ code: "radar_api_bad_payload" }));
@@ -101,7 +101,7 @@ describe("check-archi FACE-2 — chaque payload servi PORTE regulatoryStatus", (
     expect(dataSource).toContain("return parseSignalSearchResponse(body,");
     const decoder = read("packages/immo-mcp/src/signal-search-response.ts");
     expect(decoder).toContain('regulatoryStatus: z.enum(["firm", "anticipation"])');
-    expect(decoder).toContain("return parsed.data.signals;");
+    expect(decoder).toContain("return { signals: parsed.data.signals, workspaceId: parsed.data.workspaceId };");
     // A missing status is rejected by the wire contract, never reclassified.
     expect(decoder).not.toContain(".default(");
     for (const consumer of [dataSource, decoder]) {

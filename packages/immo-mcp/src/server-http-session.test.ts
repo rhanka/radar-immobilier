@@ -17,7 +17,6 @@ import type {
   SearchSignalsArgs,
 } from "./data-source.js";
 import { MockDataSource } from "./data-source.js";
-import type { MockSignal } from "./mocks.js";
 
 // Same resource-server settings as server-http.test.ts (`resource` == token `aud`).
 const ISSUER = "https://auth.test.local";
@@ -141,9 +140,9 @@ describe("mcp http session ownership", () => {
       override async searchSignals(
         args: SearchSignalsArgs,
         ctx: DataSourceCallContext = {},
-      ): Promise<MockSignal[]> {
+      ) {
         lastAccessToken = ctx.accessToken;
-        return [
+        return { signals: [
           {
             id: "sig-x",
             city: args.city,
@@ -156,7 +155,7 @@ describe("mcp http session ownership", () => {
             summary: "signal reel",
             source_document_id: "doc-1",
           },
-        ];
+        ] };
       }
     }
     const data: ImmoDataSource & { lastAccessToken: string | undefined | null } =
