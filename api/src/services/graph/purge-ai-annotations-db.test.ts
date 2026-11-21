@@ -77,7 +77,7 @@ describeDb("AI annotation rollback PostgreSQL", () => {
     const before = await readScopedPersonalHeads(f.db, f.contributor.sub, f.workspaceId, f.target.citySlug);
     expect(before).toMatchObject([{ target: f.target, basket: "pertinent", state: "active" }]);
     const events = await f.db.execute(sql`SELECT * FROM facet_events`);
-    expect((await readClassAnnotations(f.db, f.annotation.citySlug)).get(`Signal:${f.annotation.nodeId}`)?.source).toBe("manual");
+    expect((await readClassAnnotations(f.db, f.annotation.citySlug)).get(`Signal:${f.annotation.nodeId}`)?.source).toBe("ai");
     await purgeAiAnnotations(f.db, { apply: true, all: true });
     expect(await readScopedPersonalHeads(f.db, f.contributor.sub, f.workspaceId, f.target.citySlug)).toEqual(before);
     expect((await f.db.execute(sql`SELECT * FROM facet_events`)).rows).toEqual(events.rows);

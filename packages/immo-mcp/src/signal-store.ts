@@ -4,9 +4,17 @@ import { bindDatabaseName } from "./database-url.js";
 export interface SignalQuery {
   query(text: string, values: unknown[]): Promise<{ rows: Record<string, unknown>[] }>;
 }
+export type ElicitationStatus = "not_requested" | "accepted" | "declined" | "unsupported";
+export interface ElicitationOutcome {
+  readonly accepted: boolean;
+  readonly status: Exclude<ElicitationStatus, "not_requested">;
+  readonly elicitationId?: string;
+  readonly acceptedAt?: string;
+}
+export type ConfirmResult = boolean | ElicitationOutcome;
 export interface SignalRuntime {
   readonly db: SignalQuery;
-  readonly confirm?: (message: string) => Promise<boolean>;
+  readonly confirm?: (message: string) => Promise<ConfirmResult>;
 }
 export function createSignalBinding(env: NodeJS.ProcessEnv): pg.Pool | undefined {
   if (env.IMMO_MCP_SIGNALS_WRITE_ENABLED !== "1") return undefined;

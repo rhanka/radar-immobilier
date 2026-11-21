@@ -1,20 +1,45 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import type { InvocationContext } from "./invocation-context.js";
 import type { ToolTextResult } from "./tool-handlers.js";
 import { CLASS_DEFINITIONS, REASON_DEFINITIONS } from "./class-reasons.js";
 import { signalSchemas, isSignalWrite, SIGNAL_WRITE_SCOPE, type SignalTool } from "./signal-contract.js";
-import { readSignal } from "./signal-store.js";
+import { readSignal, type ConfirmResult, type ElicitationStatus } from "./signal-store.js";
 
 const result = (value: Record<string, unknown>): ToolTextResult => ({
   content: [{ type: "text", text: JSON.stringify(value) }], ...(value.error ? { isError: true } : {}),
 });
+
+interface NormalizedElicitation {
+  accepted: boolean;
+  status: ElicitationStatus;
+  elicitationId?: string;
+  acceptedAt?: string;
+}
+
+function normalizeElicitation(outcome: ConfirmResult | undefined): NormalizedElicitation {
+  if (typeof outcome === "boolean") {
+    if (!outcome) return { accepted: false, status: "declined" };
+    return { accepted: true, status: "accepted", elicitationId: randomUUID(), acceptedAt: new Date().toISOString() };
+  }
+  if (!outcome) return { accepted: false, status: "unsupported" };
+  if (outcome.accepted) {
+    return {
+      accepted: true,
+      status: "accepted",
+      elicitationId: outcome.elicitationId?.trim() || randomUUID(),
+      acceptedAt: outcome.acceptedAt?.trim() || new Date().toISOString(),
+    };
+  }
+  return { accepted: false, status: outcome.status === "unsupported" ? "unsupported" : "declined" };
+}
+
 export async function invokeSignalTool(name: SignalTool, input: Record<string, unknown>, ctx: InvocationContext) {
   const hash = createHash("sha256").update(JSON.stringify(input)).digest("hex");
-  const audit = async (error: string) => {
+  const audit = async (error: string, extra: Record<string, unknown> = {}) => {
     if (isSignalWrite(name) && ctx.signals && ctx.auth.clientId) await ctx.signals.db.query(
       "SELECT signal_mcp_result($1,$2,$3,$4,$5,$6::jsonb,$7::jsonb)",
       [ctx.auth.sub, ctx.auth.clientId, typeof input.model === "string" ? input.model : null, name, hash,
-        JSON.stringify({ error }), JSON.stringify((input as { signalRef?: unknown }).signalRef ?? null)]);
+        JSON.stringify({ error, ...extra }), JSON.stringify((input as { signalRef?: unknown }).signalRef ?? null)]);
     return result({ error });
   };
   if (!ctx.auth.scopes.includes(isSignalWrite(name) ? SIGNAL_WRITE_SCOPE : "immo:read")) return audit("scope_denied");
@@ -45,14 +70,28 @@ export async function invokeSignalTool(name: SignalTool, input: Record<string, u
   }
   if (name === "confirm_classification" && body.verdict === "up"
     && (body.newClasse !== undefined || body.reasonCode !== undefined || body.reason !== undefined)) return audit("invalid_positive_feedback");
-  let accepted = false;
+  let elicitation: NormalizedElicitation = { accepted: false, status: "not_requested" };
   if (name === "confirm_classification" || body.humanConfirmed === true) {
-    try { accepted = await ctx.signals.confirm?.(JSON.stringify({ tool: name, proposal: body, current, version: state.version })) === true; }
-    catch { accepted = false; }
+    try {
+      const outcome = await ctx.signals.confirm?.(JSON.stringify({ tool: name, proposal: body, current, version: state.version }));
+      elicitation = normalizeElicitation(outcome);
+    } catch {
+      elicitation = { accepted: false, status: "declined" };
+    }
   }
-  if (name === "confirm_classification" && !accepted) return audit("human_confirmation_required");
+  if (name === "confirm_classification" && !elicitation.accepted) {
+    return audit("human_confirmation_required", { elicitationStatus: elicitation.status });
+  }
+  const writePayload: Record<string, unknown> = {
+    ...body,
+    pendingHuman: false,
+    elicitationStatus: elicitation.status,
+    ...(elicitation.accepted && name !== "annotate_signal"
+      ? { elicitationId: elicitation.elicitationId, elicitationAcceptedAt: elicitation.acceptedAt }
+      : {}),
+  };
   const saved = await ctx.signals.db.query("SELECT signal_mcp_write_mcp($1,$2,$3,$4::jsonb,$5,$6) AS result",
-    [ctx.auth.sub, ctx.auth.clientId, name, JSON.stringify({ ...body, pendingHuman: accepted }), state.version, hash]);
+    [ctx.auth.sub, ctx.auth.clientId, name, JSON.stringify(writePayload), state.version, hash]);
   return result(saved.rows[0]?.result as Record<string, unknown>);
 }
 export const SIGNAL_TOOL_HANDLERS = Object.fromEntries(Object.keys(signalSchemas).map((name) => [name,
