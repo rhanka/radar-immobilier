@@ -233,5 +233,39 @@ else
   bad "tag guard semantics check failed"
 fi
 
+# 9. Failed Job (e.g. SQL 57014 with no JSON report) exits non-zero cleanly once Job is terminal.
+S9="$TMP/s9"; mkdir -p "$S9"
+write_base_job "$S9/base-job.json"
+echo '{"status":{"conditions":[{"type":"Failed","status":"True"}]}}' > "$S9/job-status.json"
+cat > "$S9/job.log" <<'EOF'
+reannotate-signals: failed { causeCode: '57014' }
+EOF
+if FAKE_KUBECTL_STATE="$S9" KUBECTL="$TMP/bin/kubectl" GITHUB_STEP_SUMMARY="$S9/summary.md" \
+    PIPELINE_RUN_ID="prod-reannotate-30d-fail" REANNOTATION_MODE="apply" REANNOTATION_SINCE_DAYS="30" \
+    REANNOTATION_POLL_SECONDS="0" bash "$SCRIPT" >"$S9/out.txt" 2>&1; then
+  bad "failed Job unexpectedly succeeded"
+elif grep -Fq "Missing reannotation report" "$S9/out.txt"; then
+  ok "failed Job exits non-zero cleanly after reaching Failed=True"
+else
+  bad "failed Job handling ($(cat "$S9/out.txt"))"
+fi
+
+# 10. Writer lock contract: acquires lock before running Job and always releases via release-lock (never unlock).
+if node -e '
+  const fs = require("fs");
+  const wf = fs.readFileSync(process.argv[1], "utf8");
+  if (/action:\s*unlock\b/.test(wf)) process.exit(1);
+  const lockIdx = wf.indexOf("action: lock");
+  const runIdx = wf.indexOf("bash deploy/ci/reannotate-signals-prod.sh");
+  const releaseIdx = wf.indexOf("action: release-lock");
+  if (!(lockIdx >= 0 && runIdx > lockIdx && releaseIdx > runIdx)) process.exit(2);
+  const tail = wf.slice(runIdx);
+  if (!/if:\s*always\(\)\s*&&\s*env\.CUTOVER_LOCK_RUN\s*!=\s*\x27\x27/.test(tail)) process.exit(3);
+' "$WF"; then
+  ok "workflow acquires prod writer lock before Job and releases via if: always() && env.CUTOVER_LOCK_RUN != '' + release-lock"
+else
+  bad "workflow writer lock release contract failed"
+fi
+
 echo "reannotate-signals-prod.test.sh: $PASS passed, $FAIL failed"
 [[ "$FAIL" -eq 0 ]]

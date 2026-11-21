@@ -60,14 +60,15 @@ test('a daily restore whose job died is recovered by the same workflow', () => {
 test('all competing workflows acquire before mutations and release through always', () => {
   for (const [file, jobs] of [['build-push-images.yml', ['deploy', 'deploy-preprod']],
     ['rollback.yml', ['rollback-preprod', 'rollback-prod']], ['run-job.yaml', ['run']], ['k8s-apply-mcp.yaml', ['apply']],
-    ['bascule-bundle-cd.yml', ['apply-bundle', 'apply-backup']], ['backup-cd.yml', ['apply']]]) {
+    ['bascule-bundle-cd.yml', ['apply-bundle', 'apply-backup']], ['backup-cd.yml', ['apply']],
+    ['reannotate-signals-prod.yml', ['reannotate']]]) {
     const w = workflow(file);
     for (const name of jobs) {
       const steps = w.jobs[name].steps;
       const acquire = steps.findIndex(s => s.uses === './deploy/cutover/lock-action' && s.with.action === 'lock');
       const release = steps.findIndex(s => s.uses === './deploy/cutover/lock-action' && s.with.action === 'release-lock');
       assert.ok(acquire >= 0 && release > acquire, `${file}/${name}`);
-      assert.ok(steps[release].if.includes('always()'));
+      assert.ok(steps[release].if.includes('always()') && steps[release].if.includes("env.CUTOVER_LOCK_RUN != ''"), `${file}/${name}`);
     }
   }
   const build = workflow('build-push-images.yml');
@@ -153,6 +154,13 @@ test('promote-prod applies immo-mcp-config after cutover and before drift check,
   assert.deepEqual(Object.keys(reann.on), ['workflow_dispatch']);
   assert.equal(reann.jobs.reannotate.environment, 'production');
   assert.equal(reann.jobs.reannotate.if, "startsWith(github.ref, 'refs/tags/v')");
+  const reannSteps = reann.jobs.reannotate.steps;
+  const reannLock = reannSteps.findIndex(s => s.uses === './deploy/cutover/lock-action' && s.with.action === 'lock' && s.with.environment === 'prod');
+  const reannRun = reannSteps.findIndex(s => (s.run || '').includes('reannotate-signals-prod.sh'));
+  const reannRelease = reannSteps.findIndex(s => s.uses === './deploy/cutover/lock-action' && s.with.action === 'release-lock' && s.with.environment === 'prod');
+  assert.ok(reannLock >= 0 && reannRun > reannLock && reannRelease > reannRun, 'reannotate acquires lock before running Job and releases via release-lock');
+  assert.equal(reannSteps[reannRelease].if, "always() && env.CUTOVER_LOCK_RUN != ''");
+  assert.equal(JSON.stringify(reannSteps).includes('"unlock"'), false, 'reannotate never calls nonexistent unlock target');
 });
 test('bascule-bundle-cd proves lock RBAC before creating the lock and always releases it', () => {
   const w = workflow('bascule-bundle-cd.yml');
