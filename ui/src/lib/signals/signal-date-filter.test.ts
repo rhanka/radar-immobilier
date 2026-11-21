@@ -47,7 +47,7 @@ describe("signal date filter", () => {
       to: now,
     });
     expect(formatSignalTimeRange(range, "fr-CA")).toBe("Dernière semaine");
-    expect(dateRangeFromSignalTimeRange(range)).toEqual({ start: new Date(2026, 9, 2), end: new Date(2026, 9, 9) });
+    expect(dateRangeFromSignalTimeRange(range)).toEqual({ start: new Date(2026, 9, 2), end: null });
   });
 
   it("resolves last week across a month boundary and last month as one calendar month", () => {
@@ -67,6 +67,7 @@ describe("signal date filter", () => {
     const now = new Date(2026, 9, 9, 10, 30).getTime();
     const range = dateRangeFromSignalTimeRange(defaultSignalTimeRange(now));
     const nodes = [
+      node("upcoming", { refs: [{ publishedAt: "2026-10-14" }] }),
       node("today", { refs: [{ publishedAt: "2026-10-09" }] }),
       node("first-day", { refs: [{ publishedAt: "2026-10-02" }] }),
       node("eight-days", { refs: [{ publishedAt: "2026-10-01" }] }),
@@ -76,10 +77,38 @@ describe("signal date filter", () => {
     const panel = filterNodesByDocumentDate(nodes, range).map(({ id }) => id);
     // Window sent to /api/graph-signals/by-city (rail + map counts), filtered by the API function.
     const window = signalDocumentDateWindow(range);
-    expect(window).toEqual({ dateBasis: "document", dateFrom: "2026-10-02", dateTo: "2026-10-09" });
+    expect(window).toEqual({ dateBasis: "document", dateFrom: "2026-10-02" });
     const api = nodes.filter((n) => matchesDocumentDateWindow(n.props, window)).map(({ id }) => id);
-    expect(panel).toEqual(["today", "first-day", "stage-only"]);
+    expect(panel).toEqual(["upcoming", "today", "first-day", "stage-only"]);
     expect(api).toEqual(panel);
+  });
+
+  it("keeps upcoming sessions visible in relative last-month preset while keeping dateTo for absolute ranges", () => {
+    const now = new Date(2026, 10, 20, 12, 0).getTime();
+    const lastMonth = normalizeSignalTimeRange({ mode: "relative", relative: "1mo", from: 0, to: 0 }, now);
+    const relativeRange = dateRangeFromSignalTimeRange(lastMonth);
+    const relativeWindow = signalDocumentDateWindow(relativeRange);
+    expect(relativeRange).toEqual({ start: new Date(2026, 9, 20), end: null });
+    expect(relativeWindow).toEqual({ dateBasis: "document", dateFrom: "2026-10-20" });
+
+    const nodes = [
+      node("agenda-future", { refs: [{ publishedAt: "2026-11-24" }] }),
+      node("session-in-month", { refs: [{ publishedAt: "2026-11-09" }] }),
+      node("session-before-month", { refs: [{ publishedAt: "2026-10-19" }] }),
+    ];
+    const relativePanel = filterNodesByDocumentDate(nodes, relativeRange).map(({ id }) => id);
+    const relativeApi = nodes.filter((n) => matchesDocumentDateWindow(n.props, relativeWindow)).map(({ id }) => id);
+    expect(relativePanel).toEqual(["agenda-future", "session-in-month"]);
+    expect(relativeApi).toEqual(relativePanel);
+
+    const absoluteRange = dateRangeFromSignalTimeRange({
+      mode: "absolute",
+      from: new Date(2026, 9, 20, 0, 0).getTime(),
+      to: new Date(2026, 10, 20, 0, 0).getTime(),
+    });
+    const absoluteWindow = signalDocumentDateWindow(absoluteRange);
+    expect(absoluteWindow).toEqual({ dateBasis: "document", dateFrom: "2026-10-20", dateTo: "2026-11-20" });
+    expect(filterNodesByDocumentDate(nodes, absoluteRange).map(({ id }) => id)).toEqual(["session-in-month"]);
   });
 
   it("« Illimité » (token all) : bornes nulles → tous les signaux, même sans date", () => {
