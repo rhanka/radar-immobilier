@@ -112,3 +112,110 @@ test('writer release-lock retains lock while a Job or Pod lives and releases onc
     assert.equal(nextLock.status, 0, nextLock.stderr);
   } finally { f.cleanup(); }
 });
+
+test('writer release-lock ignores Pods owned by CronJob-managed Jobs while still blocking unscheduled or orphan Job Pods', () => {
+  const f = fixture();
+  try {
+    const githubEnv = join(f.dir, 'github-env');
+    writeFileSync(githubEnv, '');
+    const ghEnv = {
+      ...f.env,
+      GITHUB_ACTIONS: 'true',
+      GITHUB_REPOSITORY: 'rhanka/radar-immobilier',
+      GITHUB_RUN_ID: '44860099999',
+      GITHUB_RUN_ATTEMPT: '1',
+      GITHUB_JOB: 'reannotate',
+      GITHUB_ENV: githubEnv,
+    };
+    const runGh = (action, extra = []) => spawnSync(
+      'make',
+      ['-s', '-f', 'deploy/cutover/operator.mk', action, ...extra, 'ENV=preprod'],
+      { env: ghEnv, encoding: 'utf8', timeout: 60000 },
+    );
+    const lockRes = runGh('lock');
+    assert.equal(lockRes.status, 0, lockRes.stderr);
+    const runId = readFileSync(githubEnv, 'utf8').match(/^CUTOVER_LOCK_RUN=([0-9a-f-]+)$/m)[1];
+
+    // Scheduled CronJob Job + Running Pod started AFTER lock acquisition (not in originalJobs),
+    // alongside a failed writer Job whose Pod is still Running.
+    const cronJobUid = 'uid-radar-refresh-pv-29920260';
+    const writerJobUid = 'uid-radar-reannotate-prod-20261121040000';
+    const state = f.state();
+    state.objects.push(
+      {
+        apiVersion: 'batch/v1',
+        kind: 'Job',
+        metadata: {
+          name: 'radar-refresh-pv-29920260',
+          uid: cronJobUid,
+          resourceVersion: '1',
+          ownerReferences: [{ kind: 'CronJob', controller: true, uid: 'uid-radar-refresh-pv' }],
+        },
+        status: { active: 1 },
+      },
+      {
+        apiVersion: 'v1',
+        kind: 'Pod',
+        metadata: {
+          name: 'radar-refresh-pv-29920260-k9m2p',
+          uid: 'uid-pod-refresh-k9m2p',
+          resourceVersion: '1',
+          ownerReferences: [{ kind: 'Job', controller: true, uid: cronJobUid }],
+        },
+        status: { phase: 'Running' },
+      },
+      {
+        apiVersion: 'batch/v1',
+        kind: 'Job',
+        metadata: { name: 'radar-reannotate-prod-20261121040000', uid: writerJobUid, resourceVersion: '1' },
+        status: { conditions: [{ type: 'Failed', status: 'True' }] },
+      },
+      {
+        apiVersion: 'v1',
+        kind: 'Pod',
+        metadata: {
+          name: 'radar-reannotate-prod-20261121040000-abcde',
+          uid: 'uid-pod-writer-abcde',
+          resourceVersion: '1',
+          ownerReferences: [{ kind: 'Job', controller: true, uid: writerJobUid }],
+        },
+        status: { phase: 'Running' },
+      },
+    );
+    writeFileSync(join(f.dir, 'state.json'), JSON.stringify(state));
+
+    // 1. Writer Pod still Running -> lock retained even though the CronJob Pod is ignored.
+    const blockedByWriterPod = runGh('release-lock', [`RUN=${runId}`]);
+    assert.notEqual(blockedByWriterPod.status, 0);
+    assert.match(blockedByWriterPod.stderr, /Writer Job Pods have not terminated/);
+    assert.ok(f.state().objects.some(o => o.metadata.name === 'radar-change-lock'));
+
+    // 2. Writer Pod terminates, but an orphan Running Pod (Job deleted) exists -> lock still retained.
+    const stateOrphan = f.state();
+    stateOrphan.objects.find(o => o.metadata.uid === 'uid-pod-writer-abcde').status = { phase: 'Failed' };
+    stateOrphan.objects.push({
+      apiVersion: 'v1',
+      kind: 'Pod',
+      metadata: {
+        name: 'deleted-job-orphan-pod',
+        uid: 'uid-pod-orphan',
+        resourceVersion: '1',
+        ownerReferences: [{ kind: 'Job', controller: true, uid: 'uid-deleted-job' }],
+      },
+      status: { phase: 'Running' },
+    });
+    writeFileSync(join(f.dir, 'state.json'), JSON.stringify(stateOrphan));
+    const blockedByOrphan = runGh('release-lock', [`RUN=${runId}`]);
+    assert.notEqual(blockedByOrphan.status, 0);
+    assert.match(blockedByOrphan.stderr, /Writer Job Pods have not terminated/);
+
+    // 3. Orphan Pod removed; CronJob Job + Running Pod (radar-refresh-pv-*) still active -> lock releases cleanly.
+    const stateCronOnly = f.state();
+    stateCronOnly.objects = stateCronOnly.objects.filter(o => o.metadata.uid !== 'uid-pod-orphan');
+    writeFileSync(join(f.dir, 'state.json'), JSON.stringify(stateCronOnly));
+    const released = runGh('release-lock', [`RUN=${runId}`]);
+    assert.equal(released.status, 0, released.stderr);
+    assert.equal(f.state().objects.some(o => o.metadata.name === 'radar-change-lock'), false,
+      'lock released while scheduled CronJob Job and Pod continue running');
+  } finally { f.cleanup(); }
+});
