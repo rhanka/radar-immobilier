@@ -17,7 +17,6 @@ import type {
   SearchSignalsArgs,
 } from "./data-source.js";
 import { MockDataSource } from "./data-source.js";
-import type { MockSignal } from "./mocks.js";
 import { createIsolatedExchangeFixture, exchangeDepsFor } from "./test-exchange-fixtures.js";
 
 // Resource-server settings under test. `resource` == the token `aud` (single-audience model).
@@ -274,9 +273,9 @@ describe("delegated token propagation (P4) through the transport", () => {
     override async searchSignals(
       args: SearchSignalsArgs,
       ctx: DataSourceCallContext = {},
-    ): Promise<MockSignal[]> {
+    ) {
       this.lastAccessToken = ctx.accessToken;
-      return [
+      return { signals: [
         {
           id: "sig-x",
           city: args.city,
@@ -289,7 +288,7 @@ describe("delegated token propagation (P4) through the transport", () => {
           summary: "signal réel",
           source_document_id: "doc-1",
         },
-      ];
+      ] };
     }
   }
 
