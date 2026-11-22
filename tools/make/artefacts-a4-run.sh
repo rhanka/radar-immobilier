@@ -23,7 +23,7 @@ else
   candidate=$(git rev-parse HEAD)
 fi
 printf '%s\n' "$candidate" > "$LOG_DIR/candidate-sha.txt"
-git show 77cb9553:package-lock.json > "$LOG_DIR/baseline-lock.json"
+git show 90edb37a:package-lock.json > "$LOG_DIR/baseline-lock.json"
 while :; do
   names=$(docker ps --filter name=radar-test- --format '{{.Names}}')
   builds=$(ps -C docker -C docker-buildx -o args= | grep -E '(docker|docker-buildx) (build|buildx build)( |$)' || true)

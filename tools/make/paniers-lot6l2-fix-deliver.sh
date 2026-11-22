@@ -3,7 +3,7 @@
 set -euo pipefail
 task_dir="$PWD/tmp/paniers-6l2-fix"
 repo="$task_dir/git"
-base=$(git rev-parse '960a9c4d^{commit}')
+base=$(git rev-parse 'c31dfb24^{commit}')
 plan=plan/PANIERS6L2-BRANCH_feat-paniers-6l2-realtime.md
 logs="$PWD/tmp/paniers-6l2/logs/fix"
 local_git() { git --git-dir="$repo/.git" --work-tree="$PWD" "$@"; }

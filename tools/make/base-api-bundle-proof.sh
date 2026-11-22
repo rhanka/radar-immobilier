@@ -10,11 +10,11 @@ exec > >(tee tmp/base-api-evidence/tooling/bundle-proof.log) 2>&1
 scratch=$(mktemp -d "$PWD/tmp/base-api-evidence/tooling/bundles.XXXXXX")
 trap 'rm -rf -- "$scratch"' EXIT
 git init -q "$scratch"
-git -C "$scratch" fetch -q --no-tags "$root" bf84974e78c6251cb9e1737a30a68c3e14af59e1
+git -C "$scratch" fetch -q --no-tags "$root" dcd795afba3142ce106ea097ea1497b8c4cecfc4
 cd "$scratch"
 git config user.name 'Synthetic tooling proof'
 git config user.email 'synthetic@example.invalid'
-git switch -q -c feat/base-api-decouplee-b2 d033bc18bf9b9537c5c7a69311ebe44b0b545517
+git switch -q -c feat/base-api-decouplee-b2 eac134dc095dcbb51897ada3f24af2ea7d46de86
 printf 'Synthetic bundle payload\n' > docs/spec/SPEC_EVOL_BASE_API.md
 git add -- docs/spec/SPEC_EVOL_BASE_API.md
 # Keep this disposable proof commit independent of the repository's hooks.
@@ -26,17 +26,17 @@ reject() {
 }
 for packet in B3 B4 B5; do
   if [[ $packet == B3 ]]; then
-    start=d033bc18bf9b9537c5c7a69311ebe44b0b545517
+    start=eac134dc095dcbb51897ada3f24af2ea7d46de86
     branch=feat/base-api-decouplee-b2
   elif [[ $packet == B4 ]]; then
-    start=4fc755e9f69daae2c32286dd3cf0069c5798ecd0
+    start=29fa51ec1442ccd9378c337fd4516e304203d625
     branch=feat/base-api-decouplee-b1
     git switch -q -c "$branch" "$start"
     printf 'Synthetic B4 payload\n' > docs/spec/SPEC_EVOL_BASE_API.md
     git add -- docs/spec/SPEC_EVOL_BASE_API.md
     git -c core.hooksPath=/dev/null commit -q -m 'test(base): create synthetic activation payload'
   else
-    start=bf84974e78c6251cb9e1737a30a68c3e14af59e1
+    start=dcd795afba3142ce106ea097ea1497b8c4cecfc4
     branch=feat/base-api-decouplee-b5
     git switch -q -c "$branch" "$start"
     printf 'Synthetic B5 payload\n' > docs/spec/SPEC_BASE_API.md
@@ -44,7 +44,7 @@ for packet in B3 B4 B5; do
     git -c core.hooksPath=/dev/null commit -q -m 'test(base): create synthetic acceptance payload'
   fi
   out=tmp/base-api-evidence/$packet/base-api-${packet,,}.bundle
-  reject "OUT=$out" "START=fd39c6168404b250c243222abe1fbba24d5480b0"
+  reject "OUT=$out" "START=b6400c29488df9ef2c7f7660299cfa2803c3d283"
   reject "OUT=tmp/base-api-evidence/$packet/wrong.bundle" "START=$start"
   git switch -q -c "feat/base-api-decouplee-wrong-${packet,,}"
   reject "OUT=$out" "START=$start"

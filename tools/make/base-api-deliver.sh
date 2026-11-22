@@ -8,7 +8,7 @@ for kv in "$@"; do case $kv in
   SLUG=*) SLUG=${kv#*=};; BRANCH=*) BRANCH=${kv#*=};; START=*) START=${kv#*=};;
   SRC=*) SRC=${kv#*=};; ENV=*) ENV=${kv#*=};; RECEIPT=*) RECEIPT=${kv#*=};;
 esac; done
-BASE=9a81508704b8ee247e3d402f9cbf15d458edfe2a
+BASE=30635f90be6b8db97dd155d727a6b87f1d40e21b
 source "$(dirname -- "$0")/base-api-guards.sh"
 require_env
 [[ $(git branch --show-current) == feat/base-api-decouplee* ]] || exit 2
@@ -76,17 +76,17 @@ case $ACTION in
       tmp/base-api-evidence/B0/base-api-b0.bundle) ;;
       tmp/base-api-evidence/B1/base-api-b1.bundle)
         [[ $(git branch --show-current) == feat/base-api-decouplee-b1 && $START =~ ^[a-f0-9]{40}$ ]] || exit 2
-        git merge-base --is-ancestor 3c6d3c1f95d6794ba0939cf71db6b169cb3f071d "$START"
+        git merge-base --is-ancestor 7a0645b32ccbe58bc4b626c0d5c9fe0a2cbb76bf "$START"
         git merge-base --is-ancestor "$START" HEAD
         prerequisite=$START;;
       tmp/base-api-evidence/B3/base-api-b3.bundle)
-        [[ $(git branch --show-current) == feat/base-api-decouplee-b2 && $START == d033bc18bf9b9537c5c7a69311ebe44b0b545517 ]] || exit 2
+        [[ $(git branch --show-current) == feat/base-api-decouplee-b2 && $START == eac134dc095dcbb51897ada3f24af2ea7d46de86 ]] || exit 2
         prerequisite=$START;;
       tmp/base-api-evidence/B4/base-api-b4.bundle)
-        [[ $(git branch --show-current) == feat/base-api-decouplee-b1 && $START == 4fc755e9f69daae2c32286dd3cf0069c5798ecd0 ]] || exit 2
+        [[ $(git branch --show-current) == feat/base-api-decouplee-b1 && $START == 29fa51ec1442ccd9378c337fd4516e304203d625 ]] || exit 2
         prerequisite=$START;;
       tmp/base-api-evidence/B5/base-api-b5.bundle)
-        [[ $(git branch --show-current) == feat/base-api-decouplee-b5 && $START == bf84974e78c6251cb9e1737a30a68c3e14af59e1 ]] || exit 2
+        [[ $(git branch --show-current) == feat/base-api-decouplee-b5 && $START == dcd795afba3142ce106ea097ea1497b8c4cecfc4 ]] || exit 2
         prerequisite=$START;;
       *) exit 2;;
     esac
@@ -124,7 +124,7 @@ case $ACTION in
       tmp/base-api-b[12])
         [[ $BRANCH == "feat/base-api-decouplee-${SLUG##*-}" && $START =~ ^[a-f0-9]{40}$ ]] || exit 2;;
       tmp/base-api-b5)
-        [[ $BRANCH == "feat/base-api-decouplee-b5" && $START == bf84974e78c6251cb9e1737a30a68c3e14af59e1 ]] || exit 2;;
+        [[ $BRANCH == "feat/base-api-decouplee-b5" && $START == dcd795afba3142ce106ea097ea1497b8c4cecfc4 ]] || exit 2;;
       *) exit 2;;
     esac
     root=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")

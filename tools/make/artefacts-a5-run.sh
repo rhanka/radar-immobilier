@@ -21,7 +21,7 @@ RUN_DIR=$TASK_DIR/runtime
 LOG_DIR=$TASK_DIR/$(date -u +%Y%m%dT%H%M%S)-$$
 mkdir -p "$RUN_DIR" "$LOG_DIR"
 echo "Evidence: $LOG_DIR"
-git show 9a723753607097c7758027eb5cc9a2071c8e0023:package-lock.json > "$LOG_DIR/baseline-lock.json"
+git show 56ec8c7cf0fc7c73ef71fdd8c98379430473df46:package-lock.json > "$LOG_DIR/baseline-lock.json"
 exec 8>"${XDG_CACHE_HOME:-$HOME/.cache}/radar-docker-campaign.lock"
 until flock -w 60 8; do
   echo 'WAIT: machine Docker campaign lock held'
@@ -41,12 +41,12 @@ wait_machine
 [[ $(awk '/MemAvailable/ {print $2}' /proc/meminfo) -ge 8388608 ]]
 candidate_git=(git)
 candidate=$("${candidate_git[@]}" rev-parse HEAD)
-"${candidate_git[@]}" show 5ea88ce1:api/drizzle/meta/_journal.json > "$LOG_DIR/baseline-journal.json"
+"${candidate_git[@]}" show 1710edb2:api/drizzle/meta/_journal.json > "$LOG_DIR/baseline-journal.json"
 while IFS= read -r path; do
   [[ $path != api/drizzle/meta/_journal.json ]] || continue
-  digest=$("${candidate_git[@]}" show "5ea88ce1:$path" | sha256sum | cut -d' ' -f1)
+  digest=$("${candidate_git[@]}" show "1710edb2:$path" | sha256sum | cut -d' ' -f1)
   printf '%s  %s\n' "$digest" "$path"
-done < <("${candidate_git[@]}" ls-tree -r --name-only 5ea88ce1 -- api/drizzle) > "$LOG_DIR/baseline-migrations.sha256"
+done < <("${candidate_git[@]}" ls-tree -r --name-only 1710edb2 -- api/drizzle) > "$LOG_DIR/baseline-migrations.sha256"
 printf '%s\n' "$candidate" > "$LOG_DIR/candidate-sha.txt"
 "${candidate_git[@]}" status --porcelain --untracked-files=all -- api packages tools .security \
   package.json package-lock.json tsconfig.base.json eslint.config.js > "$LOG_DIR/candidate-status.txt"

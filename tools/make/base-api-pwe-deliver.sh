@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 ROOT=$(pwd -P)
-BASE=37f21d3d82dffed1b51bec3f06632983cba0bd09
+BASE=062ec2ee6d8856666f9102626a30acf6cfcb4b52
 g() { git -C "$ROOT" "$@"; }
 allowed() {
   case $1 in

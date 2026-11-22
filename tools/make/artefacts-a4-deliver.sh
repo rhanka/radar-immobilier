@@ -2,7 +2,7 @@
 set -euo pipefail
 action=${1:?}
 ROOT=$(pwd -P)
-BASE=$(git rev-parse c49bb854)
+BASE=$(git rev-parse 4522d5fe)
 LOCAL=$ROOT/tmp/a4-delivery.git
 [[ $ENV == test-artefacts-a4 ]]
 if [[ $action == setup ]]; then

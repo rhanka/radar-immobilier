@@ -3,7 +3,7 @@
 set -euo pipefail
 [[ $ENV == test-api-paniers-pwa && $API_PORT == 18933 && $UI_PORT == 15933 && $MAILDEV_UI_PORT == 11933 ]]
 ROOT=$(pwd -P)
-BASE=07ef2757a80c168938e888f52c6925c9f8138016
+BASE=62eae653bb5ad0a777b7fd6a334edbe622e72b01
 START=$BASE
 PLAN=plan/PWA-BRANCH_feat-api-paniers-pwa.md
 runner=(make --no-print-directory -f tools/make/base-api-pwa.mk)
@@ -63,14 +63,14 @@ while IFS= read -r commit; do
   git show --format= --numstat "$commit" | awk '{n+=$1+$2; f++} END {exit !(n<=150 && f<=15)}'
   git show -s --format='%H %s' "$commit"
 done < <(git rev-list --reverse --first-parent --no-merges "$START..HEAD")
-for merge in 512ca686 39ed4f1b 0ab7d664; do git merge-base --is-ancestor "$merge" HEAD; done
+for merge in a99fa5db 3843bd54 ee655826; do git merge-base --is-ancestor "$merge" HEAD; done
 mapfile -t merges < <(git rev-list --first-parent --merges "$BASE..HEAD")
 [[ ${#merges[@]} == 1 ]]
 [[ $(git show -s --format=%P "${merges[0]}") == \
-  '318b97fd559aa8afe8bbaa25cdd4aef83a5ff87e 9a723753607097c7758027eb5cc9a2071c8e0023' ]]
+  '23e203b4194683b52c767f8e7cb5374d4db0a292 56ec8c7cf0fc7c73ef71fdd8c98379430473df46' ]]
 [[ $(git show -s --format=%B "${merges[0]}") == 'chore(pw-a): merge origin/main 9a723753' ]]
 [[ $(git rev-parse HEAD:.track) == $(git rev-parse "$BASE:.track") ]]
-git merge-base --is-ancestor 4c3959b6 HEAD
+git merge-base --is-ancestor 180eb6be HEAD
 [[ $(df -Pk . | awk 'NR==2 {print $4}') -ge 8388608 ]]
 head=$(git rev-parse HEAD)
 tree=$(git rev-parse 'HEAD^{tree}')
@@ -86,7 +86,7 @@ audit_git bundle verify "$out"
 audit_git fetch --no-tags --no-write-fetch-head "$out" HEAD:refs/heads/payload
 audit_git symbolic-ref HEAD refs/heads/payload
 [[ $(audit_git rev-parse HEAD) == "$head" && $(audit_git rev-parse 'HEAD^{tree}') == "$tree" ]]
-for merge in 512ca686 39ed4f1b 0ab7d664; do audit_git merge-base --is-ancestor "$merge" payload; done
+for merge in a99fa5db 3843bd54 ee655826; do audit_git merge-base --is-ancestor "$merge" payload; done
 audit_git fsck --full --no-reflogs
 sha256sum "$out" | tee tmp/pwa-evidence/bundle-fix3.sha256
 printf 'HEAD=%s\nTREE=%s\nAUDIT=%s\n' "$head" "$tree" "$audit" | tee tmp/pwa-evidence/delivery-fix3.txt

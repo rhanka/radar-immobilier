@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-BASE=b09a8ccc
+BASE=98ec1fcd
 [[ ${ENV:-} == test-api-paniers-pwd ]]
 [[ $(git branch --show-current) == feat/api-paniers-pwd ]]
 git diff --exit-code

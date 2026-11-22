@@ -5,7 +5,7 @@ TOOLS=$(cd -- "$(dirname -- "$0")" && pwd)
 source "$TOOLS/base-api-guards.sh"
 require_env
 root=$PWD
-start=bf84974e78c6251cb9e1737a30a68c3e14af59e1
+start=dcd795afba3142ce106ea097ea1497b8c4cecfc4
 mkdir -p tmp/base-api-evidence/tooling
 exec > >(tee tmp/base-api-evidence/tooling/worktree-proof.log) 2>&1
 scratch=$(mktemp -d "$root/tmp/base-api-evidence/tooling/worktrees.XXXXXX")
@@ -43,7 +43,7 @@ done
 for branch in feat/base-api-decouplee-b1 feat/base-api-decouplee-b50 main; do
   reject branch SLUG=tmp/base-api-b5 "BRANCH=$branch" "START=$start"
 done
-for pin in bf84974e 965cd42b57dbd1d793556acc0e7c243b19490005 BF84974E78C6251CB9E1737A30A68C3E14AF59E1 ''; do
+for pin in dcd795af 40f8e485268157d0125c1ecbc471c4c2dc1b4d14 DCD795AFBA3142CE106EA097EA1497B8C4CECFC4 ''; do
   reject prerequisite SLUG=tmp/base-api-b5 BRANCH=feat/base-api-decouplee-b5 "START=$pin"
 done
 saved_env=$ENV; ENV=dev

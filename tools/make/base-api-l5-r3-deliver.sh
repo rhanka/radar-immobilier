@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 root=$(pwd -P)
-base=26a78195ad17f8b80907074a91d6cb43ef6ac3dd
+base=2e2a0fa8a5eea46b1c173e8222165a0cab1d2b7d
 ref=refs/heads/feat/api-paniers-l5
 head=$(git rev-parse HEAD)
 required=${REQUIRED_EVIDENCE:?}

@@ -3,8 +3,8 @@
 set -euo pipefail
 source "$(dirname -- "$0")/base-api-guards.sh"
 require_env
-K_SHA=fd39c6168404b250c243222abe1fbba24d5480b0
-B0_SHA=8abeff79fa9cff47d1f7a84288c44b4ccbe6a6d0
+K_SHA=b6400c29488df9ef2c7f7660299cfa2803c3d283
+B0_SHA=f489805b7494890d8aad589c2e54156c109083b8
 [[ $(git branch --show-current) == feat/base-api-decouplee-b2 ]]
 git merge-base --is-ancestor "$K_SHA" HEAD
 ROOT=$(pwd -P)

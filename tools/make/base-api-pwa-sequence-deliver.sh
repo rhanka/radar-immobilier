@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Audit only the owner-requested 509e664d -> migration-order delivery.
 set -euo pipefail
-BASE=509e664d422cba43bd9d27f9488afe6ad7eba9b9
+BASE=2627dea7c600cae1297192f640d509fa5337401a
 ROOT=$(pwd -P)
 [[ $ENV == test-api-paniers-pwa && $API_PORT == 18933 && $UI_PORT == 15933 && $MAILDEV_UI_PORT == 11933 ]]
 [[ $(git branch --show-current) == feat/api-paniers-pwa ]]

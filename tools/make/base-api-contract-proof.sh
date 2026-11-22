@@ -13,7 +13,7 @@ for file in plan/BASEAPI-BRANCH_feat_base-api-decouplee.md "$spec"; do
   echo "PASS byte-identical CT-1..CT-9: $file"
 done
 sha256sum "$dir/expected" > "$dir/ct.sha256"
-pin=3c6d3c1f95d6794ba0939cf71db6b169cb3f071d
+pin=7a0645b32ccbe58bc4b626c0d5c9fe0a2cbb76bf
 for tag in 0022_facet_lot_cutover 0023_facet_lot_versions_fence; do
   git show "$pin:api/drizzle/$tag.sql" | sha256sum > "$dir/$tag.sha256"
 done

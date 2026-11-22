@@ -3,7 +3,7 @@
 set -euo pipefail
 action=${1:?}
 ROOT=$(pwd -P)
-BASE=$(git rev-parse dce9b366)
+BASE=$(git rev-parse 688aea5b)
 LOCAL=$ROOT/tmp/a2base-mcp-delivery.git
 if [[ $action == setup ]]; then
   [[ $(git branch --show-current) == feat/artefacts-mcp-a2base-mcp ]]

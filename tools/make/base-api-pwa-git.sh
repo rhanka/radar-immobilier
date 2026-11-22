@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 [[ $ENV == test-api-paniers-pwa && $(git branch --show-current) == feat/api-paniers-pwa ]]
-git merge-base --is-ancestor 39ed4f1b HEAD
+git merge-base --is-ancestor 3843bd54 HEAD
 allowed() {
   case $1 in
     api/drizzle/0025_pw_write_persistence.sql|api/drizzle/0027_pw_write_persistence.sql|api/drizzle/meta/_journal.json|\

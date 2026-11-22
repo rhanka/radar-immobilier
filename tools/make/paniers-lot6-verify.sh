@@ -113,7 +113,7 @@ if [[ "$LOT" == 6K ]]; then
   for component in EvaluationMapView LotFichePanel; do
     path="ui/src/lib/components/maps/$component.svelte"
     git show "origin/main:$path" > "$baseline/$component.svelte"
-    git show "81678e05:$path" | cmp "$baseline/$component.svelte" -
+    git show "478d0967:$path" | cmp "$baseline/$component.svelte" -
     sha256sum "$baseline/$component.svelte" >> "$log_dir/ui-baseline.sha256"
   done
   sed -i 's|\$lib/components/maps/LotFichePanel.svelte|./LotFichePanel.svelte|' "$baseline/EvaluationMapView.svelte"

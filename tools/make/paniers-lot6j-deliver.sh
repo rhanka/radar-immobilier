@@ -3,7 +3,7 @@
 set -euo pipefail
 task_dir="$PWD/tmp/paniers-6j"
 repo="$task_dir/git"
-base=$(git rev-parse '71f41b72^{commit}')
+base=$(git rev-parse '104d660c^{commit}')
 plan=plan/PANIERS6J-BRANCH_feat-paniers-6j-lot-destination.md
 lots=api/src/services/facets/lots
 migration=api/drizzle/0021_facet_lot_history.sql

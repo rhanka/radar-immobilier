@@ -4,7 +4,7 @@
     "model": "gemini-3.8-flash-tiered",
     "effort": "low",
     "contractVersion": "immo-pv-extraction-v7",
-    "t1Commit": "5068dda38bffe8659a85c2e51f566fb9c6ad4584",
+    "t1Commit": "f2d7cb40256953964e69adafe9b049a686dd66aa",
     "note": "Real refused v11 citations, copied verbatim from the frozen campaign output."
   },
   "overlongExcerpt": {

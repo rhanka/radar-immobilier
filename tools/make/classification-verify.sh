@@ -34,7 +34,7 @@ df -h . | tee "$LOG_DIR/disk-before.log"
 [[ $(df -Pk . | awk 'NR==2 {print $4}') -ge 10485760 ]] || exit 3
 git rev-parse HEAD > "$LOG_DIR/candidate.sha"
 git status --short > "$LOG_DIR/worktree-status.txt"
-BASE_API_LINT_FILES=$(git diff --name-only 600d78485965361c89109bf61eccaa0250cf7284 -- api/src | tr '\n' ' ')
+BASE_API_LINT_FILES=$(git diff --name-only aea3660c8b245eb6a3637f762c57f4904e6442b2 -- api/src | tr '\n' ' ')
 archive_sources
 archive_ci_inputs
 for path in tools/make/classification-container.sh tools/make/classification-mutants.mjs; do
