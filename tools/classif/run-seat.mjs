@@ -79,7 +79,8 @@ export const ROUTES = {
   }])),
   // Owner 12/11: Gemini 4 Carbon low and Gemini 3.8 Flash low (the production detection fallback
   // and check model), same agy route as Argon (ids from `agy models` of 12/11).
-  ...Object.fromEntries([['gemini-4-carbon-low', 'Gemini 4 Carbon'], ['gemini-3.8-flash-low', 'Gemini 3.8 Flash']].map(([label, family]) => [label, {
+  ...Object.fromEntries([['gemini-4-carbon-low', 'Gemini 4 Carbon'], ['gemini-3.8-flash-low', 'Gemini 3.8 Flash'],
+    ['gemini-4-hydrogen-low', 'Gemini 4 Hydrogen'], ['gemini-4-neon-low', 'Gemini 4 Neon']].map(([label, family]) => [label, {
     family, model: label, effort: 'low', route: 'agy --print= with stream-json stdin input, slash commands disabled, empty cwd',
     build: (_dir, _file, prompt) => ({ cmd: 'agy', args: ['--model', label, '--input-format', 'stream-json', '--output-format', 'stream-json',
       '--disable-slash-commands', '--print='], stdin: `${JSON.stringify({ event: 'user', message: { role: 'user', content: prompt } })}\n` }),
@@ -93,6 +94,55 @@ export const ROUTES = {
     parse: (stdout) => { const j = lastJson(stdout); return { text: j?.result ?? '', usage: j?.usage ?? null, costUsdApiEquivalent: j?.total_cost_usd ?? null, isError: j?.is_error ?? false,
       errorEnvelope: j?.is_error ? String(j?.result ?? j?.error ?? '') : '' }; },
   }])),
+  'fable-5.2-low': {
+    family: 'Fable 5.2', model: 'claude-fable-5-2', effort: 'low', route: 'isolated claude -p stream-json: no tools, no CLAUDE.md (CLAUDE_CODE_DISABLE_CLAUDE_MDS=1), project settings only, neutral system prompt, empty MCP config, no session persistence, empty cwd',
+    build: (_dir, _file, prompt) => ({ cmd: 'claude', args: ['-p', '--model', 'claude-fable-5-2', '--effort', 'low', '--output-format', 'stream-json', '--verbose',
+      '--tools', '', '--setting-sources', 'project', '--no-session-persistence', '--system-prompt', NEUTRAL_SYSTEM,
+      '--strict-mcp-config', '--mcp-config', '{"mcpServers":{}}'], stdin: prompt, env: { CLAUDE_CODE_DISABLE_CLAUDE_MDS: '1' } }),
+    parse: (stdout) => {
+      let res = null;
+      const rateLimitEvents = [];
+      let toolEvents = 0;
+      const toolKinds = {};
+      for (const line of String(stdout ?? '').split('\n')) {
+        if (!line.trim()) continue;
+        let e;
+        try { e = JSON.parse(line); } catch { continue; }
+        if (e?.type === 'rate_limit_event' && e.rate_limit_info) rateLimitEvents.push(e.rate_limit_info);
+        if (e?.type === 'result') res = e;
+        if (e?.type === 'assistant' && Array.isArray(e?.message?.content)) {
+          for (const c of e.message.content) {
+            if (c?.type === 'tool_use' || c?.type === 'server_tool_use') {
+              toolEvents++;
+              toolKinds[c.type] = (toolKinds[c.type] ?? 0) + 1;
+            }
+          }
+        }
+      }
+      if (!res) res = lastJson(stdout);
+      const lastRl = rateLimitEvents.at(-1) ?? null;
+      const weeklyWin = lastRl?.unifiedWindows?.seven_day ?? null;
+      const util = typeof lastRl?.utilization === 'number' ? lastRl.utilization
+        : (typeof weeklyWin?.utilization === 'number' ? weeklyWin.utilization : null);
+      const rateLimits = lastRl ? {
+        primary: {
+          used_percent: util !== null ? Math.round(util * 1000) / 10 : null,
+          window_minutes: lastRl.rateLimitType === 'seven_day' || weeklyWin ? 10080 : (lastRl.rateLimitType === 'five_hour' ? 300 : null),
+          resets_at: typeof (weeklyWin?.resetsAt ?? lastRl.resetsAt) === 'number' ? (weeklyWin?.resetsAt ?? lastRl.resetsAt) : null,
+          status: weeklyWin?.status ?? lastRl.status ?? null,
+          rateLimitType: lastRl.rateLimitType ?? null,
+        },
+        all: rateLimitEvents,
+        rate_limit_reached_type: (lastRl.status && !['allowed', 'allowed_warning'].includes(lastRl.status)) ? (lastRl.rateLimitType ?? lastRl.status)
+          : (weeklyWin?.status && !['allowed', 'allowed_warning'].includes(weeklyWin.status) ? `seven_day:${weeklyWin.status}` : null),
+      } : null;
+      return {
+        text: res?.result ?? '', usage: res?.usage ?? null, costUsdApiEquivalent: res?.total_cost_usd ?? null,
+        isError: res?.is_error ?? false, toolEvents, toolKinds, rateLimits,
+        errorEnvelope: res?.is_error ? String(res?.result ?? res?.error ?? '') : '',
+      };
+    },
+  },
   // Astra (ChatGPT seat, plan v3 owner decision 04/11): conductor-verified route
   // `codex exec -m gpt-6-astra -c model_reasoning_effort=max -s read-only`, empty cwd, scrubbed
   // env, isolated CODEX_HOME ($CLASSIF_HOME/seat-homes/astra, mode 700, config with NO
@@ -125,6 +175,8 @@ export const ROUTES = {
     ['luna-6-medium', 'Luna 6', 'gpt-6-luna', 'medium'],
     ['astra-low', 'Astra', 'gpt-6-astra', 'low'],
     ['astra-medium', 'Astra', 'gpt-6-astra', 'medium'],
+    // Owner 19/11: GPT-6.2-Astra low (slug `gpt-6.2-astra` verified in ~/.codex/models_cache.json).
+    ['astra-6.2-low', 'Astra 6.2', 'gpt-6.2-astra', 'low'],
   ].map(([label, family, model, effort]) => [label, {
     family, model, effort, route: `codex exec -m ${model} -c model_reasoning_effort=${effort} -s read-only, isolated CODEX_HOME, empty cwd, scrubbed env (--json + -o last-message.md for parsing, prompt on stdin)`,
     build: (dir, _file, prompt) => ({ cmd: 'codex', args: ['exec', '-m', model, '-c', `model_reasoning_effort=${effort}`, '-s', 'read-only',
@@ -286,6 +338,9 @@ web_search = "disabled"
 approval_policy = "never"
 sandbox_mode = "read-only"
 
+[agents]
+enabled = false
+
 [features]
 ${CODEX_DISABLED_FEATURES.map((f) => `${f} = false`).join('\n')}
 `;
@@ -438,7 +493,10 @@ export const CODEX_BENIGN_ITEM_TYPES = new Set(['agent_message', 'reasoning']);
 export const CODEX_BENIGN_ERROR_NOTICES = [/^Code Mode is unavailable because code-mode host is disabled/,
   // Transport fallback (observed 12/11 on astra-low and sol-6.1-medium, answered calls): the
   // ChatGPT WebSocket refuses (403), codex falls back to HTTPS — a CLI transport notice, no tool.
-  /^Falling back from WebSockets to HTTPS transport\. /];
+  /^Falling back from WebSockets to HTTPS transport\. /,
+  // Config deprecation notice (codex 0.171.0+): [features].multi_agent = false stays in the
+  // isolated config alongside [agents].enabled = false — pure CLI config warning, no tool.
+  /^`\[features\]\.multi_agent` is deprecated\. /];
 const benignErrorItem = (item) => item?.type === 'error' && CODEX_BENIGN_ERROR_NOTICES.some((re) => re.test(String(item.message ?? item.text ?? '')));
 
 /**
@@ -455,6 +513,7 @@ const CODEX_TOOL_KEY = /(tool_call|toolcall|function_call|exec_command|shell_com
 export function countCodexToolEvents(stdout) {
   let toolEvents = 0;
   const unknownTypes = [];
+  const errorNotices = [];
   // Diagnostic (owner 12/11): kind of every counted event — event and item types only, never
   // a message, a command or any model text — so an intermittent refusal can be explained.
   const toolKinds = {};
@@ -475,13 +534,17 @@ export function countCodexToolEvents(stdout) {
       const itype = item?.type ?? null;
       if (!itype || typeof itype !== 'string') { toolEvents++; unknownTypes.push(`${type}:<missing-item-type>`); kind(`${type}:<missing-item-type>`); continue; }
       if (benignErrorItem(item)) continue;
-      if (!CODEX_BENIGN_ITEM_TYPES.has(itype)) { toolEvents++; kind(`${type}:${itype}`); continue; }
+      if (!CODEX_BENIGN_ITEM_TYPES.has(itype)) {
+        toolEvents++; kind(`${type}:${itype}`);
+        if (itype === 'error') errorNotices.push(String(item.message ?? item.text ?? '').slice(0, 200));
+        continue;
+      }
       // Fail closed on a tool payload nested inside a benign item (keys only, never the
       // model text: the word "tool" in prose must not count).
       if (CODEX_TOOL_KEY.test(JSON.stringify(Object.keys(item)))) { toolEvents++; kind(`${type}:${itype}:tool-key`); }
     }
   }
-  return { toolEvents, unknownTypes, toolKinds };
+  return { toolEvents, unknownTypes, toolKinds, errorNotices };
 }
 
 export function parseCodex(stdout, dir) {
@@ -516,8 +579,8 @@ export function parseCodex(stdout, dir) {
   for (const line of String(stdout ?? '').split('\n')) {
     try { walk(JSON.parse(line)); } catch { /* not json */ }
   }
-  const { toolEvents, unknownTypes, toolKinds } = countCodexToolEvents(stdout);
-  return { text, usage, toolEvents, unknownTypes, toolKinds, errorEnvelope: codexErrorEnvelope(stdout), rateLimits: extractCodexRateLimits(stdout) };
+  const { toolEvents, unknownTypes, toolKinds, errorNotices } = countCodexToolEvents(stdout);
+  return { text, usage, toolEvents, unknownTypes, toolKinds, errorNotices, errorEnvelope: codexErrorEnvelope(stdout), rateLimits: extractCodexRateLimits(stdout) };
 }
 
 /**

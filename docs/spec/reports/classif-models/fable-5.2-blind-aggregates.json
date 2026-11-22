@@ -1,0 +1,303 @@
+{
+  "B": {
+    "units": 252,
+    "refShown": 94,
+    "predShown": 118,
+    "trueShown": 93,
+    "misses": 1,
+    "recall": 0.9893617021276596,
+    "recallWilson95": {
+      "low": 0.9421770870372144,
+      "high": 0.998119604251912
+    },
+    "precision": 0.788135593220339,
+    "precisionWilson95": {
+      "low": 0.7059275475272522,
+      "high": 0.8521747655784291
+    },
+    "detectionRecall": null,
+    "referenceActs": 193,
+    "detectedActs": 193,
+    "detectedUnits": 252,
+    "absent": 0,
+    "invalid": 0,
+    "matrix": {
+      "order": [
+        "pertinent",
+        "a_surveiller",
+        "ecarte",
+        "non_classe"
+      ],
+      "rows": [
+        [
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          92,
+          1,
+          0
+        ],
+        [
+          0,
+          25,
+          133,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    "D4": "fail",
+    "extractions": 0,
+    "unpairedExtractions": 0,
+    "sourceMissing": 0,
+    "sourceMissingShown": 0,
+    "diagnostics": {
+      "signalUnitsWithActs": 0,
+      "sameSiteDifferentStage": 0,
+      "shownMissesAtSameSiteDifferentStage": 0
+    },
+    "withAvailableSource": {
+      "units": 252,
+      "refShown": 94,
+      "predShown": 118,
+      "trueShown": 93,
+      "misses": 1,
+      "recall": 0.9893617021276596,
+      "recallWilson95": {
+        "low": 0.9421770870372144,
+        "high": 0.998119604251912
+      },
+      "precision": 0.788135593220339,
+      "precisionWilson95": {
+        "low": 0.7059275475272522,
+        "high": 0.8521747655784291
+      },
+      "detectionRecall": 1,
+      "referenceActs": 193,
+      "detectedActs": 193,
+      "detectedUnits": 252,
+      "absent": 0,
+      "invalid": 0,
+      "matrix": {
+        "order": [
+          "pertinent",
+          "a_surveiller",
+          "ecarte",
+          "non_classe"
+        ],
+        "rows": [
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            92,
+            1,
+            0
+          ],
+          [
+            0,
+            25,
+            133,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "D4": "fail"
+    },
+    "onMatchedSignals": {
+      "units": 193,
+      "refShown": 86,
+      "predShown": 108,
+      "trueShown": 85,
+      "misses": 1,
+      "recall": 0.9883720930232558,
+      "recallWilson95": {
+        "low": 0.9370359341070826,
+        "high": 0.9979444313347503
+      },
+      "precision": 0.7870370370370371,
+      "precisionWilson95": {
+        "low": 0.7006656475723132,
+        "high": 0.853690497758367
+      },
+      "detectionRecall": 1,
+      "referenceActs": 193,
+      "detectedActs": 193,
+      "detectedUnits": 193,
+      "absent": 0,
+      "invalid": 0,
+      "matrix": {
+        "order": [
+          "pertinent",
+          "a_surveiller",
+          "ecarte",
+          "non_classe"
+        ],
+        "rows": [
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            84,
+            1,
+            0
+          ],
+          [
+            0,
+            23,
+            84,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "D4": "fail"
+    },
+    "byKind": {
+      "signal": {
+        "units": 193,
+        "refShown": 86,
+        "predShown": 108,
+        "trueShown": 85,
+        "misses": 1,
+        "recall": 0.9883720930232558,
+        "recallWilson95": {
+          "low": 0.9370359341070826,
+          "high": 0.9979444313347503
+        },
+        "precision": 0.7870370370370371,
+        "precisionWilson95": {
+          "low": 0.7006656475723132,
+          "high": 0.853690497758367
+        },
+        "detectionRecall": 1,
+        "referenceActs": 193,
+        "detectedActs": 193,
+        "detectedUnits": 193,
+        "absent": 0,
+        "invalid": 0,
+        "matrix": {
+          "order": [
+            "pertinent",
+            "a_surveiller",
+            "ecarte",
+            "non_classe"
+          ],
+          "rows": [
+            [
+              1,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              84,
+              1,
+              0
+            ],
+            [
+              0,
+              23,
+              84,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        "D4": "fail"
+      },
+      "pv": {
+        "units": 59,
+        "refShown": 8,
+        "predShown": 10,
+        "trueShown": 8,
+        "misses": 0,
+        "recall": 1,
+        "recallWilson95": {
+          "low": 0.6755924351161198,
+          "high": 1
+        },
+        "precision": 0.8,
+        "precisionWilson95": {
+          "low": 0.49016247153664183,
+          "high": 0.9433178485456247
+        },
+        "detectionRecall": null,
+        "referenceActs": 0,
+        "detectedActs": 0,
+        "detectedUnits": 59,
+        "absent": 0,
+        "invalid": 0,
+        "matrix": {
+          "order": [
+            "pertinent",
+            "a_surveiller",
+            "ecarte",
+            "non_classe"
+          ],
+          "rows": [
+            [
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              8,
+              0,
+              0
+            ],
+            [
+              0,
+              2,
+              49,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        "D4": "pass"
+      }
+    }
+  }
+}

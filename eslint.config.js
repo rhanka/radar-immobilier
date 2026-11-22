@@ -26,6 +26,21 @@ export default tseslint.config(
         console: "readonly",
         process: "readonly",
         setTimeout: "readonly",
+        clearTimeout: "readonly",
+      },
+    },
+  },
+  {
+    // Classification and benchmark tooling scripts.
+    files: ["tools/classif/**/*.mjs", "tools/classif/**/*.ts"],
+    languageOptions: {
+      globals: {
+        console: "readonly",
+        process: "readonly",
+        setTimeout: "readonly",
+        clearTimeout: "readonly",
+        Buffer: "readonly",
+        URL: "readonly",
       },
     },
   },

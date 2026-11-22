@@ -1,0 +1,163 @@
+{
+  "bench": "B-CP",
+  "protocol": "bench-v11-oracle-676-precision-cascade",
+  "sourceModel": "astra-6.2-low",
+  "verifyModel": "gemini-3.8-flash-low",
+  "filterPromptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+  "prodPromptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+  "scoredAt": "2026-11-20T20:05:37.763Z",
+  "docs": 100,
+  "accepted": 99,
+  "invalid": 1,
+  "cascade": {
+    "actsJudged": 1285,
+    "actsRemoved": 541,
+    "keptNoValidDecision": 37,
+    "supportedUngrounded": 7,
+    "unknownIds": 0,
+    "noActs": 0,
+    "fallbackUnchanged": 1
+  },
+  "strict": {
+    "tp": 359,
+    "fp": 407,
+    "fn": 317,
+    "precision": 0.46866840731070497,
+    "recall": 0.5310650887573964,
+    "f1": 0.49791955617198336,
+    "support": 676,
+    "missed": 317,
+    "recallWilson95": {
+      "low": 0.49337678065392093,
+      "high": 0.5684023289532756
+    },
+    "precisionWilson95": {
+      "low": 0.43357408008586307,
+      "high": 0.5040754197559221
+    }
+  },
+  "broad": {
+    "tp": 361,
+    "fp": 407,
+    "fn": 358,
+    "precision": 0.4700520833333333,
+    "recall": 0.502086230876217,
+    "f1": 0.4855413584398117,
+    "support": 719,
+    "missed": 358,
+    "recallWilson95": {
+      "low": 0.46562554036131265,
+      "high": 0.5385247473171147
+    },
+    "precisionWilson95": {
+      "low": 0.4349902026092299,
+      "high": 0.5054120659210407
+    }
+  },
+  "stageTolerant": {
+    "tp": 474,
+    "fp": 293,
+    "fn": 202,
+    "precision": 0.6179921773142112,
+    "recall": 0.7011834319526628,
+    "f1": 0.656964656964657,
+    "addedMatches": 115,
+    "support": 676,
+    "missed": 202,
+    "recallWilson95": {
+      "low": 0.6656196293559721,
+      "high": 0.7344736519096812
+    },
+    "precisionWilson95": {
+      "low": 0.5830992026021771,
+      "high": 0.6517091330533944
+    }
+  },
+  "soft": {
+    "tp": 362,
+    "fp": 404,
+    "fn": 314,
+    "precision": 0.4725848563968668,
+    "recall": 0.5355029585798816,
+    "f1": 0.5020804438280166,
+    "addedMatches": 3,
+    "support": 676,
+    "missed": 314,
+    "recallWilson95": {
+      "low": 0.49781170447724893,
+      "high": 0.5727929922166898
+    },
+    "precisionWilson95": {
+      "low": 0.4374547868520629,
+      "high": 0.5079885255094989
+    }
+  },
+  "f1n4": 0.6857142857142857,
+  "halves": {
+    "tuning": {
+      "half": "tuning",
+      "docs": 50,
+      "accepted": 50,
+      "invalid": 0,
+      "strict": {
+        "tp": 194,
+        "fp": 218,
+        "fn": 178,
+        "precision": 0.470873786407767,
+        "recall": 0.521505376344086,
+        "f1": 0.49489795918367346,
+        "support": 372,
+        "missed": 178,
+        "recallWilson95": {
+          "low": 0.47078249979190917,
+          "high": 0.5717886419075839
+        },
+        "precisionWilson95": {
+          "low": 0.4231669712798476,
+          "high": 0.51911872561035
+        }
+      }
+    },
+    "blind": {
+      "half": "blind",
+      "docs": 50,
+      "accepted": 49,
+      "invalid": 1,
+      "strict": {
+        "tp": 165,
+        "fp": 189,
+        "fn": 139,
+        "precision": 0.4661016949152542,
+        "recall": 0.5427631578947368,
+        "f1": 0.5015197568389058,
+        "support": 304,
+        "missed": 139,
+        "recallWilson95": {
+          "low": 0.4865775917595881,
+          "high": 0.5978814674574616
+        },
+        "precisionWilson95": {
+          "low": 0.4147783803096835,
+          "high": 0.5181528119588295
+        }
+      }
+    }
+  },
+  "verifierExecution": {
+    "callsLogged": 103,
+    "codeZero": 100,
+    "toolEventsTotal": 7,
+    "concurrency": 4,
+    "wallSeconds": 431.971,
+    "p50Seconds": 14.727,
+    "p90Seconds": 27.634,
+    "tokens": {
+      "input": 2415220,
+      "output": 115741,
+      "thinking": 0,
+      "cached": 0,
+      "total": 2530961
+    },
+    "costUsd": "missing source"
+  }
+}
