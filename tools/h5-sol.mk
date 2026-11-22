@@ -1,7 +1,7 @@
 # Standalone A6 Git operations and environment-file-safe commit preflight.
 SHELL := /bin/bash
 ENV ?= test-artefacts-mcp-a6
-override A6_BASE := 1d4adc1014ec24e02f7e1966edadae56291a9cb1
+override A6_BASE := 724b2c10b064dda14b580882f743f5bb204b575f
 A6_EVIDENCE := $(CURDIR)/tmp/artefacts-mcp-a6
 
 .PHONY: guard-env guard git-audit bundle
