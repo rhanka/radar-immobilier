@@ -1,0 +1,5256 @@
+{
+ "rule": "score = min(texte min 1440x900 / 12 px ; min sur les rôles A4 de pt / porte du rôle, 8 pt lecture et 7 pt annotation secondaire), candidats aux portes géométriques vertes ; égalité : 1920x1080, coudes, longueur, ordre",
+ "gate": {
+  "minPx": 12,
+  "minPt": 8,
+  "minPtAnnotation": 7,
+  "annotationRoles": [
+   "liaison"
+  ]
+ },
+ "knobs": {
+  "direction": "elk.direction",
+  "inner": "elk.direction (dans les conteneurs, mode ports)",
+  "layerGap": "elk.layered.spacing.nodeNodeBetweenLayers",
+  "rootLayerGap": "elk.layered.spacing.nodeNodeBetweenLayers (racine, mode ports)",
+  "edgeLayerGap": "elk.layered.spacing.edgeNodeBetweenLayers",
+  "nodeGap": "elk.spacing.nodeNode",
+  "edgeNodeGap": "elk.spacing.edgeNode",
+  "edgeGap": "elk.spacing.edgeEdge",
+  "componentGap": "elk.spacing.componentComponent",
+  "placement": "elk.layered.nodePlacement.strategy",
+  "compaction": "elk.layered.compaction.postCompaction.strategy",
+  "labelLayer": "elk.layered.edgeLabels.centerLabelPlacementStrategy",
+  "layering": "elk.layered.layering.strategy",
+  "layerBound": "elk.layered.layering.coffmanGraham.layerBound",
+  "inline": "elk.edgeLabels.inline (posé sur chaque étiquette)",
+  "aspectRatio": "elk.aspectRatio",
+  "innerRatio": "elk.aspectRatio (repliement dans un conteneur)",
+  "packRatio": "elk.aspectRatio (composantes d’un conteneur, mode ports)",
+  "portRatio": "elk.portConstraints FIXED_RATIO (true) ou FIXED_SIDE (false)",
+  "wrap": "elk.layered.wrapping.strategy",
+  "rootPadding": "elk.padding (racine)",
+  "groupDirection": "elk.direction (conteneurs intermédiaires, mode frame)",
+  "leafDirection": "elk.direction (conteneurs de feuilles, mode frame)",
+  "leafRatio": "elk.aspectRatio (conteneurs de feuilles, mode frame)",
+  "groupRatio": "elk.aspectRatio (conteneurs intermédiaires, mode frame)",
+  "portSide": "elk.portConstraints des conteneurs internes : FIXED_SIDE (fixed) ou FREE (free)",
+  "split": "niveau de découpage par ports : chaque conteneur (all) ou frontières seules (leaf)",
+  "frameMargin": "marge des couloirs du cadre autour des étiquettes",
+  "ratioHigh": "rapport largeur / hauteur visé au plus haut par le cadre (porte 16:9)"
+ },
+ "spacingBundles": {
+  "standard": {
+   "edgeLayerGap": 30,
+   "edgeNodeGap": 30,
+   "edgeGap": 20,
+   "componentGap": 60
+  },
+  "serre": {
+   "edgeLayerGap": 15,
+   "edgeNodeGap": 15,
+   "edgeGap": 10,
+   "componentGap": 24
+  }
+ },
+ "excluded": [
+  "elk.layered.layering.strategy = STRETCH_WIDTH : ne termine pas (architecture)",
+  "Graphviz dot : rendu supprimé du dossier (ARCH-7), retiré du balayage"
+ ],
+ "winners": {
+  "architecture-sauvegardes": {
+   "elk": {
+    "mode": "frame",
+    "direction": "RIGHT",
+    "inner": "RIGHT",
+    "split": "all",
+    "portSide": "free",
+    "layerGap": 30,
+    "nodeGap": 24,
+    "rootPadding": 12,
+    "frame": {
+     "north": "USER",
+     "south": "SUD_ADMIN",
+     "anchor": "OVH_CLUSTER",
+     "band": [
+      "Z_GHX",
+      "OVH_CLUSTER",
+      "BUCKETS_OVH",
+      "EXT_REGION"
+     ]
+    },
+    "plan": {
+     "Z_GHX": {
+      "axis": "col",
+      "order": [
+       "HORS_GH",
+       "GH_PILOTAGE"
+      ]
+     },
+     "GH_PILOTAGE": {
+      "axis": "col",
+      "order": [
+       "GHA",
+       "GHA_CD",
+       "ALT_GH"
+      ]
+     },
+     "HORS_GH": {
+      "axis": "col",
+      "order": [
+       "ALT_TEM",
+       "CF_LE"
+      ]
+     },
+     "OVH_CLUSTER": {
+      "axis": "col",
+      "order": [
+       "immo_tenant",
+       "geo_tenant",
+       "PLATEFORME"
+      ],
+      "stretch": [
+       "PLATEFORME"
+      ]
+     },
+     "immo_tenant": {
+      "axis": "row",
+      "order": [
+       "immo_pp",
+       "immo_pr"
+      ]
+     },
+     "geo_tenant": {
+      "axis": "row",
+      "order": [
+       "geo_pp",
+       "geo_pr"
+      ]
+     },
+     "BUCKETS_OVH": {
+      "axis": "col",
+      "order": [
+       "S3_IMMO",
+       "S3_GEO",
+       "CLES_S3"
+      ]
+     },
+     "S3_IMMO": {
+      "axis": "col",
+      "order": [
+       "S3_IMMO_PP",
+       "S3_IMMO_PR"
+      ]
+     },
+     "S3_GEO": {
+      "axis": "col",
+      "order": [
+       "S3_GEO_PP",
+       "S3_GEO_PR"
+      ]
+     },
+     "EXT_REGION": {
+      "axis": "col",
+      "order": [
+       "R6_PP",
+       "R6_PR",
+       "GR_PP",
+       "GR_PR",
+       "OPT_HORS"
+      ]
+     },
+     "SUD_ADMIN": {
+      "axis": "row",
+      "order": [
+       "OWNER",
+       "ADMIN",
+       "K_VAULT",
+       "K_OVH"
+      ]
+     }
+    },
+    "frameMargin": 16,
+    "placement": "BRANDES_KOEPF",
+    "compaction": "EDGE_LENGTH",
+    "ratioHigh": 1.7478,
+    "edgeLayerGap": 15,
+    "edgeNodeGap": 15,
+    "edgeGap": 10,
+    "componentGap": 24
+   }
+  },
+  "sequence-bout-en-bout": {
+   "elk": {
+    "mode": "ports",
+    "direction": "DOWN",
+    "inner": "DOWN",
+    "wrap": "MULTI_EDGE",
+    "layerGap": 30,
+    "nodeGap": 24,
+    "rootPadding": 12,
+    "innerRatio": 3,
+    "inline": true,
+    "edgeLayerGap": 15,
+    "edgeNodeGap": 15,
+    "edgeGap": 10,
+    "componentGap": 24
+   }
+  },
+  "mise-en-service": {
+   "elk": {
+    "mode": "ports",
+    "direction": "DOWN",
+    "inner": "RIGHT",
+    "wrap": "MULTI_EDGE",
+    "layerGap": 30,
+    "rootLayerGap": 30,
+    "rootPadding": 12,
+    "innerRatio": 4.5,
+    "placement": "BRANDES_KOEPF",
+    "edgeLayerGap": 15,
+    "edgeNodeGap": 15,
+    "edgeGap": 10,
+    "componentGap": 24
+   }
+  }
+ },
+ "before": {
+  "architecture-sauvegardes": {
+   "elk": {
+    "scene": "architecture-sauvegardes",
+    "engine": "elk",
+    "stage": "avant",
+    "order": -1,
+    "options": {
+     "layerGap": 120,
+     "rootLayerGap": 90,
+     "edgeLayerGap": 15,
+     "nodeGap": 48,
+     "edgeNodeGap": 15,
+     "edgeGap": 10,
+     "componentGap": 24,
+     "placement": "LINEAR_SEGMENTS",
+     "compaction": "NONE",
+     "labelLayer": "MEDIAN_LAYER",
+     "layering": "NETWORK_SIMPLEX",
+     "layerBound": null,
+     "inline": false,
+     "rootPadding": 12,
+     "leafRatio": 1.6,
+     "mode": "include",
+     "direction": "RIGHT"
+    },
+    "faults": 28,
+    "fault": "immo_pp : 5 cartes sur 1 colonne(s), porte 2",
+    "px1440": 2.79,
+    "detail1440": 3.044,
+    "px1920": 3.484,
+    "ptA4": 1.917,
+    "ptMargin": 0.24,
+    "fillBlocks": 0.326,
+    "fillCards": 0.099,
+    "frame": {
+     "width": 8460,
+     "height": 5267.000000000001
+    },
+    "ratio": 1.622,
+    "bends": 140,
+    "lengthPx": 128639.461,
+    "score": 0.233
+   }
+  },
+  "sequence-bout-en-bout": {
+   "elk": {
+    "scene": "sequence-bout-en-bout",
+    "engine": "elk",
+    "stage": "avant",
+    "order": -1,
+    "options": {
+     "layerGap": 350,
+     "rootLayerGap": 90,
+     "edgeLayerGap": 30,
+     "nodeGap": 48,
+     "edgeNodeGap": 30,
+     "edgeGap": 20,
+     "componentGap": 60,
+     "placement": "NETWORK_SIMPLEX",
+     "compaction": "NONE",
+     "labelLayer": "MEDIAN_LAYER",
+     "layering": "NETWORK_SIMPLEX",
+     "layerBound": null,
+     "inline": false,
+     "rootPadding": 40,
+     "leafRatio": 1.6,
+     "mode": "ports",
+     "direction": "DOWN",
+     "inner": "RIGHT",
+     "wrap": "MULTI_EDGE",
+     "innerRatio": 4.5
+    },
+    "faults": 1,
+    "fault": "rapport 6.958 hors de [4:3 ; 16:9]",
+    "px1440": 2.006,
+    "detail1440": 2.188,
+    "px1920": 2.683,
+    "ptA4": 1.186,
+    "ptMargin": 0.148,
+    "fillBlocks": 0.485,
+    "fillCards": 0.066,
+    "frame": {
+     "width": 13676,
+     "height": 2034
+    },
+    "ratio": 6.958,
+    "bends": 40,
+    "lengthPx": 61671.55,
+    "score": 0.148
+   }
+  },
+  "mise-en-service": {
+   "elk": {
+    "scene": "mise-en-service",
+    "engine": "elk",
+    "stage": "avant",
+    "order": -1,
+    "options": {
+     "layerGap": 300,
+     "rootLayerGap": 90,
+     "edgeLayerGap": 30,
+     "nodeGap": 48,
+     "edgeNodeGap": 30,
+     "edgeGap": 20,
+     "componentGap": 60,
+     "placement": "NETWORK_SIMPLEX",
+     "compaction": "NONE",
+     "labelLayer": "MEDIAN_LAYER",
+     "layering": "NETWORK_SIMPLEX",
+     "layerBound": null,
+     "inline": false,
+     "rootPadding": 40,
+     "leafRatio": 1.6,
+     "mode": "ports",
+     "direction": "DOWN",
+     "inner": "RIGHT",
+     "wrap": "MULTI_EDGE",
+     "innerRatio": 3
+    },
+    "faults": 1,
+    "fault": "rapport 1.210 hors de [4:3 ; 16:9]",
+    "px1440": 4.13,
+    "detail1440": 4.506,
+    "px1920": 5.157,
+    "ptA4": 3.067,
+    "ptMargin": 0.383,
+    "fillBlocks": 0.682,
+    "fillCards": 0.103,
+    "frame": {
+     "width": 4288,
+     "height": 3558
+    },
+    "ratio": 1.21,
+    "bends": 36,
+    "lengthPx": 45981.28,
+    "score": 0.344
+   }
+  }
+ },
+ "retained": {
+  "architecture-sauvegardes": {
+   "elk": {
+    "scene": "architecture-sauvegardes",
+    "engine": "elk",
+    "stage": 2,
+    "order": 58,
+    "options": {
+     "mode": "frame",
+     "direction": "RIGHT",
+     "inner": "RIGHT",
+     "split": "all",
+     "portSide": "free",
+     "layerGap": 30,
+     "nodeGap": 24,
+     "rootPadding": 12,
+     "frame": {
+      "north": "USER",
+      "south": "SUD_ADMIN",
+      "anchor": "OVH_CLUSTER",
+      "band": [
+       "Z_GHX",
+       "OVH_CLUSTER",
+       "BUCKETS_OVH",
+       "EXT_REGION"
+      ]
+     },
+     "plan": {
+      "Z_GHX": {
+       "axis": "col",
+       "order": [
+        "HORS_GH",
+        "GH_PILOTAGE"
+       ]
+      },
+      "GH_PILOTAGE": {
+       "axis": "col",
+       "order": [
+        "GHA",
+        "GHA_CD",
+        "ALT_GH"
+       ]
+      },
+      "HORS_GH": {
+       "axis": "col",
+       "order": [
+        "ALT_TEM",
+        "CF_LE"
+       ]
+      },
+      "OVH_CLUSTER": {
+       "axis": "col",
+       "order": [
+        "immo_tenant",
+        "geo_tenant",
+        "PLATEFORME"
+       ],
+       "stretch": [
+        "PLATEFORME"
+       ]
+      },
+      "immo_tenant": {
+       "axis": "row",
+       "order": [
+        "immo_pp",
+        "immo_pr"
+       ]
+      },
+      "geo_tenant": {
+       "axis": "row",
+       "order": [
+        "geo_pp",
+        "geo_pr"
+       ]
+      },
+      "BUCKETS_OVH": {
+       "axis": "col",
+       "order": [
+        "S3_IMMO",
+        "S3_GEO",
+        "CLES_S3"
+       ]
+      },
+      "S3_IMMO": {
+       "axis": "col",
+       "order": [
+        "S3_IMMO_PP",
+        "S3_IMMO_PR"
+       ]
+      },
+      "S3_GEO": {
+       "axis": "col",
+       "order": [
+        "S3_GEO_PP",
+        "S3_GEO_PR"
+       ]
+      },
+      "EXT_REGION": {
+       "axis": "col",
+       "order": [
+        "R6_PP",
+        "R6_PR",
+        "GR_PP",
+        "GR_PR",
+        "OPT_HORS"
+       ]
+      },
+      "SUD_ADMIN": {
+       "axis": "row",
+       "order": [
+        "OWNER",
+        "ADMIN",
+        "K_VAULT",
+        "K_OVH"
+       ]
+      }
+     },
+     "frameMargin": 16,
+     "placement": "BRANDES_KOEPF",
+     "compaction": "EDGE_LENGTH",
+     "ratioHigh": 1.7478,
+     "edgeLayerGap": 15,
+     "edgeNodeGap": 15,
+     "edgeGap": 10,
+     "componentGap": 24
+    },
+    "faults": 0,
+    "fault": null,
+    "px1440": 3.533,
+    "detail1440": 3.854,
+    "px1920": 4.411,
+    "ptA4": 2.303,
+    "ptMargin": 0.288,
+    "fillBlocks": 0.606,
+    "fillCards": 0.151,
+    "frame": {
+     "width": 7040,
+     "height": 4159.666666666666
+    },
+    "ratio": 1.696,
+    "bends": 421,
+    "lengthPx": 182636.083,
+    "score": 0.288,
+    "rank": 1
+   }
+  },
+  "sequence-bout-en-bout": {
+   "elk": {
+    "scene": "sequence-bout-en-bout",
+    "engine": "elk",
+    "stage": 2,
+    "order": 634,
+    "options": {
+     "mode": "ports",
+     "direction": "DOWN",
+     "inner": "DOWN",
+     "wrap": "MULTI_EDGE",
+     "layerGap": 30,
+     "rootLayerGap": 90,
+     "nodeGap": 24,
+     "rootPadding": 12,
+     "innerRatio": 3,
+     "placement": "NETWORK_SIMPLEX",
+     "inline": true,
+     "labelLayer": "MEDIAN_LAYER",
+     "compaction": "NONE",
+     "aspectRatio": null,
+     "edgeLayerGap": 15,
+     "edgeNodeGap": 15,
+     "edgeGap": 10,
+     "componentGap": 24
+    },
+    "faults": 0,
+    "fault": null,
+    "px1440": 5.969,
+    "detail1440": 6.512,
+    "px1920": 7.452,
+    "ptA4": 4.004,
+    "ptMargin": 0.501,
+    "fillBlocks": 0.441,
+    "fillCards": 0.185,
+    "frame": {
+     "width": 4049,
+     "height": 2462
+    },
+    "ratio": 1.651,
+    "bends": 30,
+    "lengthPx": 12270.88,
+    "score": 0.497,
+    "rank": 1
+   }
+  },
+  "mise-en-service": {
+   "elk": {
+    "scene": "mise-en-service",
+    "engine": "elk",
+    "stage": 2,
+    "order": 1322,
+    "options": {
+     "mode": "ports",
+     "direction": "DOWN",
+     "inner": "RIGHT",
+     "wrap": "MULTI_EDGE",
+     "layerGap": 30,
+     "rootLayerGap": 30,
+     "nodeGap": 48,
+     "rootPadding": 12,
+     "innerRatio": 4.5,
+     "placement": "BRANDES_KOEPF",
+     "inline": false,
+     "labelLayer": "MEDIAN_LAYER",
+     "compaction": "NONE",
+     "aspectRatio": null,
+     "edgeLayerGap": 15,
+     "edgeNodeGap": 15,
+     "edgeGap": 10,
+     "componentGap": 24
+    },
+    "faults": 0,
+    "fault": null,
+    "px1440": 7.211,
+    "detail1440": 7.867,
+    "px1920": 9.003,
+    "ptA4": 4.683,
+    "ptMargin": 0.585,
+    "fillBlocks": 0.754,
+    "fillCards": 0.222,
+    "frame": {
+     "width": 3462,
+     "height": 2038
+    },
+    "ratio": 1.707,
+    "bends": 20,
+    "lengthPx": 18021.7,
+    "score": 0.585,
+    "rank": 1
+   }
+  }
+ },
+ "counts": {
+  "architecture-sauvegardes": {
+   "elk": {
+    "candidates": 232,
+    "passGeometry": 220,
+    "passLegibility": 0,
+    "bestIgnoringGeometry": 3.533
+   }
+  },
+  "sequence-bout-en-bout": {
+   "elk": {
+    "candidates": 672,
+    "passGeometry": 162,
+    "passLegibility": 0,
+    "bestIgnoringGeometry": 5.969
+   }
+  },
+  "mise-en-service": {
+   "elk": {
+    "candidates": 672,
+    "passGeometry": 185,
+    "passLegibility": 0,
+    "bestIgnoringGeometry": 7.991
+   }
+  }
+ },
+ "top": {
+  "architecture-sauvegardes": {
+   "elk": [
+    {
+     "scene": "architecture-sauvegardes",
+     "engine": "elk",
+     "stage": 2,
+     "order": 58,
+     "options": {
+      "mode": "frame",
+      "direction": "RIGHT",
+      "inner": "RIGHT",
+      "split": "all",
+      "portSide": "free",
+      "layerGap": 30,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "frame": {
+       "north": "USER",
+       "south": "SUD_ADMIN",
+       "anchor": "OVH_CLUSTER",
+       "band": [
+        "Z_GHX",
+        "OVH_CLUSTER",
+        "BUCKETS_OVH",
+        "EXT_REGION"
+       ]
+      },
+      "plan": {
+       "Z_GHX": {
+        "axis": "col",
+        "order": [
+         "HORS_GH",
+         "GH_PILOTAGE"
+        ]
+       },
+       "GH_PILOTAGE": {
+        "axis": "col",
+        "order": [
+         "GHA",
+         "GHA_CD",
+         "ALT_GH"
+        ]
+       },
+       "HORS_GH": {
+        "axis": "col",
+        "order": [
+         "ALT_TEM",
+         "CF_LE"
+        ]
+       },
+       "OVH_CLUSTER": {
+        "axis": "col",
+        "order": [
+         "immo_tenant",
+         "geo_tenant",
+         "PLATEFORME"
+        ],
+        "stretch": [
+         "PLATEFORME"
+        ]
+       },
+       "immo_tenant": {
+        "axis": "row",
+        "order": [
+         "immo_pp",
+         "immo_pr"
+        ]
+       },
+       "geo_tenant": {
+        "axis": "row",
+        "order": [
+         "geo_pp",
+         "geo_pr"
+        ]
+       },
+       "BUCKETS_OVH": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO",
+         "S3_GEO",
+         "CLES_S3"
+        ]
+       },
+       "S3_IMMO": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO_PP",
+         "S3_IMMO_PR"
+        ]
+       },
+       "S3_GEO": {
+        "axis": "col",
+        "order": [
+         "S3_GEO_PP",
+         "S3_GEO_PR"
+        ]
+       },
+       "EXT_REGION": {
+        "axis": "col",
+        "order": [
+         "R6_PP",
+         "R6_PR",
+         "GR_PP",
+         "GR_PR",
+         "OPT_HORS"
+        ]
+       },
+       "SUD_ADMIN": {
+        "axis": "row",
+        "order": [
+         "OWNER",
+         "ADMIN",
+         "K_VAULT",
+         "K_OVH"
+        ]
+       }
+      },
+      "frameMargin": 16,
+      "placement": "BRANDES_KOEPF",
+      "compaction": "EDGE_LENGTH",
+      "ratioHigh": 1.7478,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 3.533,
+     "detail1440": 3.854,
+     "px1920": 4.411,
+     "ptA4": 2.303,
+     "ptMargin": 0.288,
+     "fillBlocks": 0.606,
+     "fillCards": 0.151,
+     "frame": {
+      "width": 7040,
+      "height": 4159.666666666666
+     },
+     "ratio": 1.696,
+     "bends": 421,
+     "lengthPx": 182636.083,
+     "score": 0.288,
+     "rank": 1
+    },
+    {
+     "scene": "architecture-sauvegardes",
+     "engine": "elk",
+     "stage": 2,
+     "order": 59,
+     "options": {
+      "mode": "frame",
+      "direction": "RIGHT",
+      "inner": "RIGHT",
+      "split": "all",
+      "portSide": "free",
+      "layerGap": 30,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "frame": {
+       "north": "USER",
+       "south": "SUD_ADMIN",
+       "anchor": "OVH_CLUSTER",
+       "band": [
+        "Z_GHX",
+        "OVH_CLUSTER",
+        "BUCKETS_OVH",
+        "EXT_REGION"
+       ]
+      },
+      "plan": {
+       "Z_GHX": {
+        "axis": "col",
+        "order": [
+         "HORS_GH",
+         "GH_PILOTAGE"
+        ]
+       },
+       "GH_PILOTAGE": {
+        "axis": "col",
+        "order": [
+         "GHA",
+         "GHA_CD",
+         "ALT_GH"
+        ]
+       },
+       "HORS_GH": {
+        "axis": "col",
+        "order": [
+         "ALT_TEM",
+         "CF_LE"
+        ]
+       },
+       "OVH_CLUSTER": {
+        "axis": "col",
+        "order": [
+         "immo_tenant",
+         "geo_tenant",
+         "PLATEFORME"
+        ],
+        "stretch": [
+         "PLATEFORME"
+        ]
+       },
+       "immo_tenant": {
+        "axis": "row",
+        "order": [
+         "immo_pp",
+         "immo_pr"
+        ]
+       },
+       "geo_tenant": {
+        "axis": "row",
+        "order": [
+         "geo_pp",
+         "geo_pr"
+        ]
+       },
+       "BUCKETS_OVH": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO",
+         "S3_GEO",
+         "CLES_S3"
+        ]
+       },
+       "S3_IMMO": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO_PP",
+         "S3_IMMO_PR"
+        ]
+       },
+       "S3_GEO": {
+        "axis": "col",
+        "order": [
+         "S3_GEO_PP",
+         "S3_GEO_PR"
+        ]
+       },
+       "EXT_REGION": {
+        "axis": "col",
+        "order": [
+         "R6_PP",
+         "R6_PR",
+         "GR_PP",
+         "GR_PR",
+         "OPT_HORS"
+        ]
+       },
+       "SUD_ADMIN": {
+        "axis": "row",
+        "order": [
+         "OWNER",
+         "ADMIN",
+         "K_VAULT",
+         "K_OVH"
+        ]
+       }
+      },
+      "frameMargin": 16,
+      "placement": "BRANDES_KOEPF",
+      "compaction": "EDGE_LENGTH",
+      "ratioHigh": 1.775,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 3.533,
+     "detail1440": 3.854,
+     "px1920": 4.411,
+     "ptA4": 2.303,
+     "ptMargin": 0.288,
+     "fillBlocks": 0.606,
+     "fillCards": 0.151,
+     "frame": {
+      "width": 7040,
+      "height": 4159.666666666666
+     },
+     "ratio": 1.696,
+     "bends": 421,
+     "lengthPx": 182636.083,
+     "score": 0.288,
+     "rank": 2
+    },
+    {
+     "scene": "architecture-sauvegardes",
+     "engine": "elk",
+     "stage": 2,
+     "order": 46,
+     "options": {
+      "mode": "frame",
+      "direction": "RIGHT",
+      "inner": "RIGHT",
+      "split": "all",
+      "portSide": "free",
+      "layerGap": 30,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "frame": {
+       "north": "USER",
+       "south": "SUD_ADMIN",
+       "anchor": "OVH_CLUSTER",
+       "band": [
+        "Z_GHX",
+        "OVH_CLUSTER",
+        "BUCKETS_OVH",
+        "EXT_REGION"
+       ]
+      },
+      "plan": {
+       "Z_GHX": {
+        "axis": "col",
+        "order": [
+         "HORS_GH",
+         "GH_PILOTAGE"
+        ]
+       },
+       "GH_PILOTAGE": {
+        "axis": "col",
+        "order": [
+         "GHA",
+         "GHA_CD",
+         "ALT_GH"
+        ]
+       },
+       "HORS_GH": {
+        "axis": "col",
+        "order": [
+         "ALT_TEM",
+         "CF_LE"
+        ]
+       },
+       "OVH_CLUSTER": {
+        "axis": "col",
+        "order": [
+         "immo_tenant",
+         "geo_tenant",
+         "PLATEFORME"
+        ],
+        "stretch": [
+         "PLATEFORME"
+        ]
+       },
+       "immo_tenant": {
+        "axis": "row",
+        "order": [
+         "immo_pp",
+         "immo_pr"
+        ]
+       },
+       "geo_tenant": {
+        "axis": "row",
+        "order": [
+         "geo_pp",
+         "geo_pr"
+        ]
+       },
+       "BUCKETS_OVH": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO",
+         "S3_GEO",
+         "CLES_S3"
+        ]
+       },
+       "S3_IMMO": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO_PP",
+         "S3_IMMO_PR"
+        ]
+       },
+       "S3_GEO": {
+        "axis": "col",
+        "order": [
+         "S3_GEO_PP",
+         "S3_GEO_PR"
+        ]
+       },
+       "EXT_REGION": {
+        "axis": "col",
+        "order": [
+         "R6_PP",
+         "R6_PR",
+         "GR_PP",
+         "GR_PR",
+         "OPT_HORS"
+        ]
+       },
+       "SUD_ADMIN": {
+        "axis": "row",
+        "order": [
+         "OWNER",
+         "ADMIN",
+         "K_VAULT",
+         "K_OVH"
+        ]
+       }
+      },
+      "frameMargin": 16,
+      "placement": "BRANDES_KOEPF",
+      "compaction": "NONE",
+      "ratioHigh": 1.7478,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 3.533,
+     "detail1440": 3.854,
+     "px1920": 4.411,
+     "ptA4": 2.303,
+     "ptMargin": 0.288,
+     "fillBlocks": 0.606,
+     "fillCards": 0.151,
+     "frame": {
+      "width": 7040,
+      "height": 4159.666666666666
+     },
+     "ratio": 1.696,
+     "bends": 421,
+     "lengthPx": 182786.083,
+     "score": 0.288,
+     "rank": 3
+    },
+    {
+     "scene": "architecture-sauvegardes",
+     "engine": "elk",
+     "stage": 2,
+     "order": 47,
+     "options": {
+      "mode": "frame",
+      "direction": "RIGHT",
+      "inner": "RIGHT",
+      "split": "all",
+      "portSide": "free",
+      "layerGap": 30,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "frame": {
+       "north": "USER",
+       "south": "SUD_ADMIN",
+       "anchor": "OVH_CLUSTER",
+       "band": [
+        "Z_GHX",
+        "OVH_CLUSTER",
+        "BUCKETS_OVH",
+        "EXT_REGION"
+       ]
+      },
+      "plan": {
+       "Z_GHX": {
+        "axis": "col",
+        "order": [
+         "HORS_GH",
+         "GH_PILOTAGE"
+        ]
+       },
+       "GH_PILOTAGE": {
+        "axis": "col",
+        "order": [
+         "GHA",
+         "GHA_CD",
+         "ALT_GH"
+        ]
+       },
+       "HORS_GH": {
+        "axis": "col",
+        "order": [
+         "ALT_TEM",
+         "CF_LE"
+        ]
+       },
+       "OVH_CLUSTER": {
+        "axis": "col",
+        "order": [
+         "immo_tenant",
+         "geo_tenant",
+         "PLATEFORME"
+        ],
+        "stretch": [
+         "PLATEFORME"
+        ]
+       },
+       "immo_tenant": {
+        "axis": "row",
+        "order": [
+         "immo_pp",
+         "immo_pr"
+        ]
+       },
+       "geo_tenant": {
+        "axis": "row",
+        "order": [
+         "geo_pp",
+         "geo_pr"
+        ]
+       },
+       "BUCKETS_OVH": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO",
+         "S3_GEO",
+         "CLES_S3"
+        ]
+       },
+       "S3_IMMO": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO_PP",
+         "S3_IMMO_PR"
+        ]
+       },
+       "S3_GEO": {
+        "axis": "col",
+        "order": [
+         "S3_GEO_PP",
+         "S3_GEO_PR"
+        ]
+       },
+       "EXT_REGION": {
+        "axis": "col",
+        "order": [
+         "R6_PP",
+         "R6_PR",
+         "GR_PP",
+         "GR_PR",
+         "OPT_HORS"
+        ]
+       },
+       "SUD_ADMIN": {
+        "axis": "row",
+        "order": [
+         "OWNER",
+         "ADMIN",
+         "K_VAULT",
+         "K_OVH"
+        ]
+       }
+      },
+      "frameMargin": 16,
+      "placement": "BRANDES_KOEPF",
+      "compaction": "NONE",
+      "ratioHigh": 1.775,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 3.533,
+     "detail1440": 3.854,
+     "px1920": 4.411,
+     "ptA4": 2.303,
+     "ptMargin": 0.288,
+     "fillBlocks": 0.606,
+     "fillCards": 0.151,
+     "frame": {
+      "width": 7040,
+      "height": 4159.666666666666
+     },
+     "ratio": 1.696,
+     "bends": 421,
+     "lengthPx": 182786.083,
+     "score": 0.288,
+     "rank": 4
+    },
+    {
+     "scene": "architecture-sauvegardes",
+     "engine": "elk",
+     "stage": 2,
+     "order": 22,
+     "options": {
+      "mode": "frame",
+      "direction": "RIGHT",
+      "inner": "RIGHT",
+      "split": "all",
+      "portSide": "free",
+      "layerGap": 30,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "frame": {
+       "north": "USER",
+       "south": "SUD_ADMIN",
+       "anchor": "OVH_CLUSTER",
+       "band": [
+        "Z_GHX",
+        "OVH_CLUSTER",
+        "BUCKETS_OVH",
+        "EXT_REGION"
+       ]
+      },
+      "plan": {
+       "Z_GHX": {
+        "axis": "col",
+        "order": [
+         "HORS_GH",
+         "GH_PILOTAGE"
+        ]
+       },
+       "GH_PILOTAGE": {
+        "axis": "col",
+        "order": [
+         "GHA",
+         "GHA_CD",
+         "ALT_GH"
+        ]
+       },
+       "HORS_GH": {
+        "axis": "col",
+        "order": [
+         "ALT_TEM",
+         "CF_LE"
+        ]
+       },
+       "OVH_CLUSTER": {
+        "axis": "col",
+        "order": [
+         "immo_tenant",
+         "geo_tenant",
+         "PLATEFORME"
+        ],
+        "stretch": [
+         "PLATEFORME"
+        ]
+       },
+       "immo_tenant": {
+        "axis": "row",
+        "order": [
+         "immo_pp",
+         "immo_pr"
+        ]
+       },
+       "geo_tenant": {
+        "axis": "row",
+        "order": [
+         "geo_pp",
+         "geo_pr"
+        ]
+       },
+       "BUCKETS_OVH": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO",
+         "S3_GEO",
+         "CLES_S3"
+        ]
+       },
+       "S3_IMMO": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO_PP",
+         "S3_IMMO_PR"
+        ]
+       },
+       "S3_GEO": {
+        "axis": "col",
+        "order": [
+         "S3_GEO_PP",
+         "S3_GEO_PR"
+        ]
+       },
+       "EXT_REGION": {
+        "axis": "col",
+        "order": [
+         "R6_PP",
+         "R6_PR",
+         "GR_PP",
+         "GR_PR",
+         "OPT_HORS"
+        ]
+       },
+       "SUD_ADMIN": {
+        "axis": "row",
+        "order": [
+         "OWNER",
+         "ADMIN",
+         "K_VAULT",
+         "K_OVH"
+        ]
+       }
+      },
+      "frameMargin": 16,
+      "placement": "NETWORK_SIMPLEX",
+      "compaction": "NONE",
+      "ratioHigh": 1.7478,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 3.504,
+     "detail1440": 3.823,
+     "px1920": 4.375,
+     "ptA4": 2.303,
+     "ptMargin": 0.288,
+     "fillBlocks": 0.604,
+     "fillCards": 0.15,
+     "frame": {
+      "width": 7040,
+      "height": 4194
+     },
+     "ratio": 1.682,
+     "bends": 416,
+     "lengthPx": 185606.917,
+     "score": 0.288,
+     "rank": 5
+    },
+    {
+     "scene": "architecture-sauvegardes",
+     "engine": "elk",
+     "stage": 2,
+     "order": 23,
+     "options": {
+      "mode": "frame",
+      "direction": "RIGHT",
+      "inner": "RIGHT",
+      "split": "all",
+      "portSide": "free",
+      "layerGap": 30,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "frame": {
+       "north": "USER",
+       "south": "SUD_ADMIN",
+       "anchor": "OVH_CLUSTER",
+       "band": [
+        "Z_GHX",
+        "OVH_CLUSTER",
+        "BUCKETS_OVH",
+        "EXT_REGION"
+       ]
+      },
+      "plan": {
+       "Z_GHX": {
+        "axis": "col",
+        "order": [
+         "HORS_GH",
+         "GH_PILOTAGE"
+        ]
+       },
+       "GH_PILOTAGE": {
+        "axis": "col",
+        "order": [
+         "GHA",
+         "GHA_CD",
+         "ALT_GH"
+        ]
+       },
+       "HORS_GH": {
+        "axis": "col",
+        "order": [
+         "ALT_TEM",
+         "CF_LE"
+        ]
+       },
+       "OVH_CLUSTER": {
+        "axis": "col",
+        "order": [
+         "immo_tenant",
+         "geo_tenant",
+         "PLATEFORME"
+        ],
+        "stretch": [
+         "PLATEFORME"
+        ]
+       },
+       "immo_tenant": {
+        "axis": "row",
+        "order": [
+         "immo_pp",
+         "immo_pr"
+        ]
+       },
+       "geo_tenant": {
+        "axis": "row",
+        "order": [
+         "geo_pp",
+         "geo_pr"
+        ]
+       },
+       "BUCKETS_OVH": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO",
+         "S3_GEO",
+         "CLES_S3"
+        ]
+       },
+       "S3_IMMO": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO_PP",
+         "S3_IMMO_PR"
+        ]
+       },
+       "S3_GEO": {
+        "axis": "col",
+        "order": [
+         "S3_GEO_PP",
+         "S3_GEO_PR"
+        ]
+       },
+       "EXT_REGION": {
+        "axis": "col",
+        "order": [
+         "R6_PP",
+         "R6_PR",
+         "GR_PP",
+         "GR_PR",
+         "OPT_HORS"
+        ]
+       },
+       "SUD_ADMIN": {
+        "axis": "row",
+        "order": [
+         "OWNER",
+         "ADMIN",
+         "K_VAULT",
+         "K_OVH"
+        ]
+       }
+      },
+      "frameMargin": 16,
+      "placement": "NETWORK_SIMPLEX",
+      "compaction": "NONE",
+      "ratioHigh": 1.775,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 3.504,
+     "detail1440": 3.823,
+     "px1920": 4.375,
+     "ptA4": 2.303,
+     "ptMargin": 0.288,
+     "fillBlocks": 0.604,
+     "fillCards": 0.15,
+     "frame": {
+      "width": 7040,
+      "height": 4194
+     },
+     "ratio": 1.682,
+     "bends": 416,
+     "lengthPx": 185606.917,
+     "score": 0.288,
+     "rank": 6
+    },
+    {
+     "scene": "architecture-sauvegardes",
+     "engine": "elk",
+     "stage": 2,
+     "order": 34,
+     "options": {
+      "mode": "frame",
+      "direction": "RIGHT",
+      "inner": "RIGHT",
+      "split": "all",
+      "portSide": "free",
+      "layerGap": 30,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "frame": {
+       "north": "USER",
+       "south": "SUD_ADMIN",
+       "anchor": "OVH_CLUSTER",
+       "band": [
+        "Z_GHX",
+        "OVH_CLUSTER",
+        "BUCKETS_OVH",
+        "EXT_REGION"
+       ]
+      },
+      "plan": {
+       "Z_GHX": {
+        "axis": "col",
+        "order": [
+         "HORS_GH",
+         "GH_PILOTAGE"
+        ]
+       },
+       "GH_PILOTAGE": {
+        "axis": "col",
+        "order": [
+         "GHA",
+         "GHA_CD",
+         "ALT_GH"
+        ]
+       },
+       "HORS_GH": {
+        "axis": "col",
+        "order": [
+         "ALT_TEM",
+         "CF_LE"
+        ]
+       },
+       "OVH_CLUSTER": {
+        "axis": "col",
+        "order": [
+         "immo_tenant",
+         "geo_tenant",
+         "PLATEFORME"
+        ],
+        "stretch": [
+         "PLATEFORME"
+        ]
+       },
+       "immo_tenant": {
+        "axis": "row",
+        "order": [
+         "immo_pp",
+         "immo_pr"
+        ]
+       },
+       "geo_tenant": {
+        "axis": "row",
+        "order": [
+         "geo_pp",
+         "geo_pr"
+        ]
+       },
+       "BUCKETS_OVH": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO",
+         "S3_GEO",
+         "CLES_S3"
+        ]
+       },
+       "S3_IMMO": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO_PP",
+         "S3_IMMO_PR"
+        ]
+       },
+       "S3_GEO": {
+        "axis": "col",
+        "order": [
+         "S3_GEO_PP",
+         "S3_GEO_PR"
+        ]
+       },
+       "EXT_REGION": {
+        "axis": "col",
+        "order": [
+         "R6_PP",
+         "R6_PR",
+         "GR_PP",
+         "GR_PR",
+         "OPT_HORS"
+        ]
+       },
+       "SUD_ADMIN": {
+        "axis": "row",
+        "order": [
+         "OWNER",
+         "ADMIN",
+         "K_VAULT",
+         "K_OVH"
+        ]
+       }
+      },
+      "frameMargin": 16,
+      "placement": "NETWORK_SIMPLEX",
+      "compaction": "EDGE_LENGTH",
+      "ratioHigh": 1.7478,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 3.504,
+     "detail1440": 3.823,
+     "px1920": 4.375,
+     "ptA4": 2.303,
+     "ptMargin": 0.288,
+     "fillBlocks": 0.604,
+     "fillCards": 0.15,
+     "frame": {
+      "width": 7040,
+      "height": 4194
+     },
+     "ratio": 1.682,
+     "bends": 416,
+     "lengthPx": 185606.917,
+     "score": 0.288,
+     "rank": 7
+    },
+    {
+     "scene": "architecture-sauvegardes",
+     "engine": "elk",
+     "stage": 2,
+     "order": 35,
+     "options": {
+      "mode": "frame",
+      "direction": "RIGHT",
+      "inner": "RIGHT",
+      "split": "all",
+      "portSide": "free",
+      "layerGap": 30,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "frame": {
+       "north": "USER",
+       "south": "SUD_ADMIN",
+       "anchor": "OVH_CLUSTER",
+       "band": [
+        "Z_GHX",
+        "OVH_CLUSTER",
+        "BUCKETS_OVH",
+        "EXT_REGION"
+       ]
+      },
+      "plan": {
+       "Z_GHX": {
+        "axis": "col",
+        "order": [
+         "HORS_GH",
+         "GH_PILOTAGE"
+        ]
+       },
+       "GH_PILOTAGE": {
+        "axis": "col",
+        "order": [
+         "GHA",
+         "GHA_CD",
+         "ALT_GH"
+        ]
+       },
+       "HORS_GH": {
+        "axis": "col",
+        "order": [
+         "ALT_TEM",
+         "CF_LE"
+        ]
+       },
+       "OVH_CLUSTER": {
+        "axis": "col",
+        "order": [
+         "immo_tenant",
+         "geo_tenant",
+         "PLATEFORME"
+        ],
+        "stretch": [
+         "PLATEFORME"
+        ]
+       },
+       "immo_tenant": {
+        "axis": "row",
+        "order": [
+         "immo_pp",
+         "immo_pr"
+        ]
+       },
+       "geo_tenant": {
+        "axis": "row",
+        "order": [
+         "geo_pp",
+         "geo_pr"
+        ]
+       },
+       "BUCKETS_OVH": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO",
+         "S3_GEO",
+         "CLES_S3"
+        ]
+       },
+       "S3_IMMO": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO_PP",
+         "S3_IMMO_PR"
+        ]
+       },
+       "S3_GEO": {
+        "axis": "col",
+        "order": [
+         "S3_GEO_PP",
+         "S3_GEO_PR"
+        ]
+       },
+       "EXT_REGION": {
+        "axis": "col",
+        "order": [
+         "R6_PP",
+         "R6_PR",
+         "GR_PP",
+         "GR_PR",
+         "OPT_HORS"
+        ]
+       },
+       "SUD_ADMIN": {
+        "axis": "row",
+        "order": [
+         "OWNER",
+         "ADMIN",
+         "K_VAULT",
+         "K_OVH"
+        ]
+       }
+      },
+      "frameMargin": 16,
+      "placement": "NETWORK_SIMPLEX",
+      "compaction": "EDGE_LENGTH",
+      "ratioHigh": 1.775,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 3.504,
+     "detail1440": 3.823,
+     "px1920": 4.375,
+     "ptA4": 2.303,
+     "ptMargin": 0.288,
+     "fillBlocks": 0.604,
+     "fillCards": 0.15,
+     "frame": {
+      "width": 7040,
+      "height": 4194
+     },
+     "ratio": 1.682,
+     "bends": 416,
+     "lengthPx": 185606.917,
+     "score": 0.288,
+     "rank": 8
+    },
+    {
+     "scene": "architecture-sauvegardes",
+     "engine": "elk",
+     "stage": 2,
+     "order": 82,
+     "options": {
+      "mode": "frame",
+      "direction": "RIGHT",
+      "inner": "RIGHT",
+      "split": "all",
+      "portSide": "free",
+      "layerGap": 30,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "frame": {
+       "north": "USER",
+       "south": "SUD_ADMIN",
+       "anchor": "OVH_CLUSTER",
+       "band": [
+        "Z_GHX",
+        "OVH_CLUSTER",
+        "BUCKETS_OVH",
+        "EXT_REGION"
+       ]
+      },
+      "plan": {
+       "Z_GHX": {
+        "axis": "col",
+        "order": [
+         "HORS_GH",
+         "GH_PILOTAGE"
+        ]
+       },
+       "GH_PILOTAGE": {
+        "axis": "col",
+        "order": [
+         "GHA",
+         "GHA_CD",
+         "ALT_GH"
+        ]
+       },
+       "HORS_GH": {
+        "axis": "col",
+        "order": [
+         "ALT_TEM",
+         "CF_LE"
+        ]
+       },
+       "OVH_CLUSTER": {
+        "axis": "col",
+        "order": [
+         "immo_tenant",
+         "geo_tenant",
+         "PLATEFORME"
+        ],
+        "stretch": [
+         "PLATEFORME"
+        ]
+       },
+       "immo_tenant": {
+        "axis": "row",
+        "order": [
+         "immo_pp",
+         "immo_pr"
+        ]
+       },
+       "geo_tenant": {
+        "axis": "row",
+        "order": [
+         "geo_pp",
+         "geo_pr"
+        ]
+       },
+       "BUCKETS_OVH": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO",
+         "S3_GEO",
+         "CLES_S3"
+        ]
+       },
+       "S3_IMMO": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO_PP",
+         "S3_IMMO_PR"
+        ]
+       },
+       "S3_GEO": {
+        "axis": "col",
+        "order": [
+         "S3_GEO_PP",
+         "S3_GEO_PR"
+        ]
+       },
+       "EXT_REGION": {
+        "axis": "col",
+        "order": [
+         "R6_PP",
+         "R6_PR",
+         "GR_PP",
+         "GR_PR",
+         "OPT_HORS"
+        ]
+       },
+       "SUD_ADMIN": {
+        "axis": "row",
+        "order": [
+         "OWNER",
+         "ADMIN",
+         "K_VAULT",
+         "K_OVH"
+        ]
+       }
+      },
+      "frameMargin": 16,
+      "placement": "LINEAR_SEGMENTS",
+      "compaction": "EDGE_LENGTH",
+      "ratioHigh": 1.7478,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 3.504,
+     "detail1440": 3.823,
+     "px1920": 4.375,
+     "ptA4": 2.303,
+     "ptMargin": 0.288,
+     "fillBlocks": 0.605,
+     "fillCards": 0.15,
+     "frame": {
+      "width": 7040,
+      "height": 4194
+     },
+     "ratio": 1.682,
+     "bends": 426,
+     "lengthPx": 186110.641,
+     "score": 0.288,
+     "rank": 9
+    },
+    {
+     "scene": "architecture-sauvegardes",
+     "engine": "elk",
+     "stage": 2,
+     "order": 83,
+     "options": {
+      "mode": "frame",
+      "direction": "RIGHT",
+      "inner": "RIGHT",
+      "split": "all",
+      "portSide": "free",
+      "layerGap": 30,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "frame": {
+       "north": "USER",
+       "south": "SUD_ADMIN",
+       "anchor": "OVH_CLUSTER",
+       "band": [
+        "Z_GHX",
+        "OVH_CLUSTER",
+        "BUCKETS_OVH",
+        "EXT_REGION"
+       ]
+      },
+      "plan": {
+       "Z_GHX": {
+        "axis": "col",
+        "order": [
+         "HORS_GH",
+         "GH_PILOTAGE"
+        ]
+       },
+       "GH_PILOTAGE": {
+        "axis": "col",
+        "order": [
+         "GHA",
+         "GHA_CD",
+         "ALT_GH"
+        ]
+       },
+       "HORS_GH": {
+        "axis": "col",
+        "order": [
+         "ALT_TEM",
+         "CF_LE"
+        ]
+       },
+       "OVH_CLUSTER": {
+        "axis": "col",
+        "order": [
+         "immo_tenant",
+         "geo_tenant",
+         "PLATEFORME"
+        ],
+        "stretch": [
+         "PLATEFORME"
+        ]
+       },
+       "immo_tenant": {
+        "axis": "row",
+        "order": [
+         "immo_pp",
+         "immo_pr"
+        ]
+       },
+       "geo_tenant": {
+        "axis": "row",
+        "order": [
+         "geo_pp",
+         "geo_pr"
+        ]
+       },
+       "BUCKETS_OVH": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO",
+         "S3_GEO",
+         "CLES_S3"
+        ]
+       },
+       "S3_IMMO": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO_PP",
+         "S3_IMMO_PR"
+        ]
+       },
+       "S3_GEO": {
+        "axis": "col",
+        "order": [
+         "S3_GEO_PP",
+         "S3_GEO_PR"
+        ]
+       },
+       "EXT_REGION": {
+        "axis": "col",
+        "order": [
+         "R6_PP",
+         "R6_PR",
+         "GR_PP",
+         "GR_PR",
+         "OPT_HORS"
+        ]
+       },
+       "SUD_ADMIN": {
+        "axis": "row",
+        "order": [
+         "OWNER",
+         "ADMIN",
+         "K_VAULT",
+         "K_OVH"
+        ]
+       }
+      },
+      "frameMargin": 16,
+      "placement": "LINEAR_SEGMENTS",
+      "compaction": "EDGE_LENGTH",
+      "ratioHigh": 1.775,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 3.504,
+     "detail1440": 3.823,
+     "px1920": 4.375,
+     "ptA4": 2.303,
+     "ptMargin": 0.288,
+     "fillBlocks": 0.605,
+     "fillCards": 0.15,
+     "frame": {
+      "width": 7040,
+      "height": 4194
+     },
+     "ratio": 1.682,
+     "bends": 426,
+     "lengthPx": 186110.641,
+     "score": 0.288,
+     "rank": 10
+    },
+    {
+     "scene": "architecture-sauvegardes",
+     "engine": "elk",
+     "stage": 2,
+     "order": 70,
+     "options": {
+      "mode": "frame",
+      "direction": "RIGHT",
+      "inner": "RIGHT",
+      "split": "all",
+      "portSide": "free",
+      "layerGap": 30,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "frame": {
+       "north": "USER",
+       "south": "SUD_ADMIN",
+       "anchor": "OVH_CLUSTER",
+       "band": [
+        "Z_GHX",
+        "OVH_CLUSTER",
+        "BUCKETS_OVH",
+        "EXT_REGION"
+       ]
+      },
+      "plan": {
+       "Z_GHX": {
+        "axis": "col",
+        "order": [
+         "HORS_GH",
+         "GH_PILOTAGE"
+        ]
+       },
+       "GH_PILOTAGE": {
+        "axis": "col",
+        "order": [
+         "GHA",
+         "GHA_CD",
+         "ALT_GH"
+        ]
+       },
+       "HORS_GH": {
+        "axis": "col",
+        "order": [
+         "ALT_TEM",
+         "CF_LE"
+        ]
+       },
+       "OVH_CLUSTER": {
+        "axis": "col",
+        "order": [
+         "immo_tenant",
+         "geo_tenant",
+         "PLATEFORME"
+        ],
+        "stretch": [
+         "PLATEFORME"
+        ]
+       },
+       "immo_tenant": {
+        "axis": "row",
+        "order": [
+         "immo_pp",
+         "immo_pr"
+        ]
+       },
+       "geo_tenant": {
+        "axis": "row",
+        "order": [
+         "geo_pp",
+         "geo_pr"
+        ]
+       },
+       "BUCKETS_OVH": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO",
+         "S3_GEO",
+         "CLES_S3"
+        ]
+       },
+       "S3_IMMO": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO_PP",
+         "S3_IMMO_PR"
+        ]
+       },
+       "S3_GEO": {
+        "axis": "col",
+        "order": [
+         "S3_GEO_PP",
+         "S3_GEO_PR"
+        ]
+       },
+       "EXT_REGION": {
+        "axis": "col",
+        "order": [
+         "R6_PP",
+         "R6_PR",
+         "GR_PP",
+         "GR_PR",
+         "OPT_HORS"
+        ]
+       },
+       "SUD_ADMIN": {
+        "axis": "row",
+        "order": [
+         "OWNER",
+         "ADMIN",
+         "K_VAULT",
+         "K_OVH"
+        ]
+       }
+      },
+      "frameMargin": 16,
+      "placement": "LINEAR_SEGMENTS",
+      "compaction": "NONE",
+      "ratioHigh": 1.7478,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 3.496,
+     "detail1440": 3.814,
+     "px1920": 4.364,
+     "ptA4": 2.303,
+     "ptMargin": 0.288,
+     "fillBlocks": 0.606,
+     "fillCards": 0.149,
+     "frame": {
+      "width": 7040,
+      "height": 4204
+     },
+     "ratio": 1.678,
+     "bends": 426,
+     "lengthPx": 186530.641,
+     "score": 0.288,
+     "rank": 11
+    },
+    {
+     "scene": "architecture-sauvegardes",
+     "engine": "elk",
+     "stage": 2,
+     "order": 71,
+     "options": {
+      "mode": "frame",
+      "direction": "RIGHT",
+      "inner": "RIGHT",
+      "split": "all",
+      "portSide": "free",
+      "layerGap": 30,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "frame": {
+       "north": "USER",
+       "south": "SUD_ADMIN",
+       "anchor": "OVH_CLUSTER",
+       "band": [
+        "Z_GHX",
+        "OVH_CLUSTER",
+        "BUCKETS_OVH",
+        "EXT_REGION"
+       ]
+      },
+      "plan": {
+       "Z_GHX": {
+        "axis": "col",
+        "order": [
+         "HORS_GH",
+         "GH_PILOTAGE"
+        ]
+       },
+       "GH_PILOTAGE": {
+        "axis": "col",
+        "order": [
+         "GHA",
+         "GHA_CD",
+         "ALT_GH"
+        ]
+       },
+       "HORS_GH": {
+        "axis": "col",
+        "order": [
+         "ALT_TEM",
+         "CF_LE"
+        ]
+       },
+       "OVH_CLUSTER": {
+        "axis": "col",
+        "order": [
+         "immo_tenant",
+         "geo_tenant",
+         "PLATEFORME"
+        ],
+        "stretch": [
+         "PLATEFORME"
+        ]
+       },
+       "immo_tenant": {
+        "axis": "row",
+        "order": [
+         "immo_pp",
+         "immo_pr"
+        ]
+       },
+       "geo_tenant": {
+        "axis": "row",
+        "order": [
+         "geo_pp",
+         "geo_pr"
+        ]
+       },
+       "BUCKETS_OVH": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO",
+         "S3_GEO",
+         "CLES_S3"
+        ]
+       },
+       "S3_IMMO": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO_PP",
+         "S3_IMMO_PR"
+        ]
+       },
+       "S3_GEO": {
+        "axis": "col",
+        "order": [
+         "S3_GEO_PP",
+         "S3_GEO_PR"
+        ]
+       },
+       "EXT_REGION": {
+        "axis": "col",
+        "order": [
+         "R6_PP",
+         "R6_PR",
+         "GR_PP",
+         "GR_PR",
+         "OPT_HORS"
+        ]
+       },
+       "SUD_ADMIN": {
+        "axis": "row",
+        "order": [
+         "OWNER",
+         "ADMIN",
+         "K_VAULT",
+         "K_OVH"
+        ]
+       }
+      },
+      "frameMargin": 16,
+      "placement": "LINEAR_SEGMENTS",
+      "compaction": "NONE",
+      "ratioHigh": 1.775,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 3.496,
+     "detail1440": 3.814,
+     "px1920": 4.364,
+     "ptA4": 2.303,
+     "ptMargin": 0.288,
+     "fillBlocks": 0.606,
+     "fillCards": 0.149,
+     "frame": {
+      "width": 7040,
+      "height": 4204
+     },
+     "ratio": 1.678,
+     "bends": 426,
+     "lengthPx": 186530.641,
+     "score": 0.288,
+     "rank": 12
+    },
+    {
+     "scene": "architecture-sauvegardes",
+     "engine": "elk",
+     "stage": 2,
+     "order": 118,
+     "options": {
+      "mode": "frame",
+      "direction": "RIGHT",
+      "inner": "RIGHT",
+      "split": "all",
+      "portSide": "free",
+      "layerGap": 60,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "frame": {
+       "north": "USER",
+       "south": "SUD_ADMIN",
+       "anchor": "OVH_CLUSTER",
+       "band": [
+        "Z_GHX",
+        "OVH_CLUSTER",
+        "BUCKETS_OVH",
+        "EXT_REGION"
+       ]
+      },
+      "plan": {
+       "Z_GHX": {
+        "axis": "col",
+        "order": [
+         "HORS_GH",
+         "GH_PILOTAGE"
+        ]
+       },
+       "GH_PILOTAGE": {
+        "axis": "col",
+        "order": [
+         "GHA",
+         "GHA_CD",
+         "ALT_GH"
+        ]
+       },
+       "HORS_GH": {
+        "axis": "col",
+        "order": [
+         "ALT_TEM",
+         "CF_LE"
+        ]
+       },
+       "OVH_CLUSTER": {
+        "axis": "col",
+        "order": [
+         "immo_tenant",
+         "geo_tenant",
+         "PLATEFORME"
+        ],
+        "stretch": [
+         "PLATEFORME"
+        ]
+       },
+       "immo_tenant": {
+        "axis": "row",
+        "order": [
+         "immo_pp",
+         "immo_pr"
+        ]
+       },
+       "geo_tenant": {
+        "axis": "row",
+        "order": [
+         "geo_pp",
+         "geo_pr"
+        ]
+       },
+       "BUCKETS_OVH": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO",
+         "S3_GEO",
+         "CLES_S3"
+        ]
+       },
+       "S3_IMMO": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO_PP",
+         "S3_IMMO_PR"
+        ]
+       },
+       "S3_GEO": {
+        "axis": "col",
+        "order": [
+         "S3_GEO_PP",
+         "S3_GEO_PR"
+        ]
+       },
+       "EXT_REGION": {
+        "axis": "col",
+        "order": [
+         "R6_PP",
+         "R6_PR",
+         "GR_PP",
+         "GR_PR",
+         "OPT_HORS"
+        ]
+       },
+       "SUD_ADMIN": {
+        "axis": "row",
+        "order": [
+         "OWNER",
+         "ADMIN",
+         "K_VAULT",
+         "K_OVH"
+        ]
+       }
+      },
+      "frameMargin": 16,
+      "placement": "BRANDES_KOEPF",
+      "compaction": "NONE",
+      "ratioHigh": 1.7478,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 3.491,
+     "detail1440": 3.808,
+     "px1920": 4.359,
+     "ptA4": 2.303,
+     "ptMargin": 0.288,
+     "fillBlocks": 0.618,
+     "fillCards": 0.149,
+     "frame": {
+      "width": 7040,
+      "height": 4209.666666666666
+     },
+     "ratio": 1.676,
+     "bends": 421,
+     "lengthPx": 184356.083,
+     "score": 0.288,
+     "rank": 13
+    },
+    {
+     "scene": "architecture-sauvegardes",
+     "engine": "elk",
+     "stage": 2,
+     "order": 119,
+     "options": {
+      "mode": "frame",
+      "direction": "RIGHT",
+      "inner": "RIGHT",
+      "split": "all",
+      "portSide": "free",
+      "layerGap": 60,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "frame": {
+       "north": "USER",
+       "south": "SUD_ADMIN",
+       "anchor": "OVH_CLUSTER",
+       "band": [
+        "Z_GHX",
+        "OVH_CLUSTER",
+        "BUCKETS_OVH",
+        "EXT_REGION"
+       ]
+      },
+      "plan": {
+       "Z_GHX": {
+        "axis": "col",
+        "order": [
+         "HORS_GH",
+         "GH_PILOTAGE"
+        ]
+       },
+       "GH_PILOTAGE": {
+        "axis": "col",
+        "order": [
+         "GHA",
+         "GHA_CD",
+         "ALT_GH"
+        ]
+       },
+       "HORS_GH": {
+        "axis": "col",
+        "order": [
+         "ALT_TEM",
+         "CF_LE"
+        ]
+       },
+       "OVH_CLUSTER": {
+        "axis": "col",
+        "order": [
+         "immo_tenant",
+         "geo_tenant",
+         "PLATEFORME"
+        ],
+        "stretch": [
+         "PLATEFORME"
+        ]
+       },
+       "immo_tenant": {
+        "axis": "row",
+        "order": [
+         "immo_pp",
+         "immo_pr"
+        ]
+       },
+       "geo_tenant": {
+        "axis": "row",
+        "order": [
+         "geo_pp",
+         "geo_pr"
+        ]
+       },
+       "BUCKETS_OVH": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO",
+         "S3_GEO",
+         "CLES_S3"
+        ]
+       },
+       "S3_IMMO": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO_PP",
+         "S3_IMMO_PR"
+        ]
+       },
+       "S3_GEO": {
+        "axis": "col",
+        "order": [
+         "S3_GEO_PP",
+         "S3_GEO_PR"
+        ]
+       },
+       "EXT_REGION": {
+        "axis": "col",
+        "order": [
+         "R6_PP",
+         "R6_PR",
+         "GR_PP",
+         "GR_PR",
+         "OPT_HORS"
+        ]
+       },
+       "SUD_ADMIN": {
+        "axis": "row",
+        "order": [
+         "OWNER",
+         "ADMIN",
+         "K_VAULT",
+         "K_OVH"
+        ]
+       }
+      },
+      "frameMargin": 16,
+      "placement": "BRANDES_KOEPF",
+      "compaction": "NONE",
+      "ratioHigh": 1.775,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 3.491,
+     "detail1440": 3.808,
+     "px1920": 4.359,
+     "ptA4": 2.303,
+     "ptMargin": 0.288,
+     "fillBlocks": 0.618,
+     "fillCards": 0.149,
+     "frame": {
+      "width": 7040,
+      "height": 4209.666666666666
+     },
+     "ratio": 1.676,
+     "bends": 421,
+     "lengthPx": 184356.083,
+     "score": 0.288,
+     "rank": 14
+    },
+    {
+     "scene": "architecture-sauvegardes",
+     "engine": "elk",
+     "stage": 2,
+     "order": 130,
+     "options": {
+      "mode": "frame",
+      "direction": "RIGHT",
+      "inner": "RIGHT",
+      "split": "all",
+      "portSide": "free",
+      "layerGap": 60,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "frame": {
+       "north": "USER",
+       "south": "SUD_ADMIN",
+       "anchor": "OVH_CLUSTER",
+       "band": [
+        "Z_GHX",
+        "OVH_CLUSTER",
+        "BUCKETS_OVH",
+        "EXT_REGION"
+       ]
+      },
+      "plan": {
+       "Z_GHX": {
+        "axis": "col",
+        "order": [
+         "HORS_GH",
+         "GH_PILOTAGE"
+        ]
+       },
+       "GH_PILOTAGE": {
+        "axis": "col",
+        "order": [
+         "GHA",
+         "GHA_CD",
+         "ALT_GH"
+        ]
+       },
+       "HORS_GH": {
+        "axis": "col",
+        "order": [
+         "ALT_TEM",
+         "CF_LE"
+        ]
+       },
+       "OVH_CLUSTER": {
+        "axis": "col",
+        "order": [
+         "immo_tenant",
+         "geo_tenant",
+         "PLATEFORME"
+        ],
+        "stretch": [
+         "PLATEFORME"
+        ]
+       },
+       "immo_tenant": {
+        "axis": "row",
+        "order": [
+         "immo_pp",
+         "immo_pr"
+        ]
+       },
+       "geo_tenant": {
+        "axis": "row",
+        "order": [
+         "geo_pp",
+         "geo_pr"
+        ]
+       },
+       "BUCKETS_OVH": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO",
+         "S3_GEO",
+         "CLES_S3"
+        ]
+       },
+       "S3_IMMO": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO_PP",
+         "S3_IMMO_PR"
+        ]
+       },
+       "S3_GEO": {
+        "axis": "col",
+        "order": [
+         "S3_GEO_PP",
+         "S3_GEO_PR"
+        ]
+       },
+       "EXT_REGION": {
+        "axis": "col",
+        "order": [
+         "R6_PP",
+         "R6_PR",
+         "GR_PP",
+         "GR_PR",
+         "OPT_HORS"
+        ]
+       },
+       "SUD_ADMIN": {
+        "axis": "row",
+        "order": [
+         "OWNER",
+         "ADMIN",
+         "K_VAULT",
+         "K_OVH"
+        ]
+       }
+      },
+      "frameMargin": 16,
+      "placement": "BRANDES_KOEPF",
+      "compaction": "EDGE_LENGTH",
+      "ratioHigh": 1.7478,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 3.491,
+     "detail1440": 3.808,
+     "px1920": 4.359,
+     "ptA4": 2.303,
+     "ptMargin": 0.288,
+     "fillBlocks": 0.618,
+     "fillCards": 0.149,
+     "frame": {
+      "width": 7040,
+      "height": 4209.666666666666
+     },
+     "ratio": 1.676,
+     "bends": 421,
+     "lengthPx": 184356.083,
+     "score": 0.288,
+     "rank": 15
+    },
+    {
+     "scene": "architecture-sauvegardes",
+     "engine": "elk",
+     "stage": 2,
+     "order": 131,
+     "options": {
+      "mode": "frame",
+      "direction": "RIGHT",
+      "inner": "RIGHT",
+      "split": "all",
+      "portSide": "free",
+      "layerGap": 60,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "frame": {
+       "north": "USER",
+       "south": "SUD_ADMIN",
+       "anchor": "OVH_CLUSTER",
+       "band": [
+        "Z_GHX",
+        "OVH_CLUSTER",
+        "BUCKETS_OVH",
+        "EXT_REGION"
+       ]
+      },
+      "plan": {
+       "Z_GHX": {
+        "axis": "col",
+        "order": [
+         "HORS_GH",
+         "GH_PILOTAGE"
+        ]
+       },
+       "GH_PILOTAGE": {
+        "axis": "col",
+        "order": [
+         "GHA",
+         "GHA_CD",
+         "ALT_GH"
+        ]
+       },
+       "HORS_GH": {
+        "axis": "col",
+        "order": [
+         "ALT_TEM",
+         "CF_LE"
+        ]
+       },
+       "OVH_CLUSTER": {
+        "axis": "col",
+        "order": [
+         "immo_tenant",
+         "geo_tenant",
+         "PLATEFORME"
+        ],
+        "stretch": [
+         "PLATEFORME"
+        ]
+       },
+       "immo_tenant": {
+        "axis": "row",
+        "order": [
+         "immo_pp",
+         "immo_pr"
+        ]
+       },
+       "geo_tenant": {
+        "axis": "row",
+        "order": [
+         "geo_pp",
+         "geo_pr"
+        ]
+       },
+       "BUCKETS_OVH": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO",
+         "S3_GEO",
+         "CLES_S3"
+        ]
+       },
+       "S3_IMMO": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO_PP",
+         "S3_IMMO_PR"
+        ]
+       },
+       "S3_GEO": {
+        "axis": "col",
+        "order": [
+         "S3_GEO_PP",
+         "S3_GEO_PR"
+        ]
+       },
+       "EXT_REGION": {
+        "axis": "col",
+        "order": [
+         "R6_PP",
+         "R6_PR",
+         "GR_PP",
+         "GR_PR",
+         "OPT_HORS"
+        ]
+       },
+       "SUD_ADMIN": {
+        "axis": "row",
+        "order": [
+         "OWNER",
+         "ADMIN",
+         "K_VAULT",
+         "K_OVH"
+        ]
+       }
+      },
+      "frameMargin": 16,
+      "placement": "BRANDES_KOEPF",
+      "compaction": "EDGE_LENGTH",
+      "ratioHigh": 1.775,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 3.491,
+     "detail1440": 3.808,
+     "px1920": 4.359,
+     "ptA4": 2.303,
+     "ptMargin": 0.288,
+     "fillBlocks": 0.618,
+     "fillCards": 0.149,
+     "frame": {
+      "width": 7040,
+      "height": 4209.666666666666
+     },
+     "ratio": 1.676,
+     "bends": 421,
+     "lengthPx": 184356.083,
+     "score": 0.288,
+     "rank": 16
+    },
+    {
+     "scene": "architecture-sauvegardes",
+     "engine": "elk",
+     "stage": 2,
+     "order": 154,
+     "options": {
+      "mode": "frame",
+      "direction": "RIGHT",
+      "inner": "RIGHT",
+      "split": "all",
+      "portSide": "free",
+      "layerGap": 60,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "frame": {
+       "north": "USER",
+       "south": "SUD_ADMIN",
+       "anchor": "OVH_CLUSTER",
+       "band": [
+        "Z_GHX",
+        "OVH_CLUSTER",
+        "BUCKETS_OVH",
+        "EXT_REGION"
+       ]
+      },
+      "plan": {
+       "Z_GHX": {
+        "axis": "col",
+        "order": [
+         "HORS_GH",
+         "GH_PILOTAGE"
+        ]
+       },
+       "GH_PILOTAGE": {
+        "axis": "col",
+        "order": [
+         "GHA",
+         "GHA_CD",
+         "ALT_GH"
+        ]
+       },
+       "HORS_GH": {
+        "axis": "col",
+        "order": [
+         "ALT_TEM",
+         "CF_LE"
+        ]
+       },
+       "OVH_CLUSTER": {
+        "axis": "col",
+        "order": [
+         "immo_tenant",
+         "geo_tenant",
+         "PLATEFORME"
+        ],
+        "stretch": [
+         "PLATEFORME"
+        ]
+       },
+       "immo_tenant": {
+        "axis": "row",
+        "order": [
+         "immo_pp",
+         "immo_pr"
+        ]
+       },
+       "geo_tenant": {
+        "axis": "row",
+        "order": [
+         "geo_pp",
+         "geo_pr"
+        ]
+       },
+       "BUCKETS_OVH": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO",
+         "S3_GEO",
+         "CLES_S3"
+        ]
+       },
+       "S3_IMMO": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO_PP",
+         "S3_IMMO_PR"
+        ]
+       },
+       "S3_GEO": {
+        "axis": "col",
+        "order": [
+         "S3_GEO_PP",
+         "S3_GEO_PR"
+        ]
+       },
+       "EXT_REGION": {
+        "axis": "col",
+        "order": [
+         "R6_PP",
+         "R6_PR",
+         "GR_PP",
+         "GR_PR",
+         "OPT_HORS"
+        ]
+       },
+       "SUD_ADMIN": {
+        "axis": "row",
+        "order": [
+         "OWNER",
+         "ADMIN",
+         "K_VAULT",
+         "K_OVH"
+        ]
+       }
+      },
+      "frameMargin": 16,
+      "placement": "LINEAR_SEGMENTS",
+      "compaction": "EDGE_LENGTH",
+      "ratioHigh": 1.7478,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 3.447,
+     "detail1440": 3.76,
+     "px1920": 4.303,
+     "ptA4": 2.303,
+     "ptMargin": 0.288,
+     "fillBlocks": 0.616,
+     "fillCards": 0.147,
+     "frame": {
+      "width": 7040,
+      "height": 4263.805130506958
+     },
+     "ratio": 1.655,
+     "bends": 425,
+     "lengthPx": 184898.926,
+     "score": 0.287,
+     "rank": 17
+    },
+    {
+     "scene": "architecture-sauvegardes",
+     "engine": "elk",
+     "stage": 2,
+     "order": 155,
+     "options": {
+      "mode": "frame",
+      "direction": "RIGHT",
+      "inner": "RIGHT",
+      "split": "all",
+      "portSide": "free",
+      "layerGap": 60,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "frame": {
+       "north": "USER",
+       "south": "SUD_ADMIN",
+       "anchor": "OVH_CLUSTER",
+       "band": [
+        "Z_GHX",
+        "OVH_CLUSTER",
+        "BUCKETS_OVH",
+        "EXT_REGION"
+       ]
+      },
+      "plan": {
+       "Z_GHX": {
+        "axis": "col",
+        "order": [
+         "HORS_GH",
+         "GH_PILOTAGE"
+        ]
+       },
+       "GH_PILOTAGE": {
+        "axis": "col",
+        "order": [
+         "GHA",
+         "GHA_CD",
+         "ALT_GH"
+        ]
+       },
+       "HORS_GH": {
+        "axis": "col",
+        "order": [
+         "ALT_TEM",
+         "CF_LE"
+        ]
+       },
+       "OVH_CLUSTER": {
+        "axis": "col",
+        "order": [
+         "immo_tenant",
+         "geo_tenant",
+         "PLATEFORME"
+        ],
+        "stretch": [
+         "PLATEFORME"
+        ]
+       },
+       "immo_tenant": {
+        "axis": "row",
+        "order": [
+         "immo_pp",
+         "immo_pr"
+        ]
+       },
+       "geo_tenant": {
+        "axis": "row",
+        "order": [
+         "geo_pp",
+         "geo_pr"
+        ]
+       },
+       "BUCKETS_OVH": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO",
+         "S3_GEO",
+         "CLES_S3"
+        ]
+       },
+       "S3_IMMO": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO_PP",
+         "S3_IMMO_PR"
+        ]
+       },
+       "S3_GEO": {
+        "axis": "col",
+        "order": [
+         "S3_GEO_PP",
+         "S3_GEO_PR"
+        ]
+       },
+       "EXT_REGION": {
+        "axis": "col",
+        "order": [
+         "R6_PP",
+         "R6_PR",
+         "GR_PP",
+         "GR_PR",
+         "OPT_HORS"
+        ]
+       },
+       "SUD_ADMIN": {
+        "axis": "row",
+        "order": [
+         "OWNER",
+         "ADMIN",
+         "K_VAULT",
+         "K_OVH"
+        ]
+       }
+      },
+      "frameMargin": 16,
+      "placement": "LINEAR_SEGMENTS",
+      "compaction": "EDGE_LENGTH",
+      "ratioHigh": 1.775,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 3.447,
+     "detail1440": 3.76,
+     "px1920": 4.303,
+     "ptA4": 2.303,
+     "ptMargin": 0.288,
+     "fillBlocks": 0.616,
+     "fillCards": 0.147,
+     "frame": {
+      "width": 7040,
+      "height": 4263.805130506958
+     },
+     "ratio": 1.655,
+     "bends": 425,
+     "lengthPx": 184898.926,
+     "score": 0.287,
+     "rank": 18
+    },
+    {
+     "scene": "architecture-sauvegardes",
+     "engine": "elk",
+     "stage": 2,
+     "order": 142,
+     "options": {
+      "mode": "frame",
+      "direction": "RIGHT",
+      "inner": "RIGHT",
+      "split": "all",
+      "portSide": "free",
+      "layerGap": 60,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "frame": {
+       "north": "USER",
+       "south": "SUD_ADMIN",
+       "anchor": "OVH_CLUSTER",
+       "band": [
+        "Z_GHX",
+        "OVH_CLUSTER",
+        "BUCKETS_OVH",
+        "EXT_REGION"
+       ]
+      },
+      "plan": {
+       "Z_GHX": {
+        "axis": "col",
+        "order": [
+         "HORS_GH",
+         "GH_PILOTAGE"
+        ]
+       },
+       "GH_PILOTAGE": {
+        "axis": "col",
+        "order": [
+         "GHA",
+         "GHA_CD",
+         "ALT_GH"
+        ]
+       },
+       "HORS_GH": {
+        "axis": "col",
+        "order": [
+         "ALT_TEM",
+         "CF_LE"
+        ]
+       },
+       "OVH_CLUSTER": {
+        "axis": "col",
+        "order": [
+         "immo_tenant",
+         "geo_tenant",
+         "PLATEFORME"
+        ],
+        "stretch": [
+         "PLATEFORME"
+        ]
+       },
+       "immo_tenant": {
+        "axis": "row",
+        "order": [
+         "immo_pp",
+         "immo_pr"
+        ]
+       },
+       "geo_tenant": {
+        "axis": "row",
+        "order": [
+         "geo_pp",
+         "geo_pr"
+        ]
+       },
+       "BUCKETS_OVH": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO",
+         "S3_GEO",
+         "CLES_S3"
+        ]
+       },
+       "S3_IMMO": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO_PP",
+         "S3_IMMO_PR"
+        ]
+       },
+       "S3_GEO": {
+        "axis": "col",
+        "order": [
+         "S3_GEO_PP",
+         "S3_GEO_PR"
+        ]
+       },
+       "EXT_REGION": {
+        "axis": "col",
+        "order": [
+         "R6_PP",
+         "R6_PR",
+         "GR_PP",
+         "GR_PR",
+         "OPT_HORS"
+        ]
+       },
+       "SUD_ADMIN": {
+        "axis": "row",
+        "order": [
+         "OWNER",
+         "ADMIN",
+         "K_VAULT",
+         "K_OVH"
+        ]
+       }
+      },
+      "frameMargin": 16,
+      "placement": "LINEAR_SEGMENTS",
+      "compaction": "NONE",
+      "ratioHigh": 1.7478,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 3.447,
+     "detail1440": 3.76,
+     "px1920": 4.303,
+     "ptA4": 2.303,
+     "ptMargin": 0.288,
+     "fillBlocks": 0.617,
+     "fillCards": 0.147,
+     "frame": {
+      "width": 7040,
+      "height": 4263.805130506958
+     },
+     "ratio": 1.655,
+     "bends": 425,
+     "lengthPx": 185198.926,
+     "score": 0.287,
+     "rank": 19
+    },
+    {
+     "scene": "architecture-sauvegardes",
+     "engine": "elk",
+     "stage": 2,
+     "order": 143,
+     "options": {
+      "mode": "frame",
+      "direction": "RIGHT",
+      "inner": "RIGHT",
+      "split": "all",
+      "portSide": "free",
+      "layerGap": 60,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "frame": {
+       "north": "USER",
+       "south": "SUD_ADMIN",
+       "anchor": "OVH_CLUSTER",
+       "band": [
+        "Z_GHX",
+        "OVH_CLUSTER",
+        "BUCKETS_OVH",
+        "EXT_REGION"
+       ]
+      },
+      "plan": {
+       "Z_GHX": {
+        "axis": "col",
+        "order": [
+         "HORS_GH",
+         "GH_PILOTAGE"
+        ]
+       },
+       "GH_PILOTAGE": {
+        "axis": "col",
+        "order": [
+         "GHA",
+         "GHA_CD",
+         "ALT_GH"
+        ]
+       },
+       "HORS_GH": {
+        "axis": "col",
+        "order": [
+         "ALT_TEM",
+         "CF_LE"
+        ]
+       },
+       "OVH_CLUSTER": {
+        "axis": "col",
+        "order": [
+         "immo_tenant",
+         "geo_tenant",
+         "PLATEFORME"
+        ],
+        "stretch": [
+         "PLATEFORME"
+        ]
+       },
+       "immo_tenant": {
+        "axis": "row",
+        "order": [
+         "immo_pp",
+         "immo_pr"
+        ]
+       },
+       "geo_tenant": {
+        "axis": "row",
+        "order": [
+         "geo_pp",
+         "geo_pr"
+        ]
+       },
+       "BUCKETS_OVH": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO",
+         "S3_GEO",
+         "CLES_S3"
+        ]
+       },
+       "S3_IMMO": {
+        "axis": "col",
+        "order": [
+         "S3_IMMO_PP",
+         "S3_IMMO_PR"
+        ]
+       },
+       "S3_GEO": {
+        "axis": "col",
+        "order": [
+         "S3_GEO_PP",
+         "S3_GEO_PR"
+        ]
+       },
+       "EXT_REGION": {
+        "axis": "col",
+        "order": [
+         "R6_PP",
+         "R6_PR",
+         "GR_PP",
+         "GR_PR",
+         "OPT_HORS"
+        ]
+       },
+       "SUD_ADMIN": {
+        "axis": "row",
+        "order": [
+         "OWNER",
+         "ADMIN",
+         "K_VAULT",
+         "K_OVH"
+        ]
+       }
+      },
+      "frameMargin": 16,
+      "placement": "LINEAR_SEGMENTS",
+      "compaction": "NONE",
+      "ratioHigh": 1.775,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 3.447,
+     "detail1440": 3.76,
+     "px1920": 4.303,
+     "ptA4": 2.303,
+     "ptMargin": 0.288,
+     "fillBlocks": 0.617,
+     "fillCards": 0.147,
+     "frame": {
+      "width": 7040,
+      "height": 4263.805130506958
+     },
+     "ratio": 1.655,
+     "bends": 425,
+     "lengthPx": 185198.926,
+     "score": 0.287,
+     "rank": 20
+    }
+   ]
+  },
+  "sequence-bout-en-bout": {
+   "elk": [
+    {
+     "scene": "sequence-bout-en-bout",
+     "engine": "elk",
+     "stage": 2,
+     "order": 634,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "DOWN",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 90,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "innerRatio": 3,
+      "placement": "NETWORK_SIMPLEX",
+      "inline": true,
+      "labelLayer": "MEDIAN_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": null,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 5.969,
+     "detail1440": 6.512,
+     "px1920": 7.452,
+     "ptA4": 4.004,
+     "ptMargin": 0.501,
+     "fillBlocks": 0.441,
+     "fillCards": 0.185,
+     "frame": {
+      "width": 4049,
+      "height": 2462
+     },
+     "ratio": 1.651,
+     "bends": 30,
+     "lengthPx": 12270.88,
+     "score": 0.497,
+     "rank": 1
+    },
+    {
+     "scene": "sequence-bout-en-bout",
+     "engine": "elk",
+     "stage": 2,
+     "order": 635,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "DOWN",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 90,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "innerRatio": 3,
+      "placement": "NETWORK_SIMPLEX",
+      "inline": true,
+      "labelLayer": "MEDIAN_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": 1.78,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 5.969,
+     "detail1440": 6.512,
+     "px1920": 7.452,
+     "ptA4": 4.004,
+     "ptMargin": 0.501,
+     "fillBlocks": 0.441,
+     "fillCards": 0.185,
+     "frame": {
+      "width": 4049,
+      "height": 2462
+     },
+     "ratio": 1.651,
+     "bends": 30,
+     "lengthPx": 12270.88,
+     "score": 0.497,
+     "rank": 2
+    },
+    {
+     "scene": "sequence-bout-en-bout",
+     "engine": "elk",
+     "stage": 2,
+     "order": 642,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "DOWN",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 90,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "innerRatio": 3,
+      "placement": "NETWORK_SIMPLEX",
+      "inline": true,
+      "labelLayer": "SPACE_EFFICIENT_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": null,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 5.969,
+     "detail1440": 6.512,
+     "px1920": 7.452,
+     "ptA4": 4.004,
+     "ptMargin": 0.501,
+     "fillBlocks": 0.441,
+     "fillCards": 0.185,
+     "frame": {
+      "width": 4049,
+      "height": 2462
+     },
+     "ratio": 1.651,
+     "bends": 30,
+     "lengthPx": 12270.88,
+     "score": 0.497,
+     "rank": 3
+    },
+    {
+     "scene": "sequence-bout-en-bout",
+     "engine": "elk",
+     "stage": 2,
+     "order": 643,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "DOWN",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 90,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "innerRatio": 3,
+      "placement": "NETWORK_SIMPLEX",
+      "inline": true,
+      "labelLayer": "SPACE_EFFICIENT_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": 1.78,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 5.969,
+     "detail1440": 6.512,
+     "px1920": 7.452,
+     "ptA4": 4.004,
+     "ptMargin": 0.501,
+     "fillBlocks": 0.441,
+     "fillCards": 0.185,
+     "frame": {
+      "width": 4049,
+      "height": 2462
+     },
+     "ratio": 1.651,
+     "bends": 30,
+     "lengthPx": 12270.88,
+     "score": 0.497,
+     "rank": 4
+    },
+    {
+     "scene": "sequence-bout-en-bout",
+     "engine": "elk",
+     "stage": 2,
+     "order": 666,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "DOWN",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 90,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "innerRatio": 3,
+      "placement": "BRANDES_KOEPF",
+      "inline": true,
+      "labelLayer": "MEDIAN_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": null,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 5.969,
+     "detail1440": 6.512,
+     "px1920": 7.452,
+     "ptA4": 4.004,
+     "ptMargin": 0.501,
+     "fillBlocks": 0.441,
+     "fillCards": 0.185,
+     "frame": {
+      "width": 4049,
+      "height": 2462
+     },
+     "ratio": 1.651,
+     "bends": 30,
+     "lengthPx": 12271.127,
+     "score": 0.497,
+     "rank": 5
+    },
+    {
+     "scene": "sequence-bout-en-bout",
+     "engine": "elk",
+     "stage": 2,
+     "order": 667,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "DOWN",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 90,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "innerRatio": 3,
+      "placement": "BRANDES_KOEPF",
+      "inline": true,
+      "labelLayer": "MEDIAN_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": 1.78,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 5.969,
+     "detail1440": 6.512,
+     "px1920": 7.452,
+     "ptA4": 4.004,
+     "ptMargin": 0.501,
+     "fillBlocks": 0.441,
+     "fillCards": 0.185,
+     "frame": {
+      "width": 4049,
+      "height": 2462
+     },
+     "ratio": 1.651,
+     "bends": 30,
+     "lengthPx": 12271.127,
+     "score": 0.497,
+     "rank": 6
+    },
+    {
+     "scene": "sequence-bout-en-bout",
+     "engine": "elk",
+     "stage": 2,
+     "order": 674,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "DOWN",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 90,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "innerRatio": 3,
+      "placement": "BRANDES_KOEPF",
+      "inline": true,
+      "labelLayer": "SPACE_EFFICIENT_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": null,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 5.969,
+     "detail1440": 6.512,
+     "px1920": 7.452,
+     "ptA4": 4.004,
+     "ptMargin": 0.501,
+     "fillBlocks": 0.441,
+     "fillCards": 0.185,
+     "frame": {
+      "width": 4049,
+      "height": 2462
+     },
+     "ratio": 1.651,
+     "bends": 30,
+     "lengthPx": 12271.127,
+     "score": 0.497,
+     "rank": 7
+    },
+    {
+     "scene": "sequence-bout-en-bout",
+     "engine": "elk",
+     "stage": 2,
+     "order": 675,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "DOWN",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 90,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "innerRatio": 3,
+      "placement": "BRANDES_KOEPF",
+      "inline": true,
+      "labelLayer": "SPACE_EFFICIENT_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": 1.78,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 5.969,
+     "detail1440": 6.512,
+     "px1920": 7.452,
+     "ptA4": 4.004,
+     "ptMargin": 0.501,
+     "fillBlocks": 0.441,
+     "fillCards": 0.185,
+     "frame": {
+      "width": 4049,
+      "height": 2462
+     },
+     "ratio": 1.651,
+     "bends": 30,
+     "lengthPx": 12271.127,
+     "score": 0.497,
+     "rank": 8
+    },
+    {
+     "scene": "sequence-bout-en-bout",
+     "engine": "elk",
+     "stage": 2,
+     "order": 730,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "DOWN",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 90,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "innerRatio": 2,
+      "placement": "NETWORK_SIMPLEX",
+      "inline": true,
+      "labelLayer": "MEDIAN_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": null,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 5.969,
+     "detail1440": 6.512,
+     "px1920": 7.452,
+     "ptA4": 4.004,
+     "ptMargin": 0.501,
+     "fillBlocks": 0.572,
+     "fillCards": 0.185,
+     "frame": {
+      "width": 4049,
+      "height": 2462
+     },
+     "ratio": 1.651,
+     "bends": 30,
+     "lengthPx": 15522.88,
+     "score": 0.497,
+     "rank": 9
+    },
+    {
+     "scene": "sequence-bout-en-bout",
+     "engine": "elk",
+     "stage": 2,
+     "order": 731,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "DOWN",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 90,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "innerRatio": 2,
+      "placement": "NETWORK_SIMPLEX",
+      "inline": true,
+      "labelLayer": "MEDIAN_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": 1.78,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 5.969,
+     "detail1440": 6.512,
+     "px1920": 7.452,
+     "ptA4": 4.004,
+     "ptMargin": 0.501,
+     "fillBlocks": 0.572,
+     "fillCards": 0.185,
+     "frame": {
+      "width": 4049,
+      "height": 2462
+     },
+     "ratio": 1.651,
+     "bends": 30,
+     "lengthPx": 15522.88,
+     "score": 0.497,
+     "rank": 10
+    },
+    {
+     "scene": "sequence-bout-en-bout",
+     "engine": "elk",
+     "stage": 2,
+     "order": 738,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "DOWN",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 90,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "innerRatio": 2,
+      "placement": "NETWORK_SIMPLEX",
+      "inline": true,
+      "labelLayer": "SPACE_EFFICIENT_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": null,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 5.969,
+     "detail1440": 6.512,
+     "px1920": 7.452,
+     "ptA4": 4.004,
+     "ptMargin": 0.501,
+     "fillBlocks": 0.572,
+     "fillCards": 0.185,
+     "frame": {
+      "width": 4049,
+      "height": 2462
+     },
+     "ratio": 1.651,
+     "bends": 30,
+     "lengthPx": 15522.88,
+     "score": 0.497,
+     "rank": 11
+    },
+    {
+     "scene": "sequence-bout-en-bout",
+     "engine": "elk",
+     "stage": 2,
+     "order": 739,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "DOWN",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 90,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "innerRatio": 2,
+      "placement": "NETWORK_SIMPLEX",
+      "inline": true,
+      "labelLayer": "SPACE_EFFICIENT_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": 1.78,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 5.969,
+     "detail1440": 6.512,
+     "px1920": 7.452,
+     "ptA4": 4.004,
+     "ptMargin": 0.501,
+     "fillBlocks": 0.572,
+     "fillCards": 0.185,
+     "frame": {
+      "width": 4049,
+      "height": 2462
+     },
+     "ratio": 1.651,
+     "bends": 30,
+     "lengthPx": 15522.88,
+     "score": 0.497,
+     "rank": 12
+    },
+    {
+     "scene": "sequence-bout-en-bout",
+     "engine": "elk",
+     "stage": 2,
+     "order": 762,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "DOWN",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 90,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "innerRatio": 2,
+      "placement": "BRANDES_KOEPF",
+      "inline": true,
+      "labelLayer": "MEDIAN_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": null,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 5.969,
+     "detail1440": 6.512,
+     "px1920": 7.452,
+     "ptA4": 4.004,
+     "ptMargin": 0.501,
+     "fillBlocks": 0.572,
+     "fillCards": 0.185,
+     "frame": {
+      "width": 4049,
+      "height": 2462
+     },
+     "ratio": 1.651,
+     "bends": 30,
+     "lengthPx": 15523.127,
+     "score": 0.497,
+     "rank": 13
+    },
+    {
+     "scene": "sequence-bout-en-bout",
+     "engine": "elk",
+     "stage": 2,
+     "order": 763,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "DOWN",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 90,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "innerRatio": 2,
+      "placement": "BRANDES_KOEPF",
+      "inline": true,
+      "labelLayer": "MEDIAN_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": 1.78,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 5.969,
+     "detail1440": 6.512,
+     "px1920": 7.452,
+     "ptA4": 4.004,
+     "ptMargin": 0.501,
+     "fillBlocks": 0.572,
+     "fillCards": 0.185,
+     "frame": {
+      "width": 4049,
+      "height": 2462
+     },
+     "ratio": 1.651,
+     "bends": 30,
+     "lengthPx": 15523.127,
+     "score": 0.497,
+     "rank": 14
+    },
+    {
+     "scene": "sequence-bout-en-bout",
+     "engine": "elk",
+     "stage": 2,
+     "order": 770,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "DOWN",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 90,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "innerRatio": 2,
+      "placement": "BRANDES_KOEPF",
+      "inline": true,
+      "labelLayer": "SPACE_EFFICIENT_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": null,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 5.969,
+     "detail1440": 6.512,
+     "px1920": 7.452,
+     "ptA4": 4.004,
+     "ptMargin": 0.501,
+     "fillBlocks": 0.572,
+     "fillCards": 0.185,
+     "frame": {
+      "width": 4049,
+      "height": 2462
+     },
+     "ratio": 1.651,
+     "bends": 30,
+     "lengthPx": 15523.127,
+     "score": 0.497,
+     "rank": 15
+    },
+    {
+     "scene": "sequence-bout-en-bout",
+     "engine": "elk",
+     "stage": 2,
+     "order": 771,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "DOWN",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 90,
+      "nodeGap": 24,
+      "rootPadding": 12,
+      "innerRatio": 2,
+      "placement": "BRANDES_KOEPF",
+      "inline": true,
+      "labelLayer": "SPACE_EFFICIENT_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": 1.78,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 5.969,
+     "detail1440": 6.512,
+     "px1920": 7.452,
+     "ptA4": 4.004,
+     "ptMargin": 0.501,
+     "fillBlocks": 0.572,
+     "fillCards": 0.185,
+     "frame": {
+      "width": 4049,
+      "height": 2462
+     },
+     "ratio": 1.651,
+     "bends": 30,
+     "lengthPx": 15523.127,
+     "score": 0.497,
+     "rank": 16
+    },
+    {
+     "scene": "sequence-bout-en-bout",
+     "engine": "elk",
+     "stage": 2,
+     "order": 826,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "DOWN",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 90,
+      "nodeGap": 48,
+      "rootPadding": 12,
+      "innerRatio": 3,
+      "placement": "NETWORK_SIMPLEX",
+      "inline": true,
+      "labelLayer": "MEDIAN_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": null,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 5.969,
+     "detail1440": 6.512,
+     "px1920": 7.452,
+     "ptA4": 3.958,
+     "ptMargin": 0.495,
+     "fillBlocks": 0.438,
+     "fillCards": 0.182,
+     "frame": {
+      "width": 4097,
+      "height": 2462
+     },
+     "ratio": 1.671,
+     "bends": 30,
+     "lengthPx": 12379.24,
+     "score": 0.495,
+     "rank": 17
+    },
+    {
+     "scene": "sequence-bout-en-bout",
+     "engine": "elk",
+     "stage": 2,
+     "order": 827,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "DOWN",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 90,
+      "nodeGap": 48,
+      "rootPadding": 12,
+      "innerRatio": 3,
+      "placement": "NETWORK_SIMPLEX",
+      "inline": true,
+      "labelLayer": "MEDIAN_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": 1.78,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 5.969,
+     "detail1440": 6.512,
+     "px1920": 7.452,
+     "ptA4": 3.958,
+     "ptMargin": 0.495,
+     "fillBlocks": 0.438,
+     "fillCards": 0.182,
+     "frame": {
+      "width": 4097,
+      "height": 2462
+     },
+     "ratio": 1.671,
+     "bends": 30,
+     "lengthPx": 12379.24,
+     "score": 0.495,
+     "rank": 18
+    },
+    {
+     "scene": "sequence-bout-en-bout",
+     "engine": "elk",
+     "stage": 2,
+     "order": 834,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "DOWN",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 90,
+      "nodeGap": 48,
+      "rootPadding": 12,
+      "innerRatio": 3,
+      "placement": "NETWORK_SIMPLEX",
+      "inline": true,
+      "labelLayer": "SPACE_EFFICIENT_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": null,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 5.969,
+     "detail1440": 6.512,
+     "px1920": 7.452,
+     "ptA4": 3.958,
+     "ptMargin": 0.495,
+     "fillBlocks": 0.438,
+     "fillCards": 0.182,
+     "frame": {
+      "width": 4097,
+      "height": 2462
+     },
+     "ratio": 1.671,
+     "bends": 30,
+     "lengthPx": 12379.24,
+     "score": 0.495,
+     "rank": 19
+    },
+    {
+     "scene": "sequence-bout-en-bout",
+     "engine": "elk",
+     "stage": 2,
+     "order": 835,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "DOWN",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 90,
+      "nodeGap": 48,
+      "rootPadding": 12,
+      "innerRatio": 3,
+      "placement": "NETWORK_SIMPLEX",
+      "inline": true,
+      "labelLayer": "SPACE_EFFICIENT_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": 1.78,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 5.969,
+     "detail1440": 6.512,
+     "px1920": 7.452,
+     "ptA4": 3.958,
+     "ptMargin": 0.495,
+     "fillBlocks": 0.438,
+     "fillCards": 0.182,
+     "frame": {
+      "width": 4097,
+      "height": 2462
+     },
+     "ratio": 1.671,
+     "bends": 30,
+     "lengthPx": 12379.24,
+     "score": 0.495,
+     "rank": 20
+    }
+   ]
+  },
+  "mise-en-service": {
+   "elk": [
+    {
+     "scene": "mise-en-service",
+     "engine": "elk",
+     "stage": 2,
+     "order": 1322,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "RIGHT",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 30,
+      "nodeGap": 48,
+      "rootPadding": 12,
+      "innerRatio": 4.5,
+      "placement": "BRANDES_KOEPF",
+      "inline": false,
+      "labelLayer": "MEDIAN_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": null,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 7.211,
+     "detail1440": 7.867,
+     "px1920": 9.003,
+     "ptA4": 4.683,
+     "ptMargin": 0.585,
+     "fillBlocks": 0.754,
+     "fillCards": 0.222,
+     "frame": {
+      "width": 3462,
+      "height": 2038
+     },
+     "ratio": 1.707,
+     "bends": 20,
+     "lengthPx": 18021.7,
+     "score": 0.585,
+     "rank": 1
+    },
+    {
+     "scene": "mise-en-service",
+     "engine": "elk",
+     "stage": 2,
+     "order": 1323,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "RIGHT",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 30,
+      "nodeGap": 48,
+      "rootPadding": 12,
+      "innerRatio": 4.5,
+      "placement": "BRANDES_KOEPF",
+      "inline": false,
+      "labelLayer": "MEDIAN_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": 1.78,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 7.211,
+     "detail1440": 7.867,
+     "px1920": 9.003,
+     "ptA4": 4.683,
+     "ptMargin": 0.585,
+     "fillBlocks": 0.754,
+     "fillCards": 0.222,
+     "frame": {
+      "width": 3462,
+      "height": 2038
+     },
+     "ratio": 1.707,
+     "bends": 20,
+     "lengthPx": 18021.7,
+     "score": 0.585,
+     "rank": 2
+    },
+    {
+     "scene": "mise-en-service",
+     "engine": "elk",
+     "stage": 2,
+     "order": 1330,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "RIGHT",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 30,
+      "nodeGap": 48,
+      "rootPadding": 12,
+      "innerRatio": 4.5,
+      "placement": "BRANDES_KOEPF",
+      "inline": false,
+      "labelLayer": "SPACE_EFFICIENT_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": null,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 7.211,
+     "detail1440": 7.867,
+     "px1920": 9.003,
+     "ptA4": 4.683,
+     "ptMargin": 0.585,
+     "fillBlocks": 0.754,
+     "fillCards": 0.222,
+     "frame": {
+      "width": 3462,
+      "height": 2038
+     },
+     "ratio": 1.707,
+     "bends": 20,
+     "lengthPx": 18021.7,
+     "score": 0.585,
+     "rank": 3
+    },
+    {
+     "scene": "mise-en-service",
+     "engine": "elk",
+     "stage": 2,
+     "order": 1331,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "RIGHT",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 30,
+      "nodeGap": 48,
+      "rootPadding": 12,
+      "innerRatio": 4.5,
+      "placement": "BRANDES_KOEPF",
+      "inline": false,
+      "labelLayer": "SPACE_EFFICIENT_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": 1.78,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 7.211,
+     "detail1440": 7.867,
+     "px1920": 9.003,
+     "ptA4": 4.683,
+     "ptMargin": 0.585,
+     "fillBlocks": 0.754,
+     "fillCards": 0.222,
+     "frame": {
+      "width": 3462,
+      "height": 2038
+     },
+     "ratio": 1.707,
+     "bends": 20,
+     "lengthPx": 18021.7,
+     "score": 0.585,
+     "rank": 4
+    },
+    {
+     "scene": "mise-en-service",
+     "engine": "elk",
+     "stage": 2,
+     "order": 1338,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "RIGHT",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 30,
+      "nodeGap": 48,
+      "rootPadding": 12,
+      "innerRatio": 4.5,
+      "placement": "BRANDES_KOEPF",
+      "inline": true,
+      "labelLayer": "MEDIAN_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": null,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 7.211,
+     "detail1440": 7.867,
+     "px1920": 9.003,
+     "ptA4": 4.683,
+     "ptMargin": 0.585,
+     "fillBlocks": 0.754,
+     "fillCards": 0.222,
+     "frame": {
+      "width": 3462,
+      "height": 2038
+     },
+     "ratio": 1.707,
+     "bends": 20,
+     "lengthPx": 18021.7,
+     "score": 0.585,
+     "rank": 5
+    },
+    {
+     "scene": "mise-en-service",
+     "engine": "elk",
+     "stage": 2,
+     "order": 1339,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "RIGHT",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 30,
+      "nodeGap": 48,
+      "rootPadding": 12,
+      "innerRatio": 4.5,
+      "placement": "BRANDES_KOEPF",
+      "inline": true,
+      "labelLayer": "MEDIAN_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": 1.78,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 7.211,
+     "detail1440": 7.867,
+     "px1920": 9.003,
+     "ptA4": 4.683,
+     "ptMargin": 0.585,
+     "fillBlocks": 0.754,
+     "fillCards": 0.222,
+     "frame": {
+      "width": 3462,
+      "height": 2038
+     },
+     "ratio": 1.707,
+     "bends": 20,
+     "lengthPx": 18021.7,
+     "score": 0.585,
+     "rank": 6
+    },
+    {
+     "scene": "mise-en-service",
+     "engine": "elk",
+     "stage": 2,
+     "order": 1346,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "RIGHT",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 30,
+      "nodeGap": 48,
+      "rootPadding": 12,
+      "innerRatio": 4.5,
+      "placement": "BRANDES_KOEPF",
+      "inline": true,
+      "labelLayer": "SPACE_EFFICIENT_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": null,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 7.211,
+     "detail1440": 7.867,
+     "px1920": 9.003,
+     "ptA4": 4.683,
+     "ptMargin": 0.585,
+     "fillBlocks": 0.754,
+     "fillCards": 0.222,
+     "frame": {
+      "width": 3462,
+      "height": 2038
+     },
+     "ratio": 1.707,
+     "bends": 20,
+     "lengthPx": 18021.7,
+     "score": 0.585,
+     "rank": 7
+    },
+    {
+     "scene": "mise-en-service",
+     "engine": "elk",
+     "stage": 2,
+     "order": 1347,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "RIGHT",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 30,
+      "nodeGap": 48,
+      "rootPadding": 12,
+      "innerRatio": 4.5,
+      "placement": "BRANDES_KOEPF",
+      "inline": true,
+      "labelLayer": "SPACE_EFFICIENT_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": 1.78,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 7.211,
+     "detail1440": 7.867,
+     "px1920": 9.003,
+     "ptA4": 4.683,
+     "ptMargin": 0.585,
+     "fillBlocks": 0.754,
+     "fillCards": 0.222,
+     "frame": {
+      "width": 3462,
+      "height": 2038
+     },
+     "ratio": 1.707,
+     "bends": 20,
+     "lengthPx": 18021.7,
+     "score": 0.585,
+     "rank": 8
+    },
+    {
+     "scene": "mise-en-service",
+     "engine": "elk",
+     "stage": 2,
+     "order": 1290,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "RIGHT",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 30,
+      "nodeGap": 48,
+      "rootPadding": 12,
+      "innerRatio": 4.5,
+      "placement": "NETWORK_SIMPLEX",
+      "inline": false,
+      "labelLayer": "MEDIAN_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": null,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 7.211,
+     "detail1440": 7.867,
+     "px1920": 9.003,
+     "ptA4": 4.683,
+     "ptMargin": 0.585,
+     "fillBlocks": 0.754,
+     "fillCards": 0.222,
+     "frame": {
+      "width": 3462,
+      "height": 2038
+     },
+     "ratio": 1.707,
+     "bends": 20,
+     "lengthPx": 18022,
+     "score": 0.585,
+     "rank": 9
+    },
+    {
+     "scene": "mise-en-service",
+     "engine": "elk",
+     "stage": 2,
+     "order": 1291,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "RIGHT",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 30,
+      "nodeGap": 48,
+      "rootPadding": 12,
+      "innerRatio": 4.5,
+      "placement": "NETWORK_SIMPLEX",
+      "inline": false,
+      "labelLayer": "MEDIAN_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": 1.78,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 7.211,
+     "detail1440": 7.867,
+     "px1920": 9.003,
+     "ptA4": 4.683,
+     "ptMargin": 0.585,
+     "fillBlocks": 0.754,
+     "fillCards": 0.222,
+     "frame": {
+      "width": 3462,
+      "height": 2038
+     },
+     "ratio": 1.707,
+     "bends": 20,
+     "lengthPx": 18022,
+     "score": 0.585,
+     "rank": 10
+    },
+    {
+     "scene": "mise-en-service",
+     "engine": "elk",
+     "stage": 2,
+     "order": 1298,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "RIGHT",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 30,
+      "nodeGap": 48,
+      "rootPadding": 12,
+      "innerRatio": 4.5,
+      "placement": "NETWORK_SIMPLEX",
+      "inline": false,
+      "labelLayer": "SPACE_EFFICIENT_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": null,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 7.211,
+     "detail1440": 7.867,
+     "px1920": 9.003,
+     "ptA4": 4.683,
+     "ptMargin": 0.585,
+     "fillBlocks": 0.754,
+     "fillCards": 0.222,
+     "frame": {
+      "width": 3462,
+      "height": 2038
+     },
+     "ratio": 1.707,
+     "bends": 20,
+     "lengthPx": 18022,
+     "score": 0.585,
+     "rank": 11
+    },
+    {
+     "scene": "mise-en-service",
+     "engine": "elk",
+     "stage": 2,
+     "order": 1299,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "RIGHT",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 30,
+      "nodeGap": 48,
+      "rootPadding": 12,
+      "innerRatio": 4.5,
+      "placement": "NETWORK_SIMPLEX",
+      "inline": false,
+      "labelLayer": "SPACE_EFFICIENT_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": 1.78,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 7.211,
+     "detail1440": 7.867,
+     "px1920": 9.003,
+     "ptA4": 4.683,
+     "ptMargin": 0.585,
+     "fillBlocks": 0.754,
+     "fillCards": 0.222,
+     "frame": {
+      "width": 3462,
+      "height": 2038
+     },
+     "ratio": 1.707,
+     "bends": 20,
+     "lengthPx": 18022,
+     "score": 0.585,
+     "rank": 12
+    },
+    {
+     "scene": "mise-en-service",
+     "engine": "elk",
+     "stage": 2,
+     "order": 1306,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "RIGHT",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 30,
+      "nodeGap": 48,
+      "rootPadding": 12,
+      "innerRatio": 4.5,
+      "placement": "NETWORK_SIMPLEX",
+      "inline": true,
+      "labelLayer": "MEDIAN_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": null,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 7.211,
+     "detail1440": 7.867,
+     "px1920": 9.003,
+     "ptA4": 4.683,
+     "ptMargin": 0.585,
+     "fillBlocks": 0.754,
+     "fillCards": 0.222,
+     "frame": {
+      "width": 3462,
+      "height": 2038
+     },
+     "ratio": 1.707,
+     "bends": 20,
+     "lengthPx": 18022,
+     "score": 0.585,
+     "rank": 13
+    },
+    {
+     "scene": "mise-en-service",
+     "engine": "elk",
+     "stage": 2,
+     "order": 1307,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "RIGHT",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 30,
+      "nodeGap": 48,
+      "rootPadding": 12,
+      "innerRatio": 4.5,
+      "placement": "NETWORK_SIMPLEX",
+      "inline": true,
+      "labelLayer": "MEDIAN_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": 1.78,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 7.211,
+     "detail1440": 7.867,
+     "px1920": 9.003,
+     "ptA4": 4.683,
+     "ptMargin": 0.585,
+     "fillBlocks": 0.754,
+     "fillCards": 0.222,
+     "frame": {
+      "width": 3462,
+      "height": 2038
+     },
+     "ratio": 1.707,
+     "bends": 20,
+     "lengthPx": 18022,
+     "score": 0.585,
+     "rank": 14
+    },
+    {
+     "scene": "mise-en-service",
+     "engine": "elk",
+     "stage": 2,
+     "order": 1314,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "RIGHT",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 30,
+      "nodeGap": 48,
+      "rootPadding": 12,
+      "innerRatio": 4.5,
+      "placement": "NETWORK_SIMPLEX",
+      "inline": true,
+      "labelLayer": "SPACE_EFFICIENT_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": null,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 7.211,
+     "detail1440": 7.867,
+     "px1920": 9.003,
+     "ptA4": 4.683,
+     "ptMargin": 0.585,
+     "fillBlocks": 0.754,
+     "fillCards": 0.222,
+     "frame": {
+      "width": 3462,
+      "height": 2038
+     },
+     "ratio": 1.707,
+     "bends": 20,
+     "lengthPx": 18022,
+     "score": 0.585,
+     "rank": 15
+    },
+    {
+     "scene": "mise-en-service",
+     "engine": "elk",
+     "stage": 2,
+     "order": 1315,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "RIGHT",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 30,
+      "nodeGap": 48,
+      "rootPadding": 12,
+      "innerRatio": 4.5,
+      "placement": "NETWORK_SIMPLEX",
+      "inline": true,
+      "labelLayer": "SPACE_EFFICIENT_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": 1.78,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 7.211,
+     "detail1440": 7.867,
+     "px1920": 9.003,
+     "ptA4": 4.683,
+     "ptMargin": 0.585,
+     "fillBlocks": 0.754,
+     "fillCards": 0.222,
+     "frame": {
+      "width": 3462,
+      "height": 2038
+     },
+     "ratio": 1.707,
+     "bends": 20,
+     "lengthPx": 18022,
+     "score": 0.585,
+     "rank": 16
+    },
+    {
+     "scene": "mise-en-service",
+     "engine": "elk",
+     "stage": 2,
+     "order": 1354,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "RIGHT",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 30,
+      "nodeGap": 48,
+      "rootPadding": 12,
+      "innerRatio": 4.5,
+      "placement": "LINEAR_SEGMENTS",
+      "inline": false,
+      "labelLayer": "MEDIAN_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": null,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 7.051,
+     "detail1440": 7.692,
+     "px1920": 8.803,
+     "ptA4": 4.683,
+     "ptMargin": 0.585,
+     "fillBlocks": 0.757,
+     "fillCards": 0.217,
+     "frame": {
+      "width": 3462,
+      "height": 2084.2797205576358
+     },
+     "ratio": 1.669,
+     "bends": 44,
+     "lengthPx": 18214.162,
+     "score": 0.585,
+     "rank": 17
+    },
+    {
+     "scene": "mise-en-service",
+     "engine": "elk",
+     "stage": 2,
+     "order": 1355,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "RIGHT",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 30,
+      "nodeGap": 48,
+      "rootPadding": 12,
+      "innerRatio": 4.5,
+      "placement": "LINEAR_SEGMENTS",
+      "inline": false,
+      "labelLayer": "MEDIAN_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": 1.78,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 7.051,
+     "detail1440": 7.692,
+     "px1920": 8.803,
+     "ptA4": 4.683,
+     "ptMargin": 0.585,
+     "fillBlocks": 0.757,
+     "fillCards": 0.217,
+     "frame": {
+      "width": 3462,
+      "height": 2084.2797205576358
+     },
+     "ratio": 1.669,
+     "bends": 44,
+     "lengthPx": 18214.162,
+     "score": 0.585,
+     "rank": 18
+    },
+    {
+     "scene": "mise-en-service",
+     "engine": "elk",
+     "stage": 2,
+     "order": 1362,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "RIGHT",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 30,
+      "nodeGap": 48,
+      "rootPadding": 12,
+      "innerRatio": 4.5,
+      "placement": "LINEAR_SEGMENTS",
+      "inline": false,
+      "labelLayer": "SPACE_EFFICIENT_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": null,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 7.051,
+     "detail1440": 7.692,
+     "px1920": 8.803,
+     "ptA4": 4.683,
+     "ptMargin": 0.585,
+     "fillBlocks": 0.757,
+     "fillCards": 0.217,
+     "frame": {
+      "width": 3462,
+      "height": 2084.2797205576358
+     },
+     "ratio": 1.669,
+     "bends": 44,
+     "lengthPx": 18214.162,
+     "score": 0.585,
+     "rank": 19
+    },
+    {
+     "scene": "mise-en-service",
+     "engine": "elk",
+     "stage": 2,
+     "order": 1363,
+     "options": {
+      "mode": "ports",
+      "direction": "DOWN",
+      "inner": "RIGHT",
+      "wrap": "MULTI_EDGE",
+      "layerGap": 30,
+      "rootLayerGap": 30,
+      "nodeGap": 48,
+      "rootPadding": 12,
+      "innerRatio": 4.5,
+      "placement": "LINEAR_SEGMENTS",
+      "inline": false,
+      "labelLayer": "SPACE_EFFICIENT_LAYER",
+      "compaction": "NONE",
+      "aspectRatio": 1.78,
+      "edgeLayerGap": 15,
+      "edgeNodeGap": 15,
+      "edgeGap": 10,
+      "componentGap": 24
+     },
+     "faults": 0,
+     "fault": null,
+     "px1440": 7.051,
+     "detail1440": 7.692,
+     "px1920": 8.803,
+     "ptA4": 4.683,
+     "ptMargin": 0.585,
+     "fillBlocks": 0.757,
+     "fillCards": 0.217,
+     "frame": {
+      "width": 3462,
+      "height": 2084.2797205576358
+     },
+     "ratio": 1.669,
+     "bends": 44,
+     "lengthPx": 18214.162,
+     "score": 0.585,
+     "rank": 20
+    }
+   ]
+  }
+ }
+}

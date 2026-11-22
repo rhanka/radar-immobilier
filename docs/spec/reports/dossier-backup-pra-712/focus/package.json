@@ -1,0 +1,8 @@
+{
+  "name": "immo-focus-dossier-712",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "elkjs": "0.12.0"
+  }
+}
