@@ -12,11 +12,11 @@ pwd-deliver:
 	@bash tools/make/base-api-pwd-deliver.sh
 commit:
 	@test "$$($(PWD_GIT) diff --cached --numstat | awk '{n+=$$1+$$2} END {print n+0}')" -le 150
-	@$(PWD_GIT) -c core.hooksPath=/dev/null -c user.name="$$(git show -s --format=%an de81ef0e)" -c user.email="$$(git show -s --format=%ae de81ef0e)" commit -m "$(MSG)"
+	@$(PWD_GIT) -c core.hooksPath=/dev/null -c user.name="$$(git show -s --format=%an 59d8eec3)" -c user.email="$$(git show -s --format=%ae 59d8eec3)" commit -m "$(MSG)"
 pwd-stage:
 	@$(PWD_GIT) add -- $(FILES)
 pwd-rescue-init:
-	@$(PWD_GIT) update-ref refs/heads/feat/api-paniers-pwd de81ef0ef30dd1ca0bf575498e342be525f5cc2d 0000000000000000000000000000000000000000
+	@$(PWD_GIT) update-ref refs/heads/feat/api-paniers-pwd 59d8eec37bf52827c54b7c1d7f9bb1c65dd0a025 0000000000000000000000000000000000000000
 	@$(PWD_GIT) symbolic-ref HEAD refs/heads/feat/api-paniers-pwd
 	@$(PWD_GIT) read-tree HEAD
 pwd-snapshot:

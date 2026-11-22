@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Local-only delivery: bounded commits and a base-seeded independent bundle audit.
 set -euo pipefail
-BASE=b09a8ccccab5d7256c0a08b8b93979dbec57b65f
+BASE=98ec1fcde6e8adc3491e9a1875da3354e8558fc9
 [[ $(git branch --show-current) == feat/api-paniers-write ]]
 [[ ${ENV:-} == test-api-paniers-w ]]
 git merge-base --is-ancestor "$BASE" HEAD

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-BASE=de81ef0ef30dd1ca0bf575498e342be525f5cc2d
+BASE=59d8eec37bf52827c54b7c1d7f9bb1c65dd0a025
 root=$(pwd -P)
 # The shared worktree metadata is read-only; commits live in the rescue repo.
 git() {

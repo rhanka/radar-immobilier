@@ -2,7 +2,7 @@
 # Local rescue history only; never writes the shared Git directory or pushes.
 set -euo pipefail
 ROOT=$(pwd -P)
-BASE=509e664d422cba43bd9d27f9488afe6ad7eba9b9
+BASE=2627dea7c600cae1297192f640d509fa5337401a
 REPO=$ROOT/tmp/pwc-delivery.git
 g() { git --git-dir="$REPO" --work-tree="$ROOT" "$@"; }
 allowed() {
