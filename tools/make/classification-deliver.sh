@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 action=${1:?}
-BASE=4c801bab3e0ec0c494690434306d72d5158dd01f
+BASE=7ffbc0504886f30c46f3bebeaa5b292c6c9e0509
 ROOT=$(pwd -P)
 [[ $ENV == test-api-paniers && $API_PORT == 18927 && $UI_PORT == 15927 && $MAILDEV_UI_PORT == 11927 ]]
 backup=$ROOT/tmp/classification-delivery.git
