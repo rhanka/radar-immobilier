@@ -45,7 +45,9 @@ describe("published release isolation", () => {
     // Only the script is hashed: a style hash would disable style 'unsafe-inline'.
     expect(csp.match(/sha256-/g)).toHaveLength(1);
     expect(csp.match(/(?:^|; )style-src ([^;]*)/)?.[1]).toBe("'self' 'unsafe-inline'");
-    for (const directive of ["base-uri 'none'", "form-action 'none'", "worker-src 'self'", "frame-src 'none'"]) expect(csp).toContain(directive);
+    // AQX: frames are refused except the YouTube nocookie embed origin.
+    for (const directive of ["base-uri 'none'", "form-action 'none'", "worker-src 'self'",
+      "frame-src https://www.youtube-nocookie.com;"]) expect(csp).toContain(directive);
     // Application mode: style 'unsafe-inline' is generic (Svelte/pdf.js),
     // script stays hash-only and eval stays refused everywhere.
     expect(csp).toContain("style-src 'self'");

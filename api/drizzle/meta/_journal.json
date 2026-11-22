@@ -337,6 +337,13 @@
       "when": 1793000000018,
       "tag": "0048_signal_mcp_write",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1793000000019,
+      "tag": "0049_artifacts_quota_exceptions",
+      "breakpoints": true
     }
   ]
 }

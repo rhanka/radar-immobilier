@@ -391,4 +391,40 @@ describe.skipIf(!process.env.P0B_DATABASE_URL)("files parity upload channel", ()
     }, actor);
     expect(sixMibPngCreate.status).toBe(201);
   });
+
+  it("should apply an active admin page-text exception up to 10 MiB and fall back to 5 MiB once expired", async () => {
+    const actor = "idp-upload-text-exception";
+    const mib = 1024 * 1024;
+    await fixture.pool.query(
+      "INSERT INTO account_users (sub, status) VALUES ($1, 'approved') ON CONFLICT (sub) DO NOTHING", [actor]);
+    // Scope-wide durable byte budget large enough for this test's release (the
+    // actor row provisions from it on the first commit below).
+    await fixture.pool.query(
+      "UPDATE artifacts.host_quotas SET byte_limit = byte_limit + 100000000 WHERE storage_scope_id = 'p0b'");
+    await fixture.pool.query(`INSERT INTO artifacts.host_actor_page_text_exceptions
+      (storage_scope_id, actor_id, max_bytes, granted_by, reason) VALUES ('p0b', $1, $2, 'admin', 'test')`,
+    [actor, 10 * mib]);
+    const ensured = await call("ensure", { bindingName: randomUUID(), idempotencyKey: randomUUID() }, actor);
+    const artifactId = (ensured.body as { artifactId: string }).artifactId;
+
+    const overCreate = await call("create_upload", { artifactId, mimeType: "text/html", maxSize: 10 * mib + 1 }, actor);
+    expect(overCreate.status).toBe(400);
+
+    const html = Buffer.from("a".repeat(6 * mib), "utf8");
+    const css = Buffer.from("b".repeat(3 * mib), "utf8");
+    const htmlUp = await upload(artifactId, "index.html", "text/html", html, actor);
+    const cssUp = await upload(artifactId, "app.css", "text/css", css, actor);
+    const published = await call("publish_bundle", {
+      artifactId, idempotencyKey: randomUUID(), expectedCurrentReleaseId: null,
+      assets: [{ path: "index.html", uploadId: htmlUp.uploadId }, { path: "app.css", uploadId: cssUp.uploadId }],
+    }, actor);
+    expect(published.status).toBe(201);
+
+    // Expired exception: the 5 MiB default applies again.
+    await fixture.pool.query(`UPDATE artifacts.host_actor_page_text_exceptions SET expires_at = now() - interval '1 second'
+      WHERE storage_scope_id = 'p0b' AND actor_id = $1`, [actor]);
+    const expired = await call("create_upload", { artifactId, mimeType: "text/html", maxSize: 6 * mib }, actor);
+    expect(expired.status).toBe(400);
+    expect((expired.body as { error: string }).error).toBe("invalid_request");
+  });
 });

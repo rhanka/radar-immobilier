@@ -141,6 +141,48 @@ remain observable as `cleanup.failure` and
 Unknown COMMIT outcomes require the same caller key and a fresh authorized
 lookup. A 503 status alone never determines retryability.
 
+## Admin quota exceptions and external media (AQX)
+
+Refusals and the counter behind each one:
+
+| Public code | Counter | Bound |
+| --- | --- | --- |
+| `limit_exceeded` (413) on `artifacts_create_upload` | open upload sessions of the principal (`artifacts.uploads`, `state = 'open'`) | 8 per principal (provider constant), each open 24 h unless committed |
+| `limit_exceeded` (413) on `artifacts_commit_upload` | staged files of the artifact | release ceilings (255 files, 64 MiB) |
+| `conflict` (409, variant `quota_exhausted`) on writes | `artifacts.host_quotas` then `artifacts.host_actor_quotas` | cumulative, never reset automatically |
+| `rate_limited` (429, retryable) | `artifacts.host_actor_rate` | 10 attempts per actor per minute |
+| `invalid_request` (400) on page text | page-text budget | 5 MiB per file and per release text total, admin exception up to 10 MiB |
+
+An approved `account_users` row with `is_admin` operates, from its signed-in
+browser session, `GET|POST /api/v1/admin/artifacts/quotas/:actorId` (actorId is
+the account `sub`, the artifacts `ownerId`). The storage scope defaults to the
+API artifact scope; `storageScopeId` (query or body) names another existing
+scope. A POST is one transaction and requires `reason` (1-500 characters):
+
+- `actorQuota`: `operationLimit`, `byteLimit`, `resetUsage: true` (zeroes the
+  actor's used counters); a missing actor row is provisioned from the scope row.
+- `scopeQuota`: `operationLimit`, `byteLimit`; scope counters are retained.
+- `pageTextException`: `{ maxBytes, expiresAt? }` with 5 MiB < `maxBytes` <=
+  10485760 (10 MiB, CHECK in migration 0049) and an optional future expiry;
+  `null` revokes. Enforcement reads the active row on every page-text upload,
+  commit and bundle, the MCP input check and `authoringGuide.pageTextBudget`.
+  Inline payload files stay capped at 5 MiB each by the compiled profile.
+- `expireOpenUploads: true`: sets `expires_at = now()` on the actor's open
+  upload sessions; the one-minute sweeper expires them and deletes staging.
+
+Every effective change writes `artifacts.host_quota_admin_events` (admin sub,
+action, old and new values, reason, timestamp). The MCP writer role can read
+`host_actor_page_text_exceptions` but neither write it nor read the audit table.
+
+External heavy media never enters a release. The release CSP adds only
+`frame-src https://www.youtube-nocookie.com` and, for the comma-separated exact
+HTTPS origins in `ARTIFACTS_EXTERNAL_MEDIA_ORIGINS` (at most 8, unset by
+default), `media-src` and `img-src`. Set the same value on the API and MCP
+deployments: the API serves the CSP, the MCP guide lists the origins. Bucket
+objects are provisioned outside the platform; the documented policy is at most
+10 GB per object, public read or a long-lived presigned URL, byte ranges for
+`video/mp4`.
+
 ## Reproducible qualification
 
 Use `make -f tools/make/artefacts-a5.mk` with `verify`, `test-api-ci`,

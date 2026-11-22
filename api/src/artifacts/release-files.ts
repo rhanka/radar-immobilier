@@ -14,7 +14,8 @@
  * digest-verified S3 blobs. The in-memory provider below is for module tests.
  */
 import { createHash } from "node:crypto";
-import { HOST_MIME_TYPES } from "@radar/artifacts-host";
+import { HOST_MIME_TYPES, readExternalMediaPolicy, withExternalMediaSources,
+  type ExternalMediaPolicy } from "@radar/artifacts-host";
 import { contentHeaders, type ContentMode } from "@sentropic/artifacts/content/headers";
 import { mimeTypeForPath } from "@sentropic/artifacts/server/mime";
 import { parse, type DefaultTreeAdapterMap } from "parse5";
@@ -42,13 +43,22 @@ export interface ReleaseFileProvider {
 export const RELEASE_CONTENT_MODE: ContentMode = "application";
 
 /**
+ * External heavy media (AQX): YouTube nocookie embeds (frame-src) and the
+ * configured Sentropic bucket origins (media-src, img-src,
+ * ARTIFACTS_EXTERNAL_MEDIA_ORIGINS). Read once at startup; an invalid origin
+ * fails startup closed. Every other directive stays the provider policy.
+ */
+export const RELEASE_EXTERNAL_MEDIA: ExternalMediaPolicy = readExternalMediaPolicy();
+
+/**
  * Authorize only the inline script bytes of this immutable release: script-src
  * never carries unsafe-inline. Inline <style> is NOT hashed: style-src already
  * carries 'unsafe-inline' (Svelte style attributes, pdf.js runtime <style>),
  * and any style hash would make CSP2/3 browsers ignore that 'unsafe-inline'.
- * The provider appends the hashes to script-src only.
+ * The provider appends the hashes to script-src only; the external media
+ * sources are then added to frame-src, media-src and img-src only.
  */
-export function releaseCspForHtml(html: string): string {
+export function releaseCspForHtml(html: string, media: ExternalMediaPolicy = RELEASE_EXTERNAL_MEDIA): string {
   const scriptHashes: string[] = [];
   const visit = (node: DefaultTreeAdapterMap["node"]): void => {
     if ("tagName" in node && node.tagName === "script") {
@@ -60,8 +70,8 @@ export function releaseCspForHtml(html: string): string {
   };
   const normalized = normalizeReleaseHtml(html);
   visit(parse(normalized));
-  return contentHeaders({ mimeType: "text/html", size: Buffer.byteLength(normalized),
-    mode: RELEASE_CONTENT_MODE, scriptHashes })["content-security-policy"]!;
+  return withExternalMediaSources(contentHeaders({ mimeType: "text/html", size: Buffer.byteLength(normalized),
+    mode: RELEASE_CONTENT_MODE, scriptHashes })["content-security-policy"]!, media);
 }
 
 /**

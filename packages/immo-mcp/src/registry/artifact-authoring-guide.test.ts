@@ -52,7 +52,7 @@ describe("artifact authoring guide", () => {
     expect(guide.guideId).toBe(AUTHORING_GUIDE_ID);
     // Pinned literal (not the constant itself): a content change without a
     // revision bump must fail here.
-    expect(guide.revision).toBe("2026-11-05-p0b-r9");
+    expect(guide.revision).toBe("2026-11-05-p0b-r10");
     expect(guide.starterVersion).toBe(STARTER_VERSION);
     expect(guide.starterVersion).toBe("1.2.0");
     expect(guide.starter.version).toBe(guide.starterVersion);
@@ -115,7 +115,7 @@ describe("artifact authoring guide", () => {
     const guide = getAuthoringGuide();
     // Pinned literal (not the constant itself): a content change without a
     // revision bump must fail here.
-    expect(guide.revision).toBe("2026-11-05-p0b-r9");
+    expect(guide.revision).toBe("2026-11-05-p0b-r10");
     const editing = guide.lifecycle.editing.join("\n");
     expect(editing).toContain("artifacts_get_source → edit → artifacts_publish");
     expect(editing).toContain("same artifactId");
@@ -301,6 +301,59 @@ describe("artifact authoring guide", () => {
       expect(byName[name]).toContain("authoringGuide");
     }
     expect(byName["artifacts_list"]).not.toContain("authoringGuide");
+  });
+
+  it("should advertise the default page-text budget, the upload session bound and the external media paths (AQX)", () => {
+    const guide = getAuthoringGuide();
+    expect(guide.pageTextBudget).toEqual({ maxFileBytes: 5 * 1024 * 1024, maxTotalBytes: 5 * 1024 * 1024,
+      source: "default", expiresAt: null, systemMaxBytes: 10 * 1024 * 1024 });
+    const editing = guide.lifecycle.editing.join("\n");
+    expect(editing).toContain("authoringGuide.pageTextBudget");
+    expect(editing).toContain("up to 10 MiB per page text file");
+    expect(editing).toContain("At most 8 upload sessions stay open per account");
+    expect(editing).toContain("limit_exceeded");
+    expect(guide.externalMedia.youtube.frameOrigin).toBe("https://www.youtube-nocookie.com");
+    expect(guide.externalMedia.youtube.embed).toContain('referrerpolicy="strict-origin-when-cross-origin"');
+    expect(guide.externalMedia.buckets).toMatchObject({ origins: [], maxObjectBytes: 10_000_000_000 });
+    expect(guide.externalMedia.buckets.usage).toContain("No Sentropic bucket origin is configured");
+    // The served release CSP allows exactly the documented frame origin.
+    expect(releaseCspForHtml("<html></html>")).toContain(`frame-src ${guide.externalMedia.youtube.frameOrigin};`);
+  });
+
+  it("should carry the caller's admin page-text exception in the ensure/get guide only", async () => {
+    const receipt = { artifactId: "123e4567-e89b-12d3-a456-426614174000" };
+    const execute = vi.fn<ArtifactsApp["execute"]>(async (_request, invocation) => ({
+      ok: true as const, result: { status: 200, body: receipt },
+      invocationId: invocation.invocationId, commitState: "committed" as const, replayed: false,
+    }));
+    const app = { execute, profileDigest: profile.profileDigest, selectedCapabilities: profile.selectedCapabilities };
+    const pageTextBudget = vi.fn(async (actorId: string) => ({ maxFileBytes: 10 * 1024 * 1024,
+      maxTotalBytes: 10 * 1024 * 1024, source: "exception" as const, expiresAt: `2027-01-01T00:00:00.000Z#${actorId}` }));
+    const binding = bindArtifactProvider({ app, storageScopeId: "synthetic", pageTextBudget,
+      authorizeCommit: () => (async () => ({ allowed: true as const })) as never });
+    const ensured = read(await binding.invoke("artifacts_ensure", { bindingName: "x", idempotencyKey: "k" }, authority));
+    expect(ensured.authoringGuide.pageTextBudget).toEqual({ maxFileBytes: 10 * 1024 * 1024,
+      maxTotalBytes: 10 * 1024 * 1024, source: "exception", expiresAt: "2027-01-01T00:00:00.000Z#alice",
+      systemMaxBytes: 10 * 1024 * 1024 });
+    expect(pageTextBudget).toHaveBeenCalledWith("alice");
+    // The cached static guide stays the default for every other caller.
+    expect(getAuthoringGuide().pageTextBudget.source).toBe("default");
+    // An unreadable exception keeps the static default instead of failing the call.
+    pageTextBudget.mockRejectedValueOnce(new Error("db down"));
+    const got = read(await binding.invoke("artifacts_get", { artifactId: receipt.artifactId }, authority));
+    expect(got.authoringGuide.pageTextBudget.source).toBe("default");
+    // The pre-authority input check admits the exception, never above 10 MiB.
+    const upload = (maxSize: number) => ({ artifactId: receipt.artifactId, mimeType: "text/html", maxSize });
+    const calls = execute.mock.calls.length;
+    expect((await binding.invoke("artifacts_create_upload", upload(6 * 1024 * 1024), authority)).isError).not.toBe(true);
+    expect(execute.mock.calls.length).toBe(calls + 1);
+    expect(read(await binding.invoke("artifacts_create_upload", upload(10 * 1024 * 1024 + 1), authority)))
+      .toMatchObject({ error: "invalid_request" });
+    expect(read(await setup(receipt).binding.invoke("artifacts_create_upload", upload(6 * 1024 * 1024), authority)))
+      .toMatchObject({ error: "invalid_request" });
+    pageTextBudget.mockRejectedValueOnce(new Error("db down"));
+    expect(read(await binding.invoke("artifacts_create_upload", upload(6 * 1024 * 1024), authority)))
+      .toMatchObject({ error: "invalid_request" });
   });
 
   it("should return the full authoringGuide on ensure/get and a small reference on get_source, receipt fields intact", async () => {

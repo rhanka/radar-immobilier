@@ -24,11 +24,14 @@ import { startPreparationCleanup } from "./preparation-cleanup.js";
 import { projectArtifactWriteFailure } from "@sentropic/artifacts/server/outcome-contract";
 import { createTimeoutBlobStore, createTimeoutS3Client, DEFAULT_S3_BUDGET, withS3Deadline } from "./s3-timeout.js";
 import { HOST_ARTIFACT_PROFILE, HOST_MIME_TYPES, isArtifactMutation, RELEASE_FILE_BYTES_MAX, RELEASE_FILES_MAX, RELEASE_TOTAL_BYTES_MAX } from "./p0b-profile.js";
-import { isPageTextMimeType, PUBLISH_MAX_FILE_BYTES } from "./publish-policy.js";
+import { isPageTextMimeType } from "./publish-policy.js";
+import { DEFAULT_PAGE_TEXT_BUDGET, readPageTextBudget, type PageTextBudget } from "./page-text-budget.js";
 import type { ArtifactDeleteConfirmation } from "./delete-confirmation.js";
 import { ARTIFACT_GIT_MODE } from "./p0b-profile.js";
 import { composeGitModeFromEnv, type GitModeConfig, type GitModePorts } from "./git-mode/compose.js";
 import { startLiveRedriveLoop, type LiveRedriveLoop, type ShutdownSignals } from "./live-redrive.js";
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 /**
  * S3 sockets kept warm for a publish. Every file costs one PUT and one
@@ -203,16 +206,28 @@ export async function composeArtifactHost(
         maxTotalBytes: RELEASE_TOTAL_BYTES_MAX, mimeTypes: [...HOST_MIME_TYPES] },
       budget: { filesMax: RELEASE_FILES_MAX, totalBytesMax: RELEASE_TOTAL_BYTES_MAX },
     }) : undefined;
+    // Page-text ceiling of the page owner (default 5 MiB, admin exception up
+    // to 10 MiB). The owner is the artifact owner who minted the page; a
+    // malformed id keeps the default and the provider refuses the request.
+    const pageOwnerBudget = async (artifactId: string): Promise<PageTextBudget> => {
+      if (!UUID_RE.test(artifactId)) return DEFAULT_PAGE_TEXT_BUDGET;
+      const { rows } = await pool.query<{ owner_id: string }>(
+        "SELECT owner_id FROM artifacts.artifacts WHERE id = $1 AND storage_scope_id = $2",
+        [artifactId, config.storageScope]);
+      return rows[0] ? readPageTextBudget(pool, config.storageScope, rows[0].owner_id) : DEFAULT_PAGE_TEXT_BUDGET;
+    };
     const uploadPageService: UploadPageService | undefined = baseUploadPageService ? {
       ...baseUploadPageService,
       async createFile(input) {
-        if (isPageTextMimeType(input.mimeType) && input.size > PUBLISH_MAX_FILE_BYTES) {
+        if (isPageTextMimeType(input.mimeType) &&
+          input.size > (await pageOwnerBudget(input.artifactId)).maxFileBytes) {
           throw new Error("invalid page file size");
         }
         return baseUploadPageService.createFile(input);
       },
       async commitFile(input) {
-        if (isPageTextMimeType(input.mimeType) && input.size > PUBLISH_MAX_FILE_BYTES) {
+        if (isPageTextMimeType(input.mimeType) &&
+          input.size > (await pageOwnerBudget(input.artifactId)).maxFileBytes) {
           throw new Error("invalid page file size");
         }
         return baseUploadPageService.commitFile(input);

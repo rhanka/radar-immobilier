@@ -9,10 +9,11 @@ import { computeManifestDigest, type RegistryDefinition } from "@sentropic/clust
 import { projectArtifactHttpOutcome } from "@sentropic/artifacts/http";
 import { assertContentIdsDisjoint, checkAdmission, createArtifactControl, HOST_ARTIFACT_PROFILE, ARTIFACT_PROFILE_DESCRIPTOR, ARTIFACT_STRICT, ARTIFACT_PART1,
   artifactRefusalResponse, extractEnvelopeV1Metadata, isGitArtifactTool, liveCapacityState, projectContentUrls, projectListVersionsAuthors, validateArtifactInput, withInvocationScopes, withPendingArtifactMetadata,
-  type AdmissionAuthority, type ListVersionsDirectory } from "@radar/artifacts-host";
+  DEFAULT_PAGE_TEXT_BUDGET, type AdmissionAuthority, type ListVersionsDirectory, type PageTextBudget,
+  type PageTextBudgetReader } from "@radar/artifacts-host";
 import { ARTIFACT_INVOCATION_SCOPES, ARTIFACT_TOOL_SCOPES, acceptedArtifactScopes, hasArtifactScope,
   isArtifactToolName, STRICT_ARTIFACT_SCOPE_POLICY, type ArtifactScopePolicy } from "./artifact-profile.js";
-import { AUTHORING_GUIDE_SNIPPET, getAuthoringGuide } from "./artifact-authoring-guide.js";
+import { AUTHORING_GUIDE_SNIPPET, getAuthoringGuide, guidePageTextBudget } from "./artifact-authoring-guide.js";
 import { ARTIFACT_LIST_ORDER, artifactReadOutputSchema } from "./artifact-read-schema.js";
 import { assertArtifactAssembly } from "./artifact-config.js";
 
@@ -180,6 +181,10 @@ export const artifactRefusal = (error: string, retryable: boolean, extra: Record
     ? artifactRefusalResponse(400, error, retryable, extra).body : { error, retryable, ...extra }) }] });
 const refusal = artifactRefusal;
 
+/** Tools whose arguments carry page-text sizes (create/commit upload, bundles). */
+const PAGE_TEXT_TOOLS: ReadonlySet<string> = new Set(["artifacts_create_upload", "artifacts_commit_upload",
+  "artifacts_publish_bundle", "artifacts_publish_bundle_v2"]);
+
 /** Typed refusal shared by the binding and the composed namespace: the scope the call lacks. */
 export const ARTIFACT_SCOPE_DENIED = "artifact_scope_denied" as const;
 export function artifactScopeDenied(tool: string): CallToolResult {
@@ -236,6 +241,8 @@ export function bindArtifactProvider(options: {
   readonly scopePolicy?: ArtifactScopePolicy | undefined;
   readonly prepareDelete?: (actorId: string, args: Record<string, unknown>) => Promise<Record<string, unknown>>;
   readonly directory?: ListVersionsDirectory | undefined;
+  /** AQX: effective page-text ceiling per actor, carried by the ensure/get guide. */
+  readonly pageTextBudget?: PageTextBudgetReader | undefined;
 }): ArtifactMcpBinding {
   if (!options.storageScopeId.trim() || typeof options.authorizeCommit !== "function") {
     throw new Error("artifact_binding_incomplete");
@@ -269,7 +276,12 @@ export function bindArtifactProvider(options: {
     async invoke(tool: string, args: unknown, request: VerifiedMcpRequest): Promise<CallToolResult> {
       // Selection/input refusal happens before minting any host authority.
       if (hasForgedArtifactCallerFields(args)) return refusal("invalid_request", false);
-      try { validateArtifactInput(tool, args); }
+      // AQX: page-text tools check the caller's own budget; an unreadable
+      // exception keeps the 5 MiB default (never wider). The host re-checks.
+      const inputBudget = options.pageTextBudget && PAGE_TEXT_TOOLS.has(tool)
+        ? await options.pageTextBudget(request.principal.sub).catch(() => DEFAULT_PAGE_TEXT_BUDGET)
+        : DEFAULT_PAGE_TEXT_BUDGET;
+      try { validateArtifactInput(tool, args, inputBudget); }
       catch (error) {
         if (error instanceof ArtifactProfileInputError) return refusal(error.publicCode, error.retriable);
         throw error;
@@ -368,8 +380,12 @@ export function bindArtifactProvider(options: {
       // The durable receipt is untouched: the guide rides the MCP response
       // only, so tool selection and republication both surface it. Source
       // files are projected to text first so a page read stays editable.
+      // The guide carries the caller's own page-text ceiling; an unreadable
+      // exception keeps the static default (the host still enforces it).
+      const budget = options.pageTextBudget && (tool === "artifacts_ensure" || tool === "artifacts_get")
+        ? await options.pageTextBudget(request.principal.sub).catch(() => undefined) : undefined;
       const result = withAuthoringGuide(tool,
-        tool === "artifacts_get_source" ? projectSourceBody(body) : body);
+        tool === "artifacts_get_source" ? projectSourceBody(body) : body, budget);
       return { content: [{ type: "text", text: JSON.stringify(result) }],
         ...(!ARTIFACT_PART1 && artifactReadOutputSchema(tool) ? { structuredContent: result as Record<string, unknown> } : {}) };
     },
@@ -496,10 +512,12 @@ export function getSourceGuideReference(): {
  * reference so the file payload stays within the model tool-result
  * budget. Anything else passes through unchanged.
  */
-export function withAuthoringGuide(tool: string, body: unknown): unknown {
+export function withAuthoringGuide(tool: string, body: unknown, budget?: PageTextBudget): unknown {
   if ((tool === "artifacts_ensure" || tool === "artifacts_get" || tool === "artifacts_get_source") &&
     typeof body === "object" && body !== null && !Array.isArray(body)) {
-    const guide = tool === "artifacts_get_source" ? getSourceGuideReference() : getAuthoringGuide();
+    const full = getAuthoringGuide();
+    const guide = tool === "artifacts_get_source" ? getSourceGuideReference()
+      : budget === undefined ? full : { ...full, pageTextBudget: guidePageTextBudget(budget) };
     if (ARTIFACT_PART1) {
       const envelope = body as { ok: boolean; output?: object };
       if (!envelope.ok || !envelope.output) return body;

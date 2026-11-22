@@ -24,6 +24,8 @@ import {
   ARTIFACT_P0B, ARTIFACT_PROFILE_DESCRIPTOR, ARTIFACT_STRICT, ARTIFACT_PART1,
   ARTIFACT_GIT_MODE, IMMO_GIT_REFUSED_WRITE_PATHS, IMMO_GIT_WRITABLE_PATHS,
   RELEASE_FILES_MAX, RELEASE_FILE_BYTES_MAX, RELEASE_TOTAL_BYTES_MAX, type GitModeResolution,
+  DEFAULT_PAGE_TEXT_BUDGET, EXTERNAL_MEDIA_MAX_OBJECT_BYTES, PAGE_TEXT_SYSTEM_MAX_BYTES, YOUTUBE_EMBED_ORIGIN, readExternalMediaPolicy,
+  type PageTextBudget,
 } from "@radar/artifacts-host";
 import {
   STARTER_APP_CSS,
@@ -35,8 +37,8 @@ import { FRAMEWORK_STARTERS, FRAMEWORK_BUILD_RULE } from "./framework-starters.j
 import { ARTIFACT_LIST_ORDER } from "./artifact-read-schema.js";
 
 export const AUTHORING_GUIDE_ID = "immo-artifact-authoring" as const;
-const BASE_GUIDE_REVISION = ARTIFACT_STRICT ? `2026-11-05-${ARTIFACT_PROFILE_DESCRIPTOR.profileRevisionId}-r9`
-  : ARTIFACT_P0B ? "2026-11-05-p0b-r9" : "2026-11-05-r9";
+const BASE_GUIDE_REVISION = ARTIFACT_STRICT ? `2026-11-05-${ARTIFACT_PROFILE_DESCRIPTOR.profileRevisionId}-r10`
+  : ARTIFACT_P0B ? "2026-11-05-p0b-r10" : "2026-11-05-r10";
 /** Git mode adds a suffix only when the flag is on; off keeps the historical revision. */
 export const AUTHORING_GUIDE_REVISION = ARTIFACT_GIT_MODE.stage === "off" ? BASE_GUIDE_REVISION
   : `${BASE_GUIDE_REVISION}-git-${ARTIFACT_GIT_MODE.stage}`;
@@ -95,6 +97,18 @@ export function gitAuthoringSection(mode: GitModeResolution): AuthoringGuideGitM
   };
 }
 export const STARTER_VERSION = "1.2.0" as const;
+
+/** AQX: per-caller page-text ceiling (default 5 MiB, admin exception up to the system maximum). */
+const PAGE_TEXT_BUDGET_NOTE = "(the default: authoringGuide.pageTextBudget carries your effective ceiling; " +
+  "an admin-granted exception raises it up to 10 MiB per page text file and 10 MiB page text total per release " +
+  "for files staged via create_upload or the upload page, while each inline payload file stays at most 5 MiB)";
+const UPLOAD_SESSION_NOTE = "At most 8 upload sessions stay open per account, each for 24 h: commit every session " +
+  "you open with artifacts_commit_upload and never open sessions you will not use. An abandoned session keeps " +
+  "counting until it expires, and create_upload then answers limit_exceeded; an admin can expire them.";
+const EXTERNAL_MEDIA_NOTE = "Media heavier than these budgets (video, large photo sets, up to 10 GB per object) " +
+  "never enters a release: follow externalMedia in this guide (YouTube nocookie embeds or an allowed Sentropic bucket origin).";
+/** Read at module load so an invalid ARTIFACTS_EXTERNAL_MEDIA_ORIGINS fails startup closed. */
+const EXTERNAL_MEDIA = readExternalMediaPolicy();
 export const STRICT_ARTIFACT_GUIDE = "This profile requires expectedCurrentReleaseId for artifacts_publish, artifacts_revert and artifacts_delete. First read the artifact with artifacts_get or artifacts_list. For a first publication, send expectedCurrentReleaseId: null only after that read returns currentReleaseId: null. For an update, read the observed release with artifacts_get_source, edit those files, and send its releaseId as expectedCurrentReleaseId. Conversation files alone do not establish the current release. For a revert or deletion, send the currentReleaseId observed by your read. On conflict, re-read and reconcile before submitting a changed command with a new idempotencyKey. For a lost response or commitState: unknown, reconcile with the same idempotencyKey and unchanged command before attempting a new write. Read resultEnvelopeVersion in this guide: version 1 keeps business fields at the root; version 2 places them in output and the guide in output.authoringGuide.";
 
 /**
@@ -224,12 +238,28 @@ export interface AuthoringGuide {
     edit: readonly string[]; share: readonly string[]; delete: readonly string[] }>;
   /** Present only when IMMO_ARTIFACTS_GIT_MODE is on. */
   readonly gitMode?: AuthoringGuideGitMode;
+  /** Effective page-text ceiling of the caller (ensure/get inject it per actor). */
+  readonly pageTextBudget: AuthoringGuidePageTextBudget;
+  readonly externalMedia: AuthoringGuideExternalMedia;
   readonly lifecycle: Readonly<{
     editing: readonly string[];
     unavailableTools: readonly string[];
     deleteRestore: string;
     sharing: string;
   }>;
+}
+
+export type AuthoringGuidePageTextBudget = PageTextBudget & { readonly systemMaxBytes: number };
+
+export interface AuthoringGuideExternalMedia {
+  readonly rule: string;
+  readonly youtube: Readonly<{ frameOrigin: string; embed: string; note: string }>;
+  readonly buckets: Readonly<{ origins: readonly string[]; maxObjectBytes: number; usage: string; policy: string }>;
+}
+
+export function guidePageTextBudget(budget: PageTextBudget): AuthoringGuidePageTextBudget {
+  return Object.freeze({ maxFileBytes: budget.maxFileBytes, maxTotalBytes: budget.maxTotalBytes,
+    source: budget.source, expiresAt: budget.expiresAt, systemMaxBytes: PAGE_TEXT_SYSTEM_MAX_BYTES });
 }
 
 let cached: AuthoringGuide | undefined;
@@ -243,6 +273,33 @@ export function getAuthoringGuide(): AuthoringGuide {
       descriptor: ARTIFACT_PROFILE_DESCRIPTOR,
       revision: AUTHORING_GUIDE_REVISION,
       starterVersion: STARTER_VERSION,
+      pageTextBudget: guidePageTextBudget(DEFAULT_PAGE_TEXT_BUDGET),
+      externalMedia: {
+        rule: "Release bytes stay within the page and release budgets; heavier media (up to " +
+          `${EXTERNAL_MEDIA_MAX_OBJECT_BYTES / 1e9} GB per object) is referenced by URL, never published. ` +
+          "Only the two paths below are allowed by the release CSP; every other external source stays refused.",
+        youtube: {
+          frameOrigin: YOUTUBE_EMBED_ORIGIN,
+          embed: `<iframe src="${YOUTUBE_EMBED_ORIGIN}/embed/VIDEO_ID" title="Accessible video title" ` +
+            "referrerpolicy=\"strict-origin-when-cross-origin\" allow=\"encrypted-media; picture-in-picture; fullscreen\" " +
+            "allowfullscreen loading=\"lazy\"></iframe>",
+          note: "frame-src allows only the privacy-enhanced youtube-nocookie.com embed origin; youtube.com, youtu.be " +
+            "and other players are refused. Pages are served with Referrer-Policy: no-referrer and YouTube refuses an " +
+            "embed without a referrer, so keep referrerpolicy=\"strict-origin-when-cross-origin\" on the iframe (it " +
+            "discloses only the page origin). Upload the video to YouTube outside the platform first.",
+        },
+        buckets: {
+          origins: EXTERNAL_MEDIA.mediaOrigins,
+          maxObjectBytes: EXTERNAL_MEDIA_MAX_OBJECT_BYTES,
+          usage: EXTERNAL_MEDIA.mediaOrigins.length > 0
+            ? "Reference objects by absolute HTTPS URL under one of origins in <video>/<source>, <audio> or <img> " +
+              "(media-src and img-src). fetch()/XHR to a bucket stays refused (connect-src 'self')."
+            : "No Sentropic bucket origin is configured on this deployment, so the bucket path is unavailable: " +
+              "use the YouTube path or publish within the budgets. Never reference another host.",
+          policy: "Bucket objects are hosted and provisioned outside the artifacts platform, at most 10 GB per " +
+            "object: public read (or a presigned URL that outlives the page), video/mp4 served with byte-range support.",
+        },
+      },
       artifactDiscovery: {
         displayLabel: ARTIFACT_PART1 ? "Use title, description and icon when supplied; bindingName remains the binding identity."
           : "Use bindingName as the display label until part1 title/description metadata is available.",
@@ -259,7 +316,7 @@ export function getAuthoringGuide(): AuthoringGuide {
               : "Currently source retrieval is blocked: artifacts_get_source is unavailable and artifacts_get returns metadata plus this guide, without editable files."),
           ARTIFACT_STRICT ? STRICT_ARTIFACT_GUIDE : "When the complete original source bundle is already available in the conversation, edit those files and publish the full bundle with artifacts_publish on the same artifactId. Do not call artifacts_ensure to replace an existing artifact.",
           "Each publication creates a new release/version and pinnedUrl; stableUrl stays the same. Use a fresh idempotencyKey for changed content, and reuse a previous key only to retry the identical publication.",
-          "When page files (text/html, text/css, text/javascript, application/json) or binary assets (photographs, PDF) are large, stage bytes outside the model: artifacts_create_upload({artifactId, mimeType, maxSize:<exact file byte size>}) returns a signed PUT URL that binds that exact Content-Length (measure the exact UTF-8 byte length first, never pad files; omitting maxSize defaults to 5 MiB for page text files and 16 MiB for binaries): PUT exactly those bytes with exactly the announced requiredHeaders and nothing else, artifacts_commit_upload pins them to a manifest path, and artifacts_publish_bundle releases inline files plus staged assets atomically (expectedCurrentReleaseId is always required, null only for a first publication after a read with no current release). Page text files (text/html, text/css, text/javascript, application/json) are capped at 5 MiB per file and 5 MiB total whether sent inline or via create_upload, verified as strict UTF-8 plus sha256 digest at commit with no magic-byte check, and served as page files under the exact same release CSP (never as binaries). When the Product Owner supplies the files, mint an upload page: artifacts_create_upload_page({artifactId}) returns an uploadPageUrl for originals — bytes go browser to storage, never through a model payload. List assets with artifacts_list_assets; publish with artifacts_publish_bundle or artifacts_publish_bundle_v2. Release ceilings: 255 files, 16 MiB per binary file, 64 MiB per release (5 MiB per file and 5 MiB total for page text files). Served binaries: image/png, image/jpeg, image/gif, image/webp, image/svg+xml, application/pdf, font/woff2, video/mp4; magic-byte verified at commit; SVG must carry no script, handler or external reference — served sandboxed, never executable.",
+          "When page files (text/html, text/css, text/javascript, application/json) or binary assets (photographs, PDF) are large, stage bytes outside the model: artifacts_create_upload({artifactId, mimeType, maxSize:<exact file byte size>}) returns a signed PUT URL that binds that exact Content-Length (measure the exact UTF-8 byte length first, never pad files; omitting maxSize defaults to 5 MiB for page text files and 16 MiB for binaries): PUT exactly those bytes with exactly the announced requiredHeaders and nothing else, artifacts_commit_upload pins them to a manifest path, and artifacts_publish_bundle releases inline files plus staged assets atomically (expectedCurrentReleaseId is always required, null only for a first publication after a read with no current release). Page text files (text/html, text/css, text/javascript, application/json) are capped at 5 MiB per file and 5 MiB total whether sent inline or via create_upload " + PAGE_TEXT_BUDGET_NOTE + ", verified as strict UTF-8 plus sha256 digest at commit with no magic-byte check, and served as page files under the exact same release CSP (never as binaries). When the Product Owner supplies the files, mint an upload page: artifacts_create_upload_page({artifactId}) returns an uploadPageUrl for originals — bytes go browser to storage, never through a model payload. List assets with artifacts_list_assets; publish with artifacts_publish_bundle or artifacts_publish_bundle_v2. Release ceilings: 255 files, 16 MiB per binary file, 64 MiB per release (5 MiB per file and 5 MiB total for page text files). Served binaries: image/png, image/jpeg, image/gif, image/webp, image/svg+xml, application/pdf, font/woff2, video/mp4; magic-byte verified at commit; SVG must carry no script, handler or external reference — served sandboxed, never executable. " + UPLOAD_SESSION_NOTE + " " + EXTERNAL_MEDIA_NOTE,
         ],
         unavailableTools: ARTIFACT_P0B ? ["artifacts_restore", "artifacts_fork", "artifacts_promote", "artifacts_renew"]
           : ["artifacts_get_source", "artifacts_delete", "artifacts_restore", "artifacts_set_access",
@@ -476,7 +533,7 @@ export function getAuthoringGuide(): AuthoringGuide {
       ...(ARTIFACT_P0B ? { artifactLifecycle: {
         descriptor: ARTIFACT_PROFILE_DESCRIPTOR,
         edit: ["Read artifacts_get for permissions and currentReleaseId, then artifacts_get_source({artifactId}) for the retained manifest and file text. Source requires immo:artifacts:read; immo:read alone is insufficient. get_source stays bounded (at most 32 files / 256 KiB total): a release larger than that cannot be re-read whole through this call — republish from the author's own files instead; never invent missing source.",
-          "For large page files (text/html, text/css, text/javascript, application/json, up to 5 MiB per file and 5 MiB total) and binary assets (photographs, PDF) stage bytes outside the model: artifacts_create_upload({artifactId, mimeType, maxSize:<exact file byte size>}) for a signed PUT URL — the signature binds that exact Content-Length, so measure the exact UTF-8 byte length first and never pad files (omitting maxSize defaults to 5 MiB for page text files and 16 MiB for binaries): a PUT of any other size is refused. PUT the exact bytes with exactly the announced requiredHeaders and nothing else, artifacts_commit_upload({artifactId, uploadId, path, mimeType, digest, size, idempotencyKey}) to pin, then artifacts_publish_bundle({artifactId, files, assets, expectedCurrentReleaseId, idempotencyKey}) for one atomic release — or artifacts_publish_bundle_v2 for the copy/carry/keep asset forms. Page text files staged via create_upload are verified as strict UTF-8 plus sha256 digest with no magic-byte check and served as page files under the same release CSP (never as binaries). When the Product Owner supplies the files, mint an upload page: artifacts_create_upload_page({artifactId}) returns an uploadPageUrl for originals — bytes go browser to storage, never through a model payload; review staged and released files with artifacts_list_assets. Release ceilings: 255 files, 16 MiB per binary file, 64 MiB per release (5 MiB per file and 5 MiB total for page text files). Served binaries: image/png, image/jpeg, image/gif, image/webp, image/svg+xml, application/pdf, font/woff2, video/mp4; magic-byte verified at commit. Commit re-verifies the staged bytes server-side and refuses a mismatch with verification_failed, deleting the staging and closing the session with no release.",
+          "For large page files (text/html, text/css, text/javascript, application/json, up to 5 MiB per file and 5 MiB total) and binary assets (photographs, PDF) stage bytes outside the model: artifacts_create_upload({artifactId, mimeType, maxSize:<exact file byte size>}) for a signed PUT URL — the signature binds that exact Content-Length, so measure the exact UTF-8 byte length first and never pad files (omitting maxSize defaults to 5 MiB for page text files and 16 MiB for binaries): a PUT of any other size is refused. PUT the exact bytes with exactly the announced requiredHeaders and nothing else, artifacts_commit_upload({artifactId, uploadId, path, mimeType, digest, size, idempotencyKey}) to pin, then artifacts_publish_bundle({artifactId, files, assets, expectedCurrentReleaseId, idempotencyKey}) for one atomic release — or artifacts_publish_bundle_v2 for the copy/carry/keep asset forms. Page text files staged via create_upload are verified as strict UTF-8 plus sha256 digest with no magic-byte check and served as page files under the same release CSP (never as binaries). When the Product Owner supplies the files, mint an upload page: artifacts_create_upload_page({artifactId}) returns an uploadPageUrl for originals — bytes go browser to storage, never through a model payload; review staged and released files with artifacts_list_assets. Release ceilings: 255 files, 16 MiB per binary file, 64 MiB per release (5 MiB per file and 5 MiB total for page text files). Served binaries: image/png, image/jpeg, image/gif, image/webp, image/svg+xml, application/pdf, font/woff2, video/mp4; magic-byte verified at commit. Commit re-verifies the staged bytes server-side and refuses a mismatch with verification_failed, deleting the staging and closing the session with no release. " + PAGE_TEXT_BUDGET_NOTE + ". " + UPLOAD_SESSION_NOTE + " " + EXTERNAL_MEDIA_NOTE,
           ARTIFACT_STRICT ? STRICT_ARTIFACT_GUIDE : "Edit the returned text locally with the supplied DS starter rules, preserve every required file, then artifacts_publish({artifactId, files, idempotencyKey}) with a fresh key. Publish the complete snapshot, not a patch. expectedCurrentReleaseId is not required by this profile.",
           `Keep the same key and identical content on retries. resultEnvelopeVersion: ${ARTIFACT_PROFILE_DESCRIPTOR.resultEnvelopeVersion}. ` +
             (ARTIFACT_PART1 ? "Results are in output; use either full files or edits:[{path,oldStr,newStr}], never both. Supply title/description/icon on ensure or publish. list_versions returns retained releases; revert({artifactId,targetReleaseId,expectedCurrentReleaseId,idempotencyKey}) creates a new release with current metadata and ACL. " : "Results remain at the root. ") +
