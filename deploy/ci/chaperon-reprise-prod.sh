@@ -133,7 +133,14 @@ jq \
   --argjson command "$cmd_json" \
   --rawfile planB64 "$plan_b64_file" \
   '
-  (.spec.template.spec.containers | map(select(.name == "radar-api")) | .[0] // .spec.template.spec.containers[0]) as $c |
+  (if type == "array" then (map(select(.metadata.name == "radar-api"))[0] // .[0])
+   elif (.items | type) == "array" then (.items | map(select(.metadata.name == "radar-api"))[0] // .[0])
+   else . end) as $d |
+  ($d.spec.template.spec.containers // []) as $containers |
+  (($containers | map(select(.name == "api"))[0]) // ($containers | map(select(.name == "radar-api"))[0]) // $containers[0]) as $c |
+  if ($c == null) or (($c.image // "") == "") then
+    error("Deployment/radar-api container not found in deploy.json")
+  else
   {
     apiVersion: "batch/v1",
     kind: "Job",
@@ -162,9 +169,9 @@ jq \
         },
         spec: {
           restartPolicy: "Never",
-          serviceAccountName: (.spec.template.spec.serviceAccountName // "radar-app"),
+          serviceAccountName: ($d.spec.template.spec.serviceAccountName // "radar-app"),
           automountServiceAccountToken: false,
-          securityContext: (.spec.template.spec.securityContext // {
+          securityContext: ($d.spec.template.spec.securityContext // {
             runAsNonRoot: true, runAsUser: 1001, runAsGroup: 1001, fsGroup: 1001,
             seccompProfile: { type: "RuntimeDefault" }
           }),
@@ -190,6 +197,7 @@ jq \
       }
     }
   }
+  end
   ' "$deploy_json" > "$manifest"
 
 "$KUBECTL" -n "$NAMESPACE" create -f "$manifest" >/dev/null
