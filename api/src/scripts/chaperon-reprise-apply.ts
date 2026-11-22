@@ -109,6 +109,13 @@ export function repriseCommandKey(plan: Pick<Plan, "keyNamespace">, workspaceId:
     basket ? "selection" : "archive", basket, t.reasonCode]));
 }
 
+export function resolveRepriseBaseUrl(env: NodeJS.ProcessEnv): string | undefined {
+  const explicit = env.APP_BASE_URL?.trim();
+  if (explicit) return explicit;
+  const callback = env.AUTH_CALLBACK_BASE_URL?.trim();
+  return callback || undefined;
+}
+
 export function assertAllowedBaseUrl(baseUrl: string | undefined, allowProd: boolean): void {
   const value = baseUrl ?? "";
   if (allowProd) {
@@ -446,7 +453,7 @@ export async function main(args: string[]): Promise<void> {
   if (isApply && args[args.indexOf("--confirm") + 1] !== workspaceSlug) {
     throw new Error("usage: --apply --confirm <workspace-slug> [--allow-prod]");
   }
-  assertAllowedBaseUrl(process.env.APP_BASE_URL, allowProd);
+  assertAllowedBaseUrl(resolveRepriseBaseUrl(process.env), allowProd);
 
   const { db, pool } = createDb(loadConfig());
   try {
