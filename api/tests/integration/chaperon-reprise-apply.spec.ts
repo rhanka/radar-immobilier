@@ -7,7 +7,7 @@ import { runPersonalAttachmentActivation } from "../../src/services/facets/activ
 import { activation, attach, describeDb, fixture, safety, type Fixture } from "../../src/services/facets/scope-db-fixture.js";
 import { writeScopedPersonalFacet, writeScopedPersonalFacetInTx } from "../../src/services/facets/scoped-writer.js";
 import { resolveTarget } from "../../src/services/facets/target.js";
-import { applyReprise, assertAllowedBaseUrl, dryRunReprise, type Plan, type PlanTarget, type RawPlan } from "../../src/scripts/chaperon-reprise-apply.js";
+import { applyReprise, assertAllowedBaseUrl, dryRunReprise, resolveRepriseBaseUrl, type Plan, type PlanTarget, type RawPlan } from "../../src/scripts/chaperon-reprise-apply.js";
 
 const CITY = "synthetic-city";
 const NAMESPACE = "6c1f3a52-8f0e-5b7d-9a41-2e6d0c9b7f13";
@@ -115,5 +115,13 @@ describeDb("chaperon reprise apply (insert-only)", () => {
     expect(() => assertAllowedBaseUrl("https://immo.sent-tech.ca", true)).not.toThrow();
     expect(() => assertAllowedBaseUrl("https://preprod.immo.sent-tech.ca", true)).not.toThrow();
     expect(() => assertAllowedBaseUrl("https://evil.example.com", true)).toThrow(/unrecognized APP_BASE_URL/);
+    expect(resolveRepriseBaseUrl({ AUTH_CALLBACK_BASE_URL: "https://immo.sent-tech.ca" }))
+      .toBe("https://immo.sent-tech.ca");
+    expect(resolveRepriseBaseUrl({ APP_BASE_URL: "https://evil.example.com", AUTH_CALLBACK_BASE_URL: "https://immo.sent-tech.ca" }))
+      .toBe("https://evil.example.com");
+    expect(resolveRepriseBaseUrl({ APP_BASE_URL: "   ", AUTH_CALLBACK_BASE_URL: "https://preprod.immo.sent-tech.ca" }))
+      .toBe("https://preprod.immo.sent-tech.ca");
+    expect(resolveRepriseBaseUrl({})).toBeUndefined();
+    expect(() => assertAllowedBaseUrl(resolveRepriseBaseUrl({ AUTH_CALLBACK_BASE_URL: "https://immo.sent-tech.ca" }), true)).not.toThrow();
   });
 });

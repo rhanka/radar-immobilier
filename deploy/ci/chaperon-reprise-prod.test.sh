@@ -46,10 +46,21 @@ if [[ "$*" == *"create -f "* ]]; then
   exit 0
 fi
 if [[ "$*" == *"get job "* ]]; then
+  [[ ! -f "$STATE_DIR/job-deleted" ]] || { echo "get job called after job deletion" >&2; exit 98; }
   cat "$STATE_DIR/job-status.json"
   exit 0
 fi
+if [[ "$*" == *"get pods "* ]]; then
+  [[ ! -f "$STATE_DIR/job-deleted" ]] || { echo "get pods called after job deletion" >&2; exit 98; }
+  if [[ -f "$STATE_DIR/pods.json" ]]; then
+    cat "$STATE_DIR/pods.json"
+  else
+    echo '{"items":[]}'
+  fi
+  exit 0
+fi
 if [[ "$*" == *"logs job/"* ]]; then
+  [[ ! -f "$STATE_DIR/job-deleted" ]] || { echo "logs called after job deletion" >&2; exit 98; }
   cat "$STATE_DIR/job.log"
   exit 0
 fi
@@ -288,6 +299,53 @@ if FAKE_KUBECTL_STATE="$S6C" KUBECTL="$TMP/bin/kubectl" CHAPERON_REPRISE_CSV_PAT
   ok "deploy.json as Kubernetes List (.items) selects Deployment/radar-api cleanly"
 else
   bad "deploy.json as Kubernetes List ($(cat "$S6C/out.txt"))"
+fi
+
+# 7. APP_BASE_URL is mapped from ConfigMap/radar-api AUTH_CALLBACK_BASE_URL when absent, and preserved when present.
+if jq -e '
+    (.spec.template.spec.containers[0].env | map(select(.name == "APP_BASE_URL")) | length) == 1
+    and (.spec.template.spec.containers[0].env | map(select(.name == "APP_BASE_URL"))[0].valueFrom.configMapKeyRef == { name: "radar-api", key: "AUTH_CALLBACK_BASE_URL", optional: true })
+  ' "$S1/created-job.json" >/dev/null; then
+  ok "Job maps APP_BASE_URL from ConfigMap/radar-api AUTH_CALLBACK_BASE_URL when absent"
+else
+  bad "APP_BASE_URL configMapKeyRef missing from Job manifest ($(jq '.spec.template.spec.containers[0].env' "$S1/created-job.json"))"
+fi
+
+# 8. On failure, Job/Pod status and redacted log tail are printed BEFORE Job deletion (no secrets or emails).
+S8="$TMP/s8"; mkdir -p "$S8"
+write_deploy_json "$S8/deploy.json"
+cat > "$S8/job-status.json" <<'EOF'
+{"metadata":{"name":"radar-chaperon-reprise-prod-fail"},"status":{"failed":1,"conditions":[{"type":"Failed","status":"True","reason":"BackoffLimitExceeded","message":"Job has reached the specified backoff limit"}]}}
+EOF
+cat > "$S8/pods.json" <<'EOF'
+{"items":[{"metadata":{"name":"radar-chaperon-reprise-prod-fail-abc"},"status":{"phase":"Failed","containerStatuses":[{"name":"chaperon-reprise","ready":false,"restartCount":0,"state":{"terminated":{"exitCode":1,"reason":"Error"}}}]}}]}
+EOF
+cat > "$S8/job.log" <<'EOF'
+starting reprise for owner steve@chaperonimmobilier.com
+dsn=postgresql://radar_user:SuperSecretPass99@radar-postgres:5432/radar
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.signaturevalue123
+POSTGRES_PASSWORD=AnotherSecretValue42
+chaperon-reprise-apply: refused: unrecognized APP_BASE_URL for prod/preprod reprise
+EOF
+
+if FAKE_KUBECTL_STATE="$S8" KUBECTL="$TMP/bin/kubectl" CHAPERON_REPRISE_CSV_PATH="$TMP/synthetic.csv" \
+    REPRISE_MODE="dry-run" REPRISE_POLL_SECONDS="0" bash "$SCRIPT" >"$S8/out.txt" 2>&1; then
+  bad "failing diagnostics case unexpectedly succeeded"
+elif [[ -f "$S8/job-deleted" ]] \
+  && grep -Fq 'diagnostics job-status:' "$S8/out.txt" \
+  && grep -Fq 'BackoffLimitExceeded' "$S8/out.txt" \
+  && grep -Fq 'diagnostics pod-status:' "$S8/out.txt" \
+  && grep -Fq '"terminatedExitCode":1' "$S8/out.txt" \
+  && grep -Fq 'unrecognized APP_BASE_URL for prod/preprod reprise' "$S8/out.txt" \
+  && grep -Fq '[REDACTED_EMAIL]' "$S8/out.txt" \
+  && ! grep -Fq 'steve@chaperonimmobilier.com' "$S8/out.txt" \
+  && ! grep -Fq 'SuperSecretPass99' "$S8/out.txt" \
+  && ! grep -Fq 'AnotherSecretValue42' "$S8/out.txt" \
+  && ! grep -Fq 'signaturevalue123' "$S8/out.txt" \
+  && ! grep -Fq 'called after job deletion' "$S8/out.txt"; then
+  ok "failure prints Job/Pod status and redacted pod log tail before Job deletion"
+else
+  bad "failure diagnostics ($(cat "$S8/out.txt"))"
 fi
 
 echo "chaperon-reprise-prod.test.sh: $PASS passed, $FAIL failed"

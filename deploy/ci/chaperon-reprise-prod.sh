@@ -60,7 +60,80 @@ JOB_NAME="${JOB_NAME:-radar-chaperon-reprise-prod-$(date -u +%Y%m%d%H%M%S)}"
 WORK="$(mktemp -d "${RUNNER_TEMP:-/tmp}/chaperon-reprise-prod.XXXXXX")"
 chmod 700 "$WORK"
 job_created=0
+diagnostics_dumped=0
+last_job_state=""
+logs_file="$WORK/job.log"
+
+sanitize_log_stream() {
+  sed -E \
+    -e 's#(://)[^/@[:space:]]+:[^/@[:space:]]+@#\1[REDACTED]@#g' \
+    -e 's#[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}#[REDACTED_EMAIL]#g' \
+    -e 's#([Bb]earer[[:space:]]+)[A-Za-z0-9._~+/-]+=*#\1[REDACTED]#g' \
+    -e 's#eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}#[REDACTED_JWT]#g' \
+    -e 's#(([Pp][Aa][Ss][Ss][Ww][Oo][Rr][Dd]|[Ss][Ee][Cc][Rr][Ee][Tt]|[Tt][Oo][Kk][Ee][Nn]|[Aa][Pp][Ii]_?[Kk][Ee][Yy]|[Cc][Oo][Oo][Kk][Ii][Ee]|CHAPERON_REPRISE_PLAN_B64)[[:space:]]*[:=][[:space:]]*)[^[:space:]",}]+#\1[REDACTED]#g' \
+    -e 's#[A-Za-z0-9+/]{80,}={0,2}#[REDACTED_BLOB]#g'
+}
+
+dump_failure_diagnostics() {
+  if [[ "$diagnostics_dumped" -eq 1 || "$job_created" -ne 1 ]]; then
+    return 0
+  fi
+  diagnostics_dumped=1
+
+  local job_json pods_json job_summary pod_summary
+  job_json="$("$KUBECTL" -n "$NAMESPACE" get job "$JOB_NAME" -o json 2>/dev/null || printf '%s' "$last_job_state")"
+  if [[ -n "$job_json" ]]; then
+    job_summary="$(jq -c '{
+      job: (.metadata.name // "'"$JOB_NAME"'"),
+      active: (.status.active // 0),
+      succeeded: (.status.succeeded // 0),
+      failed: (.status.failed // 0),
+      startTime: (.status.startTime // null),
+      completionTime: (.status.completionTime // null),
+      conditions: [(.status.conditions // [])[] | {type, status, reason, message}]
+    }' <<< "$job_json" 2>/dev/null || true)"
+    if [[ -n "$job_summary" ]]; then
+      printf 'chaperon-reprise-prod diagnostics job-status: %s\n' "$job_summary" | sanitize_log_stream >&2
+    fi
+  fi
+
+  pods_json="$("$KUBECTL" -n "$NAMESPACE" get pods -l "job-name=${JOB_NAME}" -o json 2>/dev/null || true)"
+  if [[ -n "$pods_json" ]]; then
+    pod_summary="$(jq -c '[(.items // [])[] | {
+      name: .metadata.name,
+      phase: .status.phase,
+      reason: (.status.reason // null),
+      containers: [(.status.containerStatuses // [])[] | {
+        name,
+        ready,
+        restartCount,
+        waitingReason: (.state.waiting.reason // null),
+        terminatedExitCode: (.state.terminated.exitCode // null),
+        terminatedReason: (.state.terminated.reason // null),
+        terminatedMessage: (.state.terminated.message // null)
+      }]
+    }]' <<< "$pods_json" 2>/dev/null || true)"
+    if [[ -n "$pod_summary" && "$pod_summary" != "[]" ]]; then
+      printf 'chaperon-reprise-prod diagnostics pod-status: %s\n' "$pod_summary" | sanitize_log_stream >&2
+    fi
+  fi
+
+  if [[ ! -s "$logs_file" ]]; then
+    "$KUBECTL" -n "$NAMESPACE" logs "job/$JOB_NAME" --tail=50 > "$logs_file" 2>&1 || true
+  fi
+  if [[ -s "$logs_file" ]]; then
+    echo "chaperon-reprise-prod diagnostics pod-logs (tail, redacted):" >&2
+    tail -n 50 "$logs_file" | sanitize_log_stream >&2
+  else
+    echo "chaperon-reprise-prod diagnostics pod-logs: <empty>" >&2
+  fi
+}
+
 cleanup() {
+  local rc=$?
+  if [[ "$rc" -ne 0 && "$job_created" -eq 1 && "$diagnostics_dumped" -eq 0 ]]; then
+    dump_failure_diagnostics || true
+  fi
   if [[ "$job_created" -eq 1 ]]; then
     "$KUBECTL" -n "$NAMESPACE" delete job "$JOB_NAME" --ignore-not-found=true --wait=false >/dev/null 2>&1 || true
   fi
@@ -117,7 +190,6 @@ EOF
 
 deploy_json="$WORK/deploy.json"
 manifest="$WORK/job.json"
-logs_file="$WORK/job.log"
 
 "$KUBECTL" -n "$NAMESPACE" get deployment radar-api -o json > "$deploy_json"
 
@@ -141,6 +213,11 @@ jq \
   if ($c == null) or (($c.image // "") == "") then
     error("Deployment/radar-api container not found in deploy.json")
   else
+  ((($c.envFrom // []) | map(.configMapRef.name // empty) | .[0]) // "radar-api") as $cmName |
+  (($c.env // []) | map(select(.name != "CHAPERON_REPRISE_PLAN_B64"))) as $baseEnv |
+  (if ($baseEnv | any(.name == "APP_BASE_URL")) then [] else [
+    { name: "APP_BASE_URL", valueFrom: { configMapKeyRef: { name: $cmName, key: "AUTH_CALLBACK_BASE_URL", optional: true } } }
+  ] end) as $baseUrlEnv |
   {
     apiVersion: "batch/v1",
     kind: "Job",
@@ -188,7 +265,7 @@ jq \
               }),
               command: $command,
               envFrom: ($c.envFrom // []),
-              env: (($c.env // []) | map(select(.name != "CHAPERON_REPRISE_PLAN_B64"))) + [
+              env: $baseEnv + $baseUrlEnv + [
                 { name: "CHAPERON_REPRISE_PLAN_B64", value: ($planB64 | gsub("\n"; "")) }
               ]
             }
@@ -208,6 +285,7 @@ deadline=$(( $(date +%s) + WAIT_SECONDS ))
 job_failed=0
 while :; do
   state="$("$KUBECTL" -n "$NAMESPACE" get job "$JOB_NAME" -o json)"
+  last_job_state="$state"
   if jq -e 'any(.status.conditions[]?; .type == "Complete" and .status == "True")' <<< "$state" >/dev/null; then
     break
   fi
@@ -216,20 +294,23 @@ while :; do
     break
   fi
   if (( $(date +%s) >= deadline )); then
+    dump_failure_diagnostics
     echo "::error title=Reprise timeout::Job ${NAMESPACE}/${JOB_NAME} did not finish within ${WAIT_SECONDS}s." >&2
     exit 1
   fi
   sleep "$POLL_SECONDS"
 done
 
-"$KUBECTL" -n "$NAMESPACE" logs "job/$JOB_NAME" > "$logs_file"
-cat "$logs_file"
+"$KUBECTL" -n "$NAMESPACE" logs "job/$JOB_NAME" > "$logs_file" 2>&1 || true
 
 report_line="$(grep '"kind":"chaperon-reprise"' "$logs_file" | tail -n 1 || true)"
 if [[ -z "$report_line" ]]; then
+  dump_failure_diagnostics
   echo "::error title=Missing reprise report::No chaperon-reprise JSON line found in job/${JOB_NAME} logs." >&2
   exit 1
 fi
+
+printf '%s\n' "$report_line" | sanitize_log_stream
 
 summary_md="$(jq -r --arg job "${NAMESPACE}/${JOB_NAME}" '
   "### Prod Chaperon triage reprise (\(.mode))\n\n"
