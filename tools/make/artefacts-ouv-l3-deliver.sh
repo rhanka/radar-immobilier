@@ -2,14 +2,14 @@
 set -euo pipefail
 [[ $ENV == test-artefacts-ouv-l3 && $API_PORT == 18935 && $UI_PORT == 15935 && $MAILDEV_UI_PORT == 11935 ]]
 ROOT=$(pwd -P)
-BASE=9a723753607097c7758027eb5cc9a2071c8e0023
+BASE=56ec8c7cf0fc7c73ef71fdd8c98379430473df46
 BRANCH=feat/artefacts-ouverture-l3
 GIT=(git --git-dir="$ROOT/tmp/sol-l3.git" --work-tree="$ROOT")
 OUT=$ROOT/tmp/sol-l3-evidence
 mkdir -p "$OUT"
 [[ $("${GIT[@]}" branch --show-current) == "$BRANCH" ]]
 "${GIT[@]}" merge-base --is-ancestor "$BASE" HEAD
-"${GIT[@]}" merge-base --is-ancestor 17f439c8d8e75303177ba8972a4fd7d8a8cbdc35 HEAD
+"${GIT[@]}" merge-base --is-ancestor ed206a6dc129c9201a420b37d2eb89f488f2607d HEAD
 "${GIT[@]}" diff --check
 : > "$OUT/commit-audit.tsv"
 while IFS= read -r sha; do

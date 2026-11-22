@@ -2,7 +2,7 @@
 # All authored objects/index/refs stay in a local backup, never in shared .git.
 set -euo pipefail
 action=${1:?}
-BASE=c5fb85dbd77e12c0c4355a207de84ead0c3fa5d9
+BASE=23ee568e8eb69844b72601d286c4476c03de3ede
 ROOT=$(pwd -P)
 export GIT_DIR=$ROOT/tmp/a2base-api-delivery.git
 export GIT_WORK_TREE=$ROOT
