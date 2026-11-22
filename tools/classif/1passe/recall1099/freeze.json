@@ -1,0 +1,44 @@
+{
+  "at": "2026-11-13T22:47:41.182Z",
+  "productionPromptSha256": "8957bcaa146b3b83ee89000fccec3c6f393c7b801b320a158d58d2631fa3a205",
+  "model": {
+    "provider": "openai",
+    "model": "gpt-6-astra",
+    "effort": "low"
+  },
+  "concurrency": 10,
+  "quotaStop": 90,
+  "contract": "immo-pv-extraction-v10",
+  "sourceHashes": {
+    "api/src/services/graph/refresh-profile.ts": "d74488693dc2201e68e24f3943e4ec6ad3b675ca0a90c045c65ed641ad223b5a",
+    "api/src/services/graph/refresh-corpus.ts": "649a091eccfc2895391ae6a933ce277cd481281c1c5e45d97423878d5dd029a5",
+    "api/src/services/graph/refresh-single-pass.ts": "9eb2dd3e4cb5035f23aaf0a013aac1c0f5853a1ec5ffa9bd77ae9bd12656485e",
+    "radar/ontology/ontology-profile.yaml": "37c85a34feb97c12466b48360f92c82f5278ead479c2bd9317bff5b849ce9c37"
+  },
+  "documentCount": 100,
+  "chunkCount": 100,
+  "requestManifestSha256": "85545349f5ca4b31bd6fc661df0f1ae4a6e09e0c488a4fa7a5b4b36ec915a0aa",
+  "example": {
+    "key": "amherst-2026-06-08--0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.1",
+    "document": "amherst-2026-06-08",
+    "blind": false,
+    "chunkId": "0131f51cce9f89da09118ce6b0076d220ba53753d582429526579984deb27344.1",
+    "pages": [
+      1,
+      2
+    ],
+    "promptSha256": "d26312d75e7f618f2130b5eae6160716fa229a8d86fa777b750b27c315eb5f3f",
+    "schemaSha256": "340e0d1d803c12323dd9304a0c07b4039ba65bd33adb65571b121bb971648247",
+    "inputSha256": "0c8ad480bdac477a72ddf81737bb6da3beb900f5c47934bad1de132246298db6"
+  },
+  "metrics": [
+    "detection/B",
+    "visible/B",
+    "P_union_S/B"
+  ],
+  "matching": "inherited frozen matcher; one-to-one groups",
+  "blind": "one shot; sealed; aggregate only",
+  "surface": "production extractRefreshProfile generateJson boundary -> isolated Codex CLI seat; no mesh fallback",
+  "chunker": "production module, export-only instrumentation; cached PDF text verified against v101b",
+  "dates": "production PDF header date extraction; no remote sidecar or ingestion date"
+}
