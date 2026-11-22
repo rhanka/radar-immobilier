@@ -5,9 +5,9 @@ round=${2:-fix}
 case "$round" in fix|fix2|fix3) ;; *) exit 2;; esac
 task_dir="$PWD/tmp/paniers-6k-$round"
 repo="$task_dir/git"
-base_ref=63a8991c
-[[ "$round" != fix2 ]] || base_ref=323d0db9
-[[ "$round" != fix3 ]] || base_ref=0456f85f
+base_ref=abdbff2c
+[[ "$round" != fix2 ]] || base_ref=26d6ae74
+[[ "$round" != fix3 ]] || base_ref=5bd30c3e
 base=$(git rev-parse "$base_ref^{commit}")
 slices="tools/make/paniers-lot6k-$round-slices.txt"
 label='Review fix'

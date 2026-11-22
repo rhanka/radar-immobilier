@@ -4,7 +4,7 @@ set -euo pipefail
 task_dir="$PWD/tmp/paniers-6g"
 repo="$task_dir/git"
 local_git() { git --git-dir="$repo/.git" --work-tree="$PWD" "$@"; }
-base=$(git rev-parse 'b55cefb1^{commit}')
+base=$(git rev-parse '529ee3b6^{commit}')
 stage_paths=(api packages ui tools/make package.json package-lock.json tsconfig.base.json eslint.config.js)
 case "$1" in
   prepare)
