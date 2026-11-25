@@ -1,16 +1,24 @@
+import { createHash } from "node:crypto";
+import { fileURLToPath } from "node:url";
 import { buildRawDocumentRecord, rawMetaKey } from "@radar/sources";
-import type { Extraction } from "@sentropic/engram";
+import { loadOntologyProfile, registryRecordsToExtraction, type Extraction } from "@sentropic/engram";
 import { describe, expect, it } from "vitest";
 
+import type { Database } from "../../db/client.js";
 import type { LiveScrapeCityRecap } from "../sources/live-scrape.js";
-import type { ObjectInfo, ObjectStore } from "../../storage/object-store.js";
+import { canonicalGraphKey, type ObjectInfo, type ObjectStore } from "../../storage/object-store.js";
 import { hydrateGraphDocumentDates } from "../sources/document-date-metadata.js";
+import { FakeGraphStore } from "./canonical-graph-store.fixture.js";
+import type { Graphify34SnapshotStore } from "./graphify-34-snapshot.js";
+import { readRefreshCoverage } from "./refresh-coverage.js";
+import { createRefreshModelPolicy, type RefreshModelReceipt } from "./refresh-model-policy.js";
+import type { RefreshProfileContext } from "./refresh-profile.js";
 import { extractionToV23Graph } from "./refresh-v23.js";
 import { refreshCorpusInputHash, type RefreshCorpus, type RefreshCorpusDocument } from "./refresh-corpus.js";
 import { acquireRefreshPdfCandidates, bindDocumentSourceIds, DEFAULT_REFRESH_DOCUMENT_TIMEOUT_MS,
   DEFAULT_REFRESH_MAX_DOCUMENT_BYTES,
   orderRefreshPdfCandidates, recoverRefreshDocumentDates, refreshDocumentFailureReason,
-  refreshProjectionFailure, refreshSourceDelayMs, writeRefreshPdfManifest,
+  refreshProjectionFailure, refreshSourceDelayMs, runPvRefresh, writeRefreshPdfManifest,
   type RefreshAcquire } from "./refresh-run.js";
 import { refreshErrorDiagnostic } from "./refresh-mesh.js";
 
@@ -355,5 +363,175 @@ describe("refreshProjectionFailure", () => {
     const reason = refreshDocumentFailureReason(refreshProjectionFailure("postgres-regression-refused", "x"));
     expect(reason).not.toMatch(/^refresh-/);
     expect(reason).toBe(refreshDocumentFailureReason(new Error("x")));
+  });
+});
+
+describe("refreshDocumentFailureReason and availability non-abandonment (#1177)", () => {
+  it("classifies RoutePlanError no-route and availability errors distinctly from transport", () => {
+    expect(refreshDocumentFailureReason(
+      Object.assign(new Error("No eligible route"), { name: "RoutePlanError", code: "no-route" }),
+    )).toBe("no-route");
+    expect(refreshDocumentFailureReason(
+      Object.assign(new Error("No eligible route"), { name: "RoutePlanError", code: "no-route",
+        diagnostic: { code: "reauth-required" } }),
+    )).toBe("no-route");
+    expect(refreshDocumentFailureReason(Object.assign(new Error("limited"), { status: 429 }))).toBe("quota");
+    expect(refreshDocumentFailureReason(Object.assign(new Error("reauth"), { code: "reauth-required" }))).toBe("quota");
+    expect(refreshDocumentFailureReason(Object.assign(new Error("empty"), { code: "REFRESH_EMPTY_OUTPUT" })))
+      .toBe("refresh-empty-output");
+  });
+
+  function fakeDb(): Database {
+    return {
+      insert: () => ({ values: async () => [] }),
+    } as unknown as Database;
+  }
+
+  function fakeGraphStore(): Graphify34SnapshotStore & ObjectStore {
+    return new FakeGraphStore() as unknown as Graphify34SnapshotStore & ObjectStore;
+  }
+
+  async function seedSingleDoc(store: Graphify34SnapshotStore & ObjectStore, citySlug: string) {
+    const sourceId = `proces-verbaux-${citySlug}`;
+    const body = new TextEncoder().encode(`%PDF-1.4 ${citySlug}`);
+    const docSha = createHash("sha256").update(body).digest("hex");
+    const casKey = `raw/${sourceId}/cas/${docSha}.pdf`;
+    await store.put(casKey, body, "application/pdf");
+    await store.put(`${casKey}.meta.json`, JSON.stringify({ sourceUrl: `https://example.test/${citySlug}.pdf` }),
+      "application/json");
+    await store.putCanonicalGraph(canonicalGraphKey(citySlug), JSON.stringify({ nodes: [], edges: [] }),
+      "application/json", { ifMatch: null });
+    const acquire: RefreshAcquire = async () => [{
+      city: citySlug, sourceId, status: "seen", casKeys: [casKey], count: 1,
+    }];
+    const profilePath = fileURLToPath(new URL("../../../../radar/ontology/ontology-profile.yaml", import.meta.url));
+    const profile = loadOntologyProfile(profilePath);
+    const registries = Object.fromEntries(Object.keys(profile.registries).map((id) => [id, []]));
+    const profileContext: RefreshProfileContext = {
+      profile,
+      registries,
+      registryExtraction: registryRecordsToExtraction(registries, profile),
+    };
+    return { docSha, acquire, profileContext };
+  }
+
+  it("keeps a document pending across repeated quota and Muse cooldown no-route outages", async () => {
+    const store = fakeGraphStore();
+    const { docSha, acquire, profileContext } = await seedSingleDoc(store, "valleyfield");
+    const notes: { note: string; detail?: Record<string, unknown> }[] = [];
+    const receipts: RefreshModelReceipt[] = [];
+    let fallbackCalls = 0;
+
+    const makePolicy = () => createRefreshModelPolicy({
+      primary: { provider: "openai", model: "gpt-6.2-astra", effort: "low" },
+      fallback: { provider: "muse", model: "muse-wonder-1.0", effort: "low" },
+      forceFallback: false,
+      primaryQualityAttempts: 2,
+      timeoutMs: 1_000,
+      createClient(model) {
+        return {
+          mode: "mesh",
+          provider: model.provider,
+          model: model.model,
+          async generateJson() {
+            if (model.provider === "openai") {
+              throw Object.assign(new Error("quota exceeded"), { status: 429 });
+            }
+            fallbackCalls += 1;
+            if (fallbackCalls === 1) {
+              throw Object.assign(new Error("muse rate limited"), { statusCode: 429 });
+            }
+            throw Object.assign(new Error("No eligible route"), { name: "RoutePlanError", code: "no-route" });
+          },
+        };
+      },
+    });
+
+    for (let pass = 0; pass < 4; pass += 1) {
+      await expect(runPvRefresh({
+        citySlug: "valleyfield",
+        store,
+        db: fakeDb(),
+        profileContext,
+        documentModels: makePolicy(),
+        onModelReceipt: (_doc, _chunk, receipt) => receipts.push(receipt),
+        onNote: (note, detail) => notes.push({ note, ...(detail ? { detail } : {}) }),
+        extractPdf: async () => "Séance ordinaire du conseil municipal\f",
+        profileHash: "sha256:profile",
+        registryHash: "sha256:registry",
+        packageVersion: "0.18.0",
+        modelPolicy: "test",
+        budgetLimit: 100,
+        maximumAttempts: 1,
+        maxOutputTokens: 512,
+        maxDocumentFailures: 3,
+        acquire,
+      })).rejects.toThrow();
+    }
+
+    const { ledger } = await readRefreshCoverage(store, "valleyfield");
+    expect(ledger?.documents[docSha]).toMatchObject({
+      state: "pending",
+      failures: 0,
+      lastReason: "no-route",
+    });
+    expect(notes.filter((entry) => entry.note === "document-abandoned")).toEqual([]);
+    expect(notes.filter((entry) => entry.note === "document-failed")).toEqual([]);
+    expect(notes.filter((entry) => entry.note === "document-deferred-unavailable")).toHaveLength(4);
+    expect(receipts.every((receipt) => receipt.failureReason === "quota")).toBe(true);
+  });
+
+  it("still abandons a document after maxDocumentFailures real empty-output failures", async () => {
+    const store = fakeGraphStore();
+    const { docSha, acquire, profileContext } = await seedSingleDoc(store, "waterloo");
+    const notes: string[] = [];
+
+    const makePolicy = () => createRefreshModelPolicy({
+      primary: { provider: "openai", model: "gpt-6.2-astra", effort: "low" },
+      fallback: { provider: "muse", model: "muse-wonder-1.0", effort: "low" },
+      forceFallback: false,
+      primaryQualityAttempts: 2,
+      timeoutMs: 1_000,
+      createClient(model) {
+        return {
+          mode: "mesh",
+          provider: model.provider,
+          model: model.model,
+          async generateJson(input) {
+            await input.validateResponse?.("   ");
+            return { status: "completed", mode: "mesh", provider: model.provider, model: model.model, audit: {} };
+          },
+        };
+      },
+    });
+
+    for (let pass = 0; pass < 3; pass += 1) {
+      await expect(runPvRefresh({
+        citySlug: "waterloo",
+        store,
+        db: fakeDb(),
+        profileContext,
+        documentModels: makePolicy(),
+        onNote: (note) => notes.push(note),
+        extractPdf: async () => "Séance ordinaire\f",
+        profileHash: "sha256:profile",
+        registryHash: "sha256:registry",
+        packageVersion: "0.18.0",
+        modelPolicy: "test",
+        budgetLimit: 100,
+        maximumAttempts: 1,
+        maxOutputTokens: 512,
+        maxDocumentFailures: 3,
+        acquire,
+      })).rejects.toThrow("Empty refresh output");
+    }
+
+    const { ledger } = await readRefreshCoverage(store, "waterloo");
+    expect(ledger?.documents[docSha]).toMatchObject({
+      state: "abandoned",
+      failures: 3,
+      lastReason: "refresh-empty-output",
+    });
+    expect(notes).toContain("document-abandoned");
   });
 });
