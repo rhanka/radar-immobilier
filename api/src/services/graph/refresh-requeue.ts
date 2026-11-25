@@ -53,9 +53,10 @@ export interface RefreshRequeueTrace {
   readonly backupPrefix?: string | null;
   /** False on the progressive traces written during the loop. */
   readonly complete?: boolean;
-  /** Recurring catch-up ceilings applied by this run, when any. */
+  /** Recurring catch-up ceilings and reason filter applied by this run, when any. */
   readonly filters?: { readonly maxAgeDays?: number; readonly maxPerRun?: number;
-    readonly maxPerCity?: number; readonly maxRequeues?: number };
+    readonly maxPerCity?: number; readonly maxRequeues?: number;
+    readonly reasons?: readonly string[] };
 }
 
 export function refreshRequeueStamp(when: Date): string {
@@ -100,6 +101,8 @@ export interface RunRefreshRequeueOptions {
   readonly maxPerRun?: number;
   readonly maxPerCity?: number;
   readonly maxRequeues?: number;
+  /** Only requeue documents whose `lastReason` is in this allowlist; absent means any reason. */
+  readonly reasons?: readonly string[];
   /** Explicit city filter; absent means every city holding a registry. */
   readonly cities?: readonly string[];
   readonly now?: () => Date;
@@ -119,6 +122,7 @@ export async function runRefreshRequeueAbandoned(
   const cityTraces: RefreshRequeueCityTrace[] = [];
   let requeuedTotal = 0;
   let skipped = 0;
+  const reasons = options.reasons?.length ? [...new Set(options.reasons)].sort() : undefined;
   const snapshot = (complete: boolean): RefreshRequeueTrace => ({
     schemaVersion: 1, kind: "refresh-requeue-abandoned",
     who: options.who, when: when.toISOString(), dryRun: options.dryRun,
@@ -128,7 +132,8 @@ export async function runRefreshRequeueAbandoned(
     filters: { ...(options.maxAgeDays !== undefined ? { maxAgeDays: options.maxAgeDays } : {}),
       ...(options.maxPerRun !== undefined ? { maxPerRun: options.maxPerRun } : {}),
       ...(options.maxPerCity !== undefined ? { maxPerCity: options.maxPerCity } : {}),
-      ...(options.maxRequeues !== undefined ? { maxRequeues: options.maxRequeues } : {}) },
+      ...(options.maxRequeues !== undefined ? { maxRequeues: options.maxRequeues } : {}),
+      ...(reasons ? { reasons } : {}) },
   });
   const persist = async (complete: boolean): Promise<void> => {
     if (auditKey) await store.put(auditKey, JSON.stringify(snapshot(complete)), "application/json");
@@ -152,6 +157,7 @@ export async function runRefreshRequeueAbandoned(
       ...(options.maxAgeDays !== undefined ? { maxAgeDays: options.maxAgeDays } : {}),
       ...(perCity !== undefined ? { maxPerCity: perCity } : {}),
       ...(options.maxRequeues !== undefined ? { maxRequeues: options.maxRequeues } : {}),
+      ...(reasons ? { reasons } : {}),
       now });
     if (!result.changed || options.dryRun) {
       if (result.changed) requeuedTotal += result.requeued.length;

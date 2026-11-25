@@ -157,4 +157,53 @@ describe("runRefreshRequeueAbandoned", () => {
     expect(trace.totals).toEqual({ cities: 2, requeued: 0, skipped: 1 });
     expect(store.objects.has("refresh/018/missing-city/coverage.json")).toBe(false);
   });
+
+  it("reasons filter requeues only matching lastReason and records it in trace and audit", async () => {
+    const store = new MemoryStore();
+    // alpha: abandoned on legacy quota; beta: abandoned on quality.
+    const alpha = {
+      ...emptyRefreshCoverage("alpha", clock("2026-11-20T00:00:00.000Z")),
+      documents: {
+        [sha("a")]: {
+          state: "abandoned" as const,
+          sourceId: "proces-verbaux-alpha",
+          representationKey: `raw/x/cas/${sha("a")}.pdf`,
+          firstSeenAt: "2026-11-20T00:00:00.000Z",
+          updatedAt: "2026-11-23T00:00:00.000Z",
+          failures: 3,
+          lastReason: "quota",
+        },
+      },
+    };
+    const beta = {
+      ...emptyRefreshCoverage("beta", clock("2026-11-20T00:00:00.000Z")),
+      documents: {
+        [sha("b")]: {
+          state: "abandoned" as const,
+          sourceId: "proces-verbaux-beta",
+          representationKey: `raw/x/cas/${sha("b")}.pdf`,
+          firstSeenAt: "2026-11-20T00:00:00.000Z",
+          updatedAt: "2026-11-23T00:00:00.000Z",
+          failures: 3,
+          lastReason: "quality",
+        },
+      },
+    };
+    await writeRefreshCoverage(store, alpha);
+    await writeRefreshCoverage(store, beta);
+
+    const trace = await runRefreshRequeueAbandoned(store, {
+      who: "op@test",
+      dryRun: false,
+      reasons: ["no-route", "quota"],
+      now: clock("2026-11-25T00:00:00.000Z"),
+    });
+
+    expect(trace.totals).toEqual({ cities: 2, requeued: 1, skipped: 0 });
+    expect(trace.filters?.reasons).toEqual(["no-route", "quota"]);
+    expect(trace.cities.find((c) => c.citySlug === "alpha")?.requeued).toEqual([sha("a")]);
+    expect(trace.cities.find((c) => c.citySlug === "beta")?.requeued).toEqual([]);
+    const audit = JSON.parse(new TextDecoder().decode(store.objects.get(trace.auditKey!)));
+    expect(audit.filters.reasons).toEqual(["no-route", "quota"]);
+  });
 });
