@@ -22,7 +22,7 @@ import { materializeRefreshCorpus, refreshCorpusInputHash, type RefreshCorpus,
 import { coverRefreshDocument, failRefreshDocument, planRefreshCoverage, readRefreshCoverage,
   summarizeRefreshCoverage, writeRefreshCoverage } from "./refresh-coverage.js";
 import { appendRefreshDocumentOutcome } from "./refresh-document-outcomes.js";
-import { refreshFallbackReason, type RefreshDocumentModels,
+import { isRefreshNoRoute, refreshFallbackReason, type RefreshDocumentModels,
   type RefreshModelReceipt } from "./refresh-model-policy.js";
 import { extractRefreshProfile, refreshSourceDocumentDate, type RefreshProfileChunk,
   type RefreshProfileContext } from "./refresh-profile.js";
@@ -478,14 +478,16 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
     await writeRefreshCoverage(options.store, ledger);
     return { ...result, coverage: summarizeRefreshCoverage(ledger), submissions };
   } catch (error) {
+    const reason = refreshDocumentFailureReason(error);
     const failed = failRefreshDocument(ledger, selected.sha,
-      refreshDocumentFailureReason(error), maxDocumentFailures, now);
+      reason, maxDocumentFailures, now);
     ledger = failed.ledger;
     // A failure to persist the ledger must not mask the failure being recorded.
     try { await writeRefreshCoverage(options.store, ledger); }
     catch { note("coverage-ledger-write-failed", { documentSha: selected.sha }); }
-    note(failed.abandoned ? "document-abandoned" : "document-failed",
-      { documentSha: selected.sha, failures: failed.failures, submissions });
+    note(failed.abandoned ? "document-abandoned"
+      : failed.deferred ? "document-deferred-unavailable" : "document-failed",
+    { documentSha: selected.sha, reason, failures: failed.failures, submissions });
     throw error;
   }
 
@@ -664,5 +666,6 @@ export async function recoverRefreshDocumentDates(store: ObjectStore,
 export function refreshDocumentFailureReason(error: unknown): string {
   const code = error && typeof error === "object" ? (error as { code?: unknown }).code : undefined;
   if (typeof code === "string" && /^REFRESH_[A-Z_]+$/.test(code)) return code.toLowerCase().replace(/_/g, "-");
+  if (isRefreshNoRoute(error)) return "no-route";
   return refreshFallbackReason(error);
 }

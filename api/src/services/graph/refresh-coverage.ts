@@ -241,11 +241,40 @@ export function coverRefreshDocument(
 }
 
 /**
- * Count one failed attempt, and set the document aside once it has failed too
- * often. A document refused for quality, carrying a terminal receipt or out of
- * call budget is otherwise the first pending document of its city FOR EVER: it
- * hides every older document behind it and pays primary plus fallback on every
- * rotation.
+ * Ledger failure reasons caused by model/account unavailability rather than a
+ * defect of the document. These never increment `failures` and never transition
+ * a document to `abandoned`.
+ */
+export const REFRESH_AVAILABILITY_REASONS: readonly string[] = [
+  "quota",
+  "no-route",
+  "cooldown",
+  "rate-limit",
+  "rate-limited",
+  "reauth-required",
+  "fallback-no-route",
+  "fallback-quota-exhausted",
+];
+
+const AVAILABILITY_REASON_SET = new Set<string>(REFRESH_AVAILABILITY_REASONS);
+
+/** True when `reason` denotes model unavailability (must not count toward abandonment). */
+export function isRefreshAvailabilityReason(reason: string | undefined): boolean {
+  if (typeof reason !== "string") return false;
+  const normalized = reason.startsWith("refresh-") ? reason.slice("refresh-".length) : reason;
+  return AVAILABILITY_REASON_SET.has(normalized);
+}
+
+/**
+ * Record one failed attempt, and set the document aside once it has failed too
+ * often on genuine document/extraction errors. A document refused for quality,
+ * empty output after retries, carrying a terminal receipt or out of call budget
+ * is otherwise the first pending document of its city FOR EVER: it hides every
+ * older document behind it and pays primary plus fallback on every rotation.
+ *
+ * Model unavailability (`quota`, `no-route`, `cooldown`, `reauth-required`,
+ * fallback halts) NEVER counts toward abandonment: the document stays `pending`
+ * with its failure counter unchanged and is retried once quota returns.
  */
 export function failRefreshDocument(
   ledger: RefreshCoverageLedger,
@@ -253,13 +282,27 @@ export function failRefreshDocument(
   reason: string,
   maxFailures: number,
   now: () => Date,
-): { ledger: RefreshCoverageLedger; abandoned: boolean; failures: number } {
-  const failures = (ledger.documents[sha]?.failures ?? 0) + 1;
+): { ledger: RefreshCoverageLedger; abandoned: boolean; failures: number; deferred: boolean } {
+  const existingFailures = ledger.documents[sha]?.failures ?? 0;
+  if (isRefreshAvailabilityReason(reason)) {
+    return {
+      ledger: patch(ledger, sha, (entry) => ({
+        ...entry,
+        state: entry.state === "covered" ? "covered" : "pending",
+        failures: entry.failures,
+        lastReason: reason,
+      }), now),
+      abandoned: false,
+      failures: existingFailures,
+      deferred: true,
+    };
+  }
+  const failures = existingFailures + 1;
   const abandoned = failures >= maxFailures;
   return {
     ledger: patch(ledger, sha, (entry) => ({ ...entry,
       state: abandoned ? "abandoned" : "pending", failures, lastReason: reason }), now),
-    abandoned, failures,
+    abandoned, failures, deferred: false,
   };
 }
 
@@ -303,6 +346,12 @@ export interface RequeueAbandonedRefreshOptions {
    * `DEFAULT_MAX_REQUEUES`.
    */
   readonly maxRequeues?: number;
+  /**
+   * Only requeue documents whose `lastReason` is in this allowlist (e.g.
+   * `REFRESH_AVAILABILITY_REASONS` or `["quota", "transport"]`).
+   * Absent means every `abandoned` document.
+   */
+  readonly reasons?: readonly string[];
   readonly now: () => Date;
 }
 
@@ -319,6 +368,7 @@ export function requeueAbandonedRefreshDocuments(
 ): { ledger: RefreshCoverageLedger; requeued: readonly string[]; exhausted: readonly string[]; changed: boolean } {
   const sinceMs = options.since?.getTime();
   const maxRequeues = options.maxRequeues ?? DEFAULT_MAX_REQUEUES;
+  const allowedReasons = options.reasons?.length ? new Set(options.reasons) : undefined;
   const nowMs = options.now().getTime();
   const oldestMs = options.maxAgeDays !== undefined ? nowMs - options.maxAgeDays * 86_400_000 : undefined;
   const documents: Record<string, RefreshCoverageEntry> = { ...ledger.documents };
@@ -326,6 +376,7 @@ export function requeueAbandonedRefreshDocuments(
   const eligible: [string, RefreshCoverageEntry][] = [];
   for (const [sha, entry] of Object.entries(ledger.documents)) {
     if (entry.state !== "abandoned") continue;
+    if (allowedReasons && (!entry.lastReason || !allowedReasons.has(entry.lastReason))) continue;
     if ((entry.requeues ?? 0) >= maxRequeues) {
       // Ceiling reached: never requeue again, and say so on the entry itself
       // (idempotent: an already-stamped entry is not rewritten).
