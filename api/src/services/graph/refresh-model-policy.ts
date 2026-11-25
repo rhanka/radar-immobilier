@@ -104,13 +104,15 @@ export function isRefreshNoRoute(error: unknown, seen = new Set<unknown>()): boo
 }
 
 /**
- * True when the failure is a model-side availability refusal (quota, rate limit,
- * RoutePlanError no-route / cooldown, reauth-required, fallback halt) rather than
- * a defect of the document itself. Availability refusals must never count toward
- * document abandonment.
+ * True when the failure is a model-side unavailability or empty-output failure
+ * (quota, rate limit, RoutePlanError no-route / cooldown, reauth-required,
+ * fallback halt, empty model output) rather than a defect of the document
+ * itself. These refusals must never count toward document abandonment.
  */
 export function isRefreshModelUnavailable(error: unknown): boolean {
-  return isRefreshNoRoute(error) || refreshFallbackReason(error) === "quota";
+  if (isRefreshNoRoute(error)) return true;
+  const reason = refreshFallbackReason(error);
+  return reason === "quota" || reason === "empty-output";
 }
 
 /** One instance per cycle. A fallback sticks to its document after any model switch. */

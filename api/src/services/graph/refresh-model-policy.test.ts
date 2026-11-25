@@ -278,8 +278,11 @@ describe("refresh model policy", () => {
       expect(isRefreshModelUnavailable(error)).toBe(true);
     }
 
+    const emptyOutput = Object.assign(new Error("empty"), { code: "REFRESH_EMPTY_OUTPUT" });
+    expect(refreshFallbackReason(emptyOutput)).toBe("empty-output");
+    expect(isRefreshModelUnavailable(emptyOutput)).toBe(true);
+
     const documentOrTransportCases: [unknown, string][] = [
-      [Object.assign(new Error("empty"), { code: "REFRESH_EMPTY_OUTPUT" }), "empty-output"],
       [new DOMException("timeout", "TimeoutError"), "timeout"],
       [Object.assign(new Error("down"), { statusCode: 503 }), "transport"],
       [new TypeError("fetch failed"), "transport"],

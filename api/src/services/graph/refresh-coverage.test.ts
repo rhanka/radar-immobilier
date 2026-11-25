@@ -164,7 +164,7 @@ describe("failRefreshDocument", () => {
     expect(deferred.ledger.documents[sha("a")]).toMatchObject({ state: "pending", failures: 1, lastReason: "no-route" });
   });
 
-  it.each(["quality", "empty-output", "refresh-empty-output", "transport"])(
+  it.each(["quality", "transport", "refresh-terminal-state"])(
     "still counts and abandons on real document failure (%s)",
     (reason) => {
       expect(isRefreshAvailabilityReason(reason)).toBe(false);
@@ -177,6 +177,22 @@ describe("failRefreshDocument", () => {
       expect(last?.abandoned).toBe(true);
       expect(last?.deferred).toBe(false);
       expect(ledger.documents[sha("a")]).toMatchObject({ state: "abandoned", failures: 3, lastReason: reason });
+    },
+  );
+
+  it.each(["empty-output", "refresh-empty-output"])(
+    "treats model empty-output (%s) as availability failure without abandoning",
+    (reason) => {
+      expect(isRefreshAvailabilityReason(reason)).toBe(true);
+      let ledger = plan(null, [candidate("a")], false).ledger;
+      for (let attempt = 0; attempt < 5; attempt += 1) {
+        const result = failRefreshDocument(ledger, sha("a"), reason, 3, clock("2026-11-25T00:00:00.000Z"));
+        ledger = result.ledger;
+        expect(result.abandoned).toBe(false);
+        expect(result.deferred).toBe(true);
+        expect(result.failures).toBe(0);
+      }
+      expect(ledger.documents[sha("a")]).toMatchObject({ state: "pending", failures: 0, lastReason: reason });
     },
   );
 });
@@ -307,6 +323,19 @@ describe("requeueAbandonedRefreshDocuments", () => {
     // Unmatched quality entry is neither requeued nor stamped requeue-ceiling-exceeded.
     expect(filtered.ledger.documents[sha("b")]).toEqual(legacy.documents[sha("b")]);
     expect(filtered.ledger.documents[sha("a")]).toEqual(legacy.documents[sha("a")]);
+  });
+
+  it("requeues legacy transport-abandoned documents explicitly via reasons: ['transport']", () => {
+    const before = abandonedLedger();
+    // a failed on "transport" (legacy misclassification of cooldown no-route), b failed on "quality".
+    const res = requeueAbandonedRefreshDocuments(before, {
+      reasons: ["transport"],
+      now: clock("2026-11-25T00:00:00.000Z"),
+    });
+    expect(res.changed).toBe(true);
+    expect(res.requeued).toEqual([sha("a")]);
+    expect(res.ledger.documents[sha("a")]).toMatchObject({ state: "pending", failures: 0, requeues: 1 });
+    expect(res.ledger.documents[sha("b")]).toEqual(before.documents[sha("b")]);
   });
 
   it("is idempotent: a second run changes nothing", () => {

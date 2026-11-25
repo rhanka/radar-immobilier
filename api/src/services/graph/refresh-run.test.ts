@@ -481,7 +481,7 @@ describe("refreshDocumentFailureReason and availability non-abandonment (#1177)"
     expect(receipts.every((receipt) => receipt.failureReason === "quota")).toBe(true);
   });
 
-  it("still abandons a document after maxDocumentFailures real empty-output failures", async () => {
+  it("keeps a document pending across repeated empty-output failures from Muse", async () => {
     const store = fakeGraphStore();
     const { docSha, acquire, profileContext } = await seedSingleDoc(store, "waterloo");
     const notes: string[] = [];
@@ -505,7 +505,7 @@ describe("refreshDocumentFailureReason and availability non-abandonment (#1177)"
       },
     });
 
-    for (let pass = 0; pass < 3; pass += 1) {
+    for (let pass = 0; pass < 4; pass += 1) {
       await expect(runPvRefresh({
         citySlug: "waterloo",
         store,
@@ -528,9 +528,63 @@ describe("refreshDocumentFailureReason and availability non-abandonment (#1177)"
 
     const { ledger } = await readRefreshCoverage(store, "waterloo");
     expect(ledger?.documents[docSha]).toMatchObject({
+      state: "pending",
+      failures: 0,
+      lastReason: "refresh-empty-output",
+    });
+    expect(notes.filter((note) => note === "document-abandoned")).toEqual([]);
+    expect(notes.filter((note) => note === "document-deferred-unavailable")).toHaveLength(4);
+  });
+
+  it("still abandons a document after maxDocumentFailures genuine document or quality failures", async () => {
+    const store = fakeGraphStore();
+    const { docSha, acquire, profileContext } = await seedSingleDoc(store, "delson");
+    const notes: string[] = [];
+
+    const makePolicy = () => createRefreshModelPolicy({
+      primary: { provider: "openai", model: "gpt-6.2-astra", effort: "low" },
+      fallback: { provider: "muse", model: "muse-wonder-1.0", effort: "low" },
+      forceFallback: false,
+      primaryQualityAttempts: 1,
+      timeoutMs: 1_000,
+      createClient(model) {
+        return {
+          mode: "mesh",
+          provider: model.provider,
+          model: model.model,
+          async generateJson(input) {
+            await input.validateResponse?.("{not-valid-json");
+            return { status: "completed", mode: "mesh", provider: model.provider, model: model.model, audit: {} };
+          },
+        };
+      },
+    });
+
+    for (let pass = 0; pass < 3; pass += 1) {
+      await expect(runPvRefresh({
+        citySlug: "delson",
+        store,
+        db: fakeDb(),
+        profileContext,
+        documentModels: makePolicy(),
+        onNote: (note) => notes.push(note),
+        extractPdf: async () => "Séance ordinaire\f",
+        profileHash: "sha256:profile",
+        registryHash: "sha256:registry",
+        packageVersion: "0.18.0",
+        modelPolicy: "test",
+        budgetLimit: 100,
+        maximumAttempts: 1,
+        maxOutputTokens: 512,
+        maxDocumentFailures: 3,
+        acquire,
+      })).rejects.toThrow();
+    }
+
+    const { ledger } = await readRefreshCoverage(store, "delson");
+    expect(ledger?.documents[docSha]).toMatchObject({
       state: "abandoned",
       failures: 3,
-      lastReason: "refresh-empty-output",
     });
     expect(notes).toContain("document-abandoned");
   });

@@ -241,9 +241,9 @@ export function coverRefreshDocument(
 }
 
 /**
- * Ledger failure reasons caused by model/account unavailability rather than a
- * defect of the document. These never increment `failures` and never transition
- * a document to `abandoned`.
+ * Ledger failure reasons caused by model/account unavailability or model-side
+ * empty responses rather than a defect of the document. These never increment
+ * `failures` and never transition a document to `abandoned`.
  */
 export const REFRESH_AVAILABILITY_REASONS: readonly string[] = [
   "quota",
@@ -254,6 +254,8 @@ export const REFRESH_AVAILABILITY_REASONS: readonly string[] = [
   "reauth-required",
   "fallback-no-route",
   "fallback-quota-exhausted",
+  "empty-output",
+  "refresh-empty-output",
 ];
 
 const AVAILABILITY_REASON_SET = new Set<string>(REFRESH_AVAILABILITY_REASONS);
@@ -262,19 +264,21 @@ const AVAILABILITY_REASON_SET = new Set<string>(REFRESH_AVAILABILITY_REASONS);
 export function isRefreshAvailabilityReason(reason: string | undefined): boolean {
   if (typeof reason !== "string") return false;
   const normalized = reason.startsWith("refresh-") ? reason.slice("refresh-".length) : reason;
-  return AVAILABILITY_REASON_SET.has(normalized);
+  return AVAILABILITY_REASON_SET.has(reason) || AVAILABILITY_REASON_SET.has(normalized);
 }
 
 /**
  * Record one failed attempt, and set the document aside once it has failed too
  * often on genuine document/extraction errors. A document refused for quality,
- * empty output after retries, carrying a terminal receipt or out of call budget
- * is otherwise the first pending document of its city FOR EVER: it hides every
- * older document behind it and pays primary plus fallback on every rotation.
+ * carrying a terminal receipt or failing PDF extraction is otherwise the first
+ * pending document of its city FOR EVER: it hides every older document behind
+ * it and pays primary plus fallback on every rotation.
  *
- * Model unavailability (`quota`, `no-route`, `cooldown`, `reauth-required`,
- * fallback halts) NEVER counts toward abandonment: the document stays `pending`
- * with its failure counter unchanged and is retried once quota returns.
+ * Model unavailability and model-side empty output (`quota`, `no-route`,
+ * `cooldown`, `reauth-required`, fallback halts, `empty-output` /
+ * `refresh-empty-output`) NEVER count toward abandonment: the document stays
+ * `pending` with its failure counter unchanged and is retried once models
+ * recover.
  */
 export function failRefreshDocument(
   ledger: RefreshCoverageLedger,
