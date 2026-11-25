@@ -666,7 +666,7 @@ guard-requeue:
 	@timeout $$(( $(REQUEUE_REQUEST_SECONDS) * 3 )) $(REQUEUE_K) --request-timeout=$(REQUEUE_REQUEST_SECONDS)s get serviceaccount radar-app -o name >/dev/null
 
 .PHONY: render-requeue-abandoned
-render-requeue-abandoned: ## Render the one-off requeue Job (REQUEUE_MODE=dry-run|apply|restore)
+render-requeue-abandoned: ## Render the one-off requeue Job (REQUEUE_MODE=dry-run|apply|restore[, REQUEUE_REASON=transport|availability,...])
 	@test "$(ENV)" = "preprod" -o "$(ENV)" = "prod" || { echo "ENV=preprod or ENV=prod is required" >&2; exit 1; }
 	@[[ "$(REQUEUE_IMAGE_REF)" =~ ^ghcr\.io/rhanka/radar-api@sha256:[0-9a-f]{64}$$ ]] \
 	  || { echo "REQUEUE_IMAGE_REF must be the radar API immutable digest" >&2; exit 1; }

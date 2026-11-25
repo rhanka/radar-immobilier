@@ -7,8 +7,12 @@ describe("parseRefreshRequeueArgs", () => {
   it("parses --reason list and expands the availability alias", () => {
     expect(parseRefreshRequeueArgs(["--dry-run", "--reason", "quota,no-route"]).reasons)
       .toEqual(["no-route", "quota"]);
+    expect(parseRefreshRequeueArgs(["--dry-run", "--reason", "transport"]).reasons)
+      .toEqual(["transport"]);
     expect(parseRefreshRequeueArgs(["--dry-run", "--availability-only"]).reasons)
       .toEqual([...REFRESH_AVAILABILITY_REASONS].sort());
+    expect(parseRefreshRequeueArgs(["--dry-run", "--availability-only", "--reason", "transport"]).reasons)
+      .toEqual([...new Set([...REFRESH_AVAILABILITY_REASONS, "transport"])].sort());
     expect(parseRefreshRequeueArgs(["--dry-run", "--reason", "availability,transport"]).reasons)
       .toEqual([...new Set([...REFRESH_AVAILABILITY_REASONS, "transport"])].sort());
   });

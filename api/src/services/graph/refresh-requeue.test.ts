@@ -206,4 +206,38 @@ describe("runRefreshRequeueAbandoned", () => {
     const audit = JSON.parse(new TextDecoder().decode(store.objects.get(trace.auditKey!)));
     expect(audit.filters.reasons).toEqual(["no-route", "quota"]);
   });
+
+  it("requeues legacy transport-abandoned documents with reasons: ['transport'] while keeping quality abandoned", async () => {
+    const store = await seededStore();
+    // seededStore puts alpha & beta abandoned on "transport"; add delta abandoned on "quality".
+    let delta = emptyRefreshCoverage("delta", clock("2026-11-20T00:00:00.000Z"));
+    delta = {
+      ...delta,
+      documents: {
+        [sha("d")]: {
+          state: "abandoned",
+          sourceId: "proces-verbaux-delta",
+          representationKey: `raw/x/cas/${sha("d")}.pdf`,
+          firstSeenAt: "2026-11-20T00:00:00.000Z",
+          updatedAt: "2026-11-23T00:00:00.000Z",
+          failures: 3,
+          lastReason: "quality",
+        },
+      },
+    };
+    await writeRefreshCoverage(store, delta);
+
+    const trace = await runRefreshRequeueAbandoned(store, {
+      who: "op@test",
+      dryRun: false,
+      reasons: ["transport"],
+      now: clock("2026-11-25T00:00:00.000Z"),
+    });
+
+    expect(trace.filters?.reasons).toEqual(["transport"]);
+    expect(trace.totals).toEqual({ cities: 4, requeued: 2, skipped: 1 });
+    expect(trace.cities.find((c) => c.citySlug === "alpha")?.requeued).toEqual([sha("a")]);
+    expect(trace.cities.find((c) => c.citySlug === "beta")?.requeued).toEqual([sha("b")]);
+    expect(trace.cities.find((c) => c.citySlug === "delta")?.requeued).toEqual([]);
+  });
 });

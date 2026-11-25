@@ -628,7 +628,9 @@ var REFRESH_AVAILABILITY_REASONS = [
   "rate-limited",
   "reauth-required",
   "fallback-no-route",
-  "fallback-quota-exhausted"
+  "fallback-quota-exhausted",
+  "empty-output",
+  "refresh-empty-output"
 ];
 var AVAILABILITY_REASON_SET = new Set(REFRESH_AVAILABILITY_REASONS);
 var REQUEUE_CEILING_REASON = "requeue-ceiling-exceeded";

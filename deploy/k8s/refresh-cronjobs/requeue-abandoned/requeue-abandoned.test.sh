@@ -50,6 +50,12 @@ if render prod apply "$T/prod-reason.yaml" REQUEUE_OPERATOR=conductor REQUEUE_SI
   ok "prod apply render with REQUEUE_REASON: passes --reason and parses"
 else bad "prod apply render with REQUEUE_REASON ($(cat "$T/out"))"; fi
 
+if render prod apply "$T/prod-transport.yaml" REQUEUE_OPERATOR=conductor REQUEUE_SINCE=2026-11-21 REQUEUE_REASON=transport \
+  && grep -q 'args="--since 2026-11-21 --reason transport --operator conductor"' "$T/prod-transport.yaml" \
+  && parses "$T/prod-transport.yaml" prod-transport; then
+  ok "prod apply render with REQUEUE_REASON=transport: passes --reason transport and parses"
+else bad "prod apply render with REQUEUE_REASON=transport ($(cat "$T/out"))"; fi
+
 if render prod restore "$T/restore-reason.yaml" REQUEUE_OPERATOR=conductor REQUEUE_RESTORE_STAMP=2026-11-09T00-00-00-000Z REQUEUE_REASON=quota 2>/dev/null; then
   bad "restore with REQUEUE_REASON accepted"
 else grep -q "REQUEUE_REASON cannot be combined with restore" "$T/out" \

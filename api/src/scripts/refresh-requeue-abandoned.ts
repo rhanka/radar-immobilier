@@ -2,9 +2,17 @@
  * refresh-requeue-abandoned — operator requeue of `abandoned` coverage entries.
  *
  * Usage:
- *   node dist/scripts/refresh-requeue-abandoned.js --dry-run [--since <date>] [--city <slug>]...
- *   node dist/scripts/refresh-requeue-abandoned.js --operator <who> [--since <date>] [--city <slug>]...
+ *   node dist/scripts/refresh-requeue-abandoned.js --dry-run [--since <date>] [--reason <list>] [--availability-only] [--city <slug>]...
+ *   node dist/scripts/refresh-requeue-abandoned.js --operator <who> [--since <date>] [--reason <list>] [--availability-only] [--city <slug>]...
  *   node dist/scripts/refresh-requeue-abandoned.js --operator <who> --restore <stamp> [--city <slug>]...
+ *
+ * Filtering by `lastReason`:
+ *   - `--availability-only` (or `--reason availability`) matches all model
+ *     availability reasons (`REFRESH_AVAILABILITY_REASONS`).
+ *   - `--reason transport` (or `--reason availability,transport`) explicitly
+ *     targets documents abandoned before #1177, when `RoutePlanError no-route`
+ *     after cooldown was misclassified as `lastReason: "transport"`. Documents
+ *     abandoned on `quality` or other reasons stay untouched.
  *
  * Restore procedure: a real requeue first copies each original registry to
  * `refresh/018/_backup/requeue-abandoned-<stamp>/<city>/coverage.json` (the
