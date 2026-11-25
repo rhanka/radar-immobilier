@@ -44,6 +44,23 @@ if render prod apply "$T/prod.yaml" REQUEUE_OPERATOR=conductor REQUEUE_SINCE=202
   ok "prod apply render: namespace, since, operator, prod S3 secret, parses"
 else bad "prod apply render ($(cat "$T/out"))"; fi
 
+if render prod apply "$T/prod-reason.yaml" REQUEUE_OPERATOR=conductor REQUEUE_SINCE=2026-11-22 REQUEUE_REASON=availability,transport \
+  && grep -q 'args="--since 2026-11-22 --reason availability,transport --operator conductor"' "$T/prod-reason.yaml" \
+  && parses "$T/prod-reason.yaml" prod-reason; then
+  ok "prod apply render with REQUEUE_REASON: passes --reason and parses"
+else bad "prod apply render with REQUEUE_REASON ($(cat "$T/out"))"; fi
+
+if render prod apply "$T/prod-transport.yaml" REQUEUE_OPERATOR=conductor REQUEUE_SINCE=2026-11-21 REQUEUE_REASON=transport \
+  && grep -q 'args="--since 2026-11-21 --reason transport --operator conductor"' "$T/prod-transport.yaml" \
+  && parses "$T/prod-transport.yaml" prod-transport; then
+  ok "prod apply render with REQUEUE_REASON=transport: passes --reason transport and parses"
+else bad "prod apply render with REQUEUE_REASON=transport ($(cat "$T/out"))"; fi
+
+if render prod restore "$T/restore-reason.yaml" REQUEUE_OPERATOR=conductor REQUEUE_RESTORE_STAMP=2026-11-09T00-00-00-000Z REQUEUE_REASON=quota 2>/dev/null; then
+  bad "restore with REQUEUE_REASON accepted"
+else grep -q "REQUEUE_REASON cannot be combined with restore" "$T/out" \
+  && ok "restore with REQUEUE_REASON refused" || bad "restore reason refusal: wrong message ($(cat "$T/out"))"; fi
+
 if render prod restore "$T/restore.yaml" REQUEUE_OPERATOR=conductor REQUEUE_RESTORE_STAMP=2026-11-09T00-00-00-000Z REQUEUE_CITY=beta \
   && grep -q 'args="--restore 2026-11-09T00-00-00-000Z --city beta --operator conductor"' "$T/restore.yaml" \
   && grep -q 'flock -n /keyring/runtime/.refresh.lock' "$T/restore.yaml" \

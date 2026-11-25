@@ -74,23 +74,45 @@ export interface RefreshDocumentModels {
 /** Consecutive documents refused on quota before a seat is declared exhausted. */
 export const REFRESH_QUOTA_THRESHOLD = 3;
 
+const AVAILABILITY_REASON_PATTERN = /quota|rate.limit|no_active_account|no-active-account|usage_limit|cooldown|reauth|reenroll|re-enroll|fallback-no-route|fallback-quota-exhausted/i;
+
 /** Inspect only for classification; never emit upstream messages or response bodies. */
-export function refreshFallbackReason(error: unknown): RefreshFallbackReason {
-  const record = error && typeof error === "object" ? error as Record<string, unknown> : {};
-  const tokens = [record["code"], record["reason"], record["message"]].filter((v) => typeof v === "string").join(" ");
+export function refreshFallbackReason(error: unknown, seen = new Set<unknown>()): RefreshFallbackReason {
+  if (!error || typeof error !== "object" || seen.has(error)) return "transport";
+  seen.add(error);
+  const record = error as Record<string, unknown>;
+  const diagnostic = record["diagnostic"] && typeof record["diagnostic"] === "object"
+    ? record["diagnostic"] as Record<string, unknown> : {};
+  const tokens = [record["code"], record["reason"], record["message"], diagnostic["code"], diagnostic["reason"]]
+    .filter((v) => typeof v === "string").join(" ");
   if (record["statusCode"] === 429 || record["status"] === 429
-    || /quota|rate.limit|no_active_account|no-active-account|usage_limit/i.test(tokens)) return "quota";
+    || record["code"] === "no-route"
+    || AVAILABILITY_REASON_PATTERN.test(tokens)) return "quota";
   if (record["name"] === "TimeoutError" || record["name"] === "AbortError") return "timeout";
   if (record["code"] === "REFRESH_EMPTY_OUTPUT") return "empty-output";
-  if (record["cause"]) return refreshFallbackReason(record["cause"]);
+  if (record["cause"]) return refreshFallbackReason(record["cause"], seen);
   return "transport";
 }
 
 /** True when the mesh found no eligible account at all, on the error or its cause chain. */
-export function isRefreshNoRoute(error: unknown): boolean {
-  const record = error && typeof error === "object" ? error as Record<string, unknown> : {};
+export function isRefreshNoRoute(error: unknown, seen = new Set<unknown>()): boolean {
+  if (!error || typeof error !== "object" || seen.has(error)) return false;
+  seen.add(error);
+  const record = error as Record<string, unknown>;
   if (record["code"] === "no-route") return true;
-  return record["cause"] ? isRefreshNoRoute(record["cause"]) : false;
+  return record["cause"] ? isRefreshNoRoute(record["cause"], seen) : false;
+}
+
+/**
+ * True when the failure is a model-side unavailability or empty-output failure
+ * (quota, rate limit, RoutePlanError no-route / cooldown, reauth-required,
+ * fallback halt, empty model output) rather than a defect of the document
+ * itself. These refusals must never count toward document abandonment.
+ */
+export function isRefreshModelUnavailable(error: unknown): boolean {
+  if (isRefreshNoRoute(error)) return true;
+  const reason = refreshFallbackReason(error);
+  return reason === "quota" || reason === "empty-output";
 }
 
 /** One instance per cycle. A fallback sticks to its document after any model switch. */
@@ -310,8 +332,9 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
           }
           const fallback = await attempt(options.fallback, "fallback", selected.reason);
           if (fallback.failed) {
-            consecutiveFallbackQuota = fallback.reason === "quota" ? consecutiveFallbackQuota + 1 : 0;
-            consecutiveFallbackNoRoute = isRefreshNoRoute(fallback.failure) ? consecutiveFallbackNoRoute + 1 : 0;
+            const noRoute = isRefreshNoRoute(fallback.failure);
+            consecutiveFallbackNoRoute = noRoute ? consecutiveFallbackNoRoute + 1 : 0;
+            consecutiveFallbackQuota = !noRoute && fallback.reason === "quota" ? consecutiveFallbackQuota + 1 : 0;
             throw fallback.failure;
           }
           consecutiveFallbackQuota = 0;

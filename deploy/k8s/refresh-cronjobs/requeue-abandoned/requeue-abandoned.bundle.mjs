@@ -181,6 +181,21 @@ var envSchema = z.object({
   STRICT_RECEIVER_MCP_IMAGE: optStr(z.string().min(1)),
   STRICT_RECEIVER_RECEIPT_API_IMAGE: optStr(z.string().min(1)),
   STRICT_RECEIVER_RECEIPT_MCP_IMAGE: optStr(z.string().min(1)),
+  // ── Ops recipients port v1 (L4, Sentropic port contract) ───────────────
+  // `GET /api/v1/ops/recipients?target=...` serves the platform alert
+  // service. All three values come from the deployment environment; none
+  // is hardcoded in the route. The static opaque bearer is held by
+  // Sentropic and mirrored in the immo Secret; absent bearer or target
+  // keeps the route closed (503, fail-closed).
+  /** This instance's alerting target: `immo-prod` or `immo-preprod`. */
+  OPS_TARGET: z.preprocess(
+    (v) => v === "" ? void 0 : v,
+    z.enum(["immo-prod", "immo-preprod"]).optional()
+  ),
+  /** Slug of the reference workspace whose managers are recipients. */
+  OPS_REFERENCE_WORKSPACE_SLUG: optStr(z.string().min(1)),
+  /** Static opaque bearer (Secret radar-ops-recipients, key OPS_RECIPIENTS_BEARER). */
+  OPS_RECIPIENTS_BEARER: optStr(z.string().min(1)),
   // ── Scaleway Transactional Email (TEM) — emails d'invitation ────────────
   // L'egress SMTP est BLOQUÉ au niveau plateforme sur ce cluster (BR-37b), donc
   // le relais smtp.tem.scw.cloud:587 ne délivre jamais. On envoie via l'API HTTP
@@ -262,11 +277,25 @@ async function readRefreshCoverage(store, citySlug) {
 async function writeRefreshCoverage(store, ledger) {
   await store.put(refreshCoverageKey(ledger.citySlug), JSON.stringify(ledger), "application/json");
 }
+var REFRESH_AVAILABILITY_REASONS = [
+  "quota",
+  "no-route",
+  "cooldown",
+  "rate-limit",
+  "rate-limited",
+  "reauth-required",
+  "fallback-no-route",
+  "fallback-quota-exhausted",
+  "empty-output",
+  "refresh-empty-output"
+];
+var AVAILABILITY_REASON_SET = new Set(REFRESH_AVAILABILITY_REASONS);
 var REQUEUE_CEILING_REASON = "requeue-ceiling-exceeded";
 var DEFAULT_MAX_REQUEUES = 2;
 function requeueAbandonedRefreshDocuments(ledger, options) {
   const sinceMs = options.since?.getTime();
   const maxRequeues = options.maxRequeues ?? DEFAULT_MAX_REQUEUES;
+  const allowedReasons = options.reasons?.length ? new Set(options.reasons) : void 0;
   const nowMs = options.now().getTime();
   const oldestMs = options.maxAgeDays !== void 0 ? nowMs - options.maxAgeDays * 864e5 : void 0;
   const documents = { ...ledger.documents };
@@ -274,6 +303,7 @@ function requeueAbandonedRefreshDocuments(ledger, options) {
   const eligible = [];
   for (const [sha, entry] of Object.entries(ledger.documents)) {
     if (entry.state !== "abandoned") continue;
+    if (allowedReasons && (!entry.lastReason || !allowedReasons.has(entry.lastReason))) continue;
     if ((entry.requeues ?? 0) >= maxRequeues) {
       if (entry.lastReason !== REQUEUE_CEILING_REASON) {
         documents[sha] = { ...entry, lastReason: REQUEUE_CEILING_REASON };
@@ -350,6 +380,7 @@ async function runRefreshRequeueAbandoned(store, options) {
   const cityTraces = [];
   let requeuedTotal = 0;
   let skipped = 0;
+  const reasons = options.reasons?.length ? [...new Set(options.reasons)].sort() : void 0;
   const snapshot = (complete) => ({
     schemaVersion: 1,
     kind: "refresh-requeue-abandoned",
@@ -366,7 +397,8 @@ async function runRefreshRequeueAbandoned(store, options) {
       ...options.maxAgeDays !== void 0 ? { maxAgeDays: options.maxAgeDays } : {},
       ...options.maxPerRun !== void 0 ? { maxPerRun: options.maxPerRun } : {},
       ...options.maxPerCity !== void 0 ? { maxPerCity: options.maxPerCity } : {},
-      ...options.maxRequeues !== void 0 ? { maxRequeues: options.maxRequeues } : {}
+      ...options.maxRequeues !== void 0 ? { maxRequeues: options.maxRequeues } : {},
+      ...reasons ? { reasons } : {}
     }
   });
   const persist = async (complete) => {
@@ -395,6 +427,7 @@ async function runRefreshRequeueAbandoned(store, options) {
       ...options.maxAgeDays !== void 0 ? { maxAgeDays: options.maxAgeDays } : {},
       ...perCity !== void 0 ? { maxPerCity: perCity } : {},
       ...options.maxRequeues !== void 0 ? { maxRequeues: options.maxRequeues } : {},
+      ...reasons ? { reasons } : {},
       now
     });
     if (!result.changed || options.dryRun) {
@@ -579,9 +612,10 @@ var S3ObjectStore = class {
     const conditions = options.ifMatch === null ? { IfNoneMatch: "*" } : { IfMatch: options.ifMatch };
     return this.putUnchecked(key, body, contentType, conditions);
   }
-  async get(key) {
+  async get(key, options) {
     const res = await this.client.send(
-      new GetObjectCommand({ Bucket: this.bucket, Key: key })
+      new GetObjectCommand({ Bucket: this.bucket, Key: key }),
+      options?.signal ? { abortSignal: options.signal } : void 0
     );
     if (!res.Body) throw new Error(`empty body for ${key}`);
     return res.Body.transformToByteArray();
@@ -611,10 +645,11 @@ var S3ObjectStore = class {
     if (!res.Body) throw new Error(`empty body for ${key}`);
     return { key, body: await res.Body.transformToByteArray(), etag: res.ETag ?? null };
   }
-  async head(key) {
+  async head(key, options) {
     try {
       const res = await this.client.send(
-        new HeadObjectCommand({ Bucket: this.bucket, Key: key })
+        new HeadObjectCommand({ Bucket: this.bucket, Key: key }),
+        options?.signal ? { abortSignal: options.signal } : void 0
       );
       return {
         key,
@@ -683,12 +718,30 @@ function getScrapeObjectStore(config) {
 }
 
 // api/src/scripts/refresh-requeue-abandoned.ts
+var REASON_TOKEN = /^[a-z0-9][a-z0-9_-]*$/;
+function expandRequeueReasons(raw) {
+  const expanded = /* @__PURE__ */ new Set();
+  for (const item of raw) {
+    for (const part of item.split(",")) {
+      const token = part.trim();
+      if (!token) continue;
+      if (!REASON_TOKEN.test(token)) throw new Error(`invalid reason: ${token}`);
+      if (token === "availability") {
+        for (const reason of REFRESH_AVAILABILITY_REASONS) expanded.add(reason);
+      } else {
+        expanded.add(token);
+      }
+    }
+  }
+  return [...expanded].sort();
+}
 function parseRefreshRequeueArgs(argv) {
   let dryRun = false;
   let since;
   let operator;
   let restore;
   const cities = [];
+  const rawReasons = [];
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     const next = () => {
@@ -705,15 +758,24 @@ function parseRefreshRequeueArgs(argv) {
       since = parsed;
     } else if (arg === "--city") {
       for (const slug of next().split(",")) if (slug.trim()) cities.push(slug.trim());
+    } else if (arg === "--reason") {
+      rawReasons.push(next());
+    } else if (arg === "--availability-only") {
+      rawReasons.push("availability");
     } else if (arg === "--operator") operator = next();
     else if (arg === "--restore") restore = next();
     else throw new Error(`unknown argument: ${arg}`);
   }
   if (restore !== void 0 && since) throw new Error("--restore cannot be combined with --since");
+  if (restore !== void 0 && rawReasons.length > 0) {
+    throw new Error("--restore cannot be combined with --reason or --availability-only");
+  }
+  const reasons = rawReasons.length > 0 ? expandRequeueReasons(rawReasons) : void 0;
   return {
     dryRun,
     ...since ? { since } : {},
     cities,
+    ...reasons?.length ? { reasons } : {},
     ...operator ? { operator } : {},
     ...restore ? { restore } : {}
   };
@@ -742,7 +804,8 @@ async function main() {
     who: who || "dry-run",
     dryRun: args.dryRun,
     ...args.since ? { since: args.since } : {},
-    ...args.cities.length ? { cities: args.cities } : {}
+    ...args.cities.length ? { cities: args.cities } : {},
+    ...args.reasons?.length ? { reasons: args.reasons } : {}
   });
   if (args.dryRun) console.log(formatDryRunCounts(trace));
   console.log(JSON.stringify(trace));
@@ -755,6 +818,7 @@ if (isMain) {
   });
 }
 export {
+  expandRequeueReasons,
   formatDryRunCounts,
   parseRefreshRequeueArgs
 };

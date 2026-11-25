@@ -5,8 +5,10 @@ import {
   coverRefreshDocument,
   emptyRefreshCoverage,
   failRefreshDocument,
+  isRefreshAvailabilityReason,
   planRefreshCoverage,
   readRefreshCoverage,
+  REFRESH_AVAILABILITY_REASONS,
   refreshCoverageKey,
   requeueAbandonedRefreshDocuments,
   summarizeRefreshCoverage,
@@ -128,11 +130,71 @@ describe("failRefreshDocument", () => {
     }
     const third = failRefreshDocument(ledger, sha("a"), "quality", 3, clock("2026-09-20T00:00:00.000Z"));
     expect(third.abandoned).toBe(true);
+    expect(third.deferred).toBe(false);
     expect(third.ledger.documents[sha("a")]).toMatchObject({ state: "abandoned", lastReason: "quality" });
     // And the next document of the city finally gets its turn.
     expect(plan(third.ledger, [candidate("a"), candidate("b")], false).workItems.map((i) => i.sha))
       .toEqual([sha("b")]);
   });
+
+  it.each(REFRESH_AVAILABILITY_REASONS)(
+    "never counts or abandons a document on model availability reason (%s)",
+    (reason) => {
+      let ledger = plan(null, [candidate("a"), candidate("b")], false).ledger;
+      for (let attempt = 0; attempt < 5; attempt += 1) {
+        const result = failRefreshDocument(ledger, sha("a"), reason, 3, clock("2026-11-22T18:00:00.000Z"));
+        ledger = result.ledger;
+        expect(result.abandoned).toBe(false);
+        expect(result.deferred).toBe(true);
+        expect(result.failures).toBe(0);
+      }
+      expect(ledger.documents[sha("a")]).toMatchObject({ state: "pending", failures: 0, lastReason: reason });
+      expect(summarizeRefreshCoverage(ledger)).toEqual({ pending: 2, covered: 0, abandoned: 0 });
+      expect(plan(ledger, [candidate("a"), candidate("b")], false).workItems[0]!.sha).toBe(sha("a"));
+    },
+  );
+
+  it("preserves prior real failure count when an availability outage happens in between", () => {
+    let ledger = plan(null, [candidate("a")], false).ledger;
+    ledger = failRefreshDocument(ledger, sha("a"), "quality", 3, clock("2026-11-20T00:00:00.000Z")).ledger;
+    const deferred = failRefreshDocument(ledger, sha("a"), "no-route", 3, clock("2026-11-22T00:00:00.000Z"));
+    expect(deferred.abandoned).toBe(false);
+    expect(deferred.deferred).toBe(true);
+    expect(deferred.failures).toBe(1);
+    expect(deferred.ledger.documents[sha("a")]).toMatchObject({ state: "pending", failures: 1, lastReason: "no-route" });
+  });
+
+  it.each(["quality", "transport", "refresh-terminal-state"])(
+    "still counts and abandons on real document failure (%s)",
+    (reason) => {
+      expect(isRefreshAvailabilityReason(reason)).toBe(false);
+      let ledger = plan(null, [candidate("a")], false).ledger;
+      let last;
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        last = failRefreshDocument(ledger, sha("a"), reason, 3, clock("2026-11-22T00:00:00.000Z"));
+        ledger = last.ledger;
+      }
+      expect(last?.abandoned).toBe(true);
+      expect(last?.deferred).toBe(false);
+      expect(ledger.documents[sha("a")]).toMatchObject({ state: "abandoned", failures: 3, lastReason: reason });
+    },
+  );
+
+  it.each(["empty-output", "refresh-empty-output"])(
+    "treats model empty-output (%s) as availability failure without abandoning",
+    (reason) => {
+      expect(isRefreshAvailabilityReason(reason)).toBe(true);
+      let ledger = plan(null, [candidate("a")], false).ledger;
+      for (let attempt = 0; attempt < 5; attempt += 1) {
+        const result = failRefreshDocument(ledger, sha("a"), reason, 3, clock("2026-11-25T00:00:00.000Z"));
+        ledger = result.ledger;
+        expect(result.abandoned).toBe(false);
+        expect(result.deferred).toBe(true);
+        expect(result.failures).toBe(0);
+      }
+      expect(ledger.documents[sha("a")]).toMatchObject({ state: "pending", failures: 0, lastReason: reason });
+    },
+  );
 });
 
 describe("coverRefreshDocument", () => {
@@ -214,7 +276,7 @@ describe("requeueAbandonedRefreshDocuments", () => {
     for (let round = 0; round < 2; round += 1) {
       ledger = requeueAbandonedRefreshDocuments(ledger, { now: clock("2026-11-09T00:00:00.000Z") }).ledger;
       for (let attempt = 0; attempt < 3; attempt += 1) {
-        ledger = failRefreshDocument(ledger, sha("a"), "quota", 3, clock("2026-11-10T00:00:00.000Z")).ledger;
+        ledger = failRefreshDocument(ledger, sha("a"), "quality", 3, clock("2026-11-10T00:00:00.000Z")).ledger;
       }
     }
     const result = requeueAbandonedRefreshDocuments(ledger, { now: clock("2026-11-11T00:00:00.000Z") });
@@ -225,6 +287,55 @@ describe("requeueAbandonedRefreshDocuments", () => {
     const again = requeueAbandonedRefreshDocuments(result.ledger, { now: clock("2026-11-12T00:00:00.000Z") });
     expect(again.changed).toBe(false);
     expect(again.exhausted).toEqual([]);
+  });
+
+  it("honours reasons filter: requeues only matching lastReason and leaves others untouched", () => {
+    const base = abandonedLedger();
+    // Simulate a legacy ledger entry already abandoned on quota (pre-#1177)
+    // alongside an entry abandoned on quality (with exhausted requeues) and transport.
+    const legacy = {
+      ...base,
+      documents: {
+        ...base.documents,
+        [sha("d")]: {
+          state: "abandoned" as const,
+          sourceId: "proces-verbaux-city",
+          representationKey: `raw/proces-verbaux-city/cas/${sha("d")}.pdf`,
+          firstSeenAt: "2026-11-20T00:00:00.000Z",
+          updatedAt: "2026-11-23T00:00:00.000Z",
+          failures: 3,
+          lastReason: "quota",
+        },
+        [sha("b")]: {
+          ...base.documents[sha("b")]!,
+          requeues: 2,
+        },
+      },
+    };
+    const filtered = requeueAbandonedRefreshDocuments(legacy, {
+      reasons: REFRESH_AVAILABILITY_REASONS,
+      now: clock("2026-11-25T00:00:00.000Z"),
+    });
+    expect(filtered.changed).toBe(true);
+    expect(filtered.requeued).toEqual([sha("d")]);
+    expect(filtered.exhausted).toEqual([]);
+    expect(filtered.ledger.documents[sha("d")]).toMatchObject({ state: "pending", failures: 0, requeues: 1 });
+    // Unmatched quality entry is neither requeued nor stamped requeue-ceiling-exceeded.
+    expect(filtered.ledger.documents[sha("b")]).toEqual(legacy.documents[sha("b")]);
+    expect(filtered.ledger.documents[sha("a")]).toEqual(legacy.documents[sha("a")]);
+  });
+
+  it("requeues legacy transport-abandoned documents explicitly via reasons: ['transport']", () => {
+    const before = abandonedLedger();
+    // a failed on "transport" (legacy misclassification of cooldown no-route), b failed on "quality".
+    const res = requeueAbandonedRefreshDocuments(before, {
+      reasons: ["transport"],
+      now: clock("2026-11-25T00:00:00.000Z"),
+    });
+    expect(res.changed).toBe(true);
+    expect(res.requeued).toEqual([sha("a")]);
+    expect(res.ledger.documents[sha("a")]).toMatchObject({ state: "pending", failures: 0, requeues: 1 });
+    expect(res.ledger.documents[sha("b")]).toEqual(before.documents[sha("b")]);
   });
 
   it("is idempotent: a second run changes nothing", () => {

@@ -2,9 +2,17 @@
  * refresh-requeue-abandoned — operator requeue of `abandoned` coverage entries.
  *
  * Usage:
- *   node dist/scripts/refresh-requeue-abandoned.js --dry-run [--since <date>] [--city <slug>]...
- *   node dist/scripts/refresh-requeue-abandoned.js --operator <who> [--since <date>] [--city <slug>]...
+ *   node dist/scripts/refresh-requeue-abandoned.js --dry-run [--since <date>] [--reason <list>] [--availability-only] [--city <slug>]...
+ *   node dist/scripts/refresh-requeue-abandoned.js --operator <who> [--since <date>] [--reason <list>] [--availability-only] [--city <slug>]...
  *   node dist/scripts/refresh-requeue-abandoned.js --operator <who> --restore <stamp> [--city <slug>]...
+ *
+ * Filtering by `lastReason`:
+ *   - `--availability-only` (or `--reason availability`) matches all model
+ *     availability reasons (`REFRESH_AVAILABILITY_REASONS`).
+ *   - `--reason transport` (or `--reason availability,transport`) explicitly
+ *     targets documents abandoned before #1177, when `RoutePlanError no-route`
+ *     after cooldown was misclassified as `lastReason: "transport"`. Documents
+ *     abandoned on `quality` or other reasons stay untouched.
  *
  * Restore procedure: a real requeue first copies each original registry to
  * `refresh/018/_backup/requeue-abandoned-<stamp>/<city>/coverage.json` (the
@@ -28,16 +36,41 @@
  */
 
 import { loadConfig } from "../config.js";
+import { REFRESH_AVAILABILITY_REASONS } from "../services/graph/refresh-coverage.js";
 import {
   runRefreshRequeueAbandoned, runRefreshRequeueRestore,
   type RefreshRequeueTrace,
 } from "../services/graph/refresh-requeue.js";
 import { getScrapeObjectStore } from "../storage/s3-object-store.js";
 
+const REASON_TOKEN = /^[a-z0-9][a-z0-9_-]*$/;
+
+/**
+ * Expand CLI/env reason tokens, turning the `availability` alias into the full
+ * set of model-availability reasons. Returns sorted unique tokens.
+ */
+export function expandRequeueReasons(raw: readonly string[]): string[] {
+  const expanded = new Set<string>();
+  for (const item of raw) {
+    for (const part of item.split(",")) {
+      const token = part.trim();
+      if (!token) continue;
+      if (!REASON_TOKEN.test(token)) throw new Error(`invalid reason: ${token}`);
+      if (token === "availability") {
+        for (const reason of REFRESH_AVAILABILITY_REASONS) expanded.add(reason);
+      } else {
+        expanded.add(token);
+      }
+    }
+  }
+  return [...expanded].sort();
+}
+
 export interface RefreshRequeueArgs {
   readonly dryRun: boolean;
   readonly since?: Date;
   readonly cities: string[];
+  readonly reasons?: readonly string[];
   readonly operator?: string;
   readonly restore?: string;
 }
@@ -48,6 +81,7 @@ export function parseRefreshRequeueArgs(argv: readonly string[]): RefreshRequeue
   let operator: string | undefined;
   let restore: string | undefined;
   const cities: string[] = [];
+  const rawReasons: string[] = [];
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index]!;
     const next = (): string => {
@@ -64,12 +98,21 @@ export function parseRefreshRequeueArgs(argv: readonly string[]): RefreshRequeue
       since = parsed;
     } else if (arg === "--city") {
       for (const slug of next().split(",")) if (slug.trim()) cities.push(slug.trim());
+    } else if (arg === "--reason") {
+      rawReasons.push(next());
+    } else if (arg === "--availability-only") {
+      rawReasons.push("availability");
     } else if (arg === "--operator") operator = next();
     else if (arg === "--restore") restore = next();
     else throw new Error(`unknown argument: ${arg}`);
   }
   if (restore !== undefined && since) throw new Error("--restore cannot be combined with --since");
+  if (restore !== undefined && rawReasons.length > 0) {
+    throw new Error("--restore cannot be combined with --reason or --availability-only");
+  }
+  const reasons = rawReasons.length > 0 ? expandRequeueReasons(rawReasons) : undefined;
   return { dryRun, ...(since ? { since } : {}), cities,
+    ...(reasons?.length ? { reasons } : {}),
     ...(operator ? { operator } : {}), ...(restore ? { restore } : {}) };
 }
 
@@ -97,6 +140,7 @@ async function main(): Promise<void> {
     who: who || "dry-run", dryRun: args.dryRun,
     ...(args.since ? { since: args.since } : {}),
     ...(args.cities.length ? { cities: args.cities } : {}),
+    ...(args.reasons?.length ? { reasons: args.reasons } : {}),
   });
   if (args.dryRun) console.log(formatDryRunCounts(trace));
   console.log(JSON.stringify(trace));

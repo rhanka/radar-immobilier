@@ -32,11 +32,12 @@
 import { EncryptedFileKeyring } from "@sentropic/llm-mesh-refresh/node";
 
 import { loadConfig } from "../config.js";
-import { createRefreshMesh } from "../services/graph/refresh-mesh.js";
+import { createRefreshMesh, isRefreshProvider } from "../services/graph/refresh-mesh.js";
 import type { RefreshModel } from "../services/graph/refresh-model-policy.js";
 import { runRefreshRequeueAbandoned } from "../services/graph/refresh-requeue.js";
 import { probeRefreshSeat, type RefreshSeatProbeResult } from "../services/graph/refresh-seat-probe.js";
 import { getScrapeObjectStore } from "../storage/s3-object-store.js";
+import { expandRequeueReasons } from "./refresh-requeue-abandoned.js";
 
 export interface RefreshRequeueRecurrentConfig {
   readonly maxAgeDays: number;
@@ -44,6 +45,7 @@ export interface RefreshRequeueRecurrentConfig {
   readonly maxPerCity: number;
   readonly maxRequeues: number;
   readonly dryRun: boolean;
+  readonly reasons?: readonly string[];
 }
 
 function positiveEnv(env: NodeJS.ProcessEnv, name: string, fallback: number, maximum: number): number {
@@ -55,12 +57,15 @@ function positiveEnv(env: NodeJS.ProcessEnv, name: string, fallback: number, max
 }
 
 export function recurrentConfigFromEnv(env: NodeJS.ProcessEnv): RefreshRequeueRecurrentConfig {
+  const rawReasons = env.REQUEUE_REASONS?.trim();
+  const reasons = rawReasons ? expandRequeueReasons([rawReasons]) : undefined;
   return {
     maxAgeDays: positiveEnv(env, "REQUEUE_MAX_AGE_DAYS", 90, 3650),
     maxPerRun: positiveEnv(env, "REQUEUE_MAX_PER_RUN", 50, 100_000),
     maxPerCity: positiveEnv(env, "REQUEUE_MAX_PER_CITY", 5, 10_000),
     maxRequeues: positiveEnv(env, "REQUEUE_MAX_REQUEUES", 2, 100),
     dryRun: env.REQUEUE_DRY_RUN === "1",
+    ...(reasons?.length ? { reasons } : {}),
   };
 }
 
@@ -72,12 +77,16 @@ function required(env: NodeJS.ProcessEnv, name: string): string {
 
 function selectedModel(env: NodeJS.ProcessEnv, prefix: string): RefreshModel {
   const provider = required(env, `${prefix}_PROVIDER`);
-  if (provider !== "openai" && provider !== "gemini") throw new Error(`${prefix}_PROVIDER must be openai or gemini`);
+  if (!isRefreshProvider(provider)) throw new Error(`${prefix}_PROVIDER must be openai, gemini or muse`);
   const effort = required(env, `${prefix}_REASONING_EFFORT`);
   if (!["minimal", "low", "medium", "high", "xhigh"].includes(effort)) {
     throw new Error(`${prefix}_REASONING_EFFORT is invalid`);
   }
   return { provider, model: required(env, `${prefix}_MODEL`), effort };
+}
+
+export function recurrentRoutesFromEnv(env: NodeJS.ProcessEnv): readonly RefreshModel[] {
+  return [selectedModel(env, "REFRESH"), selectedModel(env, "REFRESH_FALLBACK")];
 }
 
 /** Structured skip line: a dry seat is logged, never thrown. */
@@ -89,7 +98,7 @@ export function seatSkipLine(seat: RefreshSeatProbeResult): string {
 async function main(): Promise<void> {
   const env = process.env;
   const config = recurrentConfigFromEnv(env);
-  const routes = [selectedModel(env, "REFRESH"), selectedModel(env, "REFRESH_FALLBACK")];
+  const routes = recurrentRoutesFromEnv(env);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(new Error("seat probe timeout")), 120_000);
   timeout.unref();
@@ -119,6 +128,7 @@ async function main(): Promise<void> {
     who: "cronjob:radar-refresh-requeue-abandoned", dryRun: config.dryRun,
     maxAgeDays: config.maxAgeDays, maxPerRun: config.maxPerRun,
     maxPerCity: config.maxPerCity, maxRequeues: config.maxRequeues,
+    ...(config.reasons?.length ? { reasons: config.reasons } : {}),
   });
   console.log(JSON.stringify({ kind: "refresh-requeue-recurrent", decision: "requeue", seat, trace }));
 }

@@ -184,6 +184,21 @@ var envSchema = z.object({
   STRICT_RECEIVER_MCP_IMAGE: optStr(z.string().min(1)),
   STRICT_RECEIVER_RECEIPT_API_IMAGE: optStr(z.string().min(1)),
   STRICT_RECEIVER_RECEIPT_MCP_IMAGE: optStr(z.string().min(1)),
+  // ── Ops recipients port v1 (L4, Sentropic port contract) ───────────────
+  // `GET /api/v1/ops/recipients?target=...` serves the platform alert
+  // service. All three values come from the deployment environment; none
+  // is hardcoded in the route. The static opaque bearer is held by
+  // Sentropic and mirrored in the immo Secret; absent bearer or target
+  // keeps the route closed (503, fail-closed).
+  /** This instance's alerting target: `immo-prod` or `immo-preprod`. */
+  OPS_TARGET: z.preprocess(
+    (v) => v === "" ? void 0 : v,
+    z.enum(["immo-prod", "immo-preprod"]).optional()
+  ),
+  /** Slug of the reference workspace whose managers are recipients. */
+  OPS_REFERENCE_WORKSPACE_SLUG: optStr(z.string().min(1)),
+  /** Static opaque bearer (Secret radar-ops-recipients, key OPS_RECIPIENTS_BEARER). */
+  OPS_RECIPIENTS_BEARER: optStr(z.string().min(1)),
   // ── Scaleway Transactional Email (TEM) — emails d'invitation ────────────
   // L'egress SMTP est BLOQUÉ au niveau plateforme sur ce cluster (BR-37b), donc
   // le relais smtp.tem.scw.cloud:587 ne délivre jamais. On envoie via l'API HTTP
@@ -242,22 +257,273 @@ function loadConfig(env = process.env) {
   return envSchema.parse(env);
 }
 
-// api/src/services/graph/refresh-mesh.ts
+// api/src/services/graph/refresh-routed-mesh.ts
+import { randomUUID } from "node:crypto";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
 import {
-  createGraphifyMesh,
-  meshTextJsonClient
-} from "@sentropic/engram/llm-mesh";
+  createDefaultProviderAdapters,
+  createLlmMesh,
+  normalizeProviderError,
+  StaticProviderRegistry
+} from "@sentropic/llm-mesh-refresh";
+var requireAuthResolver = (request) => {
+  throw new Error(
+    `Refresh mesh: no authResolver configured for provider '${request.providerId}'.`
+  );
+};
+var routeIntents = /* @__PURE__ */ new Set(["coding", "general", "reasoning", "fast"]);
+function asRecord(value) {
+  return value !== null && typeof value === "object" ? value : void 0;
+}
+function hasAbortShape(value, seen = /* @__PURE__ */ new Set()) {
+  if (!value || typeof value !== "object" && typeof value !== "function") return false;
+  if (seen.has(value)) return false;
+  seen.add(value);
+  const record = value;
+  if (record["name"] === "AbortError") return true;
+  return hasAbortShape(record["cause"], seen) || hasAbortShape(record["reason"], seen);
+}
+function classifyRouteFailure(error, signal) {
+  const code = error.code?.toLowerCase();
+  const statusCode = error.statusCode;
+  const carriesProviderEvidence = statusCode !== void 0 || code !== void 0;
+  if (hasAbortShape(error.cause) || signal?.aborted && !carriesProviderEvidence) {
+    return { reason: "cancelled", retryable: false, healthScope: "route" };
+  }
+  if (error.retryReason === "network" || code === "enotfound" || code === "econnreset" || code === "econnrefused" || code === "fetch_error" || code?.includes("network")) {
+    return { reason: "network-unavailable", retryable: true, healthScope: "transport" };
+  }
+  if (error.retryReason === "server_error" || error.retryReason === "overloaded" || typeof statusCode === "number" && statusCode >= 500 && statusCode <= 599) {
+    return { reason: "provider-5xx", retryable: true, healthScope: "provider-model" };
+  }
+  if (error.retryReason === "timeout" || statusCode === 408 || code?.includes("timeout") || code === "etimedout") {
+    return { reason: "provider-5xx", retryable: true, healthScope: "provider-model" };
+  }
+  if (error.retryReason === "rate_limit" || statusCode === 429 || code?.includes("rate_limit")) {
+    return {
+      reason: "rate-limited",
+      retryable: true,
+      ...error.retryAfterMs !== void 0 ? { retryAfterMs: error.retryAfterMs } : {},
+      healthScope: "account"
+    };
+  }
+  if (code?.includes("reauth") || code?.includes("reenroll") || code?.includes("re-enroll")) {
+    return { reason: "reauth-required", retryable: false, healthScope: "account" };
+  }
+  if (statusCode === 401 || statusCode === 403 || code === "unauthorized" || code === "forbidden" || code === "invalid_api_key") {
+    return { reason: "auth-failed", retryable: false, healthScope: "account" };
+  }
+  return { reason: "invalid-request", retryable: false, healthScope: "route" };
+}
+function requestedModel(request) {
+  const record = request;
+  if (typeof record["modelId"] === "string" && record["modelId"]) return record["modelId"];
+  const model = record["model"];
+  if (model && typeof model === "object") return String(model["modelId"]);
+  if (typeof model === "string") {
+    const separator = model.indexOf(":");
+    return separator >= 0 ? model.slice(separator + 1) : model;
+  }
+  throw new Error("Refresh mesh: a requested model is required. Pass request.modelId or request.model.");
+}
+function routePlanInput(request) {
+  const metadata = request["metadata"];
+  const rawIntent = metadata?.attributes?.["intent"];
+  const rawAffinityKey = metadata?.attributes?.["affinityKey"];
+  const intent = typeof rawIntent === "string" && routeIntents.has(rawIntent) ? rawIntent : void 0;
+  const workspaceId = metadata?.workspaceId?.trim() || void 0;
+  const affinityKey = typeof rawAffinityKey === "string" && rawAffinityKey.trim() ? rawAffinityKey.trim() : void 0;
+  return {
+    requestedModel: requestedModel(request),
+    ...intent ? { intent } : {},
+    ...workspaceId ? { workspaceId } : {},
+    ...affinityKey ? { affinityKey } : {}
+  };
+}
+function requestProviderId(request, plan, candidateRef) {
+  const planned = plan.diagnostics.find((diagnostic) => diagnostic.candidateRef === candidateRef)?.actualProviderId;
+  if (planned) return planned;
+  const record = request;
+  if (typeof record["providerId"] === "string" && record["providerId"]) return record["providerId"];
+  const model = record["model"];
+  if (model && typeof model === "object") return String(model["providerId"]);
+  if (typeof model === "string") {
+    const [providerId] = model.split(":", 1);
+    if (providerId) return providerId;
+  }
+  return "local";
+}
+function isNormalizedProviderError(error) {
+  const record = asRecord(error);
+  return Boolean(record && typeof record["providerId"] === "string" && typeof record["message"] === "string" && typeof record["retryable"] === "boolean");
+}
+function routeAttemptUsage(response) {
+  const { inputTokens, outputTokens } = response.usage ?? {};
+  if (inputTokens === void 0 || outputTokens === void 0) return void 0;
+  return { inputTokens, outputTokens, estimated: false };
+}
+var MeshResponseValidationFailure = class extends Error {
+  constructor(validationError, usage) {
+    super("Refresh mesh response validation failed", { cause: validationError });
+    this.validationError = validationError;
+    this.usage = usage;
+    this.name = "MeshResponseValidationFailure";
+  }
+};
+var MeshRequestCancellation = class extends Error {
+  constructor(reason) {
+    super("Refresh mesh request was cancelled", { cause: reason });
+    this.reason = reason;
+    this.name = "MeshRequestCancellation";
+  }
+};
+var invalidResponseClassification = {
+  reason: "invalid-request",
+  retryable: true,
+  healthScope: "route"
+};
+function abortReason(signal) {
+  if (signal.reason !== void 0) return signal.reason;
+  return Object.assign(new Error("The operation was aborted"), { name: "AbortError" });
+}
+function createRefreshRoutedMesh(options) {
+  const overrides = options.adapters ?? {};
+  const merged = createDefaultProviderAdapters().map(
+    (adapter) => overrides[adapter.provider.providerId] ?? adapter
+  );
+  for (const [providerId, adapter] of Object.entries(overrides)) {
+    if (!adapter) continue;
+    if (!merged.some((existing) => existing.provider.providerId === providerId)) merged.push(adapter);
+  }
+  const runtime = createLlmMesh({
+    registry: new StaticProviderRegistry(merged),
+    authResolver: options.authResolver ?? requireAuthResolver,
+    ...options.hooks ? { hooks: options.hooks } : {}
+  });
+  const planner = options.createRoutePlanner(runtime);
+  const generateRouted = async (request, validateResponse) => {
+    if (request.signal?.aborted) throw abortReason(request.signal);
+    const plan = await planner.plan(options.routingSubject, routePlanInput(request));
+    const metadata = request["metadata"];
+    const requestId = metadata?.correlationId?.trim() || randomUUID();
+    for (const [attemptIndex, candidateRef] of plan.candidateRefs.entries()) {
+      const attempt = await planner.prepareAttempt(options.routingSubject, plan.planRef, candidateRef, requestId, attemptIndex);
+      if (request.signal?.aborted) {
+        await attempt.releaseCancelled();
+        throw abortReason(request.signal);
+      }
+      let completionStarted = false;
+      try {
+        const response = await attempt.generate(request);
+        if (request.signal?.aborted) throw new MeshRequestCancellation(abortReason(request.signal));
+        const usage = routeAttemptUsage(response);
+        if (validateResponse) {
+          try {
+            await validateResponse(response);
+          } catch (error) {
+            if (request.signal?.aborted) throw new MeshRequestCancellation(abortReason(request.signal));
+            throw new MeshResponseValidationFailure(error, usage);
+          }
+        }
+        if (request.signal?.aborted) throw new MeshRequestCancellation(abortReason(request.signal));
+        completionStarted = true;
+        await attempt.complete(usage);
+        return response;
+      } catch (error) {
+        if (completionStarted) throw error;
+        if (error instanceof MeshRequestCancellation) {
+          await attempt.releaseCancelled();
+          throw error.reason;
+        }
+        const validationFailure = error instanceof MeshResponseValidationFailure ? error : void 0;
+        const classification = validationFailure ? invalidResponseClassification : classifyRouteFailure(
+          isNormalizedProviderError(error) ? error : normalizeProviderError(requestProviderId(request, plan, candidateRef), error),
+          request.signal
+        );
+        if (classification.reason === "cancelled") {
+          await attempt.releaseCancelled();
+          throw request.signal?.aborted ? abortReason(request.signal) : error;
+        } else if (validationFailure) {
+          await attempt.recordOutcome(classification, validationFailure.usage);
+        } else {
+          await attempt.recordOutcome(classification);
+        }
+        const hasMoreCandidates = attemptIndex + 1 < plan.candidateRefs.length;
+        if (!classification.retryable || !hasMoreCandidates) throw validationFailure?.validationError ?? error;
+      }
+    }
+    throw new Error("Refresh mesh: route planner returned no candidates");
+  };
+  return {
+    listProviders: runtime.listProviders,
+    listModels: runtime.listModels,
+    generate: (request) => generateRouted(request),
+    generateValidated: (request, validateResponse) => generateRouted(request, validateResponse),
+    async stream() {
+      throw new Error("Refresh mesh: routed streaming is not supported yet");
+    }
+  };
+}
+function refreshTextJsonClient(mesh, options) {
+  if (!options?.provider) throw new Error("refreshTextJsonClient: an explicit provider is required.");
+  if (!options.model) throw new Error("refreshTextJsonClient: an explicit model is required.");
+  const { provider, model } = options;
+  const client = {
+    mode: "mesh",
+    provider,
+    model,
+    async generateJson(input) {
+      const request = {
+        providerId: provider,
+        modelId: model,
+        messages: [
+          {
+            role: "system",
+            content: "You are Engram's JSON extraction backend. Return only valid JSON matching the requested schema. Do not include Markdown prose outside the JSON object."
+          },
+          { role: "user", content: [`Schema: ${input.schema}`, "", input.prompt].join("\n") }
+        ],
+        responseFormat: { type: "json-object" },
+        ...input.maxOutputTokens !== void 0 ? { maxOutputTokens: input.maxOutputTokens } : {}
+      };
+      const response = input.validateResponse ? await mesh.generateValidated(request, (generated) => input.validateResponse(generated.text ?? "")) : await mesh.generate(request);
+      const text = response.text ?? "";
+      if (input.outputPath) {
+        mkdirSync(dirname(input.outputPath), { recursive: true });
+        writeFileSync(input.outputPath, text, "utf-8");
+      }
+      return {
+        status: "completed",
+        provider,
+        mode: "mesh",
+        model,
+        ...input.outputPath ? { outputPath: input.outputPath } : {},
+        audit: { mesh: true, providerId: provider, modelId: model }
+      };
+    }
+  };
+  return client;
+}
+
+// api/src/services/graph/refresh-mesh.ts
 import {
   CloudCodeRuntimeClient,
   CodexRuntimeClient,
   DEFAULT_ROUTE_POLICY,
   GeminiAdapter,
   InMemoryRoutePolicyProfiles,
+  MuseAdapter,
+  MuseRuntimeClient,
   OpenAIAdapter
 } from "@sentropic/llm-mesh-refresh";
 import {
   createLlmMeshFacade
 } from "@sentropic/llm-mesh-refresh/facade";
+var REFRESH_PROVIDERS = ["openai", "gemini", "muse"];
+function isRefreshProvider(value) {
+  return REFRESH_PROVIDERS.includes(value);
+}
 function createRefreshRoutePolicyProfiles(maximumAttempts) {
   const profiles = new InMemoryRoutePolicyProfiles([{
     name: "refresh-run-budget",
@@ -273,6 +539,9 @@ function bindRefreshFetchSignal(fetchFunction, signal) {
     ...init,
     signal: init?.signal ? anySignal([init.signal, signal]) : signal
   }));
+}
+function refreshRouteReasoning(provider, reasoning) {
+  return provider === "muse" ? void 0 : reasoning;
 }
 function bindRefreshAbortSignal(mesh, signal, reasoning) {
   return {
@@ -293,11 +562,16 @@ function createRefreshMesh(options) {
     configResolver: options.configResolver,
     ...options.keyring ? { keyring: options.keyring } : {}
   });
-  const mesh = createGraphifyMesh({
+  const mesh = createRefreshRoutedMesh({
     routingSubject: options.routingSubject,
     adapters: {
       gemini: new GeminiAdapter({
         client: options.geminiClient ?? new CloudCodeRuntimeClient(bindRefreshFetchSignal(fetch, options.signal))
+      }),
+      muse: new MuseAdapter({
+        client: options.museClient ?? new MuseRuntimeClient({
+          fetch: bindRefreshFetchSignal(fetch, options.signal)
+        })
       }),
       openai: new OpenAIAdapter({
         client: options.openAiClient ?? new CodexRuntimeClient({
@@ -309,10 +583,14 @@ function createRefreshMesh(options) {
       profiles: createRefreshRoutePolicyProfiles(options.maximumAttempts)
     })
   });
-  const abortable = bindRefreshAbortSignal(mesh, options.signal, options.reasoning);
+  const abortable = bindRefreshAbortSignal(
+    mesh,
+    options.signal,
+    refreshRouteReasoning(options.provider, options.reasoning)
+  );
   return {
     mesh: abortable,
-    textClient: meshTextJsonClient(abortable, {
+    textClient: refreshTextJsonClient(abortable, {
       provider: options.provider,
       model: options.model
     })
@@ -342,11 +620,25 @@ async function readRefreshCoverage(store, citySlug2) {
 async function writeRefreshCoverage(store, ledger) {
   await store.put(refreshCoverageKey(ledger.citySlug), JSON.stringify(ledger), "application/json");
 }
+var REFRESH_AVAILABILITY_REASONS = [
+  "quota",
+  "no-route",
+  "cooldown",
+  "rate-limit",
+  "rate-limited",
+  "reauth-required",
+  "fallback-no-route",
+  "fallback-quota-exhausted",
+  "empty-output",
+  "refresh-empty-output"
+];
+var AVAILABILITY_REASON_SET = new Set(REFRESH_AVAILABILITY_REASONS);
 var REQUEUE_CEILING_REASON = "requeue-ceiling-exceeded";
 var DEFAULT_MAX_REQUEUES = 2;
 function requeueAbandonedRefreshDocuments(ledger, options) {
   const sinceMs = options.since?.getTime();
   const maxRequeues = options.maxRequeues ?? DEFAULT_MAX_REQUEUES;
+  const allowedReasons = options.reasons?.length ? new Set(options.reasons) : void 0;
   const nowMs = options.now().getTime();
   const oldestMs = options.maxAgeDays !== void 0 ? nowMs - options.maxAgeDays * 864e5 : void 0;
   const documents = { ...ledger.documents };
@@ -354,6 +646,7 @@ function requeueAbandonedRefreshDocuments(ledger, options) {
   const eligible = [];
   for (const [sha, entry] of Object.entries(ledger.documents)) {
     if (entry.state !== "abandoned") continue;
+    if (allowedReasons && (!entry.lastReason || !allowedReasons.has(entry.lastReason))) continue;
     if ((entry.requeues ?? 0) >= maxRequeues) {
       if (entry.lastReason !== REQUEUE_CEILING_REASON) {
         documents[sha] = { ...entry, lastReason: REQUEUE_CEILING_REASON };
@@ -408,6 +701,9 @@ function refreshRequeueBackupKey(when, citySlug2) {
   return `${refreshRequeueBackupPrefix(when)}/${citySlug2}/coverage.json`;
 }
 var COVERAGE_KEY = /^refresh\/018\/([^/]+)\/coverage\.json$/;
+var BACKUP_KEY = /^refresh\/018\/_backup\/requeue-abandoned-[^/]+\/([^/]+)\/coverage\.json$/;
+var STAMP = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
+var CITY_SLUG = /^[a-z0-9][a-z0-9-]*$/;
 async function discoverRefreshCoverageCities(store) {
   if (!store.list) throw new Error("object store does not support listing coverage registries");
   const keys = await store.list("refresh/018/");
@@ -427,6 +723,7 @@ async function runRefreshRequeueAbandoned(store, options) {
   const cityTraces = [];
   let requeuedTotal = 0;
   let skipped = 0;
+  const reasons = options.reasons?.length ? [...new Set(options.reasons)].sort() : void 0;
   const snapshot = (complete) => ({
     schemaVersion: 1,
     kind: "refresh-requeue-abandoned",
@@ -443,7 +740,8 @@ async function runRefreshRequeueAbandoned(store, options) {
       ...options.maxAgeDays !== void 0 ? { maxAgeDays: options.maxAgeDays } : {},
       ...options.maxPerRun !== void 0 ? { maxPerRun: options.maxPerRun } : {},
       ...options.maxPerCity !== void 0 ? { maxPerCity: options.maxPerCity } : {},
-      ...options.maxRequeues !== void 0 ? { maxRequeues: options.maxRequeues } : {}
+      ...options.maxRequeues !== void 0 ? { maxRequeues: options.maxRequeues } : {},
+      ...reasons ? { reasons } : {}
     }
   });
   const persist = async (complete) => {
@@ -472,6 +770,7 @@ async function runRefreshRequeueAbandoned(store, options) {
       ...options.maxAgeDays !== void 0 ? { maxAgeDays: options.maxAgeDays } : {},
       ...perCity !== void 0 ? { maxPerCity: perCity } : {},
       ...options.maxRequeues !== void 0 ? { maxRequeues: options.maxRequeues } : {},
+      ...reasons ? { reasons } : {},
       now
     });
     if (!result.changed || options.dryRun) {
@@ -509,10 +808,83 @@ async function runRefreshRequeueAbandoned(store, options) {
   if (auditKey) await store.put(auditKey, JSON.stringify(trace), "application/json");
   return trace;
 }
+function refreshRequeueRestoreAuditKey(when) {
+  return `refresh/018/_audit/requeue-restore-${refreshRequeueStamp(when)}.json`;
+}
+async function discoverRefreshRequeueBackupCities(store, stamp) {
+  if (!store.list) throw new Error("object store does not support listing coverage backups");
+  const keys = await store.list(`refresh/018/_backup/requeue-abandoned-${stamp}/`);
+  const cities = /* @__PURE__ */ new Set();
+  for (const key of keys) {
+    const match = BACKUP_KEY.exec(key);
+    if (match) cities.add(match[1]);
+  }
+  return [...cities].sort();
+}
+async function runRefreshRequeueRestore(store, options) {
+  if (!STAMP.test(options.stamp) || options.stamp.includes("..")) {
+    throw new Error(`invalid restore stamp: ${options.stamp}`);
+  }
+  const now = options.now ?? (() => /* @__PURE__ */ new Date());
+  const when = now();
+  let cities;
+  if (options.cities?.length) {
+    cities = [...new Set(options.cities)].sort();
+    for (const city of cities) {
+      if (!CITY_SLUG.test(city)) throw new Error(`invalid city slug: ${city}`);
+    }
+  } else {
+    cities = await discoverRefreshRequeueBackupCities(store, options.stamp);
+  }
+  const auditKey = options.dryRun ? null : refreshRequeueRestoreAuditKey(when);
+  const cityTraces = [];
+  let restored = 0;
+  let skipped = 0;
+  const snapshot = (complete) => ({
+    schemaVersion: 1,
+    kind: "refresh-requeue-restore",
+    who: options.who,
+    when: when.toISOString(),
+    dryRun: options.dryRun,
+    stamp: options.stamp,
+    cities: [...cityTraces],
+    totals: { cities: cities.length, restored, skipped },
+    auditKey,
+    complete
+  });
+  const persist = async (complete) => {
+    if (auditKey) await store.put(auditKey, JSON.stringify(snapshot(complete)), "application/json");
+  };
+  for (const citySlug2 of cities) {
+    const backupKey = `refresh/018/_backup/requeue-abandoned-${options.stamp}/${citySlug2}/coverage.json`;
+    if (!await store.head(backupKey)) {
+      skipped += 1;
+      cityTraces.push({ citySlug: citySlug2, backupKey, phase: "skipped", skipped: "absent" });
+      await persist(false);
+      continue;
+    }
+    if (options.dryRun) {
+      restored += 1;
+      cityTraces.push({ citySlug: citySlug2, backupKey, phase: "done" });
+      continue;
+    }
+    const intent = { citySlug: citySlug2, backupKey, phase: "intent" };
+    cityTraces.push(intent);
+    await persist(false);
+    const bytes = await store.get(backupKey);
+    await store.put(refreshCoverageKey(citySlug2), bytes, "application/json");
+    restored += 1;
+    cityTraces[cityTraces.indexOf(intent)] = { ...intent, phase: "done" };
+    await persist(false);
+  }
+  const trace = snapshot(true);
+  if (auditKey) await store.put(auditKey, JSON.stringify(trace), "application/json");
+  return trace;
+}
 
 // api/src/services/graph/refresh-model-policy.ts
 import { mkdir, writeFile as writeFile2 } from "node:fs/promises";
-import { dirname as dirname3 } from "node:path";
+import { dirname as dirname4 } from "node:path";
 
 // api/src/services/graph/refresh-corpus.ts
 import { createHash as createHash2 } from "node:crypto";
@@ -3012,55 +3384,68 @@ var dossier3 = OpportunityDossier.parse({
   }
 });
 
+// packages/radar-domain/src/vivier/filtre-cube.ts
+import { z as z33 } from "zod";
+var vivierFiltreCubeSchema = z33.record(
+  z33.string().regex(/^[01]{5}$/),
+  z33.number().int().nonnegative()
+);
+var vivierFiltreCubesByClassementSchema = z33.object({
+  pertinent: vivierFiltreCubeSchema,
+  a_surveiller: vivierFiltreCubeSchema,
+  non_classe: vivierFiltreCubeSchema,
+  ecarte: vivierFiltreCubeSchema
+}).strict();
+
 // packages/radar-sources/src/RawDocument.ts
 import { createHash } from "node:crypto";
-import { z as z35 } from "zod";
+import { z as z36 } from "zod";
 
 // packages/radar-sources/src/DocumentDate.ts
-import { z as z34 } from "zod";
+import { z as z35 } from "zod";
 
 // packages/radar-sources/src/sources/proces-verbaux-parser.ts
-import { z as z33 } from "zod";
-var PvDocType = z33.enum(["proces-verbal", "ordre-du-jour", "document"]);
-var PvIndexItem = z33.object({
+import { z as z34 } from "zod";
+var PvDocType = z34.enum(["proces-verbal", "ordre-du-jour", "document"]);
+var PvIndexItem = z34.object({
   /** Title / file name of the PV as displayed in the index. */
-  title: z33.string().min(1),
+  title: z34.string().min(1),
   /** Absolute URL of the PV document (HTML or PDF). */
   url: contractUrl(),
   /**
    * ISO date when parseable from the title/context, else NON_DISPONIBLE.
    * Full dates yield "YYYY-MM-DD"; month-year-only labels yield "YYYY-MM".
    */
-  dateIso: z33.string().min(1),
+  dateIso: z34.string().min(1),
   /** Human-readable date label from the index, verbatim. */
-  dateLabel: z33.string().min(1),
+  dateLabel: z34.string().min(1),
   /** Whether the link is a procès-verbal, an ordre-du-jour, or undetermined. */
   docType: PvDocType
 });
-var PvHabitationSignal = z33.object({
+var PvHabitationSignal = z34.object({
   /**
    * Where the segment sits in the document structure:
    *  - "point"    — a numbered agenda point ("5.9", "37").
    *  - "annexe"   — an appended annexe section ("L", "A-1").
    *  - "document" — unlabelled body text before the first locator.
    */
-  locator: z33.enum(["point", "annexe", "document"]),
+  locator: z34.enum(["point", "annexe", "document"]),
   /** Verbatim locator label: the point number ("5.9"), the annexe letter ("L"), or "" for document-level. */
-  reference: z33.string(),
+  reference: z34.string(),
   /** ~240-char verbatim excerpt centred on the first habitation keyword hit in this segment. */
-  citation: z33.string(),
+  citation: z34.string(),
   /** Distinct habitation/densification keywords matched verbatim in this segment. */
-  keywords: z33.array(z33.string()),
+  keywords: z34.array(z34.string()),
   /** Inline "annexe X" cross-references found inside this segment (e.g. point 5.9 → ["L"]). */
-  annexeRefs: z33.array(z33.string())
+  annexeRefs: z34.array(z34.string())
 });
-var ZonageChangeDetection = z33.object({
+var ZonageChangeDetection = z34.object({
   /**
    * True when the text contains an "avis de motion" (or closely related wording
    * such as "avis de motion a été donné", "il donne avis de motion") in the
    * context of a règlement.
    */
-  avisDeMotion: z33.boolean(),
+  avisDeMotion: z34.boolean(),
   /**
    * Règlement numbers that are themselves the OBJECT of an avis de motion for a
    * zonage change (new/proposed règlement numbers).  Only populated when the
@@ -3076,31 +3461,31 @@ var ZonageChangeDetection = z33.object({
    *
    * Verbatim, no fabrication.
    */
-  reglementNumbers: z33.array(z33.string()),
+  reglementNumbers: z34.array(z34.string()),
   /**
    * True only when ALL THREE conditions hold (high-precision rule):
    *   1. `avisDeMotion` is true.
    *   2. At least one règlement number is present.
    *   3. The matching context explicitly names a change to the zonage / zoning.
    */
-  changementZonage: z33.boolean(),
+  changementZonage: z34.boolean(),
   /**
    * Excerpt(s) of the verbatim PV text that triggered each positive detection,
    * limited to ~200 chars around the match for traceability.  Empty when
    * nothing fired.
    */
-  excerpts: z33.array(z33.string()),
+  excerpts: z34.array(z34.string()),
   /**
    * Zone codes mentioned in the same paragraph as the detected motion
    * (e.g. "H-521", "H-609").  Best-effort, may be empty.
    */
-  zoneRefs: z33.array(z33.string()),
+  zoneRefs: z34.array(z34.string()),
   /**
    * Free-text hint about the density type authorised, extracted verbatim when
    * the text mentions multi-family or densification keywords in the context of
    * the motion.  Null when absent (anti-invention).
    */
-  densiteAutorisee: z33.string().nullable(),
+  densiteAutorisee: z34.string().nullable(),
   /**
    * FULL-DOCUMENT scan of every habitation/densification segment (numbered
    * points + annexes), produced by `scanHabitationSignals`. This does NOT stop
@@ -3112,7 +3497,7 @@ var ZonageChangeDetection = z33.object({
    * Backward-compatible: defaults to `[]` so any object parsed without the field
    * still validates.
    */
-  habitationSegments: z33.array(PvHabitationSignal).default([])
+  habitationSegments: z34.array(PvHabitationSignal).default([])
 });
 function pad2(n) {
   return n.padStart(2, "0");
@@ -3169,63 +3554,63 @@ var HABITATION_KEYWORDS_RE = new RegExp(
 function isDocumentDateValue(value) {
   return /^\d{4}-(0[1-9]|1[0-2])$/.test(value) || isRealIsoDate(value) || isRealIsoDate(value.slice(0, 10)) && contractDateTime({ offset: true }).safeParse(value).success;
 }
-var evidence2 = z34.object({
-  page: z34.number().int().positive().optional(),
-  excerpt: z34.string().min(1).optional(),
-  field: z34.string().min(1).optional()
+var evidence2 = z35.object({
+  page: z35.number().int().positive().optional(),
+  excerpt: z35.string().min(1).optional(),
+  field: z35.string().min(1).optional()
 }).strict();
-var DocumentDateSchema = z34.discriminatedUnion("status", [
-  z34.object({
-    status: z34.literal("known"),
-    value: z34.string().refine(isDocumentDateValue),
-    precision: z34.enum(["day", "month"]),
-    kind: z34.enum(["session", "publication", "document"]),
-    method: z34.enum(["listing", "header", "manifest", "signal-llm"]),
+var DocumentDateSchema = z35.discriminatedUnion("status", [
+  z35.object({
+    status: z35.literal("known"),
+    value: z35.string().refine(isDocumentDateValue),
+    precision: z35.enum(["day", "month"]),
+    kind: z35.enum(["session", "publication", "document"]),
+    method: z35.enum(["listing", "header", "manifest", "signal-llm"]),
     evidence: evidence2
   }).strict(),
-  z34.object({ status: z34.literal("unknown"), reason: z34.string().optional() }).strict(),
-  z34.object({ status: z34.literal("ambiguous"), candidates: z34.array(z34.string().refine(isDocumentDateValue)).min(2), reason: z34.string() }).strict()
+  z35.object({ status: z35.literal("unknown"), reason: z35.string().optional() }).strict(),
+  z35.object({ status: z35.literal("ambiguous"), candidates: z35.array(z35.string().refine(isDocumentDateValue)).min(2), reason: z35.string() }).strict()
 ]).refine(
   (date) => date.status !== "known" || date.precision === "month" === /^\d{4}-\d{2}$/.test(date.value),
   "Date precision must match its value"
 );
 
 // packages/radar-sources/src/RawDocument.ts
-var RawDocumentRecordProvenanceSchema = z35.object({
+var RawDocumentRecordProvenanceSchema = z36.object({
   /** CIBLAGE plan that scheduled this collection, when one exists. */
-  ciblagePlanId: z35.string().min(1).optional(),
+  ciblagePlanId: z36.string().min(1).optional(),
   /** Adapter version string (`SourceAdapter.version`). */
-  version: z35.string().min(1),
+  version: z36.string().min(1),
   /** Honest user-agent used for the fetch (rules/MASTER.md Scraping Policy). */
-  userAgent: z35.string().min(1),
+  userAgent: z36.string().min(1),
   /**
    * Whether the payload was rendered/captured via the Obscura sidecar. Obscura
    * is for rendering reliability, never for circumventing access — so far every
    * Tier A/B Valleyfield source is plain HTTP, hence the default `false`.
    */
-  viaObscura: z35.boolean()
+  viaObscura: z36.boolean()
 });
-var RawDocumentRecordSchema = z35.object({
+var RawDocumentRecordSchema = z36.object({
   /** Stable id, derived from `source` + `sha256` (idempotent — see `rawDocumentId`). */
-  id: z35.string().min(1),
+  id: z36.string().min(1),
   /** Source id that produced the document (e.g. "avis-publics-valleyfield"). */
-  source: z35.string().min(1),
+  source: z36.string().min(1),
   /** Exact URL the bytes were fetched from (anti-invention: the real link). */
   sourceUrl: contractUrl(),
   /** Human title exposed by the source listing, when available. */
-  title: z35.string().min(1).optional(),
+  title: z36.string().min(1).optional(),
   /**
    * Publication/session date exposed by the source listing, when available.
    * May be an ISO date (`YYYY-MM-DD`) or an ISO datetime depending on source.
    */
-  publishedAt: z35.string().min(4).optional(),
+  publishedAt: z36.string().min(4).optional(),
   documentDate: DocumentDateSchema.optional(),
   /** SHA-256 hex digest of the raw bytes — the idempotency key. */
-  sha256: z35.string().regex(/^[a-f0-9]{64}$/),
+  sha256: z36.string().regex(/^[a-f0-9]{64}$/),
   /** ISO timestamp of the fetch. */
   fetchedAt: contractDateTime(),
   /** Object-storage key under which the raw bytes live (`raw/<source>/<Y>/<M>/<D>/<sha>.<ext>`). */
-  storageKey: z35.string().min(1),
+  storageKey: z36.string().min(1),
   /**
    * Companion key holding the PARSEABLE text extracted from a binary payload
    * (e.g. a PDF's pdftotext output), `<storageKey>.txt`. Present only when the
@@ -3233,13 +3618,13 @@ var RawDocumentRecordSchema = z35.object({
    * body) so it reconciles on real legal text; the binary `storageKey` stays the
    * canonical, openable evidence (the reglement drawer's rawRef).
    */
-  textKey: z35.string().min(1).optional(),
+  textKey: z36.string().min(1).optional(),
   /** MIME type of the stored payload. */
-  contentType: z35.string().min(1),
+  contentType: z36.string().min(1),
   /** End-to-end provenance. */
   provenance: RawDocumentRecordProvenanceSchema,
   /** Length of the raw payload in bytes. */
-  bytesLen: z35.number().int().nonnegative()
+  bytesLen: z36.number().int().nonnegative()
 }).refine(
   (record) => record.documentDate === void 0 || (record.documentDate.status === "known" ? record.publishedAt === record.documentDate.value : record.publishedAt === void 0),
   "Documentary metadata and publishedAt must agree"
@@ -3399,8 +3784,8 @@ var ALL_PRIORITY_SOURCE_BINDINGS = [
 ];
 
 // packages/radar-sources/src/sources/avis-publics-parser.ts
-import { z as z36 } from "zod";
-var AvisType = z36.enum([
+import { z as z37 } from "zod";
+var AvisType = z37.enum([
   "derogation-mineure",
   "ppcmoi",
   "consultation",
@@ -3411,90 +3796,90 @@ var AvisType = z36.enum([
   "vente-pour-taxes",
   "autre"
 ]);
-var AvisPublicItem = z36.object({
+var AvisPublicItem = z37.object({
   /** Human-readable notice title, verbatim from the page. */
-  title: z36.string().min(1),
+  title: z37.string().min(1),
   /** Notice date as displayed on the page (e.g. "20 mai 2026"), or NON_DISPONIBLE. */
-  dateLabel: z36.string().min(1),
+  dateLabel: z37.string().min(1),
   /** ISO date (YYYY-MM-DD) parsed from dateLabel when possible, else NON_DISPONIBLE. */
-  dateIso: z36.string().min(1),
+  dateIso: z37.string().min(1),
   /** Absolute URL of the notice PDF. */
   url: contractUrl(),
   /** Inferred notice kind. */
   type: AvisType,
   /** Bylaw / file references found in the title (e.g. "150-49"), if any. */
-  bylaws: z36.array(z36.string()).default([])
+  bylaws: z37.array(z37.string()).default([])
 });
 
 // packages/radar-sources/src/sources/role-evaluation-parser.ts
-import { z as z37 } from "zod";
-var RoleEvaluationUnit = z37.object({
+import { z as z38 } from "zod";
+var RoleEvaluationUnit = z38.object({
   /** Cadastre lot numbers (RL0103Ax), authoritative province-wide keys. */
-  noLots: z37.array(z37.string().min(1)).default([]),
+  noLots: z38.array(z38.string().min(1)).default([]),
   /** Assembled matricule RL0104A-RL0104B-RL0104C, or non-disponible. */
-  matricule: z37.string().min(1),
+  matricule: z38.string().min(1),
   /** Total value RL0404A (valeur de l'immeuble) in CAD; null when absent. */
-  valeur: z37.number().nonnegative().nullable().default(null),
+  valeur: z38.number().nonnegative().nullable().default(null),
   /** Land value RL0402A (valeur du terrain) in CAD; null when absent. */
-  valeurTerrain: z37.number().nonnegative().nullable().default(null),
+  valeurTerrain: z38.number().nonnegative().nullable().default(null),
   /** Role reference date RL0401A (ISO), or non-disponible. */
-  valeurDate: z37.string().min(1),
+  valeurDate: z38.string().min(1),
   /** PII excluded (§7.4): always non-disponible. */
-  owner: z37.literal("non-disponible")
+  owner: z38.literal("non-disponible")
 });
-var RoleEvaluation = z37.object({
+var RoleEvaluation = z38.object({
   /** Municipality MAMH code RLM01A (e.g. "70052"), or non-disponible. */
-  codeMamh: z37.string().min(1),
+  codeMamh: z38.string().min(1),
   /** Role year RLM02A (e.g. "2026"), or non-disponible. */
-  year: z37.string().min(1),
-  units: z37.array(RoleEvaluationUnit).default([])
+  year: z38.string().min(1),
+  units: z38.array(RoleEvaluationUnit).default([])
 });
 
 // packages/radar-sources/src/sources/adresses-quebec-parser.ts
-import { z as z38 } from "zod";
-var AdresseQuebec = z38.object({
+import { z as z39 } from "zod";
+var AdresseQuebec = z39.object({
   /** Adresses Québec provincial key (`properties.code`), province-wide id. */
-  code: z38.string().min(1),
+  code: z39.string().min(1),
   /** Full municipal address label (`properties.nom`), verbatim. */
-  nom: z38.string().min(1),
+  nom: z39.string().min(1),
   /** Dwelling-unit count (`properties.nbUnite`); null when absent. */
-  nbUnite: z38.number().int().nonnegative().nullable().default(null)
+  nbUnite: z39.number().int().nonnegative().nullable().default(null)
 });
-var AdressesQuebec = z38.object({
-  adresses: z38.array(AdresseQuebec).default([])
+var AdressesQuebec = z39.object({
+  adresses: z39.array(AdresseQuebec).default([])
 });
 
 // packages/radar-sources/src/sources/reglements-urbanisme-parser.ts
-import { z as z39 } from "zod";
-var ReglementBylaw = z39.object({
+import { z as z40 } from "zod";
+var ReglementBylaw = z40.object({
   /** City-scoped règlement number, verbatim (e.g. "150-51", "450"). */
-  numero: z39.string().min(1),
+  numero: z40.string().min(1),
   /** Whether this is the document's own number (header) or a referenced bylaw. */
-  role: z39.enum(["primary", "referenced"])
+  role: z40.enum(["primary", "referenced"])
 });
-var ReglementZone = z39.object({
+var ReglementZone = z40.object({
   /** Displayed zone code, verbatim (e.g. "H-521", "C-627-3", "REC-137"). */
-  code: z39.string().min(1),
+  code: z40.string().min(1),
   /** Coarse land-use kind derived from the prefix ("H"|"C"|…|"autre"). */
-  kind: z39.string().min(1)
+  kind: z40.string().min(1)
 });
-var ReglementDocument = z39.object({
+var ReglementDocument = z40.object({
   /** The document's own règlement number (header `RÈGLEMENT NNN-NN`), or REGLEMENT_NON_DISPONIBLE. */
-  primaryNumero: z39.string().min(1),
+  primaryNumero: z40.string().min(1),
   /** Verbatim title line (e.g. "Règlement modifiant le Règlement 150 …"), or REGLEMENT_NON_DISPONIBLE. */
-  titre: z39.string().min(1),
+  titre: z40.string().min(1),
   /** Every bylaw number present (primary + referenced), de-duplicated, in order. */
-  bylaws: z39.array(ReglementBylaw).default([]),
+  bylaws: z40.array(ReglementBylaw).default([]),
   /** Every zone code present, de-duplicated, in order of first appearance. */
-  zones: z39.array(ReglementZone).default([])
+  zones: z40.array(ReglementZone).default([])
 });
-var ReglementListingEntry = z39.object({
+var ReglementListingEntry = z40.object({
   /** Absolute detail-page URL. */
   url: contractUrl(),
   /** Bylaw number extracted from the slug (e.g. "150-51"), or REGLEMENT_NON_DISPONIBLE. */
-  numero: z39.string().min(1),
+  numero: z40.string().min(1),
   /** Human-readable slug-derived title fragment (verbatim path tail). */
-  slug: z39.string().min(1)
+  slug: z40.string().min(1)
 });
 
 // packages/radar-sources/src/sources/reglements-urbanisme-valleyfield.ts
@@ -3505,9 +3890,9 @@ import { join } from "node:path";
 
 // packages/radar-sources/src/sources/role-evaluation-mamh.fixture.ts
 import { readFileSync } from "node:fs";
-import { dirname, join as join2 } from "node:path";
+import { dirname as dirname2, join as join2 } from "node:path";
 import { fileURLToPath } from "node:url";
-var here = dirname(fileURLToPath(import.meta.url));
+var here = dirname2(fileURLToPath(import.meta.url));
 var SAMPLES_DIR = join2(
   here,
   "_spikes",
@@ -3532,9 +3917,9 @@ var roleEvaluationMamhBeauharnoisXml = lazySample(
 
 // packages/radar-sources/src/sources/adresses-quebec.fixture.ts
 import { readFileSync as readFileSync2 } from "node:fs";
-import { dirname as dirname2, join as join3 } from "node:path";
+import { dirname as dirname3, join as join3 } from "node:path";
 import { fileURLToPath as fileURLToPath2 } from "node:url";
-var here2 = dirname2(fileURLToPath2(import.meta.url));
+var here2 = dirname3(fileURLToPath2(import.meta.url));
 var SAMPLES_DIR2 = join3(
   here2,
   "_spikes",
@@ -3558,16 +3943,16 @@ var adressesQuebecBeauharnoisJson = lazySample2(
 );
 
 // packages/radar-sources/src/geo/geo-source-inventory.ts
-import { z as z40 } from "zod";
-var GeoDataAvailability = z40.enum([
+import { z as z41 } from "zod";
+var GeoDataAvailability = z41.enum([
   "donnees-quebec",
   "goazimut",
   "pdf",
   "none",
   "unknown"
 ]);
-var GeoDataQuality = z40.enum(["geojson", "html", "pdf", "none"]);
-var GeoLayerDescriptor = z40.object({
+var GeoDataQuality = z41.enum(["geojson", "html", "pdf", "none"]);
+var GeoLayerDescriptor = z41.object({
   /** Where the data comes from. */
   availability: GeoDataAvailability,
   /** Quality of the data format for automated ingestion. */
@@ -3575,12 +3960,12 @@ var GeoLayerDescriptor = z40.object({
   /** Direct URL to the resource (CKAN API, PDF link, portal page…). Optional. */
   url: contractUrl().optional()
 });
-var GeoSourceInventory = z40.object({
-  citySlug: z40.string().min(1),
+var GeoSourceInventory = z41.object({
+  citySlug: z41.string().min(1),
   zonage: GeoLayerDescriptor,
   lots: GeoLayerDescriptor,
   /** Free-text notes: caveats, date of investigation, attribution, etc. */
-  notes: z40.string().optional()
+  notes: z41.string().optional()
 });
 
 // packages/radar-sources/src/sources/voxtral-transcriber.ts
@@ -3626,19 +4011,25 @@ var YOUTUBE_SEARCH_EMPTY_RESPONSE_FIXTURE = JSON.stringify({
 });
 
 // api/src/services/graph/refresh-model-policy.ts
-function refreshFallbackReason(error) {
-  const record = error && typeof error === "object" ? error : {};
-  const tokens = [record["code"], record["reason"], record["message"]].filter((v) => typeof v === "string").join(" ");
-  if (record["statusCode"] === 429 || record["status"] === 429 || /quota|rate.limit|no_active_account|no-active-account|usage_limit/i.test(tokens)) return "quota";
+var AVAILABILITY_REASON_PATTERN = /quota|rate.limit|no_active_account|no-active-account|usage_limit|cooldown|reauth|reenroll|re-enroll|fallback-no-route|fallback-quota-exhausted/i;
+function refreshFallbackReason(error, seen = /* @__PURE__ */ new Set()) {
+  if (!error || typeof error !== "object" || seen.has(error)) return "transport";
+  seen.add(error);
+  const record = error;
+  const diagnostic = record["diagnostic"] && typeof record["diagnostic"] === "object" ? record["diagnostic"] : {};
+  const tokens = [record["code"], record["reason"], record["message"], diagnostic["code"], diagnostic["reason"]].filter((v) => typeof v === "string").join(" ");
+  if (record["statusCode"] === 429 || record["status"] === 429 || record["code"] === "no-route" || AVAILABILITY_REASON_PATTERN.test(tokens)) return "quota";
   if (record["name"] === "TimeoutError" || record["name"] === "AbortError") return "timeout";
   if (record["code"] === "REFRESH_EMPTY_OUTPUT") return "empty-output";
-  if (record["cause"]) return refreshFallbackReason(record["cause"]);
+  if (record["cause"]) return refreshFallbackReason(record["cause"], seen);
   return "transport";
 }
-function isRefreshNoRoute(error) {
-  const record = error && typeof error === "object" ? error : {};
+function isRefreshNoRoute(error, seen = /* @__PURE__ */ new Set()) {
+  if (!error || typeof error !== "object" || seen.has(error)) return false;
+  seen.add(error);
+  const record = error;
   if (record["code"] === "no-route") return true;
-  return record["cause"] ? isRefreshNoRoute(record["cause"]) : false;
+  return record["cause"] ? isRefreshNoRoute(record["cause"], seen) : false;
 }
 
 // api/src/services/graph/refresh-seat-probe.ts
@@ -3752,9 +4143,10 @@ var S3ObjectStore = class {
     const conditions = options.ifMatch === null ? { IfNoneMatch: "*" } : { IfMatch: options.ifMatch };
     return this.putUnchecked(key, body, contentType, conditions);
   }
-  async get(key) {
+  async get(key, options) {
     const res = await this.client.send(
-      new GetObjectCommand({ Bucket: this.bucket, Key: key })
+      new GetObjectCommand({ Bucket: this.bucket, Key: key }),
+      options?.signal ? { abortSignal: options.signal } : void 0
     );
     if (!res.Body) throw new Error(`empty body for ${key}`);
     return res.Body.transformToByteArray();
@@ -3784,10 +4176,11 @@ var S3ObjectStore = class {
     if (!res.Body) throw new Error(`empty body for ${key}`);
     return { key, body: await res.Body.transformToByteArray(), etag: res.ETag ?? null };
   }
-  async head(key) {
+  async head(key, options) {
     try {
       const res = await this.client.send(
-        new HeadObjectCommand({ Bucket: this.bucket, Key: key })
+        new HeadObjectCommand({ Bucket: this.bucket, Key: key }),
+        options?.signal ? { abortSignal: options.signal } : void 0
       );
       return {
         key,
@@ -3855,6 +4248,107 @@ function getScrapeObjectStore(config) {
   return new S3ObjectStore(createScrapeS3Client(scrapeConfig), scrapeConfig.bucket);
 }
 
+// api/src/scripts/refresh-requeue-abandoned.ts
+var REASON_TOKEN = /^[a-z0-9][a-z0-9_-]*$/;
+function expandRequeueReasons(raw) {
+  const expanded = /* @__PURE__ */ new Set();
+  for (const item of raw) {
+    for (const part of item.split(",")) {
+      const token = part.trim();
+      if (!token) continue;
+      if (!REASON_TOKEN.test(token)) throw new Error(`invalid reason: ${token}`);
+      if (token === "availability") {
+        for (const reason of REFRESH_AVAILABILITY_REASONS) expanded.add(reason);
+      } else {
+        expanded.add(token);
+      }
+    }
+  }
+  return [...expanded].sort();
+}
+function parseRefreshRequeueArgs(argv) {
+  let dryRun = false;
+  let since;
+  let operator;
+  let restore;
+  const cities = [];
+  const rawReasons = [];
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    const next = () => {
+      const value = argv[index + 1];
+      if (!value) throw new Error(`${arg} requires a value`);
+      index += 1;
+      return value;
+    };
+    if (arg === "--dry-run") dryRun = true;
+    else if (arg === "--since") {
+      const raw = next();
+      const parsed = /^\d{4}-\d{2}-\d{2}$/.test(raw) ? /* @__PURE__ */ new Date(`${raw}T00:00:00.000Z`) : new Date(raw);
+      if (Number.isNaN(parsed.getTime())) throw new Error(`--since is not a valid date: ${raw}`);
+      since = parsed;
+    } else if (arg === "--city") {
+      for (const slug of next().split(",")) if (slug.trim()) cities.push(slug.trim());
+    } else if (arg === "--reason") {
+      rawReasons.push(next());
+    } else if (arg === "--availability-only") {
+      rawReasons.push("availability");
+    } else if (arg === "--operator") operator = next();
+    else if (arg === "--restore") restore = next();
+    else throw new Error(`unknown argument: ${arg}`);
+  }
+  if (restore !== void 0 && since) throw new Error("--restore cannot be combined with --since");
+  if (restore !== void 0 && rawReasons.length > 0) {
+    throw new Error("--restore cannot be combined with --reason or --availability-only");
+  }
+  const reasons = rawReasons.length > 0 ? expandRequeueReasons(rawReasons) : void 0;
+  return {
+    dryRun,
+    ...since ? { since } : {},
+    cities,
+    ...reasons?.length ? { reasons } : {},
+    ...operator ? { operator } : {},
+    ...restore ? { restore } : {}
+  };
+}
+function formatDryRunCounts(trace) {
+  const lines = trace.cities.map((city) => `${city.citySlug}	${city.skipped ?? `would-requeue=${city.requeued.length}`}`);
+  lines.push(`total	cities=${trace.totals.cities}	would-requeue=${trace.totals.requeued}	skipped=${trace.totals.skipped}`);
+  return lines.join("\n");
+}
+async function main() {
+  const args = parseRefreshRequeueArgs(process.argv.slice(2));
+  const who = args.operator ?? process.env.REQUEUE_OPERATOR ?? process.env.OPERATOR ?? "";
+  if (!args.dryRun && !who) throw new Error("--operator <who> (or REQUEUE_OPERATOR) is required for a real run");
+  const store = getScrapeObjectStore(loadConfig());
+  if (args.restore) {
+    const restoreTrace = await runRefreshRequeueRestore(store, {
+      who: who || "dry-run",
+      dryRun: args.dryRun,
+      stamp: args.restore,
+      ...args.cities.length ? { cities: args.cities } : {}
+    });
+    console.log(JSON.stringify(restoreTrace));
+    return;
+  }
+  const trace = await runRefreshRequeueAbandoned(store, {
+    who: who || "dry-run",
+    dryRun: args.dryRun,
+    ...args.since ? { since: args.since } : {},
+    ...args.cities.length ? { cities: args.cities } : {},
+    ...args.reasons?.length ? { reasons: args.reasons } : {}
+  });
+  if (args.dryRun) console.log(formatDryRunCounts(trace));
+  console.log(JSON.stringify(trace));
+}
+var isMain = process.argv[1]?.endsWith("refresh-requeue-abandoned.js") || process.argv[1]?.endsWith("refresh-requeue-abandoned.ts") || process.argv[1]?.endsWith("requeue-abandoned.bundle.mjs");
+if (isMain) {
+  main().catch((error) => {
+    console.error("refresh-requeue-abandoned: failed", error instanceof Error ? error.message : String(error));
+    process.exitCode = 1;
+  });
+}
+
 // api/src/scripts/refresh-requeue-recurrent.ts
 function positiveEnv(env, name, fallback, maximum) {
   const value = Number(env[name] ?? fallback);
@@ -3864,12 +4358,15 @@ function positiveEnv(env, name, fallback, maximum) {
   return value;
 }
 function recurrentConfigFromEnv(env) {
+  const rawReasons = env.REQUEUE_REASONS?.trim();
+  const reasons = rawReasons ? expandRequeueReasons([rawReasons]) : void 0;
   return {
     maxAgeDays: positiveEnv(env, "REQUEUE_MAX_AGE_DAYS", 90, 3650),
     maxPerRun: positiveEnv(env, "REQUEUE_MAX_PER_RUN", 50, 1e5),
     maxPerCity: positiveEnv(env, "REQUEUE_MAX_PER_CITY", 5, 1e4),
     maxRequeues: positiveEnv(env, "REQUEUE_MAX_REQUEUES", 2, 100),
-    dryRun: env.REQUEUE_DRY_RUN === "1"
+    dryRun: env.REQUEUE_DRY_RUN === "1",
+    ...reasons?.length ? { reasons } : {}
   };
 }
 function required(env, name) {
@@ -3879,12 +4376,15 @@ function required(env, name) {
 }
 function selectedModel(env, prefix) {
   const provider = required(env, `${prefix}_PROVIDER`);
-  if (provider !== "openai" && provider !== "gemini") throw new Error(`${prefix}_PROVIDER must be openai or gemini`);
+  if (!isRefreshProvider(provider)) throw new Error(`${prefix}_PROVIDER must be openai, gemini or muse`);
   const effort = required(env, `${prefix}_REASONING_EFFORT`);
   if (!["minimal", "low", "medium", "high", "xhigh"].includes(effort)) {
     throw new Error(`${prefix}_REASONING_EFFORT is invalid`);
   }
   return { provider, model: required(env, `${prefix}_MODEL`), effort };
+}
+function recurrentRoutesFromEnv(env) {
+  return [selectedModel(env, "REFRESH"), selectedModel(env, "REFRESH_FALLBACK")];
 }
 function seatSkipLine(seat) {
   return JSON.stringify({
@@ -3894,10 +4394,10 @@ function seatSkipLine(seat) {
     seat
   });
 }
-async function main() {
+async function main2() {
   const env = process.env;
   const config = recurrentConfigFromEnv(env);
-  const routes = [selectedModel(env, "REFRESH"), selectedModel(env, "REFRESH_FALLBACK")];
+  const routes = recurrentRoutesFromEnv(env);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(new Error("seat probe timeout")), 12e4);
   timeout.unref();
@@ -3935,18 +4435,20 @@ async function main() {
     maxAgeDays: config.maxAgeDays,
     maxPerRun: config.maxPerRun,
     maxPerCity: config.maxPerCity,
-    maxRequeues: config.maxRequeues
+    maxRequeues: config.maxRequeues,
+    ...config.reasons?.length ? { reasons: config.reasons } : {}
   });
   console.log(JSON.stringify({ kind: "refresh-requeue-recurrent", decision: "requeue", seat, trace }));
 }
-var isMain = process.argv[1]?.endsWith("refresh-requeue-recurrent.js") || process.argv[1]?.endsWith("refresh-requeue-recurrent.ts") || process.argv[1]?.endsWith("requeue-recurrent.bundle.mjs");
-if (isMain) {
-  main().catch((error) => {
+var isMain2 = process.argv[1]?.endsWith("refresh-requeue-recurrent.js") || process.argv[1]?.endsWith("refresh-requeue-recurrent.ts") || process.argv[1]?.endsWith("requeue-recurrent.bundle.mjs");
+if (isMain2) {
+  main2().catch((error) => {
     console.error("refresh-requeue-recurrent: failed", error instanceof Error ? error.message : String(error));
     process.exitCode = 1;
   });
 }
 export {
   recurrentConfigFromEnv,
+  recurrentRoutesFromEnv,
   seatSkipLine
 };
