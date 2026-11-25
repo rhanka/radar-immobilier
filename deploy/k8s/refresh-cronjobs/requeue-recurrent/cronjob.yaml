@@ -136,11 +136,12 @@ spec:
                   valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_SECRET_KEY } }
                 # Refresh cascade identity for the seat probe: same models
                 # and keyring as radar-refresh-pv (34-refresh-cronjob.yaml).
+                # TEMPORARY (owner decision 2026-11-25): Gemini fallback while Astra/Muse quotas are exhausted; revert to muse-wonder-1.0 afterwards.
                 - { name: REFRESH_PROVIDER, value: "openai" }
                 - { name: REFRESH_MODEL, value: "gpt-6.2-astra" }
                 - { name: REFRESH_REASONING_EFFORT, value: "low" }
-                - { name: REFRESH_FALLBACK_PROVIDER, value: "muse" }
-                - { name: REFRESH_FALLBACK_MODEL, value: "muse-wonder-1.0" }
+                - { name: REFRESH_FALLBACK_PROVIDER, value: "gemini" }
+                - { name: REFRESH_FALLBACK_MODEL, value: "gemini-3.8-flash" }
                 - { name: REFRESH_FALLBACK_REASONING_EFFORT, value: "low" }
                 - { name: SENTROPIC_LLM_MESH_KEYRING_DIR, value: "/keyring/runtime" }
                 - name: REFRESH_PRINCIPAL_REF

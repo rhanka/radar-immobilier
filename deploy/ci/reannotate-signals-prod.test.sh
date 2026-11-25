@@ -154,15 +154,28 @@ else
   bad "off mode refusal ($(cat "$S3/out.txt"))"
 fi
 
-# 4. Refuses CronJob with gemini fallback or stale gpt-6-astra before creating any Job.
+# 4. Accepts temporary gemini/gemini-3.8-flash fallback, refuses mismatched fallback or stale gpt-6-astra.
 S4="$TMP/s4"; mkdir -p "$S4"
 write_base_job "$S4/base-job.json" "two-step" "gemini" "gemini-3.8-flash"
-if FAKE_KUBECTL_STATE="$S4" KUBECTL="$TMP/bin/kubectl" REANNOTATION_MODE="dry-run" bash "$SCRIPT" >"$S4/out.txt" 2>&1; then
-  bad "gemini fallback on CronJob was accepted"
-elif [[ ! -f "$S4/created-job.json" ]] && grep -Fq "CronJob contract mismatch" "$S4/out.txt"; then
-  ok "refuses CronJob with gemini fallback before creating Job"
+cp "$S1/job-status.json" "$S4/job-status.json"
+cp "$S1/job.log" "$S4/job.log"
+if FAKE_KUBECTL_STATE="$S4" KUBECTL="$TMP/bin/kubectl" GITHUB_STEP_SUMMARY="$S4/summary.md" \
+    PIPELINE_RUN_ID="prod-reannotate-30d-gemini" REANNOTATION_MODE="dry-run" REANNOTATION_SINCE_DAYS="30" \
+    REANNOTATION_POLL_SECONDS="0" bash "$SCRIPT" >"$S4/out.txt" 2>&1 \
+  && [[ -f "$S4/created-job.json" ]]; then
+  ok "accepts CronJob with temporary gemini/gemini-3.8-flash fallback"
 else
-  bad "gemini fallback refusal ($(cat "$S4/out.txt"))"
+  bad "gemini fallback acceptance ($(cat "$S4/out.txt"))"
+fi
+
+S4a="$TMP/s4a"; mkdir -p "$S4a"
+write_base_job "$S4a/base-job.json" "two-step" "gemini" "muse-wonder-1.0"
+if FAKE_KUBECTL_STATE="$S4a" KUBECTL="$TMP/bin/kubectl" REANNOTATION_MODE="dry-run" bash "$SCRIPT" >"$S4a/out.txt" 2>&1; then
+  bad "mismatched gemini/muse-wonder-1.0 fallback on CronJob was accepted"
+elif [[ ! -f "$S4a/created-job.json" ]] && grep -Fq "CronJob contract mismatch" "$S4a/out.txt"; then
+  ok "refuses CronJob with mismatched fallback provider/model before creating Job"
+else
+  bad "mismatched fallback refusal ($(cat "$S4a/out.txt"))"
 fi
 
 S4b="$TMP/s4b"; mkdir -p "$S4b"
