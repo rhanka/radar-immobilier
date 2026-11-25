@@ -1,8 +1,8 @@
 import type { TextJsonGenerationClient } from "@sentropic/engram";
 import { describe, expect, it, vi } from "vitest";
 
-import { createRefreshModelPolicy, isRefreshNoRoute, type RefreshModel,
-  type RefreshModelReceipt } from "./refresh-model-policy.js";
+import { createRefreshModelPolicy, isRefreshModelUnavailable, isRefreshNoRoute, refreshFallbackReason,
+  type RefreshModel, type RefreshModelReceipt } from "./refresh-model-policy.js";
 
 const primary: RefreshModel = { provider: "gemini", model: "gemini-3.8-flash", effort: "low" };
 const fallback: RefreshModel = { provider: "openai", model: "gpt-6-astra", effort: "low" };
@@ -29,7 +29,11 @@ describe("refresh model policy", () => {
     [Object.assign(new Error("limited"), { status: 429 }), "quota"],
     [Object.assign(new Error("down"), { statusCode: 503 }), "transport"],
     [Object.assign(new Error("missing"), { code: "no_active_account" }), "quota"],
-    [Object.assign(new Error("missing"), { code: "no-route" }), "transport"],
+    [Object.assign(new Error("missing"), { code: "no-route" }), "quota"],
+    [Object.assign(new Error("No eligible route"), { name: "RoutePlanError", code: "no-route" }), "quota"],
+    [Object.assign(new Error("reauth"), { name: "RoutePlanError", code: "no-route",
+      diagnostic: { code: "reauth-required" } }), "quota"],
+    [Object.assign(new Error("cooldown"), { code: "cooldown" }), "quota"],
     [new TypeError("fetch failed"), "transport"],
   ])("should fall back on a primary transport failure (%s)", async (error, reason) => {
     const run = fixture(async (model) => { if (model === primary) throw error; return "{}"; });
@@ -251,7 +255,40 @@ describe("refresh model policy", () => {
     expect(run.policy.fallbackUnroutable()).toBe(true);
     expect(run.receipts.filter((receipt) => receipt.transition === "fallback")
       .every((receipt) => receipt.modelUsed?.provider === "muse"
-        && receipt.modelUsed?.effort === "provider-default")).toBe(true);
+        && receipt.modelUsed?.effort === "provider-default"
+        && receipt.failureReason === "quota")).toBe(true);
+  });
+
+  it("should classify model unavailability without confusing it with transport or empty-output", () => {
+    const unavailableCases: unknown[] = [
+      Object.assign(new Error("limited"), { status: 429 }),
+      Object.assign(new Error("limited"), { statusCode: 429 }),
+      Object.assign(new Error("rate limited"), { code: "rate_limit" }),
+      Object.assign(new Error("No eligible route"), { name: "RoutePlanError", code: "no-route" }),
+      Object.assign(new Error("No eligible route"), { name: "RoutePlanError", code: "no-route",
+        diagnostic: { code: "reauth-required" } }),
+      Object.assign(new Error("No eligible route"), { name: "RoutePlanError", code: "no-route",
+        diagnostic: { code: "cooldown" } }),
+      Object.assign(new Error("account needs reauth"), { code: "reauth-required" }),
+      Object.assign(new Error("halted"), { code: "fallback-no-route" }),
+      Object.assign(new Error("wrapped"), { cause: Object.assign(new Error("x"), { code: "no-route" }) }),
+    ];
+    for (const error of unavailableCases) {
+      expect(refreshFallbackReason(error)).toBe("quota");
+      expect(isRefreshModelUnavailable(error)).toBe(true);
+    }
+
+    const documentOrTransportCases: [unknown, string][] = [
+      [Object.assign(new Error("empty"), { code: "REFRESH_EMPTY_OUTPUT" }), "empty-output"],
+      [new DOMException("timeout", "TimeoutError"), "timeout"],
+      [Object.assign(new Error("down"), { statusCode: 503 }), "transport"],
+      [new TypeError("fetch failed"), "transport"],
+      [new Error("Invalid profile extraction"), "transport"],
+    ];
+    for (const [error, reason] of documentOrTransportCases) {
+      expect(refreshFallbackReason(error)).toBe(reason);
+      expect(isRefreshModelUnavailable(error)).toBe(false);
+    }
   });
 
   it("should reset the no-route streak when an extraction succeeds in between", async () => {
