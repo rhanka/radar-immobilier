@@ -56,7 +56,7 @@ logs_file="$WORK/job.log"
 
 "$KUBECTL" -n "$NAMESPACE" create job "$JOB_NAME" --from=cronjob/radar-refresh-pv --dry-run=client -o json > "$base_json"
 
-# Fail closed unless CronJob/radar-refresh-pv already carries two-step B+C + Astra 6.2 low + Muse fallback.
+# Fail closed unless CronJob/radar-refresh-pv already carries two-step B+C + Astra 6.2 low + Muse or temporary Gemini fallback.
 jq -e '
   (.spec.template.spec.containers | map(select(.name == "refresh-pv")) | .[0].env // []) as $env |
   def val($k): ($env | map(select(.name == $k)) | .[0].value // "");
@@ -65,11 +65,13 @@ jq -e '
   and val("REFRESH_CLASSIFY_PROVIDER") == "openai"
   and val("REFRESH_CLASSIFY_MODEL") == "gpt-6.2-astra"
   and val("REFRESH_CLASSIFY_REASONING_EFFORT") == "low"
-  and val("REFRESH_CLASSIFY_FALLBACK_PROVIDER") == "muse"
-  and val("REFRESH_CLASSIFY_FALLBACK_MODEL") == "muse-wonder-1.0"
+  and (
+    (val("REFRESH_CLASSIFY_FALLBACK_PROVIDER") == "muse" and val("REFRESH_CLASSIFY_FALLBACK_MODEL") == "muse-wonder-1.0")
+    or (val("REFRESH_CLASSIFY_FALLBACK_PROVIDER") == "gemini" and val("REFRESH_CLASSIFY_FALLBACK_MODEL") == "gemini-3.8-flash")
+  )
   and val("REFRESH_CLASSIFY_FALLBACK_REASONING_EFFORT") == "low"
 ' "$base_json" >/dev/null || {
-  echo "::error title=CronJob contract mismatch::CronJob/radar-refresh-pv in ${NAMESPACE} must run REFRESH_CLASSIFY_MODE=two-step, REFRESH_SINGLE_PASS=0, openai/gpt-6.2-astra/low primary, and muse/muse-wonder-1.0/low fallback before prod reannotation." >&2
+  echo "::error title=CronJob contract mismatch::CronJob/radar-refresh-pv in ${NAMESPACE} must run REFRESH_CLASSIFY_MODE=two-step, REFRESH_SINGLE_PASS=0, openai/gpt-6.2-astra/low primary, and muse/muse-wonder-1.0/low or gemini/gemini-3.8-flash/low fallback before prod reannotation." >&2
   exit 1
 }
 

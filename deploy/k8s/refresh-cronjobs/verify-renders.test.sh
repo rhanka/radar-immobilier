@@ -87,8 +87,8 @@ check_bc_render() {
       if ($0 !~ /name: REFRESH_VERIFY_PROVIDER\n[ ]+value: gemini\n/) exit 1
       if ($0 !~ /name: REFRESH_VERIFY_MODEL\n[ ]+value: gemini-3\.8-flash\n/) exit 1
       if ($0 !~ /name: REFRESH_VERIFY_REASONING_EFFORT\n[ ]+value: low\n/) exit 1
-      if ($0 !~ /name: REFRESH_FALLBACK_PROVIDER\n[ ]+value: muse\n/) exit 1
-      if ($0 !~ /name: REFRESH_FALLBACK_MODEL\n[ ]+value: muse-wonder-1\.0\n/) exit 1
+      if ($0 !~ /name: REFRESH_FALLBACK_PROVIDER\n[ ]+value: gemini\n/) exit 1
+      if ($0 !~ /name: REFRESH_FALLBACK_MODEL\n[ ]+value: gemini-3\.8-flash\n/) exit 1
       if ($0 !~ /name: REFRESH_FALLBACK_REASONING_EFFORT\n[ ]+value: low\n/) exit 1
       if ($0 !~ /name: REFRESH_SINGLE_PASS\n[ ]+value: "0"\n/) exit 1
       if ($0 !~ /name: REFRESH_SINGLE_PASS_MODEL\n[ ]+value: gpt-6\.2-astra\n/) exit 1
@@ -98,8 +98,8 @@ check_bc_render() {
       if ($0 !~ /name: REFRESH_CLASSIFY_REASONING_EFFORT\n[ ]+value: low\n/) exit 1
       if ($0 !~ /name: REFRESH_CLASSIFY_CONCURRENCY\n[ ]+value: "2"\n/) exit 1
       if ($0 !~ /name: REFRESH_RUN_MAX_TOKENS\n[ ]+value: "100000000"\n/) exit 1
-      if ($0 !~ /name: REFRESH_CLASSIFY_FALLBACK_PROVIDER\n[ ]+value: muse\n/) exit 1
-      if ($0 !~ /name: REFRESH_CLASSIFY_FALLBACK_MODEL\n[ ]+value: muse-wonder-1\.0\n/) exit 1
+      if ($0 !~ /name: REFRESH_CLASSIFY_FALLBACK_PROVIDER\n[ ]+value: gemini\n/) exit 1
+      if ($0 !~ /name: REFRESH_CLASSIFY_FALLBACK_MODEL\n[ ]+value: gemini-3\.8-flash\n/) exit 1
       if ($0 !~ /name: REFRESH_CLASSIFY_FALLBACK_REASONING_EFFORT\n[ ]+value: low\n/) exit 1
       if ($0 !~ /name: SENTROPIC_LLM_MESH_KEYRING_DIR\n[ ]+value: \/keyring\/runtime\n/) exit 1
       if ($0 !~ /claimName: radar-refresh-keyring\n/) exit 1
@@ -111,17 +111,17 @@ if make --no-print-directory -f "$CASE_ROOT/deploy/k8s/refresh-cronjobs/refresh-
     IMAGE_REF='ghcr.io/rhanka/radar-api@sha256:0000000000000000000000000000000000000000000000000000000000000000' \
     RENDER_OUT="$PROD_RENDER" ENV=prod >/dev/null 2>&1 \
   && check_bc_render "radar-immobilier" "$PROD_RENDER"; then
-  ok "prod render pins gpt-6.2-astra low (B, C, single-pass), Flash verify, Muse Wonder fallback and keyring"
+  ok "prod render pins gpt-6.2-astra low (B, C, single-pass), Flash verify, temporary Gemini fallback and keyring"
 else
-  bad "prod render pins gpt-6.2-astra low (B, C, single-pass), Flash verify, Muse Wonder fallback and keyring"
+  bad "prod render pins gpt-6.2-astra low (B, C, single-pass), Flash verify, temporary Gemini fallback and keyring"
 fi
 if make --no-print-directory -f "$CASE_ROOT/deploy/k8s/refresh-cronjobs/refresh-018.mk" render-preprod \
     IMAGE_REF='ghcr.io/rhanka/radar-api@sha256:0000000000000000000000000000000000000000000000000000000000000000' \
     RENDER_OUT="$PREPROD_RENDER" ENV=preprod >/dev/null 2>&1 \
   && check_bc_render "radar-immobilier-preprod" "$PREPROD_RENDER"; then
-  ok "preprod render pins gpt-6.2-astra low (B, C, single-pass), Flash verify, Muse Wonder fallback and keyring"
+  ok "preprod render pins gpt-6.2-astra low (B, C, single-pass), Flash verify, temporary Gemini fallback and keyring"
 else
-  bad "preprod render pins gpt-6.2-astra low (B, C, single-pass), Flash verify, Muse Wonder fallback and keyring"
+  bad "preprod render pins gpt-6.2-astra low (B, C, single-pass), Flash verify, temporary Gemini fallback and keyring"
 fi
 
 fixture; sed -i '/name: REFRESH_MODEL,/s/gpt-6\.2-astra/gpt-6-astra/' "$CASE_ROOT/$BASE"
@@ -159,20 +159,20 @@ run_bad "classification run token budget missing" "refresh activation/model cont
 fixture; sed -i '/REFRESH_CLASSIFY_REASONING_EFFORT/s/value: "low"/value: "medium"/' "$CASE_ROOT/$BASE"
 run_bad "classification must default to Astra 6.2 low" "refresh activation/model contract failed"
 
-fixture; sed -i '/REFRESH_CLASSIFY_FALLBACK_MODEL/s/muse-wonder-1.0/other/' "$CASE_ROOT/$BASE"
-run_bad "classification fallback must stay Muse Wonder 1.0" "refresh activation/model contract failed"
+fixture; sed -i '/REFRESH_CLASSIFY_FALLBACK_MODEL/s/gemini-3.8-flash/other/' "$CASE_ROOT/$BASE"
+run_bad "classification fallback with unrecognized model is refused" "refresh activation/model contract failed"
 
-fixture; sed -i '/name: REFRESH_FALLBACK_PROVIDER/s/value: "muse"/value: "gemini"/; /name: REFRESH_FALLBACK_MODEL/s/muse-wonder-1.0/gemini-3.8-flash/' "$CASE_ROOT/$BASE"
-run_bad "detection B fallback reverting from muse to gemini is refused" "refresh activation/model contract failed"
+fixture; sed -i '/name: REFRESH_FALLBACK_PROVIDER/s/value: "gemini"/value: "muse"/; /name: REFRESH_FALLBACK_MODEL/s/gemini-3.8-flash/muse-wonder-1.0/; /name: REFRESH_CLASSIFY_FALLBACK_PROVIDER/s/value: "gemini"/value: "muse"/; /name: REFRESH_CLASSIFY_FALLBACK_MODEL/s/gemini-3.8-flash/muse-wonder-1.0/' "$CASE_ROOT/$BASE"
+run_ok "switching both B and C fallback cleanly back to muse/muse-wonder-1.0 passes"
 
-fixture; sed -i '/name: REFRESH_FALLBACK_MODEL/s/muse-wonder-1.0/other/' "$CASE_ROOT/$BASE"
-run_bad "detection B muse fallback without muse-wonder-1.0" "refresh activation/model contract failed"
+fixture; sed -i '/name: REFRESH_FALLBACK_MODEL/s/gemini-3.8-flash/other/' "$CASE_ROOT/$BASE"
+run_bad "detection B fallback with unrecognized model is refused" "refresh activation/model contract failed"
 
-fixture; sed -i '/name: REFRESH_FALLBACK_PROVIDER/s/value: "muse"/value: "gemini"/' "$CASE_ROOT/$BASE"
-run_bad "detection B fallback provider drift" "refresh activation/model contract failed"
+fixture; sed -i '/name: REFRESH_FALLBACK_PROVIDER/s/value: "gemini"/value: "muse"/' "$CASE_ROOT/$BASE"
+run_bad "detection B fallback provider/model mismatch is refused" "refresh activation/model contract failed"
 
-fixture; sed -i '/name: REFRESH_CLASSIFY_FALLBACK_PROVIDER/s/value: "muse"/value: "gemini"/' "$CASE_ROOT/$BASE"
-run_bad "classify fallback provider without its muse model" "refresh activation/model contract failed"
+fixture; sed -i '/name: REFRESH_CLASSIFY_FALLBACK_PROVIDER/s/value: "gemini"/value: "muse"/' "$CASE_ROOT/$BASE"
+run_bad "classify fallback provider/model mismatch is refused" "refresh activation/model contract failed"
 
 fixture; sed -i '/name: REFRESH_FALLBACK_REASONING_EFFORT/s/value: "low"/value: "medium"/' "$CASE_ROOT/$BASE"
 run_bad "detection B fallback reasoning effort must stay low" "refresh activation/model contract failed"
@@ -180,11 +180,11 @@ run_bad "detection B fallback reasoning effort must stay low" "refresh activatio
 fixture; sed -i '/name: REFRESH_CLASSIFY_FALLBACK_REASONING_EFFORT/s/value: "low"/value: "medium"/' "$CASE_ROOT/$BASE"
 run_bad "classify fallback reasoning effort must stay low" "refresh activation/model contract failed"
 
-fixture; sed -i '/name: NODE_OPTIONS/a\                      - { name: REFRESH_CLASSIFY_FALLBACK_PROVIDER, value: "gemini" }\n                      - { name: REFRESH_CLASSIFY_FALLBACK_MODEL, value: "gemini-3.8-flash" }' "$CASE_ROOT/$PROD"
-run_bad "prod overlay reverting classification C fallback to gemini is refused" "refresh activation/model contract failed"
+fixture; sed -i '/name: NODE_OPTIONS/a\                      - { name: REFRESH_CLASSIFY_FALLBACK_PROVIDER, value: "muse" }\n                      - { name: REFRESH_CLASSIFY_FALLBACK_MODEL, value: "muse-wonder-1.0" }' "$CASE_ROOT/$PROD"
+run_bad "prod overlay diverging from preprod on classification C fallback is refused" "refresh overlay parity failed"
 
-fixture; printf '                      - { name: REFRESH_FALLBACK_PROVIDER, value: "gemini" }\n                      - { name: REFRESH_FALLBACK_MODEL, value: "gemini-3.8-flash" }\n' >> "$CASE_ROOT/$PRE"
-run_bad "preprod overlay reverting detection B fallback to gemini is refused" "refresh activation/model contract failed"
+fixture; printf '                      - { name: REFRESH_FALLBACK_PROVIDER, value: "muse" }\n                      - { name: REFRESH_FALLBACK_MODEL, value: "muse-wonder-1.0" }\n' >> "$CASE_ROOT/$PRE"
+run_bad "preprod overlay diverging from prod on detection B fallback is refused" "refresh overlay parity failed"
 
 fixture; sed -i '/REFRESH_CLASSIFY_CONCURRENCY/s/value: "2"/value: "200"/' "$CASE_ROOT/$BASE"
 run_bad "classification concurrency must stay bounded" "refresh activation/model contract failed"
